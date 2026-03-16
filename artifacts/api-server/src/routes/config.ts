@@ -2,10 +2,11 @@ import { Router, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import { configOptionsTable } from "@workspace/db/schema";
 import { asc } from "drizzle-orm";
+import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/config", async (_req: Request, res: Response) => {
+router.get("/config", authMiddleware, async (_req: Request, res: Response) => {
   const options = await db
     .select()
     .from(configOptionsTable)

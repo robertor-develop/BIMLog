@@ -52,7 +52,7 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
                   <td className="px-6 py-4 font-medium text-white">{sub.title}</td>
                   <td className="px-6 py-4 text-muted-foreground">{getLabel('submittal_type', sub.submittalType ?? '')}</td>
                   <td className="px-6 py-4">
-                    <Badge variant={sub.status.includes('approved') ? 'default' : 'secondary'}>
+                    <Badge variant="secondary">
                       {getLabel('submittal_status', sub.status)}
                     </Badge>
                   </td>

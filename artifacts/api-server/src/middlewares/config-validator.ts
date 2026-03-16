@@ -27,6 +27,35 @@ export async function validateConfigValue(category: string, value: string): Prom
   return validValues.includes(value);
 }
 
+export async function getDefaultValue(category: string): Promise<string> {
+  const values = await getValidValues(category);
+  if (values.length === 0) {
+    throw new Error(`No config options found for category '${category}'. Seed the config_options table.`);
+  }
+  return values[0];
+}
+
+const metaCache = new Map<string, { meta: Record<string, string> | null, expiresAt: number }>();
+
+export async function getConfigOptionMeta(category: string, value: string): Promise<Record<string, string> | null> {
+  const cacheKey = `meta:${category}:${value}`;
+  const now = Date.now();
+  const cached = metaCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.meta;
+  }
+
+  const rows = await db
+    .select({ value: configOptionsTable.value, meta: configOptionsTable.meta })
+    .from(configOptionsTable)
+    .where(eq(configOptionsTable.category, category));
+
+  const row = rows.find(r => r.value === value);
+  const meta = (row?.meta as Record<string, string> | null) || null;
+  metaCache.set(cacheKey, { meta, expiresAt: now + CACHE_TTL });
+  return meta;
+}
+
 const permissionCache = new Map<string, { roles: string[], expiresAt: number }>();
 
 export async function getRolesByPermission(...permissionLevels: string[]): Promise<string[]> {

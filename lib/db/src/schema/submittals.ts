@@ -8,7 +8,7 @@ export const submittalsTable = pgTable("submittals", {
   number: text("number").notNull(),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").notNull().default("pending"),
+  status: text("status").notNull(),
   specSection: text("spec_section"),
   submittalType: text("submittal_type").notNull(),
   submittedById: integer("submitted_by_id").references(() => usersTable.id).notNull(),

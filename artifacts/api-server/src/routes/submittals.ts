@@ -4,7 +4,7 @@ import { submittalsTable, usersTable, activityLogTable } from "@workspace/db/sch
 import { eq, and, count } from "drizzle-orm";
 import { CreateSubmittalBody, ListSubmittalsParams, UpdateSubmittalParams, UpdateSubmittalBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import { validateConfigValue } from "../middlewares/config-validator";
+import { validateConfigValue, getDefaultValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -56,11 +56,13 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
     const [submittalCount] = await db.select({ count: count() }).from(submittalsTable).where(eq(submittalsTable.projectId, projectId));
     const number = `SUB-${String((submittalCount.count as number) + 1).padStart(4, "0")}`;
 
+    const defaultSubmittalStatus = await getDefaultValue("submittal_status");
     const [submittal] = await db.insert(submittalsTable).values({
       projectId,
       number,
       title: body.title,
       description: body.description || null,
+      status: defaultSubmittalStatus,
       submittalType: body.submittalType,
       specSection: body.specSection || null,
       submittedById: req.user!.userId,

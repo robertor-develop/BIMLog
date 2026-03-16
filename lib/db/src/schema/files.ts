@@ -9,7 +9,7 @@ export const filesTable = pgTable("files", {
   fileSize: integer("file_size").notNull(),
   fileType: text("file_type").notNull(),
   version: integer("version").notNull().default(1),
-  status: text("status").notNull().default("active"),
+  status: text("status").notNull(),
   uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

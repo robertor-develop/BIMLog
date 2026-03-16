@@ -6,7 +6,7 @@ export const projectsTable = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   code: text("code").notNull(),
-  status: text("status").notNull().default("active"),
+  status: text("status").notNull(),
   createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -16,7 +16,7 @@ export const projectMembersTable = pgTable("project_members", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => projectsTable.id).notNull(),
   userId: integer("user_id").references(() => usersTable.id).notNull(),
-  role: text("role").notNull().default("read_only"),
+  role: text("role").notNull(),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 });
 

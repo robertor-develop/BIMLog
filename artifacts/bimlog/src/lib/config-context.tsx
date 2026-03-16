@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useGetConfig } from '@workspace/api-client-react';
 import { useI18n } from './i18n';
+import { useAuthStore } from '@/store/auth';
 
 type ConfigOption = { value: string; label: string; labelEs: string; meta?: Record<string, string> };
 type AppConfig = Record<string, ConfigOption[]>;
@@ -17,7 +18,8 @@ type ConfigContextType = {
 const ConfigContext = createContext<ConfigContextType | null>(null);
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
-  const { data, isLoading } = useGetConfig();
+  const { token } = useAuthStore();
+  const { data, isLoading } = useGetConfig({ query: { enabled: !!token } });
   const { lang } = useI18n();
   const config = (data ?? {}) as AppConfig;
 

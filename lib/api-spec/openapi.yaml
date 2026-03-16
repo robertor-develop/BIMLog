@@ -34,6 +34,8 @@ paths:
       operationId: getConfig
       tags: [config]
       summary: Get application configuration options (roles, statuses, separators)
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Configuration options grouped by category

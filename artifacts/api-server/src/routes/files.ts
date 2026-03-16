@@ -4,6 +4,7 @@ import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { getDefaultValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -124,11 +125,13 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       return;
     }
 
+    const defaultFileStatus = await getDefaultValue("file_status");
     const [file] = await db.insert(filesTable).values({
       projectId,
       fileName: body.fileName,
       fileSize: body.fileSize,
       fileType: body.fileType,
+      status: defaultFileStatus,
       uploadedById: req.user!.userId,
     }).returning();
 

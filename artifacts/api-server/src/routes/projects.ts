@@ -4,7 +4,7 @@ import { projectsTable, projectMembersTable, filesTable } from "@workspace/db/sc
 import { eq, sql, count } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import { getRolesByPermission } from "../middlewares/config-validator";
+import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -62,21 +62,27 @@ router.post("/projects", authMiddleware, async (req, res) => {
     const body = CreateProjectBody.parse(req.body);
     const userId = req.user!.userId;
 
+    const defaultStatus = await getDefaultValue("project_status");
     const [project] = await db
       .insert(projectsTable)
       .values({
         name: body.name,
         description: body.description || null,
         code: body.code,
+        status: defaultStatus,
         createdById: userId,
       })
       .returning();
 
     const adminRoles = await getRolesByPermission("admin");
+    if (adminRoles.length === 0) {
+      res.status(500).json({ error: "No admin role configured. Seed the config_options table with member_role entries." });
+      return;
+    }
     await db.insert(projectMembersTable).values({
       projectId: project.id,
       userId,
-      role: adminRoles[0] || "project_admin",
+      role: adminRoles[0],
     });
 
     res.status(201).json({

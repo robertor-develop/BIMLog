@@ -4,7 +4,7 @@ import { rfisTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import { validateConfigValue } from "../middlewares/config-validator";
+import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -57,11 +57,13 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
     const number = `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
 
+    const defaultRfiStatus = await getDefaultValue("rfi_status");
     const [rfi] = await db.insert(rfisTable).values({
       projectId,
       number,
       subject: body.subject,
       description: body.description || null,
+      status: defaultRfiStatus,
       priority: body.priority,
       assignedToId: body.assignedToId || null,
       createdById: req.user!.userId,
@@ -118,7 +120,8 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     if (body.description !== undefined) updates.description = body.description;
     if (body.status) {
       updates.status = body.status;
-      if (body.status === "responded") {
+      const statusMeta = await getConfigOptionMeta("rfi_status", body.status);
+      if (String(statusMeta?.setsRespondedAt) === "true") {
         updates.respondedAt = new Date();
       }
     }

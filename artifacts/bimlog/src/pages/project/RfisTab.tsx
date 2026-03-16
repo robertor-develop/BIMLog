@@ -54,7 +54,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                     <StatusBadge status={rfi.status} />
                   </td>
                   <td className="px-6 py-4">
-                    <Badge variant={rfi.priority === 'high' || rfi.priority === 'critical' ? 'destructive' : 'secondary'}>
+                    <Badge variant="secondary">
                       {getLabel('rfi_priority', rfi.priority)}
                     </Badge>
                   </td>
@@ -81,14 +81,17 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const { getLabel } = useConfig();
-  const styles: Record<string, string> = {
-    open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    in_review: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    answered: "bg-green-500/20 text-green-400 border-green-500/30",
-    closed: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-  };
-  return <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${styles[status] || styles.open}`}>{getLabel('rfi_status', status)}</span>;
+  const { getLabel, getOptions } = useConfig();
+  const allStatuses = getOptions('rfi_status');
+  const idx = allStatuses.findIndex(s => s.value === status);
+  const colorSets = [
+    "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "bg-green-500/20 text-green-400 border-green-500/30",
+    "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  ];
+  const style = colorSets[idx % colorSets.length] || colorSets[0];
+  return <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${style}`}>{getLabel('rfi_status', status)}</span>;
 }
 
 function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
@@ -98,7 +101,7 @@ function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () 
   const { toast } = useToast();
   const [subject, setSubject] = useState('');
   const priorityOptions = getOptions('rfi_priority');
-  const [priority, setPriority] = useState('medium');
+  const [priority, setPriority] = useState(priorityOptions[0]?.value ?? '');
   
   const { mutate, isPending } = useCreateRfi({
     mutation: {

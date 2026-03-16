@@ -17,7 +17,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   
   const { data: convention, isLoading } = useGetConvention(projectId);
   
-  const [separator, setSeparator] = useState("-");
+  const [separator, setSeparator] = useState(separatorOptions[0]?.value ?? '');
   const [isActive, setIsActive] = useState(true);
   const [fields, setFields] = useState<{label: string, values: string}[]>([]);
 
@@ -55,7 +55,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     });
   };
 
-  const addField = () => setFields([...fields, { label: "New Field", values: "VAL1, VAL2" }]);
+  const addField = () => setFields([...fields, { label: t('convention.fieldLabel'), values: "" }]);
   const removeField = (idx: number) => setFields(fields.filter((_, i) => i !== idx));
   const updateField = (idx: number, key: 'label'|'values', val: string) => {
     const newFields = [...fields];

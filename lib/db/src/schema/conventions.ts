@@ -4,7 +4,7 @@ import { projectsTable } from "./projects";
 export const namingConventionsTable = pgTable("naming_conventions", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => projectsTable.id).notNull().unique(),
-  separator: text("separator").notNull().default("-"),
+  separator: text("separator").notNull(),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
