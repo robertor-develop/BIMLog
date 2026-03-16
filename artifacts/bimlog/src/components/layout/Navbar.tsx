@@ -1,86 +1,89 @@
 import { Link, useLocation } from "wouter";
-import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Globe, Hexagon } from "lucide-react";
+import { LogOut, Globe, LayoutDashboard } from "lucide-react";
 
 export function Navbar() {
+  const { t, lang: language, setLang: setLanguage } = useI18n();
   const { user, logout } = useAuthStore();
-  const { t, lang, setLang } = useI18n();
-  const [, setLocation] = useLocation();
+  const [location] = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    setLocation('/login');
-  };
+  const isLanding = location === "/";
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all">
-                <Hexagon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="font-display font-bold text-xl tracking-tight text-white block leading-none">
-                  {t('app.name')}
-                </span>
-                <span className="text-[10px] text-accent font-medium tracking-wider uppercase">
-                  {t('app.tagline')}
-                </span>
-              </div>
-            </Link>
-            
-            {user && (
-              <div className="hidden md:flex space-x-1">
-                <Link href="/dashboard" className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-white hover:bg-card transition-colors">
-                  {t('nav.dashboard')}
-                </Link>
-              </div>
-            )}
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-14 flex items-center justify-between">
+
+        {/* Logo */}
+        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <span className="font-display font-bold text-white text-sm">B</span>
           </div>
+          <div className="flex items-baseline gap-1">
+            <span className="font-display font-bold text-foreground text-base">BIMLog</span>
+            <span className="text-muted-foreground text-xs hidden sm:block">by IgniteSmart</span>
+          </div>
+        </Link>
 
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-              className="text-muted-foreground hover:text-white"
-            >
-              <Globe className="w-5 h-5" />
-              <span className="sr-only">{t('nav.toggleLang')}</span>
-            </Button>
+        {/* Right side */}
+        <div className="flex items-center gap-2">
 
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="hidden sm:block text-right">
-                  <p className="text-sm font-medium text-white">{user.fullName}</p>
-                  <p className="text-xs text-muted-foreground">{user.companyName}</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center">
-                  <span className="text-sm font-bold text-white">
-                    {user.fullName.charAt(0)}
+          {/* Language toggle */}
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            title={t('nav.toggleLang')}
+          >
+            <Globe className="w-4 h-4" />
+            <span className="font-medium uppercase">{language}</span>
+          </button>
+
+          {user ? (
+            <>
+              {/* User info */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary">
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">
+                    {user.fullName?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={handleLogout}>
-                  <LogOut className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors" />
-                </Button>
+                <span className="text-sm font-medium text-foreground">{user.fullName}</span>
               </div>
-            ) : (
-              <div className="flex space-x-3">
+
+              {/* Dashboard link */}
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5">
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('nav.dashboard')}</span>
+                </Button>
+              </Link>
+
+              {/* Logout */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('nav.logout')}</span>
+              </Button>
+            </>
+          ) : (
+            isLanding && (
+              <>
                 <Link href="/login">
-                  <Button variant="ghost">{t('auth.login')}</Button>
+                  <Button variant="ghost" size="sm">{t('auth.login')}</Button>
                 </Link>
                 <Link href="/register">
-                  <Button variant="default">{t('auth.register')}</Button>
+                  <Button size="sm">{t('auth.register')}</Button>
                 </Link>
-              </div>
-            )}
-          </div>
+              </>
+            )
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
