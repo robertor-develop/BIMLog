@@ -1,13 +1,20 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable } from "@workspace/db/schema";
+import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-async function validateFileName(projectId: number, fileName: string): Promise<{ valid: boolean; details?: any[] }> {
+interface ValidationDetail {
+  field: string;
+  message: string;
+  expected?: string[];
+  received: string;
+}
+
+async function validateFileName(projectId: number, fileName: string): Promise<{ valid: boolean; details?: ValidationDetail[] }> {
   const conventions = await db
     .select()
     .from(namingConventionsTable)
@@ -44,7 +51,7 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
     };
   }
 
-  const errors: any[] = [];
+  const errors: ValidationDetail[] = [];
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
     const value = parts[i];
@@ -67,7 +74,7 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
   return { valid: true };
 }
 
-router.get("/projects/:projectId/files", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
 
@@ -75,8 +82,6 @@ router.get("/projects/:projectId/files", authMiddleware, async (req, res) => {
       where: eq(filesTable.projectId, projectId),
       orderBy: (files, { desc }) => [desc(files.createdAt)],
     });
-
-    const { usersTable, companiesTable } = await import("@workspace/db/schema");
 
     const results = await Promise.all(
       files.map(async (f) => {
@@ -99,14 +104,15 @@ router.get("/projects/:projectId/files", authMiddleware, async (req, res) => {
     );
 
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
-router.post("/projects/:projectId/files", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/files", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
     const body = UploadFileBody.parse(req.body);
 
     const validation = await validateFileName(projectId, body.fileName);
@@ -146,15 +152,15 @@ router.post("/projects/:projectId/files", authMiddleware, async (req, res) => {
       createdAt: file.createdAt.toISOString(),
       updatedAt: file.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.patch("/projects/:projectId/files/:fileId", authMiddleware, async (req, res) => {
+router.patch("/projects/:projectId/files/:fileId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const fileId = Number(req.params.fileId);
+    const { projectId, fileId } = UpdateFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
     const body = UpdateFileBody.parse(req.body);
 
     const existing = await db.select().from(filesTable).where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
@@ -164,7 +170,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, async (req, r
     }
 
     const oldFile = existing[0];
-    const updates: any = { updatedAt: new Date() };
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
 
     if (body.fileName) {
       const validation = await validateFileName(projectId, body.fileName);
@@ -206,15 +212,15 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, async (req, r
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.delete("/projects/:projectId/files/:fileId", authMiddleware, async (req, res) => {
+router.delete("/projects/:projectId/files/:fileId", authMiddleware, requireProjectMember("project_admin", "company_lead", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const fileId = Number(req.params.fileId);
+    const { projectId, fileId } = DeleteFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
 
     const existing = await db.select().from(filesTable).where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
     if (existing.length === 0) {
@@ -238,8 +244,9 @@ router.delete("/projects/:projectId/files/:fileId", authMiddleware, async (req, 
     });
 
     res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

@@ -70,7 +70,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           {t('convention.title')}
         </h3>
         <p className="text-muted-foreground mt-2">
-          Define the exact structure files must follow. This controls the Name Generator and strict upload validation.
+          {t('convention.desc')}
         </p>
       </div>
 
@@ -82,9 +82,9 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
             value={separator}
             onChange={e => setSeparator(e.target.value)}
           >
-            <option value="-">Hyphen (-)</option>
-            <option value="_">Underscore (_)</option>
-            <option value=".">Dot (.)</option>
+            <option value="-">{t('convention.separatorHyphen')}</option>
+            <option value="_">{t('convention.separatorUnderscore')}</option>
+            <option value=".">{t('convention.separatorDot')}</option>
           </select>
         </div>
         <div className="flex items-center space-x-3 pt-8">
@@ -109,7 +109,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
 
         {fields.length === 0 && (
           <div className="p-8 text-center border-2 border-dashed border-border rounded-xl text-muted-foreground">
-            No fields defined. Add your first field to start building the convention.
+            {t('convention.noFields')}
           </div>
         )}
 
@@ -121,11 +121,11 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
               </div>
               <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Field Label</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">{t('convention.fieldLabel')}</label>
                   <Input value={field.label} onChange={e => updateField(idx, 'label', e.target.value)} />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-xs text-muted-foreground mb-1 block">Allowed Values (Comma separated)</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">{t('convention.allowedValues')}</label>
                   <Input value={field.values} onChange={e => updateField(idx, 'values', e.target.value)} />
                 </div>
               </div>
@@ -140,10 +140,10 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       <div className="pt-6 border-t border-border flex items-center justify-between">
         <div className="flex items-center text-accent text-sm">
           <AlertTriangle className="w-4 h-4 mr-2" />
-          Changes apply immediately to validation rules
+          {t('convention.changesWarning')}
         </div>
         <Button onClick={handleSave} disabled={isPending} className="px-8">
-          {isPending ? 'Saving...' : t('convention.save')}
+          {isPending ? t('convention.saving') : t('convention.save')}
         </Button>
       </div>
     </div>

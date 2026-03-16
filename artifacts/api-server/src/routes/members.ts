@@ -2,14 +2,14 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { projectMembersTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { AddMemberBody, UpdateMemberBody } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { AddMemberBody, UpdateMemberBody, ListMembersParams, AddMemberParams, UpdateMemberParams } from "@workspace/api-zod";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/projects/:projectId/members", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/members", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListMembersParams.parse({ projectId: req.params.projectId });
 
     const members = await db
       .select()
@@ -38,14 +38,15 @@ router.get("/projects/:projectId/members", authMiddleware, async (req, res) => {
     );
 
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
-router.post("/projects/:projectId/members", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/members", authMiddleware, requireProjectMember("project_admin", "company_lead"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = AddMemberParams.parse({ projectId: req.params.projectId });
     const body = AddMemberBody.parse(req.body);
 
     const users = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).limit(1);
@@ -96,15 +97,15 @@ router.post("/projects/:projectId/members", authMiddleware, async (req, res) => 
       role: member.role,
       joinedAt: member.joinedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.patch("/projects/:projectId/members/:memberId", authMiddleware, async (req, res) => {
+router.patch("/projects/:projectId/members/:memberId", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const memberId = Number(req.params.memberId);
+    const { projectId, memberId } = UpdateMemberParams.parse({ projectId: req.params.projectId, memberId: req.params.memberId });
     const body = UpdateMemberBody.parse(req.body);
 
     const existing = await db
@@ -137,15 +138,15 @@ router.patch("/projects/:projectId/members/:memberId", authMiddleware, async (re
       role: updated.role,
       joinedAt: updated.joinedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.delete("/projects/:projectId/members/:memberId", authMiddleware, async (req, res) => {
+router.delete("/projects/:projectId/members/:memberId", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const memberId = Number(req.params.memberId);
+    const { projectId, memberId } = UpdateMemberParams.parse({ projectId: req.params.projectId, memberId: req.params.memberId });
 
     const existing = await db
       .select()
@@ -161,8 +162,9 @@ router.delete("/projects/:projectId/members/:memberId", authMiddleware, async (r
     await db.delete(projectMembersTable).where(eq(projectMembersTable.id, memberId));
 
     res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

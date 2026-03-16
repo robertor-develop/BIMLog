@@ -2,13 +2,14 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { activityLogTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
+import { ListActivityParams } from "@workspace/api-zod";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/projects/:projectId/activity", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/activity", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListActivityParams.parse({ projectId: req.params.projectId });
 
     const entries = await db.query.activityLogTable.findMany({
       where: eq(activityLogTable.projectId, projectId),
@@ -21,8 +22,9 @@ router.get("/projects/:projectId/activity", authMiddleware, async (req, res) => 
         createdAt: e.createdAt.toISOString(),
       }))
     );
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

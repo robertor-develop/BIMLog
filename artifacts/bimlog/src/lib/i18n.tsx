@@ -4,14 +4,12 @@ type Language = 'en' | 'es';
 
 const translations = {
   en: {
-    // General
     'app.name': 'BIMLog',
     'app.tagline': 'by IgniteSmart',
     'nav.dashboard': 'Dashboard',
     'nav.projects': 'Projects',
     'nav.logout': 'Sign Out',
     
-    // Auth
     'auth.login': 'Log In',
     'auth.register': 'Create Account',
     'auth.email': 'Email Address',
@@ -21,7 +19,6 @@ const translations = {
     'auth.noAccount': "Don't have an account?",
     'auth.hasAccount': 'Already have an account?',
 
-    // Landing
     'landing.hero.title': 'Intelligent BIM Coordination & Accountability',
     'landing.hero.subtitle': 'The enterprise-grade platform for AEC professionals to manage files, RFIs, and naming conventions with uncompromising strictness.',
     'landing.hero.cta': 'Get Started',
@@ -33,7 +30,6 @@ const translations = {
     'landing.features.rfi': 'RFI & Submittals',
     'landing.features.rfiDesc': 'Track the complete lifecycle of project documentation.',
 
-    // Dashboard
     'dashboard.title': 'Your Projects',
     'dashboard.newProject': 'New Project',
     'project.code': 'Code',
@@ -44,7 +40,6 @@ const translations = {
     'project.create.desc': 'Description',
     'project.create.submit': 'Create Project',
 
-    // Project Detail
     'project.tabs.files': 'Files',
     'project.tabs.rfis': 'RFIs',
     'project.tabs.submittals': 'Submittals',
@@ -53,40 +48,112 @@ const translations = {
     'project.tabs.convention': 'Convention Builder',
     'project.tabs.generator': 'Name Generator',
 
-    // Files
     'files.upload': 'Upload File',
     'files.name': 'File Name',
+    'files.version': 'Version',
     'files.size': 'Size',
     'files.status': 'Status',
     'files.uploader': 'Uploaded By',
     'files.date': 'Date',
+    'files.actions': 'Actions',
+    'files.empty': 'No files uploaded yet.',
+    'files.simulate': 'Simulate File Upload',
+    'files.simulateHint': 'Enter a file name exactly matching the project\'s naming convention to test strict validation.',
+    'files.placeholder': 'e.g., PRJ-ARC-FL1-DWG-001.pdf',
+    'files.testUpload': 'Test Upload',
+    'files.uploading': 'Uploading...',
+    'files.deleted': 'File deleted',
+    'files.deleteConfirm': 'Are you sure you want to delete this file?',
+    'files.namingViolation': 'Naming Convention Violation',
 
-    // Activity
+    'rfis.create': 'Create RFI',
+    'rfis.number': 'Number',
+    'rfis.subject': 'Subject',
+    'rfis.status': 'Status',
+    'rfis.priority': 'Priority',
+    'rfis.creator': 'Creator',
+    'rfis.created': 'Created',
+    'rfis.empty': 'No RFIs created yet.',
+    'rfis.new': 'New RFI',
+    'rfis.subjectPlaceholder': 'RFI Subject...',
+    'rfis.priorityLow': 'Low Priority',
+    'rfis.priorityMedium': 'Medium Priority',
+    'rfis.priorityHigh': 'High Priority',
+    'rfis.creating': 'Creating...',
+    'rfis.submit': 'Submit',
+    'rfis.createdSuccess': 'RFI Created',
+
+    'submittals.create': 'Create Submittal',
+    'submittals.number': 'Number',
+    'submittals.titleCol': 'Title',
+    'submittals.type': 'Type',
+    'submittals.status': 'Status',
+    'submittals.submittedBy': 'Submitted By',
+    'submittals.date': 'Date',
+    'submittals.empty': 'No submittals created yet.',
+    'submittals.new': 'New Submittal',
+    'submittals.titlePlaceholder': 'Submittal Title...',
+    'submittals.typeShopDrawing': 'Shop Drawing',
+    'submittals.typeProductData': 'Product Data',
+    'submittals.typeSample': 'Sample',
+    'submittals.creating': 'Creating...',
+    'submittals.submit': 'Submit',
+    'submittals.createdSuccess': 'Submittal Created',
+
     'activity.user': 'User',
     'activity.company': 'Company',
     'activity.action': 'Action',
+    'activity.details': 'Details',
     'activity.before': 'Before',
     'activity.after': 'After',
     'activity.date': 'Timestamp',
+    'activity.empty': 'No activity recorded yet.',
+    'activity.auditTrail': 'Immutable Audit Trail - All events are permanently recorded',
 
-    // Team
     'team.add': 'Add Member',
     'team.name': 'Name',
+    'team.email': 'Email',
+    'team.company': 'Company',
     'team.role': 'Role',
     'team.joined': 'Joined',
+    'team.actions': 'Actions',
+    'team.addTitle': 'Add Team Member',
+    'team.emailPlaceholder': 'User Email',
+    'team.roleAdmin': 'Project Admin',
+    'team.roleCompanyLead': 'Company Lead',
+    'team.roleDrafter': 'Drafter',
+    'team.roleProjectManager': 'Project Manager',
+    'team.roleReadOnly': 'Read Only',
+    'team.adding': 'Adding...',
+    'team.addButton': 'Add',
+    'team.added': 'Member added',
+    'team.removed': 'Member removed',
+    'team.removeConfirm': 'Remove this member?',
 
-    // Convention
     'convention.title': 'Naming Convention Builder',
     'convention.separator': 'Separator Character',
+    'convention.separatorHyphen': 'Hyphen (-)',
+    'convention.separatorUnderscore': 'Underscore (_)',
+    'convention.separatorDot': 'Dot (.)',
     'convention.active': 'Convention Active',
     'convention.fields': 'Naming Fields',
     'convention.addField': 'Add Field',
     'convention.save': 'Save Convention',
+    'convention.saving': 'Saving...',
+    'convention.desc': 'Define the exact structure files must follow. This controls the Name Generator and strict upload validation.',
+    'convention.fieldLabel': 'Field Label',
+    'convention.allowedValues': 'Allowed Values (Comma separated)',
+    'convention.noFields': 'No fields defined. Add your first field to start building the convention.',
+    'convention.changesWarning': 'Changes apply immediately to validation rules',
     'convention.generator.title': 'File Name Generator',
     'convention.generator.preview': 'Generated Name Preview',
     'convention.generator.copy': 'Copy to Clipboard',
+    'convention.generator.copied': 'Copied!',
+    'convention.generator.copiedToast': 'Copied to clipboard',
+    'convention.generator.noConvention': 'No Active Convention',
+    'convention.generator.noConventionDesc': 'The project admin needs to configure the naming convention first.',
+    'convention.generator.hint': 'Select values from the dropdowns below to generate a compliant file name. Free text input is disabled to guarantee compliance.',
 
-    // Common
     'common.save': 'Save',
     'common.cancel': 'Cancel',
     'common.delete': 'Delete',
@@ -95,14 +162,12 @@ const translations = {
     'common.success': 'Success',
   },
   es: {
-    // General
     'app.name': 'BIMLog',
     'app.tagline': 'por IgniteSmart',
     'nav.dashboard': 'Panel',
     'nav.projects': 'Proyectos',
     'nav.logout': 'Cerrar Sesión',
     
-    // Auth
     'auth.login': 'Iniciar Sesión',
     'auth.register': 'Crear Cuenta',
     'auth.email': 'Correo Electrónico',
@@ -112,7 +177,6 @@ const translations = {
     'auth.noAccount': '¿No tienes cuenta?',
     'auth.hasAccount': '¿Ya tienes cuenta?',
 
-    // Landing
     'landing.hero.title': 'Coordinación y Responsabilidad BIM Inteligente',
     'landing.hero.subtitle': 'La plataforma de nivel empresarial para profesionales AEC para gestionar archivos, RFIs y convenciones de nombres con estricta rigurosidad.',
     'landing.hero.cta': 'Empezar',
@@ -124,7 +188,6 @@ const translations = {
     'landing.features.rfi': 'RFI y Entregables',
     'landing.features.rfiDesc': 'Rastrea el ciclo de vida completo de la documentación.',
 
-    // Dashboard
     'dashboard.title': 'Tus Proyectos',
     'dashboard.newProject': 'Nuevo Proyecto',
     'project.code': 'Código',
@@ -135,7 +198,6 @@ const translations = {
     'project.create.desc': 'Descripción',
     'project.create.submit': 'Crear Proyecto',
 
-    // Project Detail
     'project.tabs.files': 'Archivos',
     'project.tabs.rfis': 'RFIs',
     'project.tabs.submittals': 'Entregables',
@@ -144,40 +206,112 @@ const translations = {
     'project.tabs.convention': 'Constructor de Convenciones',
     'project.tabs.generator': 'Generador de Nombres',
 
-    // Files
     'files.upload': 'Subir Archivo',
     'files.name': 'Nombre de Archivo',
+    'files.version': 'Versión',
     'files.size': 'Tamaño',
     'files.status': 'Estado',
     'files.uploader': 'Subido Por',
     'files.date': 'Fecha',
+    'files.actions': 'Acciones',
+    'files.empty': 'No se han subido archivos aún.',
+    'files.simulate': 'Simular Carga de Archivo',
+    'files.simulateHint': 'Ingrese un nombre de archivo que coincida con la convención del proyecto para probar la validación estricta.',
+    'files.placeholder': 'ej., PRJ-ARC-FL1-DWG-001.pdf',
+    'files.testUpload': 'Probar Carga',
+    'files.uploading': 'Subiendo...',
+    'files.deleted': 'Archivo eliminado',
+    'files.deleteConfirm': '¿Estás seguro de que deseas eliminar este archivo?',
+    'files.namingViolation': 'Violación de Convención de Nombres',
 
-    // Activity
+    'rfis.create': 'Crear RFI',
+    'rfis.number': 'Número',
+    'rfis.subject': 'Asunto',
+    'rfis.status': 'Estado',
+    'rfis.priority': 'Prioridad',
+    'rfis.creator': 'Creador',
+    'rfis.created': 'Creado',
+    'rfis.empty': 'No se han creado RFIs aún.',
+    'rfis.new': 'Nuevo RFI',
+    'rfis.subjectPlaceholder': 'Asunto del RFI...',
+    'rfis.priorityLow': 'Baja Prioridad',
+    'rfis.priorityMedium': 'Media Prioridad',
+    'rfis.priorityHigh': 'Alta Prioridad',
+    'rfis.creating': 'Creando...',
+    'rfis.submit': 'Enviar',
+    'rfis.createdSuccess': 'RFI Creado',
+
+    'submittals.create': 'Crear Entregable',
+    'submittals.number': 'Número',
+    'submittals.titleCol': 'Título',
+    'submittals.type': 'Tipo',
+    'submittals.status': 'Estado',
+    'submittals.submittedBy': 'Presentado Por',
+    'submittals.date': 'Fecha',
+    'submittals.empty': 'No se han creado entregables aún.',
+    'submittals.new': 'Nuevo Entregable',
+    'submittals.titlePlaceholder': 'Título del Entregable...',
+    'submittals.typeShopDrawing': 'Plano de Taller',
+    'submittals.typeProductData': 'Datos de Producto',
+    'submittals.typeSample': 'Muestra',
+    'submittals.creating': 'Creando...',
+    'submittals.submit': 'Enviar',
+    'submittals.createdSuccess': 'Entregable Creado',
+
     'activity.user': 'Usuario',
     'activity.company': 'Empresa',
     'activity.action': 'Acción',
+    'activity.details': 'Detalles',
     'activity.before': 'Antes',
     'activity.after': 'Después',
     'activity.date': 'Marca de tiempo',
+    'activity.empty': 'No se ha registrado actividad aún.',
+    'activity.auditTrail': 'Registro de Auditoría Inmutable - Todos los eventos se registran permanentemente',
 
-    // Team
     'team.add': 'Agregar Miembro',
     'team.name': 'Nombre',
+    'team.email': 'Correo',
+    'team.company': 'Empresa',
     'team.role': 'Rol',
     'team.joined': 'Se unió',
+    'team.actions': 'Acciones',
+    'team.addTitle': 'Agregar Miembro del Equipo',
+    'team.emailPlaceholder': 'Correo del Usuario',
+    'team.roleAdmin': 'Administrador de Proyecto',
+    'team.roleCompanyLead': 'Líder de Empresa',
+    'team.roleDrafter': 'Dibujante',
+    'team.roleProjectManager': 'Gerente de Proyecto',
+    'team.roleReadOnly': 'Solo Lectura',
+    'team.adding': 'Agregando...',
+    'team.addButton': 'Agregar',
+    'team.added': 'Miembro agregado',
+    'team.removed': 'Miembro eliminado',
+    'team.removeConfirm': '¿Eliminar este miembro?',
 
-    // Convention
     'convention.title': 'Constructor de Convenciones',
     'convention.separator': 'Carácter Separador',
+    'convention.separatorHyphen': 'Guión (-)',
+    'convention.separatorUnderscore': 'Guión bajo (_)',
+    'convention.separatorDot': 'Punto (.)',
     'convention.active': 'Convención Activa',
     'convention.fields': 'Campos de Nombre',
     'convention.addField': 'Agregar Campo',
     'convention.save': 'Guardar Convención',
+    'convention.saving': 'Guardando...',
+    'convention.desc': 'Define la estructura exacta que deben seguir los archivos. Esto controla el Generador de Nombres y la validación estricta de carga.',
+    'convention.fieldLabel': 'Etiqueta del Campo',
+    'convention.allowedValues': 'Valores Permitidos (Separados por coma)',
+    'convention.noFields': 'No hay campos definidos. Agrega tu primer campo para comenzar.',
+    'convention.changesWarning': 'Los cambios se aplican inmediatamente a las reglas de validación',
     'convention.generator.title': 'Generador de Nombres',
     'convention.generator.preview': 'Vista Previa',
     'convention.generator.copy': 'Copiar al Portapapeles',
+    'convention.generator.copied': '¡Copiado!',
+    'convention.generator.copiedToast': 'Copiado al portapapeles',
+    'convention.generator.noConvention': 'Sin Convención Activa',
+    'convention.generator.noConventionDesc': 'El administrador del proyecto necesita configurar la convención de nombres primero.',
+    'convention.generator.hint': 'Seleccione valores de los menús para generar un nombre de archivo compatible. La entrada de texto libre está desactivada para garantizar el cumplimiento.',
 
-    // Common
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',
     'common.delete': 'Eliminar',
@@ -187,10 +321,12 @@ const translations = {
   }
 };
 
+type TranslationKey = keyof typeof translations.en;
+
 type I18nContextType = {
   lang: Language;
   setLang: (lang: Language) => void;
-  t: (key: keyof typeof translations.en) => string;
+  t: (key: TranslationKey) => string;
 };
 
 const I18nContext = createContext<I18nContextType | null>(null);
@@ -198,7 +334,7 @@ const I18nContext = createContext<I18nContextType | null>(null);
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>('en');
 
-  const t = (key: keyof typeof translations.en) => {
+  const t = (key: TranslationKey) => {
     return translations[lang][key] || translations['en'][key] || key;
   };
 

@@ -57,8 +57,9 @@ router.post("/auth/register", async (req, res) => {
         createdAt: user.createdAt.toISOString(),
       },
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message || "Registration failed" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Registration failed";
+    res.status(400).json({ error: message });
   }
 });
 
@@ -103,8 +104,9 @@ router.post("/auth/login", async (req, res) => {
         createdAt: user.createdAt.toISOString(),
       },
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message || "Login failed" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Login failed";
+    res.status(400).json({ error: message });
   }
 });
 

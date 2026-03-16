@@ -2,14 +2,14 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { submittalsTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
-import { CreateSubmittalBody, UpdateSubmittalBody } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { CreateSubmittalBody, ListSubmittalsParams, UpdateSubmittalParams, UpdateSubmittalBody } from "@workspace/api-zod";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/projects/:projectId/submittals", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/submittals", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListSubmittalsParams.parse({ projectId: req.params.projectId });
 
     const submittals = await db.query.submittalsTable.findMany({
       where: eq(submittalsTable.projectId, projectId),
@@ -36,14 +36,15 @@ router.get("/projects/:projectId/submittals", authMiddleware, async (req, res) =
     );
 
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
-router.post("/projects/:projectId/submittals", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/submittals", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListSubmittalsParams.parse({ projectId: req.params.projectId });
     const body = CreateSubmittalBody.parse(req.body);
 
     const [submittalCount] = await db.select({ count: count() }).from(submittalsTable).where(eq(submittalsTable.projectId, projectId));
@@ -58,7 +59,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, async (req, res) 
       specSection: body.specSection || null,
       submittedById: req.user!.userId,
       assignedToId: body.assignedToId || null,
-      dueDate: body.dueDate ? new Date(body.dueDate) : null,
+      dueDate: body.dueDate ? new Date(body.dueDate as string) : null,
     }).returning();
 
     await db.insert(activityLogTable).values({
@@ -79,15 +80,15 @@ router.post("/projects/:projectId/submittals", authMiddleware, async (req, res) 
       createdAt: submittal.createdAt.toISOString(),
       updatedAt: submittal.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, async (req, res) => {
+router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const submittalId = Number(req.params.submittalId);
+    const { projectId, submittalId } = UpdateSubmittalParams.parse({ projectId: req.params.projectId, submittalId: req.params.submittalId });
     const body = UpdateSubmittalBody.parse(req.body);
 
     const existing = await db.select().from(submittalsTable).where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
@@ -96,13 +97,13 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, asy
       return;
     }
 
-    const updates: any = { updatedAt: new Date() };
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.title) updates.title = body.title;
     if (body.description !== undefined) updates.description = body.description;
     if (body.status) updates.status = body.status;
     if (body.specSection !== undefined) updates.specSection = body.specSection;
     if (body.assignedToId !== undefined) updates.assignedToId = body.assignedToId;
-    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate as string) : null;
 
     const [updated] = await db.update(submittalsTable).set(updates).where(eq(submittalsTable.id, submittalId)).returning();
 
@@ -124,8 +125,9 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, asy
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 

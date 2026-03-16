@@ -17,7 +17,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
           </h3>
           <p className="text-sm text-muted-foreground mt-1 flex items-center">
             <ShieldCheck className="w-4 h-4 mr-1" />
-            Immutable Audit Trail - All events are permanently recorded
+            {t('activity.auditTrail')}
           </p>
         </div>
       </div>
@@ -32,7 +32,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
                 <th className="px-6 py-4">{t('activity.date')}</th>
                 <th className="px-6 py-4">{t('activity.user')}</th>
                 <th className="px-6 py-4">{t('activity.action')}</th>
-                <th className="px-6 py-4">Details</th>
+                <th className="px-6 py-4">{t('activity.details')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -62,7 +62,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
               {activities?.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
-                    No activity recorded yet.
+                    {t('activity.empty')}
                   </td>
                 </tr>
               )}

@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectsTable, projectMembersTable, usersTable, companiesTable, filesTable } from "@workspace/db/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { projectsTable, projectMembersTable, filesTable } from "@workspace/db/schema";
+import { eq, sql, count } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -50,8 +50,9 @@ router.get("/projects", authMiddleware, async (req, res) => {
     );
 
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
@@ -83,12 +84,13 @@ router.post("/projects", authMiddleware, async (req, res) => {
       memberCount: 1,
       fileCount: 0,
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.get("/projects/:projectId", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
 
@@ -122,8 +124,9 @@ router.get("/projects/:projectId", authMiddleware, async (req, res) => {
       memberCount: memberCount.count,
       fileCount: fileCount.count,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

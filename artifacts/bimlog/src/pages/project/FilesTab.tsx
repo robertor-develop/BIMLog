@@ -9,6 +9,24 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, File, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
+interface ValidationDetail {
+  field: string;
+  message: string;
+  expected?: string[];
+  received: string;
+}
+
+interface ApiErrorData {
+  error?: string;
+  details?: ValidationDetail[];
+}
+
+interface ApiError {
+  data?: ApiErrorData;
+  response?: { data?: ApiErrorData };
+  message?: string;
+}
+
 export function FilesTab({ projectId }: { projectId: number }) {
   const { t } = useI18n();
   const { data: files, isLoading } = useListFiles(projectId);
@@ -34,11 +52,11 @@ export function FilesTab({ projectId }: { projectId: number }) {
             <thead className="bg-card text-muted-foreground text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4">{t('files.name')}</th>
-                <th className="px-6 py-4">Version</th>
+                <th className="px-6 py-4">{t('files.version')}</th>
                 <th className="px-6 py-4">{t('files.status')}</th>
                 <th className="px-6 py-4">{t('files.uploader')}</th>
                 <th className="px-6 py-4">{t('files.date')}</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 text-right">{t('files.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -64,7 +82,7 @@ export function FilesTab({ projectId }: { projectId: number }) {
               {files?.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    No files uploaded yet.
+                    {t('files.empty')}
                   </td>
                 </tr>
               )}
@@ -81,7 +99,7 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [fileName, setFileName] = useState('');
-  const [errorDetails, setErrorDetails] = useState<any[]>([]);
+  const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
 
   const { mutate, isPending } = useUploadFile({
     mutation: {
@@ -91,12 +109,12 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
         toast({ title: t('common.success') });
         onClose();
       },
-      onError: (err: any) => {
+      onError: (err: ApiError) => {
         const errorData = err.data || err.response?.data;
         if (errorData?.details) {
            setErrorDetails(errorData.details);
         } else {
-           toast({ title: t('common.error'), description: errorData?.error || err.message || "Upload failed", variant: "destructive" });
+           toast({ title: t('common.error'), description: errorData?.error || err.message || t('common.error'), variant: "destructive" });
         }
       }
     }
@@ -104,15 +122,15 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
 
   return (
     <div className="bg-card/50 p-6 rounded-xl border border-border mb-6">
-      <h4 className="font-semibold text-white mb-4">Simulate File Upload</h4>
+      <h4 className="font-semibold text-white mb-4">{t('files.simulate')}</h4>
       <p className="text-xs text-muted-foreground mb-4">
-        Enter a file name exactly matching the project's naming convention to test strict validation.
+        {t('files.simulateHint')}
       </p>
       
       <div className="flex space-x-4">
         <div className="flex-1">
           <Input 
-            placeholder="e.g., PRJ-ARC-FL1-DWG-001.pdf" 
+            placeholder={t('files.placeholder')}
             value={fileName}
             onChange={(e) => { setFileName(e.target.value); setErrorDetails([]); }}
           />
@@ -121,7 +139,7 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
           disabled={!fileName || isPending}
           onClick={() => mutate({ projectId, data: { fileName, fileSize: 1024, fileType: 'application/pdf' } })}
         >
-          {isPending ? 'Uploading...' : 'Test Upload'}
+          {isPending ? t('files.uploading') : t('files.testUpload')}
         </Button>
       </div>
 
@@ -129,7 +147,7 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
         <div className="mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
           <div className="flex items-center text-destructive font-semibold mb-2">
             <AlertCircle className="w-4 h-4 mr-2" />
-            Naming Convention Violation
+            {t('files.namingViolation')}
           </div>
           <ul className="text-sm text-destructive/90 space-y-1 list-disc pl-5">
             {errorDetails.map((detail, idx) => (
@@ -146,6 +164,7 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
 }
 
 function DeleteFileButton({ projectId, fileId }: { projectId: number, fileId: number }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { mutate, isPending } = useDeleteFile({
@@ -153,7 +172,7 @@ function DeleteFileButton({ projectId, fileId }: { projectId: number, fileId: nu
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/files`] });
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/activity`] });
-        toast({ title: "File deleted" });
+        toast({ title: t('files.deleted') });
       }
     }
   });
@@ -165,7 +184,7 @@ function DeleteFileButton({ projectId, fileId }: { projectId: number, fileId: nu
       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
       disabled={isPending}
       onClick={() => {
-        if(confirm("Are you sure you want to delete this file?")) {
+        if(confirm(t('files.deleteConfirm'))) {
           mutate({ projectId, fileId });
         }
       }}

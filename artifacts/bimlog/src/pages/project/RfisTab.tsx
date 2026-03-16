@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Plus } from "lucide-react";
 import { format } from "date-fns";
 
+type RfiPriority = 'low' | 'medium' | 'high';
+
 export function RfisTab({ projectId }: { projectId: number }) {
   const { t } = useI18n();
   const { data: rfis, isLoading } = useListRfis(projectId);
@@ -20,7 +22,7 @@ export function RfisTab({ projectId }: { projectId: number }) {
         <h3 className="text-2xl font-display font-bold text-white">{t('project.tabs.rfis')}</h3>
         <Button onClick={() => setShowCreate(!showCreate)}>
           <Plus className="w-4 h-4 mr-2" />
-          Create RFI
+          {t('rfis.create')}
         </Button>
       </div>
 
@@ -33,12 +35,12 @@ export function RfisTab({ projectId }: { projectId: number }) {
           <table className="w-full text-sm text-left">
             <thead className="bg-card text-muted-foreground text-xs uppercase font-semibold">
               <tr>
-                <th className="px-6 py-4">Number</th>
-                <th className="px-6 py-4">Subject</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Priority</th>
-                <th className="px-6 py-4">Creator</th>
-                <th className="px-6 py-4">Created</th>
+                <th className="px-6 py-4">{t('rfis.number')}</th>
+                <th className="px-6 py-4">{t('rfis.subject')}</th>
+                <th className="px-6 py-4">{t('rfis.status')}</th>
+                <th className="px-6 py-4">{t('rfis.priority')}</th>
+                <th className="px-6 py-4">{t('rfis.creator')}</th>
+                <th className="px-6 py-4">{t('rfis.created')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -64,7 +66,7 @@ export function RfisTab({ projectId }: { projectId: number }) {
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                     <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    No RFIs created yet.
+                    {t('rfis.empty')}
                   </td>
                 </tr>
               )}
@@ -87,15 +89,17 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [subject, setSubject] = useState('');
+  const [priority, setPriority] = useState<RfiPriority>('medium');
   
   const { mutate, isPending } = useCreateRfi({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/rfis`] });
-        toast({ title: "RFI Created" });
+        toast({ title: t('rfis.createdSuccess') });
         onClose();
       }
     }
@@ -103,28 +107,29 @@ function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () 
 
   return (
     <div className="bg-card/50 p-6 rounded-xl border border-border mb-6">
-      <h4 className="font-semibold text-white mb-4">New RFI</h4>
+      <h4 className="font-semibold text-white mb-4">{t('rfis.new')}</h4>
       <div className="flex space-x-4">
         <div className="flex-1">
           <Input 
-            placeholder="RFI Subject..." 
+            placeholder={t('rfis.subjectPlaceholder')}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
         </div>
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
-          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as RfiPriority)}
         >
-          <option value="low">Low Priority</option>
-          <option value="medium">Medium Priority</option>
-          <option value="high">High Priority</option>
+          <option value="low">{t('rfis.priorityLow')}</option>
+          <option value="medium">{t('rfis.priorityMedium')}</option>
+          <option value="high">{t('rfis.priorityHigh')}</option>
         </select>
         <Button 
           disabled={!subject || isPending}
-          onClick={() => mutate({ projectId, data: { subject, priority: 'medium' } })}
+          onClick={() => mutate({ projectId, data: { subject, priority } })}
         >
-          {isPending ? 'Creating...' : 'Submit'}
+          {isPending ? t('rfis.creating') : t('rfis.submit')}
         </Button>
       </div>
     </div>

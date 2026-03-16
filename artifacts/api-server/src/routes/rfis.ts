@@ -2,14 +2,14 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
-import { CreateRfiBody, ListRfisParams, UpdateRfiBody } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/projects/:projectId/rfis", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
 
     const rfis = await db.query.rfisTable.findMany({
       where: eq(rfisTable.projectId, projectId),
@@ -37,14 +37,15 @@ router.get("/projects/:projectId/rfis", authMiddleware, async (req, res) => {
     );
 
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
-router.post("/projects/:projectId/rfis", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/rfis", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
     const body = CreateRfiBody.parse(req.body);
 
     const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
@@ -58,7 +59,7 @@ router.post("/projects/:projectId/rfis", authMiddleware, async (req, res) => {
       priority: body.priority,
       assignedToId: body.assignedToId || null,
       createdById: req.user!.userId,
-      dueDate: body.dueDate ? new Date(body.dueDate) : null,
+      dueDate: body.dueDate ? new Date(body.dueDate as string) : null,
     }).returning();
 
     await db.insert(activityLogTable).values({
@@ -80,15 +81,15 @@ router.post("/projects/:projectId/rfis", authMiddleware, async (req, res) => {
       createdAt: rfi.createdAt.toISOString(),
       updatedAt: rfi.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 
-router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, async (req, res) => {
+router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
-    const rfiId = Number(req.params.rfiId);
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
     const body = UpdateRfiBody.parse(req.body);
 
     const existing = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
@@ -97,7 +98,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, async (req, res
       return;
     }
 
-    const updates: any = { updatedAt: new Date() };
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.subject) updates.subject = body.subject;
     if (body.description !== undefined) updates.description = body.description;
     if (body.status) {
@@ -109,7 +110,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, async (req, res
     if (body.priority) updates.priority = body.priority;
     if (body.assignedToId !== undefined) updates.assignedToId = body.assignedToId;
     if (body.response !== undefined) updates.response = body.response;
-    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate as string) : null;
 
     const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
 
@@ -132,8 +133,9 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, async (req, res
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 

@@ -14,7 +14,6 @@ export function NameGenerator({ projectId }: { projectId: number }) {
   const [selections, setSelections] = useState<Record<number, string>>({});
   const [copied, setCopied] = useState(false);
 
-  // Initialize selections with the first allowed value of each field
   useEffect(() => {
     if (convention && convention.fields) {
       const initial: Record<number, string> = {};
@@ -33,8 +32,8 @@ export function NameGenerator({ projectId }: { projectId: number }) {
     return (
       <div className="text-center py-20">
         <Wand2 className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-white mb-2">No Active Convention</h3>
-        <p className="text-muted-foreground">The project admin needs to configure the naming convention first.</p>
+        <h3 className="text-xl font-bold text-white mb-2">{t('convention.generator.noConvention')}</h3>
+        <p className="text-muted-foreground">{t('convention.generator.noConventionDesc')}</p>
       </div>
     );
   }
@@ -48,7 +47,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedName);
     setCopied(true);
-    toast({ title: "Copied to clipboard" });
+    toast({ title: t('convention.generator.copiedToast') });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -59,7 +58,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
           {t('convention.generator.title')}
         </h3>
         <p className="text-muted-foreground">
-          Select values from the dropdowns below to generate a compliant file name. Free text input is disabled to guarantee compliance.
+          {t('convention.generator.hint')}
         </p>
       </div>
 
@@ -98,7 +97,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
           className={`px-8 transition-all ${copied ? 'bg-green-500 hover:bg-green-600' : ''}`}
         >
           {copied ? (
-            <><CheckCircle2 className="w-5 h-5 mr-2" /> Copied!</>
+            <><CheckCircle2 className="w-5 h-5 mr-2" /> {t('convention.generator.copied')}</>
           ) : (
             <><Copy className="w-5 h-5 mr-2" /> {t('convention.generator.copy')}</>
           )}

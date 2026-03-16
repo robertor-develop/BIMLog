@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+
+type MemberRole = 'project_admin' | 'company_lead' | 'drafter' | 'project_manager' | 'read_only';
 
 export function TeamTab({ projectId }: { projectId: number }) {
   const { t } = useI18n();
@@ -34,11 +36,11 @@ export function TeamTab({ projectId }: { projectId: number }) {
             <thead className="bg-card text-muted-foreground text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4">{t('team.name')}</th>
-                <th className="px-6 py-4">Email</th>
-                <th className="px-6 py-4">Company</th>
+                <th className="px-6 py-4">{t('team.email')}</th>
+                <th className="px-6 py-4">{t('team.company')}</th>
                 <th className="px-6 py-4">{t('team.role')}</th>
                 <th className="px-6 py-4">{t('team.joined')}</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 text-right">{t('team.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -61,7 +63,7 @@ export function TeamTab({ projectId }: { projectId: number }) {
                     {format(new Date(member.joinedAt), 'MMM d, yyyy')}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <RemoveMemberButton projectId={projectId} memberId={member.userId} />
+                    <RemoveMemberButton projectId={projectId} memberId={member.id} />
                   </td>
                 </tr>
               ))}
@@ -74,16 +76,17 @@ export function TeamTab({ projectId }: { projectId: number }) {
 }
 
 function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<'project_admin' | 'drafter' | 'read_only'>('drafter');
+  const [role, setRole] = useState<MemberRole>('drafter');
   
   const { mutate, isPending } = useAddMember({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/members`] });
-        toast({ title: "Member added" });
+        toast({ title: t('team.added') });
         onClose();
       }
     }
@@ -91,11 +94,11 @@ function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () 
 
   return (
     <div className="bg-card/50 p-6 rounded-xl border border-border mb-6">
-      <h4 className="font-semibold text-white mb-4">Add Team Member</h4>
+      <h4 className="font-semibold text-white mb-4">{t('team.addTitle')}</h4>
       <div className="flex space-x-4">
         <div className="flex-1">
           <Input 
-            placeholder="User Email" 
+            placeholder={t('team.emailPlaceholder')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -104,17 +107,19 @@ function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () 
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
           value={role}
-          onChange={(e) => setRole(e.target.value as any)}
+          onChange={(e) => setRole(e.target.value as MemberRole)}
         >
-          <option value="project_admin">Project Admin</option>
-          <option value="drafter">Drafter</option>
-          <option value="read_only">Read Only</option>
+          <option value="project_admin">{t('team.roleAdmin')}</option>
+          <option value="company_lead">{t('team.roleCompanyLead')}</option>
+          <option value="drafter">{t('team.roleDrafter')}</option>
+          <option value="project_manager">{t('team.roleProjectManager')}</option>
+          <option value="read_only">{t('team.roleReadOnly')}</option>
         </select>
         <Button 
           disabled={!email || isPending}
           onClick={() => mutate({ projectId, data: { email, role } })}
         >
-          {isPending ? 'Adding...' : 'Add'}
+          {isPending ? t('team.adding') : t('team.addButton')}
         </Button>
       </div>
     </div>
@@ -122,13 +127,14 @@ function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () 
 }
 
 function RemoveMemberButton({ projectId, memberId }: { projectId: number, memberId: number }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { mutate, isPending } = useRemoveMember({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/members`] });
-        toast({ title: "Member removed" });
+        toast({ title: t('team.removed') });
       }
     }
   });
@@ -140,7 +146,7 @@ function RemoveMemberButton({ projectId, memberId }: { projectId: number, member
       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
       disabled={isPending}
       onClick={() => {
-        if(confirm("Remove this member?")) mutate({ projectId, memberId });
+        if(confirm(t('team.removeConfirm'))) mutate({ projectId, memberId });
       }}
     >
       <Trash2 className="w-4 h-4" />

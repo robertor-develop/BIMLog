@@ -2,14 +2,14 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import { UpsertConventionBody } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth";
+import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/projects/:projectId/conventions", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = GetConventionParams.parse({ projectId: req.params.projectId });
 
     const conventions = await db
       .select()
@@ -51,14 +51,15 @@ router.get("/projects/:projectId/conventions", authMiddleware, async (req, res) 
       createdAt: convention.createdAt.toISOString(),
       updatedAt: convention.updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 
-router.put("/projects/:projectId/conventions", authMiddleware, async (req, res) => {
+router.put("/projects/:projectId/conventions", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
   try {
-    const projectId = Number(req.params.projectId);
+    const { projectId } = UpsertConventionParams.parse({ projectId: req.params.projectId });
     const body = UpsertConventionBody.parse(req.body);
 
     const existing = await db
@@ -97,8 +98,13 @@ router.put("/projects/:projectId/conventions", authMiddleware, async (req, res) 
     }
 
     if (body.fields && body.fields.length > 0) {
+      interface ConventionField {
+        label: string;
+        fieldOrder: number;
+        allowedValues: string[];
+      }
       await db.insert(namingFieldsTable).values(
-        body.fields.map((f: any) => ({
+        body.fields.map((f: ConventionField) => ({
           conventionId,
           label: f.label,
           fieldOrder: f.fieldOrder,
@@ -133,8 +139,9 @@ router.put("/projects/:projectId/conventions", authMiddleware, async (req, res) 
       createdAt: convention[0].createdAt.toISOString(),
       updatedAt: convention[0].updatedAt.toISOString(),
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 

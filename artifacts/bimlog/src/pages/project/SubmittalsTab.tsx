@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { FileCheck, Plus } from "lucide-react";
 import { format } from "date-fns";
 
+type SubmittalType = 'shop_drawing' | 'product_data' | 'sample';
+
 export function SubmittalsTab({ projectId }: { projectId: number }) {
   const { t } = useI18n();
   const { data: submittals, isLoading } = useListSubmittals(projectId);
@@ -20,7 +22,7 @@ export function SubmittalsTab({ projectId }: { projectId: number }) {
         <h3 className="text-2xl font-display font-bold text-white">{t('project.tabs.submittals')}</h3>
         <Button onClick={() => setShowCreate(!showCreate)}>
           <Plus className="w-4 h-4 mr-2" />
-          Create Submittal
+          {t('submittals.create')}
         </Button>
       </div>
 
@@ -33,12 +35,12 @@ export function SubmittalsTab({ projectId }: { projectId: number }) {
           <table className="w-full text-sm text-left">
             <thead className="bg-card text-muted-foreground text-xs uppercase font-semibold">
               <tr>
-                <th className="px-6 py-4">Number</th>
-                <th className="px-6 py-4">Title</th>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Submitted By</th>
-                <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4">{t('submittals.number')}</th>
+                <th className="px-6 py-4">{t('submittals.titleCol')}</th>
+                <th className="px-6 py-4">{t('submittals.type')}</th>
+                <th className="px-6 py-4">{t('submittals.status')}</th>
+                <th className="px-6 py-4">{t('submittals.submittedBy')}</th>
+                <th className="px-6 py-4">{t('submittals.date')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -62,7 +64,7 @@ export function SubmittalsTab({ projectId }: { projectId: number }) {
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                     <FileCheck className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                    No Submittals created yet.
+                    {t('submittals.empty')}
                   </td>
                 </tr>
               )}
@@ -75,15 +77,17 @@ export function SubmittalsTab({ projectId }: { projectId: number }) {
 }
 
 function CreateSubmittalForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [title, setTitle] = useState('');
+  const [submittalType, setSubmittalType] = useState<SubmittalType>('shop_drawing');
   
   const { mutate, isPending } = useCreateSubmittal({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/submittals`] });
-        toast({ title: "Submittal Created" });
+        toast({ title: t('submittals.createdSuccess') });
         onClose();
       }
     }
@@ -91,28 +95,29 @@ function CreateSubmittalForm({ projectId, onClose }: { projectId: number, onClos
 
   return (
     <div className="bg-card/50 p-6 rounded-xl border border-border mb-6">
-      <h4 className="font-semibold text-white mb-4">New Submittal</h4>
+      <h4 className="font-semibold text-white mb-4">{t('submittals.new')}</h4>
       <div className="flex space-x-4">
         <div className="flex-1">
           <Input 
-            placeholder="Submittal Title..." 
+            placeholder={t('submittals.titlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
-          id="type"
+          value={submittalType}
+          onChange={(e) => setSubmittalType(e.target.value as SubmittalType)}
         >
-          <option value="shop_drawing">Shop Drawing</option>
-          <option value="product_data">Product Data</option>
-          <option value="sample">Sample</option>
+          <option value="shop_drawing">{t('submittals.typeShopDrawing')}</option>
+          <option value="product_data">{t('submittals.typeProductData')}</option>
+          <option value="sample">{t('submittals.typeSample')}</option>
         </select>
         <Button 
           disabled={!title || isPending}
-          onClick={() => mutate({ projectId, data: { title, submittalType: 'shop_drawing' } })}
+          onClick={() => mutate({ projectId, data: { title, submittalType } })}
         >
-          {isPending ? 'Creating...' : 'Submit'}
+          {isPending ? t('submittals.creating') : t('submittals.submit')}
         </Button>
       </div>
     </div>
