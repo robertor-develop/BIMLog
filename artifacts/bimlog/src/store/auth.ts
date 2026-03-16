@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User } from '@workspace/api-client-react/src/generated/api.schemas';
+import type { User } from '@workspace/api-client-react';
 
 interface AuthState {
   token: string | null;

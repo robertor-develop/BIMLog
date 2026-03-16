@@ -34,7 +34,7 @@ export function Register() {
       onError: (error) => {
         toast({ 
           title: t('common.error'), 
-          description: error.response?.data?.error || t('auth.registerFailed'),
+          description: (error as any)?.data?.error || t('auth.registerFailed'),
           variant: "destructive" 
         });
       }

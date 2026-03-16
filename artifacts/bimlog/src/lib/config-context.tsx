@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { useGetConfig } from '@workspace/api-client-react';
+import { useGetConfig, getGetConfigQueryKey } from '@workspace/api-client-react';
 import { useI18n } from './i18n';
 import { useAuthStore } from '@/store/auth';
 
@@ -19,7 +19,7 @@ const ConfigContext = createContext<ConfigContextType | null>(null);
 
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const { token } = useAuthStore();
-  const { data, isLoading } = useGetConfig({ query: { enabled: !!token } });
+  const { data, isLoading } = useGetConfig({ query: { queryKey: getGetConfigQueryKey(), enabled: !!token } });
   const { lang } = useI18n();
   const config = (data ?? {}) as AppConfig;
 
