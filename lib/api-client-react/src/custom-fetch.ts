@@ -271,6 +271,17 @@ async function parseSuccessBody(
   }
 }
 
+function getStoredToken(): string | null {
+  try {
+    const stored = localStorage.getItem("bimlog-auth");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.state?.token || null;
+    }
+  } catch {}
+  return null;
+}
+
 export async function customFetch<T = unknown>(
   input: RequestInfo | URL,
   options: CustomFetchOptions = {},
@@ -284,6 +295,13 @@ export async function customFetch<T = unknown>(
   }
 
   const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
+
+  if (!headers.has("authorization")) {
+    const token = getStoredToken();
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+  }
 
   if (
     typeof init.body === "string" &&

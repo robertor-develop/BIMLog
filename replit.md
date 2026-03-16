@@ -1,8 +1,8 @@
-# Workspace
+# BIMLog by IgniteSmart
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+BIMLog is a full-stack BIM project coordination and accountability platform for the AEC (architecture, engineering, construction) industry. Built with React + Vite frontend and Express 5 backend in a pnpm monorepo.
 
 ## Stack
 
@@ -10,87 +10,82 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5
+- **Frontend**: React + Vite + Tailwind CSS + wouter router + TanStack React Query
+- **Backend**: Express 5 API server
 - **Database**: PostgreSQL + Drizzle ORM
+- **Authentication**: JWT (bcryptjs + jsonwebtoken)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **i18n**: Custom context-based EN/ES language toggle
+- **State**: Zustand (auth store)
+- **Build**: esbuild (CJS bundle for server), Vite (frontend)
 
 ## Structure
 
 ```text
-artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+├── artifacts/
+│   ├── api-server/          # Express API server (port 8080, path /api)
+│   │   ├── src/routes/      # Route handlers: auth, projects, files, rfis, submittals, activity, conventions, members
+│   │   └── src/middlewares/  # JWT auth middleware
+│   └── bimlog/              # React + Vite frontend (root path /)
+│       └── src/
+│           ├── pages/        # Landing, Login, Register, Dashboard, ProjectDetail
+│           ├── pages/project/ # FilesTab, RfisTab, SubmittalsTab, ActivityTab, TeamTab, ConventionBuilder, NameGenerator
+│           ├── store/        # Zustand auth store
+│           ├── lib/          # i18n, utils
+│           └── components/   # UI components, layout (Navbar)
+├── lib/
+│   ├── api-spec/            # OpenAPI spec + Orval codegen config
+│   ├── api-client-react/    # Generated React Query hooks (with JWT token injection)
+│   ├── api-zod/             # Generated Zod schemas from OpenAPI
+│   └── db/                  # Drizzle ORM schema + DB connection
+│       └── src/schema/      # users, projects, files, rfis, submittals, activity, conventions
+├── scripts/                 # Utility scripts
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+└── package.json
 ```
 
-## TypeScript & Composite Projects
+## Key Features
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+- **Strict Naming Convention Validation**: Files are REJECTED server-side if name doesn't match active project convention (field count, separator, allowed values)
+- **Immutable Activity Log**: Append-only log with user name, company, timestamp, action type, file name before/after. No delete endpoint.
+- **Name Generator**: Dropdown-only fields sourced from active convention. No free-text input.
+- **Role-Based Access**: project_admin, company_lead, drafter, project_manager, read_only
+- **Bilingual**: Full EN/ES i18n toggle
+- **RFI Tracking**: Open → In Review → Responded → Closed
+- **Submittal Register**: Full lifecycle tracking with type classification
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+## Database Schema
 
-## Root Scripts
+Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+## API Endpoints
 
-## Packages
+- `POST /api/auth/register` — Register with email, password, fullName, companyName
+- `POST /api/auth/login` — Login, returns JWT token
+- `GET /api/auth/me` — Get current user (requires auth)
+- `GET/POST /api/projects` — List/create projects
+- `GET /api/projects/:id` — Project details
+- `GET/POST /api/projects/:id/files` — File list and upload (with naming validation)
+- `PATCH/DELETE /api/projects/:id/files/:fileId` — Update/delete file
+- `GET/POST /api/projects/:id/rfis` — RFI list and create
+- `PATCH /api/projects/:id/rfis/:rfiId` — Update RFI
+- `GET/POST /api/projects/:id/submittals` — Submittal list and create
+- `PATCH /api/projects/:id/submittals/:submittalId` — Update submittal
+- `GET /api/projects/:id/activity` — Activity log (read-only, no delete)
+- `GET/PUT /api/projects/:id/conventions` — Get/upsert naming convention
+- `GET/POST /api/projects/:id/members` — Member list and add
+- `PATCH/DELETE /api/projects/:id/members/:memberId` — Update/remove member
 
-### `artifacts/api-server` (`@workspace/api-server`)
+## Development Commands
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+- `pnpm --filter @workspace/api-server run dev` — Start API server
+- `pnpm --filter @workspace/bimlog run dev` — Start frontend dev server
+- `pnpm --filter @workspace/api-spec run codegen` — Regenerate API hooks/schemas
+- `pnpm --filter @workspace/db run push` — Push DB schema changes
+- `pnpm run typecheck` — Full typecheck
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+## Authentication
 
-### `lib/db` (`@workspace/db`)
-
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
-
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
-
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+JWT tokens are stored in localStorage under key `bimlog-auth` (Zustand persist). The custom-fetch automatically injects Bearer token into all API requests.
