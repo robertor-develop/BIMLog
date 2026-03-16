@@ -32,7 +32,7 @@ export function Login() {
       onError: (error) => {
         toast({ 
           title: t('common.error'), 
-          description: (error as any)?.data?.error || t('auth.loginFailed'),
+          description: 'data' in error && error.data && typeof (error.data as { error?: string }).error === 'string' ? (error.data as { error: string }).error : t('auth.loginFailed'),
           variant: "destructive" 
         });
       }
