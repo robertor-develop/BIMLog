@@ -118,3 +118,29 @@
 .status-review  { @apply bg-amber-50 text-amber-700 border-amber-200; }
 .status-closed  { @apply bg-green-50 text-green-700 border-green-200; }
 .status-pending { @apply bg-slate-50 text-slate-600 border-slate-200; }
+
+/* Light theme overrides */
+.text-white { color: hsl(var(--foreground)) !important; }
+.text-white\/80 { color: hsl(var(--foreground) / 0.8) !important; }
+.bg-card\/50 { background-color: hsl(var(--secondary) / 0.6) !important; }
+.hover\:bg-card\/50:hover { background-color: hsl(var(--secondary) / 0.4) !important; }
+.glass-panel {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  backdrop-filter: none;
+}
+select {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  height: 36px;
+  font-size: 14px;
+}
+select:focus {
+  outline: none;
+  ring: 2px solid hsl(var(--primary) / 0.2);
+  border-color: hsl(var(--primary));
+}
