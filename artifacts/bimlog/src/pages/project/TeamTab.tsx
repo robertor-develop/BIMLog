@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 type MemberRole = 'project_admin' | 'company_lead' | 'drafter' | 'project_manager' | 'read_only';
 
-export function TeamTab({ projectId }: { projectId: number }) {
+export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
   const { t } = useI18n();
   const { data: members, isLoading } = useListMembers(projectId);
   const [showAdd, setShowAdd] = useState(false);
@@ -20,10 +20,12 @@ export function TeamTab({ projectId }: { projectId: number }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-display font-bold text-white">{t('project.tabs.team')}</h3>
-        <Button onClick={() => setShowAdd(!showAdd)}>
-          <Plus className="w-4 h-4 mr-2" />
-          {t('team.add')}
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setShowAdd(!showAdd)}>
+            <Plus className="w-4 h-4 mr-2" />
+            {t('team.add')}
+          </Button>
+        )}
       </div>
 
       {showAdd && <AddMemberForm projectId={projectId} onClose={() => setShowAdd(false)} />}
@@ -63,7 +65,7 @@ export function TeamTab({ projectId }: { projectId: number }) {
                     {format(new Date(member.joinedAt), 'MMM d, yyyy')}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <RemoveMemberButton projectId={projectId} memberId={member.id} />
+                    {isAdmin && <RemoveMemberButton projectId={projectId} memberId={member.id} />}
                   </td>
                 </tr>
               ))}

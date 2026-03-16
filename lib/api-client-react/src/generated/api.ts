@@ -57,7 +57,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
-  return `/api/healthz`;
+  return `/api/v1/healthz`;
 };
 
 export const healthCheck = async (
@@ -70,7 +70,7 @@ export const healthCheck = async (
 };
 
 export const getHealthCheckQueryKey = () => {
-  return [`/api/healthz`] as const;
+  return [`/api/v1/healthz`] as const;
 };
 
 export const getHealthCheckQueryOptions = <
@@ -132,7 +132,7 @@ export function useHealthCheck<
  * @summary Register a new user
  */
 export const getRegisterUrl = () => {
-  return `/api/auth/register`;
+  return `/api/v1/auth/register`;
 };
 
 export const register = async (
@@ -218,7 +218,7 @@ export const useRegister = <
  * @summary Login
  */
 export const getLoginUrl = () => {
-  return `/api/auth/login`;
+  return `/api/v1/auth/login`;
 };
 
 export const login = async (
@@ -304,7 +304,7 @@ export const useLogin = <
  * @summary Get current user
  */
 export const getGetMeUrl = () => {
-  return `/api/auth/me`;
+  return `/api/v1/auth/me`;
 };
 
 export const getMe = async (options?: RequestInit): Promise<User> => {
@@ -315,7 +315,7 @@ export const getMe = async (options?: RequestInit): Promise<User> => {
 };
 
 export const getGetMeQueryKey = () => {
-  return [`/api/auth/me`] as const;
+  return [`/api/v1/auth/me`] as const;
 };
 
 export const getGetMeQueryOptions = <
@@ -367,7 +367,7 @@ export function useGetMe<
  * @summary List projects for current user
  */
 export const getListProjectsUrl = () => {
-  return `/api/projects`;
+  return `/api/v1/projects`;
 };
 
 export const listProjects = async (
@@ -380,7 +380,7 @@ export const listProjects = async (
 };
 
 export const getListProjectsQueryKey = () => {
-  return [`/api/projects`] as const;
+  return [`/api/v1/projects`] as const;
 };
 
 export const getListProjectsQueryOptions = <
@@ -442,7 +442,7 @@ export function useListProjects<
  * @summary Create a project
  */
 export const getCreateProjectUrl = () => {
-  return `/api/projects`;
+  return `/api/v1/projects`;
 };
 
 export const createProject = async (
@@ -528,7 +528,7 @@ export const useCreateProject = <
  * @summary Get project details
  */
 export const getGetProjectUrl = (projectId: number) => {
-  return `/api/projects/${projectId}`;
+  return `/api/v1/projects/${projectId}`;
 };
 
 export const getProject = async (
@@ -542,7 +542,7 @@ export const getProject = async (
 };
 
 export const getGetProjectQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}`] as const;
+  return [`/api/v1/projects/${projectId}`] as const;
 };
 
 export const getGetProjectQueryOptions = <
@@ -615,7 +615,7 @@ export function useGetProject<
  * @summary List files for a project
  */
 export const getListFilesUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/files`;
+  return `/api/v1/projects/${projectId}/files`;
 };
 
 export const listFiles = async (
@@ -629,7 +629,7 @@ export const listFiles = async (
 };
 
 export const getListFilesQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/files`] as const;
+  return [`/api/v1/projects/${projectId}/files`] as const;
 };
 
 export const getListFilesQueryOptions = <
@@ -700,7 +700,7 @@ export function useListFiles<
  * @summary Upload a file (validates naming convention)
  */
 export const getUploadFileUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/files`;
+  return `/api/v1/projects/${projectId}/files`;
 };
 
 export const uploadFile = async (
@@ -787,7 +787,7 @@ export const useUploadFile = <
  * @summary Update a file (rename, status change)
  */
 export const getUpdateFileUrl = (projectId: number, fileId: number) => {
-  return `/api/projects/${projectId}/files/${fileId}`;
+  return `/api/v1/projects/${projectId}/files/${fileId}`;
 };
 
 export const updateFile = async (
@@ -875,7 +875,7 @@ export const useUpdateFile = <
  * @summary Delete a file
  */
 export const getDeleteFileUrl = (projectId: number, fileId: number) => {
-  return `/api/projects/${projectId}/files/${fileId}`;
+  return `/api/v1/projects/${projectId}/files/${fileId}`;
 };
 
 export const deleteFile = async (
@@ -960,7 +960,7 @@ export const useDeleteFile = <
  * @summary List RFIs for a project
  */
 export const getListRfisUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/rfis`;
+  return `/api/v1/projects/${projectId}/rfis`;
 };
 
 export const listRfis = async (
@@ -974,7 +974,7 @@ export const listRfis = async (
 };
 
 export const getListRfisQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/rfis`] as const;
+  return [`/api/v1/projects/${projectId}/rfis`] as const;
 };
 
 export const getListRfisQueryOptions = <
@@ -1045,7 +1045,7 @@ export function useListRfis<
  * @summary Create an RFI
  */
 export const getCreateRfiUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/rfis`;
+  return `/api/v1/projects/${projectId}/rfis`;
 };
 
 export const createRfi = async (
@@ -1132,7 +1132,7 @@ export const useCreateRfi = <
  * @summary Update an RFI
  */
 export const getUpdateRfiUrl = (projectId: number, rfiId: number) => {
-  return `/api/projects/${projectId}/rfis/${rfiId}`;
+  return `/api/v1/projects/${projectId}/rfis/${rfiId}`;
 };
 
 export const updateRfi = async (
@@ -1220,7 +1220,7 @@ export const useUpdateRfi = <
  * @summary List submittals for a project
  */
 export const getListSubmittalsUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/submittals`;
+  return `/api/v1/projects/${projectId}/submittals`;
 };
 
 export const listSubmittals = async (
@@ -1234,7 +1234,7 @@ export const listSubmittals = async (
 };
 
 export const getListSubmittalsQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/submittals`] as const;
+  return [`/api/v1/projects/${projectId}/submittals`] as const;
 };
 
 export const getListSubmittalsQueryOptions = <
@@ -1308,7 +1308,7 @@ export function useListSubmittals<
  * @summary Create a submittal
  */
 export const getCreateSubmittalUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/submittals`;
+  return `/api/v1/projects/${projectId}/submittals`;
 };
 
 export const createSubmittal = async (
@@ -1398,7 +1398,7 @@ export const getUpdateSubmittalUrl = (
   projectId: number,
   submittalId: number,
 ) => {
-  return `/api/projects/${projectId}/submittals/${submittalId}`;
+  return `/api/v1/projects/${projectId}/submittals/${submittalId}`;
 };
 
 export const updateSubmittal = async (
@@ -1506,7 +1506,7 @@ export const useUpdateSubmittal = <
  * @summary List activity log for a project (read-only, no delete)
  */
 export const getListActivityUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/activity`;
+  return `/api/v1/projects/${projectId}/activity`;
 };
 
 export const listActivity = async (
@@ -1520,7 +1520,7 @@ export const listActivity = async (
 };
 
 export const getListActivityQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/activity`] as const;
+  return [`/api/v1/projects/${projectId}/activity`] as const;
 };
 
 export const getListActivityQueryOptions = <
@@ -1593,7 +1593,7 @@ export function useListActivity<
  * @summary Get naming convention for a project
  */
 export const getGetConventionUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/conventions`;
+  return `/api/v1/projects/${projectId}/conventions`;
 };
 
 export const getConvention = async (
@@ -1607,7 +1607,7 @@ export const getConvention = async (
 };
 
 export const getGetConventionQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/conventions`] as const;
+  return [`/api/v1/projects/${projectId}/conventions`] as const;
 };
 
 export const getGetConventionQueryOptions = <
@@ -1681,7 +1681,7 @@ export function useGetConvention<
  * @summary Create or update naming convention for a project
  */
 export const getUpsertConventionUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/conventions`;
+  return `/api/v1/projects/${projectId}/conventions`;
 };
 
 export const upsertConvention = async (
@@ -1768,7 +1768,7 @@ export const useUpsertConvention = <
  * @summary List team members for a project
  */
 export const getListMembersUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/members`;
+  return `/api/v1/projects/${projectId}/members`;
 };
 
 export const listMembers = async (
@@ -1782,7 +1782,7 @@ export const listMembers = async (
 };
 
 export const getListMembersQueryKey = (projectId: number) => {
-  return [`/api/projects/${projectId}/members`] as const;
+  return [`/api/v1/projects/${projectId}/members`] as const;
 };
 
 export const getListMembersQueryOptions = <
@@ -1855,7 +1855,7 @@ export function useListMembers<
  * @summary Add a team member to a project
  */
 export const getAddMemberUrl = (projectId: number) => {
-  return `/api/projects/${projectId}/members`;
+  return `/api/v1/projects/${projectId}/members`;
 };
 
 export const addMember = async (
@@ -1942,7 +1942,7 @@ export const useAddMember = <
  * @summary Update a team member's role
  */
 export const getUpdateMemberUrl = (projectId: number, memberId: number) => {
-  return `/api/projects/${projectId}/members/${memberId}`;
+  return `/api/v1/projects/${projectId}/members/${memberId}`;
 };
 
 export const updateMember = async (
@@ -2038,7 +2038,7 @@ export const useUpdateMember = <
  * @summary Remove a team member from a project
  */
 export const getRemoveMemberUrl = (projectId: number, memberId: number) => {
-  return `/api/projects/${projectId}/members/${memberId}`;
+  return `/api/v1/projects/${projectId}/members/${memberId}`;
 };
 
 export const removeMember = async (

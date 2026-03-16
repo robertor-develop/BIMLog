@@ -50,7 +50,7 @@ export function Navbar() {
               className="text-muted-foreground hover:text-white"
             >
               <Globe className="w-5 h-5" />
-              <span className="sr-only">Toggle Language</span>
+              <span className="sr-only">{t('nav.toggleLang')}</span>
             </Button>
 
             {user ? (

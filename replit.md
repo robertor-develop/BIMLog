@@ -60,23 +60,27 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 
 Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields
 
-## API Endpoints
+## API Endpoints (v1)
 
-- `POST /api/auth/register` — Register with email, password, fullName, companyName
-- `POST /api/auth/login` — Login, returns JWT token
-- `GET /api/auth/me` — Get current user (requires auth)
-- `GET/POST /api/projects` — List/create projects
-- `GET /api/projects/:id` — Project details
-- `GET/POST /api/projects/:id/files` — File list and upload (with naming validation)
-- `PATCH/DELETE /api/projects/:id/files/:fileId` — Update/delete file
-- `GET/POST /api/projects/:id/rfis` — RFI list and create
-- `PATCH /api/projects/:id/rfis/:rfiId` — Update RFI
-- `GET/POST /api/projects/:id/submittals` — Submittal list and create
-- `PATCH /api/projects/:id/submittals/:submittalId` — Update submittal
-- `GET /api/projects/:id/activity` — Activity log (read-only, no delete)
-- `GET/PUT /api/projects/:id/conventions` — Get/upsert naming convention
-- `GET/POST /api/projects/:id/members` — Member list and add
-- `PATCH/DELETE /api/projects/:id/members/:memberId` — Update/remove member
+All endpoints are versioned under `/api/v1/`.
+
+- `POST /api/v1/auth/register` — Register with email, password, fullName, companyName
+- `POST /api/v1/auth/login` — Login, returns JWT token
+- `GET /api/v1/auth/me` — Get current user (requires auth)
+- `GET/POST /api/v1/projects` — List/create projects (member-scoped)
+- `GET /api/v1/projects/:id` — Project details (requires membership)
+- `GET/POST /api/v1/projects/:id/files` — File list and upload (upload: write roles only)
+- `PATCH/DELETE /api/v1/projects/:id/files/:fileId` — Update/delete file (write roles)
+- `GET/POST /api/v1/projects/:id/rfis` — RFI list and create (create: write roles)
+- `PATCH /api/v1/projects/:id/rfis/:rfiId` — Update RFI (write roles)
+- `GET/POST /api/v1/projects/:id/submittals` — Submittal list and create (create: write roles)
+- `PATCH /api/v1/projects/:id/submittals/:submittalId` — Update submittal (write roles)
+- `GET /api/v1/projects/:id/activity` — Activity log (read-only, no delete)
+- `GET /api/v1/projects/:id/conventions` — Get naming convention (any member)
+- `PUT /api/v1/projects/:id/conventions` — Upsert naming convention (project_admin only)
+- `GET /api/v1/projects/:id/members` — Member list (any member)
+- `POST /api/v1/projects/:id/members` — Add member (project_admin, company_lead)
+- `PATCH/DELETE /api/v1/projects/:id/members/:memberId` — Update/remove member (project_admin only)
 
 ## Development Commands
 

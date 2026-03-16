@@ -154,6 +154,18 @@ const translations = {
     'convention.generator.noConventionDesc': 'The project admin needs to configure the naming convention first.',
     'convention.generator.hint': 'Select values from the dropdowns below to generate a compliant file name. Free text input is disabled to guarantee compliance.',
 
+    'landing.badge': 'Enterprise AEC Software',
+    'landing.features.rbac': 'Role-Based Security',
+    'landing.features.rbacDesc': 'Granular permissions ensuring the right access for every team member.',
+
+    'dashboard.empty': 'No projects yet',
+    'dashboard.emptyDesc': 'Create your first project to get started.',
+    'dashboard.createProject': 'Create Project',
+    'dashboard.noDescription': 'No description provided.',
+
+    'project.notFound': 'Project not found',
+    'nav.toggleLang': 'Toggle Language',
+
     'common.save': 'Save',
     'common.cancel': 'Cancel',
     'common.delete': 'Delete',
@@ -311,6 +323,18 @@ const translations = {
     'convention.generator.noConvention': 'Sin Convención Activa',
     'convention.generator.noConventionDesc': 'El administrador del proyecto necesita configurar la convención de nombres primero.',
     'convention.generator.hint': 'Seleccione valores de los menús para generar un nombre de archivo compatible. La entrada de texto libre está desactivada para garantizar el cumplimiento.',
+
+    'landing.badge': 'Software AEC Empresarial',
+    'landing.features.rbac': 'Seguridad Basada en Roles',
+    'landing.features.rbacDesc': 'Permisos granulares que aseguran el acceso correcto para cada miembro del equipo.',
+
+    'dashboard.empty': 'Aún no hay proyectos',
+    'dashboard.emptyDesc': 'Crea tu primer proyecto para comenzar.',
+    'dashboard.createProject': 'Crear Proyecto',
+    'dashboard.noDescription': 'Sin descripción.',
+
+    'project.notFound': 'Proyecto no encontrado',
+    'nav.toggleLang': 'Cambiar Idioma',
 
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',

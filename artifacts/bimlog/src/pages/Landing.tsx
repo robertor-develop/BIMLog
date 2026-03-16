@@ -9,7 +9,6 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background Image / Effects */}
       <div className="absolute inset-0 z-0">
         <img 
           src={`${import.meta.env.BASE_URL}images/hero-bg.png`} 
@@ -28,7 +27,7 @@ export function Landing() {
         >
           <div className="inline-flex items-center space-x-2 bg-card border border-white/10 rounded-full px-4 py-1.5 mb-8">
             <span className="flex h-2 w-2 rounded-full bg-accent animate-pulse"></span>
-            <span className="text-sm font-medium text-muted-foreground">Enterprise AEC Software</span>
+            <span className="text-sm font-medium text-muted-foreground">{t('landing.badge')}</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-8 leading-tight">
@@ -76,8 +75,8 @@ export function Landing() {
           />
           <FeatureCard 
             icon={<LockKeyhole className="w-8 h-8 text-accent" />}
-            title="Role-Based Security"
-            desc="Granular permissions ensuring the right access for every team member."
+            title={t('landing.features.rbac')}
+            desc={t('landing.features.rbacDesc')}
           />
         </motion.div>
       </div>

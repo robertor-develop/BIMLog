@@ -1,6 +1,7 @@
-import { Link, useRoute, useLocation } from "wouter";
-import { useGetProject } from "@workspace/api-client-react";
+import { Link, useRoute } from "wouter";
+import { useGetProject, useListMembers } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
+import { useAuthStore } from "@/store/auth";
 import { FilesTab } from "./project/FilesTab";
 import { RfisTab } from "./project/RfisTab";
 import { SubmittalsTab } from "./project/SubmittalsTab";
@@ -13,30 +14,41 @@ import {
   Users, Settings2, Wand2 
 } from "lucide-react";
 
+const ADMIN_ROLES = ['project_admin'];
+const WRITE_ROLES = ['project_admin', 'company_lead', 'drafter', 'project_manager'];
+
 export function ProjectDetail() {
-  const [match, params] = useRoute("/projects/:id/:tab");
+  const [, params] = useRoute("/projects/:id/:tab");
   const projectId = params?.id ? parseInt(params.id) : 0;
   const tab = params?.tab || "files";
   const { t } = useI18n();
+  const { user } = useAuthStore();
 
   const { data: project, isLoading } = useGetProject(projectId);
+  const { data: members } = useListMembers(projectId);
+
+  const currentMember = members?.find(m => m.userId === user?.id);
+  const memberRole = currentMember?.role || 'read_only';
+  const isAdmin = ADMIN_ROLES.includes(memberRole);
+  const canWrite = WRITE_ROLES.includes(memberRole);
 
   if (isLoading) return <div className="p-8 text-center">{t('common.loading')}</div>;
-  if (!project) return <div className="p-8 text-center">Project not found</div>;
+  if (!project) return <div className="p-8 text-center">{t('project.notFound')}</div>;
 
   const tabs = [
-    { id: 'files', label: t('project.tabs.files'), icon: FolderOpen },
-    { id: 'rfis', label: t('project.tabs.rfis'), icon: MessageSquare },
-    { id: 'submittals', label: t('project.tabs.submittals'), icon: FileCheck },
-    { id: 'activity', label: t('project.tabs.activity'), icon: Activity },
-    { id: 'team', label: t('project.tabs.team'), icon: Users },
-    { id: 'generator', label: t('project.tabs.generator'), icon: Wand2 },
-    { id: 'convention', label: t('project.tabs.convention'), icon: Settings2 },
+    { id: 'files', label: t('project.tabs.files'), icon: FolderOpen, visible: true },
+    { id: 'rfis', label: t('project.tabs.rfis'), icon: MessageSquare, visible: true },
+    { id: 'submittals', label: t('project.tabs.submittals'), icon: FileCheck, visible: true },
+    { id: 'activity', label: t('project.tabs.activity'), icon: Activity, visible: true },
+    { id: 'team', label: t('project.tabs.team'), icon: Users, visible: true },
+    { id: 'generator', label: t('project.tabs.generator'), icon: Wand2, visible: true },
+    { id: 'convention', label: t('project.tabs.convention'), icon: Settings2, visible: isAdmin },
   ];
+
+  const visibleTabs = tabs.filter(tabItem => tabItem.visible);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
-      {/* Sidebar */}
       <div className="w-full md:w-64 flex-shrink-0">
         <div className="glass-panel p-6 rounded-2xl mb-6">
           <div className="text-xs font-bold text-accent uppercase tracking-wider mb-1">{project.code}</div>
@@ -44,7 +56,7 @@ export function ProjectDetail() {
         </div>
 
         <nav className="space-y-1">
-          {tabs.map((tItem) => {
+          {visibleTabs.map((tItem) => {
             const isActive = tab === tItem.id;
             const Icon = tItem.icon;
             return (
@@ -67,14 +79,13 @@ export function ProjectDetail() {
         </nav>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 glass-panel rounded-3xl p-6 md:p-8 min-h-[600px]">
-        {tab === 'files' && <FilesTab projectId={projectId} />}
-        {tab === 'rfis' && <RfisTab projectId={projectId} />}
-        {tab === 'submittals' && <SubmittalsTab projectId={projectId} />}
+        {tab === 'files' && <FilesTab projectId={projectId} canWrite={canWrite} />}
+        {tab === 'rfis' && <RfisTab projectId={projectId} canWrite={canWrite} />}
+        {tab === 'submittals' && <SubmittalsTab projectId={projectId} canWrite={canWrite} />}
         {tab === 'activity' && <ActivityTab projectId={projectId} />}
-        {tab === 'team' && <TeamTab projectId={projectId} />}
-        {tab === 'convention' && <ConventionBuilder projectId={projectId} />}
+        {tab === 'team' && <TeamTab projectId={projectId} isAdmin={isAdmin} />}
+        {tab === 'convention' && isAdmin && <ConventionBuilder projectId={projectId} />}
         {tab === 'generator' && <NameGenerator projectId={projectId} />}
       </div>
     </div>

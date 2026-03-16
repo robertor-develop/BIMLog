@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 type SubmittalType = 'shop_drawing' | 'product_data' | 'sample';
 
-export function SubmittalsTab({ projectId }: { projectId: number }) {
+export function SubmittalsTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
   const { data: submittals, isLoading } = useListSubmittals(projectId);
   const [showCreate, setShowCreate] = useState(false);
@@ -20,10 +20,12 @@ export function SubmittalsTab({ projectId }: { projectId: number }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-display font-bold text-white">{t('project.tabs.submittals')}</h3>
-        <Button onClick={() => setShowCreate(!showCreate)}>
-          <Plus className="w-4 h-4 mr-2" />
-          {t('submittals.create')}
-        </Button>
+        {canWrite && (
+          <Button onClick={() => setShowCreate(!showCreate)}>
+            <Plus className="w-4 h-4 mr-2" />
+            {t('submittals.create')}
+          </Button>
+        )}
       </div>
 
       {showCreate && <CreateSubmittalForm projectId={projectId} onClose={() => setShowCreate(false)} />}

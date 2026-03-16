@@ -4,8 +4,8 @@ info:
   version: 0.1.0
   description: BIMLog API specification
 servers:
-  - url: /api
-    description: Base API path
+  - url: /api/v1
+    description: Base API path (v1)
 tags:
   - name: health
     description: Health operations

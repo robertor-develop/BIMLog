@@ -27,7 +27,7 @@ interface ApiError {
   message?: string;
 }
 
-export function FilesTab({ projectId }: { projectId: number }) {
+export function FilesTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
   const { data: files, isLoading } = useListFiles(projectId);
   const [showUpload, setShowUpload] = useState(false);
@@ -36,10 +36,12 @@ export function FilesTab({ projectId }: { projectId: number }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-display font-bold text-white">{t('project.tabs.files')}</h3>
-        <Button onClick={() => setShowUpload(!showUpload)}>
-          <Upload className="w-4 h-4 mr-2" />
-          {t('files.upload')}
-        </Button>
+        {canWrite && (
+          <Button onClick={() => setShowUpload(!showUpload)}>
+            <Upload className="w-4 h-4 mr-2" />
+            {t('files.upload')}
+          </Button>
+        )}
       </div>
 
       {showUpload && <UploadForm projectId={projectId} onClose={() => setShowUpload(false)} />}
@@ -75,7 +77,7 @@ export function FilesTab({ projectId }: { projectId: number }) {
                     {format(new Date(file.createdAt), 'MMM d, yyyy HH:mm')}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <DeleteFileButton projectId={projectId} fileId={file.id} />
+                    {canWrite && <DeleteFileButton projectId={projectId} fileId={file.id} />}
                   </td>
                 </tr>
               ))}

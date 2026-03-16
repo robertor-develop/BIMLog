@@ -51,7 +51,7 @@ export function Dashboard() {
                   {project.name}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-6 flex-grow line-clamp-2">
-                  {project.description || "No description provided."}
+                  {project.description || t('dashboard.noDescription')}
                 </p>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
@@ -75,10 +75,10 @@ export function Dashboard() {
         {projects?.length === 0 && !showCreate && (
           <div className="col-span-full py-20 text-center border-2 border-dashed border-border rounded-2xl">
             <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white">No projects yet</h3>
-            <p className="text-muted-foreground mt-1 mb-6">Create your first project to get started.</p>
+            <h3 className="text-lg font-medium text-white">{t('dashboard.empty')}</h3>
+            <p className="text-muted-foreground mt-1 mb-6">{t('dashboard.emptyDesc')}</p>
             <Button onClick={() => setShowCreate(true)} variant="outline">
-              Create Project
+              {t('dashboard.createProject')}
             </Button>
           </div>
         )}
@@ -97,7 +97,7 @@ function CreateProjectForm({ onClose }: { onClose: () => void }) {
   const { mutate, isPending } = useCreateProject({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/v1/projects'] });
         toast({ title: t('common.success') });
         onClose();
       },
