@@ -232,7 +232,7 @@ export const CreateRfiParams = zod.object({
 export const CreateRfiBody = zod.object({
   subject: zod.string(),
   description: zod.string().optional(),
-  priority: zod.enum(["low", "medium", "high", "critical"]),
+  priority: zod.string(),
   assignedToId: zod.number().optional(),
   dueDate: zod.date().optional(),
 });
@@ -248,8 +248,8 @@ export const UpdateRfiParams = zod.object({
 export const UpdateRfiBody = zod.object({
   subject: zod.string().optional(),
   description: zod.string().optional(),
-  status: zod.enum(["open", "in_review", "responded", "closed"]).optional(),
-  priority: zod.enum(["low", "medium", "high", "critical"]).optional(),
+  status: zod.string().optional(),
+  priority: zod.string().optional(),
   assignedToId: zod.number().optional(),
   response: zod.string().optional(),
   dueDate: zod.date().optional(),
@@ -311,17 +311,7 @@ export const CreateSubmittalBody = zod.object({
   title: zod.string(),
   description: zod.string().optional(),
   specSection: zod.string().optional(),
-  submittalType: zod.enum([
-    "shop_drawing",
-    "product_data",
-    "sample",
-    "mock_up",
-    "design_data",
-    "test_report",
-    "certificate",
-    "manufacturers_instructions",
-    "other",
-  ]),
+  submittalType: zod.string(),
   assignedToId: zod.number().optional(),
   dueDate: zod.date().optional(),
 });
@@ -337,17 +327,7 @@ export const UpdateSubmittalParams = zod.object({
 export const UpdateSubmittalBody = zod.object({
   title: zod.string().optional(),
   description: zod.string().optional(),
-  status: zod
-    .enum([
-      "pending",
-      "submitted",
-      "approved",
-      "approved_as_noted",
-      "rejected",
-      "resubmit",
-      "closed",
-    ])
-    .optional(),
+  status: zod.string().optional(),
   specSection: zod.string().optional(),
   assignedToId: zod.number().optional(),
   dueDate: zod.date().optional(),
@@ -482,13 +462,7 @@ export const AddMemberParams = zod.object({
 
 export const AddMemberBody = zod.object({
   email: zod.string().email(),
-  role: zod.enum([
-    "project_admin",
-    "company_lead",
-    "drafter",
-    "project_manager",
-    "read_only",
-  ]),
+  role: zod.string(),
 });
 
 /**
@@ -500,13 +474,7 @@ export const UpdateMemberParams = zod.object({
 });
 
 export const UpdateMemberBody = zod.object({
-  role: zod.enum([
-    "project_admin",
-    "company_lead",
-    "drafter",
-    "project_manager",
-    "read_only",
-  ]),
+  role: zod.string(),
 });
 
 export const UpdateMemberResponse = zod.object({

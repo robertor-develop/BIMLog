@@ -4,6 +4,7 @@ import { projectsTable, projectMembersTable, filesTable } from "@workspace/db/sc
 import { eq, sql, count } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { getRolesByPermission } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -71,10 +72,11 @@ router.post("/projects", authMiddleware, async (req, res) => {
       })
       .returning();
 
+    const adminRoles = await getRolesByPermission("admin");
     await db.insert(projectMembersTable).values({
       projectId: project.id,
       userId,
-      role: "project_admin",
+      role: adminRoles[0] || "project_admin",
     });
 
     res.status(201).json({

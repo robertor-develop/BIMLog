@@ -52,7 +52,7 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 - **Strict Naming Convention Validation**: Files are REJECTED server-side if name doesn't match active project convention (field count, separator, allowed values)
 - **Immutable Activity Log**: Append-only log with user name, company, timestamp, action type, file name before/after. No delete endpoint.
 - **Name Generator**: Dropdown-only fields sourced from active convention. No free-text input.
-- **Role-Based Access**: project_admin, company_lead, drafter, project_manager, read_only
+- **Role-Based Access**: DB-driven via config_options with permission metadata (admin/write/read). No hardcoded role names.
 - **Bilingual**: Full EN/ES i18n toggle
 - **RFI Tracking**: Open → In Review → Responded → Closed
 - **Submittal Register**: Full lifecycle tracking with type classification
@@ -61,7 +61,7 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 
 Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
 
-The `config_options` table stores all configurable domain values (roles, statuses, separators, priorities, submittal types) and serves as the single source of truth. Values are exposed via `GET /api/v1/config` and used by both frontend and backend validation.
+The `config_options` table stores all configurable domain values (roles, statuses, separators, priorities, submittal types) with an optional `meta` JSON column for permission metadata. It serves as the single source of truth. Values are exposed via `GET /api/v1/config` and used by both frontend and backend validation. Backend RBAC uses `requirePermission("admin", "write")` which resolves allowed roles from DB at runtime (cached 60s).
 
 ## API Endpoints (v1)
 
@@ -81,10 +81,10 @@ All endpoints are versioned under `/api/v1/`.
 - `PATCH /api/v1/projects/:id/submittals/:submittalId` — Update submittal (write roles)
 - `GET /api/v1/projects/:id/activity` — Activity log (read-only, no delete)
 - `GET /api/v1/projects/:id/conventions` — Get naming convention (any member)
-- `PUT /api/v1/projects/:id/conventions` — Upsert naming convention (project_admin only)
+- `PUT /api/v1/projects/:id/conventions` — Upsert naming convention (admin permission only)
 - `GET /api/v1/projects/:id/members` — Member list (any member)
-- `POST /api/v1/projects/:id/members` — Add member (project_admin, company_lead)
-- `PATCH/DELETE /api/v1/projects/:id/members/:memberId` — Update/remove member (project_admin only)
+- `POST /api/v1/projects/:id/members` — Add member (admin permission only)
+- `PATCH/DELETE /api/v1/projects/:id/members/:memberId` — Update/remove member (admin permission only)
 
 ## Development Commands
 

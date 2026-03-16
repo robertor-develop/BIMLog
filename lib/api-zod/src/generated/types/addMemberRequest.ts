@@ -5,9 +5,8 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { AddMemberRequestRole } from "./addMemberRequestRole";
 
 export interface AddMemberRequest {
   email: string;
-  role: AddMemberRequestRole;
+  role: string;
 }

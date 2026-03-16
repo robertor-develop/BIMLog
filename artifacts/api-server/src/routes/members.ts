@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { projectMembersTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { AddMemberBody, UpdateMemberBody, ListMembersParams, AddMemberParams, UpdateMemberParams } from "@workspace/api-zod";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
@@ -45,7 +45,7 @@ router.get("/projects/:projectId/members", authMiddleware, requireProjectMember(
   }
 });
 
-router.post("/projects/:projectId/members", authMiddleware, requireProjectMember("project_admin", "company_lead"), async (req, res) => {
+router.post("/projects/:projectId/members", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId } = AddMemberParams.parse({ projectId: req.params.projectId });
     const body = AddMemberBody.parse(req.body);
@@ -109,7 +109,7 @@ router.post("/projects/:projectId/members", authMiddleware, requireProjectMember
   }
 });
 
-router.patch("/projects/:projectId/members/:memberId", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+router.patch("/projects/:projectId/members/:memberId", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId, memberId } = UpdateMemberParams.parse({ projectId: req.params.projectId, memberId: req.params.memberId });
     const body = UpdateMemberBody.parse(req.body);
@@ -155,7 +155,7 @@ router.patch("/projects/:projectId/members/:memberId", authMiddleware, requirePr
   }
 });
 
-router.delete("/projects/:projectId/members/:memberId", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+router.delete("/projects/:projectId/members/:memberId", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId, memberId } = UpdateMemberParams.parse({ projectId: req.params.projectId, memberId: req.params.memberId });
 

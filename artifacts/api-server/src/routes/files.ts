@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -110,7 +110,7 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
   }
 });
 
-router.post("/projects/:projectId/files", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
     const body = UploadFileBody.parse(req.body);
@@ -158,7 +158,7 @@ router.post("/projects/:projectId/files", authMiddleware, requireProjectMember("
   }
 });
 
-router.patch("/projects/:projectId/files/:fileId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, fileId } = UpdateFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
     const body = UpdateFileBody.parse(req.body);
@@ -218,7 +218,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requireProjec
   }
 });
 
-router.delete("/projects/:projectId/files/:fileId", authMiddleware, requireProjectMember("project_admin", "company_lead", "project_manager"), async (req, res) => {
+router.delete("/projects/:projectId/files/:fileId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, fileId } = DeleteFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
 

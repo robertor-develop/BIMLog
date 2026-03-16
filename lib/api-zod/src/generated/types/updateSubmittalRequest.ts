@@ -5,12 +5,11 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { UpdateSubmittalRequestStatus } from "./updateSubmittalRequestStatus";
 
 export interface UpdateSubmittalRequest {
   title?: string;
   description?: string;
-  status?: UpdateSubmittalRequestStatus;
+  status?: string;
   specSection?: string;
   assignedToId?: number;
   dueDate?: Date;

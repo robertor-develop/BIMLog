@@ -3,15 +3,22 @@ import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
 import { projectMembersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getRolesByPermission } from "./config-validator";
 
-if (!process.env.JWT_SECRET) {
+import crypto from "crypto";
+
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
   if (process.env.NODE_ENV === "production") {
     throw new Error("JWT_SECRET environment variable is required in production.");
   }
-  process.env.JWT_SECRET = process.env.REPL_ID || require("crypto").randomBytes(32).toString("hex");
+  const generated = crypto.randomBytes(32).toString("hex");
+  process.env.JWT_SECRET = generated;
+  return generated;
 }
 
-const JWT_SECRET: string = process.env.JWT_SECRET;
+const JWT_SECRET: string = resolveJwtSecret();
 
 export interface AuthPayload {
   userId: number;
@@ -82,6 +89,42 @@ export function requireProjectMember(...allowedRoles: string[]) {
     if (allowedRoles.length > 0 && !allowedRoles.includes(memberRole)) {
       res.status(403).json({ error: "Insufficient permissions for this action" });
       return;
+    }
+
+    next();
+  };
+}
+
+export function requirePermission(...permissionLevels: string[]) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.userId;
+    const projectId = Number(req.params.projectId);
+
+    if (!userId || isNaN(projectId)) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    const members = await db
+      .select()
+      .from(projectMembersTable)
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
+      .limit(1);
+
+    if (members.length === 0) {
+      res.status(403).json({ error: "Not a member of this project" });
+      return;
+    }
+
+    const memberRole = members[0].role;
+    req.memberRole = memberRole;
+
+    if (permissionLevels.length > 0) {
+      const allowedRoles = await getRolesByPermission(...permissionLevels);
+      if (!allowedRoles.includes(memberRole)) {
+        res.status(403).json({ error: "Insufficient permissions for this action" });
+        return;
+      }
     }
 
     next();

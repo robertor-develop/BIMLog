@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
@@ -44,7 +44,7 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
   }
 });
 
-router.post("/projects/:projectId/rfis", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
     const body = CreateRfiBody.parse(req.body);
@@ -65,7 +65,7 @@ router.post("/projects/:projectId/rfis", authMiddleware, requireProjectMember("p
       priority: body.priority,
       assignedToId: body.assignedToId || null,
       createdById: req.user!.userId,
-      dueDate: body.dueDate ? new Date(body.dueDate as string) : null,
+      dueDate: body.dueDate ? new Date(body.dueDate) : null,
     }).returning();
 
     await db.insert(activityLogTable).values({
@@ -93,7 +93,7 @@ router.post("/projects/:projectId/rfis", authMiddleware, requireProjectMember("p
   }
 });
 
-router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
     const body = UpdateRfiBody.parse(req.body);
@@ -125,7 +125,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectM
     if (body.priority) updates.priority = body.priority;
     if (body.assignedToId !== undefined) updates.assignedToId = body.assignedToId;
     if (body.response !== undefined) updates.response = body.response;
-    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate as string) : null;
+    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
 
     const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
 

@@ -133,49 +133,19 @@ export interface Rfi {
   updatedAt: string;
 }
 
-export type CreateRfiRequestPriority =
-  (typeof CreateRfiRequestPriority)[keyof typeof CreateRfiRequestPriority];
-
-export const CreateRfiRequestPriority = {
-  low: "low",
-  medium: "medium",
-  high: "high",
-  critical: "critical",
-} as const;
-
 export interface CreateRfiRequest {
   subject: string;
   description?: string;
-  priority: CreateRfiRequestPriority;
+  priority: string;
   assignedToId?: number;
   dueDate?: string;
 }
 
-export type UpdateRfiRequestStatus =
-  (typeof UpdateRfiRequestStatus)[keyof typeof UpdateRfiRequestStatus];
-
-export const UpdateRfiRequestStatus = {
-  open: "open",
-  in_review: "in_review",
-  responded: "responded",
-  closed: "closed",
-} as const;
-
-export type UpdateRfiRequestPriority =
-  (typeof UpdateRfiRequestPriority)[keyof typeof UpdateRfiRequestPriority];
-
-export const UpdateRfiRequestPriority = {
-  low: "low",
-  medium: "medium",
-  high: "high",
-  critical: "critical",
-} as const;
-
 export interface UpdateRfiRequest {
   subject?: string;
   description?: string;
-  status?: UpdateRfiRequestStatus;
-  priority?: UpdateRfiRequestPriority;
+  status?: string;
+  priority?: string;
   assignedToId?: number;
   response?: string;
   dueDate?: string;
@@ -199,47 +169,19 @@ export interface Submittal {
   updatedAt: string;
 }
 
-export type CreateSubmittalRequestSubmittalType =
-  (typeof CreateSubmittalRequestSubmittalType)[keyof typeof CreateSubmittalRequestSubmittalType];
-
-export const CreateSubmittalRequestSubmittalType = {
-  shop_drawing: "shop_drawing",
-  product_data: "product_data",
-  sample: "sample",
-  mock_up: "mock_up",
-  design_data: "design_data",
-  test_report: "test_report",
-  certificate: "certificate",
-  manufacturers_instructions: "manufacturers_instructions",
-  other: "other",
-} as const;
-
 export interface CreateSubmittalRequest {
   title: string;
   description?: string;
   specSection?: string;
-  submittalType: CreateSubmittalRequestSubmittalType;
+  submittalType: string;
   assignedToId?: number;
   dueDate?: string;
 }
 
-export type UpdateSubmittalRequestStatus =
-  (typeof UpdateSubmittalRequestStatus)[keyof typeof UpdateSubmittalRequestStatus];
-
-export const UpdateSubmittalRequestStatus = {
-  pending: "pending",
-  submitted: "submitted",
-  approved: "approved",
-  approved_as_noted: "approved_as_noted",
-  rejected: "rejected",
-  resubmit: "resubmit",
-  closed: "closed",
-} as const;
-
 export interface UpdateSubmittalRequest {
   title?: string;
   description?: string;
-  status?: UpdateSubmittalRequestStatus;
+  status?: string;
   specSection?: string;
   assignedToId?: number;
   dueDate?: string;
@@ -300,33 +242,11 @@ export interface ProjectMember {
   joinedAt: string;
 }
 
-export type AddMemberRequestRole =
-  (typeof AddMemberRequestRole)[keyof typeof AddMemberRequestRole];
-
-export const AddMemberRequestRole = {
-  project_admin: "project_admin",
-  company_lead: "company_lead",
-  drafter: "drafter",
-  project_manager: "project_manager",
-  read_only: "read_only",
-} as const;
-
 export interface AddMemberRequest {
   email: string;
-  role: AddMemberRequestRole;
+  role: string;
 }
 
-export type UpdateMemberRequestRole =
-  (typeof UpdateMemberRequestRole)[keyof typeof UpdateMemberRequestRole];
-
-export const UpdateMemberRequestRole = {
-  project_admin: "project_admin",
-  company_lead: "company_lead",
-  drafter: "drafter",
-  project_manager: "project_manager",
-  read_only: "read_only",
-} as const;
-
 export interface UpdateMemberRequest {
-  role: UpdateMemberRequestRole;
+  role: string;
 }

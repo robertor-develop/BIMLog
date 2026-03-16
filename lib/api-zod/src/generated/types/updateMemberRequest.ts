@@ -5,8 +5,7 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { UpdateMemberRequestRole } from "./updateMemberRequestRole";
 
 export interface UpdateMemberRequest {
-  role: UpdateMemberRequestRole;
+  role: string;
 }

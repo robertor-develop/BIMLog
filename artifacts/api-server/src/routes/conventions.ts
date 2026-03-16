@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -57,7 +57,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
   }
 });
 
-router.put("/projects/:projectId/conventions", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+router.put("/projects/:projectId/conventions", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId } = UpsertConventionParams.parse({ projectId: req.params.projectId });
     const body = UpsertConventionBody.parse(req.body);

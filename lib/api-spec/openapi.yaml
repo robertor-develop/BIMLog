@@ -941,7 +941,6 @@ components:
           type: string
         priority:
           type: string
-          enum: [low, medium, high, critical]
         assignedToId:
           type: integer
         dueDate:
@@ -960,10 +959,8 @@ components:
           type: string
         status:
           type: string
-          enum: [open, in_review, responded, closed]
         priority:
           type: string
-          enum: [low, medium, high, critical]
         assignedToId:
           type: integer
         response:
@@ -1030,7 +1027,6 @@ components:
           type: string
         submittalType:
           type: string
-          enum: [shop_drawing, product_data, sample, mock_up, design_data, test_report, certificate, manufacturers_instructions, other]
         assignedToId:
           type: integer
         dueDate:
@@ -1049,7 +1045,6 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, submitted, approved, approved_as_noted, rejected, resubmit, closed]
         specSection:
           type: string
         assignedToId:
@@ -1211,7 +1206,6 @@ components:
           format: email
         role:
           type: string
-          enum: [project_admin, company_lead, drafter, project_manager, read_only]
       required:
         - email
         - role
@@ -1221,6 +1215,5 @@ components:
       properties:
         role:
           type: string
-          enum: [project_admin, company_lead, drafter, project_manager, read_only]
       required:
         - role

@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1),
 });
 
 export function Login() {
@@ -32,7 +32,7 @@ export function Login() {
       onError: (error) => {
         toast({ 
           title: t('common.error'), 
-          description: error.response?.data?.error || "Login failed",
+          description: error.response?.data?.error || t('auth.loginFailed'),
           variant: "destructive" 
         });
       }

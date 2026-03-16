@@ -5,14 +5,12 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { UpdateRfiRequestPriority } from "./updateRfiRequestPriority";
-import type { UpdateRfiRequestStatus } from "./updateRfiRequestStatus";
 
 export interface UpdateRfiRequest {
   subject?: string;
   description?: string;
-  status?: UpdateRfiRequestStatus;
-  priority?: UpdateRfiRequestPriority;
+  status?: string;
+  priority?: string;
   assignedToId?: number;
   response?: string;
   dueDate?: Date;

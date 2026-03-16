@@ -5,13 +5,12 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateSubmittalRequestSubmittalType } from "./createSubmittalRequestSubmittalType";
 
 export interface CreateSubmittalRequest {
   title: string;
   description?: string;
   specSection?: string;
-  submittalType: CreateSubmittalRequestSubmittalType;
+  submittalType: string;
   assignedToId?: number;
   dueDate?: Date;
 }

@@ -13,9 +13,9 @@ import { motion } from "framer-motion";
 
 const registerSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6, "Minimum 6 characters"),
-  fullName: z.string().min(2, "Name required"),
-  companyName: z.string().min(2, "Company required"),
+  password: z.string().min(6),
+  fullName: z.string().min(2),
+  companyName: z.string().min(2),
 });
 
 export function Register() {
@@ -34,7 +34,7 @@ export function Register() {
       onError: (error) => {
         toast({ 
           title: t('common.error'), 
-          description: error.response?.data?.error || "Registration failed",
+          description: error.response?.data?.error || t('auth.registerFailed'),
           variant: "destructive" 
         });
       }

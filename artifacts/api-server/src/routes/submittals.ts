@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { submittalsTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateSubmittalBody, ListSubmittalsParams, UpdateSubmittalParams, UpdateSubmittalBody } from "@workspace/api-zod";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
@@ -43,7 +43,7 @@ router.get("/projects/:projectId/submittals", authMiddleware, requireProjectMemb
   }
 });
 
-router.post("/projects/:projectId/submittals", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.post("/projects/:projectId/submittals", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListSubmittalsParams.parse({ projectId: req.params.projectId });
     const body = CreateSubmittalBody.parse(req.body);
@@ -65,7 +65,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requireProjectMem
       specSection: body.specSection || null,
       submittedById: req.user!.userId,
       assignedToId: body.assignedToId || null,
-      dueDate: body.dueDate ? new Date(body.dueDate as string) : null,
+      dueDate: body.dueDate ? new Date(body.dueDate) : null,
     }).returning();
 
     await db.insert(activityLogTable).values({
@@ -92,7 +92,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requireProjectMem
   }
 });
 
-router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, requireProjectMember("project_admin", "company_lead", "drafter", "project_manager"), async (req, res) => {
+router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, submittalId } = UpdateSubmittalParams.parse({ projectId: req.params.projectId, submittalId: req.params.submittalId });
     const body = UpdateSubmittalBody.parse(req.body);
@@ -114,7 +114,7 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
     if (body.status) updates.status = body.status;
     if (body.specSection !== undefined) updates.specSection = body.specSection;
     if (body.assignedToId !== undefined) updates.assignedToId = body.assignedToId;
-    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate as string) : null;
+    if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
 
     const [updated] = await db.update(submittalsTable).set(updates).where(eq(submittalsTable.id, submittalId)).returning();
 
