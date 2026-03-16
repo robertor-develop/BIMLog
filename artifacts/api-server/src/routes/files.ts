@@ -4,7 +4,7 @@ import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import { getDefaultValue } from "../middlewares/config-validator";
+import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -187,6 +187,11 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
       updates.fileName = body.fileName;
     }
     if (body.status) {
+      const validStatus = await validateConfigValue("file_status", body.status);
+      if (!validStatus) {
+        res.status(422).json({ error: `Invalid file status: '${body.status}'` });
+        return;
+      }
       updates.status = body.status;
     }
 

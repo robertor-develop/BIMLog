@@ -158,5 +158,9 @@
   "common.delete": "Eliminar",
   "common.loading": "Cargando...",
   "common.error": "Ocurrió un error.",
-  "common.success": "Éxito"
+  "common.success": "Éxito",
+
+  "notFound.title": "404 - Página No Encontrada",
+  "notFound.message": "La página que busca no existe o ha sido movida.",
+  "notFound.backHome": "Volver al Inicio"
 }

@@ -4,6 +4,7 @@ import { namingConventionsTable, namingFieldsTable } from "@workspace/db/schema"
 import { eq } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { getDefaultValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -18,10 +19,11 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       .limit(1);
 
     if (conventions.length === 0) {
+      const defaultSeparator = await getDefaultValue("convention_separator");
       res.json({
         id: 0,
         projectId,
-        separator: "-",
+        separator: defaultSeparator,
         isActive: false,
         fields: [],
         createdAt: new Date().toISOString(),
