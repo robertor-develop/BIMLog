@@ -5,3 +5,4 @@ export * from "./rfis";
 export * from "./submittals";
 export * from "./activity";
 export * from "./conventions";
+export * from "./config";

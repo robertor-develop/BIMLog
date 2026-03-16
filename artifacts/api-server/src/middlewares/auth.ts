@@ -4,11 +4,14 @@ import { db } from "@workspace/db";
 import { projectMembersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.REPL_ID;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required. Set it or ensure REPL_ID is available.");
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production.");
+  }
+  process.env.JWT_SECRET = process.env.REPL_ID || require("crypto").randomBytes(32).toString("hex");
 }
+
+const JWT_SECRET: string = process.env.JWT_SECRET;
 
 export interface AuthPayload {
   userId: number;

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/lib/i18n";
+import { ConfigProvider } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 
 // Pages
@@ -53,6 +54,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
+        <ConfigProvider>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
@@ -64,6 +66,7 @@ function App() {
           </WouterRouter>
           <Toaster />
         </TooltipProvider>
+        </ConfigProvider>
       </I18nProvider>
     </QueryClientProvider>
   );

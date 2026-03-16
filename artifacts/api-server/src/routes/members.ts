@@ -4,6 +4,7 @@ import { projectMembersTable, usersTable, companiesTable, activityLogTable } fro
 import { eq, and } from "drizzle-orm";
 import { AddMemberBody, UpdateMemberBody, ListMembersParams, AddMemberParams, UpdateMemberParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -48,6 +49,11 @@ router.post("/projects/:projectId/members", authMiddleware, requireProjectMember
   try {
     const { projectId } = AddMemberParams.parse({ projectId: req.params.projectId });
     const body = AddMemberBody.parse(req.body);
+
+    if (body.role && !(await validateConfigValue("member_role", body.role))) {
+      res.status(422).json({ error: `Invalid role: ${body.role}` });
+      return;
+    }
 
     const users = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).limit(1);
     if (users.length === 0) {
@@ -116,6 +122,11 @@ router.patch("/projects/:projectId/members/:memberId", authMiddleware, requirePr
 
     if (existing.length === 0) {
       res.status(404).json({ error: "Member not found" });
+      return;
+    }
+
+    if (body.role && !(await validateConfigValue("member_role", body.role))) {
+      res.status(422).json({ error: `Invalid role: ${body.role}` });
       return;
     }
 

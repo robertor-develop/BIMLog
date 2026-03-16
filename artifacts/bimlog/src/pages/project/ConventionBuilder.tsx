@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Settings2, Plus, Trash2, GripVertical, AlertTriangle } from "lucide-react";
 
 export function ConventionBuilder({ projectId }: { projectId: number }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { getOptions } = useConfig();
   const queryClient = useQueryClient();
+  const separatorOptions = getOptions('separator');
   const { toast } = useToast();
   
   const { data: convention, isLoading } = useGetConvention(projectId);
@@ -33,7 +36,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const { mutate, isPending } = useUpsertConvention({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/conventions`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/conventions`] });
         toast({ title: t('common.success') });
       }
     }
@@ -82,9 +85,11 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
             value={separator}
             onChange={e => setSeparator(e.target.value)}
           >
-            <option value="-">{t('convention.separatorHyphen')}</option>
-            <option value="_">{t('convention.separatorUnderscore')}</option>
-            <option value=".">{t('convention.separatorDot')}</option>
+            {separatorOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {lang === 'es' ? opt.labelEs : opt.label}
+              </option>
+            ))}
           </select>
         </div>
         <div className="flex items-center space-x-3 pt-8">

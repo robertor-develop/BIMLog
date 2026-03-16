@@ -4,6 +4,7 @@ import { rfisTable, usersTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -47,6 +48,11 @@ router.post("/projects/:projectId/rfis", authMiddleware, requireProjectMember("p
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
     const body = CreateRfiBody.parse(req.body);
+
+    if (body.priority && !(await validateConfigValue("rfi_priority", body.priority))) {
+      res.status(422).json({ error: `Invalid priority value: ${body.priority}` });
+      return;
+    }
 
     const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
     const number = `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
@@ -95,6 +101,15 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectM
     const existing = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
     if (existing.length === 0) {
       res.status(404).json({ error: "RFI not found" });
+      return;
+    }
+
+    if (body.status && !(await validateConfigValue("rfi_status", body.status))) {
+      res.status(422).json({ error: `Invalid status value: ${body.status}` });
+      return;
+    }
+    if (body.priority && !(await validateConfigValue("rfi_priority", body.priority))) {
+      res.status(422).json({ error: `Invalid priority value: ${body.priority}` });
       return;
     }
 

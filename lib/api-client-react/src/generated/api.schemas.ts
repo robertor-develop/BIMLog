@@ -5,6 +5,19 @@
  * BIMLog API specification
  * OpenAPI spec version: 0.1.0
  */
+export type ConfigOptionMeta = { [key: string]: string };
+
+export interface ConfigOption {
+  value: string;
+  label: string;
+  labelEs: string;
+  meta?: ConfigOptionMeta;
+}
+
+export interface AppConfig {
+  [key: string]: ConfigOption[];
+}
+
 export interface HealthStatus {
   status: string;
 }

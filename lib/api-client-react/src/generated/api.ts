@@ -19,6 +19,7 @@ import type {
 import type {
   ActivityEntry,
   AddMemberRequest,
+  AppConfig,
   AuthResponse,
   CreateProjectRequest,
   CreateRfiRequest,
@@ -52,6 +53,71 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * @summary Get application configuration options (roles, statuses, separators)
+ */
+export const getGetConfigUrl = () => {
+  return `/api/v1/config`;
+};
+
+export const getConfig = async (options?: RequestInit): Promise<AppConfig> => {
+  return customFetch<AppConfig>(getGetConfigUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetConfigQueryKey = () => {
+  return [`/api/v1/config`] as const;
+};
+
+export const getGetConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetConfigQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfig>>> = ({
+    signal,
+  }) => getConfig({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getConfig>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetConfigQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getConfig>>
+>;
+export type GetConfigQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get application configuration options (roles, statuses, separators)
+ */
+
+export function useGetConfig<
+  TData = Awaited<ReturnType<typeof getConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetConfigQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Health check

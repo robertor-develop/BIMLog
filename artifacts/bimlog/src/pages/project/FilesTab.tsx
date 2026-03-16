@@ -106,8 +106,8 @@ function UploadForm({ projectId, onClose }: { projectId: number, onClose: () => 
   const { mutate, isPending } = useUploadFile({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/files`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/activity`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
         toast({ title: t('common.success') });
         onClose();
       },
@@ -172,8 +172,8 @@ function DeleteFileButton({ projectId, fileId }: { projectId: number, fileId: nu
   const { mutate, isPending } = useDeleteFile({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/files`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/activity`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
         toast({ title: t('files.deleted') });
       }
     }

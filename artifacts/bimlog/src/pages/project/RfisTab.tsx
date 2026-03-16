@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useListRfis, useCreateRfi } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Plus } from "lucide-react";
 import { format } from "date-fns";
 
-type RfiPriority = 'low' | 'medium' | 'high';
-
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
+  const { getLabel } = useConfig();
   const { data: rfis, isLoading } = useListRfis(projectId);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -55,7 +55,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={rfi.priority === 'high' || rfi.priority === 'critical' ? 'destructive' : 'secondary'}>
-                      {rfi.priority}
+                      {getLabel('rfi_priority', rfi.priority)}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">{rfi.createdByName}</td>
@@ -81,26 +81,29 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { getLabel } = useConfig();
   const styles: Record<string, string> = {
     open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     in_review: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    responded: "bg-green-500/20 text-green-400 border-green-500/30",
+    answered: "bg-green-500/20 text-green-400 border-green-500/30",
     closed: "bg-gray-500/20 text-gray-400 border-gray-500/30",
   };
-  return <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${styles[status] || styles.open}`}>{status.replace('_', ' ').toUpperCase()}</span>;
+  return <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${styles[status] || styles.open}`}>{getLabel('rfi_status', status)}</span>;
 }
 
 function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [subject, setSubject] = useState('');
-  const [priority, setPriority] = useState<RfiPriority>('medium');
+  const priorityOptions = getOptions('rfi_priority');
+  const [priority, setPriority] = useState('medium');
   
   const { mutate, isPending } = useCreateRfi({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/rfis`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
         toast({ title: t('rfis.createdSuccess') });
         onClose();
       }
@@ -121,11 +124,13 @@ function CreateRfiForm({ projectId, onClose }: { projectId: number, onClose: () 
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
           value={priority}
-          onChange={(e) => setPriority(e.target.value as RfiPriority)}
+          onChange={(e) => setPriority(e.target.value)}
         >
-          <option value="low">{t('rfis.priorityLow')}</option>
-          <option value="medium">{t('rfis.priorityMedium')}</option>
-          <option value="high">{t('rfis.priorityHigh')}</option>
+          {priorityOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {lang === 'es' ? opt.labelEs : opt.label}
+            </option>
+          ))}
         </select>
         <Button 
           disabled={!subject || isPending}

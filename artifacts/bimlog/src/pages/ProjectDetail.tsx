@@ -1,6 +1,7 @@
 import { Link, useRoute } from "wouter";
 import { useGetProject, useListMembers } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 import { FilesTab } from "./project/FilesTab";
 import { RfisTab } from "./project/RfisTab";
@@ -14,23 +15,21 @@ import {
   Users, Settings2, Wand2 
 } from "lucide-react";
 
-const ADMIN_ROLES = ['project_admin'];
-const WRITE_ROLES = ['project_admin', 'company_lead', 'drafter', 'project_manager'];
-
 export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab");
   const projectId = params?.id ? parseInt(params.id) : 0;
   const tab = params?.tab || "files";
   const { t } = useI18n();
   const { user } = useAuthStore();
+  const { adminRoles, writeRoles } = useConfig();
 
   const { data: project, isLoading } = useGetProject(projectId);
   const { data: members } = useListMembers(projectId);
 
   const currentMember = members?.find(m => m.userId === user?.id);
-  const memberRole = currentMember?.role || 'read_only';
-  const isAdmin = ADMIN_ROLES.includes(memberRole);
-  const canWrite = WRITE_ROLES.includes(memberRole);
+  const memberRole = currentMember?.role || '';
+  const isAdmin = adminRoles.includes(memberRole);
+  const canWrite = writeRoles.includes(memberRole);
 
   if (isLoading) return <div className="p-8 text-center">{t('common.loading')}</div>;
   if (!project) return <div className="p-8 text-center">{t('project.notFound')}</div>;

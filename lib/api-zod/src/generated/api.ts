@@ -8,6 +8,21 @@
 import * as zod from "zod";
 
 /**
+ * @summary Get application configuration options (roles, statuses, separators)
+ */
+export const GetConfigResponse = zod.record(
+  zod.string(),
+  zod.array(
+    zod.object({
+      value: zod.string(),
+      label: zod.string(),
+      labelEs: zod.string(),
+      meta: zod.record(zod.string(), zod.string()).optional(),
+    }),
+  ),
+);
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

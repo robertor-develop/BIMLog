@@ -4,6 +4,7 @@ import { submittalsTable, usersTable, activityLogTable } from "@workspace/db/sch
 import { eq, and, count } from "drizzle-orm";
 import { CreateSubmittalBody, ListSubmittalsParams, UpdateSubmittalParams, UpdateSubmittalBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { validateConfigValue } from "../middlewares/config-validator";
 
 const router: IRouter = Router();
 
@@ -46,6 +47,11 @@ router.post("/projects/:projectId/submittals", authMiddleware, requireProjectMem
   try {
     const { projectId } = ListSubmittalsParams.parse({ projectId: req.params.projectId });
     const body = CreateSubmittalBody.parse(req.body);
+
+    if (body.submittalType && !(await validateConfigValue("submittal_type", body.submittalType))) {
+      res.status(422).json({ error: `Invalid submittal type: ${body.submittalType}` });
+      return;
+    }
 
     const [submittalCount] = await db.select({ count: count() }).from(submittalsTable).where(eq(submittalsTable.projectId, projectId));
     const number = `SUB-${String((submittalCount.count as number) + 1).padStart(4, "0")}`;
@@ -94,6 +100,11 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
     const existing = await db.select().from(submittalsTable).where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
     if (existing.length === 0) {
       res.status(404).json({ error: "Submittal not found" });
+      return;
+    }
+
+    if (body.status && !(await validateConfigValue("submittal_status", body.status))) {
+      res.status(422).json({ error: `Invalid status value: ${body.status}` });
       return;
     }
 

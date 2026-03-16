@@ -16,7 +16,7 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 - **Authentication**: JWT (bcryptjs + jsonwebtoken)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **i18n**: Custom context-based EN/ES language toggle
+- **i18n**: JSON-based EN/ES translation files with React context provider
 - **State**: Zustand (auth store)
 - **Build**: esbuild (CJS bundle for server), Vite (frontend)
 
@@ -25,14 +25,15 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 ```text
 ├── artifacts/
 │   ├── api-server/          # Express API server (port 8080, path /api)
-│   │   ├── src/routes/      # Route handlers: auth, projects, files, rfis, submittals, activity, conventions, members
-│   │   └── src/middlewares/  # JWT auth middleware
+│   │   ├── src/routes/      # Route handlers: auth, projects, files, rfis, submittals, activity, conventions, members, config
+│   │   └── src/middlewares/  # JWT auth, config-validator middleware
 │   └── bimlog/              # React + Vite frontend (root path /)
 │       └── src/
 │           ├── pages/        # Landing, Login, Register, Dashboard, ProjectDetail
 │           ├── pages/project/ # FilesTab, RfisTab, SubmittalsTab, ActivityTab, TeamTab, ConventionBuilder, NameGenerator
 │           ├── store/        # Zustand auth store
-│           ├── lib/          # i18n, utils
+│           ├── lib/          # i18n (JSON files), config-context, utils
+│           ├── lib/i18n/     # en.json, es.json translation files
 │           └── components/   # UI components, layout (Navbar)
 ├── lib/
 │   ├── api-spec/            # OpenAPI spec + Orval codegen config
@@ -58,7 +59,9 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 
 ## Database Schema
 
-Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields
+Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
+
+The `config_options` table stores all configurable domain values (roles, statuses, separators, priorities, submittal types) and serves as the single source of truth. Values are exposed via `GET /api/v1/config` and used by both frontend and backend validation.
 
 ## API Endpoints (v1)
 
@@ -67,6 +70,7 @@ All endpoints are versioned under `/api/v1/`.
 - `POST /api/v1/auth/register` — Register with email, password, fullName, companyName
 - `POST /api/v1/auth/login` — Login, returns JWT token
 - `GET /api/v1/auth/me` — Get current user (requires auth)
+- `GET /api/v1/config` — Get app configuration (roles, statuses, separators, priorities) from DB
 - `GET/POST /api/v1/projects` — List/create projects (member-scoped)
 - `GET /api/v1/projects/:id` — Project details (requires membership)
 - `GET/POST /api/v1/projects/:id/files` — File list and upload (upload: write roles only)

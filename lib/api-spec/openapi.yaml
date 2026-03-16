@@ -25,8 +25,23 @@ tags:
     description: Naming convention operations
   - name: members
     description: Team member operations
+  - name: config
+    description: Application configuration
 
 paths:
+  /config:
+    get:
+      operationId: getConfig
+      tags: [config]
+      summary: Get application configuration options (roles, statuses, separators)
+      responses:
+        "200":
+          description: Configuration options grouped by category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfig"
+
   /healthz:
     get:
       operationId: healthCheck
@@ -613,6 +628,31 @@ components:
       bearerFormat: JWT
 
   schemas:
+    ConfigOption:
+      type: object
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+        labelEs:
+          type: string
+        meta:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - value
+        - label
+        - labelEs
+
+    AppConfig:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: "#/components/schemas/ConfigOption"
+
     HealthStatus:
       type: object
       properties:

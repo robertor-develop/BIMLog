@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useListMembers, useAddMember, useRemoveMember } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
-type MemberRole = 'project_admin' | 'company_lead' | 'drafter' | 'project_manager' | 'read_only';
-
 export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
   const { t } = useI18n();
+  const { getLabel, adminRoles } = useConfig();
   const { data: members, isLoading } = useListMembers(projectId);
   const [showAdd, setShowAdd] = useState(false);
 
@@ -57,8 +57,8 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
                   <td className="px-6 py-4 text-muted-foreground">{member.userEmail}</td>
                   <td className="px-6 py-4 text-muted-foreground">{member.userCompanyName}</td>
                   <td className="px-6 py-4">
-                    <Badge variant={member.role === 'project_admin' ? 'default' : 'outline'}>
-                      {member.role.replace('_', ' ').toUpperCase()}
+                    <Badge variant={adminRoles.includes(member.role) ? 'default' : 'outline'}>
+                      {getLabel('member_role', member.role)}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">
@@ -79,15 +79,18 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
 
 function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
   const { t } = useI18n();
+  const { getOptions } = useConfig();
+  const { lang } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const roleOptions = getOptions('member_role');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<MemberRole>('drafter');
-  
+  const [role, setRole] = useState(roleOptions[0]?.value ?? '');
+
   const { mutate, isPending } = useAddMember({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/members`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/members`] });
         toast({ title: t('team.added') });
         onClose();
       }
@@ -109,13 +112,13 @@ function AddMemberForm({ projectId, onClose }: { projectId: number, onClose: () 
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
           value={role}
-          onChange={(e) => setRole(e.target.value as MemberRole)}
+          onChange={(e) => setRole(e.target.value)}
         >
-          <option value="project_admin">{t('team.roleAdmin')}</option>
-          <option value="company_lead">{t('team.roleCompanyLead')}</option>
-          <option value="drafter">{t('team.roleDrafter')}</option>
-          <option value="project_manager">{t('team.roleProjectManager')}</option>
-          <option value="read_only">{t('team.roleReadOnly')}</option>
+          {roleOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {lang === 'es' ? opt.labelEs : opt.label}
+            </option>
+          ))}
         </select>
         <Button 
           disabled={!email || isPending}
@@ -135,7 +138,7 @@ function RemoveMemberButton({ projectId, memberId }: { projectId: number, member
   const { mutate, isPending } = useRemoveMember({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/members`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/members`] });
         toast({ title: t('team.removed') });
       }
     }

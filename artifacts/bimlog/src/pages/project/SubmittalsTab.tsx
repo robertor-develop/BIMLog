@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useListSubmittals, useCreateSubmittal } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { FileCheck, Plus } from "lucide-react";
 import { format } from "date-fns";
 
-type SubmittalType = 'shop_drawing' | 'product_data' | 'sample';
-
 export function SubmittalsTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
+  const { getLabel } = useConfig();
   const { data: submittals, isLoading } = useListSubmittals(projectId);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -50,10 +50,10 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
                 <tr key={sub.id} className="hover:bg-card/50 transition-colors cursor-pointer">
                   <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{sub.number}</td>
                   <td className="px-6 py-4 font-medium text-white">{sub.title}</td>
-                  <td className="px-6 py-4 text-muted-foreground capitalize">{sub.submittalType?.replace('_', ' ')}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{getLabel('submittal_type', sub.submittalType ?? '')}</td>
                   <td className="px-6 py-4">
                     <Badge variant={sub.status.includes('approved') ? 'default' : 'secondary'}>
-                      {sub.status.replace(/_/g, ' ').toUpperCase()}
+                      {getLabel('submittal_status', sub.status)}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">{sub.submittedByName}</td>
@@ -79,16 +79,18 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
 }
 
 function CreateSubmittalForm({ projectId, onClose }: { projectId: number, onClose: () => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [title, setTitle] = useState('');
-  const [submittalType, setSubmittalType] = useState<SubmittalType>('shop_drawing');
+  const typeOptions = getOptions('submittal_type');
+  const [submittalType, setSubmittalType] = useState(typeOptions[0]?.value ?? '');
   
   const { mutate, isPending } = useCreateSubmittal({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/submittals`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
         toast({ title: t('submittals.createdSuccess') });
         onClose();
       }
@@ -109,11 +111,13 @@ function CreateSubmittalForm({ projectId, onClose }: { projectId: number, onClos
         <select 
           className="h-12 rounded-xl border-2 border-border bg-background px-4 text-sm text-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
           value={submittalType}
-          onChange={(e) => setSubmittalType(e.target.value as SubmittalType)}
+          onChange={(e) => setSubmittalType(e.target.value)}
         >
-          <option value="shop_drawing">{t('submittals.typeShopDrawing')}</option>
-          <option value="product_data">{t('submittals.typeProductData')}</option>
-          <option value="sample">{t('submittals.typeSample')}</option>
+          {typeOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {lang === 'es' ? opt.labelEs : opt.label}
+            </option>
+          ))}
         </select>
         <Button 
           disabled={!title || isPending}
