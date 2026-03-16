@@ -19,7 +19,7 @@ export interface Submittal {
   submittedByName: string;
   assignedToId?: number;
   assignedToName?: string;
-  dueDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  dueDate?: string;
+  createdAt: string;
+  updatedAt: string;
 }

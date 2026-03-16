@@ -57,7 +57,7 @@ export const LoginResponse = zod.object({
     fullName: zod.string(),
     companyName: zod.string(),
     companyId: zod.number(),
-    createdAt: zod.date(),
+    createdAt: zod.string().datetime({}),
   }),
 });
 
@@ -70,7 +70,7 @@ export const GetMeResponse = zod.object({
   fullName: zod.string(),
   companyName: zod.string(),
   companyId: zod.number(),
-  createdAt: zod.date(),
+  createdAt: zod.string().datetime({}),
 });
 
 /**
@@ -83,8 +83,8 @@ export const ListProjectsResponseItem = zod.object({
   code: zod.string(),
   status: zod.string(),
   createdById: zod.number(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
   memberCount: zod.number().optional(),
   fileCount: zod.number().optional(),
 });
@@ -113,8 +113,8 @@ export const GetProjectResponse = zod.object({
   code: zod.string(),
   status: zod.string(),
   createdById: zod.number(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
   memberCount: zod.number().optional(),
   fileCount: zod.number().optional(),
 });
@@ -137,8 +137,8 @@ export const ListFilesResponseItem = zod.object({
   uploadedById: zod.number(),
   uploadedByName: zod.string(),
   uploadedByCompany: zod.string().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 export const ListFilesResponse = zod.array(ListFilesResponseItem);
 
@@ -179,8 +179,8 @@ export const UpdateFileResponse = zod.object({
   uploadedById: zod.number(),
   uploadedByName: zod.string(),
   uploadedByCompany: zod.string().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 
 /**
@@ -214,11 +214,11 @@ export const ListRfisResponseItem = zod.object({
   assignedToName: zod.string().optional(),
   createdById: zod.number(),
   createdByName: zod.string(),
-  dueDate: zod.date().optional(),
-  respondedAt: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
+  respondedAt: zod.string().datetime({}).optional(),
   response: zod.string().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 export const ListRfisResponse = zod.array(ListRfisResponseItem);
 
@@ -234,7 +234,7 @@ export const CreateRfiBody = zod.object({
   description: zod.string().optional(),
   priority: zod.string(),
   assignedToId: zod.number().optional(),
-  dueDate: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
 });
 
 /**
@@ -252,7 +252,7 @@ export const UpdateRfiBody = zod.object({
   priority: zod.string().optional(),
   assignedToId: zod.number().optional(),
   response: zod.string().optional(),
-  dueDate: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
 });
 
 export const UpdateRfiResponse = zod.object({
@@ -267,11 +267,11 @@ export const UpdateRfiResponse = zod.object({
   assignedToName: zod.string().optional(),
   createdById: zod.number(),
   createdByName: zod.string(),
-  dueDate: zod.date().optional(),
-  respondedAt: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
+  respondedAt: zod.string().datetime({}).optional(),
   response: zod.string().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 
 /**
@@ -294,9 +294,9 @@ export const ListSubmittalsResponseItem = zod.object({
   submittedByName: zod.string(),
   assignedToId: zod.number().optional(),
   assignedToName: zod.string().optional(),
-  dueDate: zod.date().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  dueDate: zod.string().datetime({}).optional(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 export const ListSubmittalsResponse = zod.array(ListSubmittalsResponseItem);
 
@@ -313,7 +313,7 @@ export const CreateSubmittalBody = zod.object({
   specSection: zod.string().optional(),
   submittalType: zod.string(),
   assignedToId: zod.number().optional(),
-  dueDate: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
 });
 
 /**
@@ -330,7 +330,7 @@ export const UpdateSubmittalBody = zod.object({
   status: zod.string().optional(),
   specSection: zod.string().optional(),
   assignedToId: zod.number().optional(),
-  dueDate: zod.date().optional(),
+  dueDate: zod.string().datetime({}).optional(),
 });
 
 export const UpdateSubmittalResponse = zod.object({
@@ -346,9 +346,9 @@ export const UpdateSubmittalResponse = zod.object({
   submittedByName: zod.string(),
   assignedToId: zod.number().optional(),
   assignedToName: zod.string().optional(),
-  dueDate: zod.date().optional(),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  dueDate: zod.string().datetime({}).optional(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 
 /**
@@ -370,7 +370,7 @@ export const ListActivityResponseItem = zod.object({
   fileNameBefore: zod.string().optional(),
   fileNameAfter: zod.string().optional(),
   details: zod.string().optional(),
-  createdAt: zod.date(),
+  createdAt: zod.string().datetime({}),
 });
 export const ListActivityResponse = zod.array(ListActivityResponseItem);
 
@@ -394,8 +394,8 @@ export const GetConventionResponse = zod.object({
       allowedValues: zod.array(zod.string()),
     }),
   ),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 
 /**
@@ -430,8 +430,8 @@ export const UpsertConventionResponse = zod.object({
       allowedValues: zod.array(zod.string()),
     }),
   ),
-  createdAt: zod.date(),
-  updatedAt: zod.date(),
+  createdAt: zod.string().datetime({}),
+  updatedAt: zod.string().datetime({}),
 });
 
 /**
@@ -449,7 +449,7 @@ export const ListMembersResponseItem = zod.object({
   userEmail: zod.string(),
   userCompanyName: zod.string().optional(),
   role: zod.string(),
-  joinedAt: zod.date(),
+  joinedAt: zod.string().datetime({}),
 });
 export const ListMembersResponse = zod.array(ListMembersResponseItem);
 
@@ -485,7 +485,7 @@ export const UpdateMemberResponse = zod.object({
   userEmail: zod.string(),
   userCompanyName: zod.string().optional(),
   role: zod.string(),
-  joinedAt: zod.date(),
+  joinedAt: zod.string().datetime({}),
 });
 
 /**

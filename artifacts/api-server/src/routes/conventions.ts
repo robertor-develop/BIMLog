@@ -19,7 +19,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       .limit(1);
 
     if (conventions.length === 0) {
-      const defaultSeparator = await getDefaultValue("convention_separator");
+      const defaultSeparator = await getDefaultValue("separator");
       res.json({
         id: 0,
         projectId,

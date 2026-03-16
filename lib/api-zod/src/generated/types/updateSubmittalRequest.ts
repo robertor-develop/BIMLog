@@ -12,5 +12,5 @@ export interface UpdateSubmittalRequest {
   status?: string;
   specSection?: string;
   assignedToId?: number;
-  dueDate?: Date;
+  dueDate?: string;
 }

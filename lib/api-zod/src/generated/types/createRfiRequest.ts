@@ -11,5 +11,5 @@ export interface CreateRfiRequest {
   description?: string;
   priority: string;
   assignedToId?: number;
-  dueDate?: Date;
+  dueDate?: string;
 }

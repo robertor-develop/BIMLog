@@ -13,5 +13,5 @@ export interface UpdateRfiRequest {
   priority?: string;
   assignedToId?: number;
   response?: string;
-  dueDate?: Date;
+  dueDate?: string;
 }

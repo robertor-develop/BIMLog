@@ -13,6 +13,6 @@ export interface NamingConvention {
   separator: string;
   isActive: boolean;
   fields: NamingField[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -14,5 +14,5 @@ export interface ProjectMember {
   userEmail: string;
   userCompanyName?: string;
   role: string;
-  joinedAt: Date;
+  joinedAt: string;
 }

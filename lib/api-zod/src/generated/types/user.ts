@@ -12,5 +12,5 @@ export interface User {
   fullName: string;
   companyName: string;
   companyId: number;
-  createdAt: Date;
+  createdAt: string;
 }

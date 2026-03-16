@@ -17,6 +17,6 @@ export interface ProjectFile {
   uploadedById: number;
   uploadedByName: string;
   uploadedByCompany?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

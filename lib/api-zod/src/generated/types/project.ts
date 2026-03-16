@@ -13,8 +13,8 @@ export interface Project {
   code: string;
   status: string;
   createdById: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   memberCount?: number;
   fileCount?: number;
 }

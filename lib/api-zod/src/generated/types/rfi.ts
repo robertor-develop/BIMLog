@@ -18,9 +18,9 @@ export interface Rfi {
   assignedToName?: string;
   createdById: number;
   createdByName: string;
-  dueDate?: Date;
-  respondedAt?: Date;
+  dueDate?: string;
+  respondedAt?: string;
   response?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -12,5 +12,5 @@ export interface CreateSubmittalRequest {
   specSection?: string;
   submittalType: string;
   assignedToId?: number;
-  dueDate?: Date;
+  dueDate?: string;
 }

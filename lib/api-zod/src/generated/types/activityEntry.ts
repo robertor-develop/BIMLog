@@ -18,5 +18,5 @@ export interface ActivityEntry {
   fileNameBefore?: string;
   fileNameAfter?: string;
   details?: string;
-  createdAt: Date;
+  createdAt: string;
 }
