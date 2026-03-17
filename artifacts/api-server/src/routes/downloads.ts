@@ -2,19 +2,38 @@ import { Router, type Request, type Response } from "express";
 import archiver from "archiver";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
 const router = Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+function findSyncAgentDir(): string {
+  const cwd = process.cwd();
+  const candidates = [
+    path.resolve(cwd, "../sync-agent"),
+    path.resolve(cwd, "artifacts/sync-agent"),
+    path.resolve(cwd, "sync-agent"),
+    path.resolve(cwd, "../../sync-agent"),
+  ];
+  const found = candidates.find(p => fs.existsSync(p));
+  if (found) {
+    console.log(`[downloads] Sync agent dir: ${found}`);
+    return found;
+  }
+  console.warn(`[downloads] Sync agent dir not found. Tried: ${candidates.join(", ")}`);
+  return candidates[0];
+}
 
-const SYNC_AGENT_DIR = path.resolve(__dirname, "../../../sync-agent");
+const SYNC_AGENT_DIR = findSyncAgentDir();
 const ZIP_CACHE = "/tmp/bimlog-sync-agent.zip";
 
 let zipStatus: "pending" | "ready" | "error" = "pending";
 
 function buildZip() {
+  if (!fs.existsSync(SYNC_AGENT_DIR)) {
+    console.warn("[downloads] Sync agent dir does not exist — skipping zip build");
+    zipStatus = "error";
+    return;
+  }
+
   const output = fs.createWriteStream(ZIP_CACHE);
   const archive = archiver("zip", { zlib: { level: 6 } });
 
