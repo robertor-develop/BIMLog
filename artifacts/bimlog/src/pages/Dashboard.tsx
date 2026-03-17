@@ -6,12 +6,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut } from "lucide-react";
+import { useAuthStore } from "@/store/auth";
 
 export function Dashboard() {
   const { t } = useI18n();
   const { data: projects, isLoading, isError, error, refetch } = useListProjects();
+  const logout = useAuthStore(s => s.logout);
   const [showCreate, setShowCreate] = useState(false);
+
+  function clearSessionAndRetry() {
+    localStorage.removeItem("bimlog-auth");
+    logout();
+    window.location.href = "/";
+  }
 
   const activeProjects = projects?.filter(p => p.status === "active") ?? [];
   const totalFiles = projects?.reduce((sum, p) => sum + (p.fileCount || 0), 0) ?? 0;
@@ -121,10 +129,25 @@ export function Dashboard() {
               </div>
               <div className="empty-title">{t("dashboard.empty")}</div>
               <div className="empty-desc" style={{ marginBottom: 16 }}>{t("dashboard.emptyDesc")}</div>
-              <Button onClick={() => setShowCreate(true)} variant="outline" style={{ gap: 6, fontSize: 12 }}>
-                <Plus style={{ width: 13, height: 13 }} />
-                {t("dashboard.createProject")}
-              </Button>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                <Button onClick={() => setShowCreate(true)} variant="outline" style={{ gap: 6, fontSize: 12 }}>
+                  <Plus style={{ width: 13, height: 13 }} />
+                  {t("dashboard.createProject")}
+                </Button>
+                <button
+                  onClick={clearSessionAndRetry}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    fontSize: 11, color: "hsl(var(--muted-foreground))",
+                    background: "none", border: "none", cursor: "pointer",
+                    padding: "4px 8px", borderRadius: 4,
+                    textDecoration: "underline", textUnderlineOffset: 3,
+                  }}
+                >
+                  <LogOut style={{ width: 11, height: 11 }} />
+                  Clear session &amp; sign in again
+                </button>
+              </div>
             </div>
           )}
         </>
