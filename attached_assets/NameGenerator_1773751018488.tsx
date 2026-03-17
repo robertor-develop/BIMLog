@@ -16,6 +16,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
   const [copied, setCopied]         = useState(false);
   const [savedNames, setSavedNames] = useState<SavedName[]>([]);
 
+  // Initialize selections with first allowed value per field
   useEffect(() => {
     if (convention?.fields) {
       const initial: Record<number, string> = {};
@@ -122,6 +123,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
           const selectedVal = selections[field.id] || "";
           return (
             <div key={field.id}>
+              {/* Field label with position */}
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                 <span style={{
                   width: 20, height: 20, borderRadius: 5,
@@ -135,6 +137,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
                 </span>
               </div>
 
+              {/* Dropdown — only allowed values, no free text */}
               <select
                 value={selectedVal}
                 onChange={e => setSelections(prev => ({ ...prev, [field.id]: e.target.value }))}
@@ -151,6 +154,7 @@ export function NameGenerator({ projectId }: { projectId: number }) {
                 ))}
               </select>
 
+              {/* Selected value preview chip */}
               {selectedVal && (
                 <div style={{ marginTop: 4 }}>
                   <span className="name-tag name-tag-valid" style={{ fontSize: 11 }}>{selectedVal}</span>
