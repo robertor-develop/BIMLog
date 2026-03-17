@@ -31,6 +31,11 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
   ).slice(0, 6);
 
   const violationsByCompany: Record<string, number> = {};
+  activity.forEach(a => {
+    if (a.actionType === "upload" && a.fileNameAfter) {
+      // count uploads per company as proxy for activity
+    }
+  });
   files.filter(f => f.status === "rejected").forEach(f => {
     const company = f.uploadedByCompany || "Unknown";
     violationsByCompany[company] = (violationsByCompany[company] || 0) + 1;
@@ -112,7 +117,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
       {/* Row 2 — Charts */}
       <div className="col-3" style={{ marginBottom: 18 }}>
 
-        {/* Compliance ring */}
+        {/* Compliance ring / stat */}
         <div className="card-padded">
           <div className="section-header">
             <div>
@@ -356,10 +361,10 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
 
         <div style={{ padding: "20px 0" }}>
           {[
-            { label: "MEP Rough-in L3",     baseline: 55, delay: 15, company: "DDS Mech." },
-            { label: "Structural steel L4",  baseline: 70, delay: 5,  company: "Pace GC" },
-            { label: "Arch. drawings",       baseline: 80, delay: 0,  company: "ACM Arch." },
-            { label: "MEP Coordination",     baseline: 40, delay: 20, company: "DDS Mech." },
+            { label: "MEP Rough-in L3",    baseline: 55, delay: 15, company: "DDS Mech." },
+            { label: "Structural steel L4", baseline: 70, delay: 5,  company: "Pace GC" },
+            { label: "Arch. drawings",      baseline: 80, delay: 0,  company: "ACM Arch." },
+            { label: "MEP Coordination",    baseline: 40, delay: 20, company: "DDS Mech." },
           ].map(row => (
             <div key={row.label} className="gantt-row">
               <div className="gantt-label">{row.label}</div>
