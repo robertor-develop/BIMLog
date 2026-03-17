@@ -1,0 +1,19 @@
+I need two things done. Do not touch anything else in the app that is currently working.
+Thing 1 — Add the integration modal. When a user clicks any Connect button on any integration card in the Integrations tab show a modal with exactly this content:
+Modal title: Connect [Platform Name]
+Option 1 — Validate and Download. Upload through BIMLog. We validate your files instantly and give you back the approved file with a full audit record. You upload it yourself to your platform. Works today. Zero setup required. Button: Get Started.
+Option 2 — Managed Connection. Our team logs in on your behalf using your API token or credentials and configures everything for you. White-glove setup included with founding partner onboarding. Button: Contact us — mailto:info@ignitesmart.ai
+Option 3 — BIMLog Sync Agent — Enterprise Version. A lightweight desktop app watches a folder on your computer or server. Drop any file in the folder and BIMLog validates and routes it to the right platform automatically. No manual upload. No API setup. Just a folder you already know how to use. Button: Contact us — mailto:info@ignitesmart.ai
+Option 4 — OAuth Connection — Enterprise Version. You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project. Button: Contact us — mailto:info@ignitesmart.ai
+Do not build any OAuth functionality. Option 4 is text and a contact button only.
+Thing 2 — Build the BIMLog Sync Agent as an Electron desktop app. Create a new folder in the monorepo called artifacts/sync-agent. Build a cross-platform Electron app that does exactly these things and nothing else:
+
+Shows a system tray icon with the BIMLog B logo
+Has a simple settings screen where the user enters their BIMLog API token and selects which local folder to watch
+Watches that folder for any new files dropped into it
+When a new file appears it calls the BIMLog API endpoint POST /api/v1/projects/:projectId/files with the file name to validate it
+Shows a desktop notification — green if the file name is valid, red if it is rejected with the violation reason
+Logs every validation event to a local log file
+
+Use Electron with a simple HTML and vanilla JS interface. No React needed. Keep it dead simple. Do not touch the existing frontend, backend, or any other part of the monorepo. Only create the new artifacts/sync-agent folder and build inside it.
+Then confirm it compiles and runs without errors.

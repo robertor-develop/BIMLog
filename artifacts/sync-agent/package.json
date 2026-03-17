@@ -1,0 +1,19 @@
+{
+  "name": "bimlog-sync-agent",
+  "version": "1.0.0",
+  "description": "BIMLog Sync Agent — watches a folder and validates files against BIMLog naming conventions",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0"
+  },
+  "keywords": ["bimlog", "bim", "sync", "electron"],
+  "author": "IgniteSmart",
+  "license": "UNLICENSED"
+}

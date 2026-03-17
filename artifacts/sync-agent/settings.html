@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIMLog Sync Agent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #F8FAFC;
+      color: #1E293B;
+      font-size: 13px;
+    }
+
+    .header {
+      background: #1E293B;
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 30px; height: 30px;
+      background: #2563EB;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .header-text h1 { font-size: 14px; font-weight: 700; }
+    .header-text p  { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+
+    .status-bar {
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #E2E8F0;
+      background: #fff;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #CBD5E1;
+    }
+    .status-dot.active {
+      background: #22C55E;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+      50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0.05); }
+    }
+
+    .status-label { font-size: 11px; font-weight: 600; color: #64748B; }
+    .status-label.active { color: #16A34A; }
+
+    .content { padding: 16px 20px; }
+
+    .section { margin-bottom: 16px; }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 8px;
+    }
+
+    .field { margin-bottom: 10px; }
+
+    label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: #475569; margin-bottom: 4px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 7px 10px;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      font-size: 12px; color: #1E293B;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+    .folder-row { display: flex; gap: 6px; }
+    .folder-row input { flex: 1; }
+
+    button {
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: opacity 0.15s;
+    }
+    button:active { opacity: 0.8; }
+
+    .btn-primary { background: #2563EB; color: #fff; }
+    .btn-secondary { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .btn-danger   { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .btn-success  { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+
+    .btn-row {
+      display: flex; gap: 6px; margin-top: 4px;
+    }
+
+    .watch-toggle {
+      width: 100%; padding: 9px;
+      font-size: 12px; font-weight: 700;
+      border-radius: 8px; cursor: pointer; border: none;
+      transition: all 0.15s;
+    }
+    .watch-toggle.start { background: #2563EB; color: #fff; }
+    .watch-toggle.stop  { background: #DC2626; color: #fff; }
+
+    .divider { border: none; border-top: 1px solid #E2E8F0; margin: 12px 0; }
+
+    .log-container {
+      background: #0F172A;
+      border-radius: 8px;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .log-entry {
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+
+    .log-time { color: #64748B; flex-shrink: 0; }
+    .log-badge {
+      flex-shrink: 0; font-size: 9px; font-weight: 700;
+      padding: 0 5px; border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .log-badge.valid    { background: #166534; color: #BBF7D0; }
+    .log-badge.rejected { background: #7F1D1D; color: #FECACA; }
+    .log-badge.error    { background: #7C2D12; color: #FED7AA; }
+
+    .log-file { color: #94A3B8; }
+    .log-msg  { color: #CBD5E1; }
+
+    .log-empty { color: #475569; padding: 4px 0; }
+
+    .toast {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: #1E293B; color: #fff; padding: 8px 16px;
+      border-radius: 8px; font-size: 12px; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    .log-path-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 6px;
+    }
+    .log-path { font-size: 10px; color: #94A3B8; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">B</div>
+  <div class="header-text">
+    <h1>BIMLog Sync Agent</h1>
+    <p>Folder watcher &amp; naming validator · IgniteSmart</p>
+  </div>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <span class="status-label" id="statusLabel">Stopped</span>
+</div>
+
+<div class="content">
+
+  <div class="section">
+    <div class="section-label">Connection</div>
+    <div class="field">
+      <label>BIMLog API Token</label>
+      <input type="password" id="apiToken" placeholder="eyJhbGci..." autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Project ID</label>
+      <input type="text" id="projectId" placeholder="e.g. 1" />
+    </div>
+    <div class="field">
+      <label>BIMLog Base URL</label>
+      <input type="text" id="baseUrl" placeholder="https://bim-log-ignite.replit.app" />
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <div class="section-label">Watch Folder</div>
+    <div class="field">
+      <label>Folder path to watch</label>
+      <div class="folder-row">
+        <input type="text" id="watchFolder" placeholder="/Users/you/Desktop/BIMLog-Upload" />
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-bottom: 10px;">
+    <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+  </div>
+
+  <button class="watch-toggle start" id="watchToggle" onclick="toggleWatch()">
+    Start Watching
+  </button>
+
+  <hr class="divider" />
+
+  <div class="section-label">Validation Log</div>
+  <div class="log-container" id="logContainer">
+    <div class="log-empty">No events yet. Drop a file into your watch folder to begin.</div>
+  </div>
+  <div class="log-path-row">
+    <span class="log-path" id="logPath"></span>
+    <button class="btn-secondary" style="font-size:10px; padding: 3px 8px;" onclick="clearLogs()">Clear</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let isWatching = false;
+
+  function showToast(msg, duration) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), duration || 2200);
+  }
+
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour12: false });
+  }
+
+  function renderLogs(logs) {
+    const container = document.getElementById("logContainer");
+    if (!logs || logs.length === 0) {
+      container.innerHTML = '<div class="log-empty">No events yet. Drop a file into your watch folder to begin.</div>';
+      return;
+    }
+    container.innerHTML = logs.map(entry => `
+      <div class="log-entry">
+        <span class="log-time">${formatTime(entry.timestamp)}</span>
+        <span class="log-badge ${entry.status}">${entry.status}</span>
+        <span class="log-file">${entry.fileName}</span>
+        <span class="log-msg">— ${entry.message}</span>
+      </div>
+    `).join("");
+  }
+
+  function prependLog(entry) {
+    const container = document.getElementById("logContainer");
+    const empty = container.querySelector(".log-empty");
+    if (empty) container.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    div.innerHTML = `
+      <span class="log-time">${formatTime(entry.timestamp)}</span>
+      <span class="log-badge ${entry.status}">${entry.status}</span>
+      <span class="log-file">${entry.fileName}</span>
+      <span class="log-msg">— ${entry.message}</span>
+    `;
+    container.insertBefore(div, container.firstChild);
+  }
+
+  function updateStatusUI(watching) {
+    isWatching = watching;
+    const dot = document.getElementById("statusDot");
+    const label = document.getElementById("statusLabel");
+    const toggle = document.getElementById("watchToggle");
+    if (watching) {
+      dot.classList.add("active");
+      label.textContent = "Watching — active";
+      label.classList.add("active");
+      toggle.textContent = "Stop Watching";
+      toggle.className = "watch-toggle stop";
+    } else {
+      dot.classList.remove("active");
+      label.textContent = "Stopped";
+      label.classList.remove("active");
+      toggle.textContent = "Start Watching";
+      toggle.className = "watch-toggle start";
+    }
+  }
+
+  async function saveSettings() {
+    const settings = {
+      apiToken:    document.getElementById("apiToken").value.trim(),
+      projectId:   document.getElementById("projectId").value.trim(),
+      baseUrl:     document.getElementById("baseUrl").value.trim() || "https://bim-log-ignite.replit.app",
+      watchFolder: document.getElementById("watchFolder").value.trim(),
+    };
+    await window.bimlog.saveSettings(settings);
+    showToast("Settings saved.");
+  }
+
+  async function toggleWatch() {
+    if (!isWatching) {
+      await saveSettings();
+      const result = await window.bimlog.startWatching();
+      if (result.started) {
+        updateStatusUI(true);
+        showToast("Watching started.");
+      } else {
+        showToast("Error: " + (result.error || "Could not start."));
+      }
+    } else {
+      await window.bimlog.stopWatching();
+      updateStatusUI(false);
+      showToast("Watching stopped.");
+    }
+  }
+
+  async function clearLogs() {
+    renderLogs([]);
+  }
+
+  async function init() {
+    const settings = await window.bimlog.loadSettings();
+    document.getElementById("apiToken").value    = settings.apiToken    || "";
+    document.getElementById("projectId").value   = settings.projectId   || "";
+    document.getElementById("baseUrl").value     = settings.baseUrl     || "https://bim-log-ignite.replit.app";
+    document.getElementById("watchFolder").value = settings.watchFolder || "";
+
+    const status = await window.bimlog.getWatcherStatus();
+    updateStatusUI(status.isWatching);
+
+    const logs = await window.bimlog.getLogs();
+    renderLogs(logs);
+
+    const homeDir = settings.watchFolder || "~/";
+    document.getElementById("logPath").textContent = "Log: ~/bimlog-sync-agent.log";
+
+    window.bimlog.onLog((entry) => prependLog(entry));
+  }
+
+  init();
+</script>
+</body>
+</html>
