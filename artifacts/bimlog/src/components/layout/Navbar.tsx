@@ -9,6 +9,9 @@ export function Navbar() {
   const { user, logout } = useAuthStore();
   const [location] = useLocation();
   const isLanding = location === "/";
+  const isProjectPage = location.startsWith("/projects/");
+
+  if (isProjectPage) return null;
 
   return (
     <header className="topbar">
