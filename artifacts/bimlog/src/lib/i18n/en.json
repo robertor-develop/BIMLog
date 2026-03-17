@@ -21,8 +21,8 @@
   "auth.loginFailed": "Login failed. Please check your credentials.",
   "auth.registerFailed": "Registration failed. Please try again.",
 
-  "landing.hero.title": "Intelligent BIM Coordination & Accountability",
-  "landing.hero.subtitle": "The enterprise-grade platform for AEC professionals to manage files, RFIs, and naming conventions with uncompromising strictness.",
+  "landing.hero.title": "The accountability layer your construction projects are missing.",
+  "landing.hero.subtitle": "BIMLog connects to the tools your team already uses — Procore, OneDrive, Autodesk, MS Project and more. We don't store your files or replace your workflow. We add the one thing every platform is missing — enforcement, attribution, and accountability. Every file validated. Every deadline tracked. Every delay attributed. All automatically.",
   "landing.hero.cta": "Get Started",
   "landing.badge": "Enterprise AEC Software",
   "landing.features.title": "Built for Precision",

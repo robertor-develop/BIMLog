@@ -46,10 +46,10 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { value: "100%", label: "Server-side validation" },
-              { value: "0", label: "Audit log deletions allowed" },
-              { value: "50+", label: "Users per project" },
-              { value: "ISO 19650", label: "Standards aligned" },
+              { value: "Works with", label: "your existing tools" },
+              { value: "100%", label: "server-side validation" },
+              { value: "Real-time", label: "audit trail" },
+              { value: "ISO 19650", label: "standards aligned" },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="font-display text-2xl font-bold text-primary mb-1">{stat.value}</div>
