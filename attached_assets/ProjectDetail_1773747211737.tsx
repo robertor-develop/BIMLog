@@ -103,15 +103,15 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
-          {tab === "analytics"    && <AnalyticsTab     projectId={projectId} />}
-          {tab === "files"        && <FilesTab          projectId={projectId} canWrite={canWrite} />}
-          {tab === "rfis"         && <RfisTab           projectId={projectId} canWrite={canWrite} />}
-          {tab === "submittals"   && <SubmittalsTab     projectId={projectId} canWrite={canWrite} />}
-          {tab === "activity"     && <ActivityTab       projectId={projectId} />}
-          {tab === "team"         && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
-          {tab === "generator"    && <NameGenerator     projectId={projectId} />}
-          {tab === "convention"   && isAdmin && <ConventionBuilder projectId={projectId} />}
-          {tab === "integrations" && <IntegrationsTab   projectId={projectId} />}
+          {tab === "analytics"  && <AnalyticsTab   projectId={projectId} />}
+          {tab === "files"      && <FilesTab        projectId={projectId} canWrite={canWrite} />}
+          {tab === "rfis"       && <RfisTab         projectId={projectId} canWrite={canWrite} />}
+          {tab === "submittals" && <SubmittalsTab   projectId={projectId} canWrite={canWrite} />}
+          {tab === "activity"   && <ActivityTab     projectId={projectId} />}
+          {tab === "team"       && <TeamTab         projectId={projectId} isAdmin={isAdmin} />}
+          {tab === "generator"  && <NameGenerator   projectId={projectId} />}
+          {tab === "convention" && isAdmin && <ConventionBuilder projectId={projectId} />}
+          {tab === "integrations" && <IntegrationsTab projectId={projectId} />}
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ type TranslationKey = keyof typeof en;
 type I18nContextType = {
   lang: Language;
   setLang: (lang: Language) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
   t: (key: TranslationKey) => string;
 };
 
@@ -24,7 +26,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <I18nContext.Provider value={{ lang, setLang, t }}>
+    <I18nContext.Provider value={{ lang, setLang, language: lang, setLanguage: setLang, t }}>
       {children}
     </I18nContext.Provider>
   );
