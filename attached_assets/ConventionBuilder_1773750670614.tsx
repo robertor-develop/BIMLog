@@ -72,6 +72,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     setDirty(true);
   };
 
+  // Live preview of generated name
   const previewName = fields
     .map(f => {
       const vals = f.values.split(",").map(v => v.trim()).filter(Boolean);
