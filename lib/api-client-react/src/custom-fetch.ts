@@ -282,6 +282,20 @@ function getStoredToken(): string | null {
   return null;
 }
 
+function clearStoredToken(): void {
+  try {
+    const stored = localStorage.getItem("bimlog-auth");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.state) {
+        parsed.state.token = null;
+        parsed.state.user = null;
+        localStorage.setItem("bimlog-auth", JSON.stringify(parsed));
+      }
+    }
+  } catch {}
+}
+
 export async function customFetch<T = unknown>(
   input: RequestInfo | URL,
   options: CustomFetchOptions = {},
@@ -321,6 +335,12 @@ export async function customFetch<T = unknown>(
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
+    if (response.status === 401) {
+      clearStoredToken();
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
+    }
     throw new ApiError(response, errorData, requestInfo);
   }
 

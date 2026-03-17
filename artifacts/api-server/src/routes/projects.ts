@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { projectsTable, projectMembersTable, filesTable } from "@workspace/db/schema";
-import { eq, sql, count } from "drizzle-orm";
+import { eq, count, inArray } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
@@ -26,7 +26,7 @@ router.get("/projects", authMiddleware, async (req, res) => {
     const projects = await db
       .select()
       .from(projectsTable)
-      .where(sql`${projectsTable.id} IN ${projectIds}`);
+      .where(inArray(projectsTable.id, projectIds));
 
     const results = await Promise.all(
       projects.map(async (p) => {
