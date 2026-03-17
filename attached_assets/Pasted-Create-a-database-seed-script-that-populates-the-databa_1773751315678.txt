@@ -1,0 +1,78 @@
+Create a database seed script that populates the database with realistic sample data for testing. Create the file at scripts/src/seed.ts with the following:
+
+Create 2 companies: "BIMtech Corp" and "DDS Mechanical"
+Create 3 users:
+
+Roberto Rodriguez, email: roberto@bimtechcorp.com, password: Demo1234!, company: BIMtech Corp
+Maria Sanchez, email: maria@bimtechcorp.com, password: Demo1234!, company: BIMtech Corp
+Tom Davis, email: tom@ddsmechanical.com, password: Demo1234!, company: DDS Mechanical
+
+
+Create 1 project:
+
+Name: "270 Park Avenue"
+Code: NYC-270
+Description: "Full MEP coordination and BIM management for the new JPMorgan Chase HQ tower, New York"
+Status: active
+Created by: Roberto Rodriguez
+
+
+Add all 3 users as project members:
+
+Roberto Rodriguez: project_admin
+Maria Sanchez: drafter
+Tom Davis: drafter
+
+
+Create a naming convention for the project:
+
+Separator: "-"
+Active: true
+Fields in order:
+
+Field 1: "Project Code" — allowed values: NYC-270
+Field 2: "Originator" — allowed values: BTC, DDS, ACM, PCE
+Field 3: "Volume" — allowed values: ARC, STR, MEP, ELE, PLM, CIV
+Field 4: "Level" — allowed values: B1, G0, L1, L2, L3, L4, L5, RF, ZZ
+Field 5: "Type" — allowed values: M3, DR, SP, CA, RP, SH
+Field 6: "Role" — allowed values: A, S, M, E, P, X
+Field 7: "Sequence" — allowed values: 0001, 0002, 0003, 0004, 0005, 0006, 0007, 0008, 0009, 0010
+Field 8: "Status" — allowed values: S0, S1, S2, S3, S4, S5, S6
+
+
+
+
+Create 8 files — mix of valid and rejected:
+
+NYC-270-BTC-ARC-L3-M3-A-0001-S3.rvt — uploaded by Maria, status: active
+NYC-270-BTC-MEP-ZZ-M3-X-0001-S2.nwd — uploaded by Maria, status: active
+NYC-270-BTC-STR-L1-DR-S-0001-S3.pdf — uploaded by Roberto, status: active
+NYC-270-DDS-MEP-L3-DR-M-0001-S1.dwg — uploaded by Tom, status: active
+NYC-270-DDS-MEP-L4-DR-M-0002-S1.dwg — uploaded by Tom, status: active
+MEP_floor3_FINAL_v2.dwg — uploaded by Tom, status: rejected
+coordination_composite_March.nwd — uploaded by Tom, status: rejected
+Structure_Level1_latest.rvt — uploaded by Maria, status: active
+
+
+Create activity log entries for each file upload and the 2 rejections
+Create 4 RFIs:
+
+"Structural penetration clearance L3" — created by Tom, priority: high, status: open
+"MEP chase dimensions Level 4" — created by Tom, priority: medium, status: in_review
+"Curtain wall anchor detail grid B" — created by Maria, priority: low, status: responded
+"Plumbing stack routing basement" — created by Roberto, priority: medium, status: closed
+
+
+Create 3 submittals:
+
+"Mechanical ductwork shop drawings L3" — submitted by Tom, type: shop_drawing, status: under_review
+"Structural steel connection details" — submitted by Maria, type: shop_drawing, status: approved
+"MEP coordination composite model" — submitted by Roberto, type: product_data, status: pending
+
+
+
+After writing the seed script, add a script entry to scripts/package.json:
+json"seed": "tsx src/seed.ts"
+Then run the seed script with:
+bashpnpm --filter @workspace/scripts run seed
+Confirm how many records were created and that it ran without errors.
