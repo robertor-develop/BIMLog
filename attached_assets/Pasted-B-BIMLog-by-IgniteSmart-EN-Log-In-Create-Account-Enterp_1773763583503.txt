@@ -1,0 +1,98 @@
+B
+BIMLog
+by IgniteSmart
+EN
+Log In
+Create Account
+Enterprise AEC Software
+Intelligent BIM Coordination & Accountability
+The enterprise-grade platform for AEC professionals to manage files, RFIs, and naming conventions with uncompromising strictness.
+
+Get Started
+Log In
+100%
+Server-side validation
+0
+Audit log deletions allowed
+50+
+Users per project
+ISO 19650
+Standards aligned
+Built for precision. Designed for teams.
+Every feature in BIMLog exists to eliminate coordination failures and establish clear accountability.
+
+Strict Naming Conventions
+Enforce exact file naming rules. Uploads fail if they don't match.
+
+Immutable Audit Trail
+Every action is logged. No deletes. Total accountability.
+
+RFI & Submittals
+Track the complete lifecycle of project documentation.
+
+Role-Based Security
+Granular permissions ensuring the right access for every team member.
+
+Getting Started
+Up and running in 6 steps
+From account creation to fully coordinated BIM project — here's the complete workflow.
+
+01
+Create your account
+Register with your name, email, and company. Your account is immediately ready — no email confirmation required.
+
+Use your company email
+Company name appears in reports
+02
+Create a project
+Click '+ New Project' on the dashboard. Give it a name and a short code (e.g. NYC-270). You are automatically assigned Project Admin.
+
+Code must be uppercase alphanumeric
+Invite team from the Team tab
+03
+Define naming conventions
+Go to Convention Builder (admin only). Add fields like Originator, Discipline, Phase. Activate when ready — all uploads validate against it instantly.
+
+Set allowed values per field
+Activate/deactivate without deleting
+04
+Upload & validate files
+Open the Files tab and upload BIM files. The server validates the filename against the active convention. Non-compliant files are rejected with field-level errors.
+
+Use Name Generator for compliant names
+See exact field violations on rejection
+05
+Manage RFIs & Submittals
+Create and track Requests for Information and Submittals from their dedicated tabs. Assign status, reference files, and keep the full coordination trail.
+
+Status follows ISO 19650 workflow
+All changes logged automatically
+06
+Monitor & report
+Use the Analytics dashboard for a live overview of files, RFIs, and team activity. The Activity Log is immutable — every action is permanently recorded.
+
+Activity log cannot be deleted
+Switch language EN / ES anytime
+Ready to start?
+Create an account and build your first project in under 2 minutes.
+Sign In
+Create Account
+Zero tolerance for naming chaos.
+BIMLog enforces your naming conventions at the server — not just the client. Every upload is validated against the active convention. Non-compliant files are rejected with detailed feedback.
+
+422 response on convention mismatch
+Field-level error messages
+Dropdown-only Name Generator
+Immutable activity log
+HTTP 422 — Naming Violation
+originator received "XYZ"
+allowed: ABCDEFGHI
+discipline received "AR"
+allowed: ARCSTRMEP
+Ready to bring order to your BIM workflow?
+Join teams using BIMLog to enforce standards and maintain accountability across every project.
+
+Start for free
+BIMLog
+by IgniteSmart
+ignitesmart.ai · bimtechcorp.com

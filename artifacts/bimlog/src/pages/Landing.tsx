@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2 } from "lucide-react";
+import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2 } from "lucide-react";
 
 export function Landing() {
   const { t } = useI18n();
@@ -96,6 +96,119 @@ export function Landing() {
             desc={t('landing.features.rbacDesc')}
             color="purple"
           />
+        </div>
+      </section>
+
+      {/* User Guide — How It Works */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-primary text-sm font-medium rounded-full px-4 py-1.5 mb-6">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            Getting Started
+          </div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Up and running in 6 steps
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            From account creation to fully coordinated BIM project — here's the complete workflow.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            {
+              step: "01",
+              icon: <UserPlus className="w-5 h-5 text-blue-600" />,
+              color: "bg-blue-50 border-blue-100",
+              title: "Create your account",
+              desc: "Register with your name, email, and company. Your account is immediately ready — no email confirmation required.",
+              tips: ["Use your company email", "Company name appears in reports"],
+            },
+            {
+              step: "02",
+              icon: <FolderPlus className="w-5 h-5 text-violet-600" />,
+              color: "bg-violet-50 border-violet-100",
+              title: "Create a project",
+              desc: "Click '+ New Project' on the dashboard. Give it a name and a short code (e.g. NYC-270). You are automatically assigned Project Admin.",
+              tips: ["Code must be uppercase alphanumeric", "Invite team from the Team tab"],
+            },
+            {
+              step: "03",
+              icon: <Settings2 className="w-5 h-5 text-orange-600" />,
+              color: "bg-orange-50 border-orange-100",
+              title: "Define naming conventions",
+              desc: "Go to Convention Builder (admin only). Add fields like Originator, Discipline, Phase. Activate when ready — all uploads validate against it instantly.",
+              tips: ["Set allowed values per field", "Activate/deactivate without deleting"],
+            },
+            {
+              step: "04",
+              icon: <Upload className="w-5 h-5 text-emerald-600" />,
+              color: "bg-emerald-50 border-emerald-100",
+              title: "Upload & validate files",
+              desc: "Open the Files tab and upload BIM files. The server validates the filename against the active convention. Non-compliant files are rejected with field-level errors.",
+              tips: ["Use Name Generator for compliant names", "See exact field violations on rejection"],
+            },
+            {
+              step: "05",
+              icon: <MessageSquare className="w-5 h-5 text-red-500" />,
+              color: "bg-red-50 border-red-100",
+              title: "Manage RFIs & Submittals",
+              desc: "Create and track Requests for Information and Submittals from their dedicated tabs. Assign status, reference files, and keep the full coordination trail.",
+              tips: ["Status follows ISO 19650 workflow", "All changes logged automatically"],
+            },
+            {
+              step: "06",
+              icon: <BarChart2 className="w-5 h-5 text-primary" />,
+              color: "bg-blue-50 border-blue-100",
+              title: "Monitor & report",
+              desc: "Use the Analytics dashboard for a live overview of files, RFIs, and team activity. The Activity Log is immutable — every action is permanently recorded.",
+              tips: ["Activity log cannot be deleted", "Switch language EN / ES anytime"],
+            },
+          ].map((item) => (
+            <div key={item.step} className="card p-6 relative">
+              <div style={{
+                position: "absolute", top: 20, right: 20,
+                fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
+                color: "hsl(var(--muted-foreground))", opacity: 0.4,
+                letterSpacing: "0.05em"
+              }}>{item.step}</div>
+
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 border ${item.color}`}>
+                {item.icon}
+              </div>
+
+              <h3 className="font-display font-semibold text-foreground mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
+
+              <ul className="space-y-1.5">
+                {item.tips.map(tip => (
+                  <li key={tip} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick-start CTA strip */}
+        <div className="mt-12 surface rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <div className="font-display font-bold text-foreground text-lg mb-1">Ready to start?</div>
+            <div className="text-sm text-muted-foreground">Create an account and build your first project in under 2 minutes.</div>
+          </div>
+          <div className="flex gap-3 flex-shrink-0">
+            <Link href="/login">
+              <Button variant="outline" className="text-sm px-5">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button className="gap-2 text-sm px-5">
+                Create Account
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
