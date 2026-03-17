@@ -6,12 +6,23 @@ import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Settings2, Plus, Trash2, GripVertical, AlertTriangle, CheckCircle2, Eye } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, CheckCircle2, Eye } from "lucide-react";
 
 interface Field { label: string; values: string; }
 
+const CHIP_COLORS = [
+  { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE" },
+  { bg: "#F0FDF4", color: "#166534", border: "#BBF7D0" },
+  { bg: "#FFF7ED", color: "#9A3412", border: "#FED7AA" },
+  { bg: "#FEF9C3", color: "#854D0E", border: "#FDE68A" },
+  { bg: "#F5F3FF", color: "#5B21B6", border: "#DDD6FE" },
+  { bg: "#FCE7F3", color: "#9D174D", border: "#FBCFE8" },
+  { bg: "#ECFDF5", color: "#065F46", border: "#A7F3D0" },
+  { bg: "#FEF2F2", color: "#991B1B", border: "#FECACA" },
+];
+
 export function ConventionBuilder({ projectId }: { projectId: number }) {
-  const { t, lang } = useI18n();
+  const { lang } = useI18n();
   const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const separatorOptions = getOptions("separator");
@@ -20,9 +31,9 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const { data: convention, isLoading } = useGetConvention(projectId);
 
   const [separator, setSeparator] = useState(separatorOptions[0]?.value ?? "-");
-  const [isActive, setIsActive]   = useState(true);
-  const [fields, setFields]       = useState<Field[]>([]);
-  const [dirty, setDirty]         = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [fields, setFields] = useState<Field[]>([]);
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     if (convention) {
@@ -44,7 +55,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         toast({ title: "Convention saved — validation rules updated immediately" });
         setDirty(false);
       },
-      onError: () => toast({ title: t("common.error"), variant: "destructive" }),
+      onError: () => toast({ title: "Error saving convention", variant: "destructive" }),
     },
   });
 
@@ -72,12 +83,24 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     setDirty(true);
   };
 
-  const previewName = fields
-    .map(f => {
-      const vals = f.values.split(",").map(v => v.trim()).filter(Boolean);
-      return vals[0] || f.label.toUpperCase().replace(/\s+/g, "").slice(0, 4);
-    })
-    .join(separator);
+  const handleDiscard = () => {
+    if (convention) {
+      setSeparator(convention.separator);
+      setIsActive(convention.isActive);
+      setFields(
+        [...convention.fields]
+          .sort((a, b) => a.fieldOrder - b.fieldOrder)
+          .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
+      );
+      setDirty(false);
+    }
+  };
+
+  const previewTokens = fields.map(f => {
+    const vals = f.values.split(",").map(v => v.trim()).filter(Boolean);
+    return vals[0] || f.label.toUpperCase().replace(/\s+/g, "").slice(0, 4);
+  });
+  const previewName = previewTokens.join(separator);
 
   if (isLoading) {
     return (
@@ -90,20 +113,22 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   return (
     <div>
       {/* Header */}
-      <div className="section-header" style={{ marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Settings2 style={{ width: 16, height: 16, color: "#2563EB" }} />
-            <div className="section-title" style={{ fontSize: 16 }}>{t("convention.title")}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 2 }}>
+            Naming Convention Builder
           </div>
-          <div className="section-sub" style={{ marginTop: 3 }}>{t("convention.desc")}</div>
+          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+            Define the naming structure enforced on every uploaded file
+          </div>
         </div>
         {dirty && (
           <span style={{
             fontSize: 11, fontWeight: 600,
             background: "#FFFBEB", color: "#B45309",
             border: "1px solid #FDE68A",
-            padding: "4px 10px", borderRadius: 5
+            padding: "5px 11px", borderRadius: 6,
+            flexShrink: 0,
           }}>
             Unsaved changes
           </span>
@@ -111,230 +136,290 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       </div>
 
       {/* Settings row */}
-      <div className="card-padded" style={{ marginBottom: 14 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 20, alignItems: "start" }}>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              {t("convention.separator")}
-            </label>
-            <select
-              value={separator}
-              onChange={e => { setSeparator(e.target.value); setDirty(true); }}
-              style={{ width: "100%", height: 36 }}
-            >
-              {separatorOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {lang === "es" ? opt.labelEs : opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div style={{
+        padding: "14px 16px", marginBottom: 14,
+        background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+        borderRadius: 8,
+        display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <label style={{
+            fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))",
+            textTransform: "uppercase", letterSpacing: "0.07em",
+          }}>
+            Separator
+          </label>
+          <select
+            value={separator}
+            onChange={e => { setSeparator(e.target.value); setDirty(true); }}
+            style={{ height: 34, fontSize: 13, minWidth: 160 }}
+          >
+            {separatorOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {lang === "es" ? opt.labelEs : opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          <div style={{ paddingTop: 26, display: "flex", alignItems: "center", gap: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={e => { setIsActive(e.target.checked); setDirty(true); }}
-                style={{ width: 16, height: 16, accentColor: "#2563EB", cursor: "pointer" }}
-              />
-              <span style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--foreground))" }}>
-                {t("convention.active")}
-              </span>
-            </label>
-            {isActive ? (
-              <span className="badge badge-green" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <CheckCircle2 style={{ width: 10, height: 10 }} />
-                Enforcing uploads
-              </span>
-            ) : (
-              <span className="badge badge-gray">Not enforcing</span>
-            )}
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={e => { setIsActive(e.target.checked); setDirty(true); }}
+              style={{ width: 15, height: 15, accentColor: "#2563EB", cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--foreground))" }}>
+              Active convention
+            </span>
+          </label>
+          {isActive ? (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 11, fontWeight: 600,
+              background: "#F0FDF4", color: "#166534",
+              border: "1px solid #BBF7D0",
+              padding: "3px 9px", borderRadius: 5,
+            }}>
+              <CheckCircle2 style={{ width: 10, height: 10 }} />
+              Enforcing uploads
+            </span>
+          ) : (
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              background: "hsl(var(--secondary))", color: "hsl(var(--muted-foreground))",
+              border: "1px solid hsl(var(--border))",
+              padding: "3px 9px", borderRadius: 5,
+            }}>
+              Not enforcing
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Live preview */}
+      {/* LIVE PREVIEW */}
       {fields.length > 0 && (
         <div style={{
-          marginBottom: 14, padding: "12px 16px",
+          marginBottom: 16, padding: "16px 20px",
           background: "#F0F7FF", border: "1px solid #BFDBFE",
-          borderRadius: 8
+          borderRadius: 8,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 11, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6, marginBottom: 12,
+            fontSize: 10, fontWeight: 700, color: "#1D4ED8",
+            textTransform: "uppercase", letterSpacing: "0.08em",
+          }}>
             <Eye style={{ width: 12, height: 12 }} />
             Live preview
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, marginBottom: 8 }}>
-            {fields.map((f, i) => {
-              const firstVal = f.values.split(",")[0]?.trim() || f.label.toUpperCase().replace(/\s+/g, "").slice(0, 4);
+
+          {/* Colored token chips */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3, marginBottom: 12 }}>
+            {previewTokens.map((tok, i) => {
+              const c = CHIP_COLORS[i % CHIP_COLORS.length];
               return (
-                <span key={i}>
-                  <span className="name-tag name-tag-valid" style={{ fontSize: 12 }}>{firstVal}</span>
-                  {i < fields.length - 1 && (
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "#1D4ED8", margin: "0 1px" }}>{separator}</span>
+                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600,
+                    background: c.bg, color: c.color, border: `1px solid ${c.border}`,
+                    padding: "3px 8px", borderRadius: 4,
+                  }}>
+                    {tok}
+                  </span>
+                  {i < previewTokens.length - 1 && (
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "#1D4ED8", fontWeight: 700 }}>
+                      {separator}
+                    </span>
                   )}
                 </span>
               );
             })}
           </div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600, color: "#1D4ED8" }}>
+
+          {/* Large monospace assembled name */}
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 20, fontWeight: 700,
+            color: "#0F1623", letterSpacing: "0.01em", wordBreak: "break-all",
+            lineHeight: 1.3, marginBottom: 10,
+          }}>
             {previewName}
           </div>
-          <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
-            {fields.map((f, i) => (
-              <span key={i} style={{ fontSize: 10, color: "#374151" }}>
-                <span style={{ color: "#6B7280" }}>Field {i + 1}:</span> {f.label}
-                {i < fields.length - 1 && <span style={{ color: "#BFDBFE" }}> · </span>}
-              </span>
-            ))}
+
+          {/* Field legend */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {fields.map((f, i) => {
+              const c = CHIP_COLORS[i % CHIP_COLORS.length];
+              return (
+                <span key={i} style={{ fontSize: 10, color: "#374151", display: "flex", alignItems: "center", gap: 3 }}>
+                  <span style={{
+                    width: 14, height: 14, borderRadius: 3,
+                    background: c.bg, border: `1px solid ${c.border}`,
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 8, fontWeight: 700, color: c.color, fontFamily: "var(--font-mono)",
+                  }}>
+                    {i + 1}
+                  </span>
+                  {f.label}
+                  {i < fields.length - 1 && <span style={{ color: "#BFDBFE", marginLeft: 3 }}>·</span>}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Fields section */}
-      <div style={{ marginBottom: 14 }}>
-        <div className="section-header" style={{ marginBottom: 10 }}>
+      {/* Naming Fields section */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10,
+        }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}>
-            {t("convention.fields")}
-            <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", fontWeight: 400, marginLeft: 6 }}>
+            Naming Fields{" "}
+            <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>
               {fields.length} field{fields.length !== 1 ? "s" : ""} defined
             </span>
           </div>
           <Button variant="outline" size="sm" onClick={addField} style={{ gap: 5, fontSize: 12 }}>
             <Plus style={{ width: 12, height: 12 }} />
-            {t("convention.addField")}
+            Add Field
           </Button>
         </div>
 
         {fields.length === 0 ? (
-          <div className="empty-state" style={{ padding: "32px 24px" }}>
-            <div className="empty-icon">
-              <Settings2 style={{ width: 20, height: 20, color: "hsl(var(--muted-foreground))" }} />
+          <div style={{
+            padding: "32px 24px", textAlign: "center",
+            background: "hsl(var(--secondary))",
+            border: "2px dashed hsl(var(--border))",
+            borderRadius: 8,
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 4 }}>
+              No fields defined yet
             </div>
-            <div className="empty-title" style={{ fontSize: 13 }}>{t("convention.noFields")}</div>
-            <div className="empty-desc">
+            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
               Add fields to define the structure every file name must follow. Each field can have a list of allowed values.
             </div>
-            <Button variant="outline" size="sm" onClick={addField} style={{ marginTop: 12, gap: 5, fontSize: 12 }}>
+            <Button variant="outline" size="sm" onClick={addField} style={{ gap: 5, fontSize: 12 }}>
               <Plus style={{ width: 12, height: 12 }} />
               Add first field
             </Button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {/* Column labels */}
-            <div style={{ display: "grid", gridTemplateColumns: "32px 40px 1fr 2fr 32px", gap: 8, paddingLeft: 2, paddingRight: 2 }}>
-              <div />
+            {/* Column headers */}
+            <div style={{
+              display: "grid", gridTemplateColumns: "36px 1fr 2fr 32px",
+              gap: 8, paddingLeft: 4, paddingRight: 4,
+            }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>#</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t("convention.fieldLabel")}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t("convention.allowedValues")}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>Field Label</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>Allowed Values (comma-separated)</div>
               <div />
             </div>
 
-            {fields.map((field, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: "grid", gridTemplateColumns: "32px 40px 1fr 2fr 32px",
-                  gap: 8, alignItems: "center",
-                  padding: "10px 10px",
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 8,
-                }}
-              >
-                {/* Drag handle */}
-                <div style={{ color: "hsl(var(--muted-foreground))", cursor: "grab", display: "flex", justifyContent: "center" }}>
-                  <GripVertical style={{ width: 14, height: 14 }} />
-                </div>
+            {fields.map((field, idx) => {
+              const c = CHIP_COLORS[idx % CHIP_COLORS.length];
+              const chips = field.values.split(",").map(v => v.trim()).filter(Boolean);
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    padding: "12px 12px 10px 12px",
+                  }}
+                >
+                  <div style={{
+                    display: "grid", gridTemplateColumns: "36px 1fr 2fr 32px",
+                    gap: 8, alignItems: "start",
+                  }}>
+                    {/* Position badge */}
+                    <div style={{ paddingTop: 6 }}>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 26, height: 26, borderRadius: 6,
+                        background: c.bg, color: c.color, border: `1px solid ${c.border}`,
+                        fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono)",
+                      }}>
+                        {idx + 1}
+                      </span>
+                    </div>
 
-                {/* Position badge */}
-                <div style={{
-                  width: 26, height: 26, borderRadius: 6,
-                  background: "#EFF6FF", color: "#1D4ED8",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono)"
-                }}>
-                  {idx + 1}
-                </div>
+                    {/* Label input */}
+                    <Input
+                      value={field.label}
+                      onChange={e => updateField(idx, "label", e.target.value)}
+                      placeholder="e.g. Project Code"
+                      style={{ fontSize: 13 }}
+                    />
 
-                {/* Label input */}
-                <Input
-                  value={field.label}
-                  onChange={e => updateField(idx, "label", e.target.value)}
-                  placeholder="e.g. Project Code"
-                  style={{ fontSize: 13 }}
-                />
-
-                {/* Values input */}
-                <div style={{ position: "relative" }}>
-                  <Input
-                    value={field.values}
-                    onChange={e => updateField(idx, "values", e.target.value)}
-                    placeholder="e.g. PROJ01, PROJ02, PROJ03"
-                    style={{ fontSize: 12, fontFamily: "var(--font-mono)" }}
-                  />
-                  {field.values && (
-                    <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 3 }}>
-                      {field.values.split(",").map(v => v.trim()).filter(Boolean).slice(0, 8).map((v, i) => (
-                        <span key={i} style={{
-                          fontFamily: "var(--font-mono)", fontSize: 10,
-                          background: "#EFF6FF", color: "#1D4ED8",
-                          border: "1px solid #BFDBFE",
-                          padding: "1px 5px", borderRadius: 3
-                        }}>{v}</span>
-                      ))}
-                      {field.values.split(",").filter(v => v.trim()).length > 8 && (
-                        <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                          +{field.values.split(",").filter(v => v.trim()).length - 8} more
-                        </span>
+                    {/* Values input + chips */}
+                    <div>
+                      <Input
+                        value={field.values}
+                        onChange={e => updateField(idx, "values", e.target.value)}
+                        placeholder="e.g. PROJ01, PROJ02, PROJ03"
+                        style={{ fontSize: 12, fontFamily: "var(--font-mono)" }}
+                      />
+                      {chips.length > 0 && (
+                        <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 3 }}>
+                          {chips.slice(0, 10).map((v, i) => (
+                            <span key={i} style={{
+                              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
+                              background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE",
+                              padding: "1px 6px", borderRadius: 3,
+                            }}>
+                              {v}
+                            </span>
+                          ))}
+                          {chips.length > 10 && (
+                            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                              +{chips.length - 10} more
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
 
-                {/* Remove */}
-                <button
-                  onClick={() => removeField(idx)}
-                  style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
-                >
-                  <Trash2 style={{ width: 13, height: 13 }} />
-                </button>
-              </div>
-            ))}
+                    {/* Remove */}
+                    <div style={{ paddingTop: 4 }}>
+                      <button
+                        onClick={() => removeField(idx)}
+                        style={{
+                          padding: 5, border: "none", background: "transparent",
+                          cursor: "pointer", color: "hsl(var(--muted-foreground))",
+                          borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
+                      >
+                        <Trash2 style={{ width: 13, height: 13 }} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Footer */}
+      {/* Footer actions */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        paddingTop: 14, borderTop: "1px solid hsl(var(--border))"
+        paddingTop: 14, borderTop: "1px solid hsl(var(--border))",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#B45309" }}>
           <AlertTriangle style={{ width: 13, height: 13 }} />
-          {t("convention.changesWarning")}
+          Changes take effect immediately on all new uploads
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {dirty && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                if (convention) {
-                  setSeparator(convention.separator);
-                  setIsActive(convention.isActive);
-                  setFields(
-                    [...convention.fields]
-                      .sort((a, b) => a.fieldOrder - b.fieldOrder)
-                      .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
-                  );
-                  setDirty(false);
-                }
-              }}
+              onClick={handleDiscard}
               style={{ fontSize: 12 }}
             >
               Discard changes
@@ -345,7 +430,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
             disabled={isPending || fields.length === 0}
             style={{ gap: 6, fontSize: 12 }}
           >
-            {isPending ? "Saving..." : t("convention.save")}
+            {isPending ? "Saving…" : "Save Convention"}
           </Button>
         </div>
       </div>
