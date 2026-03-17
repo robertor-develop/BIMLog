@@ -23,6 +23,7 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
   const { data: members, isLoading } = useListMembers(projectId);
   const [showAdd, setShowAdd] = useState(false);
 
+  // Group members by company
   const byCompany = (members ?? []).reduce<Record<string, typeof members>>((acc, m) => {
     const co = m.userCompanyName || "Unknown";
     if (!acc[co]) acc[co] = [];
@@ -88,7 +89,7 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
                 </span>
               </div>
 
-              {/* Member table */}
+              {/* Member cards */}
               <div className="table-card">
                 <table className="data-table">
                   <thead>
