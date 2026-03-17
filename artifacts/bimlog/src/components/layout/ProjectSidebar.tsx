@@ -135,14 +135,9 @@ export function ProjectSidebar({
                 padding: 0,
               }}
             >
-              <div className={`sidebar-status-dot dot-${int.status}`} />
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6B7280", flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{int.name}</span>
-              <span style={{
-                fontSize: 9, fontWeight: 700,
-                color: int.status === "live" ? "#4ADE80" : int.status === "sync" ? "#FCD34D" : "#9CA3AF"
-              }}>
-                {int.status === "live" ? "LIVE" : int.status === "sync" ? "SYNC" : "IDLE"}
-              </span>
+              <span style={{ fontSize: 9, fontWeight: 600, color: "#6B7280" }}>Connect</span>
             </button>
           ))}
         </div>

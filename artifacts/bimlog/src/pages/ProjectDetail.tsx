@@ -13,7 +13,7 @@ import { ConventionBuilder } from "./project/ConventionBuilder";
 import { NameGenerator } from "./project/NameGenerator";
 import { AnalyticsTab } from "./project/AnalyticsTab";
 import { IntegrationsTab } from "./project/IntegrationsTab";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ProjectDetail() {
@@ -93,6 +93,20 @@ export function ProjectDetail() {
               border: "1px solid rgba(245,158,11,0.25)",
               padding: "3px 10px", borderRadius: 5
             }}>{project.code}</span>
+            <Link href="/setup-guide">
+              <button style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "5px 10px", borderRadius: 6,
+                fontSize: 11, fontWeight: 600,
+                color: "hsl(var(--muted-foreground))",
+                background: "hsl(var(--secondary))",
+                border: "1px solid hsl(var(--border))",
+                cursor: "pointer",
+              }}>
+                <HelpCircle style={{ width: 13, height: 13 }} />
+                Help
+              </button>
+            </Link>
             {canWrite && (
               <Link href={`/projects/${projectId}/files`}>
                 <Button size="sm" style={{ fontSize: 12 }}>+ Upload File</Button>

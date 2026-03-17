@@ -1,4 +1,5 @@
-import { X, Download, Users, Monitor, Lock } from "lucide-react";
+import { useState } from "react";
+import { X, Download, Users, Monitor, Lock, Mail, Phone, MessageCircle, ChevronLeft } from "lucide-react";
 
 export interface IntegrationInfo {
   name: string;
@@ -7,49 +8,409 @@ export interface IntegrationInfo {
   logoText: string;
 }
 
+type SubScreen = null | "managed-form" | "sync-agent" | "oauth-contact";
+
+function ManagedForm({ integration, onBack }: { integration: IntegrationInfo; onBack: () => void }) {
+  const [mode, setMode] = useState<"token" | "credentials">("token");
+  const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleSubmit() {
+    const subject = encodeURIComponent(`BIMLog Managed Connection Request — ${integration.name}`);
+    const body = mode === "token"
+      ? encodeURIComponent(`Platform: ${integration.name}\nAPI Token: ${token}`)
+      : encodeURIComponent(`Platform: ${integration.name}\nUsername: ${username}\nPassword: ${password}`);
+    window.location.href = `mailto:info@ignitesmart.ai?subject=${subject}&body=${body}`;
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "7px 10px",
+    border: "1px solid hsl(var(--border))", borderRadius: 6,
+    fontSize: 12, color: "hsl(var(--foreground))",
+    background: "hsl(var(--background))", outline: "none",
+    fontFamily: "inherit",
+  };
+
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        style={{
+          display: "flex", alignItems: "center", gap: 5,
+          fontSize: 11, color: "hsl(var(--muted-foreground))",
+          background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0,
+        }}
+      >
+        <ChevronLeft style={{ width: 13, height: 13 }} />
+        Back
+      </button>
+
+      <div style={{ fontSize: 13, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4, fontFamily: "var(--font-display)" }}>
+        Managed Connection — {integration.name}
+      </div>
+      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 16, lineHeight: 1.5 }}>
+        Our team will configure everything on your behalf. Enter your credentials below.
+      </div>
+
+      {/* Mode toggle */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {(["token", "credentials"] as const).map(m => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            style={{
+              padding: "5px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+              cursor: "pointer",
+              background: mode === m ? "#EFF6FF" : "hsl(var(--secondary))",
+              border: mode === m ? "1px solid #BFDBFE" : "1px solid hsl(var(--border))",
+              color: mode === m ? "#1D4ED8" : "hsl(var(--muted-foreground))",
+            }}
+          >
+            {m === "token" ? "API Token" : "Username & Password"}
+          </button>
+        ))}
+      </div>
+
+      {mode === "token" ? (
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>
+            API Token
+          </label>
+          <input
+            type="password"
+            value={token}
+            onChange={e => setToken(e.target.value)}
+            placeholder="Paste your API token"
+            style={inputStyle}
+            autoComplete="off"
+          />
+        </div>
+      ) : (
+        <>
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>
+              Username
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Your username or email"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Your password"
+              style={inputStyle}
+              autoComplete="new-password"
+            />
+          </div>
+        </>
+      )}
+
+      <div style={{
+        padding: "10px 12px", borderRadius: 7,
+        background: "#F0FDF4", border: "1px solid #BBF7D0",
+        fontSize: 11, color: "#15803D", lineHeight: 1.5, marginBottom: 14,
+      }}>
+        Your credentials are encrypted and used only to configure your connection. You can revoke access at any time.
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        style={{
+          width: "100%", padding: "9px", borderRadius: 7,
+          fontSize: 12, fontWeight: 700, cursor: "pointer",
+          background: "#16A34A", color: "#fff", border: "none",
+        }}
+      >
+        Submit
+      </button>
+    </div>
+  );
+}
+
+function SyncAgentScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        style={{
+          display: "flex", alignItems: "center", gap: 5,
+          fontSize: 11, color: "hsl(var(--muted-foreground))",
+          background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0,
+        }}
+      >
+        <ChevronLeft style={{ width: 13, height: 13 }} />
+        Back
+      </button>
+
+      <div style={{ fontSize: 13, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4, fontFamily: "var(--font-display)" }}>
+        BIMLog Sync Agent — Setup
+      </div>
+      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 16, lineHeight: 1.5 }}>
+        A lightweight desktop app that watches a folder and validates files automatically.
+      </div>
+
+      {[
+        {
+          num: 1,
+          title: "Download the BIMLog Sync Agent installer for your operating system.",
+          extra: (
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <a
+                href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Download%20Request&body=Please%20send%20me%20the%20Windows%20installer."
+                style={{
+                  padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                  background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE",
+                  textDecoration: "none", display: "inline-block",
+                }}
+              >
+                Download for Windows
+              </a>
+              <a
+                href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Download%20Request&body=Please%20send%20me%20the%20Mac%20installer."
+                style={{
+                  padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                  background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE",
+                  textDecoration: "none", display: "inline-block",
+                }}
+              >
+                Download for Mac
+              </a>
+            </div>
+          ),
+        },
+        { num: 2, title: "Install the app and open it.", extra: null },
+        { num: 3, title: "Enter your BIMLog API token and select the folder you want to watch.", extra: null },
+        { num: 4, title: "Drop any file in the folder and BIMLog validates and routes it automatically.", extra: null },
+      ].map(step => (
+        <div key={step.num} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+          <div style={{
+            width: 24, height: 24, borderRadius: "50%",
+            background: "#F5F3FF", color: "#7C3AED",
+            fontSize: 11, fontWeight: 800,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, marginTop: 1,
+          }}>
+            {step.num}
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", lineHeight: 1.5 }}>
+              Step {step.num} — {step.title}
+            </div>
+            {step.extra}
+          </div>
+        </div>
+      ))}
+
+      <div style={{
+        marginTop: 4, padding: "10px 12px", borderRadius: 7,
+        background: "#F5F3FF", border: "1px solid #DDD6FE",
+        fontSize: 11, color: "#6D28D9", lineHeight: 1.5,
+      }}>
+        Need help setting up? Contact us at{" "}
+        <a href="mailto:info@ignitesmart.ai" style={{ color: "#7C3AED", fontWeight: 600 }}>
+          info@ignitesmart.ai
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function OAuthContactScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <div>
+      <button
+        onClick={onBack}
+        style={{
+          display: "flex", alignItems: "center", gap: 5,
+          fontSize: 11, color: "hsl(var(--muted-foreground))",
+          background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0,
+        }}
+      >
+        <ChevronLeft style={{ width: 13, height: 13 }} />
+        Back
+      </button>
+
+      <div style={{ fontSize: 13, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4, fontFamily: "var(--font-display)" }}>
+        OAuth Connection — Contact Us
+      </div>
+      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 16, lineHeight: 1.5 }}>
+        Our team will set up your secure OAuth connection. Choose how you'd like to reach us.
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <a
+          href="mailto:info@ignitesmart.ai"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 16px", borderRadius: 8,
+            background: "#EFF6FF", border: "1px solid #BFDBFE",
+            textDecoration: "none",
+          }}
+        >
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: "#DBEAFE", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Mail style={{ width: 15, height: 15, color: "#1D4ED8" }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1D4ED8" }}>Email us</div>
+            <div style={{ fontSize: 11, color: "#2563EB" }}>info@ignitesmart.ai</div>
+          </div>
+        </a>
+
+        <a
+          href="tel:+59171054305"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 16px", borderRadius: 8,
+            background: "#F0FDF4", border: "1px solid #BBF7D0",
+            textDecoration: "none",
+          }}
+        >
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Phone style={{ width: 15, height: 15, color: "#16A34A" }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#16A34A" }}>Call or text us</div>
+            <div style={{ fontSize: 11, color: "#15803D" }}>+591 71054305</div>
+          </div>
+        </a>
+
+        <a
+          href="https://wa.me/59171054305"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 16px", borderRadius: 8,
+            background: "#F0FDF4", border: "1px solid #BBF7D0",
+            textDecoration: "none",
+          }}
+        >
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <MessageCircle style={{ width: 15, height: 15, color: "#16A34A" }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#16A34A" }}>WhatsApp us</div>
+            <div style={{ fontSize: 11, color: "#15803D" }}>wa.me/59171054305</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export function ConnectModal({ integration, onClose }: { integration: IntegrationInfo; onClose: () => void }) {
-  const options = [
-    {
-      icon: <Download style={{ width: 18, height: 18, color: "#2563EB" }} />,
-      iconBg: "#EFF6FF",
-      title: "Validate and Download",
-      badge: null,
-      desc: "Upload through BIMLog. We validate your files instantly and give you back the approved file with a full audit record. You upload it yourself to your platform. Works today. Zero setup required.",
-      buttonLabel: "Get Started",
-      buttonStyle: { background: "#2563EB", color: "#fff", border: "none" } as React.CSSProperties,
-      onClick: () => {},
-    },
-    {
-      icon: <Users style={{ width: 18, height: 18, color: "#16A34A" }} />,
-      iconBg: "#F0FDF4",
-      title: "Managed Connection",
-      badge: null,
-      desc: "Our team logs in on your behalf using your API token or credentials and configures everything for you. White-glove setup included with founding partner onboarding.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#16A34A", border: "1px solid #BBF7D0" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-    {
-      icon: <Monitor style={{ width: 18, height: 18, color: "#7C3AED" }} />,
-      iconBg: "#F5F3FF",
-      title: "BIMLog Sync Agent",
-      badge: "Enterprise",
-      desc: "A lightweight desktop app watches a folder on your computer or server. Drop any file in the folder and BIMLog validates and routes it to the right platform automatically. No manual upload. No API setup. Just a folder you already know how to use.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#7C3AED", border: "1px solid #DDD6FE" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-    {
-      icon: <Lock style={{ width: 18, height: 18, color: "#0369A1" }} />,
-      iconBg: "#E0F2FE",
-      title: "OAuth Connection",
-      badge: "Enterprise",
-      desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#0369A1", border: "1px solid #BAE6FD" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-  ];
+  const [subScreen, setSubScreen] = useState<SubScreen>(null);
+
+  const mainContent = (
+    <>
+      {[
+        {
+          key: "validate",
+          icon: <Download style={{ width: 18, height: 18, color: "#2563EB" }} />,
+          iconBg: "#EFF6FF",
+          title: "Validate and Download",
+          badge: null,
+          desc: "Upload through BIMLog. We validate your files instantly and give you back the approved file with a full audit record. You upload it yourself to your platform. Works today. Zero setup required.",
+          buttonLabel: "Get Started",
+          buttonStyle: { background: "#2563EB", color: "#fff", border: "none" } as React.CSSProperties,
+          onClick: () => {},
+        },
+        {
+          key: "managed",
+          icon: <Users style={{ width: 18, height: 18, color: "#16A34A" }} />,
+          iconBg: "#F0FDF4",
+          title: "Managed Connection",
+          badge: null,
+          desc: "Our team logs in on your behalf using your API token or credentials and configures everything for you. White-glove setup included with founding partner onboarding.",
+          buttonLabel: "Get Started",
+          buttonStyle: { background: "transparent", color: "#16A34A", border: "1px solid #BBF7D0" } as React.CSSProperties,
+          onClick: () => setSubScreen("managed-form"),
+        },
+        {
+          key: "sync",
+          icon: <Monitor style={{ width: 18, height: 18, color: "#7C3AED" }} />,
+          iconBg: "#F5F3FF",
+          title: "BIMLog Sync Agent",
+          badge: null,
+          desc: "A lightweight desktop app watches a folder on your computer or server. Drop any file in the folder and BIMLog validates and routes it to the right platform automatically. No manual upload. No API setup. Just a folder you already know how to use.",
+          buttonLabel: "Get Started",
+          buttonStyle: { background: "transparent", color: "#7C3AED", border: "1px solid #DDD6FE" } as React.CSSProperties,
+          onClick: () => setSubScreen("sync-agent"),
+        },
+        {
+          key: "oauth",
+          icon: <Lock style={{ width: 18, height: 18, color: "#0369A1" }} />,
+          iconBg: "#E0F2FE",
+          title: "OAuth Connection",
+          badge: "Enterprise",
+          desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project.",
+          buttonLabel: "Contact us",
+          buttonStyle: { background: "transparent", color: "#0369A1", border: "1px solid #BAE6FD" } as React.CSSProperties,
+          onClick: () => setSubScreen("oauth-contact"),
+        },
+      ].map((opt) => (
+        <div
+          key={opt.key}
+          style={{
+            padding: "14px 16px", borderRadius: 10,
+            border: "1px solid hsl(var(--border))",
+            background: "hsl(var(--background))",
+            display: "flex", flexDirection: "column", gap: 8,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 8,
+              background: opt.iconBg, flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {opt.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>
+                  {opt.title}
+                </span>
+                {opt.badge && (
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+                    letterSpacing: "0.06em", padding: "1px 6px", borderRadius: 4,
+                    background: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0",
+                  }}>
+                    {opt.badge}
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", lineHeight: 1.55, margin: 0 }}>
+                {opt.desc}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={opt.onClick}
+            style={{
+              alignSelf: "flex-end", padding: "5px 14px",
+              borderRadius: 6, fontSize: 11, fontWeight: 600,
+              cursor: "pointer", ...opt.buttonStyle,
+            }}
+          >
+            {opt.buttonLabel}
+          </button>
+        </div>
+      ))}
+    </>
+  );
 
   return (
     <div
@@ -64,11 +425,8 @@ export function ConnectModal({ integration, onClose }: { integration: Integratio
       <div style={{
         background: "hsl(var(--card))",
         border: "1px solid hsl(var(--border))",
-        borderRadius: 14,
-        width: "100%",
-        maxWidth: 540,
-        maxHeight: "90vh",
-        overflowY: "auto",
+        borderRadius: 14, width: "100%", maxWidth: 540,
+        maxHeight: "90vh", overflowY: "auto",
         boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
       }}>
         {/* Modal header */}
@@ -91,7 +449,7 @@ export function ConnectModal({ integration, onClose }: { integration: Integratio
                 Connect {integration.name}
               </div>
               <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                Choose how you want to connect
+                {subScreen ? "Complete the steps below" : "Choose how you want to connect"}
               </div>
             </div>
           </div>
@@ -108,65 +466,12 @@ export function ConnectModal({ integration, onClose }: { integration: Integratio
           </button>
         </div>
 
-        {/* Options */}
-        <div style={{ padding: "14px 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
-          {options.map((opt, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "14px 16px",
-                borderRadius: 10,
-                border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--background))",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div style={{
-                  width: 34, height: 34, borderRadius: 8,
-                  background: opt.iconBg, flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  {opt.icon}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>
-                      {opt.title}
-                    </span>
-                    {opt.badge && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, textTransform: "uppercase",
-                        letterSpacing: "0.06em", padding: "1px 6px", borderRadius: 4,
-                        background: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0",
-                      }}>
-                        {opt.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", lineHeight: 1.55, margin: 0 }}>
-                    {opt.desc}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={opt.onClick}
-                style={{
-                  alignSelf: "flex-end",
-                  padding: "5px 14px",
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  ...opt.buttonStyle,
-                }}
-              >
-                {opt.buttonLabel}
-              </button>
-            </div>
-          ))}
+        {/* Content */}
+        <div style={{ padding: "14px 20px 20px", display: "flex", flexDirection: "column", gap: subScreen ? 0 : 10 }}>
+          {subScreen === null && mainContent}
+          {subScreen === "managed-form" && <ManagedForm integration={integration} onBack={() => setSubScreen(null)} />}
+          {subScreen === "sync-agent"   && <SyncAgentScreen onBack={() => setSubScreen(null)} />}
+          {subScreen === "oauth-contact" && <OAuthContactScreen onBack={() => setSubScreen(null)} />}
         </div>
       </div>
     </div>
