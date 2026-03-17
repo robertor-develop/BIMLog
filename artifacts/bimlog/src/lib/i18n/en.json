@@ -21,8 +21,8 @@
   "auth.loginFailed": "Login failed. Please check your credentials.",
   "auth.registerFailed": "Registration failed. Please try again.",
 
-  "landing.hero.title": "The accountability layer your construction projects are missing.",
-  "landing.hero.subtitle": "BIMLog connects to every platform your team already uses — Procore, Autodesk, OneDrive, Revit, Navisworks, Speckle, MS Project, Google Drive and more. Upload through BIMLog once and we validate, log, and deliver your files automatically. Your platforms don't change. Your accountability does.",
+  "landing.hero.title": "Upload through BIMLog once. We validate, log, and deliver to wherever your project lives. Your platforms don't change. Your accountability does.",
+  "landing.hero.subtitle": "BIMLog is the intelligence layer that sits on top of every tool your team already uses — Procore, Autodesk, OneDrive, Revit, Navisworks, Speckle, MS Project, Google Drive and more. Every feature exists to eliminate coordination failures and establish clear accountability.",
   "landing.hero.cta": "Get Started",
   "landing.badge": "Enterprise AEC Software",
   "landing.features.title": "Built for Precision",
