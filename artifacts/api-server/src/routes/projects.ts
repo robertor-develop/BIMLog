@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectsTable, projectMembersTable, filesTable } from "@workspace/db/schema";
-import { eq, count, inArray } from "drizzle-orm";
+import { projectsTable, projectMembersTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
+import { eq, count, inArray, and } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
@@ -12,16 +12,19 @@ router.get("/projects", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
 
-    const memberProjects = await db
-      .select({ projectId: projectMembersTable.projectId })
+    const memberRows = await db
+      .select({ projectId: projectMembersTable.projectId, role: projectMembersTable.role })
       .from(projectMembersTable)
       .where(eq(projectMembersTable.userId, userId));
 
-    const projectIds = memberProjects.map((m) => m.projectId);
+    const projectIds = memberRows.map((m) => m.projectId);
     if (projectIds.length === 0) {
       res.json([]);
       return;
     }
+
+    const roleMap: Record<number, string> = {};
+    memberRows.forEach(m => { roleMap[m.projectId] = m.role; });
 
     const projects = await db
       .select()
@@ -46,6 +49,7 @@ router.get("/projects", authMiddleware, async (req, res) => {
           updatedAt: p.updatedAt.toISOString(),
           memberCount: memberCount.count,
           fileCount: fileCount.count,
+          userRole: roleMap[p.id] || "",
         };
       })
     );
@@ -91,6 +95,7 @@ router.post("/projects", authMiddleware, async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
       memberCount: 1,
       fileCount: 0,
+      userRole: adminRoles[0],
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
@@ -132,6 +137,58 @@ router.get("/projects/:projectId", authMiddleware, requireProjectMember(), async
       memberCount: memberCount.count,
       fileCount: fileCount.count,
     });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+router.delete("/projects/:projectId", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
+    const userId = req.user!.userId;
+
+    const memberRow = await db
+      .select()
+      .from(projectMembersTable)
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
+      .limit(1);
+
+    if (memberRow.length === 0) {
+      res.status(403).json({ error: "Not a project member." });
+      return;
+    }
+
+    const adminRoles = await getRolesByPermission("admin");
+    const isAdmin = adminRoles.includes(memberRow[0].role);
+
+    const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const isCreator = project.length > 0 && project[0].createdById === userId;
+
+    if (!isAdmin && !isCreator) {
+      res.status(403).json({ error: "Only project admins or the project creator can delete a project." });
+      return;
+    }
+
+    const conventions = await db
+      .select({ id: namingConventionsTable.id })
+      .from(namingConventionsTable)
+      .where(eq(namingConventionsTable.projectId, projectId));
+
+    if (conventions.length > 0) {
+      const convIds = conventions.map(c => c.id);
+      await db.delete(namingFieldsTable).where(inArray(namingFieldsTable.conventionId, convIds));
+    }
+
+    await db.delete(namingConventionsTable).where(eq(namingConventionsTable.projectId, projectId));
+    await db.delete(filesTable).where(eq(filesTable.projectId, projectId));
+    await db.delete(rfisTable).where(eq(rfisTable.projectId, projectId));
+    await db.delete(submittalsTable).where(eq(submittalsTable.projectId, projectId));
+    await db.delete(activityLogTable).where(eq(activityLogTable.projectId, projectId));
+    await db.delete(projectMembersTable).where(eq(projectMembersTable.projectId, projectId));
+    await db.delete(projectsTable).where(eq(projectsTable.id, projectId));
+
+    res.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

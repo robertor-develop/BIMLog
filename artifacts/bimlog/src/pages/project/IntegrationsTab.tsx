@@ -1,22 +1,19 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { CheckCircle2, RefreshCw, ExternalLink, Zap, X, Download, Users, Monitor, Lock } from "lucide-react";
+import { CheckCircle2, RefreshCw, ExternalLink, Zap, Monitor, Mail } from "lucide-react";
+import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 
 interface IntegrationsTabProps { projectId: number; }
 
 type SyncStatus = "live" | "syncing" | "idle" | "error" | "available";
 
-interface Integration {
+interface Integration extends IntegrationInfo {
   id: string;
-  name: string;
   description: string;
   category: "construction" | "storage" | "bim" | "analytics" | "ai";
   status: SyncStatus;
   lastSync?: string;
   stats?: string;
-  logoBg: string;
-  logoColor: string;
-  logoText: string;
   docsUrl?: string;
 }
 
@@ -165,12 +162,12 @@ const INTEGRATIONS: Integration[] = [
   },
 ];
 
-const STATUS_CONFIG: Record<SyncStatus, { label: string; dotClass: string; textColor: string; badgeStyle: React.CSSProperties }> = {
-  live:      { label: "Live",      dotClass: "sync-live",    textColor: "#16A34A", badgeStyle: { background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0" } },
-  syncing:   { label: "Syncing",   dotClass: "sync-syncing", textColor: "#D97706", badgeStyle: { background: "#FFFBEB", color: "#B45309", border: "1px solid #FDE68A" } },
-  idle:      { label: "Idle",      dotClass: "sync-idle",    textColor: "#6B7280", badgeStyle: { background: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0" } },
-  error:     { label: "Error",     dotClass: "sync-idle",    textColor: "#DC2626", badgeStyle: { background: "#FFF1F2", color: "#BE123C", border: "1px solid #FECDD3" } },
-  available: { label: "Available", dotClass: "sync-idle",    textColor: "#9CA3AF", badgeStyle: { background: "#F8FAFC", color: "#94A3B8", border: "1px solid #E2E8F0" } },
+const STATUS_CONFIG: Record<SyncStatus, { label: string; dotClass: string; badgeStyle: React.CSSProperties }> = {
+  live:      { label: "Live",      dotClass: "sync-live",    badgeStyle: { background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0" } },
+  syncing:   { label: "Syncing",   dotClass: "sync-syncing", badgeStyle: { background: "#FFFBEB", color: "#B45309", border: "1px solid #FDE68A" } },
+  idle:      { label: "Idle",      dotClass: "sync-idle",    badgeStyle: { background: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0" } },
+  error:     { label: "Error",     dotClass: "sync-idle",    badgeStyle: { background: "#FFF1F2", color: "#BE123C", border: "1px solid #FECDD3" } },
+  available: { label: "Available", dotClass: "sync-idle",    badgeStyle: { background: "#F8FAFC", color: "#94A3B8", border: "1px solid #E2E8F0" } },
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -183,176 +180,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_ORDER = ["construction", "bim", "storage", "analytics", "ai"];
 
-function ConnectModal({ integration, onClose }: { integration: Integration; onClose: () => void }) {
-  const options = [
-    {
-      icon: <Download style={{ width: 18, height: 18, color: "#2563EB" }} />,
-      iconBg: "#EFF6FF",
-      title: "Validate and Download",
-      badge: null,
-      desc: "Upload through BIMLog. We validate your files instantly and give you back the approved file with a full audit record. You upload it yourself to your platform. Works today. Zero setup required.",
-      buttonLabel: "Get Started",
-      buttonStyle: { background: "#2563EB", color: "#fff", border: "none" } as React.CSSProperties,
-      onClick: () => {},
-    },
-    {
-      icon: <Users style={{ width: 18, height: 18, color: "#16A34A" }} />,
-      iconBg: "#F0FDF4",
-      title: "Managed Connection",
-      badge: null,
-      desc: "Our team logs in on your behalf using your API token or credentials and configures everything for you. White-glove setup included with founding partner onboarding.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#16A34A", border: "1px solid #BBF7D0" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-    {
-      icon: <Monitor style={{ width: 18, height: 18, color: "#7C3AED" }} />,
-      iconBg: "#F5F3FF",
-      title: "BIMLog Sync Agent",
-      badge: "Enterprise",
-      desc: "A lightweight desktop app watches a folder on your computer or server. Drop any file in the folder and BIMLog validates and routes it to the right platform automatically. No manual upload. No API setup. Just a folder you already know how to use.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#7C3AED", border: "1px solid #DDD6FE" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-    {
-      icon: <Lock style={{ width: 18, height: 18, color: "#0369A1" }} />,
-      iconBg: "#E0F2FE",
-      title: "OAuth Connection",
-      badge: "Enterprise",
-      desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project.",
-      buttonLabel: "Contact us",
-      buttonStyle: { background: "transparent", color: "#0369A1", border: "1px solid #BAE6FD" } as React.CSSProperties,
-      onClick: () => { window.location.href = "mailto:info@ignitesmart.ai"; },
-    },
-  ];
-
-  return (
-    <div
-      style={{
-        position: "fixed", inset: 0, zIndex: 1000,
-        background: "rgba(0,0,0,0.45)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "24px",
-      }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div style={{
-        background: "hsl(var(--card))",
-        border: "1px solid hsl(var(--border))",
-        borderRadius: 14,
-        width: "100%",
-        maxWidth: 540,
-        maxHeight: "90vh",
-        overflowY: "auto",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-      }}>
-        {/* Modal header */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "18px 20px 14px",
-          borderBottom: "1px solid hsl(var(--border))",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: integration.logoBg, color: integration.logoColor,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 10, fontWeight: 800, fontFamily: "var(--font-mono)",
-            }}>
-              {integration.logoText}
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>
-                Connect {integration.name}
-              </div>
-              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                Choose how you want to connect
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              width: 28, height: 28, borderRadius: 6, border: "none",
-              background: "hsl(var(--secondary))", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "hsl(var(--muted-foreground))",
-            }}
-          >
-            <X style={{ width: 14, height: 14 }} />
-          </button>
-        </div>
-
-        {/* Options */}
-        <div style={{ padding: "14px 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
-          {options.map((opt, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "14px 16px",
-                borderRadius: 10,
-                border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--background))",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div style={{
-                  width: 34, height: 34, borderRadius: 8,
-                  background: opt.iconBg, flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  {opt.icon}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>
-                      {opt.title}
-                    </span>
-                    {opt.badge && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 700, textTransform: "uppercase",
-                        letterSpacing: "0.06em", padding: "1px 6px", borderRadius: 4,
-                        background: "#F1F5F9", color: "#475569", border: "1px solid #E2E8F0",
-                      }}>
-                        {opt.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", lineHeight: 1.55, margin: 0 }}>
-                    {opt.desc}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={opt.onClick}
-                style={{
-                  alignSelf: "flex-end",
-                  padding: "5px 14px",
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  ...opt.buttonStyle,
-                }}
-              >
-                {opt.buttonLabel}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const { t } = useI18n();
   const [filter, setFilter] = useState<string>("all");
-  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
+  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
+  const [showSyncMsg, setShowSyncMsg] = useState(false);
 
   const connectedCount = INTEGRATIONS.filter(i => i.status === "live" || i.status === "syncing" || i.status === "idle").length;
   const liveCount      = INTEGRATIONS.filter(i => i.status === "live").length;
@@ -404,6 +236,55 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         </div>
       </div>
 
+      {/* Download Sync Agent banner */}
+      <div style={{
+        marginBottom: 16, padding: "12px 16px",
+        background: "#F5F3FF", border: "1px solid #DDD6FE",
+        borderRadius: 10, display: "flex", alignItems: "center", gap: 12,
+        flexWrap: "wrap",
+      }}>
+        <div style={{ width: 32, height: 32, background: "#EDE9FE", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Monitor style={{ width: 15, height: 15, color: "#7C3AED" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#5B21B6", marginBottom: 1 }}>
+            BIMLog Sync Agent — Desktop App
+          </div>
+          <div style={{ fontSize: 11, color: "#6D28D9" }}>
+            Windows and Mac · Watch a folder, validate automatically, no upload needed
+          </div>
+        </div>
+        {showSyncMsg ? (
+          <div style={{
+            padding: "8px 14px", borderRadius: 8,
+            background: "#EDE9FE", border: "1px solid #DDD6FE",
+            fontSize: 11, color: "#5B21B6", lineHeight: 1.5, maxWidth: 300,
+            display: "flex", alignItems: "flex-start", gap: 8,
+          }}>
+            <Mail style={{ width: 13, height: 13, flexShrink: 0, marginTop: 1 }} />
+            <span>
+              Your download will be prepared by our team. Contact us at{" "}
+              <a href="mailto:info@ignitesmart.ai" style={{ color: "#5B21B6", fontWeight: 600 }}>
+                info@ignitesmart.ai
+              </a>{" "}
+              to receive the installer for your operating system.
+            </span>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowSyncMsg(true)}
+            style={{
+              padding: "7px 14px", borderRadius: 6,
+              fontSize: 11, fontWeight: 600,
+              background: "#7C3AED", color: "#fff",
+              border: "none", cursor: "pointer", flexShrink: 0,
+            }}
+          >
+            Download BIMLog Sync Agent
+          </button>
+        )}
+      </div>
+
       {/* Filter tabs */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
         {["all", ...CATEGORY_ORDER].map(cat => (
@@ -448,7 +329,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   className="integration-card"
                   style={{ opacity: isAvailable ? 0.75 : 1 }}
                 >
-                  {/* Top row */}
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                     <div
                       className="integration-logo"
@@ -462,7 +342,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     </div>
                   </div>
 
-                  {/* Name + description */}
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 4, fontFamily: "var(--font-display)" }}>
                       {integration.name}
@@ -472,7 +351,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     </div>
                   </div>
 
-                  {/* Stats row */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4 }}>
                     <span style={{ fontSize: 10, fontWeight: 600, color: isAvailable ? "hsl(var(--muted-foreground))" : "#1D4ED8" }}>
                       {integration.stats}
@@ -485,7 +363,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     )}
                   </div>
 
-                  {/* Action */}
                   {isAvailable ? (
                     <button
                       onClick={() => setSelectedIntegration(integration)}

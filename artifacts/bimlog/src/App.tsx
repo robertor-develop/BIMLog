@@ -12,6 +12,7 @@ import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
 import { ProjectDetail } from "@/pages/ProjectDetail";
+import { SetupGuide } from "@/pages/SetupGuide";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}
       </Route>
+      <Route path="/setup-guide" component={SetupGuide} />
 
       <Route component={NotFound} />
     </Switch>
