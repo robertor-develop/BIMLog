@@ -31,12 +31,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [showCreate, setShowCreate] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const openCount    = rfis?.filter(r => r.status !== "closed").length ?? 0;
-  const overdueCount = rfis?.filter(r => {
+  const openCount     = rfis?.filter(r => r.status !== "closed").length ?? 0;
+  const overdueCount  = rfis?.filter(r => {
     if (r.status === "closed") return false;
     return differenceInDays(new Date(), new Date(r.createdAt)) > 7;
   }).length ?? 0;
-  const closedCount  = rfis?.filter(r => r.status === "closed").length ?? 0;
+  const closedCount   = rfis?.filter(r => r.status === "closed").length ?? 0;
 
   return (
     <div>
@@ -288,9 +288,9 @@ function UpdateRfiRow({ projectId, rfi, onClose }: {
   const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const statusOptions   = getOptions("rfi_status");
+  const statusOptions  = getOptions("rfi_status");
   const priorityOptions = getOptions("rfi_priority");
-  const [status, setStatus]     = useState(rfi.status);
+  const [status, setStatus]   = useState(rfi.status);
   const [priority, setPriority] = useState(rfi.priority);
 
   const { mutate, isPending } = useUpdateRfi({
