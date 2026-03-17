@@ -2,6 +2,12 @@ import { Link } from "wouter";
 import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor, Mail } from "lucide-react";
 import { useState } from "react";
 
+function useFromParam(): string | null {
+  const search = typeof window !== "undefined" ? window.location.search : "";
+  const params = new URLSearchParams(search);
+  return params.get("from");
+}
+
 const sections = [
   {
     id: "getting-started",
@@ -185,23 +191,37 @@ function SyncAgentDownload() {
   );
 }
 
+function SetupGuideBackButton() {
+  const from = useFromParam();
+  if (from) {
+    return (
+      <Link
+        href={from}
+        style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 20 }}
+      >
+        <ChevronLeft style={{ width: 14, height: 14 }} />
+        Back to Project
+      </Link>
+    );
+  }
+  return (
+    <Link
+      href="/dashboard"
+      style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 20 }}
+    >
+      <ChevronLeft style={{ width: 14, height: 14 }} />
+      Back to Dashboard
+    </Link>
+  );
+}
+
 export function SetupGuide() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px" }}>
       {/* Back */}
-      <Link
-        href="/dashboard"
-        style={{
-          display: "inline-flex", alignItems: "center", gap: 4,
-          fontSize: 12, color: "hsl(var(--muted-foreground))",
-          textDecoration: "none", marginBottom: 20,
-        }}
-      >
-        <ChevronLeft style={{ width: 14, height: 14 }} />
-        Back to Dashboard
-      </Link>
+      <SetupGuideBackButton />
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>

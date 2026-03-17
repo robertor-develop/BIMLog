@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { ExternalLink, Zap, Monitor, Mail, X, Plus } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
@@ -272,6 +273,7 @@ function AddIntegrationModal({ onClose, onSelect }: { onClose: () => void; onSel
 
 export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const { t } = useI18n();
+  const [, navigate] = useLocation();
   const [filter, setFilter] = useState<string>("all");
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
   const [showSyncMsg, setShowSyncMsg] = useState(false);
@@ -293,6 +295,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         <ConnectModal
           integration={selectedIntegration}
           onClose={() => setSelectedIntegration(null)}
+          projectId={projectId}
+          onNavigate={navigate}
         />
       )}
       {showAddModal && (
@@ -474,13 +478,13 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
       <button
         onClick={() => setShowAddModal(true)}
         style={{
-          width: "100%", padding: "12px",
-          borderRadius: 10, fontSize: 13, fontWeight: 600,
+          width: "100%", padding: "18px 20px",
+          borderRadius: 10,
           background: "hsl(var(--secondary))",
           border: "2px dashed hsl(var(--border))",
           color: "hsl(var(--muted-foreground))",
           cursor: "pointer", marginBottom: 16,
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6,
           transition: "border-color 0.15s, color 0.15s",
         }}
         onMouseEnter={e => {
@@ -492,8 +496,13 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           e.currentTarget.style.color = "hsl(var(--muted-foreground))";
         }}
       >
-        <Plus style={{ width: 15, height: 15 }} />
-        Add Integration
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Plus style={{ width: 16, height: 16 }} />
+          <span style={{ fontSize: 13, fontWeight: 700 }}>Add Integration</span>
+        </div>
+        <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.8 }}>
+          Connect any platform your team uses
+        </span>
       </button>
 
       {/* Bottom note */}

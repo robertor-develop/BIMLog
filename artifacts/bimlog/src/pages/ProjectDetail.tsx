@@ -93,7 +93,7 @@ export function ProjectDetail() {
               border: "1px solid rgba(245,158,11,0.25)",
               padding: "3px 10px", borderRadius: 5
             }}>{project.code}</span>
-            <Link href="/setup-guide">
+            <Link href={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${tab}`)}`}>
               <button style={{
                 display: "flex", alignItems: "center", gap: 5,
                 padding: "5px 10px", borderRadius: 6,

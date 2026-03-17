@@ -9,9 +9,11 @@ import activityRouter from "./activity";
 import conventionsRouter from "./conventions";
 import membersRouter from "./members";
 import configRouter from "./config";
+import downloadsRouter from "./downloads";
 
 const router: IRouter = Router();
 
+router.use(downloadsRouter);
 router.use(healthRouter);
 router.use(authRouter);
 router.use(configRouter);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import {
@@ -43,6 +43,7 @@ export function ProjectSidebar({
 }: SidebarProps) {
   const { t } = useI18n();
   const { user } = useAuthStore();
+  const [, navigate] = useLocation();
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
 
   const getLabel = (id: string, label: string) => {
@@ -58,6 +59,8 @@ export function ProjectSidebar({
         <ConnectModal
           integration={selectedIntegration}
           onClose={() => setSelectedIntegration(null)}
+          projectId={projectId}
+          onNavigate={navigate}
         />
       )}
 
