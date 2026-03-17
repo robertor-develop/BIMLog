@@ -1,19 +1,81 @@
 {
   "name": "bimlog-sync-agent",
   "version": "1.0.0",
-  "description": "BIMLog Sync Agent — watches a folder and validates files against BIMLog naming conventions",
+  "productName": "BIMLog Sync Agent",
+  "description": "BIMLog folder watcher and naming validator by IgniteSmart",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron ."
+    "dev": "electron .",
+    "build:win": "npx electron-builder --win --x64",
+    "build:mac": "npx electron-builder --mac --x64"
+  },
+  "build": {
+    "appId": "ai.ignitesmart.bimlog-sync-agent",
+    "productName": "BIMLog Sync Agent",
+    "copyright": "Copyright 2026 IgniteSmart",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "settings.html",
+      "assets/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.icns"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png"
+    }
   },
   "dependencies": {
     "chokidar": "^3.6.0"
   },
   "devDependencies": {
-    "electron": "^29.0.0"
+    "electron": "^29.0.0",
+    "electron-builder": "^26.8.1"
   },
-  "keywords": ["bimlog", "bim", "sync", "electron"],
+  "keywords": [
+    "bimlog",
+    "bim",
+    "sync",
+    "electron"
+  ],
   "author": "IgniteSmart",
   "license": "UNLICENSED"
 }

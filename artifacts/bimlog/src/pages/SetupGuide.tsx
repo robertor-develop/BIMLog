@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor, Mail } from "lucide-react";
+import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor } from "lucide-react";
 import { useState } from "react";
 
 function useFromParam(): string | null {
@@ -155,7 +155,6 @@ const sections = [
 ];
 
 function SyncAgentDownload() {
-  const [shown, setShown] = useState(false);
   return (
     <div style={{
       marginTop: 14, padding: "12px 16px",
@@ -163,30 +162,34 @@ function SyncAgentDownload() {
       borderRadius: 8, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
     }}>
       <Monitor style={{ width: 16, height: 16, color: "#7C3AED", flexShrink: 0 }} />
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, minWidth: 160 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: "#5B21B6" }}>BIMLog Sync Agent — Desktop App</div>
-        <div style={{ fontSize: 11, color: "#6D28D9" }}>Windows and Mac</div>
+        <div style={{ fontSize: 11, color: "#6D28D9" }}>Windows · Watch a folder, validate automatically</div>
       </div>
-      {shown ? (
-        <div style={{ fontSize: 11, color: "#5B21B6", lineHeight: 1.5, display: "flex", alignItems: "flex-start", gap: 6 }}>
-          <Mail style={{ width: 13, height: 13, flexShrink: 0, marginTop: 1 }} />
-          <span>
-            Your download will be prepared by our team. Contact us at{" "}
-            <a href="mailto:info@ignitesmart.ai" style={{ color: "#5B21B6", fontWeight: 600 }}>info@ignitesmart.ai</a>{" "}
-            to receive the installer for your operating system.
-          </span>
-        </div>
-      ) : (
-        <button
-          onClick={() => setShown(true)}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <a
+          href="/api/v1/downloads/sync-agent-windows"
+          download="BIMLog-Sync-Agent-Windows-Portable.zip"
           style={{
             padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600,
             background: "#7C3AED", color: "#fff", border: "none", cursor: "pointer",
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5,
           }}
         >
-          Download BIMLog Sync Agent
-        </button>
-      )}
+          ⬇ Windows Portable (ZIP)
+        </a>
+        <a
+          href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Mac%20Installer&body=Hello%2C%0A%0AI%20would%20like%20to%20receive%20the%20BIMLog%20Sync%20Agent%20installer%20for%20Mac."
+          style={{
+            padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+            background: "#EDE9FE", color: "#7C3AED",
+            border: "1px solid #DDD6FE", cursor: "pointer",
+            textDecoration: "none", display: "inline-flex", alignItems: "center",
+          }}
+        >
+          Mac — Coming Soon
+        </a>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,2 @@
+artifacts/sync-agent/releases/BIMLog-Sync-Agent-Windows-Portable.tar.gz filter=lfs diff=lfs merge=lfs -text
+artifacts/sync-agent/releases/BIMLog-Sync-Agent-Windows-Portable.zip filter=lfs diff=lfs merge=lfs -text

@@ -1,74 +1,53 @@
 import { Router, type Request, type Response } from "express";
-import archiver from "archiver";
 import fs from "fs";
 import path from "path";
 
 const router = Router();
 
-function findSyncAgentDir(): string {
+function findReleasesDir(): string {
   const cwd = process.cwd();
   const candidates = [
-    path.resolve(cwd, "../sync-agent"),
-    path.resolve(cwd, "artifacts/sync-agent"),
-    path.resolve(cwd, "sync-agent"),
-    path.resolve(cwd, "../../sync-agent"),
+    path.resolve(cwd, "../sync-agent/releases"),
+    path.resolve(cwd, "artifacts/sync-agent/releases"),
+    path.resolve(cwd, "sync-agent/releases"),
+    path.resolve(cwd, "../../sync-agent/releases"),
   ];
   const found = candidates.find(p => fs.existsSync(p));
   if (found) {
-    console.log(`[downloads] Sync agent dir: ${found}`);
-    return found;
+    console.log(`[downloads] Releases dir: ${found}`);
+  } else {
+    console.warn(`[downloads] Releases dir not found. Tried: ${candidates.join(", ")}`);
   }
-  console.warn(`[downloads] Sync agent dir not found. Tried: ${candidates.join(", ")}`);
-  return candidates[0];
+  return found ?? candidates[0];
 }
 
-const SYNC_AGENT_DIR = findSyncAgentDir();
-const ZIP_CACHE = "/tmp/bimlog-sync-agent.zip";
+const RELEASES_DIR = findReleasesDir();
+const WINDOWS_ZIP = path.join(RELEASES_DIR, "BIMLog-Sync-Agent-Windows-Portable.zip");
 
-let zipStatus: "pending" | "ready" | "error" = "pending";
-
-function buildZip() {
-  if (!fs.existsSync(SYNC_AGENT_DIR)) {
-    console.warn("[downloads] Sync agent dir does not exist — skipping zip build");
-    zipStatus = "error";
-    return;
+router.get("/downloads/sync-agent-windows", (_req: Request, res: Response) => {
+  if (!fs.existsSync(WINDOWS_ZIP)) {
+    return res.status(503).json({
+      error: "Windows installer not yet available on this server",
+      message: "Contact info@ignitesmart.ai to receive the Windows installer for your project.",
+      contact: "info@ignitesmart.ai",
+    });
   }
 
-  const output = fs.createWriteStream(ZIP_CACHE);
-  const archive = archiver("zip", { zlib: { level: 6 } });
+  const stat = fs.statSync(WINDOWS_ZIP);
+  res.setHeader("Content-Type", "application/octet-stream");
+  res.setHeader("Content-Disposition", 'attachment; filename="BIMLog-Sync-Agent-Windows-Portable.zip"');
+  res.setHeader("Content-Length", stat.size);
+  console.log(`[downloads] Serving Windows portable zip — ${stat.size} bytes`);
+  fs.createReadStream(WINDOWS_ZIP).pipe(res);
+});
 
-  output.on("close", () => {
-    zipStatus = "ready";
-    console.log(`[downloads] Sync agent zip ready — ${archive.pointer()} bytes`);
+router.get("/downloads/sync-agent-mac", (_req: Request, res: Response) => {
+  return res.status(200).json({
+    available: false,
+    message: "Mac installer coming soon — contact info@ignitesmart.ai",
+    contact: "info@ignitesmart.ai",
+    whatsapp: "https://wa.me/59171054305",
   });
-
-  archive.on("error", (err) => {
-    zipStatus = "error";
-    console.error("[downloads] Failed to build sync agent zip:", err);
-  });
-
-  archive.pipe(output);
-  archive.glob("**/*", {
-    cwd: SYNC_AGENT_DIR,
-    ignore: ["node_modules/**", ".git/**", "dist/**"],
-    dot: false,
-  });
-  archive.finalize();
-}
-
-buildZip();
-
-function serveZip(_req: Request, res: Response) {
-  if (zipStatus === "error") {
-    return res.status(500).json({ error: "Failed to package sync agent" });
-  }
-  if (zipStatus === "pending") {
-    return res.status(503).json({ error: "Sync agent package is being prepared — please try again in a moment" });
-  }
-  res.download(ZIP_CACHE, "bimlog-sync-agent.zip");
-}
-
-router.get("/downloads/sync-agent-windows", serveZip);
-router.get("/downloads/sync-agent-mac", serveZip);
+});
 
 export default router;

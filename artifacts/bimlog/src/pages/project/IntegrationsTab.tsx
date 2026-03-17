@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
-import { ExternalLink, Zap, Monitor, Mail, X, Plus } from "lucide-react";
+import { ExternalLink, Zap, Monitor, X, Plus } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 
 interface IntegrationsTabProps { projectId: number; }
@@ -276,7 +276,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState<string>("all");
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
-  const [showSyncMsg, setShowSyncMsg] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const filtered = filter === "all"
@@ -352,35 +351,33 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             Windows and Mac · Watch a folder, validate automatically, no upload needed
           </div>
         </div>
-        {showSyncMsg ? (
-          <div style={{
-            padding: "8px 14px", borderRadius: 8,
-            background: "#EDE9FE", border: "1px solid #DDD6FE",
-            fontSize: 11, color: "#5B21B6", lineHeight: 1.5, maxWidth: 300,
-            display: "flex", alignItems: "flex-start", gap: 8,
-          }}>
-            <Mail style={{ width: 13, height: 13, flexShrink: 0, marginTop: 1 }} />
-            <span>
-              Your download will be prepared by our team. Contact us at{" "}
-              <a href="mailto:info@ignitesmart.ai" style={{ color: "#5B21B6", fontWeight: 600 }}>
-                info@ignitesmart.ai
-              </a>{" "}
-              to receive the installer for your operating system.
-            </span>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowSyncMsg(true)}
+        <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
+          <a
+            href="/api/v1/downloads/sync-agent-windows"
+            download="BIMLog-Sync-Agent-Windows-Portable.zip"
             style={{
               padding: "7px 14px", borderRadius: 6,
               fontSize: 11, fontWeight: 600,
               background: "#7C3AED", color: "#fff",
-              border: "none", cursor: "pointer", flexShrink: 0,
+              border: "none", cursor: "pointer",
+              textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5,
             }}
           >
-            Download BIMLog Sync Agent
-          </button>
-        )}
+            ⬇ Windows (ZIP)
+          </a>
+          <a
+            href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Mac%20Installer&body=Hello%2C%0A%0AI%20would%20like%20to%20receive%20the%20BIMLog%20Sync%20Agent%20installer%20for%20Mac."
+            style={{
+              padding: "7px 14px", borderRadius: 6,
+              fontSize: 11, fontWeight: 600,
+              background: "#EDE9FE", color: "#7C3AED",
+              border: "1px solid #DDD6FE", cursor: "pointer",
+              textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5,
+            }}
+          >
+            Mac — Coming Soon
+          </a>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -523,13 +520,17 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             Enterprise plans include dedicated integration support from the IgniteSmart team.
           </div>
         </div>
-        <button style={{
-          flexShrink: 0, padding: "7px 14px", borderRadius: 6,
-          fontSize: 11, fontWeight: 600, background: "#2563EB",
-          color: "#fff", border: "none", cursor: "pointer",
-        }}>
+        <a
+          href="mailto:info@ignitesmart.ai?subject=BIMLog%20API%20Documentation%20Request&body=Hello%20IgniteSmart%2C%0A%0AI%20would%20like%20to%20access%20the%20BIMLog%20REST%20API%20documentation."
+          style={{
+            flexShrink: 0, padding: "7px 14px", borderRadius: 6,
+            fontSize: 11, fontWeight: 600, background: "#2563EB",
+            color: "#fff", border: "none", cursor: "pointer",
+            textDecoration: "none", display: "inline-block",
+          }}
+        >
           API docs
-        </button>
+        </a>
       </div>
     </div>
   );

@@ -94,22 +94,21 @@ function SyncAgentScreen({ onBack }: { onBack: () => void }) {
       {[
         {
           num: 1,
-          title: "Download the BIMLog Sync Agent installer for your operating system.",
+          title: "Download the BIMLog Sync Agent for Windows. Extract the ZIP and run BIMLog Sync Agent.exe.",
           extra: (
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
               <a
                 href="/api/v1/downloads/sync-agent-windows"
-                download="bimlog-sync-agent.zip"
+                download="BIMLog-Sync-Agent-Windows-Portable.zip"
                 style={{ padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: "#2563EB", color: "#fff", border: "none", textDecoration: "none", display: "inline-block" }}
               >
-                Download for Windows
+                ⬇ Windows Portable (ZIP)
               </a>
               <a
-                href="/api/v1/downloads/sync-agent-mac"
-                download="bimlog-sync-agent.zip"
-                style={{ padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: "#2563EB", color: "#fff", border: "none", textDecoration: "none", display: "inline-block" }}
+                href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Mac%20Installer&body=Hello%2C%0A%0AI%20would%20like%20to%20receive%20the%20BIMLog%20Sync%20Agent%20installer%20for%20Mac."
+                style={{ padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: "#F5F3FF", color: "#7C3AED", border: "1px solid #DDD6FE", textDecoration: "none", display: "inline-block" }}
               >
-                Download for Mac
+                Mac — Coming Soon
               </a>
             </div>
           ),
