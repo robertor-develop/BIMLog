@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/auth";
 import { useLogin } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 
 export function Login() {
@@ -14,6 +14,7 @@ export function Login() {
   const { login } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const { mutate, isPending } = useLogin({
@@ -52,13 +53,32 @@ export function Login() {
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">{t('auth.password')}</label>
-          <Input
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={e => { setPassword(e.target.value); setError(''); }}
-            autoComplete="current-password"
-          />
+          <div style={{ position: "relative" }}>
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={e => { setPassword(e.target.value); setError(''); }}
+              autoComplete="current-password"
+              style={{ paddingRight: 40 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              style={{
+                position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                background: "none", border: "none", cursor: "pointer",
+                color: "hsl(var(--muted-foreground))", padding: 2, display: "flex", alignItems: "center"
+              }}
+              tabIndex={-1}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword
+                ? <EyeOff style={{ width: 16, height: 16 }} />
+                : <Eye style={{ width: 16, height: 16 }} />
+              }
+            </button>
+          </div>
         </div>
       </div>
 
