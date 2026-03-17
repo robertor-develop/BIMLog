@@ -9,14 +9,12 @@ import activityRouter from "./activity";
 import conventionsRouter from "./conventions";
 import membersRouter from "./members";
 import configRouter from "./config";
-import prodSeedRouter from "./prod-seed";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
 router.use(configRouter);
-router.use(prodSeedRouter);
 router.use(projectsRouter);
 router.use(filesRouter);
 router.use(rfisRouter);

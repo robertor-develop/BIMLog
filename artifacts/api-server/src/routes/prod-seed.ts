@@ -126,28 +126,27 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
       userMap[u.email] = u.id;
     }
 
-    // 5. Create demo projects
+    // 5. Create demo projects (check before insert — no unique constraint on code)
     const projectDefs = [
-      { name: "Downtown Tower",     code: "DT-2026", description: "Mixed-use downtown development", status: "active" },
-      { name: "270 Park Avenue",    code: "NYC-270",  description: "Full MEP coordination and BIM management for the new JPMorgan Chase HQ tower, New York", status: "active" },
-      { name: "Harbor View Complex",code: "HV-2026",  description: "Waterfront mixed-use development with 3 towers", status: "active" },
-      { name: "Metro Line Extension",code: "MLE-05", description: "Underground civil and MEP for subway extension", status: "on_hold" },
-      { name: "BIM Test",           code: "BIM-001", description: "Internal BIM coordination test project", status: "active" },
+      { name: "Downtown Tower",      code: "DT-2026", description: "Mixed-use downtown development", status: "active" },
+      { name: "270 Park Avenue",     code: "NYC-270",  description: "Full MEP coordination and BIM management for the new JPMorgan Chase HQ tower, New York", status: "active" },
+      { name: "Harbor View Complex", code: "HV-2026",  description: "Waterfront mixed-use development with 3 towers", status: "active" },
+      { name: "Metro Line Extension",code: "MLE-05",  description: "Underground civil and MEP for subway extension", status: "on_hold" },
+      { name: "BIM Test",            code: "BIM-001", description: "Internal BIM coordination test project", status: "active" },
     ];
 
-    const createdProjects: number[] = [];
+    let createdCount = 0;
     for (const p of projectDefs) {
-      const rows = await db.execute(sql`
-        INSERT INTO projects (name, code, description, status, created_by_id)
-        VALUES (${p.name}, ${p.code}, ${p.description}, ${p.status}, ${callingUserId})
-        ON CONFLICT (code) DO NOTHING
-        RETURNING id
-      `);
-      if (rows.rows.length > 0) {
-        createdProjects.push((rows.rows[0] as any).id);
+      const existing = await db.execute(sql`SELECT id FROM projects WHERE code = ${p.code} LIMIT 1`);
+      if (existing.rows.length === 0) {
+        await db.execute(sql`
+          INSERT INTO projects (name, code, description, status, created_by_id)
+          VALUES (${p.name}, ${p.code}, ${p.description}, ${p.status}, ${callingUserId})
+        `);
+        createdCount++;
       }
     }
-    log.push(`Created ${createdProjects.length} new projects`);
+    log.push(`Created ${createdCount} new projects (skipped existing)`);
 
     // 6. Get ALL projects
     const allProjects = await db.execute(sql`SELECT id, code FROM projects`);
