@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useListFiles, useUploadFile, useDeleteFile } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -201,6 +201,8 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [fileName, setFileName] = useState("");
   const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
   const [success, setSuccess] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { mutate, isPending } = useUploadFile({
     mutation: {
@@ -221,6 +223,26 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     },
   });
 
+  const handleFile = useCallback((file: File) => {
+    setErrorDetails([]);
+    setSuccess(false);
+    setFileName(file.name);
+    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream" } });
+  }, [mutate, projectId]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }, [handleFile]);
+
+  const handleBrowse = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [handleFile]);
+
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -236,6 +258,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         </button>
       </div>
 
+      {/* Text input row */}
       <div style={{ display: "flex", gap: 8 }}>
         <Input
           style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 12 }}
@@ -254,6 +277,42 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
             : isPending ? "Validating..."
             : t("files.testUpload")}
         </Button>
+      </div>
+
+      {/* Drag and drop zone */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        style={{ display: "none" }}
+        onChange={handleBrowse}
+      />
+      <div
+        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        style={{
+          marginTop: 10,
+          padding: "20px 16px",
+          borderRadius: 8,
+          border: `2px dashed ${dragOver ? "#2563EB" : "hsl(var(--border))"}`,
+          background: dragOver ? "#EFF6FF" : "hsl(var(--secondary))",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          transition: "border-color 0.15s, background 0.15s",
+        }}
+      >
+        <Upload style={{ width: 20, height: 20, color: dragOver ? "#2563EB" : "hsl(var(--muted-foreground))" }} />
+        <div style={{ fontSize: 12, fontWeight: 600, color: dragOver ? "#1D4ED8" : "hsl(var(--foreground))" }}>
+          {isPending ? "Validating…" : "Drag and drop your file here or click to browse"}
+        </div>
+        <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+          Only the file name is validated — no content is stored
+        </div>
       </div>
 
       {/* Validation error breakdown */}
