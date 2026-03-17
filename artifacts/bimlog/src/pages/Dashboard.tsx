@@ -6,11 +6,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2 } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw } from "lucide-react";
 
 export function Dashboard() {
   const { t } = useI18n();
-  const { data: projects, isLoading } = useListProjects();
+  const { data: projects, isLoading, isError, error, refetch } = useListProjects();
   const [showCreate, setShowCreate] = useState(false);
 
   const activeProjects = projects?.filter(p => p.status === "active") ?? [];
@@ -65,6 +65,31 @@ export function Dashboard() {
       {/* Create project form */}
       {showCreate && (
         <CreateProjectForm onClose={() => setShowCreate(false)} />
+      )}
+
+      {/* Error state */}
+      {isError && (
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 12,
+          padding: "14px 16px", marginBottom: 20,
+          background: "hsl(var(--destructive) / 0.06)",
+          border: "1px solid hsl(var(--destructive) / 0.3)",
+          borderRadius: 8
+        }}>
+          <AlertCircle style={{ width: 16, height: 16, color: "hsl(var(--destructive))", flexShrink: 0, marginTop: 1 }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))", marginBottom: 3 }}>
+              Could not load projects
+            </div>
+            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10, fontFamily: "var(--font-mono)" }}>
+              {error instanceof Error ? error.message : "Unknown error — try signing out and back in"}
+            </div>
+            <Button size="sm" variant="outline" onClick={() => refetch()} style={{ gap: 5, fontSize: 11 }}>
+              <RefreshCw style={{ width: 11, height: 11 }} />
+              Retry
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Loading skeletons */}
