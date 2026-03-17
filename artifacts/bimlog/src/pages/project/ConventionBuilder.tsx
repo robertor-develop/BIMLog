@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -6,7 +6,7 @@ import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, AlertTriangle, CheckCircle2, Eye } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, CheckCircle2, Eye, RefreshCw, AlertCircle } from "lucide-react";
 
 interface Field { label: string; values: string; }
 
@@ -28,24 +28,35 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const separatorOptions = getOptions("separator");
   const { toast } = useToast();
 
-  const { data: convention, isLoading } = useGetConvention(projectId);
+  const { data: convention, isLoading, isError, refetch } = useGetConvention(projectId);
 
   const [separator, setSeparator] = useState(separatorOptions[0]?.value ?? "-");
   const [isActive, setIsActive] = useState(true);
   const [fields, setFields] = useState<Field[]>([]);
   const [dirty, setDirty] = useState(false);
 
+  const loadedConventionId = useRef<number | null>(null);
+  const loadedConventionTs = useRef<string | null>(null);
+
   useEffect(() => {
-    if (convention) {
-      setSeparator(convention.separator);
-      setIsActive(convention.isActive);
-      setFields(
-        [...convention.fields]
-          .sort((a, b) => a.fieldOrder - b.fieldOrder)
-          .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
-      );
-      setDirty(false);
-    }
+    if (!convention) return;
+
+    const sameId = loadedConventionId.current === convention.id;
+    const sameTs = loadedConventionTs.current === convention.updatedAt;
+
+    if (sameId && sameTs) return;
+
+    loadedConventionId.current = convention.id;
+    loadedConventionTs.current = convention.updatedAt;
+
+    setSeparator(convention.separator);
+    setIsActive(convention.isActive);
+    setFields(
+      [...convention.fields]
+        .sort((a, b) => a.fieldOrder - b.fieldOrder)
+        .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
+    );
+    setDirty(false);
   }, [convention]);
 
   const { mutate, isPending } = useUpsertConvention({
@@ -84,16 +95,15 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   };
 
   const handleDiscard = () => {
-    if (convention) {
-      setSeparator(convention.separator);
-      setIsActive(convention.isActive);
-      setFields(
-        [...convention.fields]
-          .sort((a, b) => a.fieldOrder - b.fieldOrder)
-          .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
-      );
-      setDirty(false);
-    }
+    if (!convention) return;
+    setSeparator(convention.separator);
+    setIsActive(convention.isActive);
+    setFields(
+      [...convention.fields]
+        .sort((a, b) => a.fieldOrder - b.fieldOrder)
+        .map(f => ({ label: f.label, values: f.allowedValues.join(", ") }))
+    );
+    setDirty(false);
   };
 
   const previewTokens = fields.map(f => {
@@ -105,7 +115,25 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   if (isLoading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 48, borderRadius: 8 }} />)}
+        {[1, 2, 3, 4].map(i => <div key={i} className="skeleton" style={{ height: 48, borderRadius: 8 }} />)}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div style={{ textAlign: "center", padding: "48px 24px" }}>
+        <AlertCircle style={{ width: 32, height: 32, color: "#DC2626", margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 15, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 6 }}>
+          Failed to load convention
+        </div>
+        <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
+          Could not fetch naming convention data. Check your connection and try again.
+        </div>
+        <Button variant="outline" onClick={() => refetch()} style={{ gap: 6, fontSize: 12 }}>
+          <RefreshCw style={{ width: 13, height: 13 }} />
+          Retry
+        </Button>
       </div>
     );
   }
@@ -198,7 +226,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         </div>
       </div>
 
-      {/* LIVE PREVIEW */}
+      {/* LIVE PREVIEW — only when there are fields */}
       {fields.length > 0 && (
         <div style={{
           marginBottom: 16, padding: "16px 20px",
@@ -288,19 +316,21 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
 
         {fields.length === 0 ? (
           <div style={{
-            padding: "32px 24px", textAlign: "center",
+            padding: "40px 24px", textAlign: "center",
             background: "hsl(var(--secondary))",
             border: "2px dashed hsl(var(--border))",
             borderRadius: 8,
           }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 4 }}>
-              No fields defined yet
+            <div style={{ fontSize: 24, marginBottom: 10 }}>📋</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 6 }}>
+              No naming convention defined yet
             </div>
-            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
-              Add fields to define the structure every file name must follow. Each field can have a list of allowed values.
+            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 18, maxWidth: 380, margin: "0 auto 18px" }}>
+              Add fields to define the ISO 19650 naming structure that every uploaded file must follow.
+              Each field can have a list of allowed values.
             </div>
-            <Button variant="outline" size="sm" onClick={addField} style={{ gap: 5, fontSize: 12 }}>
-              <Plus style={{ width: 12, height: 12 }} />
+            <Button onClick={addField} style={{ gap: 6, fontSize: 12 }}>
+              <Plus style={{ width: 13, height: 13 }} />
               Add first field
             </Button>
           </div>
