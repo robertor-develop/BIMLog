@@ -285,7 +285,7 @@ export function Landing() {
             <span className="text-muted-foreground text-sm">by IgniteSmart</span>
           </div>
           <div className="text-sm text-muted-foreground">
-            ignitesmart.ai · bimtechcorp.com
+            ignitesmart.ai
           </div>
         </div>
       </footer>
