@@ -574,16 +574,35 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       conventionSummary = `Separator: "${sep}". Fields in order: ${fieldDescriptions.join(` ${sep} `)}`;
     }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
-    });
+    // Helper: build a smart fallback name by matching fileName tokens against allowed values
+    const buildFallbackName = (
+      fName: string,
+      fields: Array<{ allowedValues: string[] | null; fieldOrder: number }>,
+      sep: string
+    ): string => {
+      const extMatch = fName.match(/\.[^.]+$/);
+      const ext = extMatch ? extMatch[0] : "";
+      const namePart = fName.replace(/\.[^.]+$/, "").toLowerCase();
+      const sorted = [...fields].sort((a, b) => a.fieldOrder - b.fieldOrder);
+      const parts = sorted.map(field => {
+        const allowed = field.allowedValues && field.allowedValues.length > 0 ? field.allowedValues : null;
+        if (!allowed) return namePart.split(/[-_.]/)[0] || "val";
+        const match = allowed.find(v => namePart.includes(v.toLowerCase()));
+        return match || allowed[0];
+      });
+      return parts.join(sep) + ext;
+    };
 
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 8192,
-      messages: [
-        {
+    // Try AI suggestion, fall back to smart builder on any error
+    try {
+      const anthropic = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      });
+      const message = await anthropic.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 8192,
+        messages: [{
           role: "user",
           content: `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
 
@@ -601,20 +620,26 @@ Respond with ONLY a JSON object in this exact format (no other text):
   "suggestedName": "the-corrected-file-name.ext",
   "reason": "brief explanation of what was changed and why"
 }`,
-        },
-      ],
-    });
-
-    const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-    try {
+        }],
+      });
+      const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
       const parsed = JSON.parse(rawText) as { suggestedName: string; reason: string };
       res.json({ suggestedName: parsed.suggestedName, reason: parsed.reason });
     } catch {
-      res.status(500).json({ error: "AI returned an unexpected response format" });
+      // AI unavailable or bad response — build smart suggestion from convention
+      if (convention) {
+        const fields = await db.select().from(namingFieldsTable)
+          .where(eq(namingFieldsTable.conventionId, convention.id))
+          .orderBy(namingFieldsTable.fieldOrder);
+        const sep = convention.separator || "-";
+        const suggested = buildFallbackName(fileName, fields, sep);
+        res.json({ suggestedName: suggested, reason: "Built by matching your file name against allowed convention values." });
+      } else {
+        res.json({ suggestedName: fileName, reason: "No active convention found — original name returned." });
+      }
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
 

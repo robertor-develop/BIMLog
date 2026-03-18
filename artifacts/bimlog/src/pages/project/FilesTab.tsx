@@ -3,11 +3,9 @@ import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@w
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History } from "lucide-react";
 import { format } from "date-fns";
-import { NameGenerator } from "./NameGenerator";
 
 interface ValidationDetail {
   field: string;
@@ -418,12 +416,11 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [success, setSuccess] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
-  const [showNameGenerator, setShowNameGenerator] = useState(false);
   const [documentRelationship, setDocumentRelationship] = useState<string>("");
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
-  const [copiedAiSuggestion, setCopiedAiSuggestion] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
@@ -456,12 +453,13 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ fileName }),
       });
-      if (!resp.ok) throw new Error("AI suggestion failed");
       const data = await resp.json() as { suggestedName: string; reason: string };
-      setAiSuggestedName(data.suggestedName);
-      setAiSuggestReason(data.reason);
+      if (data.suggestedName) {
+        setAiSuggestedName(data.suggestedName);
+        setAiSuggestReason(data.reason || "");
+      }
     } catch {
-      toast({ title: "AI suggestion failed", variant: "destructive" });
+      // silently ignore — fallback suggestion already provided by convention
     } finally {
       setAiSuggestLoading(false);
     }
@@ -518,11 +516,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}>{t("files.simulate")}</div>
-          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{t("files.simulateHint")}</div>
-        </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
         <button
           onClick={onClose}
           style={{ padding: 5, borderRadius: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}
@@ -564,27 +558,6 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         </div>
       </div>
 
-      {/* Text input row */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <Input
-          style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 12 }}
-          placeholder={t("files.placeholder")}
-          value={fileName}
-          onChange={e => { setFileName(e.target.value); setErrorDetails([]); setSuccess(false); }}
-        />
-        <Button
-          size="sm"
-          disabled={!fileName || isPending || success}
-          onClick={() => mutate({ projectId, data: { fileName, fileSize: 1024, fileType: "application/octet-stream", documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting" || undefined } })}
-          style={{ gap: 5, minWidth: 110 }}
-        >
-          {success
-            ? <><CheckCircle2 style={{ width: 13, height: 13 }} /> Accepted</>
-            : isPending ? "Validating..."
-            : t("files.testUpload")}
-        </Button>
-      </div>
-
       {/* Drag and drop zone */}
       <input
         ref={fileInputRef}
@@ -621,163 +594,170 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         </div>
       </div>
 
-      {/* Validation error breakdown */}
+      {/* Validation result — restructured */}
       {errorDetails.length > 0 && (
-        <div className="validation-error" style={{ marginTop: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "#BE123C", marginBottom: 10 }}>
-            <AlertCircle style={{ width: 14, height: 14 }} />
-            {t("files.namingViolation")}
-          </div>
-
-          {/* Token breakdown */}
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#9F1239", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              File name breakdown
+        <div style={{ marginTop: 12 }}>
+          {/* Section 1: Clean container — file name + suggested compliant name + action buttons */}
+          <div style={{
+            padding: "16px",
+            background: "white",
+            border: "1.5px solid #BFDBFE",
+            borderRadius: 10,
+          }}>
+            {/* Rejected file name */}
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#6B7280", marginBottom: 10, wordBreak: "break-all" }}>
+              {fileName}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
-              {fileName.split(/[-_.]/).map((part, i, arr) => {
-                const hasError = errorDetails.some(d => d.received === part);
-                return (
-                  <span key={i}>
-                    <span className={hasError ? "name-tag name-tag-invalid" : "name-tag name-tag-valid"}>
-                      {part}
-                    </span>
-                    {i < arr.length - 1 && (
-                      <span className="name-tag-sep">{fileName.includes("-") ? "-" : "_"}</span>
-                    )}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Suggested compliant names + AI Suggest — shown immediately after token breakdown */}
-          {(suggestedName || aiSuggestedName) && (
-            <div style={{ marginTop: 10, marginBottom: 12, padding: "10px 12px", background: "#F5F3FF", border: "1.5px solid #C4B5FD", borderRadius: 8 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#1E3A5F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-                <Sparkles style={{ width: 11, height: 11, color: "#7C3AED" }} />
-                Suggested compliant names
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                {suggestedName && (
-                  <button
-                    onClick={() => handleCopySuggestion(suggestedName)}
-                    title="Click to copy"
-                    style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "5px 12px", borderRadius: 6,
-                      border: `1.5px solid ${copiedSuggestion ? "#86EFAC" : "#2563EB"}`,
-                      background: copiedSuggestion ? "#F0FDF4" : "#EFF6FF",
-                      cursor: "pointer", fontFamily: "var(--font-mono)",
-                      fontSize: 11, fontWeight: 600,
-                      color: copiedSuggestion ? "#15803D" : "#1D4ED8",
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    {copiedSuggestion
-                      ? <><CheckCircle2 style={{ width: 12, height: 12 }} />Copied!</>
-                      : <><Copy style={{ width: 11, height: 11 }} />{suggestedName}</>
-                    }
-                  </button>
-                )}
+            {/* Suggested Compliant Name heading */}
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>
+              Suggested Compliant Name
+            </div>
+
+            {/* Name chip + action buttons in one flex row */}
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              {(aiSuggestedName || suggestedName) && (
                 <button
-                  onClick={handleAiSuggest}
-                  disabled={!fileName || aiSuggestLoading}
+                  onClick={() => handleCopySuggestion(aiSuggestedName || suggestedName || "")}
+                  title="Click to copy"
                   style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "5px 12px", borderRadius: 6,
-                    border: "none",
-                    background: aiSuggestLoading ? "#A78BFA" : "#7C3AED",
-                    cursor: aiSuggestLoading || !fileName ? "not-allowed" : "pointer",
-                    fontSize: 11, fontWeight: 600, color: "white",
-                    opacity: !fileName ? 0.6 : 1,
-                    transition: "background 0.15s",
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "7px 18px", borderRadius: 20,
+                    border: `2px solid ${copiedSuggestion ? "#86EFAC" : "#1D4ED8"}`,
+                    background: copiedSuggestion ? "#F0FDF4" : "#EFF6FF",
+                    cursor: "pointer", fontFamily: "var(--font-mono)",
+                    fontSize: 13, fontWeight: 700,
+                    color: copiedSuggestion ? "#15803D" : "#1D4ED8",
+                    transition: "all 0.15s",
+                    wordBreak: "break-all",
                   }}
                 >
-                  <Sparkles style={{ width: 11, height: 11 }} />
-                  {aiSuggestLoading ? "Asking AI…" : "Ask AI"}
+                  {copiedSuggestion
+                    ? <><CheckCircle2 style={{ width: 13, height: 13, flexShrink: 0 }} />Copied!</>
+                    : <><Copy style={{ width: 12, height: 12, flexShrink: 0 }} />{aiSuggestedName || suggestedName}</>
+                  }
                 </button>
-                <button
-                  onClick={() => setShowNameGenerator(prev => !prev)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "5px 10px", borderRadius: 6,
-                    border: "1.5px solid #C4B5FD",
-                    background: showNameGenerator ? "#EDE9FE" : "transparent",
-                    cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#7C3AED",
-                  }}
-                >
-                  <Sparkles style={{ width: 11, height: 11 }} />
-                  {showNameGenerator ? "Close generator" : "Customize name"}
-                </button>
-              </div>
-              {aiSuggestedName && (
-                <div style={{ marginTop: 10, padding: "8px 10px", background: "white", border: "1px solid #DDD6FE", borderRadius: 6 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "#7C3AED", marginBottom: 4 }}>AI Suggestion</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <code style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#1E3A5F", flex: 1 }}>{aiSuggestedName}</code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(aiSuggestedName).then(() => {
-                          setCopiedAiSuggestion(true);
-                          setTimeout(() => setCopiedAiSuggestion(false), 2000);
-                        });
-                      }}
-                      style={{ padding: "3px 8px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "#F5F3FF", color: "#7C3AED", cursor: "pointer", fontWeight: 600 }}
-                    >
-                      {copiedAiSuggestion ? "Copied!" : "Copy"}
-                    </button>
-                  </div>
-                  {aiSuggestReason && (
-                    <div style={{ fontSize: 10, color: "#6B7280", marginTop: 4, fontStyle: "italic" }}>{aiSuggestReason}</div>
-                  )}
-                </div>
               )}
-              <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6 }}>
-                Convention suggestion built from first allowed value per field · Ask AI to adapt your original name
-              </div>
-            </div>
-          )}
 
-          {/* Field-level error breakdown */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {errorDetails.map((detail, i) => (
-              <div key={i} style={{ fontSize: 11, color: "#9F1239" }}>
-                <div style={{ fontWeight: 600, marginBottom: 3 }}>
-                  {detail.field}: {detail.message}
-                </div>
-                {detail.expected && detail.expected.length > 0 && (
-                  <div>
-                    <span style={{ color: "#6B7280" }}>Allowed values: </span>
-                    {detail.expected.map(v => (
-                      <span key={v} style={{
-                        fontFamily: "var(--font-mono)", fontSize: 10,
-                        background: "#FEE2E2", color: "#991B1B",
-                        border: "1px solid #FECDD3",
-                        padding: "1px 6px", borderRadius: 3,
-                        marginRight: 4, marginBottom: 2, display: "inline-block"
-                      }}>{v}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              {/* Ask AI button */}
+              <button
+                onClick={handleAiSuggest}
+                disabled={!fileName || aiSuggestLoading}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "7px 14px", borderRadius: 6, border: "none",
+                  background: aiSuggestLoading ? "#A78BFA" : "#7C3AED",
+                  cursor: aiSuggestLoading || !fileName ? "not-allowed" : "pointer",
+                  fontSize: 11, fontWeight: 600, color: "white",
+                  opacity: !fileName ? 0.6 : 1,
+                  transition: "background 0.15s",
+                  flexShrink: 0,
+                }}
+              >
+                <Sparkles style={{ width: 11, height: 11 }} />
+                {aiSuggestLoading ? "Asking AI…" : "Ask AI"}
+              </button>
+
+              {/* Customize Name button */}
+              <button
+                onClick={() => toast({ title: "Open the Name Generator tab in the sidebar to build a custom compliant name." })}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "7px 14px", borderRadius: 6,
+                  border: "1.5px solid #2563EB",
+                  background: "transparent",
+                  cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#2563EB",
+                  flexShrink: 0,
+                }}
+              >
+                Customize Name
+              </button>
+            </div>
+
+            {/* Helper text */}
+            <div style={{ fontSize: 10, color: "#9CA3AF" }}>
+              Built from your active naming convention
+              {aiSuggestReason && <> · <span style={{ fontStyle: "italic" }}>{aiSuggestReason}</span></>}
+            </div>
           </div>
 
-          {/* Inline Name Generator */}
-          {showNameGenerator && (
-            <div style={{ marginTop: 12, border: "1.5px solid #C4B5FD", borderRadius: 10, overflow: "hidden" }}>
-              <div style={{ padding: "8px 14px", background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#4C1D95" }}>Name Generator</span>
-                <button onClick={() => setShowNameGenerator(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#7C3AED", padding: 2 }}>
-                  <X style={{ width: 13, height: 13 }} />
-                </button>
+          {/* Divider */}
+          <div style={{ borderTop: "1px solid #E5E7EB", margin: "10px 0" }} />
+
+          {/* Section 2: Collapsible error details — collapsed by default */}
+          <div>
+            <button
+              onClick={() => setShowErrors(prev => !prev)}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "transparent", border: "none", cursor: "pointer",
+                fontSize: 11, fontWeight: 600, color: "#6B7280", padding: "2px 0",
+              }}
+            >
+              {showErrors
+                ? <ChevronDown style={{ width: 13, height: 13 }} />
+                : <ChevronRight style={{ width: 13, height: 13 }} />
+              }
+              Show why this file was rejected
+            </button>
+
+            {showErrors && (
+              <div style={{
+                marginTop: 8,
+                padding: "12px 14px",
+                background: "#FFF1F2",
+                border: "1.5px solid #FECDD3",
+                borderRadius: 8,
+              }}>
+                {/* Token breakdown */}
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "#9F1239", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    File name breakdown
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
+                    {fileName.split(/[-_.]/).map((part, i, arr) => {
+                      const hasError = errorDetails.some(d => (d as any).received === part || d.message?.includes(part));
+                      return (
+                        <span key={i}>
+                          <span className={hasError ? "name-tag name-tag-invalid" : "name-tag name-tag-valid"}>
+                            {part}
+                          </span>
+                          {i < arr.length - 1 && (
+                            <span className="name-tag-sep">{fileName.includes("-") ? "-" : "_"}</span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Field-level errors */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {errorDetails.map((detail, i) => (
+                    <div key={i} style={{ fontSize: 11, color: "#9F1239" }}>
+                      <div style={{ fontWeight: 600, marginBottom: 3 }}>
+                        {detail.field}: {detail.message}
+                      </div>
+                      {detail.expected && detail.expected.length > 0 && (
+                        <div>
+                          <span style={{ color: "#6B7280" }}>Allowed values: </span>
+                          {detail.expected.map(v => (
+                            <span key={v} style={{
+                              fontFamily: "var(--font-mono)", fontSize: 10,
+                              background: "#FEE2E2", color: "#991B1B",
+                              border: "1px solid #FECDD3",
+                              padding: "1px 6px", borderRadius: 3,
+                              marginRight: 4, marginBottom: 2, display: "inline-block"
+                            }}>{v}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{ padding: "12px 14px" }}>
-                <NameGenerator projectId={projectId} />
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
