@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useListMembers, useAddMember, useRemoveMember, useUpdateMember } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -6,7 +6,7 @@ import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Plus, X, Trash2, Building2, Shield } from "lucide-react";
+import { Users, Plus, X, Trash2, Building2, Shield, Mail, Clock, UserCheck } from "lucide-react";
 import { format } from "date-fns";
 
 const AVATAR_COLORS = ["av-blue", "av-purple", "av-green", "av-orange", "av-teal", "av-red"];
@@ -178,6 +178,9 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
         </div>
       )}
 
+      {/* Pending Invitations */}
+      {isAdmin && <PendingInvitations projectId={projectId} />}
+
       {/* Role legend */}
       {(members ?? []).length > 0 && (
         <div style={{
@@ -218,8 +221,18 @@ function AddMemberForm({ projectId, onClose }: { projectId: number; onClose: () 
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const roleOptions = getOptions("member_role");
+  const [activeTab, setActiveTab] = useState<"existing" | "invite">("existing");
+
+  // Existing user tab
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(roleOptions[0]?.value ?? "");
+
+  // Invite by email tab
+  const [invEmail, setInvEmail] = useState("");
+  const [invFullName, setInvFullName] = useState("");
+  const [invCompany, setInvCompany] = useState("");
+  const [invRole, setInvRole] = useState(roleOptions[0]?.value ?? "");
+  const [invPending, setInvPending] = useState(false);
 
   const { mutate, isPending } = useAddMember({
     mutation: {
@@ -232,45 +245,182 @@ function AddMemberForm({ projectId, onClose }: { projectId: number; onClose: () 
     },
   });
 
+  const handleInvite = async () => {
+    if (!invEmail) return;
+    setInvPending(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+      const r = await fetch(`${BASE}/api/v1/projects/${projectId}/invitations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: invEmail, fullName: invFullName || undefined, companyName: invCompany || undefined, role: invRole }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/invitations`] });
+      toast({ title: `Invitation sent to ${invEmail}` });
+      onClose();
+    } catch (e) {
+      toast({ title: "Failed to send invitation", variant: "destructive" });
+    } finally {
+      setInvPending(false);
+    }
+  };
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1, padding: "7px 0", fontSize: 12, fontWeight: active ? 700 : 500,
+    border: "none", background: active ? "hsl(var(--background))" : "transparent",
+    color: active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+    cursor: "pointer", borderRadius: 6, borderBottom: active ? "2px solid #2563EB" : "2px solid transparent",
+    transition: "all 0.15s",
+  });
+
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}>{t("team.addTitle")}</div>
         <button onClick={onClose} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}>
           <X style={{ width: 13, height: 13 }} />
         </button>
       </div>
-      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
-        The user must already have a BIMLog account. Enter their registered email address.
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 14, borderBottom: "1px solid hsl(var(--border))", paddingBottom: 0 }}>
+        <button style={tabStyle(activeTab === "existing")} onClick={() => setActiveTab("existing")}>
+          <UserCheck style={{ width: 12, height: 12, display: "inline", marginRight: 5 }} />
+          Existing User
+        </button>
+        <button style={tabStyle(activeTab === "invite")} onClick={() => setActiveTab("invite")}>
+          <Mail style={{ width: 12, height: 12, display: "inline", marginRight: 5 }} />
+          Invite by Email
+        </button>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <Input
-          type="email"
-          style={{ flex: 1 }}
-          placeholder={t("team.emailPlaceholder")}
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          autoFocus
-        />
-        <select
-          value={role}
-          onChange={e => setRole(e.target.value)}
-          style={{ height: 36, minWidth: 140 }}
-        >
-          {roleOptions.map(opt => (
-            <option key={opt.value} value={opt.value}>
-              {lang === "es" ? opt.labelEs : opt.label}
-            </option>
-          ))}
-        </select>
-        <Button
-          size="sm"
-          disabled={!email || isPending}
-          onClick={() => mutate({ projectId, data: { email, role } })}
-          style={{ minWidth: 70 }}
-        >
-          {isPending ? "..." : t("team.addButton")}
-        </Button>
+
+      {activeTab === "existing" && (
+        <>
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
+            The user must already have a BIMLog account. Enter their registered email address.
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Input type="email" style={{ flex: 1 }} placeholder={t("team.emailPlaceholder")} value={email} onChange={e => setEmail(e.target.value)} autoFocus />
+            <select value={role} onChange={e => setRole(e.target.value)} style={{ height: 36, minWidth: 140 }}>
+              {roleOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{lang === "es" ? opt.labelEs : opt.label}</option>
+              ))}
+            </select>
+            <Button size="sm" disabled={!email || isPending} onClick={() => mutate({ projectId, data: { email, role } })} style={{ minWidth: 70 }}>
+              {isPending ? "..." : t("team.addButton")}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {activeTab === "invite" && (
+        <>
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
+            Send an invitation to someone who doesn't have a BIMLog account yet. When they register with this email they will be automatically added to the project.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Input type="email" style={{ flex: 1 }} placeholder="Email address *" value={invEmail} onChange={e => setInvEmail(e.target.value)} autoFocus />
+              <select value={invRole} onChange={e => setInvRole(e.target.value)} style={{ height: 36, minWidth: 140 }}>
+                {roleOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{lang === "es" ? opt.labelEs : opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Input style={{ flex: 1 }} placeholder="Full name (optional)" value={invFullName} onChange={e => setInvFullName(e.target.value)} />
+              <Input style={{ flex: 1 }} placeholder="Company (optional)" value={invCompany} onChange={e => setInvCompany(e.target.value)} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button size="sm" disabled={!invEmail || invPending} onClick={handleInvite} style={{ gap: 6 }}>
+                <Mail style={{ width: 12, height: 12 }} />
+                {invPending ? "Sending..." : "Send Invitation"}
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function PendingInvitations({ projectId }: { projectId: number }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadInvitations = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+      const r = await fetch(`${BASE}/api/v1/projects/${projectId}/invitations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) return;
+      const data = await r.json();
+      setInvitations(data.filter((i: any) => i.status === "pending"));
+    } catch (_) {}
+  };
+
+  useEffect(() => { loadInvitations(); }, [projectId]);
+
+  const handleCancel = async (id: number) => {
+    setLoading(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+      await fetch(`${BASE}/api/v1/projects/${projectId}/invitations/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/invitations`] });
+      setInvitations(prev => prev.filter(i => i.id !== id));
+      toast({ title: "Invitation cancelled" });
+    } catch (_) {
+      toast({ title: "Failed to cancel invitation", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (invitations.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 16, padding: "12px 14px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <Clock style={{ width: 13, height: 13, color: "#92400E" }} />
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#92400E" }}>Pending Invitations</span>
+        <span style={{ fontSize: 11, color: "#B45309", marginLeft: 4 }}>{invitations.length} awaiting registration</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {invitations.map(inv => (
+          <div key={inv.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "#FEF3C7", border: "1px solid #FDE68A", borderRadius: 6 }}>
+            <Mail style={{ width: 13, height: 13, color: "#B45309", flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#78350F", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+              {inv.fullName && <div style={{ fontSize: 11, color: "#92400E" }}>{inv.fullName}{inv.companyName ? ` · ${inv.companyName}` : ""}</div>}
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: "#FEF9C3", color: "#854D0E", border: "1px solid #FDE68A", flexShrink: 0 }}>
+              {inv.role.replace("_", " ")}
+            </span>
+            <span style={{ fontSize: 10, color: "#B45309", flexShrink: 0 }}>
+              {new Date(inv.createdAt).toLocaleDateString()}
+            </span>
+            <button
+              disabled={loading}
+              onClick={() => handleCancel(inv.id)}
+              title="Cancel invitation"
+              style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "#B45309", flexShrink: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#B45309")}
+            >
+              <X style={{ width: 12, height: 12 }} />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

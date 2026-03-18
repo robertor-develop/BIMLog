@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
-import { usersTable, companiesTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { usersTable, companiesTable, projectInvitations, projectMembersTable } from "@workspace/db/schema";
+import { eq, and } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import { signToken, authMiddleware, type AuthPayload } from "../middlewares/auth";
 
@@ -34,6 +34,20 @@ router.post("/auth/register", async (req, res) => {
       fullName: body.fullName,
       companyId,
     }).returning();
+
+    // Auto-accept any pending invitations for this email
+    try {
+      const pending = await db.select().from(projectInvitations)
+        .where(and(eq(projectInvitations.email, body.email), eq(projectInvitations.status, "pending")));
+      for (const inv of pending) {
+        const alreadyMember = await db.select().from(projectMembersTable)
+          .where(and(eq(projectMembersTable.projectId, inv.projectId), eq(projectMembersTable.userId, user.id))).limit(1);
+        if (alreadyMember.length === 0) {
+          await db.insert(projectMembersTable).values({ projectId: inv.projectId, userId: user.id, role: inv.role });
+        }
+        await db.update(projectInvitations).set({ status: "accepted", acceptedAt: new Date() }).where(eq(projectInvitations.id, inv.id));
+      }
+    } catch (_) {}
 
     const companyName = company.length > 0 ? company[0].name : body.companyName;
     const payload: AuthPayload = {

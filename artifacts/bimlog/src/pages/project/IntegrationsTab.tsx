@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
-import { ExternalLink, Zap, Monitor, X, Plus } from "lucide-react";
+import { ExternalLink, Zap, Monitor, X, Plus, Code2 } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 
 interface IntegrationsTabProps { projectId: number; }
@@ -18,7 +18,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "procore",
     name: "Procore",
-    description: "RFIs, submittals, and documents sync bidirectionally. Files validated by BIMLog before reaching Procore storage.",
+    description: "Sync RFIs, submittals, and documents bidirectionally. Every action recorded in BIMLog audit trail.",
     category: "construction",
     stats: "Not connected",
     logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC",
@@ -26,7 +26,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "onedrive",
     name: "OneDrive / SharePoint",
-    description: "Files are validated by BIMLog naming gateway before being stored in OneDrive. Non-compliant files are blocked.",
+    description: "File storage sync with naming validation gateway. Every upload validated before it reaches your folders.",
     category: "storage",
     stats: "Not connected",
     logoBg: "#E0F2FE", logoColor: "#0067B8", logoText: "OD",
@@ -34,7 +34,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "speckle",
     name: "Speckle",
-    description: "3D model data streams connected. BIM objects and clash detection reports ingested for coordination analysis.",
+    description: "Model data streams connected and tracked. Every version attributed and timestamped.",
     category: "bim",
     stats: "Not connected",
     logoBg: "#DCFCE7", logoColor: "#166534", logoText: "SP",
@@ -42,7 +42,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "msproject",
     name: "MS Project",
-    description: "Schedule baseline imported. Delay detection runs against live file submission data to attribute schedule overruns.",
+    description: "Schedule data imported and monitored. Milestones and baselines tracked for delay attribution.",
     category: "construction",
     stats: "Not connected",
     logoBg: "#FFF7ED", logoColor: "#C2410C", logoText: "MP",
@@ -50,7 +50,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "powerbi",
     name: "Power BI",
-    description: "BIMLog project data exposed as a live Power BI dataset. Build custom compliance and performance dashboards.",
+    description: "BIMLog data exposed as a Power BI data source for custom compliance and performance dashboards.",
     category: "analytics",
     stats: "Not connected",
     logoBg: "#F5F3FF", logoColor: "#6D28D9", logoText: "PB",
@@ -58,7 +58,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "googledrive",
     name: "Google Drive / Docs",
-    description: "Specifications, contracts, and RFI response documents linked from Drive and versioned within BIMLog.",
+    description: "File storage sync with naming validation. Every file routed through BIMLog before delivery.",
     category: "storage",
     stats: "Not connected",
     logoBg: "#DCFCE7", logoColor: "#166534", logoText: "GD",
@@ -66,7 +66,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "claude",
     name: "Claude · Anthropic",
-    description: "Natural language report generation, delay attribution analysis, compliance summaries, and RFI drafting on demand.",
+    description: "AI-powered RFI drafting, submittal compliance checking, and report generation on demand.",
     category: "ai",
     stats: "Not connected",
     logoBg: "#EDE9FE", logoColor: "#5B21B6", logoText: "AI",
@@ -75,7 +75,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "gemini",
     name: "Gemini · Google AI",
-    description: "Alternative AI engine for report generation, data analysis, and project insights. Activate as primary or fallback.",
+    description: "Alternative AI provider for project insights and report generation. Activate as primary or fallback.",
     category: "ai",
     stats: "Not connected",
     logoBg: "#F0FDF4", logoColor: "#065F46", logoText: "GM",
@@ -83,7 +83,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "revit",
     name: "Revit (Autodesk)",
-    description: "Direct upload from Revit via BIMLog add-in. Files validated at source before leaving the authoring environment.",
+    description: "Model file upload gateway. Every RVT file validated against active convention on upload.",
     category: "bim",
     stats: "Not connected",
     logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "RV",
@@ -91,7 +91,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "navisworks",
     name: "Navisworks",
-    description: "NWD and NWF composite models tracked with naming validation. Clash reports ingested and attributed by trade.",
+    description: "Composite model uploads validated. NWD and NWF files tracked with version history.",
     category: "bim",
     stats: "Not connected",
     logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "NW",
@@ -99,7 +99,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "ifc",
     name: "IFC / openBIM",
-    description: "ISO 19650-compliant IFC file uploads validated against naming convention. buildingSMART certified workflow.",
+    description: "Open BIM file uploads validated against active convention. IFC model versions tracked.",
     category: "bim",
     stats: "Not connected",
     logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "IFC",
@@ -107,7 +107,7 @@ const INTEGRATIONS: Integration[] = [
   {
     id: "excel",
     name: "Excel / Google Sheets",
-    description: "Schedule trackers, submittal logs, and RFI registers imported and kept in sync. No manual re-entry.",
+    description: "Schedule trackers and submittal logs parsed and synced. No manual data entry.",
     category: "analytics",
     stats: "Not connected",
     logoBg: "#DCFCE7", logoColor: "#166534", logoText: "XL",
@@ -125,19 +125,87 @@ const CATEGORY_LABELS: Record<string, string> = {
 const CATEGORY_ORDER = ["construction", "bim", "storage", "analytics", "ai"];
 
 const ADD_PLATFORMS: IntegrationInfo[] = [
-  { name: "Procore",       logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC"  },
-  { name: "Autodesk ACC",  logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "AU"  },
-  { name: "OneDrive",      logoBg: "#E0F2FE", logoColor: "#0067B8", logoText: "OD"  },
-  { name: "SharePoint",    logoBg: "#E0F2FE", logoColor: "#0067B8", logoText: "SP2" },
-  { name: "Revit",         logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "RV"  },
-  { name: "Navisworks",    logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "NW"  },
-  { name: "Speckle",       logoBg: "#DCFCE7", logoColor: "#166534", logoText: "SP"  },
-  { name: "MS Project",    logoBg: "#FFF7ED", logoColor: "#C2410C", logoText: "MP"  },
-  { name: "Google Drive",  logoBg: "#DCFCE7", logoColor: "#166534", logoText: "GD"  },
-  { name: "Power BI",      logoBg: "#F5F3FF", logoColor: "#6D28D9", logoText: "PB"  },
-  { name: "Excel",         logoBg: "#DCFCE7", logoColor: "#166534", logoText: "XL"  },
-  { name: "IFC",           logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "IFC" },
+  { name: "Autodesk BIM 360", logoBg: "#FEF9C3", logoColor: "#A16207", logoText: "B360" },
+  { name: "Aconex",           logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "ACX"  },
+  { name: "Primavera P6",     logoBg: "#FFF7ED", logoColor: "#C2410C", logoText: "P6"   },
+  { name: "Bluebeam Revu",    logoBg: "#EFF6FF", logoColor: "#1D4ED8", logoText: "BB"   },
+  { name: "Fieldwire",        logoBg: "#DCFCE7", logoColor: "#166534", logoText: "FW"   },
+  { name: "PlanGrid",         logoBg: "#F0FDF4", logoColor: "#065F46", logoText: "PG"   },
+  { name: "Smartsheet",       logoBg: "#F0FDF4", logoColor: "#166534", logoText: "SS"   },
+  { name: "Trimble Connect",  logoBg: "#FEF9C3", logoColor: "#854D0E", logoText: "TC"   },
+  { name: "Dropbox",          logoBg: "#EFF6FF", logoColor: "#0369A1", logoText: "DB"   },
+  { name: "Box",              logoBg: "#EFF6FF", logoColor: "#1D4ED8", logoText: "BOX"  },
+  { name: "Egnyte",           logoBg: "#DCFCE7", logoColor: "#166534", logoText: "EG"   },
+  { name: "Prostream",        logoBg: "#F5F3FF", logoColor: "#5B21B6", logoText: "PS"   },
+  { name: "e-Builder",        logoBg: "#FFF7ED", logoColor: "#9A3412", logoText: "EB"   },
+  { name: "Kahua",            logoBg: "#EDE9FE", logoColor: "#5B21B6", logoText: "KA"   },
+  { name: "Newforma",         logoBg: "#FEF2F2", logoColor: "#991B1B", logoText: "NF"   },
 ];
+
+const API_ENDPOINTS = [
+  { method: "GET",  path: "/projects",                                      desc: "List all projects for authenticated user" },
+  { method: "POST", path: "/projects",                                      desc: "Create a new project" },
+  { method: "GET",  path: "/projects/:id/files",                            desc: "List all files for a project" },
+  { method: "POST", path: "/projects/:id/files",                            desc: "Upload and validate a file" },
+  { method: "GET",  path: "/projects/:id/rfis",                             desc: "List all RFIs" },
+  { method: "POST", path: "/projects/:id/rfis",                             desc: "Create a new RFI" },
+  { method: "GET",  path: "/projects/:id/rfis/:id/audit-certificate",       desc: "Generate audit certificate PDF" },
+  { method: "GET",  path: "/projects/:id/submittals",                       desc: "List all submittals" },
+  { method: "POST", path: "/projects/:id/submittals",                       desc: "Create a new submittal" },
+  { method: "GET",  path: "/projects/:id/submittals/:id/audit-certificate", desc: "Generate submittal audit certificate" },
+  { method: "GET",  path: "/projects/:id/activity",                         desc: "Get full activity log" },
+];
+
+const METHOD_COLOR: Record<string, { bg: string; color: string }> = {
+  GET:  { bg: "#EFF6FF", color: "#1D4ED8" },
+  POST: { bg: "#F0FDF4", color: "#166534" },
+};
+
+function ApiDocsModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 14, width: "100%", maxWidth: 620, maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Code2 style={{ width: 16, height: 16, color: "#2563EB" }} />
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>BIMLog REST API</div>
+          </div>
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "hsl(var(--secondary))", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))" }}>
+            <X style={{ width: 14, height: 14 }} />
+          </button>
+        </div>
+        <div style={{ padding: "16px 20px 20px" }}>
+          <div style={{ padding: "12px 14px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 8, marginBottom: 16, fontSize: 12, color: "#1E3A5F", lineHeight: 1.7 }}>
+            BIMLog exposes a full REST API for integration with any platform that supports standard HTTP authentication.
+            <br />
+            <strong>Base URL:</strong> <code style={{ fontFamily: "var(--font-mono)", background: "#DBEAFE", padding: "1px 5px", borderRadius: 3 }}>https://bim-log-ignite.replit.app/api/v1</code>
+            <br />
+            <strong>Authentication:</strong> Bearer token via JWT — contact <a href="mailto:info@ignitesmart.ai" style={{ color: "#2563EB" }}>info@ignitesmart.ai</a> to request API credentials.
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Endpoints</div>
+          <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
+            {API_ENDPOINTS.map((ep, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderBottom: i < API_ENDPOINTS.length - 1 ? "1px solid hsl(var(--border))" : "none", background: i % 2 === 0 ? "hsl(var(--card))" : "hsl(var(--background))" }}>
+                <span style={{ fontSize: 9, fontWeight: 800, fontFamily: "var(--font-mono)", padding: "2px 6px", borderRadius: 4, background: METHOD_COLOR[ep.method]?.bg ?? "#F3F4F6", color: METHOD_COLOR[ep.method]?.color ?? "#374151", flexShrink: 0, minWidth: 38, textAlign: "center" }}>{ep.method}</span>
+                <code style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#1E3A5F", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ep.path}</code>
+                <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>{ep.desc}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, padding: "10px 14px", background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 8, fontSize: 11, color: "#5B21B6", lineHeight: 1.6 }}>
+            Webhooks available on Enterprise — contact <a href="mailto:info@ignitesmart.ai" style={{ color: "#7C3AED", fontWeight: 600 }}>info@ignitesmart.ai</a>.
+            Full documentation coming soon at <a href="https://ignitesmart.ai/api-docs" target="_blank" rel="noopener noreferrer" style={{ color: "#7C3AED", fontWeight: 600 }}>ignitesmart.ai/api-docs</a>.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function AddIntegrationModal({ onClose, onSelect }: { onClose: () => void; onSelect: (p: IntegrationInfo) => void }) {
   const [other, setOther] = useState("");
@@ -277,6 +345,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [filter, setFilter] = useState<string>("all");
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showApiDocs, setShowApiDocs] = useState(false);
 
   const filtered = filter === "all"
     ? INTEGRATIONS
@@ -304,6 +373,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           onSelect={p => setSelectedIntegration(p)}
         />
       )}
+      {showApiDocs && <ApiDocsModal onClose={() => setShowApiDocs(false)} />}
 
       {/* Header KPIs */}
       <div className="kpi-grid-4" style={{ marginBottom: 20 }}>
@@ -520,17 +590,18 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             Enterprise plans include dedicated integration support from the IgniteSmart team.
           </div>
         </div>
-        <a
-          href="mailto:info@ignitesmart.ai?subject=BIMLog%20API%20Documentation%20Request&body=Hello%20IgniteSmart%2C%0A%0AI%20would%20like%20to%20access%20the%20BIMLog%20REST%20API%20documentation."
+        <button
+          onClick={() => setShowApiDocs(true)}
           style={{
             flexShrink: 0, padding: "7px 14px", borderRadius: 6,
             fontSize: 11, fontWeight: 600, background: "#2563EB",
             color: "#fff", border: "none", cursor: "pointer",
-            textDecoration: "none", display: "inline-block",
+            display: "inline-flex", alignItems: "center", gap: 5,
           }}
         >
+          <Code2 style={{ width: 12, height: 12 }} />
           API docs
-        </a>
+        </button>
       </div>
     </div>
   );

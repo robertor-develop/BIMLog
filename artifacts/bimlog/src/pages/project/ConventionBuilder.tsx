@@ -1460,6 +1460,45 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
           <RotateCcw style={{ width: 13, height: 13 }} />{w("Re-run setup wizard","Reejecutar asistente",lang)}
         </Button>
       </div>
+
+      {/* Live Preview */}
+      {(() => {
+        const sep = convention.separator || "-";
+        const previewTokens = fields.map((f: any) => {
+          const first = f.values.split(",").map((v: string) => v.trim()).filter(Boolean)[0] || f.label;
+          return first;
+        });
+        const previewName = previewTokens.join(sep);
+        return (
+          <div style={{ marginBottom: 16, padding: "12px 16px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 10 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#1E40AF", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
+              {w("Live Preview","Vista previa en vivo",lang)}
+            </div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "#1E3A5F", wordBreak: "break-all", marginBottom: 8 }}>
+              {previewName || <span style={{ fontStyle: "italic", fontWeight: 400, color: "#94A3B8" }}>{w("Add fields to see preview","Agrega campos para ver la vista previa",lang)}</span>}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3 }}>
+              {previewTokens.map((tok: string, i: number) => {
+                const c = CHIP_COLORS[i % CHIP_COLORS.length];
+                return (
+                  <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                    <span title={fields[i]?.label} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, background: c.bg, color: c.color, border: `1px solid ${c.border}`, padding: "2px 7px", borderRadius: 4, cursor: "default" }}>
+                      {tok}
+                    </span>
+                    {i < previewTokens.length - 1 && (
+                      <span style={{ color: "#CBD5E1", fontSize: 13, fontFamily: "var(--font-mono)" }}>{sep}</span>
+                    )}
+                  </span>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 10, color: "#64748B" }}>
+              {w(`${fields.length} field${fields.length === 1 ? "" : "s"} · separator: "${sep}"`,`${fields.length} campo${fields.length === 1 ? "" : "s"} · separador: "${sep}"`,lang)}
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "grid", gridTemplateColumns: "24px 24px 1fr 2fr 28px", gap: 8, paddingLeft: 4, paddingRight: 4, marginBottom: 4 }}>
           <div /><div />

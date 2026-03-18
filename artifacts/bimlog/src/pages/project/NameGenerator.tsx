@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown } from "lucide-react";
+import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -165,6 +165,7 @@ export function NameGenerator({ projectId, onGoToConvention }: { projectId: numb
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [savedNames, setSavedNames] = useState<SavedName[]>([]);
+  const [recentNames, setRecentNames] = useState<{ name: string; ts: string }[]>([]);
 
   // When convention loads, initialise selections with the first allowed value of each field
   useEffect(() => {
@@ -242,11 +243,13 @@ export function NameGenerator({ projectId, onGoToConvention }: { projectId: numb
     setCopied(true);
     toast({ title: w("File name copied to clipboard", "Nombre de archivo copiado", lang) });
     setTimeout(() => setCopied(false), 2000);
+    setRecentNames(prev => [{ name: generatedName, ts: new Date().toISOString() }, ...prev].slice(0, 5));
   };
 
   const handleSave = () => {
     if (!generatedName) return;
     setSavedNames(prev => [{ name: generatedName, savedAt: new Date().toISOString() }, ...prev]);
+    setRecentNames(prev => [{ name: generatedName, ts: new Date().toISOString() }, ...prev].slice(0, 5));
     toast({ title: w("Saved to list", "Guardado en la lista", lang) });
   };
 
@@ -400,6 +403,30 @@ export function NameGenerator({ projectId, onGoToConvention }: { projectId: numb
           {w("Reset","Restablecer",lang)}
         </Button>
       </div>
+
+      {/* Recent Names */}
+      {recentNames.length > 0 && (
+        <div style={{ marginBottom: 20, padding: "12px 16px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <Clock style={{ width: 13, height: 13, color: "hsl(var(--muted-foreground))" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))" }}>{w("Recent names","Nombres recientes",lang)}</span>
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>({w("this session","esta sesión",lang)})</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {recentNames.map((entry, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 10px", background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "hsl(var(--foreground))", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.name}</span>
+                <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
+                  {new Date(entry.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <button onClick={() => { navigator.clipboard.writeText(entry.name); toast({ title: w("Copied","Copiado",lang) }); }} style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
+                  <Copy style={{ width: 11, height: 11 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Naming structure bar */}
       <div style={{

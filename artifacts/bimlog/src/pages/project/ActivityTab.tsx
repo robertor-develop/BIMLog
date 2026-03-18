@@ -27,6 +27,8 @@ export function ActivityTab({ projectId }: { projectId: number }) {
   const { data: activities, isLoading } = useListActivity(projectId);
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const filtered = (activities ?? []).filter(a => {
     const matchesSearch =
@@ -37,7 +39,10 @@ export function ActivityTab({ projectId }: { projectId: number }) {
       a.fileNameBefore?.toLowerCase().includes(search.toLowerCase()) ||
       a.details?.toLowerCase().includes(search.toLowerCase());
     const matchesAction = actionFilter === "all" || a.actionType === actionFilter;
-    return matchesSearch && matchesAction;
+    const ts = new Date(a.createdAt).getTime();
+    const matchesFrom = !dateFrom || ts >= new Date(dateFrom).getTime();
+    const matchesTo = !dateTo || ts <= new Date(dateTo + "T23:59:59").getTime();
+    return matchesSearch && matchesAction && matchesFrom && matchesTo;
   });
 
   const actionTypes = [...new Set((activities ?? []).map(a => a.actionType))];
@@ -150,6 +155,30 @@ export function ActivityTab({ projectId }: { projectId: number }) {
                 </option>
               ))}
             </select>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>From</span>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              style={{ height: 34, padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12, background: "hsl(var(--card))", color: "hsl(var(--foreground))", outline: "none", cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>To</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              style={{ height: 34, padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12, background: "hsl(var(--card))", color: "hsl(var(--foreground))", outline: "none", cursor: "pointer" }}
+            />
+            {(dateFrom || dateTo) && (
+              <button
+                onClick={() => { setDateFrom(""); setDateTo(""); }}
+                style={{ height: 34, padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 11, background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", cursor: "pointer" }}
+              >
+                Clear
+              </button>
+            )}
           </div>
         </div>
       )}

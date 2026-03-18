@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectMembersTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
+import { projectMembersTable, usersTable, companiesTable, activityLogTable, projectInvitations } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { AddMemberBody, UpdateMemberBody, ListMembersParams, AddMemberParams, UpdateMemberParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -176,6 +176,52 @@ router.delete("/projects/:projectId/members/:memberId", authMiddleware, requireP
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });
+  }
+});
+
+// ─── Invitations ──────────────────────────────────────────────────────────────
+
+router.get("/projects/:projectId/invitations", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string, 10);
+    const rows = await db.select().from(projectInvitations).where(eq(projectInvitations.projectId, projectId));
+    res.json(rows.map(r => ({ ...r, createdAt: r.createdAt.toISOString(), acceptedAt: r.acceptedAt?.toISOString() ?? null })));
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.post("/projects/:projectId/invitations", authMiddleware, requirePermission("admin"), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string, 10);
+    const { email, fullName, companyName, role } = req.body as { email: string; fullName?: string; companyName?: string; role?: string };
+    if (!email) { res.status(400).json({ error: "email is required" }); return; }
+    const roleValue = role || "member";
+    const [row] = await db.insert(projectInvitations).values({
+      projectId,
+      invitedByUserId: req.user!.userId,
+      email,
+      fullName: fullName ?? null,
+      companyName: companyName ?? null,
+      role: roleValue,
+      status: "pending",
+    }).returning();
+    res.status(201).json({ ...row, createdAt: row.createdAt.toISOString(), acceptedAt: null });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.delete("/projects/:projectId/invitations/:invId", authMiddleware, requirePermission("admin"), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string, 10);
+    const invId = parseInt(req.params["invId"] as string, 10);
+    const existing = await db.select().from(projectInvitations).where(and(eq(projectInvitations.id, invId), eq(projectInvitations.projectId, projectId))).limit(1);
+    if (existing.length === 0) { res.status(404).json({ error: "Invitation not found" }); return; }
+    await db.delete(projectInvitations).where(eq(projectInvitations.id, invId));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
 
