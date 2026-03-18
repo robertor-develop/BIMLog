@@ -7,3 +7,5 @@ export * from "./activity";
 export * from "./conventions";
 export * from "./config";
 export * from "./rfi-view-events";
+export * from "./submittal-register";
+export * from "./submittal-view-events";
