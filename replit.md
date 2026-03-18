@@ -54,7 +54,8 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 - **Name Generator**: Dropdown-only fields sourced from active convention. No free-text input.
 - **Role-Based Access**: DB-driven via config_options with permission metadata (admin/write/read). No hardcoded role names.
 - **Bilingual**: Full EN/ES i18n toggle
-- **RFI Tracking**: Open → In Review → Responded → Closed
+- **RFI System v2**: Full construction RFI with 8-section form (header, submitted by/to, reference info, question, impact, distribution, AI assistant), ball-in-court tracking, PDF export, revision system, list/log view toggle, CSV export, bilingual
+- **AI Question Generator**: Claude (claude-haiku-4-5) generates formal RFI questions from plain-language descriptions via `/api/v1/rfis/generate-question`
 - **Submittal Register**: Full lifecycle tracking with type classification
 
 ## Database Schema
@@ -75,8 +76,11 @@ All endpoints are versioned under `/api/v1/`.
 - `GET /api/v1/projects/:id` — Project details (requires membership)
 - `GET/POST /api/v1/projects/:id/files` — File list and upload (upload: write roles only)
 - `PATCH/DELETE /api/v1/projects/:id/files/:fileId` — Update/delete file (write roles)
-- `GET/POST /api/v1/projects/:id/rfis` — RFI list and create (create: write roles)
-- `PATCH /api/v1/projects/:id/rfis/:rfiId` — Update RFI (write roles)
+- `GET/POST /api/v1/projects/:id/rfis` — RFI list and create (create: write roles, all v2 fields)
+- `PATCH /api/v1/projects/:id/rfis/:rfiId` — Update RFI including answer/responded (write roles)
+- `GET /api/v1/projects/:id/rfis/:rfiId/export` — PDF export of single RFI (pdfkit)
+- `POST /api/v1/projects/:id/rfis/:rfiId/revise` — Create a new revision of an RFI
+- `POST /api/v1/rfis/generate-question` — AI question generation (Anthropic claude-haiku-4-5)
 - `GET/POST /api/v1/projects/:id/submittals` — Submittal list and create (create: write roles)
 - `PATCH /api/v1/projects/:id/submittals/:submittalId` — Update submittal (write roles)
 - `GET /api/v1/projects/:id/activity` — Activity log (read-only, no delete)

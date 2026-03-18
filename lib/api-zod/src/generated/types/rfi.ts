@@ -23,4 +23,34 @@ export interface Rfi {
   response?: string;
   createdAt: string;
   updatedAt: string;
+
+  dateRequested?: string;
+  dateRequired?: string;
+  submittedByCompany?: string;
+  submittedByContact?: string;
+  submittedByAddress?: string;
+  submittedByPhone?: string;
+  submittedByEmail?: string;
+  submittedToCompany?: string;
+  submittedToPerson?: string;
+  submittedToEmail?: string;
+  drawingNumber?: string;
+  drawingTitle?: string;
+  specSection?: string;
+  detailNumber?: string;
+  noteNumber?: string;
+  locationDescription?: string;
+  question?: string;
+  costImpact?: string;
+  costImpactAmount?: string;
+  scheduleImpact?: string;
+  scheduleImpactDays?: number;
+  answer?: string;
+  answeredBy?: string;
+  dateAnswered?: string;
+  distributionList?: string[];
+  attachmentsJson?: string[];
+  parentRfiId?: number;
+  revisionNumber?: number;
+  projectAddress?: string;
 }

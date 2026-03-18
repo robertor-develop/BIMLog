@@ -1,0 +1,53 @@
+Completely rewrite the RFI system. This is a major feature upgrade. Do the following exactly. Do not change anything else in the app.
+PART 1 — DATABASE CHANGES
+Add these new columns to the rfis table: rfi_number auto-incrementing per project, submitted_by_company text, submitted_to_company text, submitted_to_person text, submitted_to_email text, drawing_number text, drawing_title text, spec_section text, detail_number text, note_number text, location_description text, question text — the full detailed question not just subject, cost_impact text with options No Cost Impact, Cost Increase TBD, Cost Increase Known, Cost Decrease, answer text — the formal response, answered_by text, answered_by_company text, answered_by_email text, date_required date, date_answered date, schedule_impact text with options No Schedule Impact, Increase in Calendar Days, Decrease in Calendar Days, schedule_impact_days integer, attachments jsonb array of attachment references, revision_number integer default 0, revision_of integer references rfis id, distribution_list jsonb array of emails, ball_in_court text — who needs to act next, cover_page_notes text. Run the migration immediately.
+PART 2 — API CHANGES
+Update the RFI endpoints to handle all new fields. Update POST /api/v1/projects/:projectId/rfis to accept all new fields. Update PATCH /api/v1/projects/:projectId/rfis/:rfiId to accept all new fields including answer, answered_by, date_answered, schedule_impact, schedule_impact_days. Add GET /api/v1/projects/:projectId/rfis/:rfiId/export which generates a formatted PDF of the RFI matching the standard construction RFI format shown in the reference images. Add POST /api/v1/projects/:projectId/rfis/:rfiId/revise which creates a new RFI linked to the original as a revision.
+PART 3 — FRONTEND CHANGES
+Rewrite artifacts/bimlog/src/pages/project/RfisTab.tsx completely.
+THE RFI LIST VIEW must show these columns: RFI number, subject, status badge, priority badge, ball in court — who needs to act, submitted by company, date required, days outstanding color coded, schedule impact. Add a search bar at the top. Add filter buttons for status. Add an Export All button that exports the full RFI log as PDF or Excel with all columns. Add a New RFI button.
+THE NEW RFI FORM must be a proper full form — not just a subject line. Show it as a slide-out panel or modal with these sections:
+Section 1 — Header Information:
+RFI Number — auto-generated read only
+Project — auto-populated from current project read only
+Project Address — auto-populated from project data
+Date Requested — date picker defaulting to today
+Date Required — date picker — when a response is needed by
+Subject — text input
+Priority — dropdown Low Medium High Critical
+Section 2 — Submitted By — auto-populated from logged in user's profile but editable:
+Company Name
+Contact Person
+Address
+Phone
+Email
+Section 3 — Submitted To — who needs to answer this RFI:
+Company Name — dropdown from project team members' companies
+Contact Person — dropdown from that company's team members
+Email — auto-populated when person is selected but editable
+Section 4 — Reference Information — what this RFI is about:
+Drawing Number — text input
+Drawing Title — text input
+Spec Section — text input
+Detail Number — text input
+Note Number — text input
+Location Description — text area — describe where on the project this applies
+Section 5 — The Question:
+Description of Question — large text area — the full detailed question
+Attachments — file reference input — link to files already in BIMLog or paste external links
+Section 6 — Impact Assessment:
+Cost Impact — radio buttons: No Cost Impact, Cost Increase TBD, Cost Increase Known with amount field, Cost Decrease
+Schedule Impact — radio buttons: No Schedule Impact, Increase in Calendar Days with number field, Decrease in Calendar Days with number field
+Section 7 — Distribution:
+Distribution List — add team members who should receive notifications about this RFI
+Each person added gets an email notification when the RFI is created and when it is answered
+Section 8 — AI Assistant:
+Show a button Generate question with AI. When clicked — open a small input where the user types a brief description of their issue in plain language. Call the Claude API to generate a professional formal RFI question from their description. Insert the generated text into the Description of Question field. The user can edit it before submitting.
+THE RFI DETAIL VIEW — when you click on an RFI show a full detail view with all fields visible. Show the complete RFI in the standard construction format matching the reference images. Show a Response section at the bottom where the answering party can fill in their response, mark cost and schedule impact, sign off, and close the RFI. Show a full audit trail of every status change at the bottom.
+THE RFI EXPORT — when Export PDF is clicked generate a properly formatted PDF that matches the standard construction RFI cover page format shown in the reference images including: project name and address, RFI number, date requested and date required, submitted by with company name address phone email, submitted to with company name and person, all reference fields drawing number spec section etc, the full question text, the response text, cost impact, schedule impact, signatures section, and the BIMLog audit trail showing every status change with timestamps. Also allow export as Word document and Excel.
+THE RFI LOG VIEW — add a toggle to switch between card view and log view. The log view shows all RFIs in a table format matching a standard RFI log with columns: RFI number, description, requested by company, requested by person, sent to company, sent to person, date forwarded, date answered, status, schedule impact, notes.
+SMART DATA POPULATION — implement this safety feature: when a user fills in company name address or contact information in an RFI form — check if that information already exists in their profile or in the project team data. If it does — auto-populate the field. If the user changes a pre-populated field — show a warning that says This information comes from your company profile. Do you want to update your profile with this new information? with Yes update my profile and No just use it for this RFI buttons. This prevents inconsistent data across the platform.
+BALL IN COURT — after every action on an RFI the system must clearly show who needs to act next. Show a prominent colored badge in the RFI list and detail view showing the company and person who currently holds the ball. When the RFI is submitted — ball is in court of the Submitted To party. When answered — ball is in court of the Submitted By party to review and close. When closed — no ball in court.
+REVISION SYSTEM — allow any closed RFI to be revised. When Revise RFI is clicked — create a new RFI pre-populated with all the original fields, linked to the original RFI, with revision number incremented. Show the revision history on every RFI.
+BILINGUAL — all labels buttons and messages must use the existing i18n system in both English and Spanish.
+Then update the database schema file to include all new RFI columns. Run the migration. Rebuild and redeploy. Do not change anything else in the app.

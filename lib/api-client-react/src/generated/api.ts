@@ -25,6 +25,7 @@ import type {
   CreateRfiRequest,
   CreateSubmittalRequest,
   ErrorResponse,
+  GenerateRfiQuestionRequest,
   HealthStatus,
   LoginRequest,
   NamingConvention,
@@ -32,6 +33,7 @@ import type {
   ProjectFile,
   ProjectMember,
   RegisterRequest,
+  ReviseRfiRequest,
   Rfi,
   Submittal,
   SuccessResponse,
@@ -1280,6 +1282,156 @@ export const useUpdateRfi = <
   TContext
 > => {
   return useMutation(getUpdateRfiMutationOptions(options));
+};
+
+/**
+ * @summary Revise an RFI (create a new revision linked to the original)
+ */
+export const getReviseRfiUrl = (projectId: number, rfiId: number) => {
+  return `/api/v1/projects/${projectId}/rfis/${rfiId}/revise`;
+};
+
+export const reviseRfi = async (
+  projectId: number,
+  rfiId: number,
+  reviseRfiRequest: ReviseRfiRequest,
+  options?: RequestInit,
+): Promise<Rfi> => {
+  return customFetch<Rfi>(getReviseRfiUrl(projectId, rfiId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reviseRfiRequest),
+  });
+};
+
+export const getReviseRfiMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reviseRfi>>,
+    TError,
+    { projectId: number; rfiId: number; data: BodyType<ReviseRfiRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reviseRfi>>,
+  TError,
+  { projectId: number; rfiId: number; data: BodyType<ReviseRfiRequest> },
+  TContext
+> => {
+  const mutationKey = ["reviseRfi"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reviseRfi>>,
+    { projectId: number; rfiId: number; data: BodyType<ReviseRfiRequest> }
+  > = (props) => {
+    const { projectId, rfiId, data } = props ?? {};
+    return reviseRfi(projectId, rfiId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useReviseRfi = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reviseRfi>>,
+    TError,
+    { projectId: number; rfiId: number; data: BodyType<ReviseRfiRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reviseRfi>>,
+  TError,
+  { projectId: number; rfiId: number; data: BodyType<ReviseRfiRequest> },
+  TContext
+> => {
+  return useMutation(getReviseRfiMutationOptions(options));
+};
+
+/**
+ * @summary Generate a professional RFI question using AI
+ */
+export const getGenerateRfiQuestionUrl = () => {
+  return `/api/v1/rfis/generate-question`;
+};
+
+export const generateRfiQuestion = async (
+  generateRfiQuestionRequest: GenerateRfiQuestionRequest,
+  options?: RequestInit,
+): Promise<{ question: string }> => {
+  return customFetch<{ question: string }>(getGenerateRfiQuestionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateRfiQuestionRequest),
+  });
+};
+
+export const getGenerateRfiQuestionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateRfiQuestion>>,
+    TError,
+    { data: BodyType<GenerateRfiQuestionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateRfiQuestion>>,
+  TError,
+  { data: BodyType<GenerateRfiQuestionRequest> },
+  TContext
+> => {
+  const mutationKey = ["generateRfiQuestion"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateRfiQuestion>>,
+    { data: BodyType<GenerateRfiQuestionRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+    return generateRfiQuestion(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useGenerateRfiQuestion = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateRfiQuestion>>,
+    TError,
+    { data: BodyType<GenerateRfiQuestionRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateRfiQuestion>>,
+  TError,
+  { data: BodyType<GenerateRfiQuestionRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateRfiQuestionMutationOptions(options));
 };
 
 /**

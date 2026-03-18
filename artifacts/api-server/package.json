@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
     "@types/archiver": "^7.0.0",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
@@ -18,7 +19,8 @@
     "cors": "^2",
     "drizzle-orm": "catalog:",
     "express": "^5",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "pdfkit": "^0.18.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -27,6 +29,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "catalog:",
+    "@types/pdfkit": "^0.17.5",
     "esbuild": "^0.27.3",
     "tsx": "catalog:"
   }
