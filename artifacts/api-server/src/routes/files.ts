@@ -1,13 +1,14 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
 import { db } from "@workspace/db";
-import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable } from "@workspace/db/schema";
+import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { PDFParse } from "pdf-parse";
 import PDFDocument from "pdfkit";
+import Anthropic from "@anthropic-ai/sdk";
 
 const router: IRouter = Router();
 
@@ -208,7 +209,7 @@ async function parseFileNameMetadata(projectId: number, fileName: string): Promi
 }
 
 // Async background extraction — called after upload response is sent
-async function extractAndStoreContent(fileId: number, projectId: number, fileName: string, fileContent: string | undefined): Promise<void> {
+async function extractAndStoreContent(fileId: number, projectId: number, fileName: string, fileContent: string | undefined, uploadedById: number): Promise<void> {
   try {
     const ext = fileName.split(".").pop()?.toLowerCase() || "";
     let extractedText: string | null = null;
@@ -237,8 +238,131 @@ async function extractAndStoreContent(fileId: number, projectId: number, fileNam
       await db.update(filesTable).set(updates).where(eq(filesTable.id, fileId));
       console.log(`[files] content indexed for file ${fileId} (${fileName}): pdf=${extractedText !== null}, bim=${fileMetadata !== null}`);
     }
+
+    // ── AI content verification (PDFs with extracted text only) ─────────────
+    if (ext === "pdf" && extractedText) {
+      await runContentVerification(fileId, projectId, fileName, extractedText, uploadedById);
+    } else if (ext === "pdf") {
+      // PDF but no text extracted — mark not_applicable
+      await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
+    }
   } catch (err) {
     console.error(`[files] background extraction failed for file ${fileId}:`, err instanceof Error ? err.message : err);
+  }
+}
+
+async function runContentVerification(fileId: number, projectId: number, fileName: string, extractedText: string, uploadedById: number): Promise<void> {
+  try {
+    // First 500 words
+    const words = extractedText.split(/\s+/).filter(Boolean);
+    const snippet = words.slice(0, 500).join(" ");
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 8192,
+      messages: [
+        {
+          role: "user",
+          content: `You are a BIM document coordinator assistant. Your task is to verify whether a document's content matches what its file name suggests.
+
+File name: ${fileName}
+First 500 words of extracted text:
+${snippet}
+
+Analyze whether the content of this document matches what the file name suggests it should contain.
+
+Respond with ONLY a JSON object in this exact format (no other text):
+{
+  "result": "match" | "possible_mismatch" | "clear_mismatch",
+  "reason": "brief explanation in one sentence"
+}
+
+Rules:
+- "match": Content clearly matches the file name (same subject, type, or context)
+- "possible_mismatch": Content is partially related but there are inconsistencies or insufficient content to confirm
+- "clear_mismatch": Content is clearly unrelated to what the file name suggests`,
+        },
+      ],
+    });
+
+    const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    let result: "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable" = "not_applicable";
+    let reason = "";
+
+    try {
+      const parsed = JSON.parse(rawText) as { result: string; reason: string };
+      if (["match", "possible_mismatch", "clear_mismatch"].includes(parsed.result)) {
+        result = parsed.result as "match" | "possible_mismatch" | "clear_mismatch";
+        reason = parsed.reason || "";
+      }
+    } catch {
+      console.warn(`[files] AI verification: could not parse Claude response for file ${fileId}: ${rawText.slice(0, 100)}`);
+      result = "not_applicable";
+    }
+
+    // Update file record
+    await db.update(filesTable).set({ contentVerificationResult: result, updatedAt: new Date() }).where(eq(filesTable.id, fileId));
+    console.log(`[files] AI content verification for file ${fileId} (${fileName}): ${result}`);
+
+    // ── Flag mismatch: insert activity log + notify project admins ───────────
+    if (result === "possible_mismatch" || result === "clear_mismatch") {
+      // Get uploader info for activity log
+      const [uploader] = await db.select().from(usersTable).where(eq(usersTable.id, uploadedById)).limit(1);
+      const uploaderName = uploader?.fullName || "Unknown User";
+      let uploaderCompany = "";
+      if (uploader) {
+        const [uploaderCo] = await db.select().from(companiesTable).where(eq(companiesTable.id, uploader.companyId)).limit(1);
+        uploaderCompany = uploaderCo?.name || "";
+      }
+
+      const severity = result === "clear_mismatch" ? "⚠️ CLEAR MISMATCH" : "⚠️ Possible Mismatch";
+      const details = `AI content verification flagged file "${fileName}" — ${severity}. ${reason} File has been marked for coordinator review.`;
+
+      // Activity log entry — flagging event
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: uploadedById,
+        userFullName: uploaderName,
+        userCompanyName: uploaderCompany,
+        actionType: "content_verification_flag",
+        entityType: "file",
+        entityId: fileId,
+        fileNameAfter: fileName,
+        details,
+      });
+
+      // Notify all project admins via activity log
+      const adminMembers = await db
+        .select({ userId: projectMembersTable.userId })
+        .from(projectMembersTable)
+        .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
+
+      for (const adminMember of adminMembers) {
+        if (adminMember.userId === uploadedById) continue; // skip if uploader is admin
+        const [adminUser] = await db.select().from(usersTable).where(eq(usersTable.id, adminMember.userId)).limit(1);
+        if (!adminUser) continue;
+        const [adminCo] = await db.select().from(companiesTable).where(eq(companiesTable.id, adminUser.companyId)).limit(1);
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: adminMember.userId,
+          userFullName: adminUser.fullName,
+          userCompanyName: adminCo?.name || "",
+          actionType: "content_verification_notification",
+          entityType: "file",
+          entityId: fileId,
+          fileNameAfter: fileName,
+          details: `📢 Coordinator alert: ${details}`,
+        });
+      }
+    }
+  } catch (err) {
+    console.error(`[files] AI content verification failed for file ${fileId}:`, err instanceof Error ? err.message : err);
+    await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId)).catch(() => {});
   }
 }
 
@@ -525,7 +649,7 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
     });
 
     setImmediate(() => {
-      extractAndStoreContent(file.id, projectId, body.fileName, body.fileContent).catch(() => {});
+      extractAndStoreContent(file.id, projectId, body.fileName, body.fileContent, req.user!.userId).catch(() => {});
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
@@ -590,7 +714,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
       const newExt = body.fileName.split(".").pop()?.toLowerCase() || "";
       if (BIM_EXTENSIONS.has(newExt)) {
         setImmediate(() => {
-          extractAndStoreContent(fileId, projectId, body.fileName!, undefined).catch(() => {});
+          extractAndStoreContent(fileId, projectId, body.fileName!, undefined, req.user!.userId).catch(() => {});
         });
       }
     }

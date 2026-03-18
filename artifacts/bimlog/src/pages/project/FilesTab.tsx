@@ -56,6 +56,7 @@ interface FileRow {
   fileTypeTier?: string | null;
   source?: string | null;
   linkedRfiId?: number | null;
+  contentVerificationResult?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -200,12 +201,28 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                               {getExtLabel(root.fileName)}
                             </div>
                             <div>
-                              <div className={isRejected ? "file-name-rejected" : "file-name"}>
-                                {root.fileName}
+                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <div className={isRejected ? "file-name-rejected" : "file-name"}>
+                                  {root.fileName}
+                                </div>
+                                {(latest.contentVerificationResult === "possible_mismatch" || latest.contentVerificationResult === "clear_mismatch") && (
+                                  <span
+                                    title={`Content may not match file name — flagged for coordinator review${latest.contentVerificationResult === "clear_mismatch" ? " (clear mismatch)" : ""}`}
+                                    style={{ display: "inline-flex", alignItems: "center", cursor: "help" }}
+                                  >
+                                    <AlertCircle style={{ width: 13, height: 13, color: latest.contentVerificationResult === "clear_mismatch" ? "#DC2626" : "#D97706" }} />
+                                  </span>
+                                )}
                               </div>
                               {isRejected && (
                                 <div style={{ fontSize: 10, color: "#BE123C", marginTop: 1 }}>
                                   Naming violation — upload rejected
+                                </div>
+                              )}
+                              {(latest.contentVerificationResult === "possible_mismatch" || latest.contentVerificationResult === "clear_mismatch") && (
+                                <div style={{ fontSize: 10, color: latest.contentVerificationResult === "clear_mismatch" ? "#DC2626" : "#D97706", marginTop: 1, display: "flex", alignItems: "center", gap: 3 }}>
+                                  <AlertCircle style={{ width: 10, height: 10 }} />
+                                  Content may not match file name — flagged for coordinator review
                                 </div>
                               )}
                             </div>

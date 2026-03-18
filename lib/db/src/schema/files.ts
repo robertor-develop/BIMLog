@@ -26,6 +26,7 @@ export const filesTable = pgTable("files", {
   fileTypeTier: text("file_type_tier"),
   source: text("source").default("user-uploaded"),
   linkedRfiId: integer("linked_rfi_id").references(() => rfisTable.id),
+  contentVerificationResult: text("content_verification_result"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

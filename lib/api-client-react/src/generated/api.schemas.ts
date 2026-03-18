@@ -109,6 +109,7 @@ export interface ProjectFile {
   fileTypeTier?: string | null;
   source?: string | null;
   linkedRfiId?: number | null;
+  contentVerificationResult?: string | null;
   createdAt: string;
   updatedAt: string;
 }
