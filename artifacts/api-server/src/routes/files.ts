@@ -37,35 +37,82 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
     return { valid: true };
   }
 
+  const sep = convention.separator;
   const nameWithoutExt = fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName;
-  const parts = nameWithoutExt.split(convention.separator);
-
-  if (parts.length !== fields.length) {
-    return {
-      valid: false,
-      details: [{
-        field: "fileName",
-        message: `Expected ${fields.length} segments separated by "${convention.separator}", got ${parts.length}`,
-        expected: fields.map(f => f.label),
-        received: nameWithoutExt,
-      }],
-    };
-  }
-
   const errors: ValidationDetail[] = [];
+
+  // Greedy matching: supports allowed values that contain the separator character.
+  // For each field we try to consume a matching prefix from the remaining string.
+  let remaining = nameWithoutExt;
+
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
-    const value = parts[i];
     const allowed = field.allowedValues as string[];
+    const isLast = i === fields.length - 1;
 
-    if (allowed.length > 0 && !allowed.includes(value)) {
-      errors.push({
-        field: field.label,
-        message: `Value "${value}" is not allowed for field "${field.label}"`,
-        expected: allowed,
-        received: value,
-      });
+    if (allowed.length > 0) {
+      // Try each allowed value (longest first to prefer more-specific matches).
+      const sorted = [...allowed].sort((a, b) => b.length - a.length);
+      let matched = false;
+
+      for (const value of sorted) {
+        if (isLast) {
+          if (remaining === value) {
+            remaining = "";
+            matched = true;
+            break;
+          }
+        } else {
+          const prefix = value + sep;
+          if (remaining.startsWith(prefix)) {
+            remaining = remaining.slice(prefix.length);
+            matched = true;
+            break;
+          }
+        }
+      }
+
+      if (!matched) {
+        // Record what was actually at this position (up to the next separator).
+        const nextSep = remaining.indexOf(sep);
+        const actualValue = nextSep >= 0 ? remaining.slice(0, nextSep) : remaining;
+        errors.push({
+          field: field.label,
+          message: `Value "${actualValue}" is not allowed for field "${field.label}"`,
+          expected: allowed,
+          received: actualValue,
+        });
+        // Advance past the bad segment for error recovery.
+        remaining = nextSep >= 0 ? remaining.slice(nextSep + sep.length) : "";
+      }
+    } else {
+      // Free field: consume up to the next separator (or to the end if last field).
+      const nextSep = remaining.indexOf(sep);
+      if (isLast) {
+        remaining = "";
+      } else if (nextSep >= 0) {
+        remaining = remaining.slice(nextSep + sep.length);
+      } else {
+        // Not enough segments — will be caught by the trailing-content check.
+        errors.push({
+          field: field.label,
+          message: `Missing value for field "${field.label}"`,
+          expected: [],
+          received: "",
+        });
+        remaining = "";
+      }
     }
+  }
+
+  // Any leftover text means too many segments.
+  if (remaining.length > 0) {
+    errors.push({
+      field: "fileName",
+      message: `Unexpected extra content "${remaining}" — too many segments`,
+      expected: [],
+      received: remaining,
+    });
   }
 
   if (errors.length > 0) {

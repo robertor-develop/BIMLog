@@ -1440,6 +1440,13 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
     },
   });
   const handleSave = () => {
+    const sep = convention.separator;
+    const conflicts = fields.flatMap((f) =>
+      f.values.split(",").map((v: string) => v.trim()).filter((v: string) => v.includes(sep)).map((v: string) => `"${v}" in ${f.label}`)
+    );
+    if (conflicts.length > 0) {
+      toast({ title: w("Warning: values contain separator","Advertencia: valores contienen separador",lang), description: `${conflicts.join(", ")} — ${w("these values contain the separator character","estos valores contienen el separador"," ")}  "${sep}". ${w("File names will still validate correctly.","Los nombres de archivo se validarán correctamente.",lang)}`, variant: "destructive" });
+    }
     mutate({ projectId, data: { separator: convention.separator, isActive: convention.isActive, fields: fields.map((f, i) => ({ label: f.label, fieldOrder: i, allowedValues: f.values.split(",").map((v: string) => v.trim()).filter(Boolean) })) } });
   };
   return (
