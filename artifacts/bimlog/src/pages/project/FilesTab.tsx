@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useLocation } from "wouter";
 import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -411,6 +412,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [fileName, setFileName] = useState("");
   const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
   const [success, setSuccess] = useState(false);
@@ -660,7 +662,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => toast({ title: "Open the Name Generator tab in the sidebar to build a custom compliant name." })}
+                onClick={() => setLocation(`/projects/${projectId}/name-generator`)}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,
