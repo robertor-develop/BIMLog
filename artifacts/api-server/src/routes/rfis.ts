@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -378,6 +378,93 @@ function makeRfiLogPdf(
   drawLogFooter(pageNum);
 }
 
+// ─── List-view PDF (portrait, 6-column summary) ───────────────────────────────
+function makeRfiListPdf(
+  doc: PDFKit.PDFDocument,
+  rfis: (typeof rfisTable.$inferSelect)[],
+  project: { name: string } | undefined,
+  creatorMap: Map<number, string>,
+) {
+  const fmtD = (d: Date | string | null | undefined) =>
+    d ? new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }) : "—";
+
+  const getBic = (rfi: typeof rfisTable.$inferSelect) => {
+    if (rfi.status === "closed") return "Closed";
+    if (rfi.status === "responded") return rfi.submittedByCompany || creatorMap.get(rfi.createdById) || "Submitter";
+    return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
+  };
+
+  // Portrait LETTER: content width = 612 - 100 = 512
+  const cols: [string, number, (r: typeof rfisTable.$inferSelect) => string][] = [
+    ["RFI #",        55,  r => r.number],
+    ["Subject",      175, r => r.subject],
+    ["Status",       65,  r => (r.status || "").replace("_", " ")],
+    ["Priority",     50,  r => r.priority || "—"],
+    ["Ball in Court",115, r => getBic(r)],
+    ["Days Out",     52,  r => String(daysSince(r.createdAt))],
+  ]; // total = 512
+
+  let y = MARGIN;
+
+  doc.rect(MARGIN, y, LETTER_WIDTH - MARGIN * 2, 32).fill("#1E3A5F");
+  doc.fillColor("white").fontSize(14).font("Helvetica-Bold").text("RFI SUMMARY", MARGIN + 10, y + 8);
+  doc.fontSize(9).font("Helvetica").text(project?.name || "—", MARGIN + 110, y + 10);
+  doc.fontSize(7).text(`Exported: ${new Date().toLocaleDateString()}  |  ${rfis.length} RFIs`, MARGIN + 110, y + 21);
+  doc.fillColor("black");
+  y += 36;
+
+  const drawHeader = (atY: number) => {
+    doc.rect(MARGIN, atY, LETTER_WIDTH - MARGIN * 2, 16).fill("#334155");
+    let cx = MARGIN;
+    cols.forEach(([header, colW]) => {
+      doc.fontSize(6).fillColor("white").font("Helvetica-Bold")
+        .text(header.toUpperCase(), cx + 3, atY + 5, { width: colW - 4, lineBreak: false });
+      cx += colW;
+    });
+    return atY + 16;
+  };
+
+  y = drawHeader(y);
+  let pageNum = 1;
+  let rowIndex = 0;
+
+  for (const rfi of rfis) {
+    const subjectH = Math.min(doc.heightOfString(rfi.subject, { width: 169 }), 30);
+    const rowH = Math.max(subjectH + 8, 18);
+
+    if (y + rowH > CONTENT_BOTTOM) {
+      drawFooter(doc, `BIMLog by IgniteSmart  |  RFI Summary${project ? `: ${project.name}` : ""}  |  ${new Date().toLocaleDateString()}  |  Page ${pageNum}`);
+      pageNum++;
+      doc.addPage();
+      y = MARGIN;
+      y = drawHeader(y);
+    }
+
+    const isEven = rowIndex % 2 === 0;
+    const contentW = LETTER_WIDTH - MARGIN * 2;
+    doc.rect(MARGIN, y, contentW, rowH).fill(isEven ? "#F8FAFC" : "white");
+
+    let cx = MARGIN;
+    cols.forEach(([, colW, getter], ci) => {
+      const cellText = getter(rfi);
+      const textColor = ci === 0 ? "#1D4ED8" : ci === 2
+        ? (rfi.status === "closed" ? "#16A34A" : rfi.status === "responded" ? "#7C3AED" : "#D97706")
+        : "#1E293B";
+      doc.fontSize(6.5).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
+        .text(cellText, cx + 3, y + 4, { width: colW - 6, lineBreak: false });
+      doc.moveTo(cx + colW, y).lineTo(cx + colW, y + rowH).stroke("#E2E8F0");
+      cx += colW;
+    });
+
+    doc.moveTo(MARGIN, y + rowH).lineTo(MARGIN + contentW, y + rowH).stroke("#E2E8F0");
+    doc.moveTo(MARGIN, y).lineTo(MARGIN, y + rowH).stroke("#E2E8F0");
+    y += rowH;
+    rowIndex++;
+  }
+
+  drawFooter(doc, `BIMLog by IgniteSmart  |  RFI Summary${project ? `: ${project.name}` : ""}  |  ${new Date().toLocaleDateString()}  |  Page ${pageNum}`);
+}
+
 // ─── GET /projects/:projectId/rfis ──────────────────────────────────────────
 router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
@@ -671,10 +758,11 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
   }
 });
 
-// ─── GET /projects/:projectId/rfis/export-all  (RFI log — table format) ─────
+// ─── GET /projects/:projectId/rfis/export-all  (RFI log or summary) ──────────
 router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
+    const isList = req.query.view === "list";
 
     const rfis = await db.query.rfisTable.findMany({
       where: eq(rfisTable.projectId, projectId),
@@ -688,7 +776,6 @@ router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjec
 
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    // Build creator name map
     const creatorMap = new Map<number, string>();
     for (const rfi of rfis) {
       if (!creatorMap.has(rfi.createdById)) {
@@ -697,20 +784,190 @@ router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjec
       }
     }
 
-    // Landscape letter for the log table
-    const doc = new PDFDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    const docOptions = isList
+      ? { margin: MARGIN, size: "LETTER" as const, autoFirstPage: true }
+      : { margin: LOG_MARGIN, size: "LETTER" as const, layout: "landscape" as const, autoFirstPage: true };
+
+    const doc = new PDFDocument(docOptions);
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("end", () => {
       const pdfBuffer = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="RFI-Log-${project?.name || projectId}.pdf"`);
+      const label = isList ? "RFI-Summary" : "RFI-Log";
+      res.setHeader("Content-Disposition", `attachment; filename="${label}-${project?.name || projectId}.pdf"`);
       res.setHeader("Content-Length", pdfBuffer.length);
       res.send(pdfBuffer);
     });
 
-    makeRfiLogPdf(doc, rfis, project, creatorMap);
+    if (isList) {
+      makeRfiListPdf(doc, rfis, project, creatorMap);
+    } else {
+      makeRfiLogPdf(doc, rfis, project, creatorMap);
+    }
     doc.end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId/export-response  (Response PDF) ────
+router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
+    // Fix 7 — Build filename following project naming convention
+    let responseFileName = `${rfi.number}-Response`;
+    try {
+      const conventions = await db.select().from(namingConventionsTable)
+        .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
+        .limit(1);
+      if (conventions.length > 0) {
+        const sep = conventions[0].separator;
+        const fields = await db.select().from(namingFieldsTable)
+          .where(eq(namingFieldsTable.conventionId, conventions[0].id))
+          .orderBy(namingFieldsTable.fieldOrder);
+        const parts: string[] = [];
+        for (const field of fields) {
+          const allowed = field.allowedValues as string[];
+          const lbl = field.label.toLowerCase();
+          if (lbl.includes("status") || lbl.includes("estado")) {
+            parts.push("S2");
+          } else if (lbl.includes("type") || lbl.includes("tipo")) {
+            parts.push("RP");
+          } else if (allowed.length > 0) {
+            parts.push(allowed[0]);
+          } else {
+            parts.push("RP");
+          }
+        }
+        if (parts.length > 0) responseFileName = parts.join(sep);
+      }
+    } catch { /* fallback to default */ }
+
+    const fmtD = (d: Date | string | null | undefined) =>
+      d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
+
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${responseFileName}.pdf"`);
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.send(pdfBuffer);
+    });
+
+    let y = MARGIN;
+
+    // Header bar
+    doc.rect(MARGIN, y, LETTER_WIDTH - MARGIN * 2, 36).fill("#0F4C75");
+    doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
+      .text("OFFICIAL RESPONSE DOCUMENT", MARGIN + 10, y + 6, { lineBreak: false });
+    doc.fontSize(9).font("Helvetica")
+      .text(`${rfi.number}  |  ${project?.name || ""}`, MARGIN + 10, y + 23, { lineBreak: false });
+    doc.fillColor("black");
+    y += 44;
+
+    // RFI info rows (2 cols)
+    const half = (LETTER_WIDTH - MARGIN * 2) / 2 - 2;
+    const drawInfoRow = (l1: string, v1: string, l2: string, v2: string) => {
+      const lw = half * 0.38;
+      doc.rect(MARGIN, y, lw, 16).fill("#F1F5F9");
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold")
+        .text(l1.toUpperCase(), MARGIN + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+      doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
+        .text(v1, MARGIN + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+
+      const col2x = MARGIN + half + 4;
+      doc.rect(col2x, y, lw, 16).fill("#F1F5F9");
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold")
+        .text(l2.toUpperCase(), col2x + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+      doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
+        .text(v2, col2x + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+      y += 16;
+    };
+
+    drawInfoRow("RFI #", rfi.number, "Subject", rfi.subject);
+    drawInfoRow("Status", (rfi.status || "").replace("_", " "), "Priority", rfi.priority || "—");
+    drawInfoRow("Date Requested", fmtD(rfi.dateRequested || rfi.createdAt), "Date Required", fmtD(rfi.dateRequired || rfi.dueDate));
+    drawInfoRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`);
+    drawInfoRow("Drawing #", rfi.drawingNumber || "—", "Spec Section", rfi.specSection || "—");
+    y += 6;
+
+    // Question section
+    const contentW = LETTER_WIDTH - MARGIN * 2;
+    doc.rect(MARGIN, y, contentW, 14).fill("#E2E8F0");
+    doc.fillColor("#1E3A5F").fontSize(7.5).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", MARGIN + 6, y + 3.5);
+    y += 14;
+    const questionText = rfi.question || rfi.description || "No description provided.";
+    const questionH = Math.min(doc.heightOfString(questionText, { width: contentW - 12 }) + 12, 120);
+    doc.rect(MARGIN, y, contentW, questionH).stroke("#E2E8F0");
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(questionText, MARGIN + 6, y + 6, { width: contentW - 12 });
+    y += questionH + 8;
+
+    // Official Response section
+    doc.rect(MARGIN, y, contentW, 14).fill("#0F4C75");
+    doc.fillColor("white").fontSize(7.5).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 3.5);
+    y += 14;
+
+    const respText = rfi.answer || rfi.response || "";
+    if (respText) {
+      const respH = Math.min(doc.heightOfString(respText, { width: contentW - 12 }) + 12, 160);
+      doc.rect(MARGIN, y, contentW, respH).fillAndStroke("#F0FDF4", "#86EFAC");
+      doc.fillColor("#14532D").fontSize(9).font("Helvetica").text(respText, MARGIN + 6, y + 6, { width: contentW - 12 });
+      y += respH + 6;
+    } else {
+      doc.rect(MARGIN, y, contentW, 80).stroke("#E2E8F0");
+      y += 84;
+    }
+
+    // Signature row
+    const sigLabels = ["ANSWERED BY", "DATE OF RESPONSE", "COST IMPACT", "SCHEDULE IMPACT"];
+    const sigVals = [
+      rfi.answeredBy || (respText ? "—" : ""),
+      fmtD(rfi.dateAnswered || rfi.respondedAt),
+      rfi.costImpact || (respText ? "—" : ""),
+      rfi.scheduleImpact ? `${rfi.scheduleImpact}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays}d)` : ""}` : (respText ? "—" : ""),
+    ];
+    const segW = contentW / 4;
+    doc.rect(MARGIN, y, contentW, 14).fill("#F1F5F9");
+    sigLabels.forEach((lbl, i) => {
+      doc.fillColor("#64748B").fontSize(6.5).font("Helvetica-Bold")
+        .text(lbl, MARGIN + i * segW + 4, y + 3.5, { width: segW - 6, lineBreak: false });
+    });
+    y += 14;
+    doc.rect(MARGIN, y, contentW, 20).stroke("#E2E8F0");
+    sigVals.forEach((val, i) => {
+      if (val) {
+        doc.fillColor("#1E293B").fontSize(8.5).font("Helvetica")
+          .text(val, MARGIN + i * segW + 4, y + 5, { width: segW - 8, lineBreak: false });
+      }
+      if (i < 3) doc.moveTo(MARGIN + (i + 1) * segW, y).lineTo(MARGIN + (i + 1) * segW, y + 20).stroke("#E2E8F0");
+    });
+    y += 24;
+
+    drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number} — Official Response  |  ${new Date().toLocaleDateString()}`);
+    doc.end();
+
+    // Log in activity
+    db.insert(activityLogTable).values({
+      projectId,
+      userId: 0,
+      userFullName: "System",
+      userCompanyName: "",
+      actionType: "export",
+      entityType: "rfi",
+      entityId: rfiId,
+      details: `Response PDF generated: ${responseFileName}.pdf`,
+    }).catch(() => {});
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

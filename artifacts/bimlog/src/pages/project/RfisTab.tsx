@@ -90,28 +90,32 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
   );
 }
 
-// ─── ExportModal (Fix 7) ──────────────────────────────────────────────────────
-function ExportModal({ projectId, projectName, rfis, lang, onClose }: {
+// ─── ExportModal ──────────────────────────────────────────────────────────────
+function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
   projectId: number;
   projectName?: string;
   rfis: Rfi[];
   lang: string;
+  view: "list" | "log";
   onClose: () => void;
 }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const isLog = view === "log";
 
   const handlePdf = async () => {
     setLoading("pdf");
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all`, {
+      const qs = isLog ? "" : "?view=list";
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all${qs}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!resp.ok) throw new Error("Export failed");
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.pdf`; a.click();
+      const label = isLog ? "RFI-Log" : "RFI-Summary";
+      const a = document.createElement("a"); a.href = url; a.download = `${label}-${projectId}.pdf`; a.click();
       URL.revokeObjectURL(url);
       toast({ title: w("PDF exported", "PDF exportado", lang) });
       onClose();
@@ -124,43 +128,65 @@ function ExportModal({ projectId, projectName, rfis, lang, onClose }: {
     setLoading("excel");
     try {
       const wb = XLSX.utils.book_new();
-      const headerRow = [
-        "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
-        "Submitted By Company", "Submitted By Contact", "Submitted By Email",
-        "Submitted To Company", "Submitted To Person", "Submitted To Email",
-        "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
-        "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
-        "Ball In Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
-      ];
-      const rows = rfis.map(r => {
-        const bic = getBallInCourt(r);
-        const days = differenceInDays(new Date(), new Date(r.createdAt));
-        return [
-          r.number, r.subject, r.status, r.priority,
-          fmt(r.dateRequested || r.createdAt), fmt(r.dateRequired || r.dueDate),
-          r.submittedByCompany || "", r.submittedByContact || "", r.submittedByEmail || "",
-          r.submittedToCompany || "", r.submittedToPerson || "", r.submittedToEmail || "",
-          r.drawingNumber || "", r.drawingTitle || "", r.specSection || "",
-          r.detailNumber || "", r.noteNumber || "", r.locationDescription || "",
-          r.costImpact || "", r.costImpactAmount || "",
-          r.scheduleImpact || "", r.scheduleImpactDays != null ? r.scheduleImpactDays : "",
-          bic?.label || "", days, r.answer || r.response || "",
-          r.answeredBy || "", fmt(r.dateAnswered || r.respondedAt),
+
+      if (isLog) {
+        // Log view — full register (all fields)
+        const headerRow = [
+          "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
+          "Submitted By Company", "Submitted By Contact", "Submitted By Email",
+          "Submitted To Company", "Submitted To Person", "Submitted To Email",
+          "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
+          "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
+          "Ball In Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
         ];
-      });
+        const rows = rfis.map(r => {
+          const bic = getBallInCourt(r);
+          const days = differenceInDays(new Date(), new Date(r.createdAt));
+          return [
+            r.number, r.subject, r.status, r.priority,
+            fmt(r.dateRequested || r.createdAt), fmt(r.dateRequired || r.dueDate),
+            r.submittedByCompany || "", r.submittedByContact || "", r.submittedByEmail || "",
+            r.submittedToCompany || "", r.submittedToPerson || "", r.submittedToEmail || "",
+            r.drawingNumber || "", r.drawingTitle || "", r.specSection || "",
+            r.detailNumber || "", r.noteNumber || "", r.locationDescription || "",
+            r.costImpact || "", r.costImpactAmount || "",
+            r.scheduleImpact || "", r.scheduleImpactDays != null ? r.scheduleImpactDays : "",
+            bic?.label || "", days, r.answer || r.response || "",
+            r.answeredBy || "", fmt(r.dateAnswered || r.respondedAt),
+          ];
+        });
+        const ws = XLSX.utils.aoa_to_sheet([
+          [`BIMLog by IgniteSmart — RFI Log${projectName ? `: ${projectName}` : ""}`],
+          [`Exported: ${new Date().toLocaleDateString()}`],
+          [],
+          headerRow,
+          ...rows,
+        ]);
+        ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
+        ws["!cols"] = headerRow.map((_, i) => ({ wch: i < 2 ? 12 : i < 5 ? 18 : 20 }));
+        XLSX.utils.book_append_sheet(wb, ws, "RFI Log");
+        XLSX.writeFile(wb, `RFI-Log-${projectId}.xlsx`);
+      } else {
+        // List view — card-style summary (6 key columns)
+        const headerRow = ["RFI #", "Subject", "Status", "Priority", "Ball In Court", "Days Outstanding"];
+        const rows = rfis.map(r => {
+          const bic = getBallInCourt(r);
+          const days = differenceInDays(new Date(), new Date(r.createdAt));
+          return [r.number, r.subject, r.status, r.priority, bic?.label || "Closed", days];
+        });
+        const ws = XLSX.utils.aoa_to_sheet([
+          [`BIMLog by IgniteSmart — RFI Summary${projectName ? `: ${projectName}` : ""}`],
+          [`Exported: ${new Date().toLocaleDateString()}`],
+          [],
+          headerRow,
+          ...rows,
+        ]);
+        ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
+        ws["!cols"] = [{ wch: 12 }, { wch: 40 }, { wch: 14 }, { wch: 12 }, { wch: 28 }, { wch: 14 }];
+        XLSX.utils.book_append_sheet(wb, ws, "RFI Summary");
+        XLSX.writeFile(wb, `RFI-Summary-${projectId}.xlsx`);
+      }
 
-      const ws = XLSX.utils.aoa_to_sheet([
-        [`BIMLog by IgniteSmart — RFI Log${projectName ? `: ${projectName}` : ""}`],
-        [`Exported: ${new Date().toLocaleDateString()}`],
-        [],
-        headerRow,
-        ...rows,
-      ]);
-      ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
-      ws["!cols"] = headerRow.map((_, i) => ({ wch: i < 2 ? 12 : i < 5 ? 18 : 20 }));
-
-      XLSX.utils.book_append_sheet(wb, ws, "RFI Log");
-      XLSX.writeFile(wb, `RFI-Log-${projectId}.xlsx`);
       toast({ title: w("Excel exported", "Excel exportado", lang) });
       onClose();
     } catch {
@@ -171,35 +197,68 @@ function ExportModal({ projectId, projectName, rfis, lang, onClose }: {
   const handleWord = () => {
     setLoading("word");
     try {
-      const htmlRows = rfis.map(r => {
-        const bic = getBallInCourt(r);
-        return `
-          <h2 style="color:#1E3A5F;border-bottom:2px solid #CBD5E1;padding-bottom:4pt">${r.number} — ${r.subject}</h2>
-          <table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:12pt">
-            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt;width:25%">Status</td><td style="padding:4pt 6pt">${r.status}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt;width:25%">Priority</td><td style="padding:4pt 6pt">${r.priority}</td></tr>
-            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Date Requested</td><td style="padding:4pt 6pt">${fmt(r.dateRequested || r.createdAt)}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Date Required</td><td style="padding:4pt 6pt">${fmt(r.dateRequired || r.dueDate)}</td></tr>
-            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Submitted By</td><td style="padding:4pt 6pt">${r.submittedByCompany || "—"} / ${r.submittedByContact || "—"}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Submitted To</td><td style="padding:4pt 6pt">${r.submittedToCompany || "—"} / ${r.submittedToPerson || "—"}</td></tr>
-            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Ball in Court</td><td colspan="3" style="padding:4pt 6pt">${bic?.label || "Closed"}</td></tr>
-            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Drawing #</td><td style="padding:4pt 6pt">${r.drawingNumber || "—"}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Spec Section</td><td style="padding:4pt 6pt">${r.specSection || "—"}</td></tr>
-          </table>
-          <h3 style="color:#1E3A5F;font-size:10pt;margin-bottom:4pt">Description of Question</h3>
-          <p style="font-size:10pt;line-height:1.5;border:1pt solid #CBD5E1;padding:6pt;margin-bottom:8pt">${r.question || r.description || "—"}</p>
-          ${(r.answer || r.response) ? `<h3 style="color:#0F4C75;font-size:10pt;margin-bottom:4pt">Response</h3><p style="font-size:10pt;line-height:1.5;border:1pt solid #BBF7D0;padding:6pt;background:#F0FDF4">${r.answer || r.response}</p><p style="font-size:9pt;color:#64748B">Answered by: ${r.answeredBy || "—"} | ${fmt(r.dateAnswered)}</p>` : "<p style='font-size:10pt;color:#94A3B8'>No response yet.</p>"}
-          <div style="page-break-after:always"></div>`;
-      }).join("\n");
+      const th = (s: string) => `<th style="background:#1E3A5F;color:white;padding:5pt 6pt;font-size:9pt;text-align:left;border:1pt solid #334155;">${s}</th>`;
+      const td = (s: string, color?: string) => `<td style="padding:4pt 6pt;font-size:9pt;border:1pt solid #E2E8F0;${color ? `color:${color};font-weight:bold;` : ""}">${s || "—"}</td>`;
 
-      const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1E293B;} h1{color:#1E3A5F;}</style>
-</head><body>
-<h1>RFI Log — ${projectName || `Project ${projectId}`}</h1>
-<p style="color:#64748B;font-size:9pt">BIMLog by IgniteSmart | Generated ${new Date().toLocaleDateString()}</p>
-${htmlRows}
+      let tableHtml: string;
+      let sheetTitle: string;
+      let filename: string;
+
+      if (isLog) {
+        sheetTitle = `RFI Log — ${projectName || `Project ${projectId}`}`;
+        filename = `RFI-Log-${projectId}.doc`;
+        const headerHtml = `<tr>${["RFI #","Subject","Status","Priority","Submitted By","Submitted To","Forwarded","Answered","Days Out","Ball in Court","Sched. Impact"].map(th).join("")}</tr>`;
+        const dataRows = rfis.map(r => {
+          const bic = getBallInCourt(r);
+          const days = differenceInDays(new Date(), new Date(r.createdAt));
+          const statusColor = r.status === "closed" ? "#16A34A" : r.status === "responded" ? "#7C3AED" : "#D97706";
+          return `<tr>${[
+            td(r.number, "#2563EB"),
+            td(r.subject),
+            td((r.status || "").replace("_", " "), statusColor),
+            td(r.priority || "—"),
+            td(`${r.submittedByCompany || "—"}`),
+            td(`${r.submittedToCompany || r.submittedToPerson || "—"}`),
+            td(fmt(r.dateRequested || r.createdAt)),
+            td(fmt(r.dateAnswered || r.respondedAt)),
+            td(String(days)),
+            td(bic?.label || "Closed"),
+            td(r.scheduleImpact || "None"),
+          ].join("")}</tr>`;
+        }).join("");
+        tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
+      } else {
+        sheetTitle = `RFI Summary — ${projectName || `Project ${projectId}`}`;
+        filename = `RFI-Summary-${projectId}.doc`;
+        const headerHtml = `<tr>${["RFI #","Subject","Status","Priority","Ball In Court","Days Outstanding"].map(th).join("")}</tr>`;
+        const dataRows = rfis.map(r => {
+          const bic = getBallInCourt(r);
+          const days = differenceInDays(new Date(), new Date(r.createdAt));
+          const statusColor = r.status === "closed" ? "#16A34A" : r.status === "responded" ? "#7C3AED" : "#D97706";
+          return `<tr>${[
+            td(r.number, "#2563EB"),
+            td(r.subject),
+            td((r.status || "").replace("_", " "), statusColor),
+            td(r.priority || "—"),
+            td(bic?.label || "Closed"),
+            td(String(days)),
+          ].join("")}</tr>`;
+        }).join("");
+        tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
+      }
+
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#1E293B;margin:24pt;}
+h1{color:#1E3A5F;font-size:14pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
+</style></head><body>
+<h1>${sheetTitle}</h1>
+<p style="font-size:9pt;color:#64748B;">BIMLog by IgniteSmart | Generated ${new Date().toLocaleDateString()} | ${rfis.length} RFIs</p>
+${tableHtml}
 </body></html>`;
 
       const blob = new Blob([html], { type: "application/msword" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.doc`; a.click();
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
       toast({ title: w("Word document exported", "Documento Word exportado", lang) });
       onClose();
@@ -208,15 +267,28 @@ ${htmlRows}
     } finally { setLoading(null); }
   };
 
+  const pdfDesc = isLog
+    ? w("Full RFI register — all columns, landscape (PDF)", "Registro completo — todas las columnas, paisaje", lang)
+    : w("RFI summary — 6 key columns, portrait (PDF)", "Resumen RFI — 6 columnas clave, retrato", lang);
+  const xlDesc = isLog
+    ? w("Full register spreadsheet — all 27 fields", "Hoja registro completo — 27 campos", lang)
+    : w("Summary spreadsheet — 6 key columns", "Hoja resumen — 6 columnas clave", lang);
+  const wdDesc = isLog
+    ? w("Full register table — all columns as Word table", "Tabla registro completo en Word", lang)
+    : w("Summary table — 6 key columns as Word table", "Tabla resumen en Word", lang);
+
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.45)" }} onClick={onClose}>
-      <div style={{ background: "hsl(var(--card))", borderRadius: 12, padding: "28px 28px 24px", width: 400, boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div style={{ background: "hsl(var(--card))", borderRadius: 12, padding: "28px 28px 24px", width: 420, boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
           <div style={{ fontSize: 16, fontWeight: 700 }}>{w("Export All RFIs", "Exportar todos los RFIs", lang)}</div>
           <button onClick={onClose} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 16, height: 16 }} /></button>
         </div>
-        <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 18 }}>
-          {w(`Choose a format to export ${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}.`, `Elija un formato para exportar ${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}.`, lang)}
+        <div style={{ fontSize: 11, color: "#7C3AED", fontWeight: 600, marginBottom: 14, padding: "4px 10px", background: "#F5F3FF", borderRadius: 6, display: "inline-block" }}>
+          {isLog ? w("Log view export", "Exportar vista registro", lang) : w("List view export", "Exportar vista lista", lang)}
+        </div>
+        <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
+          {w(`${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}`, `${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}`, lang)}
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button onClick={handlePdf} disabled={!!loading}
@@ -224,7 +296,7 @@ ${htmlRows}
             <FileText style={{ width: 20, height: 20, color: "#2563EB", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#1E3A5F" }}>PDF</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{w("RFI log — summary table, one row per RFI (landscape)", "Registro RFI — tabla resumen, una fila por RFI", lang)}</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{pdfDesc}</div>
             </div>
             {loading === "pdf" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
           </button>
@@ -233,7 +305,7 @@ ${htmlRows}
             <Download style={{ width: 20, height: 20, color: "#16A34A", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#14532D" }}>Excel (.xlsx)</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Spreadsheet with all fields, auto-sized columns, header row", "Hoja de cálculo con todos los campos", lang)}</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{xlDesc}</div>
             </div>
             {loading === "excel" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
           </button>
@@ -242,7 +314,7 @@ ${htmlRows}
             <FileText style={{ width: 20, height: 20, color: "#7C3AED", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#4C1D95" }}>Word (.doc)</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Log with all RFIs — each as a section with response area", "Registro con todos los RFIs con área de respuesta", lang)}</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{wdDesc}</div>
             </div>
             {loading === "word" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
           </button>
@@ -344,7 +416,33 @@ td{padding:4pt 6pt;vertical-align:top;}
 <div style="border:1pt solid #CBD5E1;padding:8pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;min-height:40pt;">${rfi.question||rfi.description||"—"}</div>
 <br/>
 <table><tr><td class="resp-hdr" colspan="4">OFFICIAL RESPONSE</td></tr></table>
-${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><td>Answered by: <strong>${rfi.answeredBy||"—"}</strong></td><td>Date: <strong>${fmtW(rfi.dateAnswered||rfi.respondedAt)}</strong></td></tr></table>` : `<div class="blank-box"></div><table><tr class="sig-row"><td width="35%">Answered by: ____________________</td><td width="25%">Date: ______________</td><td width="20%">Cost Impact: __________</td><td width="20%">Schedule Impact: ______</td></tr></table>`}
+${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><td>Answered by: <strong>${rfi.answeredBy||"—"}</strong></td><td>Date: <strong>${fmtW(rfi.dateAnswered||rfi.respondedAt)}</strong></td><td>Cost Impact: <strong>${rfi.costImpact||"—"}</strong></td><td>Schedule Impact: <strong>${rfi.scheduleImpact||"—"}${rfi.scheduleImpactDays!=null?` (${rfi.scheduleImpactDays}d)`:""}</strong></td></tr></table>` : `<div class="blank-box" style="min-height:80pt;"></div>
+<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
+  <tr>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:40%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">ANSWERED BY (Name &amp; Company)</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">DATE OF RESPONSE</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:35%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
+      &#9633; No Cost Impact<br/>&#9633; Cost Increase TBD<br/>&#9633; Cost Increase Known: $__________<br/>&#9633; Cost Decrease
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
+      &#9633; No Schedule Impact &nbsp; &#9633; Increase in Calendar Days: _______ &nbsp; &#9633; Decrease in Calendar Days: _______
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">SIGNATURE</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:24pt;"></div>
+    </td>
+  </tr>
+</table>`}
 <p style="font-size:8pt;color:#94A3B8;margin-top:24pt;">Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}</p>
 </body></html>`;
     const blob = new Blob([html], { type: "application/msword" });
@@ -363,6 +461,7 @@ ${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><
           projectId={projectId}
           rfis={filtered.length > 0 ? filtered : rfis}
           lang={lang}
+          view={view}
           onClose={() => setShowExportModal(false)}
         />
       )}
@@ -524,21 +623,19 @@ ${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><
 
       {/* LOG VIEW */}
       {!isLoading && filtered.length > 0 && view === "log" && (
-        <div className="table-card">
-          <table className="data-table">
+        <div style={{ overflowX: "auto", borderRadius: 8, border: "1px solid hsl(var(--border))" }}>
+          <table className="data-table" style={{ minWidth: 980, borderRadius: 0, border: "none" }}>
             <thead>
               <tr>
-                <th style={{ width: 80 }}>{w("RFI #", "RFI #", lang)}</th>
-                <th>{w("Description", "Descripción", lang)}</th>
-                <th>{w("Req. By Co.", "Empresa Solic.", lang)}</th>
-                <th>{w("Req. By Person", "Persona Solic.", lang)}</th>
-                <th>{w("Sent To Co.", "Empresa Destino", lang)}</th>
-                <th>{w("Sent To Person", "Persona Destino", lang)}</th>
-                <th style={{ width: 90 }}>{w("Forwarded", "Enviado", lang)}</th>
-                <th style={{ width: 90 }}>{w("Answered", "Respondido", lang)}</th>
-                <th style={{ width: 95 }}>{w("Status", "Estado", lang)}</th>
-                <th>{w("Sched. Impact", "Impacto Prog.", lang)}</th>
-                <th style={{ width: 60, textAlign: "right" }}></th>
+                <th style={{ width: 80, whiteSpace: "nowrap" }}>{w("RFI #", "RFI #", lang)}</th>
+                <th style={{ minWidth: 160 }}>{w("Description", "Descripción", lang)}</th>
+                <th style={{ minWidth: 110 }}>{w("Req. By Co.", "Empresa Solic.", lang)}</th>
+                <th style={{ minWidth: 110 }}>{w("Sent To Co.", "Empresa Destino", lang)}</th>
+                <th style={{ width: 88, whiteSpace: "nowrap" }}>{w("Forwarded", "Enviado", lang)}</th>
+                <th style={{ width: 88, whiteSpace: "nowrap" }}>{w("Answered", "Respondido", lang)}</th>
+                <th style={{ width: 90, whiteSpace: "nowrap" }}>{w("Status", "Estado", lang)}</th>
+                <th style={{ minWidth: 120 }}>{w("Sched. Impact", "Impacto Prog.", lang)}</th>
+                <th style={{ width: 110, textAlign: "right", position: "sticky", right: 0, background: "hsl(var(--card))", zIndex: 2, boxShadow: "-2px 0 4px rgba(0,0,0,0.05)" }}></th>
               </tr>
             </thead>
             <tbody>
@@ -547,9 +644,7 @@ ${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><
                   <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>{rfi.number}</span></td>
                   <td><span style={{ fontSize: 12 }}>{rfi.subject}</span></td>
                   <td><span style={{ fontSize: 12 }}>{rfi.submittedByCompany || "—"}</span></td>
-                  <td><span style={{ fontSize: 12 }}>{rfi.submittedByContact || rfi.createdByName || "—"}</span></td>
-                  <td><span style={{ fontSize: 12 }}>{rfi.submittedToCompany || "—"}</span></td>
-                  <td><span style={{ fontSize: 12 }}>{rfi.submittedToPerson || "—"}</span></td>
+                  <td><span style={{ fontSize: 12 }}>{rfi.submittedToCompany || rfi.submittedToPerson || "—"}</span></td>
                   <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{fmt(rfi.dateRequested || rfi.createdAt)}</td>
                   <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>{fmt(rfi.dateAnswered || rfi.respondedAt)}</td>
                   <td><span className={`badge ${STATUS_BADGE[rfi.status] ?? "badge-gray"}`}>{getLabel("rfi_status", rfi.status)}</span></td>
@@ -559,20 +654,20 @@ ${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><
                       : <span style={{ fontSize: 11, color: "#16A34A" }}>{w("None", "Ninguno", lang)}</span>
                     }
                   </td>
-                  <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                  <td style={{ textAlign: "right", position: "sticky", right: 0, background: "hsl(var(--card))", zIndex: 1, boxShadow: "-2px 0 4px rgba(0,0,0,0.05)" }} onClick={e => e.stopPropagation()}>
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
-                    <button title="Export PDF"
-                      style={{ padding: "3px 6px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3 }}
-                      onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
-                    >
-                      <FileText style={{ width: 10, height: 10 }} />PDF
-                    </button>
-                    <button title="Export Word"
-                      style={{ padding: "3px 6px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3 }}
-                      onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
-                    >
-                      <FileText style={{ width: 10, height: 10 }} />Doc
-                    </button>
+                      <button title="Export PDF"
+                        style={{ padding: "3px 7px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}
+                        onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
+                      >
+                        <FileText style={{ width: 10, height: 10 }} />PDF
+                      </button>
+                      <button title="Export Word"
+                        style={{ padding: "3px 7px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}
+                        onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
+                      >
+                        <FileText style={{ width: 10, height: 10 }} />Doc
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1198,13 +1293,33 @@ ${hasResp ? `
   <td>Date: <strong>${fmtW(rfi.dateAnswered || rfi.respondedAt)}</strong></td>
 </tr></table>
 ` : `
-<div class="blank-box"></div>
-<table><tr class="sig-row">
-  <td width="35%">Answered by: ____________________</td>
-  <td width="25%">Date: ______________</td>
-  <td width="20%">Cost Impact: __________</td>
-  <td width="20%">Schedule Impact: ______</td>
-</tr></table>
+<div class="blank-box" style="min-height:80pt;"></div>
+<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
+  <tr>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:40%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">ANSWERED BY (Name &amp; Company)</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">DATE OF RESPONSE</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:35%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
+      &#9633; No Cost Impact<br/>&#9633; Cost Increase TBD<br/>&#9633; Cost Increase Known: $__________<br/>&#9633; Cost Decrease
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
+      &#9633; No Schedule Impact &nbsp; &#9633; Increase in Calendar Days: _______ &nbsp; &#9633; Decrease in Calendar Days: _______
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">SIGNATURE</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:24pt;"></div>
+    </td>
+  </tr>
+</table>
 `}
 <p style="font-size:8pt;color:#94A3B8;margin-top:24pt;">Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}</p>
 </body></html>`;
@@ -1214,6 +1329,26 @@ ${hasResp ? `
     const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.doc`; a.click();
     URL.revokeObjectURL(url);
     toast({ title: w("Word document exported", "Documento Word exportado", lang) });
+  };
+
+  const handleDownloadResponsePdf = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-response`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Export failed");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const contentDisposition = resp.headers.get("Content-Disposition") || "";
+      const match = contentDisposition.match(/filename="(.+?)"/);
+      const filename = match ? match[1] : `${rfi.number}-Response.pdf`;
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w("Response PDF downloaded", "PDF de respuesta descargado", lang) });
+    } catch {
+      toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
+    }
   };
 
   const statusOptions = getOptions("rfi_status");
@@ -1295,13 +1430,18 @@ ${hasResp ? `
               </div>
             )}
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
             <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />{w("PDF", "PDF", lang)}
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#C4B5FD" }}>
               <FileText style={{ width: 12, height: 12 }} />{w("Word", "Word", lang)}
             </Button>
+            {(rfi.answer || rfi.response) && (
+              <Button variant="outline" size="sm" onClick={handleDownloadResponsePdf} style={{ gap: 5, fontSize: 11, color: "#16A34A", borderColor: "#86EFAC", background: "#F0FDF4" }}>
+                <FileText style={{ width: 12, height: 12 }} />{w("Resp. PDF", "PDF Resp.", lang)}
+              </Button>
+            )}
             {rfi.status === "closed" && canWrite && (
               <Button variant="outline" size="sm" onClick={() => { onRevise(rfi); onClose(); }} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
