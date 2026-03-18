@@ -1,9 +1,9 @@
 import { useState, useMemo, useRef } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
-  useListMembers,
+  useListMembers, useListFiles,
 } from "@workspace/api-client-react";
-import type { Rfi } from "@workspace/api-client-react";
+import type { Rfi, ProjectFile } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
@@ -11,14 +11,16 @@ import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from "xlsx";
 import {
-  MessageSquare, Plus, X, ChevronDown, ChevronUp, FileText, Download,
+  MessageSquare, Plus, X, FileText, Download,
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
+  Search, UserPlus,
 } from "lucide-react";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
-// ─── helpers ────────────────────────────────────────────────────────────────
+// ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
 function fmt(d: string | Date | null | undefined) {
   if (!d) return "—";
@@ -36,21 +38,218 @@ const PRIORITY_BADGE: Record<string, string> = {
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
   if (rfi.status === "closed") return null;
   if (rfi.status === "responded") {
-    return {
-      label: rfi.submittedByCompany || rfi.createdByName || "Submitter",
-      color: "#7C3AED",
-    };
+    return { label: rfi.submittedByCompany || rfi.createdByName || "Submitter", color: "#7C3AED" };
   }
-  return {
-    label: rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer",
-    color: "#0369A1",
-  };
+  return { label: rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer", color: "#0369A1" };
 }
 
 function daysColor(days: number, isOverdue: boolean) {
   if (isOverdue) return "#DC2626";
   if (days > 7) return "#D97706";
   return "#16A34A";
+}
+
+// Parse distribution entry - "EXT:name:email:phone" or plain email
+function parseDistEntry(entry: string): { display: string; isExternal: boolean; email: string } {
+  if (entry.startsWith("EXT:")) {
+    const parts = entry.slice(4).split(":");
+    const name = parts[0] || "";
+    const email = parts[1] || "";
+    return { display: `${name} <${email}> (ext.)`, isExternal: true, email };
+  }
+  return { display: entry, isExternal: false, email: entry };
+}
+
+// ─── FileSearchDropdown ───────────────────────────────────────────────────────
+function FileSearchDropdown({ files, onSelect, onClose }: {
+  files: ProjectFile[];
+  onSelect: (name: string) => void;
+  onClose: () => void;
+}) {
+  const [q, setQ] = useState("");
+  const filtered = files.filter(f => !q || f.fileName.toLowerCase().includes(q.toLowerCase())).slice(0, 20);
+  return (
+    <div style={{
+      position: "absolute", zIndex: 50, top: "100%", left: 0, right: 0,
+      background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+      borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", padding: 8,
+    }}>
+      <Input value={q} onChange={e => setQ(e.target.value)} placeholder="Search files…" style={{ fontSize: 11, marginBottom: 6 }} autoFocus />
+      {filtered.length === 0 && <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", padding: "4px 6px" }}>No files found</p>}
+      {filtered.map(f => (
+        <button key={f.id} onClick={() => { onSelect(f.fileName); onClose(); }}
+          style={{ display: "block", width: "100%", textAlign: "left", padding: "5px 8px", fontSize: 11, borderRadius: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--foreground))" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "hsl(var(--secondary))")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
+          <FileText style={{ width: 11, height: 11, display: "inline", marginRight: 4, verticalAlign: "middle" }} />
+          {f.fileName}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── ExportModal (Fix 7) ──────────────────────────────────────────────────────
+function ExportModal({ projectId, projectName, rfis, lang, onClose }: {
+  projectId: number;
+  projectName?: string;
+  rfis: Rfi[];
+  lang: string;
+  onClose: () => void;
+}) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handlePdf = async () => {
+    setLoading("pdf");
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Export failed");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w("PDF exported", "PDF exportado", lang) });
+      onClose();
+    } catch {
+      toast({ title: w("PDF export failed", "Error al exportar PDF", lang), variant: "destructive" });
+    } finally { setLoading(null); }
+  };
+
+  const handleExcel = () => {
+    setLoading("excel");
+    try {
+      const wb = XLSX.utils.book_new();
+      const headerRow = [
+        "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
+        "Submitted By Company", "Submitted By Contact", "Submitted By Email",
+        "Submitted To Company", "Submitted To Person", "Submitted To Email",
+        "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
+        "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
+        "Ball In Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
+      ];
+      const rows = rfis.map(r => {
+        const bic = getBallInCourt(r);
+        const days = differenceInDays(new Date(), new Date(r.createdAt));
+        return [
+          r.number, r.subject, r.status, r.priority,
+          fmt(r.dateRequested || r.createdAt), fmt(r.dateRequired || r.dueDate),
+          r.submittedByCompany || "", r.submittedByContact || "", r.submittedByEmail || "",
+          r.submittedToCompany || "", r.submittedToPerson || "", r.submittedToEmail || "",
+          r.drawingNumber || "", r.drawingTitle || "", r.specSection || "",
+          r.detailNumber || "", r.noteNumber || "", r.locationDescription || "",
+          r.costImpact || "", r.costImpactAmount || "",
+          r.scheduleImpact || "", r.scheduleImpactDays != null ? r.scheduleImpactDays : "",
+          bic?.label || "", days, r.answer || r.response || "",
+          r.answeredBy || "", fmt(r.dateAnswered || r.respondedAt),
+        ];
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet([
+        [`BIMLog by IgniteSmart — RFI Log${projectName ? `: ${projectName}` : ""}`],
+        [`Exported: ${new Date().toLocaleDateString()}`],
+        [],
+        headerRow,
+        ...rows,
+      ]);
+      ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
+      ws["!cols"] = headerRow.map((_, i) => ({ wch: i < 2 ? 12 : i < 5 ? 18 : 20 }));
+
+      XLSX.utils.book_append_sheet(wb, ws, "RFI Log");
+      XLSX.writeFile(wb, `RFI-Log-${projectId}.xlsx`);
+      toast({ title: w("Excel exported", "Excel exportado", lang) });
+      onClose();
+    } catch {
+      toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
+    } finally { setLoading(null); }
+  };
+
+  const handleWord = () => {
+    setLoading("word");
+    try {
+      const htmlRows = rfis.map(r => {
+        const bic = getBallInCourt(r);
+        return `
+          <h2 style="color:#1E3A5F;border-bottom:2px solid #CBD5E1;padding-bottom:4pt">${r.number} — ${r.subject}</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:12pt">
+            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt;width:25%">Status</td><td style="padding:4pt 6pt">${r.status}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt;width:25%">Priority</td><td style="padding:4pt 6pt">${r.priority}</td></tr>
+            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Date Requested</td><td style="padding:4pt 6pt">${fmt(r.dateRequested || r.createdAt)}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Date Required</td><td style="padding:4pt 6pt">${fmt(r.dateRequired || r.dueDate)}</td></tr>
+            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Submitted By</td><td style="padding:4pt 6pt">${r.submittedByCompany || "—"} / ${r.submittedByContact || "—"}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Submitted To</td><td style="padding:4pt 6pt">${r.submittedToCompany || "—"} / ${r.submittedToPerson || "—"}</td></tr>
+            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Ball in Court</td><td colspan="3" style="padding:4pt 6pt">${bic?.label || "Closed"}</td></tr>
+            <tr><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Drawing #</td><td style="padding:4pt 6pt">${r.drawingNumber || "—"}</td><td style="background:#F1F5F9;font-weight:bold;padding:4pt 6pt">Spec Section</td><td style="padding:4pt 6pt">${r.specSection || "—"}</td></tr>
+          </table>
+          <h3 style="color:#1E3A5F;font-size:10pt;margin-bottom:4pt">Description of Question</h3>
+          <p style="font-size:10pt;line-height:1.5;border:1pt solid #CBD5E1;padding:6pt;margin-bottom:8pt">${r.question || r.description || "—"}</p>
+          ${(r.answer || r.response) ? `<h3 style="color:#0F4C75;font-size:10pt;margin-bottom:4pt">Response</h3><p style="font-size:10pt;line-height:1.5;border:1pt solid #BBF7D0;padding:6pt;background:#F0FDF4">${r.answer || r.response}</p><p style="font-size:9pt;color:#64748B">Answered by: ${r.answeredBy || "—"} | ${fmt(r.dateAnswered)}</p>` : "<p style='font-size:10pt;color:#94A3B8'>No response yet.</p>"}
+          <div style="page-break-after:always"></div>`;
+      }).join("\n");
+
+      const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1E293B;} h1{color:#1E3A5F;}</style>
+</head><body>
+<h1>RFI Log — ${projectName || `Project ${projectId}`}</h1>
+<p style="color:#64748B;font-size:9pt">BIMLog by IgniteSmart | Generated ${new Date().toLocaleDateString()}</p>
+${htmlRows}
+</body></html>`;
+
+      const blob = new Blob([html], { type: "application/msword" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.doc`; a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w("Word document exported", "Documento Word exportado", lang) });
+      onClose();
+    } catch {
+      toast({ title: w("Word export failed", "Error al exportar Word", lang), variant: "destructive" });
+    } finally { setLoading(null); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.45)" }} onClick={onClose}>
+      <div style={{ background: "hsl(var(--card))", borderRadius: 12, padding: "28px 28px 24px", width: 400, boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>{w("Export All RFIs", "Exportar todos los RFIs", lang)}</div>
+          <button onClick={onClose} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 16, height: 16 }} /></button>
+        </div>
+        <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 18 }}>
+          {w(`Choose a format to export ${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}.`, `Elija un formato para exportar ${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}.`, lang)}
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <button onClick={handlePdf} disabled={!!loading}
+            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #2563EB", background: "#EFF6FF", cursor: "pointer", textAlign: "left" }}>
+            <FileText style={{ width: 20, height: 20, color: "#2563EB", flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1E3A5F" }}>PDF</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{w("All RFIs in one combined PDF — professional layout", "Todos los RFIs en un PDF combinado", lang)}</div>
+            </div>
+            {loading === "pdf" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
+          </button>
+          <button onClick={handleExcel} disabled={!!loading}
+            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #16A34A", background: "#F0FDF4", cursor: "pointer", textAlign: "left" }}>
+            <Download style={{ width: 20, height: 20, color: "#16A34A", flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#14532D" }}>Excel (.xlsx)</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Spreadsheet with all fields, auto-sized columns, header row", "Hoja de cálculo con todos los campos", lang)}</div>
+            </div>
+            {loading === "excel" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
+          </button>
+          <button onClick={handleWord} disabled={!!loading}
+            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #7C3AED", background: "#F5F3FF", cursor: "pointer", textAlign: "left" }}>
+            <FileText style={{ width: 20, height: 20, color: "#7C3AED", flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#4C1D95" }}>Word (.doc)</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Formatted document with each RFI as a section", "Documento con cada RFI como sección", lang)}</div>
+            </div>
+            {loading === "word" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── main export ─────────────────────────────────────────────────────────────
@@ -68,6 +267,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [revising, setRevising] = useState<Rfi | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const filtered = useMemo(() => {
     if (!rfis) return [];
@@ -101,36 +301,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     }).length ?? 0
   , [rfis]);
 
-  const handleExportCsv = () => {
-    if (!rfis || rfis.length === 0) return;
-    const headers = [
-      "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
-      "Submitted By Company", "Submitted By Contact", "Submitted To Company", "Submitted To Person",
-      "Drawing #", "Spec Section", "Cost Impact", "Schedule Impact", "Schedule Impact Days",
-      "Ball In Court", "Days Outstanding", "Answer"
-    ];
-    const rows = rfis.map(r => {
-      const bic = getBallInCourt(r);
-      const days = differenceInDays(new Date(), new Date(r.createdAt));
-      return [
-        r.number, r.subject, r.status, r.priority,
-        fmt(r.dateRequested || r.createdAt), fmt(r.dateRequired || r.dueDate),
-        r.submittedByCompany || "", r.submittedByContact || "",
-        r.submittedToCompany || "", r.submittedToPerson || "",
-        r.drawingNumber || "", r.specSection || "",
-        r.costImpact || "", r.scheduleImpact || "",
-        r.scheduleImpactDays != null ? String(r.scheduleImpactDays) : "",
-        bic?.label || "", String(days), r.answer || r.response || "",
-      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(",");
-    });
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `RFI-Log-Project-${projectId}.csv`; a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: w("RFI log exported", "Log de RFI exportado", lang) });
-  };
-
   const handleExportPdf = async (rfi: Rfi) => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export`, {
@@ -147,6 +317,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 
   return (
     <div style={{ position: "relative" }}>
+      {showExportModal && rfis && (
+        <ExportModal
+          projectId={projectId}
+          rfis={filtered.length > 0 ? filtered : rfis}
+          lang={lang}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="section-header" style={{ marginBottom: 12 }}>
         <div>
@@ -156,7 +335,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* View toggle */}
           <div style={{ display: "flex", border: "1px solid hsl(var(--border))", borderRadius: 6, overflow: "hidden" }}>
             <button onClick={() => setView("list")} style={{ padding: "5px 10px", background: view === "list" ? "hsl(var(--primary))" : "transparent", color: view === "list" ? "white" : "hsl(var(--muted-foreground))", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
               <LayoutList style={{ width: 13, height: 13 }} />{w("List", "Lista", lang)}
@@ -165,9 +343,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               <Table2 style={{ width: 13, height: 13 }} />{w("Log", "Registro", lang)}
             </button>
           </div>
-
           {rfis && rfis.length > 0 && (
-            <Button variant="outline" size="sm" onClick={handleExportCsv} style={{ gap: 5, fontSize: 11 }}>
+            <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)} style={{ gap: 5, fontSize: 11 }}>
               <Download style={{ width: 12, height: 12 }} />{w("Export All", "Exportar Todo", lang)}
             </Button>
           )}
@@ -179,7 +356,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       </div>
 
-      {/* Overdue warning */}
       {overdueCount > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
           <AlertTriangle style={{ width: 14, height: 14, flexShrink: 0 }} />
@@ -187,14 +363,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       )}
 
-      {/* Search + Filter */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
-        <Input
-          placeholder={w("Search RFIs…", "Buscar RFIs…", lang)}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ maxWidth: 280, fontSize: 12 }}
-        />
+        <Input placeholder={w("Search RFIs…", "Buscar RFIs…", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 280, fontSize: 12 }} />
         <div style={{ display: "flex", gap: 4 }}>
           {["all", ...statusOptions.map(o => o.value)].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)} style={{
@@ -209,14 +379,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       </div>
 
-      {/* Loading */}
       {isLoading && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 52, borderRadius: 8 }} />)}
         </div>
       )}
 
-      {/* Empty state */}
       {!isLoading && filtered.length === 0 && (
         <div className="empty-state">
           <div className="empty-icon"><MessageSquare style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} /></div>
@@ -239,7 +407,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                 <th>{w("Submitted By", "Enviado por", lang)}</th>
                 <th style={{ width: 100 }}>{w("Date Req.", "Fecha Req.", lang)}</th>
                 <th style={{ width: 80 }}>{w("Days Out", "Días", lang)}</th>
-                {canWrite && <th style={{ width: 80, textAlign: "right" }}></th>}
+                <th style={{ width: 110, textAlign: "right" }}></th>
               </tr>
             </thead>
             <tbody>
@@ -274,25 +442,32 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                       )}
                     </td>
                     <td><span style={{ fontSize: 12 }}>{rfi.submittedByCompany || rfi.createdByName || "—"}</span></td>
-                    <td style={{ fontSize: 11, color: isOverdue ? "#DC2626" : "hsl(var(--muted-foreground))", fontWeight: isOverdue ? 700 : 400, whiteSpace: "nowrap" }}>
-                      {fmt(due)}
-                    </td>
+                    <td style={{ fontSize: 11, color: isOverdue ? "#DC2626" : "hsl(var(--muted-foreground))", fontWeight: isOverdue ? 700 : 400, whiteSpace: "nowrap" }}>{fmt(due)}</td>
                     <td>
                       <span style={{ fontSize: 11, fontWeight: 700, color: daysColor(days, isOverdue) }}>{days}d</span>
                       {rfi.scheduleImpact && rfi.scheduleImpact !== "No Schedule Impact" && (
                         <span style={{ display: "block", fontSize: 9, color: "#D97706" }}>⚠ {w("Sched.", "Prog.", lang)}</span>
                       )}
                     </td>
-                    {canWrite && (
-                      <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
-                        <button
-                          style={{ padding: "4px 8px", fontSize: 11, border: "1px solid hsl(var(--border))", borderRadius: 5, background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}
-                          onClick={e => { e.stopPropagation(); setSelectedRfi(rfi); }}
+                    {/* Fix 8 — per-row export button */}
+                    <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                        <button title="Export PDF"
+                          style={{ padding: "3px 6px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3 }}
+                          onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
                         >
-                          {w("View", "Ver", lang)}
+                          <FileText style={{ width: 10, height: 10 }} />PDF
                         </button>
-                      </td>
-                    )}
+                        {canWrite && (
+                          <button
+                            style={{ padding: "3px 7px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}
+                            onClick={e => { e.stopPropagation(); setSelectedRfi(rfi); }}
+                          >
+                            {w("View", "Ver", lang)}
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -317,6 +492,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                 <th style={{ width: 90 }}>{w("Answered", "Respondido", lang)}</th>
                 <th style={{ width: 95 }}>{w("Status", "Estado", lang)}</th>
                 <th>{w("Sched. Impact", "Impacto Prog.", lang)}</th>
+                <th style={{ width: 60, textAlign: "right" }}></th>
               </tr>
             </thead>
             <tbody>
@@ -337,6 +513,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                       : <span style={{ fontSize: 11, color: "#16A34A" }}>{w("None", "Ninguno", lang)}</span>
                     }
                   </td>
+                  {/* Fix 8 — per-row PDF in log view */}
+                  <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                    <button title="Export PDF"
+                      style={{ padding: "3px 6px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3 }}
+                      onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
+                    >
+                      <FileText style={{ width: 10, height: 10 }} />PDF
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -349,6 +534,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         <RfiCreatePanel
           projectId={projectId}
           preload={revising ?? undefined}
+          existingRfis={rfis || []}
           members={members || []}
           user={user}
           lang={lang}
@@ -375,10 +561,11 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   );
 }
 
-// ─── RFI Create Panel (slide-out) ────────────────────────────────────────────
-function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
+// ─── RFI Create Panel ─────────────────────────────────────────────────────────
+function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang, onClose }: {
   projectId: number;
   preload?: Rfi;
+  existingRfis: Rfi[];
   members: { userFullName: string; userCompanyName?: string; userEmail: string }[];
   user: { fullName: string; companyName: string; email: string } | null;
   lang: string;
@@ -388,14 +575,22 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
   const { toast } = useToast();
   const { getOptions } = useConfig();
   const priorityOptions = getOptions("rfi_priority");
+  const { data: files } = useListFiles(projectId);
 
   const isRevision = !!preload;
+
+  // Fix 1 — auto-populate project address from last RFI that has one
+  const lastAddress = useMemo(() => {
+    if (preload?.projectAddress) return preload.projectAddress;
+    const withAddr = [...existingRfis].reverse().find(r => r.projectAddress);
+    return withAddr?.projectAddress || "";
+  }, [existingRfis, preload]);
 
   const [subject, setSubject] = useState(preload?.subject || "");
   const [priority, setPriority] = useState(preload?.priority || priorityOptions[0]?.value || "medium");
   const [dateRequested, setDateRequested] = useState(format(new Date(), "yyyy-MM-dd"));
   const [dateRequired, setDateRequired] = useState(preload?.dateRequired ? format(parseISO(preload.dateRequired), "yyyy-MM-dd") : "");
-  const [projectAddress, setProjectAddress] = useState(preload?.projectAddress || "");
+  const [projectAddress, setProjectAddress] = useState(lastAddress);
 
   const [sByCompany, setsByCompany] = useState(preload?.submittedByCompany || user?.companyName || "");
   const [sByContact, setsByContact] = useState(preload?.submittedByContact || user?.fullName || "");
@@ -407,12 +602,21 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
   const [sToPerson, setsToPerson] = useState(preload?.submittedToPerson || "");
   const [sToEmail, setsToEmail] = useState(preload?.submittedToEmail || "");
 
+  // Fix 2 — add external person to submitted to
+  const [showAddExtPerson, setShowAddExtPerson] = useState(false);
+  const [extPersonName, setExtPersonName] = useState("");
+  const [extPersonEmail, setExtPersonEmail] = useState("");
+  const [extPersonPhone, setExtPersonPhone] = useState("");
+
   const [drawingNum, setDrawingNum] = useState(preload?.drawingNumber || "");
   const [drawingTitle, setDrawingTitle] = useState(preload?.drawingTitle || "");
   const [specSection, setSpecSection] = useState(preload?.specSection || "");
   const [detailNum, setDetailNum] = useState(preload?.detailNumber || "");
   const [noteNum, setNoteNum] = useState(preload?.noteNumber || "");
   const [location, setLocation] = useState(preload?.locationDescription || "");
+
+  // Fix 3 — file search state per reference field
+  const [fileSearch, setFileSearch] = useState<string | null>(null);
 
   const [question, setQuestion] = useState(preload?.question || "");
   const [attachments, setAttachments] = useState<string[]>(preload?.attachmentsJson || []);
@@ -424,6 +628,12 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
   const [schedDays, setSchedDays] = useState(preload?.scheduleImpactDays != null ? String(preload.scheduleImpactDays) : "");
 
   const [distList, setDistList] = useState<string[]>(preload?.distributionList || []);
+
+  // Fix 4 — external contact form state
+  const [showAddExtContact, setShowAddExtContact] = useState(false);
+  const [extContactName, setExtContactName] = useState("");
+  const [extContactEmail, setExtContactEmail] = useState("");
+  const [extContactPhone, setExtContactPhone] = useState("");
 
   const [aiDesc, setAiDesc] = useState("");
   const [showAi, setShowAi] = useState(false);
@@ -444,14 +654,31 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
 
   const { mutate: generateQ, isPending: isGenerating } = useGenerateRfiQuestion({
     mutation: {
-      onSuccess: (data) => {
-        setQuestion(data.question);
-        setShowAi(false);
-        setAiDesc("");
-      },
+      onSuccess: (data) => { setQuestion(data.question); setShowAi(false); setAiDesc(""); },
       onError: () => toast({ title: w("AI generation failed", "Generación IA falló", lang), variant: "destructive" }),
     },
   });
+
+  // Fix 2 — save external person
+  const handleAddExtPerson = () => {
+    if (!extPersonName.trim() || !extPersonEmail.trim()) return;
+    setsToPerson(extPersonName.trim());
+    setsToEmail(extPersonEmail.trim());
+    // Also add to distribution list
+    const entry = `EXT:${extPersonName.trim()}:${extPersonEmail.trim()}:${extPersonPhone.trim()}`;
+    setDistList(prev => prev.includes(entry) ? prev : [...prev, entry]);
+    setShowAddExtPerson(false);
+    setExtPersonName(""); setExtPersonEmail(""); setExtPersonPhone("");
+  };
+
+  // Fix 4 — save external contact
+  const handleAddExtContact = () => {
+    if (!extContactName.trim() || !extContactEmail.trim()) return;
+    const entry = `EXT:${extContactName.trim()}:${extContactEmail.trim()}:${extContactPhone.trim()}`;
+    setDistList(prev => prev.includes(entry) ? prev : [...prev, entry]);
+    setShowAddExtContact(false);
+    setExtContactName(""); setExtContactEmail(""); setExtContactPhone("");
+  };
 
   const handleSubmit = () => {
     if (!subject.trim()) {
@@ -489,15 +716,38 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
     });
   };
 
+  // Fix 3 — inline file search input+dropdown for a field
+  const RefFieldWithSearch = ({ label, value, onChange, placeholder, fieldKey }: {
+    label: string; value: string; onChange: (v: string) => void; placeholder: string; fieldKey: string;
+  }) => (
+    <FormField label={label}>
+      <div style={{ position: "relative" }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{ fontSize: 12, flex: 1 }} />
+          <button
+            type="button"
+            title={w("Search project files", "Buscar archivos del proyecto", lang)}
+            onClick={() => setFileSearch(fileSearch === fieldKey ? null : fieldKey)}
+            style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: fileSearch === fieldKey ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: fileSearch === fieldKey ? "white" : "hsl(var(--muted-foreground))" }}
+          >
+            <Search style={{ width: 12, height: 12 }} />
+          </button>
+        </div>
+        {fileSearch === fieldKey && (
+          <FileSearchDropdown
+            files={files || []}
+            onSelect={(name) => { onChange(name); setFileSearch(null); }}
+            onClose={() => setFileSearch(null)}
+          />
+        )}
+      </div>
+    </FormField>
+  );
+
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex" }}>
       <div style={{ flex: 1, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
-      <div style={{
-        width: 680, maxWidth: "95vw", background: "hsl(var(--background))",
-        boxShadow: "-4px 0 32px rgba(0,0,0,0.18)", display: "flex", flexDirection: "column",
-        overflow: "hidden",
-      }}>
-        {/* Panel header */}
+      <div style={{ width: 680, maxWidth: "95vw", background: "hsl(var(--background))", boxShadow: "-4px 0 32px rgba(0,0,0,0.18)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700 }}>{w(isRevision ? "Revise RFI" : "New RFI", isRevision ? "Revisar RFI" : "Nuevo RFI", lang)}</div>
@@ -508,9 +758,8 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
           </button>
         </div>
 
-        {/* Scrollable content */}
         <div style={{ overflowY: "auto", flex: 1, padding: "0 24px 24px" }}>
-          {/* Section 1 — Header Info */}
+          {/* Section 1 — Header */}
           <SectionHeader title={w("1. Header Information", "1. Información del Encabezado", lang)} />
           <FormGrid>
             <FormField label={w("Date Requested", "Fecha Solicitada", lang)} full>
@@ -520,7 +769,7 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
                   <Input type="date" value={dateRequested} onChange={e => setDateRequested(e.target.value)} style={{ fontSize: 12 }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Date Required (response by)", "Fecha Requerida (respuesta antes de)", lang)}</label>
+                  <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Date Required (response by)", "Fecha Requerida", lang)}</label>
                   <Input type="date" value={dateRequired} onChange={e => setDateRequired(e.target.value)} style={{ fontSize: 12 }} />
                 </div>
               </div>
@@ -534,7 +783,7 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
               </select>
             </FormField>
             <FormField label={w("Project Address", "Dirección del Proyecto", lang)}>
-              <Input value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder={w("Project site address", "Dirección del sitio del proyecto", lang)} style={{ fontSize: 12 }} />
+              <Input value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder={w("Auto-filled from project history", "Auto-llenado del historial del proyecto", lang)} style={{ fontSize: 12 }} />
             </FormField>
           </FormGrid>
 
@@ -564,50 +813,81 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
             <FormField label={w("Company Name", "Nombre de Empresa", lang)}>
               <select value={sToCompany} onChange={e => {
                 setsToCompany(e.target.value);
-                setsToPerson("");
-                setsToEmail("");
+                setsToPerson(""); setsToEmail("");
+                setShowAddExtPerson(false);
               }} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
                 <option value="">{w("— Select company —", "— Seleccionar empresa —", lang)}</option>
                 {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </FormField>
             <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
-              <select value={sToPerson} onChange={e => {
-                const sel = companyPeople(sToCompany).find(m => m.userFullName === e.target.value);
-                setsToPerson(e.target.value);
-                if (sel) setsToEmail(sel.userEmail);
-              }} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                <option value="">{w("— Select person —", "— Seleccionar persona —", lang)}</option>
-                {companyPeople(sToCompany).map(m => <option key={m.userEmail} value={m.userFullName}>{m.userFullName}</option>)}
-              </select>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <select value={sToPerson} onChange={e => {
+                  const sel = companyPeople(sToCompany).find(m => m.userFullName === e.target.value);
+                  setsToPerson(e.target.value);
+                  if (sel) setsToEmail(sel.userEmail);
+                }} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
+                  <option value="">{w("— Select person —", "— Seleccionar persona —", lang)}</option>
+                  {companyPeople(sToCompany).map(m => <option key={m.userEmail} value={m.userFullName}>{m.userFullName}</option>)}
+                </select>
+                {/* Fix 2 — Add person button */}
+                {sToCompany && (
+                  <button type="button" onClick={() => setShowAddExtPerson(!showAddExtPerson)}
+                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddExtPerson ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content" }}>
+                    <UserPlus style={{ width: 12, height: 12 }} />
+                    {w("Add person not in list", "Agregar persona fuera de lista", lang)}
+                  </button>
+                )}
+              </div>
             </FormField>
+            {/* Fix 2 — Inline add external person form */}
+            {showAddExtPerson && (
+              <div style={{ gridColumn: "span 2", padding: "10px 12px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 8 }}>
+                  {w("Add external person (RFI only — not added as project member)", "Agregar persona externa (solo RFI — no se agrega como miembro)", lang)}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Name *</label>
+                    <Input value={extPersonName} onChange={e => setExtPersonName(e.target.value)} placeholder="John Smith" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Email *</label>
+                    <Input value={extPersonEmail} onChange={e => setExtPersonEmail(e.target.value)} placeholder="j.smith@firm.com" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Phone</label>
+                    <Input value={extPersonPhone} onChange={e => setExtPersonPhone(e.target.value)} placeholder="+1 555 0100" style={{ fontSize: 12 }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                  <Button size="sm" onClick={handleAddExtPerson} disabled={!extPersonName.trim() || !extPersonEmail.trim()} style={{ fontSize: 11 }}>
+                    {w("Add & Select", "Agregar y Seleccionar", lang)}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowAddExtPerson(false)} style={{ fontSize: 11 }}>
+                    {w("Cancel", "Cancelar", lang)}
+                  </Button>
+                </div>
+              </div>
+            )}
             <FormField label={w("Email", "Correo", lang)}>
               <Input value={sToEmail} onChange={e => setsToEmail(e.target.value)} style={{ fontSize: 12 }} />
             </FormField>
           </FormGrid>
 
-          {/* Section 4 — Reference Info */}
+          {/* Section 4 — Reference Information */}
+          {/* Fix 3 — meaningful placeholders + file search buttons */}
           <SectionHeader title={w("4. Reference Information", "4. Información de Referencia", lang)} />
-          <FormGrid>
-            <FormField label={w("Drawing Number", "Número de Plano", lang)}>
-              <Input value={drawingNum} onChange={e => setDrawingNum(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Drawing Title", "Título del Plano", lang)}>
-              <Input value={drawingTitle} onChange={e => setDrawingTitle(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Spec Section", "Sección de Especificación", lang)}>
-              <Input value={specSection} onChange={e => setSpecSection(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Detail Number", "Número de Detalle", lang)}>
-              <Input value={detailNum} onChange={e => setDetailNum(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Note Number", "Número de Nota", lang)}>
-              <Input value={noteNum} onChange={e => setNoteNum(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px", marginTop: 10 }}>
+            <RefFieldWithSearch label={w("Drawing Number", "Número de Plano", lang)} value={drawingNum} onChange={setDrawingNum} placeholder="e.g. A-101" fieldKey="drawingNum" />
+            <RefFieldWithSearch label={w("Drawing Title", "Título del Plano", lang)} value={drawingTitle} onChange={setDrawingTitle} placeholder="e.g. Floor Plan Level 3" fieldKey="drawingTitle" />
+            <RefFieldWithSearch label={w("Spec Section", "Sección de Especificación", lang)} value={specSection} onChange={setSpecSection} placeholder="e.g. 23 00 00" fieldKey="specSection" />
+            <RefFieldWithSearch label={w("Detail Number", "Número de Detalle", lang)} value={detailNum} onChange={setDetailNum} placeholder="e.g. 5/A-301" fieldKey="detailNum" />
+            <RefFieldWithSearch label={w("Note Number", "Número de Nota", lang)} value={noteNum} onChange={setNoteNum} placeholder="e.g. NOTE 3" fieldKey="noteNum" />
             <FormField label={w("Location Description", "Descripción de Ubicación", lang)} full>
-              <Input value={location} onChange={e => setLocation(e.target.value)} placeholder={w("Where on the project does this apply?", "¿Dónde aplica en el proyecto?", lang)} style={{ fontSize: 12 }} />
+              <Input value={location} onChange={e => setLocation(e.target.value)} placeholder={w("e.g. Level 2 North Wing, Grid B-C/3-4", "ej. Nivel 2 Ala Norte, Cuadrícula B-C/3-4", lang)} style={{ fontSize: 12 }} />
             </FormField>
-          </FormGrid>
+          </div>
 
           {/* Section 5 — Question */}
           <SectionHeader title={w("5. Description of Question", "5. Descripción de la Pregunta", lang)} />
@@ -618,8 +898,6 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
               placeholder={w("Provide a clear, detailed description of the information requested…", "Proporcione una descripción clara y detallada de la información solicitada…", lang)}
               style={{ width: "100%", minHeight: 100, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
             />
-
-            {/* AI Assistant */}
             <div style={{ marginTop: 8 }}>
               <button
                 onClick={() => setShowAi(!showAi)}
@@ -639,12 +917,9 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
                     placeholder={w("e.g. The drawing shows a beam but the spec says something different…", "ej. El plano muestra una viga pero la especificación dice algo diferente…", lang)}
                     style={{ width: "100%", minHeight: 60, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
                   />
-                  <Button
-                    size="sm"
-                    disabled={!aiDesc.trim() || isGenerating}
+                  <Button size="sm" disabled={!aiDesc.trim() || isGenerating}
                     onClick={() => generateQ({ data: { description: aiDesc, subject, projectName: undefined } })}
-                    style={{ marginTop: 8, fontSize: 12, background: "#7C3AED", gap: 5 }}
-                  >
+                    style={{ marginTop: 8, fontSize: 12, background: "#7C3AED", gap: 5 }}>
                     {isGenerating ? <><Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />{w("Generating…", "Generando…", lang)}</> : <><Sparkles style={{ width: 12, height: 12 }} />{w("Generate", "Generar", lang)}</>}
                   </Button>
                 </div>
@@ -655,7 +930,8 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
             <div style={{ marginTop: 12 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</label>
               <div style={{ display: "flex", gap: 6 }}>
-                <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL…", "Pegar nombre de archivo o URL…", lang)} style={{ fontSize: 12, flex: 1 }} onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
+                <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL…", "Pegar nombre de archivo o URL…", lang)} style={{ fontSize: 12, flex: 1 }}
+                  onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
                 <Button size="sm" variant="outline" onClick={() => { if (attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); } }} style={{ fontSize: 11 }}>{w("Add", "Agregar", lang)}</Button>
               </div>
               {attachments.map((a, i) => (
@@ -698,28 +974,72 @@ function RfiCreatePanel({ projectId, preload, members, user, lang, onClose }: {
           </div>
 
           {/* Section 7 — Distribution */}
+          {/* Fix 4 — external contacts */}
           <SectionHeader title={w("7. Distribution List", "7. Lista de Distribución", lang)} />
           <div style={{ marginTop: 10 }}>
             {members.map(m => (
               <label key={m.userEmail} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
-                <input
-                  type="checkbox"
-                  checked={distList.includes(m.userEmail)}
+                <input type="checkbox" checked={distList.includes(m.userEmail)}
                   onChange={e => {
                     if (e.target.checked) setDistList(prev => [...prev, m.userEmail]);
                     else setDistList(prev => prev.filter(x => x !== m.userEmail));
-                  }}
-                />
+                  }} />
                 <span>{m.userFullName}</span>
                 {m.userCompanyName && <span style={{ color: "hsl(var(--muted-foreground))" }}>· {m.userCompanyName}</span>}
                 <span style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{m.userEmail}</span>
               </label>
             ))}
-            {members.length === 0 && <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No team members found.", "No se encontraron miembros del equipo.", lang)}</p>}
+            {/* Show external contacts already added */}
+            {distList.filter(e => e.startsWith("EXT:")).map((entry, i) => {
+              const parsed = parseDistEntry(entry);
+              return (
+                <div key={entry} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: 12, padding: "3px 6px", background: "#F0F9FF", borderRadius: 5, border: "1px solid #BAE6FD" }}>
+                  <UserPlus style={{ width: 12, height: 12, color: "#0369A1", flexShrink: 0 }} />
+                  <span style={{ flex: 1 }}>{parsed.display}</span>
+                  <button onClick={() => setDistList(prev => prev.filter(x => x !== entry))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 2 }}><X style={{ width: 11, height: 11 }} /></button>
+                </div>
+              );
+            })}
+            {members.length === 0 && distList.filter(e => !e.startsWith("EXT:")).length === 0 && (
+              <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>{w("No team members found.", "No se encontraron miembros del equipo.", lang)}</p>
+            )}
+
+            {/* Fix 4 — Add external contact */}
+            <button type="button" onClick={() => setShowAddExtContact(!showAddExtContact)}
+              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 11, borderRadius: 5, border: "1px dashed #0369A1", background: showAddExtContact ? "#E0F2FE" : "transparent", cursor: "pointer", color: "#0369A1", marginTop: 8 }}>
+              <UserPlus style={{ width: 12, height: 12 }} />
+              {w("Add external contact", "Agregar contacto externo", lang)}
+            </button>
+            {showAddExtContact && (
+              <div style={{ marginTop: 8, padding: "10px 12px", background: "#E0F2FE", borderRadius: 8, border: "1px solid #BAE6FD" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#0369A1", marginBottom: 8 }}>
+                  {w("External contact (RFI notifications only — not a project member)", "Contacto externo (solo notificaciones RFI — no es miembro del proyecto)", lang)}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Name *</label>
+                    <Input value={extContactName} onChange={e => setExtContactName(e.target.value)} placeholder="Jane Doe" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Email *</label>
+                    <Input value={extContactEmail} onChange={e => setExtContactEmail(e.target.value)} placeholder="jane@company.com" style={{ fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Phone (optional)</label>
+                    <Input value={extContactPhone} onChange={e => setExtContactPhone(e.target.value)} placeholder="+1 555 0200" style={{ fontSize: 12 }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                  <Button size="sm" onClick={handleAddExtContact} disabled={!extContactName.trim() || !extContactEmail.trim()} style={{ fontSize: 11 }}>
+                    {w("Add to Distribution", "Agregar a Distribución", lang)}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowAddExtContact(false)} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer */}
         <div style={{ padding: "14px 24px", borderTop: "1px solid hsl(var(--border))", display: "flex", justifyContent: "flex-end", gap: 8, flexShrink: 0 }}>
           <Button variant="outline" onClick={onClose} style={{ fontSize: 12 }}>{w("Cancel", "Cancelar", lang)}</Button>
           <Button onClick={handleSubmit} disabled={isPending} style={{ fontSize: 12, gap: 5 }}>
@@ -747,7 +1067,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getLabel, getOptions } = useConfig();
-  const { data: activity } = useListRfis(projectId);
+  const { data: files } = useListFiles(projectId);
 
   const [answer, setAnswer] = useState(rfi.answer || rfi.response || "");
   const [answeredBy, setAnsweredBy] = useState(rfi.answeredBy || user?.fullName || "");
@@ -756,6 +1076,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [costAmount, setCostAmount] = useState(rfi.costImpactAmount || "");
   const [schedImpact, setSchedImpact] = useState(rfi.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+
+  // Fix 5 — response documents
+  const [responseDocInput, setResponseDocInput] = useState("");
+  const [responseDocs, setResponseDocs] = useState<string[]>(rfi.responseAttachmentsJson || []);
+  const [showFileSearch, setShowFileSearch] = useState(false);
 
   const statusOptions = getOptions("rfi_status");
 
@@ -770,7 +1095,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     },
   });
 
-  const { mutate: reviseRfi, isPending: isRevising } = useReviseRfi({
+  const { mutate: reviseRfi } = useReviseRfi({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
@@ -797,6 +1122,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
         scheduleImpact: schedImpact || undefined,
         scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
+        responseAttachmentsJson: responseDocs.length > 0 ? responseDocs : undefined,
       },
     });
   };
@@ -848,8 +1174,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
         {/* Content */}
         <div style={{ overflowY: "auto", flex: 1, padding: "20px 24px 24px" }}>
-
-          {/* Overdue warning */}
           {isOverdue && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
               <AlertTriangle style={{ width: 14, height: 14 }} />
@@ -910,7 +1234,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
             <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
-
             {(rfi.attachmentsJson as string[] | null)?.length ? (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
@@ -937,7 +1260,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
             </div>
           </div>
 
-          {/* Response section */}
+          {/* Fix 5 — Response section with response documents */}
           <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
               {rfi.answer || rfi.response ? <CheckCircle2 style={{ width: 15, height: 15, color: "#16A34A" }} /> : <MessageSquare style={{ width: 15, height: 15 }} />}
@@ -948,6 +1271,17 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
               <div style={{ marginBottom: 10 }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.answer || rfi.response}</p>
                 {rfi.answeredBy && <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Answered by:", "Respondido por:", lang)} <strong>{rfi.answeredBy}</strong> {rfi.dateAnswered ? `· ${fmt(rfi.dateAnswered)}` : ""}</p>}
+                {/* Show response documents in view */}
+                {(rfi.responseAttachmentsJson as string[] | null)?.length ? (
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #BBF7D0" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 4 }}>{w("Response Documents", "Documentos de Respuesta", lang)}</div>
+                    {(rfi.responseAttachmentsJson as string[]).map((doc, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
+                        <ExternalLink style={{ width: 12, height: 12 }} />{doc}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -972,7 +1306,46 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
                     </select>
                   </div>
                 </div>
-                {/* Response impact update */}
+
+                {/* Fix 5 — Response documents */}
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Attach Response Documents", "Adjuntar Documentos de Respuesta", lang)}</label>
+                  <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
+                    {w("Paste a URL, file name from BIMLog, or search project files below.", "Pegue una URL, nombre de archivo de BIMLog o busque archivos del proyecto.", lang)}
+                  </p>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)}
+                      placeholder={w("e.g. SK-105 Rev2.pdf or https://docs.example.com/response", "ej. SK-105 Rev2.pdf o https://docs.example.com/respuesta", lang)}
+                      style={{ fontSize: 12, flex: 1 }}
+                      onKeyDown={e => { if (e.key === "Enter" && responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); e.preventDefault(); } }} />
+                    <button type="button" title={w("Search project files", "Buscar archivos del proyecto", lang)}
+                      onClick={() => setShowFileSearch(!showFileSearch)}
+                      style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: showFileSearch ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: showFileSearch ? "white" : "hsl(var(--muted-foreground))" }}>
+                      <Search style={{ width: 13, height: 13 }} />
+                    </button>
+                    <Button size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }} style={{ fontSize: 11 }}>
+                      {w("Add", "Agregar", lang)}
+                    </Button>
+                  </div>
+                  {showFileSearch && (
+                    <div style={{ position: "relative" }}>
+                      <FileSearchDropdown
+                        files={files || []}
+                        onSelect={(name) => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }}
+                        onClose={() => setShowFileSearch(false)}
+                      />
+                    </div>
+                  )}
+                  {responseDocs.map((doc, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
+                      <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
+                      <span style={{ flex: 1 }}>{doc}</span>
+                      <button onClick={() => setResponseDocs(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Impact update */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Cost Impact", "Impacto Costo", lang)}</label>
@@ -1023,11 +1396,15 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Distribution List", "Lista de Distribución", lang)}</div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {(rfi.distributionList as string[]).map(e => (
-                  <span key={e} style={{ fontSize: 11, padding: "3px 8px", background: "hsl(var(--secondary))", borderRadius: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Mail style={{ width: 10, height: 10 }} />{e}
-                  </span>
-                ))}
+                {(rfi.distributionList as string[]).map(e => {
+                  const parsed = parseDistEntry(e);
+                  return (
+                    <span key={e} style={{ fontSize: 11, padding: "3px 8px", background: parsed.isExternal ? "#E0F2FE" : "hsl(var(--secondary))", borderRadius: 12, display: "flex", alignItems: "center", gap: 4, border: parsed.isExternal ? "1px solid #BAE6FD" : "none" }}>
+                      {parsed.isExternal ? <UserPlus style={{ width: 10, height: 10, color: "#0369A1" }} /> : <Mail style={{ width: 10, height: 10 }} />}
+                      {parsed.display}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           ) : null}

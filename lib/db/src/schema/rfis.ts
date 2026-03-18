@@ -52,6 +52,7 @@ export const rfisTable = pgTable("rfis", {
 
   distributionList: json("distribution_list").$type<string[]>().default([]),
   attachmentsJson: json("attachments_json").$type<string[]>().default([]),
+  responseAttachmentsJson: json("response_attachments_json").$type<string[]>().default([]),
 
   parentRfiId: integer("parent_rfi_id"),
   revisionNumber: integer("revision_number").default(0),

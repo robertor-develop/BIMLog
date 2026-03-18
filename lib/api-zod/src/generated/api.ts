@@ -259,6 +259,7 @@ export const CreateRfiBody = zod.object({
   distributionList: zod.array(zod.string()).optional(),
   attachmentsJson: zod.array(zod.string()).optional(),
   projectAddress: zod.string().optional(),
+  responseAttachmentsJson: zod.array(zod.string()).optional(),
 });
 
 /**
@@ -304,6 +305,7 @@ export const UpdateRfiBody = zod.object({
   distributionList: zod.array(zod.string()).optional(),
   attachmentsJson: zod.array(zod.string()).optional(),
   projectAddress: zod.string().optional(),
+  responseAttachmentsJson: zod.array(zod.string()).optional(),
 });
 
 export const UpdateRfiResponse = zod.object({

@@ -24,6 +24,219 @@ function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unkn
   };
 }
 
+// ─── PDF helpers ─────────────────────────────────────────────────────────────
+const LETTER_HEIGHT = 792;
+const LETTER_WIDTH = 612;
+const MARGIN = 50;
+const CONTENT_BOTTOM = LETTER_HEIGHT - 65;
+const COL_W = 256;
+
+function makeRfiPdf(
+  doc: PDFKit.PDFDocument,
+  rfi: typeof rfisTable.$inferSelect,
+  project: { name: string } | undefined,
+  creatorName: string,
+  startY = MARGIN,
+  isFirstPage = true,
+): number {
+  const fmtD = (d: Date | string | null | undefined) =>
+    d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
+  const val = (v: string | null | undefined) => v || "—";
+
+  let y = startY;
+
+  const addPageIfNeeded = (needed: number) => {
+    if (y + needed > CONTENT_BOTTOM) {
+      doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
+        .text(`BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`,
+          MARGIN, LETTER_HEIGHT - 40, { width: 512, align: "center" });
+      doc.addPage();
+      y = MARGIN;
+    }
+  };
+
+  if (isFirstPage) {
+    doc.rect(MARGIN, y, 512, 58).fill("#1E3A5F");
+    doc.fillColor("white").fontSize(17).font("Helvetica-Bold")
+      .text("REQUEST FOR INFORMATION", MARGIN + 10, y + 10, { width: 380 });
+    doc.fontSize(22).font("Helvetica-Bold")
+      .text(rfi.number, MARGIN + 10, y + 28, { width: 490, align: "right" });
+    doc.fillColor("black");
+    y += 62;
+
+    doc.rect(MARGIN, y, 512, 46).stroke("#CBD5E1");
+    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
+      .text("PROJECT", MARGIN + 10, y + 6)
+      .text("ADDRESS", 240, y + 6)
+      .text("DATE REQUESTED", 390, y + 6)
+      .text("DATE REQUIRED", 490, y + 6);
+    doc.fontSize(10).fillColor("black").font("Helvetica")
+      .text(project?.name || "—", MARGIN + 10, y + 18, { width: 180 })
+      .text(val(rfi.projectAddress), 240, y + 18, { width: 140 })
+      .text(fmtD(rfi.dateRequested || rfi.createdAt), 390, y + 18, { width: 90 })
+      .text(fmtD(rfi.dateRequired || rfi.dueDate), 490, y + 18, { width: 70 });
+    y += 50;
+  }
+
+  const drawSection = (title: string, fields: [string, string | null | undefined][]) => {
+    const rows = Math.ceil(fields.length / 2);
+    const sectionH = 18 + rows * 28 + 6;
+    addPageIfNeeded(sectionH + 10);
+
+    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text(title, MARGIN + 6, y + 5);
+    doc.fillColor("black");
+    y += 18;
+
+    fields.forEach(([label, value], i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const fx = col === 0 ? MARGIN : MARGIN + COL_W;
+      const fy = y + row * 28;
+      doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
+        .text(label.toUpperCase(), fx + 6, fy + 4, { width: COL_W - 12 });
+      doc.fontSize(10).fillColor("black").font("Helvetica")
+        .text(val(value), fx + 6, fy + 14, { width: COL_W - 12 });
+      if (col === 1 || i === fields.length - 1) {
+        doc.moveTo(MARGIN, fy + 28).lineTo(MARGIN + 512, fy + 28).stroke("#E2E8F0");
+      }
+    });
+    y += rows * 28 + 4;
+  };
+
+  addPageIfNeeded(56);
+  doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+  doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("SUBJECT & PRIORITY", MARGIN + 6, y + 5);
+  y += 18;
+  doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("SUBJECT", MARGIN + 6, y + 4);
+  doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("PRIORITY / STATUS", 420, y + 4);
+  doc.fontSize(11).fillColor("black").font("Helvetica").text(rfi.subject, MARGIN + 6, y + 14, { width: 340 });
+  doc.fontSize(10).fillColor("black").font("Helvetica")
+    .text(`${(rfi.priority || "").toUpperCase()} / ${(rfi.status || "").replace("_", " ").toUpperCase()}`, 420, y + 14, { width: 140 });
+  doc.moveTo(MARGIN, y + 34).lineTo(MARGIN + 512, y + 34).stroke("#E2E8F0");
+  y += 38;
+
+  drawSection("SUBMITTED BY", [
+    ["Company", rfi.submittedByCompany || creatorName],
+    ["Contact Person", rfi.submittedByContact],
+    ["Address", rfi.submittedByAddress],
+    ["Phone", rfi.submittedByPhone],
+    ["Email", rfi.submittedByEmail],
+  ]);
+
+  drawSection("SUBMITTED TO", [
+    ["Company", rfi.submittedToCompany],
+    ["Contact Person", rfi.submittedToPerson],
+    ["Email", rfi.submittedToEmail],
+  ]);
+
+  drawSection("REFERENCE INFORMATION", [
+    ["Drawing Number", rfi.drawingNumber],
+    ["Drawing Title", rfi.drawingTitle],
+    ["Spec Section", rfi.specSection],
+    ["Detail Number", rfi.detailNumber],
+    ["Note Number", rfi.noteNumber],
+    ["Location", rfi.locationDescription],
+  ]);
+
+  const questionText = rfi.question || rfi.description || "No question text provided.";
+  const estimatedQH = Math.min(Math.max(doc.heightOfString(questionText, { width: 500 }) + 36, 60), 300);
+  addPageIfNeeded(estimatedQH + 30);
+  doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+  doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", MARGIN + 6, y + 5);
+  y += 18;
+  const beforeQ = y;
+  doc.fontSize(10).fillColor("black").font("Helvetica").text(questionText, MARGIN + 6, y + 6, { width: 500 });
+  const actualQH = doc.heightOfString(questionText, { width: 500 }) + 18;
+  doc.rect(MARGIN, beforeQ, 512, actualQH).stroke("#E2E8F0");
+  y = beforeQ + actualQH + 6;
+
+  const attList = (rfi.attachmentsJson as string[] | null) || [];
+  if (attList.length > 0) {
+    addPageIfNeeded(24 + attList.length * 16);
+    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("QUESTION ATTACHMENTS", MARGIN + 6, y + 5);
+    y += 18;
+    attList.forEach((a, i) => {
+      doc.fontSize(9).fillColor("#1D4ED8").font("Helvetica").text(`${i + 1}. ${a}`, MARGIN + 6, y + 4, { width: 500 });
+      y += 16;
+    });
+    y += 4;
+  }
+
+  drawSection("IMPACT ASSESSMENT", [
+    ["Cost Impact", rfi.costImpact],
+    ["Cost Impact Amount", rfi.costImpact === "Cost Increase Known" ? rfi.costImpactAmount : undefined],
+    ["Schedule Impact", rfi.scheduleImpact],
+    ["Schedule Impact Days", rfi.scheduleImpactDays != null ? `${rfi.scheduleImpactDays} calendar days` : undefined],
+  ]);
+
+  const distList = (rfi.distributionList as string[] | null) || [];
+  if (distList.length > 0) {
+    addPageIfNeeded(24 + distList.length * 14);
+    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("DISTRIBUTION LIST", MARGIN + 6, y + 5);
+    y += 18;
+    distList.forEach((entry, i) => {
+      doc.fontSize(9).fillColor("black").font("Helvetica").text(`${i + 1}. ${entry}`, MARGIN + 6, y + 4, { width: 500 });
+      y += 14;
+    });
+    y += 4;
+  }
+
+  const hasResponse = !!(rfi.answer || rfi.response);
+  const responseText = rfi.answer || rfi.response || "";
+  const estimatedRespH = hasResponse
+    ? Math.min(Math.max(doc.heightOfString(responseText, { width: 500 }) + 60, 80), 300)
+    : 80;
+  addPageIfNeeded(estimatedRespH + 30);
+  doc.rect(MARGIN, y, 512, 18).fill("#0F4C75");
+  doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("RESPONSE", MARGIN + 6, y + 5);
+  doc.fillColor("black");
+  y += 18;
+  if (hasResponse) {
+    const beforeAns = y;
+    doc.fontSize(10).fillColor("black").font("Helvetica")
+      .text(responseText, MARGIN + 6, y + 6, { width: 500 });
+    const ansH = doc.heightOfString(responseText, { width: 500 }) + 18;
+    doc.rect(MARGIN, beforeAns, 512, ansH).stroke("#E2E8F0");
+    y = beforeAns + ansH + 4;
+
+    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
+      .text("ANSWERED BY", MARGIN + 6, y + 4)
+      .text("DATE ANSWERED", 306, y + 4);
+    doc.fontSize(10).fillColor("black").font("Helvetica")
+      .text(val(rfi.answeredBy), MARGIN + 6, y + 14)
+      .text(fmtD(rfi.dateAnswered || rfi.respondedAt), 306, y + 14);
+    doc.moveTo(MARGIN, y + 32).lineTo(MARGIN + 512, y + 32).stroke("#E2E8F0");
+    y += 36;
+
+    const respAtts = (rfi.responseAttachmentsJson as string[] | null) || [];
+    if (respAtts.length > 0) {
+      addPageIfNeeded(24 + respAtts.length * 14);
+      doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
+      doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("RESPONSE DOCUMENTS", MARGIN + 6, y + 5);
+      y += 18;
+      respAtts.forEach((a, i) => {
+        doc.fontSize(9).fillColor("#1D4ED8").font("Helvetica").text(`${i + 1}. ${a}`, MARGIN + 6, y + 4, { width: 500 });
+        y += 14;
+      });
+      y += 4;
+    }
+  } else {
+    doc.rect(MARGIN, y, 512, 56).stroke("#E2E8F0");
+    doc.fontSize(10).fillColor("#94A3B8").font("Helvetica")
+      .text("No response provided yet.", MARGIN + 6, y + 22, { width: 500, align: "center" });
+    y += 60;
+  }
+
+  doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
+    .text(`Generated by BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`,
+      MARGIN, LETTER_HEIGHT - 40, { width: 512, align: "center" });
+
+  return y;
+}
+
 // ─── GET /projects/:projectId/rfis ──────────────────────────────────────────
 router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
@@ -190,6 +403,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     if (body.dateAnswered !== undefined) updates.dateAnswered = body.dateAnswered ? new Date(body.dateAnswered) : null;
     if (body.distributionList !== undefined) updates.distributionList = body.distributionList;
     if (body.attachmentsJson !== undefined) updates.attachmentsJson = body.attachmentsJson;
+    if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
     if (body.projectAddress !== undefined) updates.projectAddress = body.projectAddress;
 
     const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
@@ -225,15 +439,8 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
 
     const orig = existing[0];
     const parentId = orig.parentRfiId ?? orig.id;
-
-    const siblings = await db.select({ count: count() }).from(rfisTable)
-      .where(and(
-        eq(rfisTable.projectId, projectId),
-        // count revisions of same parent
-      ));
     const revNum = (orig.revisionNumber ?? 0) + 1;
     const newNumber = `${orig.number.replace(/-R\d+$/, "")}-R${revNum}`;
-
     const defaultStatus = await getDefaultValue("rfi_status");
 
     const [newRfi] = await db.insert(rfisTable).values({
@@ -290,7 +497,7 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
   }
 });
 
-// ─── GET /projects/:projectId/rfis/:rfiId/export ────────────────────────────
+// ─── GET /projects/:projectId/rfis/:rfiId/export  (single PDF) ──────────────
 router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
@@ -304,7 +511,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
 
-    const doc = new PDFDocument({ margin: 50, size: "LETTER" });
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("end", () => {
@@ -315,147 +522,48 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       res.send(pdfBuffer);
     });
 
-    const fmt = (d: Date | string | null | undefined) => d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
-    const val = (v: string | null | undefined) => v || "—";
+    makeRfiPdf(doc, rfi, project, creator[0]?.fullName || "", MARGIN, true);
+    doc.end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
 
-    // Header bar
-    doc.rect(50, 50, 512, 60).fill("#1E3A5F");
-    doc.fillColor("white").fontSize(18).font("Helvetica-Bold")
-      .text("REQUEST FOR INFORMATION", 60, 65, { width: 400 });
-    doc.fontSize(12).font("Helvetica")
-      .text(rfi.number, 460, 72, { align: "right", width: 100 });
+// ─── GET /projects/:projectId/rfis/export-all  (bulk PDF) ───────────────────
+router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
 
-    doc.fillColor("black").moveDown(2);
+    const rfis = await db.query.rfisTable.findMany({
+      where: eq(rfisTable.projectId, projectId),
+      orderBy: (t, { asc }) => [asc(t.createdAt)],
+    });
 
-    // Project info box
-    const y1 = 125;
-    doc.rect(50, y1, 512, 50).stroke("#CBD5E1");
-    doc.fontSize(8).fillColor("#64748B").font("Helvetica-Bold")
-      .text("PROJECT", 60, y1 + 6).text("DATE REQUESTED", 280, y1 + 6).text("DATE REQUIRED", 420, y1 + 6);
-    doc.fontSize(11).fillColor("black").font("Helvetica")
-      .text(project?.name || "—", 60, y1 + 20, { width: 200 })
-      .text(fmt(rfi.dateRequested || rfi.createdAt), 280, y1 + 20)
-      .text(fmt(rfi.dateRequired || rfi.dueDate), 420, y1 + 20);
-
-    if (rfi.projectAddress) {
-      doc.fontSize(9).fillColor("#475569").text(rfi.projectAddress, 60, y1 + 34, { width: 200 });
+    if (rfis.length === 0) {
+      res.status(404).json({ error: "No RFIs found" });
+      return;
     }
 
-    doc.moveDown(0.5);
-    let y = y1 + 65;
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const drawSection = (title: string, fields: [string, string | null | undefined][]) => {
-      doc.rect(50, y, 512, 18).fill("#F1F5F9");
-      doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold").text(title, 56, y + 5);
-      doc.fillColor("black");
-      y += 18;
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="RFI-Log-${project?.name || projectId}.pdf"`);
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.send(pdfBuffer);
+    });
 
-      const colW = 256;
-      fields.forEach(([label, value], i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const fx = col === 0 ? 50 : 306;
-        const fy = y + row * 28;
-        doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text(label.toUpperCase(), fx + 6, fy + 4, { width: colW - 12 });
-        doc.fontSize(10).fillColor("black").font("Helvetica").text(val(value), fx + 6, fy + 14, { width: colW - 12 });
-        if (col === 1 || i === fields.length - 1) {
-          doc.moveTo(50, fy + 28).lineTo(562, fy + 28).stroke("#E2E8F0");
-        }
-      });
-
-      const rows = Math.ceil(fields.length / 2);
-      y += rows * 28 + 4;
-    };
-
-    // Subject + priority
-    doc.rect(50, y, 512, 18).fill("#F1F5F9");
-    doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold").text("SUBJECT & PRIORITY", 56, y + 5);
-    y += 18;
-    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("SUBJECT", 56, y + 4);
-    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("PRIORITY / STATUS", 400, y + 4);
-    doc.fontSize(11).fillColor("black").font("Helvetica").text(rfi.subject, 56, y + 14, { width: 320 });
-    doc.fontSize(10).fillColor("black").font("Helvetica").text(`${rfi.priority?.toUpperCase()} / ${rfi.status?.replace("_", " ").toUpperCase()}`, 400, y + 14, { width: 160 });
-    doc.moveTo(50, y + 32).lineTo(562, y + 32).stroke("#E2E8F0");
-    y += 36;
-
-    drawSection("SUBMITTED BY", [
-      ["Company", rfi.submittedByCompany || creator[0]?.fullName],
-      ["Contact Person", rfi.submittedByContact],
-      ["Address", rfi.submittedByAddress],
-      ["Phone", rfi.submittedByPhone],
-      ["Email", rfi.submittedByEmail],
-    ]);
-
-    drawSection("SUBMITTED TO", [
-      ["Company", rfi.submittedToCompany],
-      ["Contact Person", rfi.submittedToPerson],
-      ["Email", rfi.submittedToEmail],
-    ]);
-
-    drawSection("REFERENCE INFORMATION", [
-      ["Drawing Number", rfi.drawingNumber],
-      ["Drawing Title", rfi.drawingTitle],
-      ["Spec Section", rfi.specSection],
-      ["Detail Number", rfi.detailNumber],
-      ["Note Number", rfi.noteNumber],
-      ["Location", rfi.locationDescription],
-    ]);
-
-    // Question block
-    doc.rect(50, y, 512, 18).fill("#F1F5F9");
-    doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", 56, y + 5);
-    y += 18;
-    const questionText = rfi.question || rfi.description || "No question text provided.";
-    doc.rect(50, y, 512, 0).stroke("#E2E8F0");
-    doc.fontSize(10).fillColor("black").font("Helvetica").text(questionText, 56, y + 6, { width: 500 });
-    const qHeight = doc.heightOfString(questionText, { width: 500 }) + 18;
-    doc.rect(50, y, 512, qHeight).stroke("#E2E8F0");
-    y += qHeight + 6;
-
-    // Attachments
-    const attList = (rfi.attachmentsJson as string[] | null) || [];
-    if (attList.length > 0) {
-      doc.rect(50, y, 512, 18).fill("#F1F5F9");
-      doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold").text("ATTACHMENTS", 56, y + 5);
-      y += 18;
-      attList.forEach((a, i) => {
-        doc.fontSize(9).fillColor("#1D4ED8").font("Helvetica").text(`${i + 1}. ${a}`, 56, y + 4, { width: 500 });
-        y += 16;
-      });
-      y += 4;
+    for (let i = 0; i < rfis.length; i++) {
+      const rfi = rfis[i];
+      const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
+      if (i > 0) doc.addPage();
+      makeRfiPdf(doc, rfi, project, creator[0]?.fullName || "", MARGIN, true);
     }
-
-    drawSection("IMPACT ASSESSMENT", [
-      ["Cost Impact", rfi.costImpact],
-      ["Cost Impact Amount", rfi.costImpact === "Cost Increase Known" ? rfi.costImpactAmount : undefined],
-      ["Schedule Impact", rfi.scheduleImpact],
-      ["Schedule Impact Days", rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : undefined],
-    ]);
-
-    // Response / Answer block
-    doc.rect(50, y, 512, 18).fill("#0F4C75").fillColor("white").fontSize(9).font("Helvetica-Bold").text("RESPONSE", 56, y + 5);
-    y += 18;
-    if (rfi.answer || rfi.response) {
-      doc.fontSize(10).fillColor("black").font("Helvetica").text(rfi.answer || rfi.response || "", 56, y + 6, { width: 500 });
-      const ansH = doc.heightOfString(rfi.answer || rfi.response || "", { width: 500 }) + 18;
-      doc.rect(50, y, 512, ansH).stroke("#E2E8F0");
-      y += ansH + 4;
-
-      doc.fontSize(8).fillColor("#64748B").font("Helvetica-Bold").text("ANSWERED BY", 56, y + 4);
-      doc.fontSize(8).fillColor("#64748B").font("Helvetica-Bold").text("DATE ANSWERED", 300, y + 4);
-      doc.fontSize(10).fillColor("black").font("Helvetica").text(val(rfi.answeredBy), 56, y + 14);
-      doc.fontSize(10).fillColor("black").font("Helvetica").text(fmt(rfi.dateAnswered || rfi.respondedAt), 300, y + 14);
-      doc.moveTo(50, y + 30).lineTo(562, y + 30).stroke("#E2E8F0");
-      y += 34;
-    } else {
-      doc.rect(50, y, 512, 60).stroke("#E2E8F0");
-      doc.fontSize(10).fillColor("#94A3B8").font("Helvetica").text("No response provided yet.", 56, y + 24, { width: 500, align: "center" });
-      y += 64;
-    }
-
-    // Footer
-    doc.fontSize(7).fillColor("#94A3B8")
-      .text(`Generated by BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`, 50, 740, { width: 512, align: "center" });
 
     doc.end();
   } catch (error) {
