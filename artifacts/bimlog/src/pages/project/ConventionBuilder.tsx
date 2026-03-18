@@ -1236,6 +1236,197 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
 }
 
 // ─── edit mode ────────────────────────────────────────────────────────────────
+// ─── suggestion data helpers ──────────────────────────────────────────────────
+const SUGGEST_DOC_TYPES = DOC_TYPE_CATEGORIES.flatMap(cat =>
+  cat.types.map(t => ({ code: t.code, label: `${t.code} — ${t.name}` }))
+);
+const SUGGEST_DISCIPLINES = DEFAULT_DISCIPLINES.map(d => ({ code: d.code, label: `${d.code} — ${d.name}` }));
+const SUGGEST_STATUS = DEFAULT_STATUS.map(s => ({ code: s.code, label: `${s.code} — ${s.meaning}` }));
+const SUGGEST_LEVELS = [
+  "B5","B4","B3","B2","B1","G0","G1","L1","L2","L3","L4","L5","L6","L7","L8","L9","L10",
+  "L11","L12","L13","L14","L15","L16","L17","L18","L19","L20","L25","L30","L40","L50",
+  "MEZ1","MEZ2","MEZ3","MER","MER2","PH","PH1","PH2","RF","RF2","SKY","ZZ","XX","HALF",
+].map(c => ({ code: c, label: c }));
+const SUGGEST_REVISIONS = [
+  "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P",
+  "P01","P02","P03","P04","P05","C01","C02","C03","C04","S0","S1","S2","S3","R1","R2","R3",
+].map(c => ({ code: c, label: c }));
+const SUGGEST_SEQ = ["001","002","003","0001","0002","0003","0004","0005","0006","0007","0008","0009","0010"].map(c => ({ code: c, label: c }));
+
+function getFieldSuggestions(label: string): { type: "chips"; items: { code: string; label: string }[] } | { type: "note"; text: string } {
+  const l = label.toLowerCase();
+  if (/type|document|doc/.test(l))      return { type: "chips", items: SUGGEST_DOC_TYPES };
+  if (/discipline/.test(l))             return { type: "chips", items: SUGGEST_DISCIPLINES };
+  if (/level|floor/.test(l))            return { type: "chips", items: SUGGEST_LEVELS };
+  if (/status|suitability/.test(l))     return { type: "chips", items: SUGGEST_STATUS };
+  if (/revision|rev/.test(l))           return { type: "chips", items: SUGGEST_REVISIONS };
+  if (/sequence|seq/.test(l))           return { type: "chips", items: SUGGEST_SEQ };
+  if (/originator|company|code/.test(l)) return { type: "note", text: "Enter your company codes (e.g. BIM, ACM, JMP). Each company that submits files needs a unique code." };
+  return { type: "note", text: `Enter comma-separated values for the "${label}" field (e.g. AA, BB, CC).` };
+}
+
+// ─── smart suggest input ──────────────────────────────────────────────────────
+function SmartSuggestInput({ value, onChange, fieldLabel, lang }: {
+  value: string; onChange: (v: string) => void; fieldLabel: string; lang: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const suggestion = getFieldSuggestions(fieldLabel);
+
+  // parse current comma-separated values into a Set for quick lookup
+  const currentSet = new Set(
+    value.split(",").map(v => v.trim()).filter(Boolean).map(v => v.toUpperCase())
+  );
+
+  const toggle = (code: string) => {
+    const upper = code.toUpperCase();
+    const arr = value.split(",").map(v => v.trim()).filter(Boolean);
+    const idx = arr.findIndex(v => v.toUpperCase() === upper);
+    if (idx >= 0) {
+      arr.splice(idx, 1);
+    } else {
+      arr.push(code);
+    }
+    onChange(arr.join(", "));
+  };
+
+  // filtered items for chip suggestions
+  const filteredItems = suggestion.type === "chips"
+    ? (search.trim()
+        ? suggestion.items.filter(it => it.label.toLowerCase().includes(search.toLowerCase()))
+        : suggestion.items)
+    : [];
+
+  // close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false); setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (open && suggestion.type === "chips") {
+      setTimeout(() => searchRef.current?.focus(), 60);
+    }
+  }, [open]);
+
+  return (
+    <div ref={containerRef} style={{ position: "relative" }}>
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onFocus={() => setOpen(true)}
+        style={{
+          width: "100%", height: 36, fontSize: 12, fontFamily: "var(--font-mono)",
+          padding: "0 10px", borderRadius: 6,
+          border: open ? "1px solid #2563EB" : "1px solid hsl(var(--border))",
+          background: "hsl(var(--card))", color: "hsl(var(--foreground))",
+          outline: "none", boxSizing: "border-box",
+          boxShadow: open ? "0 0 0 2px #BFDBFE" : "none",
+          transition: "border-color 0.15s, box-shadow 0.15s",
+        }}
+      />
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 2000,
+          background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+          borderRadius: 10, boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
+          overflow: "hidden", minWidth: 320,
+        }}>
+          {suggestion.type === "note" ? (
+            <div style={{ padding: "14px 16px", fontSize: 12, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
+              <div style={{ fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4 }}>
+                {w("Tip", "Consejo", lang)}
+              </div>
+              {suggestion.text}
+            </div>
+          ) : (
+            <>
+              {/* search + count header */}
+              <div style={{ padding: "8px 10px 6px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 8, alignItems: "center" }}>
+                <input
+                  ref={searchRef}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  onKeyDown={e => e.key === "Escape" && (setOpen(false), setSearch(""))}
+                  placeholder={w("Search suggestions…", "Buscar sugerencias…", lang)}
+                  style={{
+                    flex: 1, height: 28, fontSize: 12, padding: "0 8px",
+                    border: "1px solid hsl(var(--border))", borderRadius: 5,
+                    background: "hsl(var(--secondary))", color: "hsl(var(--foreground))",
+                    outline: "none",
+                  }}
+                />
+                <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
+                  {currentSet.size} {w("selected", "sel.", lang)} · {filteredItems.length} {w("shown", "visibles", lang)}
+                </span>
+              </div>
+              {/* instruction line */}
+              <div style={{ padding: "5px 12px", fontSize: 10, color: "hsl(var(--muted-foreground))", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
+                {w("Click to add or remove from the allowed values list. Already included values are highlighted.", "Clic para agregar o quitar de los valores permitidos.", lang)}
+              </div>
+              {/* chip grid */}
+              <div style={{ maxHeight: 260, overflowY: "auto", padding: "10px 10px" }}>
+                {filteredItems.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "12px", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                    {w("No matches", "Sin coincidencias", lang)}
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                    {filteredItems.map(it => {
+                      const selected = currentSet.has(it.code.toUpperCase());
+                      return (
+                        <button
+                          key={it.code}
+                          onMouseDown={e => { e.preventDefault(); toggle(it.code); }}
+                          title={it.label}
+                          style={{
+                            padding: "4px 9px", borderRadius: 5, cursor: "pointer", fontSize: 11, fontWeight: 700,
+                            fontFamily: "var(--font-mono)",
+                            border: `1px solid ${selected ? "#2563EB" : "hsl(var(--border))"}`,
+                            background: selected ? "#EFF6FF" : "hsl(var(--secondary))",
+                            color: selected ? "#1D4ED8" : "hsl(var(--foreground))",
+                            display: "flex", alignItems: "center", gap: 4,
+                          }}
+                        >
+                          {selected && <span style={{ fontSize: 9 }}>✓</span>}
+                          {it.code}
+                          <span style={{ fontSize: 9, fontWeight: 400, color: selected ? "#1D4ED8" : "hsl(var(--muted-foreground))", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {it.label.includes("—") ? it.label.split("—")[1].trim() : ""}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              {/* close button */}
+              <div style={{ padding: "8px 10px", borderTop: "1px solid hsl(var(--border))", display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  onMouseDown={e => { e.preventDefault(); setOpen(false); setSearch(""); }}
+                  style={{ fontSize: 11, padding: "4px 12px", borderRadius: 5, border: "1px solid hsl(var(--border))", background: "hsl(var(--secondary))", cursor: "pointer", color: "hsl(var(--foreground))" }}
+                >
+                  {w("Done", "Listo", lang)}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── edit mode ────────────────────────────────────────────────────────────────
 function EditMode({ convention, onRunWizard, lang, projectId }: { convention: any; onRunWizard: () => void; lang: string; projectId: number; }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
