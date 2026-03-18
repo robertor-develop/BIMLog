@@ -1,0 +1,12 @@
+Check 1 — Declaration panel upload error fixed: grep -n "documentRelationship|document_relationship|disabled.*upload|Upload.*disabled|Select your document" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -10
+Check 2 — RFI conflict of interest warning: grep -n "conflict|same.*person|same.*company|selfResponse|conflict.*interest" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+Check 3 — RFI multiple responses allowed: grep -n "Response 1|Response 2|responseSequence|multiple.*response|additionalResponse|response.*attempt" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+Check 4 — Close RFI button for Project Admin: grep -n "closeRfi|Close RFI|close.*rfi|rfi.*close|isClosed|CLOSED" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+Check 5 — RFI Word export has checkboxes: grep -n "checkbox|CheckBox|Cost Impact|Schedule Impact|No Cost Impact|Increase in Calendar" artifacts/api-server/src/routes/rfis.ts | head -10
+Check 6 — Add Review Response auto-scrolls: grep -n "scrollIntoView|reviewRef|scroll.*review|autoScroll|scrollTo" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 7 — AI Draft Rejection rewrites not appends: grep -n "rewrite|Rewrite|draftRejection|rejection.*rewrite|replace.*rejection" artifacts/api-server/src/routes/submittals.ts | head -10
+Check 8 — AI Pre-Submission Check works without saving: grep -n "inlineCheck|formValues|unsaved|inline.*ai|ai.*inline|currentForm" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 9 — All submittal categories present: grep -n "shop_drawing|product_data|Shop Drawing|Product Data|Mockup|Calculation|Certificate|Warranty" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 10 — Email validation on submittal form: grep -n "email.*valid|validateEmail|invalid.*email|email.*format|isValidEmail" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 11 — Drawing field guidance text added: grep -n "reference only|drawing number exactly|does not validate|drawing.*note|note.*drawing" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Show exact output of all 11 checks. Nothing else.
