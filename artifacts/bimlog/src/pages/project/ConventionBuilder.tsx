@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -1235,7 +1235,6 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
   );
 }
 
-// ─── edit mode ────────────────────────────────────────────────────────────────
 // ─── suggestion data helpers ──────────────────────────────────────────────────
 const SUGGEST_DOC_TYPES = DOC_TYPE_CATEGORIES.flatMap(cat =>
   cat.types.map(t => ({ code: t.code, label: `${t.code} — ${t.name}` }))
@@ -1468,7 +1467,12 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
               <div style={{ cursor: "grab", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}><GripVertical style={{ width: 14, height: 14 }} /></div>
               <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 5, background: c.bg, color: c.color, border: `1px solid ${c.border}`, fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{idx + 1}</span>
               <Input value={f.label} onChange={e => setFields(prev => prev.map((x, i) => i === idx ? { ...x, label: e.target.value } : x))} style={{ fontSize: 13 }} />
-              <Input value={f.values} onChange={e => setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: e.target.value } : x))} style={{ fontSize: 12, fontFamily: "var(--font-mono)" }} />
+              <SmartSuggestInput
+                value={f.values}
+                onChange={v => setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: v } : x))}
+                fieldLabel={f.label}
+                lang={lang}
+              />
               <button onClick={() => setFields(prev => prev.filter((_, i) => i !== idx))} style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }} onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
                 <Trash2 style={{ width: 13, height: 13 }} />
               </button>
