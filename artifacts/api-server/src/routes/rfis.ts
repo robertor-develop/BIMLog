@@ -347,6 +347,7 @@ function makeRfiLogPdf(
       drawLogFooter(pageNum);
       pageNum++;
       doc.addPage();
+      doc.page.margins.bottom = 0;
       y = LOG_MARGIN;
       y = drawHeader(y);
     }
@@ -440,6 +441,7 @@ function makeRfiListPdf(
       drawFooter(doc, `BIMLog by IgniteSmart  |  RFI Summary${project ? `: ${project.name}` : ""}  |  ${new Date().toLocaleDateString()}  |  Page ${pageNum}`);
       pageNum++;
       doc.addPage();
+      doc.page.margins.bottom = 0;
       y = MARGIN;
       y = drawHeader(y);
     }

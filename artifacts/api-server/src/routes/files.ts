@@ -543,6 +543,81 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
   }
 });
 
+// ─── POST /projects/:projectId/files/suggest-name ────────────────────────────
+router.post("/projects/:projectId/files/suggest-name", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
+    const { fileName } = req.body as { fileName?: string };
+    if (!fileName || typeof fileName !== "string") {
+      res.status(400).json({ error: "fileName is required" });
+      return;
+    }
+
+    // Load active convention fields
+    const conventions = await db.select().from(namingConventionsTable)
+      .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
+      .limit(1);
+
+    const convention = conventions[0] ?? null;
+    let conventionSummary = "No active naming convention found for this project.";
+    if (convention) {
+      const fields = await db.select().from(namingFieldsTable)
+        .where(eq(namingFieldsTable.conventionId, convention.id))
+        .orderBy(namingFieldsTable.fieldOrder);
+      const sep = convention.separator || "-";
+      const fieldDescriptions = fields.map((f: any) => {
+        const allowed = f.allowedValues && f.allowedValues.length > 0
+          ? `allowed values: [${f.allowedValues.join(", ")}]`
+          : "free text";
+        return `${f.fieldName} (${allowed})`;
+      });
+      conventionSummary = `Separator: "${sep}". Fields in order: ${fieldDescriptions.join(` ${sep} `)}`;
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 8192,
+      messages: [
+        {
+          role: "user",
+          content: `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
+
+Original file name: ${fileName}
+
+Project naming convention: ${conventionSummary}
+
+Your task: Suggest a single corrected file name that:
+1. Keeps as much of the original name's intent as possible
+2. Strictly complies with the naming convention (uses the correct separator, correct field order, and only allowed values where specified)
+3. Uses the first or most appropriate allowed value for any field that cannot be inferred from the original name
+
+Respond with ONLY a JSON object in this exact format (no other text):
+{
+  "suggestedName": "the-corrected-file-name.ext",
+  "reason": "brief explanation of what was changed and why"
+}`,
+        },
+      ],
+    });
+
+    const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    try {
+      const parsed = JSON.parse(rawText) as { suggestedName: string; reason: string };
+      res.json({ suggestedName: parsed.suggestedName, reason: parsed.reason });
+    } catch {
+      res.status(500).json({ error: "AI returned an unexpected response format" });
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 // ─── POST /projects/:projectId/files ─────────────────────────────────────────
 router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
@@ -622,6 +697,25 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       fileTypeTier,
       source: "user-uploaded",
     }).returning();
+
+    // ── Auto-supersede all previous versions in the same document family ────
+    if (newVersion > 1) {
+      await db.update(filesTable)
+        .set({ isSuperseded: true, updatedAt: new Date() })
+        .where(and(
+          eq(filesTable.projectId, projectId),
+          eq(filesTable.parentFileId, parentFileId!),
+        ));
+      // Also mark the root (which has no parentFileId) as superseded
+      if (parentFileId) {
+        await db.update(filesTable)
+          .set({ isSuperseded: true, updatedAt: new Date() })
+          .where(and(
+            eq(filesTable.projectId, projectId),
+            eq(filesTable.id, parentFileId),
+          ));
+      }
+    }
 
     const isNewVersion = newVersion > 1;
     await db.insert(activityLogTable).values({

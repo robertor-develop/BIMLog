@@ -420,6 +420,10 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
   const [showNameGenerator, setShowNameGenerator] = useState(false);
   const [documentRelationship, setDocumentRelationship] = useState<string>("");
+  const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
+  const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
+  const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
+  const [copiedAiSuggestion, setCopiedAiSuggestion] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
@@ -438,6 +442,29 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       setCopiedSuggestion(true);
       setTimeout(() => setCopiedSuggestion(false), 2000);
     });
+  };
+
+  const handleAiSuggest = async () => {
+    if (!fileName) return;
+    setAiSuggestLoading(true);
+    setAiSuggestedName(null);
+    setAiSuggestReason("");
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ fileName }),
+      });
+      if (!resp.ok) throw new Error("AI suggestion failed");
+      const data = await resp.json() as { suggestedName: string; reason: string };
+      setAiSuggestedName(data.suggestedName);
+      setAiSuggestReason(data.reason);
+    } catch {
+      toast({ title: "AI suggestion failed", variant: "destructive" });
+    } finally {
+      setAiSuggestLoading(false);
+    }
   };
 
   const { mutate, isPending } = useUploadFile({
@@ -624,7 +651,95 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
             </div>
           </div>
 
-          {/* Error list */}
+          {/* Suggested compliant names + AI Suggest — shown immediately after token breakdown */}
+          {(suggestedName || aiSuggestedName) && (
+            <div style={{ marginTop: 10, marginBottom: 12, padding: "10px 12px", background: "#F5F3FF", border: "1.5px solid #C4B5FD", borderRadius: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#1E3A5F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
+                <Sparkles style={{ width: 11, height: 11, color: "#7C3AED" }} />
+                Suggested compliant names
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                {suggestedName && (
+                  <button
+                    onClick={() => handleCopySuggestion(suggestedName)}
+                    title="Click to copy"
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "5px 12px", borderRadius: 6,
+                      border: `1.5px solid ${copiedSuggestion ? "#86EFAC" : "#2563EB"}`,
+                      background: copiedSuggestion ? "#F0FDF4" : "#EFF6FF",
+                      cursor: "pointer", fontFamily: "var(--font-mono)",
+                      fontSize: 11, fontWeight: 600,
+                      color: copiedSuggestion ? "#15803D" : "#1D4ED8",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {copiedSuggestion
+                      ? <><CheckCircle2 style={{ width: 12, height: 12 }} />Copied!</>
+                      : <><Copy style={{ width: 11, height: 11 }} />{suggestedName}</>
+                    }
+                  </button>
+                )}
+                <button
+                  onClick={handleAiSuggest}
+                  disabled={!fileName || aiSuggestLoading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "5px 12px", borderRadius: 6,
+                    border: "none",
+                    background: aiSuggestLoading ? "#A78BFA" : "#7C3AED",
+                    cursor: aiSuggestLoading || !fileName ? "not-allowed" : "pointer",
+                    fontSize: 11, fontWeight: 600, color: "white",
+                    opacity: !fileName ? 0.6 : 1,
+                    transition: "background 0.15s",
+                  }}
+                >
+                  <Sparkles style={{ width: 11, height: 11 }} />
+                  {aiSuggestLoading ? "Asking AI…" : "Ask AI"}
+                </button>
+                <button
+                  onClick={() => setShowNameGenerator(prev => !prev)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "5px 10px", borderRadius: 6,
+                    border: "1.5px solid #C4B5FD",
+                    background: showNameGenerator ? "#EDE9FE" : "transparent",
+                    cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#7C3AED",
+                  }}
+                >
+                  <Sparkles style={{ width: 11, height: 11 }} />
+                  {showNameGenerator ? "Close generator" : "Customize name"}
+                </button>
+              </div>
+              {aiSuggestedName && (
+                <div style={{ marginTop: 10, padding: "8px 10px", background: "white", border: "1px solid #DDD6FE", borderRadius: 6 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#7C3AED", marginBottom: 4 }}>AI Suggestion</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <code style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#1E3A5F", flex: 1 }}>{aiSuggestedName}</code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(aiSuggestedName).then(() => {
+                          setCopiedAiSuggestion(true);
+                          setTimeout(() => setCopiedAiSuggestion(false), 2000);
+                        });
+                      }}
+                      style={{ padding: "3px 8px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "#F5F3FF", color: "#7C3AED", cursor: "pointer", fontWeight: 600 }}
+                    >
+                      {copiedAiSuggestion ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  {aiSuggestReason && (
+                    <div style={{ fontSize: 10, color: "#6B7280", marginTop: 4, fontStyle: "italic" }}>{aiSuggestReason}</div>
+                  )}
+                </div>
+              )}
+              <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6 }}>
+                Convention suggestion built from first allowed value per field · Ask AI to adapt your original name
+              </div>
+            </div>
+          )}
+
+          {/* Field-level error breakdown */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {errorDetails.map((detail, i) => (
               <div key={i} style={{ fontSize: 11, color: "#9F1239" }}>
@@ -648,53 +763,6 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
               </div>
             ))}
           </div>
-
-          {/* Suggested compliant names */}
-          {suggestedName && (
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #FECDD3" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#1E3A5F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
-                <Sparkles style={{ width: 11, height: 11, color: "#7C3AED" }} />
-                Suggested compliant names
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                <button
-                  onClick={() => handleCopySuggestion(suggestedName)}
-                  title="Click to copy"
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "5px 12px", borderRadius: 6,
-                    border: `1.5px solid ${copiedSuggestion ? "#86EFAC" : "#2563EB"}`,
-                    background: copiedSuggestion ? "#F0FDF4" : "#EFF6FF",
-                    cursor: "pointer", fontFamily: "var(--font-mono)",
-                    fontSize: 11, fontWeight: 600,
-                    color: copiedSuggestion ? "#15803D" : "#1D4ED8",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {copiedSuggestion
-                    ? <><CheckCircle2 style={{ width: 12, height: 12 }} />Copied!</>
-                    : <><Copy style={{ width: 11, height: 11 }} />{suggestedName}</>
-                  }
-                </button>
-                <button
-                  onClick={() => setShowNameGenerator(prev => !prev)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "5px 10px", borderRadius: 6,
-                    border: "1.5px solid #C4B5FD",
-                    background: showNameGenerator ? "#EDE9FE" : "transparent",
-                    cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#7C3AED",
-                  }}
-                >
-                  <Sparkles style={{ width: 11, height: 11 }} />
-                  {showNameGenerator ? "Close generator" : "Customize name"}
-                </button>
-              </div>
-              <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 5 }}>
-                Built from your active naming convention using the first allowed value per field
-              </div>
-            </div>
-          )}
 
           {/* Inline Name Generator */}
           {showNameGenerator && (

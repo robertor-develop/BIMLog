@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, json, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, json, boolean, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 import { rfisTable } from "./rfis";
@@ -27,6 +27,8 @@ export const filesTable = pgTable("files", {
   source: text("source").default("user-uploaded"),
   linkedRfiId: integer("linked_rfi_id").references(() => rfisTable.id),
   contentVerificationResult: text("content_verification_result"),
+  isSuperseded: boolean("is_superseded").default(false).notNull(),
+  conventionVersion: text("convention_version"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
