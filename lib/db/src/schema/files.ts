@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, json, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -9,6 +9,7 @@ export const filesTable = pgTable("files", {
   fileSize: integer("file_size").notNull(),
   fileType: text("file_type").notNull(),
   version: integer("version").notNull().default(1),
+  parentFileId: integer("parent_file_id").references((): AnyPgColumn => filesTable.id),
   status: text("status").notNull(),
   uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
   extractedText: text("extracted_text"),

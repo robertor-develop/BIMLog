@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield, Sparkles, Copy } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History } from "lucide-react";
 import { format } from "date-fns";
 import { NameGenerator } from "./NameGenerator";
 
@@ -39,13 +39,67 @@ function getExtLabel(fileName: string): string {
   return (fileName.split(".").pop() || "FILE").toUpperCase().slice(0, 3);
 }
 
+interface FileRow {
+  id: number;
+  projectId: number;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  version: number;
+  parentFileId?: number | null;
+  status: string;
+  uploadedById: number;
+  uploadedByName?: string;
+  uploadedByCompany?: string;
+  extractedText?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DocumentFamily {
+  root: FileRow;
+  versions: FileRow[];
+}
+
+function buildFamilies(files: FileRow[]): DocumentFamily[] {
+  const roots = files.filter(f => f.parentFileId == null);
+  const childrenByRoot = new Map<number, FileRow[]>();
+  files.filter(f => f.parentFileId != null).forEach(f => {
+    const rid = f.parentFileId!;
+    if (!childrenByRoot.has(rid)) childrenByRoot.set(rid, []);
+    childrenByRoot.get(rid)!.push(f);
+  });
+  return roots
+    .map(root => ({
+      root,
+      versions: [root, ...(childrenByRoot.get(root.id) ?? [])].sort((a, b) => a.version - b.version),
+    }))
+    .sort((a, b) => {
+      const latestA = a.versions[a.versions.length - 1];
+      const latestB = b.versions[b.versions.length - 1];
+      return new Date(latestB.createdAt).getTime() - new Date(latestA.createdAt).getTime();
+    });
+}
+
+function versionColor(v: number): string {
+  const palette = ["#1D4ED8", "#7C3AED", "#0F766E", "#9A3412", "#1E3A5F", "#64748B"];
+  return palette[(v - 1) % palette.length];
+}
+
 export function FilesTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
   const { data: files, isLoading } = useListFiles(projectId);
   const [showUpload, setShowUpload] = useState(false);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+
+  const toggleFamily = (rootId: number) =>
+    setExpanded(prev => { const s = new Set(prev); s.has(rootId) ? s.delete(rootId) : s.add(rootId); return s; });
 
   const validCount    = files?.filter(f => f.status !== "rejected").length ?? 0;
   const rejectedCount = files?.filter(f => f.status === "rejected").length ?? 0;
+
+  const families = files ? buildFamilies(files) : [];
+  const versionedCount = families.filter(f => f.versions.length > 1).length;
 
   return (
     <div>
@@ -54,7 +108,10 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         <div>
           <div className="section-title" style={{ fontSize: 16 }}>{t("project.tabs.files")}</div>
           <div className="section-sub">
-            {files?.length ?? 0} total · {validCount} valid · {rejectedCount} rejected
+            {families.length} document{families.length !== 1 ? "s" : ""}
+            {" "}·{" "}{files?.length ?? 0} total versions
+            {" "}·{" "}{validCount} valid · {rejectedCount} rejected
+            {versionedCount > 0 && <> · <span style={{ color: "#7C3AED", fontWeight: 600 }}>{versionedCount} versioned</span></>}
           </div>
         </div>
         {canWrite && !showUpload && (
@@ -92,36 +149,55 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         </div>
       )}
 
-      {/* Table */}
+      {/* Document families table */}
       {!isLoading && (
-        files && files.length > 0 ? (
+        families.length > 0 ? (
           <div className="table-card">
             <table className="data-table">
               <thead>
                 <tr>
+                  <th style={{ width: 28 }}></th>
                   <th>{t("files.name")}</th>
-                  <th>{t("files.version")}</th>
+                  <th>Versions</th>
                   <th>{t("files.status")}</th>
-                  <th>{t("files.uploader")}</th>
-                  <th>{t("files.date")}</th>
+                  <th>Latest upload</th>
+                  <th>Date</th>
                   {canWrite && <th style={{ textAlign: "right" }}>{t("files.actions")}</th>}
                 </tr>
               </thead>
               <tbody>
-                {[...files]
-                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                  .map(file => {
-                    const isRejected = file.status === "rejected";
-                    return (
-                      <tr key={file.id}>
+                {families.map(({ root, versions }) => {
+                  const latest = versions[versions.length - 1];
+                  const isMulti = versions.length > 1;
+                  const isExp = expanded.has(root.id);
+                  const isRejected = latest.status === "rejected";
+
+                  return (
+                    <>
+                      {/* ── Primary document row ── */}
+                      <tr
+                        key={`root-${root.id}`}
+                        style={{ cursor: isMulti ? "pointer" : "default", background: isExp ? "hsl(var(--secondary) / 0.4)" : undefined }}
+                        onClick={isMulti ? () => toggleFamily(root.id) : undefined}
+                      >
+                        {/* Expand chevron */}
+                        <td style={{ paddingRight: 0, width: 28, textAlign: "center" }}>
+                          {isMulti ? (
+                            isExp
+                              ? <ChevronDown style={{ width: 13, height: 13, color: "hsl(var(--muted-foreground))" }} />
+                              : <ChevronRight style={{ width: 13, height: 13, color: "hsl(var(--muted-foreground))" }} />
+                          ) : null}
+                        </td>
+
+                        {/* Document name */}
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div className={`file-icon ${getIconClass(file.fileName)}`}>
-                              {getExtLabel(file.fileName)}
+                            <div className={`file-icon ${getIconClass(root.fileName)}`}>
+                              {getExtLabel(root.fileName)}
                             </div>
                             <div>
                               <div className={isRejected ? "file-name-rejected" : "file-name"}>
-                                {file.fileName}
+                                {root.fileName}
                               </div>
                               {isRejected && (
                                 <div style={{ fontSize: 10, color: "#BE123C", marginTop: 1 }}>
@@ -131,40 +207,145 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                             </div>
                           </div>
                         </td>
-                        <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
-                          v{file.version}
+
+                        {/* Version count / badge */}
+                        <td>
+                          {isMulti ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                              <History style={{ width: 11, height: 11, color: "#7C3AED" }} />
+                              <span style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED" }}>
+                                {versions.length} versions
+                              </span>
+                              <span style={{
+                                fontSize: 10, fontFamily: "var(--font-mono)",
+                                background: `${versionColor(latest.version)}18`,
+                                color: versionColor(latest.version),
+                                border: `1px solid ${versionColor(latest.version)}40`,
+                                padding: "1px 6px", borderRadius: 4, fontWeight: 700,
+                              }}>
+                                V{latest.version} latest
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{
+                              fontSize: 10, fontFamily: "var(--font-mono)",
+                              color: "hsl(var(--muted-foreground))", fontWeight: 500,
+                            }}>
+                              v1
+                            </span>
+                          )}
                         </td>
+
+                        {/* Status */}
                         <td>
                           <span className={`badge ${isRejected ? "badge-red" : "badge-green"}`}>
                             {isRejected ? "Rejected" : "Valid"}
                           </span>
                         </td>
+
+                        {/* Latest uploader */}
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div className="avatar avatar-sm av-blue">
-                              {file.uploadedByName?.charAt(0).toUpperCase()}
+                              {latest.uploadedByName?.charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <div style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>
-                                {file.uploadedByName}
+                                {latest.uploadedByName}
                               </div>
                               <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                                {file.uploadedByCompany}
+                                {latest.uploadedByCompany}
                               </div>
                             </div>
                           </div>
                         </td>
+
+                        {/* Date */}
                         <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
-                          {format(new Date(file.createdAt), "MMM d, yyyy HH:mm")}
+                          {format(new Date(latest.createdAt), "MMM d, yyyy HH:mm")}
                         </td>
+
+                        {/* Actions (delete latest version) */}
                         {canWrite && (
                           <td style={{ textAlign: "right" }}>
-                            <DeleteButton projectId={projectId} fileId={file.id} />
+                            <DeleteButton projectId={projectId} fileId={latest.id} />
                           </td>
                         )}
                       </tr>
-                    );
-                  })}
+
+                      {/* ── Version history rows (expanded) ── */}
+                      {isExp && versions.map((ver, idx) => {
+                        const isVerRejected = ver.status === "rejected";
+                        const isOriginal = idx === 0;
+                        const isLatestVer = idx === versions.length - 1;
+                        return (
+                          <tr key={`ver-${ver.id}`} style={{ background: "hsl(var(--secondary) / 0.25)" }}>
+                            <td></td>
+                            <td colSpan={1}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, paddingLeft: 24 }}>
+                                {/* Version badge */}
+                                <span style={{
+                                  fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700,
+                                  background: `${versionColor(ver.version)}18`,
+                                  color: versionColor(ver.version),
+                                  border: `1px solid ${versionColor(ver.version)}40`,
+                                  padding: "2px 7px", borderRadius: 4,
+                                  flexShrink: 0,
+                                }}>
+                                  V{ver.version}
+                                </span>
+                                <div>
+                                  <div style={{ fontSize: 11, color: "hsl(var(--foreground))", fontWeight: 500 }}>
+                                    {isOriginal ? "Original document" : isLatestVer ? "Latest response" : `Response v${ver.version}`}
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
+                                    {ver.fileName}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span style={{
+                                fontSize: 10, fontFamily: "var(--font-mono)",
+                                color: "hsl(var(--muted-foreground))",
+                              }}>
+                                {(ver.fileSize / 1024).toFixed(1)} KB
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`badge ${isVerRejected ? "badge-red" : "badge-green"}`} style={{ fontSize: 9 }}>
+                                {isVerRejected ? "Rejected" : "Valid"}
+                              </span>
+                            </td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <div className="avatar avatar-sm av-blue" style={{ width: 20, height: 20, fontSize: 9 }}>
+                                  {ver.uploadedByName?.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--foreground))" }}>
+                                    {ver.uploadedByName}
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                                    {ver.uploadedByCompany}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>
+                              {format(new Date(ver.createdAt), "MMM d, yyyy HH:mm")}
+                            </td>
+                            {canWrite && (
+                              <td style={{ textAlign: "right" }}>
+                                <DeleteButton projectId={projectId} fileId={ver.id} />
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -182,13 +363,13 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       )}
 
       {/* Audit trail notice */}
-      {(files?.length ?? 0) > 0 && (
+      {families.length > 0 && (
         <div style={{
           display: "flex", alignItems: "center", gap: 8, marginTop: 12,
           fontSize: 11, color: "hsl(var(--muted-foreground))"
         }}>
           <Shield style={{ width: 12, height: 12 }} />
-          All file events are permanently recorded in the immutable audit trail. Go to Activity Log to view the full history.
+          Every version is immutably recorded with full attribution. Nobody can hide a submission or claim the original was different.
         </div>
       )}
     </div>

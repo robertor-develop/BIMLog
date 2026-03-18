@@ -267,6 +267,11 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
   }
 });
 
+// Helper: extract base name (without extension, lower-cased for comparison)
+function getBaseName(fileName: string): string {
+  return (fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName).toLowerCase();
+}
+
 // ─── POST /projects/:projectId/files ─────────────────────────────────────────
 router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
@@ -282,16 +287,35 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       return;
     }
 
+    // ── Version detection ────────────────────────────────────────────────────
+    const incomingBase = getBaseName(body.fileName);
+    const existingFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const family = existingFiles.filter(f => getBaseName(f.fileName) === incomingBase);
+
+    let newVersion = 1;
+    let parentFileId: number | null = null;
+
+    if (family.length > 0) {
+      // The root is the file with no parentFileId (the original v1)
+      const root = family.find(f => f.parentFileId === null) ?? family[0];
+      parentFileId = root.id;
+      newVersion = Math.max(...family.map(f => f.version)) + 1;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const defaultFileStatus = await getDefaultValue("file_status");
     const [file] = await db.insert(filesTable).values({
       projectId,
       fileName: body.fileName,
       fileSize: body.fileSize,
       fileType: body.fileType,
+      version: newVersion,
+      parentFileId,
       status: defaultFileStatus,
       uploadedById: req.user!.userId,
     }).returning();
 
+    const isNewVersion = newVersion > 1;
     await db.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
@@ -302,7 +326,9 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       entityId: file.id,
       fileNameBefore: null,
       fileNameAfter: body.fileName,
-      details: `Uploaded file: ${body.fileName}`,
+      details: isNewVersion
+        ? `Uploaded Version ${newVersion} of document: ${body.fileName}`
+        : `Uploaded file: ${body.fileName}`,
     });
 
     // Respond immediately — extraction runs in background
