@@ -224,7 +224,7 @@ ${htmlRows}
             <FileText style={{ width: 20, height: 20, color: "#2563EB", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#1E3A5F" }}>PDF</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{w("All RFIs in one combined PDF — professional layout", "Todos los RFIs en un PDF combinado", lang)}</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{w("RFI log — summary table, one row per RFI (landscape)", "Registro RFI — tabla resumen, una fila por RFI", lang)}</div>
             </div>
             {loading === "pdf" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
           </button>
@@ -242,7 +242,7 @@ ${htmlRows}
             <FileText style={{ width: 20, height: 20, color: "#7C3AED", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#4C1D95" }}>Word (.doc)</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Formatted document with each RFI as a section", "Documento con cada RFI como sección", lang)}</div>
+              <div style={{ fontSize: 11, color: "#64748B" }}>{w("Log with all RFIs — each as a section with response area", "Registro con todos los RFIs con área de respuesta", lang)}</div>
             </div>
             {loading === "word" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
           </button>
@@ -311,6 +311,47 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.pdf`; a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportWordRfi = (rfi: Rfi) => {
+    const fmtW = (d: string | null | undefined) => {
+      if (!d) return "—";
+      return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    };
+    const hasResp = !!(rfi.answer || rfi.response);
+    const respText = rfi.answer || rfi.response || "";
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1E293B;margin:36pt;}
+h1{color:#1E3A5F;font-size:16pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
+table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:10pt;}
+td{padding:4pt 6pt;vertical-align:top;}
+.lbl{background:#F1F5F9;font-weight:bold;width:25%;}
+.resp-hdr{background:#0F4C75;color:white;font-weight:bold;padding:4pt 6pt;font-size:9pt;text-transform:uppercase;}
+.resp-box{border:1pt solid #CBD5E1;padding:8pt;min-height:60pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;}
+.blank-box{border:1pt solid #CBD5E1;min-height:60pt;}
+.sig-row td{border-top:1pt solid #CBD5E1;padding-top:4pt;font-size:9pt;color:#64748B;}
+</style></head><body>
+<h1>REQUEST FOR INFORMATION — ${rfi.number}</h1>
+<table>
+  <tr><td class="lbl">Subject</td><td colspan="3">${rfi.subject}</td></tr>
+  <tr><td class="lbl">Status</td><td>${(rfi.status||"").replace("_"," ")}</td><td class="lbl">Priority</td><td>${rfi.priority||"—"}</td></tr>
+  <tr><td class="lbl">Date Requested</td><td>${fmtW(rfi.dateRequested||rfi.createdAt)}</td><td class="lbl">Date Required</td><td>${fmtW(rfi.dateRequired||rfi.dueDate)}</td></tr>
+  <tr><td class="lbl">Submitted By</td><td>${rfi.submittedByCompany||"—"} / ${rfi.submittedByContact||rfi.createdByName||"—"}</td><td class="lbl">Submitted To</td><td>${rfi.submittedToCompany||"—"} / ${rfi.submittedToPerson||"—"}</td></tr>
+  <tr><td class="lbl">Drawing #</td><td>${rfi.drawingNumber||"—"}</td><td class="lbl">Spec Section</td><td>${rfi.specSection||"—"}</td></tr>
+  <tr><td class="lbl">Cost Impact</td><td>${rfi.costImpact||"—"}${rfi.costImpactAmount?` — ${rfi.costImpactAmount}`:""}</td><td class="lbl">Schedule Impact</td><td>${rfi.scheduleImpact||"—"}${rfi.scheduleImpactDays!=null?` (${rfi.scheduleImpactDays} days)`:""}</td></tr>
+</table>
+<p style="font-size:9pt;font-weight:bold;color:#1E3A5F;">DESCRIPTION OF QUESTION</p>
+<div style="border:1pt solid #CBD5E1;padding:8pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;min-height:40pt;">${rfi.question||rfi.description||"—"}</div>
+<br/>
+<table><tr><td class="resp-hdr" colspan="4">OFFICIAL RESPONSE</td></tr></table>
+${hasResp ? `<div class="resp-box">${respText}</div><table><tr class="sig-row"><td>Answered by: <strong>${rfi.answeredBy||"—"}</strong></td><td>Date: <strong>${fmtW(rfi.dateAnswered||rfi.respondedAt)}</strong></td></tr></table>` : `<div class="blank-box"></div><table><tr class="sig-row"><td width="35%">Answered by: ____________________</td><td width="25%">Date: ______________</td><td width="20%">Cost Impact: __________</td><td width="20%">Schedule Impact: ______</td></tr></table>`}
+<p style="font-size:8pt;color:#94A3B8;margin-top:24pt;">Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}</p>
+</body></html>`;
+    const blob = new Blob([html], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.doc`; a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `${rfi.number} exported as Word` });
   };
 
   const statusOptions = getOptions("rfi_status");
@@ -449,7 +490,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                         <span style={{ display: "block", fontSize: 9, color: "#D97706" }}>⚠ {w("Sched.", "Prog.", lang)}</span>
                       )}
                     </td>
-                    {/* Fix 8 — per-row export button */}
                     <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                         <button title="Export PDF"
@@ -457,6 +497,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                           onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
                         >
                           <FileText style={{ width: 10, height: 10 }} />PDF
+                        </button>
+                        <button title="Export Word"
+                          style={{ padding: "3px 6px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3 }}
+                          onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
+                        >
+                          <FileText style={{ width: 10, height: 10 }} />Doc
                         </button>
                         {canWrite && (
                           <button
@@ -513,14 +559,21 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                       : <span style={{ fontSize: 11, color: "#16A34A" }}>{w("None", "Ninguno", lang)}</span>
                     }
                   </td>
-                  {/* Fix 8 — per-row PDF in log view */}
                   <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                    <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                     <button title="Export PDF"
                       style={{ padding: "3px 6px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3 }}
                       onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
                     >
                       <FileText style={{ width: 10, height: 10 }} />PDF
                     </button>
+                    <button title="Export Word"
+                      style={{ padding: "3px 6px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3 }}
+                      onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
+                    >
+                      <FileText style={{ width: 10, height: 10 }} />Doc
+                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1076,11 +1129,92 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [costAmount, setCostAmount] = useState(rfi.costImpactAmount || "");
   const [schedImpact, setSchedImpact] = useState(rfi.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+  const [aiAssistLoading, setAiAssistLoading] = useState(false);
 
-  // Fix 5 — response documents
+  // response documents
   const [responseDocInput, setResponseDocInput] = useState("");
   const [responseDocs, setResponseDocs] = useState<string[]>(rfi.responseAttachmentsJson || []);
   const [showFileSearch, setShowFileSearch] = useState(false);
+
+  const handleAiAssist = async () => {
+    setAiAssistLoading(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/generate-response`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("AI request failed");
+      const data = await resp.json() as { response: string };
+      setAnswer(data.response);
+      toast({ title: w("AI draft ready — review before saving", "Borrador listo — revise antes de guardar", lang) });
+    } catch {
+      toast({ title: w("AI assist failed", "Asistencia IA falló", lang), variant: "destructive" });
+    } finally {
+      setAiAssistLoading(false);
+    }
+  };
+
+  const handleExportWord = () => {
+    const fmtW = (d: string | Date | null | undefined) => {
+      if (!d) return "—";
+      const dt = typeof d === "string" ? new Date(d) : d;
+      return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    };
+    const hasResp = !!(rfi.answer || rfi.response);
+    const respText = rfi.answer || rfi.response || "";
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1E293B;margin:36pt;}
+h1{color:#1E3A5F;font-size:16pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
+h2{color:#1E3A5F;font-size:10pt;margin:14pt 0 4pt;}
+table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:10pt;}
+td{padding:4pt 6pt;vertical-align:top;}
+.lbl{background:#F1F5F9;font-weight:bold;width:25%;}
+.resp-hdr{background:#0F4C75;color:white;font-weight:bold;padding:4pt 6pt;font-size:9pt;text-transform:uppercase;}
+.resp-box{border:1pt solid #CBD5E1;padding:8pt;min-height:60pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;}
+.blank-box{border:1pt solid #CBD5E1;min-height:60pt;}
+.sig-row td{border-top:1pt solid #CBD5E1;padding-top:4pt;font-size:9pt;color:#64748B;}
+</style></head><body>
+<h1>REQUEST FOR INFORMATION — ${rfi.number}</h1>
+<table>
+  <tr><td class="lbl">Project</td><td colspan="3">${rfi.subject}</td></tr>
+  <tr><td class="lbl">Subject</td><td colspan="3">${rfi.subject}</td></tr>
+  <tr><td class="lbl">Status</td><td>${(rfi.status || "").replace("_", " ")}</td><td class="lbl">Priority</td><td>${rfi.priority || "—"}</td></tr>
+  <tr><td class="lbl">Date Requested</td><td>${fmtW(rfi.dateRequested || rfi.createdAt)}</td><td class="lbl">Date Required</td><td>${fmtW(rfi.dateRequired || rfi.dueDate)}</td></tr>
+  <tr><td class="lbl">Submitted By</td><td>${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || rfi.createdByName || "—"}</td><td class="lbl">Submitted To</td><td>${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}</td></tr>
+  <tr><td class="lbl">Drawing #</td><td>${rfi.drawingNumber || "—"}</td><td class="lbl">Spec Section</td><td>${rfi.specSection || "—"}</td></tr>
+  <tr><td class="lbl">Cost Impact</td><td>${rfi.costImpact || "—"}${rfi.costImpactAmount ? ` — ${rfi.costImpactAmount}` : ""}</td><td class="lbl">Schedule Impact</td><td>${rfi.scheduleImpact || "—"}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays} days)` : ""}</td></tr>
+</table>
+<h2>Description of Question</h2>
+<div style="border:1pt solid #CBD5E1;padding:8pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;">${rfi.question || rfi.description || "—"}</div>
+<br/>
+<table><tr><td class="resp-hdr" colspan="4">OFFICIAL RESPONSE</td></tr></table>
+${hasResp ? `
+<div class="resp-box">${respText}</div>
+<table><tr class="sig-row">
+  <td>Answered by: <strong>${rfi.answeredBy || "—"}</strong></td>
+  <td>Date: <strong>${fmtW(rfi.dateAnswered || rfi.respondedAt)}</strong></td>
+</tr></table>
+` : `
+<div class="blank-box"></div>
+<table><tr class="sig-row">
+  <td width="35%">Answered by: ____________________</td>
+  <td width="25%">Date: ______________</td>
+  <td width="20%">Cost Impact: __________</td>
+  <td width="20%">Schedule Impact: ______</td>
+</tr></table>
+`}
+<p style="font-size:8pt;color:#94A3B8;margin-top:24pt;">Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}</p>
+</body></html>`;
+
+    const blob = new Blob([html], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.doc`; a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: w("Word document exported", "Documento Word exportado", lang) });
+  };
 
   const statusOptions = getOptions("rfi_status");
 
@@ -1111,6 +1245,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const days = differenceInDays(new Date(), new Date(rfi.createdAt));
 
   const handleSaveResponse = () => {
+    if (closingStatus === "responded" && !answer.trim()) {
+      toast({ title: w("Official response text is required before setting status to Responded.", "Se requiere texto de respuesta oficial.", lang), variant: "destructive" });
+      return;
+    }
     updateRfi({
       projectId,
       rfiId: rfi.id,
@@ -1159,7 +1297,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("Export PDF", "Exportar PDF", lang)}
+              <FileText style={{ width: 12, height: 12 }} />{w("PDF", "PDF", lang)}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#C4B5FD" }}>
+              <FileText style={{ width: 12, height: 12 }} />{w("Word", "Word", lang)}
             </Button>
             {rfi.status === "closed" && canWrite && (
               <Button variant="outline" size="sm" onClick={() => { onRevise(rfi); onClose(); }} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
@@ -1287,13 +1428,27 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
             {canWrite && rfi.status !== "closed" && (
               <div style={{ borderTop: rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfi.answer || rfi.response ? 12 : 0 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 6 }}>{w("Add / Update Response", "Agregar / Actualizar Respuesta", lang)}</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700 }}>
+                    {w("Official Response", "Respuesta Oficial", lang)}
+                    <span style={{ fontSize: 10, color: "#DC2626", marginLeft: 4 }}>*</span>
+                    <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400, marginLeft: 6 }}>{w("Required to set status to Responded", "Requerido para marcar como Respondido", lang)}</span>
+                  </label>
+                  <Button size="sm" variant="outline" onClick={handleAiAssist} disabled={aiAssistLoading}
+                    style={{ gap: 5, fontSize: 11, borderColor: "#7C3AED", color: "#7C3AED", flexShrink: 0 }}>
+                    {aiAssistLoading ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <Sparkles style={{ width: 11, height: 11 }} />}
+                    {w("AI Assist", "Asistencia IA", lang)}
+                  </Button>
+                </div>
                 <textarea
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
-                  placeholder={w("Enter your response here…", "Ingrese su respuesta aquí…", lang)}
-                  style={{ width: "100%", minHeight: 80, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                  placeholder={w("Type the official response here, or click AI Assist to draft one…", "Escriba la respuesta oficial aquí, o use Asistencia IA para redactar…", lang)}
+                  style={{ width: "100%", minHeight: 120, fontSize: 12, borderRadius: 6, border: `1px solid ${!answer.trim() && closingStatus === "responded" ? "#DC2626" : "hsl(var(--border))"}`, padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
                 />
+                {!answer.trim() && closingStatus === "responded" && (
+                  <p style={{ fontSize: 11, color: "#DC2626", marginTop: 3 }}>{w("Official response text is required before setting status to Responded.", "Se requiere texto de respuesta oficial antes de establecer el estado como Respondido.", lang)}</p>
+                )}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
                   <div>
                     <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 3 }}>{w("Answered by", "Respondido por", lang)}</label>

@@ -7,9 +7,11 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
-import { differenceInCalendarDays } from "date-fns";
-
 const router: IRouter = Router();
+
+function daysSince(d: Date | string): number {
+  return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000);
+}
 
 function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unknown> = {}) {
   return {
@@ -244,7 +246,6 @@ function makeRfiPdf(
       .text("DATE ANSWERED", 200, y + 4)
       .text("COST IMPACT", 360, y + 4)
       .text("SCHEDULE IMPACT", 460, y + 4);
-    doc.rect(MARGIN, y + 14).lineTo(MARGIN + 130, y + 14).stroke("#CBD5E1");
     doc.moveTo(MARGIN, y + 14).lineTo(MARGIN + 512, y + 14).stroke("#E2E8F0");
     doc.moveTo(MARGIN, y + 32).lineTo(MARGIN + 512, y + 32).stroke("#E2E8F0");
     y += 36;
@@ -266,7 +267,7 @@ function makeRfiLogPdf(
   doc: PDFKit.PDFDocument,
   rfis: (typeof rfisTable.$inferSelect)[],
   project: { name: string } | undefined,
-  creatorMap: Map<string, string>,
+  creatorMap: Map<number, string>,
 ) {
   const fmtD = (d: Date | string | null | undefined) =>
     d ? new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }) : "—";
@@ -287,7 +288,7 @@ function makeRfiLogPdf(
     ["Submitted To",72,  r => r.submittedToCompany || r.submittedToPerson || "—"],
     ["Date Req.",   50,  r => fmtD(r.dateRequested || r.createdAt)],
     ["Date Req'd",  50,  r => fmtD(r.dateRequired || r.dueDate)],
-    ["Days Out",    42,  r => String(differenceInCalendarDays(new Date(), new Date(r.createdAt)))],
+    ["Days Out",    42,  r => String(daysSince(r.createdAt))],
     ["Ball in Court",72, r => getBic(r)],
     ["Sched. Impact",62, r => r.scheduleImpact || "—"],
   ];
@@ -688,7 +689,7 @@ router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjec
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
     // Build creator name map
-    const creatorMap = new Map<string, string>();
+    const creatorMap = new Map<number, string>();
     for (const rfi of rfis) {
       if (!creatorMap.has(rfi.createdById)) {
         const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
