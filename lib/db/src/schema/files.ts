@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, json } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -11,6 +11,8 @@ export const filesTable = pgTable("files", {
   version: integer("version").notNull().default(1),
   status: text("status").notNull(),
   uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
+  extractedText: text("extracted_text"),
+  fileMetadata: json("file_metadata").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

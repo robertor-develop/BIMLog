@@ -153,6 +153,7 @@ export const UploadFileBody = zod.object({
   fileName: zod.string(),
   fileSize: zod.number(),
   fileType: zod.string(),
+  fileContent: zod.string().optional(),
 });
 
 /**

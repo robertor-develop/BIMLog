@@ -99,6 +99,8 @@ export interface ProjectFile {
   uploadedById: number;
   uploadedByName: string;
   uploadedByCompany?: string;
+  extractedText?: string;
+  fileMetadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -107,6 +109,7 @@ export interface UploadFileRequest {
   fileName: string;
   fileSize: number;
   fileType: string;
+  fileContent?: string;
 }
 
 export interface UpdateFileRequest {

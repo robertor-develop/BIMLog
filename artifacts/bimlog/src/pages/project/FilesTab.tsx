@@ -223,11 +223,21 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     },
   });
 
-  const handleFile = useCallback((file: File) => {
+  const handleFile = useCallback(async (file: File) => {
     setErrorDetails([]);
     setSuccess(false);
     setFileName(file.name);
-    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream" } });
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    let fileContent: string | undefined;
+    if (ext === "pdf" && file.size < 10 * 1024 * 1024) {
+      try {
+        const buf = await file.arrayBuffer();
+        fileContent = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      } catch {
+        fileContent = undefined;
+      }
+    }
+    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream", fileContent } });
   }, [mutate, projectId]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {

@@ -10,6 +10,7 @@ import conventionsRouter from "./conventions";
 import membersRouter from "./members";
 import configRouter from "./config";
 import downloadsRouter from "./downloads";
+import documentsRouter from "./documents";
 
 const router: IRouter = Router();
 
@@ -19,6 +20,7 @@ router.use(authRouter);
 router.use(configRouter);
 router.use(projectsRouter);
 router.use(filesRouter);
+router.use(documentsRouter);
 router.use(rfisRouter);
 router.use(submittalsRouter);
 router.use(activityRouter);

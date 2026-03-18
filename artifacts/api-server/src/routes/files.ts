@@ -5,8 +5,11 @@ import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
+import { PDFParse } from "pdf-parse";
 
 const router: IRouter = Router();
+
+const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
 
 interface ValidationDetail {
   field: string;
@@ -40,9 +43,6 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
   const sep = convention.separator;
   const nameWithoutExt = fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName;
   const errors: ValidationDetail[] = [];
-
-  // Greedy matching: supports allowed values that contain the separator character.
-  // For each field we try to consume a matching prefix from the remaining string.
   let remaining = nameWithoutExt;
 
   for (let i = 0; i < fields.length; i++) {
@@ -51,7 +51,6 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
     const isLast = i === fields.length - 1;
 
     if (allowed.length > 0) {
-      // Try each allowed value (longest first to prefer more-specific matches).
       const sorted = [...allowed].sort((a, b) => b.length - a.length);
       let matched = false;
 
@@ -73,7 +72,6 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
       }
 
       if (!matched) {
-        // Record what was actually at this position (up to the next separator).
         const nextSep = remaining.indexOf(sep);
         const actualValue = nextSep >= 0 ? remaining.slice(0, nextSep) : remaining;
         errors.push({
@@ -82,18 +80,15 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
           expected: allowed,
           received: actualValue,
         });
-        // Advance past the bad segment for error recovery.
         remaining = nextSep >= 0 ? remaining.slice(nextSep + sep.length) : "";
       }
     } else {
-      // Free field: consume up to the next separator (or to the end if last field).
       const nextSep = remaining.indexOf(sep);
       if (isLast) {
         remaining = "";
       } else if (nextSep >= 0) {
         remaining = remaining.slice(nextSep + sep.length);
       } else {
-        // Not enough segments — will be caught by the trailing-content check.
         errors.push({
           field: field.label,
           message: `Missing value for field "${field.label}"`,
@@ -105,7 +100,6 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
     }
   }
 
-  // Any leftover text means too many segments.
   if (remaining.length > 0) {
     errors.push({
       field: "fileName",
@@ -122,6 +116,121 @@ async function validateFileName(projectId: number, fileName: string): Promise<{ 
   return { valid: true };
 }
 
+// Parse file name against the active naming convention and return field→value map
+async function parseFileNameMetadata(projectId: number, fileName: string): Promise<Record<string, unknown> | null> {
+  const conventions = await db
+    .select()
+    .from(namingConventionsTable)
+    .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
+    .limit(1);
+
+  if (conventions.length === 0) return null;
+
+  const convention = conventions[0];
+  const fields = await db
+    .select()
+    .from(namingFieldsTable)
+    .where(eq(namingFieldsTable.conventionId, convention.id))
+    .orderBy(namingFieldsTable.fieldOrder);
+
+  if (fields.length === 0) return null;
+
+  const sep = convention.separator;
+  const ext = fileName.includes(".") ? fileName.split(".").pop()!.toLowerCase() : "";
+  const nameWithoutExt = fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName;
+
+  const parsedFields: Record<string, string> = {};
+  let remaining = nameWithoutExt;
+
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    const allowed = field.allowedValues as string[];
+    const isLast = i === fields.length - 1;
+
+    if (allowed.length > 0) {
+      const sorted = [...allowed].sort((a, b) => b.length - a.length);
+      let matched = false;
+      for (const value of sorted) {
+        if (isLast) {
+          if (remaining === value) {
+            parsedFields[field.label] = value;
+            remaining = "";
+            matched = true;
+            break;
+          }
+        } else {
+          const prefix = value + sep;
+          if (remaining.startsWith(prefix)) {
+            parsedFields[field.label] = value;
+            remaining = remaining.slice(prefix.length);
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (!matched) {
+        const nextSep = remaining.indexOf(sep);
+        const actualValue = nextSep >= 0 ? remaining.slice(0, nextSep) : remaining;
+        parsedFields[field.label] = actualValue;
+        remaining = nextSep >= 0 ? remaining.slice(nextSep + sep.length) : "";
+      }
+    } else {
+      const nextSep = remaining.indexOf(sep);
+      if (isLast) {
+        parsedFields[field.label] = remaining;
+        remaining = "";
+      } else if (nextSep >= 0) {
+        parsedFields[field.label] = remaining.slice(0, nextSep);
+        remaining = remaining.slice(nextSep + sep.length);
+      }
+    }
+  }
+
+  return {
+    fields: parsedFields,
+    fileExtension: ext,
+    separator: sep,
+    conventionId: convention.id,
+    parsedAt: new Date().toISOString(),
+  };
+}
+
+// Async background extraction — called after upload response is sent
+async function extractAndStoreContent(fileId: number, projectId: number, fileName: string, fileContent: string | undefined): Promise<void> {
+  try {
+    const ext = fileName.split(".").pop()?.toLowerCase() || "";
+    let extractedText: string | null = null;
+    let fileMetadata: Record<string, unknown> | null = null;
+
+    if (ext === "pdf" && fileContent) {
+      try {
+        const buffer = Buffer.from(fileContent, "base64");
+        const parser = new PDFParse({ data: buffer, verbosity: 0 });
+        const result = await parser.getText();
+        await parser.destroy();
+        extractedText = result.text?.trim() || null;
+      } catch (err) {
+        console.error(`[files] pdf-parse failed for file ${fileId}:`, err instanceof Error ? err.message : err);
+      }
+    }
+
+    if (BIM_EXTENSIONS.has(ext)) {
+      fileMetadata = await parseFileNameMetadata(projectId, fileName);
+    }
+
+    if (extractedText !== null || fileMetadata !== null) {
+      const updates: Record<string, unknown> = { updatedAt: new Date() };
+      if (extractedText !== null) updates.extractedText = extractedText;
+      if (fileMetadata !== null) updates.fileMetadata = fileMetadata;
+      await db.update(filesTable).set(updates).where(eq(filesTable.id, fileId));
+      console.log(`[files] content indexed for file ${fileId} (${fileName}): pdf=${extractedText !== null}, bim=${fileMetadata !== null}`);
+    }
+  } catch (err) {
+    console.error(`[files] background extraction failed for file ${fileId}:`, err instanceof Error ? err.message : err);
+  }
+}
+
+// ─── GET /projects/:projectId/files ─────────────────────────────────────────
 router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
@@ -158,6 +267,7 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
   }
 });
 
+// ─── POST /projects/:projectId/files ─────────────────────────────────────────
 router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
@@ -195,6 +305,7 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       details: `Uploaded file: ${body.fileName}`,
     });
 
+    // Respond immediately — extraction runs in background
     res.status(201).json({
       ...file,
       uploadedByName: req.user!.fullName,
@@ -202,12 +313,18 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       createdAt: file.createdAt.toISOString(),
       updatedAt: file.updatedAt.toISOString(),
     });
+
+    // Fire-and-forget background extraction (does not affect response)
+    setImmediate(() => {
+      extractAndStoreContent(file.id, projectId, body.fileName, body.fileContent).catch(() => {});
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
   }
 });
 
+// ─── PATCH /projects/:projectId/files/:fileId ─────────────────────────────────
 router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, fileId } = UpdateFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
@@ -260,6 +377,16 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
         : `Changed status to "${body.status}"`,
     });
 
+    // If renamed to a BIM file, re-parse metadata in background
+    if (body.fileName) {
+      const newExt = body.fileName.split(".").pop()?.toLowerCase() || "";
+      if (BIM_EXTENSIONS.has(newExt)) {
+        setImmediate(() => {
+          extractAndStoreContent(fileId, projectId, body.fileName!, undefined).catch(() => {});
+        });
+      }
+    }
+
     res.json({
       ...updated,
       uploadedByName: req.user!.fullName,
@@ -273,6 +400,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
   }
 });
 
+// ─── DELETE /projects/:projectId/files/:fileId ─────────────────────────────────
 router.delete("/projects/:projectId/files/:fileId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, fileId } = DeleteFileParams.parse({ projectId: req.params.projectId, fileId: req.params.fileId });
