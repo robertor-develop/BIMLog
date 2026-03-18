@@ -1,0 +1,13 @@
+Run this exactly — copy and paste to Replit:
+Stop. Do not build anything new. Run these checks and report the exact output of each one.
+Check 1 — AI assist endpoint uses rewrite prompt not append: grep -n "rewrite|Rewrite|userDescription|plain.*formal|formal.*AEC" artifacts/api-server/src/routes/submittals.ts | head -10
+Check 2 — Related RFI is now a dropdown not number input: grep -n "rfiOptions|listRfis|RFI dropdown|select.*rfi|rfi.*select" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 3 — Procurement warning includes installed: grep -n "installed|Installed|procureWarn|on_order|delivered" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 4 — AI check shows risk score and icons: grep -n "Risk Score|riskScore|submission_risk|Low|Medium|High|checkmark|✓|✗" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 5 — Distribution list pre-populated with user email: grep -n "distributionList|user.*email|email.*prepopul|useAuthStore|currentUser" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 6 — Export all generates log not individual submittals: grep -n "export-all|exportAll|landscape|log.*export|summary.*log" artifacts/api-server/src/routes/submittals.ts | head -10
+Check 7 — Per-row PDF and DOC buttons exist in submittal list: grep -n "per.*row|row.*export|PDF.*button|DOC.*button|exportSingle|single.*export" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 8 — File search dropdown exists for reference fields: grep -n "FileSearch|fileSearch|file.*search|search.*dropdown|DrawingNumber|specSection.*search" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 9 — Files tab inline Name Generator removed: grep -n "NameGenerator|nameGenerator|Name Generator|inline.*generator" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -5
+Check 10 — Files tab Simulate text input removed: grep -n "Simulate|simulate|text.*input|fileName.*input|Test Upload" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -5
+Show me the exact output of all 10 checks. Nothing else.
