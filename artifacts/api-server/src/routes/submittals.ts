@@ -20,6 +20,13 @@ const MARGIN        = 50;
 const CONTENT_W     = LETTER_WIDTH - MARGIN * 2;
 const CONTENT_BOT   = LETTER_HEIGHT - 65;
 
+// Landscape log constants
+const LOG_MARGIN     = 36;
+const LOG_W          = 792;
+const LOG_H          = 612;
+const LOG_CONTENT_W  = LOG_W - LOG_MARGIN * 2;
+const LOG_CONTENT_BOT = LOG_H - 50;
+
 function drawFooter(doc: PDFKit.PDFDocument, text: string) {
   const orig = doc.page.margins.bottom;
   doc.page.margins.bottom = 0;
@@ -151,6 +158,116 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
     res.status(201).json({ ...subToJson(submittal), submittedByName: req.user!.fullName });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "Bad request" });
+  }
+});
+
+// ─── GET /projects/:projectId/submittals/export-all (landscape log PDF) ─────
+router.get("/projects/:projectId/submittals/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId));
+    const subs = await db.select().from(submittalsTable)
+      .where(eq(submittalsTable.projectId, projectId))
+      .orderBy(submittalsTable.createdAt);
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
+    const doc = new PDFDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    doc.page.margins.bottom = 0;
+    const chunks: Buffer[] = [];
+    doc.on("data", (c: Buffer) => chunks.push(c));
+    doc.on("end", () => {
+      const buf = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="Submittal-Log-${project?.name || projectId}.pdf"`);
+      res.setHeader("Content-Length", buf.length);
+      res.send(buf);
+    });
+
+    let y = LOG_MARGIN;
+
+    // Header band
+    doc.rect(0, 0, LOG_W, 52).fill("#1E3A5F");
+    doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
+      .text("SUBMITTAL LOG", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
+    doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
+      .text(`${project?.name || "Project"} · Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
+    doc.fillColor("white").fontSize(9)
+      .text(`${subs.length} submittals · BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 200, 32, { width: 200, align: "right", lineBreak: false });
+    y = 62;
+
+    // Column defs (landscape 792-72=720 content)
+    const COLS = [
+      { label: "Number",        w: 65 },
+      { label: "Title",         w: 130 },
+      { label: "Type",          w: 70 },
+      { label: "Status",        w: 75 },
+      { label: "Submitted By",  w: 85 },
+      { label: "Submitted To",  w: 85 },
+      { label: "Date Submitted",w: 72 },
+      { label: "Date Required", w: 72 },
+      { label: "Days Out",      w: 46 },
+      { label: "Ball in Court", w: LOG_CONTENT_W - (65+130+70+75+85+85+72+72+46) },
+    ];
+
+    // Column header row
+    doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).fill("#EFF6FF");
+    let cx = LOG_MARGIN;
+    COLS.forEach(col => {
+      doc.fillColor("#1E3A5F").fontSize(7).font("Helvetica-Bold")
+        .text(col.label, cx + 3, y + 4, { width: col.w - 4, lineBreak: false });
+      cx += col.w;
+    });
+    doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).stroke("#BFDBFE");
+    y += 16;
+
+    const STATUS_COLORS: Record<string, string> = {
+      approved: "#15803D", approved_as_noted: "#1D4ED8", rejected: "#DC2626",
+      revise_resubmit: "#EA580C", under_review: "#B45309", submitted: "#374151", pending: "#9CA3AF",
+    };
+
+    subs.forEach((sub, idx) => {
+      const rowH = 15;
+      if (y + rowH > LOG_CONTENT_BOT) {
+        doc.addPage(); doc.page.margins.bottom = 0; y = LOG_MARGIN;
+      }
+      const bg = idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC";
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).fill(bg);
+
+      const days = sub.dateRequired
+        ? Math.ceil((new Date(sub.dateRequired).getTime() - Date.now()) / 86400000)
+        : null;
+      const daysStr = days !== null ? (days < 0 ? `${Math.abs(days)}d over` : `${days}d`) : "—";
+
+      const vals = [
+        sub.number,
+        sub.title,
+        (sub.submittalCategory || sub.submittalType || "").replace("_", " "),
+        sub.status || "—",
+        sub.submittedByCompany || "—",
+        sub.submittedToCompany || "—",
+        sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "—",
+        sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "—",
+        daysStr,
+        sub.ballInCourt || "—",
+      ];
+
+      cx = LOG_MARGIN;
+      COLS.forEach((col, ci) => {
+        const color = ci === 3 ? (STATUS_COLORS[vals[ci]] || "#374151") : "#374151";
+        doc.fillColor(color).fontSize(6.5).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
+          .text(vals[ci], cx + 3, y + 4, { width: col.w - 6, lineBreak: false });
+        cx += col.w;
+      });
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).stroke("#F1F5F9");
+      y += rowH;
+    });
+
+    // Footer
+    doc.page.margins.bottom = 0;
+    doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
+      .text(`Submittal Log · ${project?.name || ""} · BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
 
@@ -405,24 +522,28 @@ Respond ONLY with a JSON object in this exact format:
 // ─── POST /projects/:projectId/submittals/:submittalId/ai-assist-description ──
 router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const body = req.body as { specSection?: string; submittalCategory?: string; title?: string };
+    const body = req.body as { userDescription?: string; specSection?: string; submittalCategory?: string; title?: string };
     const anthropic = new Anthropic({
       apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
       baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
     });
 
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 8192,
-      messages: [{
-        role: "user",
-        content: `You are a BIM/AEC submittal expert. A contractor is preparing a submittal for:
+    const prompt = body.userDescription && body.userDescription.trim()
+      ? `The user has written the following description of a submittal in plain informal language. Rewrite it as a formal, professional AEC/construction submittal description suitable for an architect or engineer's review. Keep it concise, precise, and technical. Do not add generic filler content. Just rewrite what the user wrote in formal professional language appropriate for an AIA transmittal document. Output only the rewritten description with no preamble or explanation.
+
+User's original text:
+${body.userDescription}`
+      : `You are a BIM/AEC submittal expert. A contractor is preparing a submittal for:
 - Title: ${body.title || "Not specified"}
 - Spec Section: ${body.specSection || "Not specified"}
 - Category: ${body.submittalCategory || "Not specified"}
 
-Write a thorough submittal description that will maximize approval chances. Include what product data to provide, what certifications to include, compliance statements, and any spec-specific information typically required. Keep it practical and under 200 words.`,
-      }],
+Write a concise, formal submittal description under 150 words that covers what is being submitted, its intended use, and relevant compliance or certification notes.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 8192,
+      messages: [{ role: "user", content: prompt }],
     });
 
     const suggestion = message.content[0].type === "text" ? message.content[0].text.trim() : "";
@@ -593,6 +714,56 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
 
     drawFooter(doc, `${sub.number} · Generated ${new Date().toLocaleString()} · BIMLog by IgniteSmart`);
     doc.end();
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── GET /projects/:projectId/submittals/:submittalId/export-word ─────────────
+router.get("/projects/:projectId/submittals/:submittalId/export-word", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, submittalId } = UpdateSubmittalParams.parse({
+      projectId: req.params.projectId, submittalId: req.params.submittalId,
+    });
+    const [sub] = await db.select().from(submittalsTable)
+      .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
+    if (!sub) { res.status(404).json({ error: "Submittal not found" }); return; }
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
+    const bic = (sub.ballInCourtHistory as Array<{ party: string; setAt: string; setBy: string }>) || [];
+    const aiCheck = sub.aiCheckResult as { overall: string; aspects: Array<{ label: string; result: string; note: string }>; summary: string } | null;
+
+    const row = (label: string, value: string) =>
+      `<tr><td style="font-weight:bold;width:160px;padding:4px 8px;background:#F0F4F8;border:1px solid #CBD5E1">${label}</td>` +
+      `<td style="padding:4px 8px;border:1px solid #CBD5E1">${value || "—"}</td></tr>`;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>body{font-family:Arial,sans-serif;font-size:11pt;margin:40px}
+h1{color:#1E3A5F;font-size:18pt;margin-bottom:4px}
+h2{color:#1E3A5F;font-size:12pt;margin-top:20px;margin-bottom:6px;border-bottom:2px solid #1E3A5F;padding-bottom:4px}
+table{border-collapse:collapse;width:100%;margin-bottom:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:bold}</style>
+</head><body>
+<h1>SUBMITTAL TRANSMITTAL</h1>
+<p style="color:#64748B;margin-top:0">${project?.name || ""} · ${sub.number} · Generated ${new Date().toLocaleDateString()}</p>
+<h2>Header</h2>
+<table>${row("Number", sub.number)}${row("Title", sub.title)}${row("Status", sub.status)}${row("Spec Section", sub.specSection || "")}${row("Category", (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " "))}${row("Date Submitted", sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "")}${row("Date Required", sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "")}${row("Ball in Court", sub.ballInCourt || "")}</table>
+<h2>Submitted By</h2>
+<table>${row("Company", sub.submittedByCompany || "")}${row("Contact", sub.submittedByPerson || "")}${row("Email", sub.submittedByEmail || "")}${row("Phone", sub.submittedByPhone || "")}</table>
+<h2>Submitted To</h2>
+<table>${row("Company", sub.submittedToCompany || "")}${row("Contact", sub.submittedToPerson || "")}${row("Email", sub.submittedToEmail || "")}</table>
+<h2>Product Information</h2>
+<table>${row("Manufacturer", sub.manufacturer || "")}${row("Model Number", sub.modelNumber || "")}${row("Drawing Number", sub.drawingNumber || "")}${row("Drawing Title", sub.drawingTitle || "")}${row("Procurement Status", (sub.procurementStatus || "").replace(/_/g, " "))}</table>
+${sub.description ? `<h2>Description</h2><p>${sub.description.replace(/\n/g, "<br>")}</p>` : ""}
+${sub.reviewDecision ? `<h2>Review Decision</h2><table>${row("Decision", sub.reviewDecision.replace(/_/g, " "))}${row("Reviewer", sub.reviewerName || "")}${row("Date", sub.reviewedAt ? new Date(sub.reviewedAt).toLocaleDateString() : "")}${row("Compliance Notes", sub.complianceNotes || "")}${row("Rejection Reason", sub.rejectionReason || "")}</table>` : ""}
+${aiCheck ? `<h2>AI Compliance Check</h2><p><strong>Overall: ${aiCheck.overall.replace("_", " ").toUpperCase()}</strong> — ${aiCheck.summary}</p><table><tr><th style="border:1px solid #CBD5E1;padding:4px 8px">Category</th><th style="border:1px solid #CBD5E1;padding:4px 8px">Result</th><th style="border:1px solid #CBD5E1;padding:4px 8px">Notes</th></tr>${aiCheck.aspects.map(a => `<tr><td style="border:1px solid #CBD5E1;padding:4px 8px">${a.label}</td><td style="border:1px solid #CBD5E1;padding:4px 8px">${a.result.replace("_", " ")}</td><td style="border:1px solid #CBD5E1;padding:4px 8px">${a.note}</td></tr>`).join("")}</table>` : ""}
+${bic.length > 0 ? `<h2>Ball in Court History</h2><table><tr><th style="border:1px solid #CBD5E1;padding:4px 8px">Date</th><th style="border:1px solid #CBD5E1;padding:4px 8px">Party</th><th style="border:1px solid #CBD5E1;padding:4px 8px">Set By</th></tr>${bic.map(e => `<tr><td style="border:1px solid #CBD5E1;padding:4px 8px">${new Date(e.setAt).toLocaleDateString()}</td><td style="border:1px solid #CBD5E1;padding:4px 8px">${e.party}</td><td style="border:1px solid #CBD5E1;padding:4px 8px">${e.setBy}</td></tr>`).join("")}</table>` : ""}
+<p style="color:#94A3B8;font-size:9pt;margin-top:40px">Generated by BIMLog by IgniteSmart · ${new Date().toLocaleString()}</p>
+</body></html>`;
+
+    res.setHeader("Content-Type", "application/msword");
+    res.setHeader("Content-Disposition", `attachment; filename="${sub.number}-Submittal.doc"`);
+    res.send(html);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }

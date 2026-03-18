@@ -56,6 +56,9 @@ type ViewEvent = {
   userFullName: string; userCompanyName: string; viewedAt: string; eventType: string;
 };
 
+type RFI = { id: number; number: string; subject: string; status: string };
+type ProjectFile = { id: number; fileName: string; fileType: string; fileUrl?: string };
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORY_OPTIONS = [
   { value: "shop_drawing", label: "Shop Drawing", labelEs: "Plano de Taller" },
@@ -586,34 +589,46 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
     if (format === "excel") {
       const rows = submittals.map(s => ({
         "Number": s.number, "Title": s.title,
-        "Status": s.status, "Category": s.submittalCategory || s.submittalType,
-        "Spec Section": s.specSection || "", "Manufacturer": s.manufacturer || "",
-        "Model No": s.modelNumber || "", "Submitted By": s.submittedByCompany || s.submittedByName || "",
-        "Submitted To": s.submittedToCompany || "", "Date Submitted": fmtDate(s.dateSubmitted || s.createdAt),
-        "Date Required": fmtDate(s.dateRequired || s.dueDate), "Ball in Court": s.ballInCourt || "",
-        "AI Check": s.aiCheckResult ? (s.aiCheckResult as AiCheckResult).overall : "",
-        "Review Decision": s.reviewDecision || "", "Reviewer": s.reviewerName || "",
-        "Rapid Approval Flag": s.rapidApprovalFlag ? "YES" : "",
+        "Type": s.submittalCategory || s.submittalType,
+        "Status": s.status, "Spec Section": s.specSection || "",
+        "Submitted By": s.submittedByCompany || s.submittedByName || "",
+        "Submitted To": s.submittedToCompany || "",
+        "Date Submitted": fmtDate(s.dateSubmitted || s.createdAt),
+        "Date Required": fmtDate(s.dateRequired || s.dueDate),
+        "Days Outstanding": s.dateRequired ? Math.ceil((new Date(s.dateRequired).getTime() - Date.now()) / 86400000) : "",
+        "Ball in Court": s.ballInCourt || "",
       }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Submittals");
-      XLSX.writeFile(wb, `Submittals-Project${projectId}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Submittal Log");
+      XLSX.writeFile(wb, `Submittal-Log-Project${projectId}.xlsx`);
       toast({ title: w("Excel exported", "Excel exportado", lang) });
       return;
     }
     toast({ title: w("Generating PDF…", "Generando PDF…", lang) });
-    const token = getToken();
-    // Export each submittal as individual PDF
-    for (const s of submittals) {
-      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${s.id}/export`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (r.ok) {
-        const blob = await r.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = `${s.number}-Submittal.pdf`; a.click();
-        URL.revokeObjectURL(url);
-      }
+    const r = await fetch(`/api/v1/projects/${projectId}/submittals/export-all`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (r.ok) {
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `Submittal-Log-Project${projectId}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      toast({ title: w("PDF export failed", "Error al exportar PDF", lang), variant: "destructive" });
+    }
+  };
+
+  const handleRowExport = async (s: Submittal, fmt: "pdf" | "word") => {
+    const endpoint = fmt === "pdf"
+      ? `/api/v1/projects/${projectId}/submittals/${s.id}/export`
+      : `/api/v1/projects/${projectId}/submittals/${s.id}/export-word`;
+    const ext = fmt === "pdf" ? "pdf" : "doc";
+    const r = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (r.ok) {
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${s.number}-Submittal.${ext}`; a.click();
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -698,6 +713,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                 <th style={{ width: 60, textAlign: "center" }}>{w("Days", "Días", lang)}</th>
                 <th style={{ width: 110 }}>{w("Ball in Court", "En Espera De", lang)}</th>
                 <th style={{ width: 60, textAlign: "center" }}>AI</th>
+                <th style={{ width: 90, textAlign: "center" }}>{w("Export", "Exportar", lang)}</th>
               </tr>
             </thead>
             <tbody>
@@ -738,6 +754,20 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                     <td style={{ textAlign: "center" }}>
                       {sub.aiCheckRan && aiCheck && <AiBadge result={aiCheck.overall} />}
                     </td>
+                    <td style={{ textAlign: "center" }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+                        <button
+                          onClick={() => handleRowExport(sub, "pdf")}
+                          title="Export PDF"
+                          style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", fontSize: 10, color: "#DC2626" }}
+                        >PDF</button>
+                        <button
+                          onClick={() => handleRowExport(sub, "word")}
+                          title="Export Word"
+                          style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", fontSize: 10, color: "#1D4ED8" }}
+                        >DOC</button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -773,8 +803,9 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   const [aiCheckResult, setAiCheckResult] = useState<AiCheckResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
+  const [rfis, setRfis] = useState<RFI[]>([]);
 
-  const procureWarning = ["on_order", "delivered"].includes(form.procurementStatus);
+  const procureWarning = ["on_order", "delivered", "installed"].includes(form.procurementStatus);
 
   useEffect(() => {
     if (user) {
@@ -782,9 +813,16 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
         ...f,
         submittedByPerson: user.fullName || "",
         submittedByEmail: user.email || "",
+        distributionList: user.email || "",
       }));
     }
   }, [user]);
+
+  useEffect(() => {
+    void fetch(`/api/v1/projects/${projectId}/rfis`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setRfis(data as RFI[]));
+  }, [projectId]);
 
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
@@ -792,11 +830,16 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       const r = await fetch(`/api/v1/projects/${projectId}/submittals/0/ai-assist-description`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ specSection: form.specSection, submittalCategory: form.submittalCategory, title: form.title }),
+        body: JSON.stringify({
+          userDescription: form.description,
+          specSection: form.specSection,
+          submittalCategory: form.submittalCategory,
+          title: form.title,
+        }),
       });
       if (r.ok) {
         const d = await r.json() as { suggestion: string };
-        setForm(f => ({ ...f, description: f.description ? f.description + "\n\n" + d.suggestion : d.suggestion }));
+        setForm(f => ({ ...f, description: d.suggestion }));
       }
     } catch { toast({ title: w("AI assist failed", "Error de asistencia IA", lang), variant: "destructive" }); }
     finally { setAiAssistLoading(false); }
@@ -859,7 +902,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           <FieldInput type="date" value={form.dateRequired} onChange={e => set("dateRequired", e.target.value)} />
         </Field>
         <Field label={w("Spec Section", "Sección de Especificación", lang)}>
-          <FieldInput placeholder="23 00 00" value={form.specSection} onChange={e => set("specSection", e.target.value)} />
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <FieldInput placeholder="23 00 00" value={form.specSection} onChange={e => set("specSection", e.target.value)} />
+            <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("specSection", v.replace(/\.[^.]+$/, ""))} />
+          </div>
         </Field>
         <Field label={w("Submittal Category", "Categoría de Entregable", lang)}>
           <FieldSelect value={form.submittalCategory} onChange={e => set("submittalCategory", e.target.value)}>
@@ -943,13 +989,24 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       <PanelSection title={w("5. Reference Documents", "5. Documentos de Referencia", lang)} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Field label={w("Drawing Number", "Número de Plano", lang)}>
-          <FieldInput value={form.drawingNumber} onChange={e => set("drawingNumber", e.target.value)} />
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <FieldInput value={form.drawingNumber} onChange={e => set("drawingNumber", e.target.value)} />
+            <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingNumber", v.replace(/\.[^.]+$/, ""))} />
+          </div>
         </Field>
         <Field label={w("Drawing Title", "Título de Plano", lang)}>
-          <FieldInput value={form.drawingTitle} onChange={e => set("drawingTitle", e.target.value)} />
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <FieldInput value={form.drawingTitle} onChange={e => set("drawingTitle", e.target.value)} />
+            <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingTitle", v.replace(/\.[^.]+$/, ""))} />
+          </div>
         </Field>
-        <Field label={w("Related RFI ID", "ID de RFI Relacionado", lang)}>
-          <FieldInput type="number" value={form.linkedRfiId} onChange={e => set("linkedRfiId", e.target.value)} placeholder="RFI ID" />
+        <Field label={w("Related RFI", "RFI Relacionado", lang)}>
+          <FieldSelect value={form.linkedRfiId} onChange={e => set("linkedRfiId", e.target.value)}>
+            <option value="">{rfis.length === 0 ? w("No RFIs on this project yet", "Sin RFIs en este proyecto aún", lang) : w("— None —", "— Ninguno —", lang)}</option>
+            {rfis.map(rfi => (
+              <option key={rfi.id} value={String(rfi.id)}>{rfi.number}: {rfi.subject}</option>
+            ))}
+          </FieldSelect>
         </Field>
       </div>
 
@@ -977,8 +1034,8 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
         }}>
           <TriangleAlert style={{ width: 15, height: 15, flexShrink: 0, marginTop: 1 }} />
           <div>
-            <strong>{w("Warning: Procurement Before Approval", "Advertencia: Adquisición Antes de Aprobación", lang)}</strong>
-            {" — "}{w("Materials were ordered or delivered before this submittal was formally approved. This creates liability risk.", "Los materiales fueron ordenados o entregados antes de que este entregable fuera aprobado formalmente. Esto crea riesgo de responsabilidad.", lang)}
+            <strong>{w("Warning — Procurement Before Approval:", "Advertencia — Adquisición Antes de Aprobación:", lang)}</strong>
+            {" "}{w("Materials have been ordered or delivered before this submittal has been formally approved. This creates significant liability risk. Proceed only if you have written authorization from the responsible party.", "Los materiales han sido ordenados o entregados antes de que este entregable sea aprobado formalmente. Esto crea un riesgo de responsabilidad significativo. Proceda solo si tiene autorización escrita de la parte responsable.", lang)}
           </div>
         </div>
       )}
@@ -999,7 +1056,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           {aiCheckLoading ? <Loader2 style={{ width: 13, height: 13, animation: "spin 1s linear infinite" }} /> : <Shield style={{ width: 13, height: 13 }} />}
           {w("Run AI Compliance Check", "Ejecutar Verificación IA", lang)}
         </button>
-        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("Save submittal first to enable AI check", "Guarde el entregable primero para habilitar la verificación", lang)}</span>}
+        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("Save the submittal first to run the AI compliance check.", "Guarde el entregable primero para ejecutar la verificación de cumplimiento IA.", lang)}</span>}
       </div>
       {aiCheckResult && <AiCheckDisplay result={aiCheckResult} lang={lang} />}
 
@@ -1027,20 +1084,136 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   );
 }
 
+// ─── File Search Dropdown (Fix 7) ─────────────────────────────────────────────
+function FileSearchButton({ projectId, onSelect, lang }: {
+  projectId: number; onSelect: (fileName: string) => void; lang: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const handleOpen = async () => {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/files`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (r.ok) setFiles((await r.json()) as ProjectFile[]);
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const filtered = files.filter(f => !search || f.fileName.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
+      <button
+        type="button"
+        onClick={handleOpen}
+        title={w("Search project files", "Buscar archivos del proyecto", lang)}
+        style={{
+          padding: "4px 7px", border: "1px solid #D1D5DB", borderRadius: 5,
+          background: open ? "#EFF6FF" : "white", cursor: "pointer", display: "flex", alignItems: "center",
+        }}
+      >
+        <Search style={{ width: 11, height: 11, color: "#6B7280" }} />
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: "110%", left: 0, zIndex: 100, background: "white",
+          border: "1.5px solid #BFDBFE", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+          minWidth: 240, maxWidth: 320,
+        }}>
+          {loading ? (
+            <div style={{ padding: "12px 14px", fontSize: 12, color: "#6B7280", display: "flex", alignItems: "center", gap: 6 }}>
+              <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} />
+              {w("Loading files…", "Cargando archivos…", lang)}
+            </div>
+          ) : files.length === 0 ? (
+            <div style={{ padding: "12px 14px", fontSize: 12, color: "#6B7280" }}>
+              {w("No files uploaded to this project yet — upload files in the Files tab to link them here.", "Sin archivos en este proyecto — suba archivos en la pestaña Archivos para enlazarlos aquí.", lang)}
+            </div>
+          ) : (
+            <>
+              <div style={{ padding: "8px 10px", borderBottom: "1px solid #F3F4F6" }}>
+                <Input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder={w("Search files…", "Buscar archivos…", lang)}
+                  style={{ height: 28, fontSize: 11 }}
+                  autoFocus
+                />
+              </div>
+              <div style={{ maxHeight: 200, overflowY: "auto" }}>
+                {filtered.length === 0 ? (
+                  <div style={{ padding: "10px 12px", fontSize: 12, color: "#9CA3AF" }}>
+                    {w("No matching files", "Sin coincidencias", lang)}
+                  </div>
+                ) : filtered.map(f => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => { onSelect(f.fileName); setOpen(false); setSearch(""); }}
+                    style={{
+                      width: "100%", textAlign: "left", padding: "7px 12px", background: "none",
+                      border: "none", cursor: "pointer", fontSize: 11, color: "#1E293B",
+                      borderBottom: "1px solid #F9FAFB",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#EFF6FF")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                  >
+                    {f.fileName}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── AI Check Display ─────────────────────────────────────────────────────────
+const RISK_SCORE: Record<string, { label: string; labelEs: string; color: string; bg: string }> = {
+  pass:           { label: "Low",    labelEs: "Bajo",   color: "#15803D", bg: "#F0FDF4" },
+  possible_issue: { label: "Medium", labelEs: "Medio",  color: "#B45309", bg: "#FFFBEB" },
+  fail:           { label: "High",   labelEs: "Alto",   color: "#DC2626", bg: "#FEF2F2" },
+};
+const ASPECT_ICON: Record<string, string> = { pass: "✓", possible_issue: "!", fail: "✗" };
+
 function AiCheckDisplay({ result, lang }: { result: AiCheckResult; lang: string }) {
+  const risk = RISK_SCORE[result.overall] || RISK_SCORE.pass;
   return (
     <div style={{ border: "1.5px solid #C4B5FD", borderRadius: 8, overflow: "hidden", marginBottom: 8 }}>
       <div style={{
         padding: "8px 12px", background: AI_BG[result.overall],
         borderBottom: "1px solid #E5E7EB",
-        display: "flex", alignItems: "center", gap: 8,
+        display: "flex", alignItems: "center", gap: 12,
       }}>
         <AiBadge result={result.overall} />
         <span style={{ fontSize: 12, fontWeight: 600, color: AI_COLOR[result.overall] }}>
           {result.overall === "pass" ? w("Likely to be approved", "Probable aprobación", lang) :
            result.overall === "fail" ? w("High rejection risk", "Alto riesgo de rechazo", lang) :
            w("Possible issues detected", "Posibles problemas detectados", lang)}
+        </span>
+        <span style={{
+          marginLeft: "auto", display: "flex", alignItems: "center", gap: 5,
+          padding: "2px 10px", borderRadius: 6, background: risk.bg, border: `1.5px solid ${risk.color}`,
+          fontSize: 11, fontWeight: 700, color: risk.color,
+        }}>
+          {w("Submission Risk:", "Riesgo de Envío:", lang)} {lang === "es" ? risk.labelEs : risk.label}
         </span>
       </div>
       <div style={{ padding: "8px 12px" }}>
@@ -1050,8 +1223,11 @@ function AiCheckDisplay({ result, lang }: { result: AiCheckResult; lang: string 
             padding: "5px 8px", borderRadius: 5,
             background: a.result === "pass" ? "#F0FDF4" : a.result === "fail" ? "#FEF2F2" : "#FFFBEB",
           }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: AI_COLOR[a.result], width: 40, flexShrink: 0, marginTop: 1 }}>
-              {a.result.toUpperCase().replace("_", " ")}
+            <span style={{
+              fontSize: 14, fontWeight: 700, color: AI_COLOR[a.result],
+              width: 20, flexShrink: 0, marginTop: 0, textAlign: "center",
+            }}>
+              {ASPECT_ICON[a.result] || "?"}
             </span>
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, color: "#1E3A5F" }}>{a.label}</div>
@@ -1236,7 +1412,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       </div>
 
       {/* Procurement warning */}
-      {["on_order", "delivered"].includes(submittal.procurementStatus || "") && !["approved", "approved_as_noted"].includes(submittal.status) && (
+      {["on_order", "delivered", "installed"].includes(submittal.procurementStatus || "") && !["approved", "approved_as_noted"].includes(submittal.status) && (
         <div style={{
           padding: "10px 14px", background: "#FEF3C7", border: "1.5px solid #FDE68A",
           borderRadius: 8, fontSize: 12, color: "#B45309", marginBottom: 12,
@@ -1244,8 +1420,8 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         }}>
           <TriangleAlert style={{ width: 15, height: 15, flexShrink: 0, marginTop: 1 }} />
           <div>
-            <strong>{w("Procurement Before Approval", "Adquisición Antes de Aprobación", lang)}</strong>
-            {" — "}{w("Materials ordered/delivered before formal approval. Liability risk.", "Materiales ordenados/entregados antes de aprobación formal. Riesgo de responsabilidad.", lang)}
+            <strong>{w("Warning — Procurement Before Approval:", "Advertencia — Adquisición Antes de Aprobación:", lang)}</strong>
+            {" "}{w("Materials have been ordered or delivered before this submittal has been formally approved. This creates significant liability risk. Proceed only if you have written authorization from the responsible party.", "Los materiales han sido ordenados o entregados antes de que este entregable sea aprobado formalmente. Esto crea un riesgo de responsabilidad significativo. Proceda solo si tiene autorización escrita de la parte responsable.", lang)}
           </div>
         </div>
       )}
