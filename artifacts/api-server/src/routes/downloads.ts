@@ -50,6 +50,7 @@ router.get("/downloads/sync-agent-windows", (_req: Request, res: Response) => {
     }
   });
   stream.pipe(res);
+  return;
 });
 
 router.get("/downloads/sync-agent-mac", (_req: Request, res: Response) => {

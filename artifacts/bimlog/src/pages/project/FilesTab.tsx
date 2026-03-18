@@ -52,6 +52,10 @@ interface FileRow {
   uploadedByName?: string;
   uploadedByCompany?: string;
   extractedText?: string | null;
+  documentRelationship?: string | null;
+  fileTypeTier?: string | null;
+  source?: string | null;
+  linkedRfiId?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -245,19 +249,31 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
 
                         {/* Latest uploader */}
                         <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <div className="avatar avatar-sm av-blue">
-                              {latest.uploadedByName?.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>
-                                {latest.uploadedByName}
+                          {latest.source === "system-generated" ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#1E3A5F", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Shield style={{ width: 13, height: 13, color: "white" }} />
                               </div>
-                              <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                                {latest.uploadedByCompany}
+                              <div>
+                                <div style={{ fontSize: 10, fontWeight: 700, color: "#1E3A5F" }}>BIMLog Auto</div>
+                                <div style={{ fontSize: 9, color: "hsl(var(--muted-foreground))" }}>System-generated</div>
                               </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <div className="avatar avatar-sm av-blue">
+                                {latest.uploadedByName?.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>
+                                  {latest.uploadedByName}
+                                </div>
+                                <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                                  {latest.uploadedByCompany}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </td>
 
                         {/* Date */}
@@ -386,6 +402,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [dragOver, setDragOver] = useState(false);
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
   const [showNameGenerator, setShowNameGenerator] = useState(false);
+  const [documentRelationship, setDocumentRelationship] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
@@ -439,8 +456,8 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         fileContent = undefined;
       }
     }
-    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream", fileContent } });
-  }, [mutate, projectId]);
+    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream", fileContent, documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting" || undefined } });
+  }, [mutate, projectId, documentRelationship]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -470,6 +487,39 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         </button>
       </div>
 
+      {/* Document Relationship Declaration */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+          Document Relationship <span style={{ color: "#BE123C" }}>*</span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+          {([
+            { value: "created", label: "Created", desc: "New document originating from this project", color: "#16A34A", bg: "#F0FDF4", border: "#86EFAC" },
+            { value: "modified", label: "Modified", desc: "Revised version of an existing document", color: "#D97706", bg: "#FFFBEB", border: "#FCD34D" },
+            { value: "reference", label: "Reference", desc: "External or standard document cited", color: "#2563EB", bg: "#EFF6FF", border: "#93C5FD" },
+            { value: "supporting", label: "Supporting", desc: "Supplementary or background material", color: "#7C3AED", bg: "#F5F3FF", border: "#C4B5FD" },
+          ] as const).map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setDocumentRelationship(documentRelationship === opt.value ? "" : opt.value)}
+              style={{
+                padding: "8px 6px",
+                borderRadius: 8,
+                border: `2px solid ${documentRelationship === opt.value ? opt.color : opt.border}`,
+                background: documentRelationship === opt.value ? opt.bg : "white",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "border-color 0.15s, background 0.15s",
+                outline: "none",
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: opt.color, marginBottom: 2 }}>{opt.label}</div>
+              <div style={{ fontSize: 10, color: "#6B7280", lineHeight: 1.3 }}>{opt.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Text input row */}
       <div style={{ display: "flex", gap: 8 }}>
         <Input
@@ -481,7 +531,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         <Button
           size="sm"
           disabled={!fileName || isPending || success}
-          onClick={() => mutate({ projectId, data: { fileName, fileSize: 1024, fileType: "application/octet-stream" } })}
+          onClick={() => mutate({ projectId, data: { fileName, fileSize: 1024, fileType: "application/octet-stream", documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting" || undefined } })}
           style={{ gap: 5, minWidth: 110 }}
         >
           {success

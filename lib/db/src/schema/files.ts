@@ -1,6 +1,7 @@
 import { pgTable, serial, text, timestamp, integer, json, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
+import { rfisTable } from "./rfis";
 
 export const filesTable = pgTable("files", {
   id: serial("id").primaryKey(),
@@ -14,6 +15,18 @@ export const filesTable = pgTable("files", {
   uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
   extractedText: text("extracted_text"),
   fileMetadata: json("file_metadata").$type<Record<string, unknown>>(),
+
+  // ── Document integrity fields ────────────────────────────────────────────
+  fileHash: text("file_hash"),
+  fileSizeBytes: integer("file_size_bytes"),
+  documentRelationship: text("document_relationship"),
+  documentRelationshipDeclaredAt: timestamp("document_relationship_declared_at"),
+  versionDiffStatus: text("version_diff_status"),
+  hashComparisonNote: text("hash_comparison_note"),
+  fileTypeTier: text("file_type_tier"),
+  source: text("source").default("user-uploaded"),
+  linkedRfiId: integer("linked_rfi_id").references(() => rfisTable.id),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

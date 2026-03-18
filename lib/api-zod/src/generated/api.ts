@@ -154,6 +154,7 @@ export const UploadFileBody = zod.object({
   fileSize: zod.number(),
   fileType: zod.string(),
   fileContent: zod.string().optional(),
+  documentRelationship: zod.enum(["created", "modified", "reference", "supporting"]).optional(),
 });
 
 /**

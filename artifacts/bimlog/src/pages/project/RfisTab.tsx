@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
   useListMembers, useListFiles,
@@ -16,7 +16,7 @@ import {
   MessageSquare, Plus, X, FileText, Download,
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
-  Search, UserPlus,
+  Search, UserPlus, Shield, Eye,
 } from "lucide-react";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
@@ -247,8 +247,9 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
         tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
       }
 
+      const pageCSS = isLog ? "@page { size: letter landscape; margin: 14pt; } " : "";
       const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#1E293B;margin:24pt;}
+<style>${pageCSS}body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#1E293B;margin:24pt;}
 h1{color:#1E3A5F;font-size:14pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
 </style></head><body>
 <h1>${sheetTitle}</h1>
@@ -1226,6 +1227,28 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
 
+  // view tracking
+  const [viewEvents, setViewEvents] = useState<{ id: number; userFullName: string; userCompanyName: string; viewedAt: string }[]>([]);
+  const [showViewedBy, setShowViewedBy] = useState(false);
+
+  // Track view event on panel open, and load viewed-by list
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/view`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/viewed-by`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then((data: { id: number; userFullName: string; userCompanyName: string; viewedAt: string }[]) => {
+        if (Array.isArray(data)) setViewEvents(data);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // response documents
   const [responseDocInput, setResponseDocInput] = useState("");
   const [responseDocs, setResponseDocs] = useState<string[]>(rfi.responseAttachmentsJson || []);
@@ -1288,10 +1311,34 @@ td{padding:4pt 6pt;vertical-align:top;}
 <table><tr><td class="resp-hdr" colspan="4">OFFICIAL RESPONSE</td></tr></table>
 ${hasResp ? `
 <div class="resp-box">${respText}</div>
-<table><tr class="sig-row">
-  <td>Answered by: <strong>${rfi.answeredBy || "—"}</strong></td>
-  <td>Date: <strong>${fmtW(rfi.dateAnswered || rfi.respondedAt)}</strong></td>
-</tr></table>
+<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
+  <tr>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:30%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ANSWERED BY (Name &amp; Company)</div>
+      <div style="font-size:10pt;">${rfi.answeredBy || "—"}</div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:20%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">DATE OF RESPONSE</div>
+      <div style="font-size:10pt;">${fmtW(rfi.dateAnswered || rfi.respondedAt)}</div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
+      <div style="font-size:9pt;">
+        ${'No Cost Impact,Cost Increase TBD,Cost Increase Known,Cost Decrease'.split(',').map(opt => 
+          `${rfi.costImpact === opt ? '&#9745;' : '&#9633;'} ${opt}${opt === 'Cost Increase Known' && rfi.costImpactAmount ? `: ${rfi.costImpactAmount}` : ''}`
+        ).join('<br/>')}
+      </div>
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
+      <div style="font-size:9pt;">
+        ${'No Schedule Impact,Increase in Calendar Days,Decrease in Calendar Days'.split(',').map(opt => 
+          `${rfi.scheduleImpact === opt ? '&#9745;' : '&#9633;'} ${opt}${opt !== 'No Schedule Impact' && rfi.scheduleImpactDays != null ? `: ${rfi.scheduleImpactDays}d` : ''}`
+        ).join('<br/>')}
+      </div>
+    </td>
+  </tr>
+</table>
 ` : `
 <div class="blank-box" style="min-height:80pt;"></div>
 <table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
@@ -1346,6 +1393,23 @@ ${hasResp ? `
       const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
       toast({ title: w("Response PDF downloaded", "PDF de respuesta descargado", lang) });
+    } catch {
+      toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
+    }
+  };
+
+  const handleDownloadAuditCert = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/audit-certificate`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Failed to generate audit certificate");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-AuditCert.pdf`; a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w("Audit certificate downloaded", "Certificado de auditoría descargado", lang) });
     } catch {
       toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
     }
@@ -1442,6 +1506,12 @@ ${hasResp ? `
                 <FileText style={{ width: 12, height: 12 }} />{w("Resp. PDF", "PDF Resp.", lang)}
               </Button>
             )}
+            <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11, color: "#6D28D9", borderColor: "#C4B5FD", background: "#F5F3FF" }}>
+              <Shield style={{ width: 12, height: 12 }} />{w("Audit Cert", "Cert. Auditoría", lang)}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} style={{ gap: 5, fontSize: 11, color: "#0369A1", borderColor: "#BAE6FD", background: "#F0F9FF" }}>
+              <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
+            </Button>
             {rfi.status === "closed" && canWrite && (
               <Button variant="outline" size="sm" onClick={() => { onRevise(rfi); onClose(); }} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
@@ -1459,6 +1529,64 @@ ${hasResp ? `
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
               <AlertTriangle style={{ width: 14, height: 14 }} />
               {w("This RFI is overdue. Response was required by", "Este RFI está vencido. La respuesta era requerida el", lang)} {fmt(due)}.
+            </div>
+          )}
+
+          {/* Viewed-by dropdown */}
+          {showViewedBy && (
+            <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid #BAE6FD", borderRadius: 8, background: "#F0F9FF" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#0369A1", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                <Eye style={{ width: 13, height: 13 }} />
+                {w("View History", "Historial de Visualización", lang)} ({viewEvents.length})
+              </div>
+              {viewEvents.length === 0 ? (
+                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("No view events yet.", "Sin eventos de visualización.", lang)}</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {viewEvents.slice().reverse().map((evt) => (
+                    <div key={evt.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, padding: "3px 0", borderBottom: "1px solid #E0F2FE" }}>
+                      <span style={{ fontWeight: 600 }}>{evt.userFullName} <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>· {evt.userCompanyName}</span></span>
+                      <span style={{ color: "hsl(var(--muted-foreground))" }}>{new Date(evt.viewedAt).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Generated Response Documents */}
+          {files && files.filter(f => f.source === "system-generated" && f.linkedRfiId === rfi.id).length > 0 && (
+            <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid #BBF7D0", borderRadius: 8, background: "#F0FDF4" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#166534", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
+                {w("Auto-Generated Response Documents", "Documentos de Respuesta Generados", lang)}
+                <span style={{ fontSize: 9, fontWeight: 700, background: "#1E3A5F", color: "white", padding: "1px 6px", borderRadius: 10, marginLeft: 4 }}>BIMLog Auto</span>
+              </div>
+              {files.filter(f => f.source === "system-generated" && f.linkedRfiId === rfi.id).map(f => (
+                <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4 }}>
+                  <FileText style={{ width: 12, height: 12, color: "#16A34A" }} />
+                  <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 11 }}>{f.fileName}</span>
+                  <button
+                    onClick={async () => {
+                      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+                      const resp = await fetch(`/api/v1/projects/${projectId}/files/${f.id}/download`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (resp.ok) {
+                        const blob = await resp.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a"); a.href = url; a.download = f.fileName; a.click();
+                        URL.revokeObjectURL(url);
+                      } else {
+                        toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
+                      }
+                    }}
+                    style={{ padding: "2px 8px", fontSize: 10, border: "1px solid #86EFAC", borderRadius: 4, background: "white", color: "#166534", cursor: "pointer" }}
+                  >
+                    {w("Download", "Descargar", lang)}
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 

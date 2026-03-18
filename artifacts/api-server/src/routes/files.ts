@@ -1,15 +1,27 @@
 import { Router, type IRouter } from "express";
+import { createHash } from "crypto";
 import { db } from "@workspace/db";
-import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { PDFParse } from "pdf-parse";
+import PDFDocument from "pdfkit";
 
 const router: IRouter = Router();
 
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
+
+// ── File type tier classification ────────────────────────────────────────────
+const TIER_A = new Set(["rvt", "nwd", "dwg", "ifc", "nwf", "nwc", "rfa", "rte", "dxf"]);
+const TIER_B = new Set(["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "dwf", "skp"]);
+function getFileTypeTier(fileName: string): string {
+  const ext = (fileName.split(".").pop() || "").toLowerCase();
+  if (TIER_A.has(ext)) return "A";
+  if (TIER_B.has(ext)) return "B";
+  return "C";
+}
 
 interface ValidationDetail {
   field: string;
@@ -256,6 +268,7 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
           uploadedByCompany,
           createdAt: f.createdAt.toISOString(),
           updatedAt: f.updatedAt.toISOString(),
+          documentRelationshipDeclaredAt: f.documentRelationshipDeclaredAt?.toISOString() ?? null,
         };
       })
     );
@@ -272,11 +285,153 @@ function getBaseName(fileName: string): string {
   return (fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName).toLowerCase();
 }
 
+// ─── GET /projects/:projectId/files/:fileId/download ─────────────────────────
+router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId), 10);
+    const fileId = parseInt(String(req.params.fileId), 10);
+
+    const [file] = await db.select().from(filesTable)
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId)))
+      .limit(1);
+
+    if (!file) {
+      res.status(404).json({ error: "File not found" });
+      return;
+    }
+
+    // Only system-generated response docs can be downloaded — generate on the fly
+    if (file.source !== "system-generated" || !file.linkedRfiId) {
+      res.status(501).json({ error: "Binary download not available — only system-generated documents can be downloaded directly." });
+      return;
+    }
+
+    // Load the linked RFI and project, then stream the response PDF
+    const [rfi] = await db.select().from(rfisTable).where(eq(rfisTable.id, file.linkedRfiId)).limit(1);
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
+    if (!rfi) {
+      res.status(404).json({ error: "Linked RFI not found" });
+      return;
+    }
+
+    const MARGIN = 50;
+    const LETTER_WIDTH = 612;
+    const LETTER_HEIGHT = 792;
+
+    const fmtD = (d: Date | string | null | undefined) =>
+      d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
+
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    doc.page.margins.bottom = 0;
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"`);
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.send(pdfBuffer);
+    });
+
+    let y = MARGIN;
+    const contentW = LETTER_WIDTH - MARGIN * 2;
+
+    // Header bar
+    doc.rect(MARGIN, y, contentW, 36).fill("#0F4C75");
+    doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
+      .text("OFFICIAL RESPONSE DOCUMENT", MARGIN + 10, y + 6, { lineBreak: false });
+    doc.fontSize(9).font("Helvetica")
+      .text(`${rfi.number}  |  ${project?.name || ""}`, MARGIN + 10, y + 23, { lineBreak: false });
+    doc.fillColor("black");
+    y += 44;
+
+    // Info rows
+    const half = contentW / 2 - 2;
+    const drawInfoRow = (l1: string, v1: string, l2: string, v2: string) => {
+      const lw = half * 0.38;
+      doc.rect(MARGIN, y, lw, 16).fill("#F1F5F9");
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold").text(l1.toUpperCase(), MARGIN + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+      doc.fillColor("#1E293B").fontSize(8).font("Helvetica").text(v1, MARGIN + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+      const col2x = MARGIN + half + 4;
+      doc.rect(col2x, y, lw, 16).fill("#F1F5F9");
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold").text(l2.toUpperCase(), col2x + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+      doc.fillColor("#1E293B").fontSize(8).font("Helvetica").text(v2, col2x + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+      y += 16;
+    };
+    drawInfoRow("RFI #", rfi.number, "Subject", rfi.subject);
+    drawInfoRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`);
+    y += 6;
+
+    // Question
+    doc.rect(MARGIN, y, contentW, 14).fill("#E2E8F0");
+    doc.fillColor("#1E3A5F").fontSize(7.5).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", MARGIN + 6, y + 3.5);
+    y += 14;
+    const questionText = rfi.question || rfi.description || "No description provided.";
+    const questionH = Math.min(doc.heightOfString(questionText, { width: contentW - 12 }) + 12, 120);
+    doc.rect(MARGIN, y, contentW, questionH).stroke("#E2E8F0");
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(questionText, MARGIN + 6, y + 6, { width: contentW - 12 });
+    y += questionH + 8;
+
+    // Response
+    doc.rect(MARGIN, y, contentW, 14).fill("#0F4C75");
+    doc.fillColor("white").fontSize(7.5).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 3.5);
+    y += 14;
+    const respText = rfi.answer || rfi.response || "";
+    if (respText) {
+      const respH = Math.min(doc.heightOfString(respText, { width: contentW - 12 }) + 12, 160);
+      doc.rect(MARGIN, y, contentW, respH).fillAndStroke("#F0FDF4", "#86EFAC");
+      doc.fillColor("#14532D").fontSize(9).font("Helvetica").text(respText, MARGIN + 6, y + 6, { width: contentW - 12 });
+      y += respH + 6;
+    } else {
+      doc.rect(MARGIN, y, contentW, 80).stroke("#E2E8F0");
+      y += 84;
+    }
+
+    // Signature row
+    const segW = contentW / 4;
+    const sigLabels = ["ANSWERED BY", "DATE OF RESPONSE", "COST IMPACT", "SCHEDULE IMPACT"];
+    const sigVals = [
+      rfi.answeredBy || "—",
+      fmtD(rfi.dateAnswered || rfi.respondedAt),
+      rfi.costImpact || "—",
+      rfi.scheduleImpact ? `${rfi.scheduleImpact}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays}d)` : ""}` : "—",
+    ];
+    doc.rect(MARGIN, y, contentW, 14).fill("#F1F5F9");
+    sigLabels.forEach((lbl, i) => {
+      doc.fillColor("#64748B").fontSize(6.5).font("Helvetica-Bold")
+        .text(lbl, MARGIN + i * segW + 4, y + 3.5, { width: segW - 6, lineBreak: false });
+    });
+    y += 14;
+    doc.rect(MARGIN, y, contentW, 20).stroke("#E2E8F0");
+    sigVals.forEach((val, i) => {
+      if (val) doc.fillColor("#1E293B").fontSize(8.5).font("Helvetica").text(val, MARGIN + i * segW + 4, y + 5, { width: segW - 8, lineBreak: false });
+      if (i < 3) doc.moveTo(MARGIN + (i + 1) * segW, y).lineTo(MARGIN + (i + 1) * segW, y + 20).stroke("#E2E8F0");
+    });
+
+    doc.fillColor("#94A3B8").fontSize(7).font("Helvetica")
+      .text(`Generated by BIMLog by IgniteSmart  |  ${rfi.number} — Official Response  |  ${new Date().toLocaleDateString()}`,
+        MARGIN, LETTER_HEIGHT - 30, { width: contentW, align: "center", lineBreak: false });
+    doc.end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 // ─── POST /projects/:projectId/files ─────────────────────────────────────────
 router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
     const body = UploadFileBody.parse(req.body);
+
+    // ── document_relationship is required for user-uploaded files ────────────
+    if (!body.documentRelationship) {
+      res.status(400).json({
+        error: "document_relationship is required. Declare whether this document is 'created', 'modified', 'reference', or 'supporting'.",
+      });
+      return;
+    }
 
     const validation = await validateFileName(projectId, body.fileName);
     if (!validation.valid) {
@@ -285,6 +440,30 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
         details: validation.details,
       });
       return;
+    }
+
+    // ── SHA-256 hash ─────────────────────────────────────────────────────────
+    let fileHash: string;
+    if (body.fileContent) {
+      const contentBytes = Buffer.from(body.fileContent, "base64");
+      fileHash = createHash("sha256").update(contentBytes).digest("hex");
+    } else {
+      fileHash = createHash("sha256").update(body.fileName).digest("hex");
+    }
+
+    // ── Duplicate detection (content-based only) ─────────────────────────────
+    if (body.fileContent) {
+      const duplicates = await db.select({ id: filesTable.id, fileName: filesTable.fileName })
+        .from(filesTable)
+        .where(and(eq(filesTable.projectId, projectId), eq(filesTable.fileHash, fileHash)))
+        .limit(1);
+      if (duplicates.length > 0) {
+        res.status(409).json({
+          error: "Duplicate file detected",
+          details: `An identical file already exists in this project: "${duplicates[0].fileName}" (file ID ${duplicates[0].id}). The uploaded content matches an existing document.`,
+        });
+        return;
+      }
     }
 
     // ── Version detection ────────────────────────────────────────────────────
@@ -296,13 +475,12 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
     let parentFileId: number | null = null;
 
     if (family.length > 0) {
-      // The root is the file with no parentFileId (the original v1)
       const root = family.find(f => f.parentFileId === null) ?? family[0];
       parentFileId = root.id;
       newVersion = Math.max(...family.map(f => f.version)) + 1;
     }
-    // ─────────────────────────────────────────────────────────────────────────
 
+    const fileTypeTier = getFileTypeTier(body.fileName);
     const defaultFileStatus = await getDefaultValue("file_status");
     const [file] = await db.insert(filesTable).values({
       projectId,
@@ -313,6 +491,12 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       parentFileId,
       status: defaultFileStatus,
       uploadedById: req.user!.userId,
+      fileHash,
+      fileSizeBytes: body.fileSize,
+      documentRelationship: body.documentRelationship,
+      documentRelationshipDeclaredAt: new Date(),
+      fileTypeTier,
+      source: "user-uploaded",
     }).returning();
 
     const isNewVersion = newVersion > 1;
@@ -328,19 +512,18 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       fileNameAfter: body.fileName,
       details: isNewVersion
         ? `Uploaded Version ${newVersion} of document: ${body.fileName}`
-        : `Uploaded file: ${body.fileName}`,
+        : `Uploaded file: ${body.fileName} [${body.documentRelationship}]`,
     });
 
-    // Respond immediately — extraction runs in background
     res.status(201).json({
       ...file,
       uploadedByName: req.user!.fullName,
       uploadedByCompany: req.user!.companyName,
       createdAt: file.createdAt.toISOString(),
       updatedAt: file.updatedAt.toISOString(),
+      documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
     });
 
-    // Fire-and-forget background extraction (does not affect response)
     setImmediate(() => {
       extractAndStoreContent(file.id, projectId, body.fileName, body.fileContent).catch(() => {});
     });
@@ -403,7 +586,6 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
         : `Changed status to "${body.status}"`,
     });
 
-    // If renamed to a BIM file, re-parse metadata in background
     if (body.fileName) {
       const newExt = body.fileName.split(".").pop()?.toLowerCase() || "";
       if (BIM_EXTENSIONS.has(newExt)) {
@@ -419,6 +601,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
       uploadedByCompany: req.user!.companyName,
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
+      documentRelationshipDeclaredAt: updated.documentRelationshipDeclaredAt?.toISOString() ?? null,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";

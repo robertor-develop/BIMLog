@@ -95,12 +95,20 @@ export interface ProjectFile {
   fileSize: number;
   fileType: string;
   version: number;
+  parentFileId?: number | null;
   status: string;
   uploadedById: number;
   uploadedByName: string;
   uploadedByCompany?: string;
   extractedText?: string;
   fileMetadata?: Record<string, unknown>;
+  fileHash?: string | null;
+  fileSizeBytes?: number | null;
+  documentRelationship?: string | null;
+  documentRelationshipDeclaredAt?: string | null;
+  fileTypeTier?: string | null;
+  source?: string | null;
+  linkedRfiId?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -110,6 +118,7 @@ export interface UploadFileRequest {
   fileSize: number;
   fileType: string;
   fileContent?: string;
+  documentRelationship?: "created" | "modified" | "reference" | "supporting";
 }
 
 export interface UpdateFileRequest {

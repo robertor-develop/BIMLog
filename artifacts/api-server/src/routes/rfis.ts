@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -55,12 +55,16 @@ function makeRfiPdf(
     d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
   const val = (v: string | null | undefined) => v || "—";
 
+  // Disable PDFKit auto-paging so only our addPageIfNeeded triggers new pages
+  doc.page.margins.bottom = 0;
+
   let y = startY;
 
   const addPageIfNeeded = (needed: number) => {
     if (y + needed > CONTENT_BOTTOM) {
       drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`);
       doc.addPage();
+      doc.page.margins.bottom = 0;
       y = MARGIN;
     }
   };
@@ -648,6 +652,76 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));
+
+    // Auto-save a response document record when answer is set for the first time
+    const isFirstAnswer = body.answer && !existing[0].answer && !existing[0].response;
+    if (isFirstAnswer) {
+      setImmediate(async () => {
+        try {
+          const rfiForDoc = updated;
+          // Build filename following naming convention
+          let responseFileName = `${rfiForDoc.number}-Response`;
+          try {
+            const conventions = await db.select().from(namingConventionsTable)
+              .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
+              .limit(1);
+            if (conventions.length > 0) {
+              const sep = conventions[0].separator;
+              const nfFields = await db.select().from(namingFieldsTable)
+                .where(eq(namingFieldsTable.conventionId, conventions[0].id))
+                .orderBy(namingFieldsTable.fieldOrder);
+              const parts: string[] = [];
+              for (const field of nfFields) {
+                const allowed = field.allowedValues as string[];
+                const lbl = field.label.toLowerCase();
+                if (lbl.includes("status") || lbl.includes("estado")) {
+                  parts.push("S2");
+                } else if (lbl.includes("type") || lbl.includes("tipo")) {
+                  parts.push("RP");
+                } else if (allowed.length > 0) {
+                  parts.push(allowed[0]);
+                } else {
+                  parts.push("RP");
+                }
+              }
+              if (parts.length > 0) responseFileName = parts.join(sep);
+            }
+          } catch { /* use fallback */ }
+
+          const finalFileName = `${responseFileName}.pdf`;
+          const defaultStatus = await getDefaultValue("file_status").catch(() => "Active");
+          await db.insert(filesTable).values({
+            projectId,
+            fileName: finalFileName,
+            fileSize: 0,
+            fileType: "application/pdf",
+            version: 1,
+            parentFileId: null,
+            status: defaultStatus,
+            uploadedById: req.user!.userId,
+            documentRelationship: "created",
+            documentRelationshipDeclaredAt: new Date(),
+            fileTypeTier: "B",
+            source: "system-generated",
+            linkedRfiId: rfiId,
+          });
+          await db.insert(activityLogTable).values({
+            projectId,
+            userId: req.user!.userId,
+            userFullName: req.user!.fullName,
+            userCompanyName: req.user!.companyName,
+            actionType: "upload",
+            entityType: "file",
+            entityId: rfiId,
+            fileNameBefore: null,
+            fileNameAfter: finalFileName,
+            details: `Auto-generated Response Document: ${finalFileName} (linked to ${rfiForDoc.number})`,
+          });
+        } catch (err) {
+          console.error("[rfis] auto-save response doc failed:", err instanceof Error ? err.message : err);
+        }
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
@@ -1031,7 +1105,183 @@ Write only the response text itself, no headers or labels.`;
   }
 });
 
-// ─── POST /rfis/generate-question ───────────────────────────────────────────
+// ─── POST /projects/:projectId/rfis/:rfiId/view (Track view event) ───────────
+router.post("/projects/:projectId/rfis/:rfiId/view", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    await db.insert(rfiViewEventsTable).values({
+      rfiId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      eventType: "viewed",
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId/viewed-by (Who viewed) ─────────────
+router.get("/projects/:projectId/rfis/:rfiId/viewed-by", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const events = await db.select().from(rfiViewEventsTable)
+      .where(eq(rfiViewEventsTable.rfiId, rfiId))
+      .orderBy(rfiViewEventsTable.viewedAt);
+    res.json(events.map(e => ({
+      ...e,
+      viewedAt: e.viewedAt.toISOString(),
+    })));
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId/audit-certificate ──────────────────
+router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const viewEvents = await db.select().from(rfiViewEventsTable)
+      .where(eq(rfiViewEventsTable.rfiId, rfiId))
+      .orderBy(rfiViewEventsTable.viewedAt);
+    const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
+
+    const fmtD = (d: Date | string | null | undefined) =>
+      d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
+    const fmtTs = (d: Date | string) =>
+      new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    doc.page.margins.bottom = 0;
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}-AuditCert.pdf"`);
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.send(pdfBuffer);
+    });
+
+    let y = MARGIN;
+    const contentW = LETTER_WIDTH - MARGIN * 2;
+
+    // ── Header ───────────────────────────────────────────────────────────────
+    doc.rect(MARGIN, y, contentW, 44).fill("#1E3A5F");
+    doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
+      .text("IMMUTABLE AUDIT CERTIFICATE", MARGIN + 12, y + 8, { lineBreak: false });
+    doc.fontSize(9).font("Helvetica")
+      .text(`BIMLog by IgniteSmart  |  Generated ${new Date().toLocaleString()}`, MARGIN + 12, y + 28, { lineBreak: false });
+    doc.fillColor("black");
+    y += 52;
+
+    // ── RFI Summary box ───────────────────────────────────────────────────────
+    doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("RFI INFORMATION", MARGIN + 6, y + 4.5);
+    doc.fillColor("black");
+    y += 16;
+
+    const half = contentW / 2 - 2;
+    const drawAuditRow = (l1: string, v1: string, l2?: string, v2?: string) => {
+      const lw = 110;
+      doc.rect(MARGIN, y, lw, 16).fill("#F8FAFC");
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold").text(l1, MARGIN + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+      doc.fillColor("#1E293B").fontSize(8).font("Helvetica").text(v1, MARGIN + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+      if (l2 !== undefined) {
+        const col2x = MARGIN + half + 4;
+        doc.rect(col2x, y, lw, 16).fill("#F8FAFC");
+        doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold").text(l2, col2x + 3, y + 4.5, { width: lw - 4, lineBreak: false });
+        doc.fillColor("#1E293B").fontSize(8).font("Helvetica").text(v2 || "—", col2x + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
+      }
+      y += 16;
+    };
+    drawAuditRow("RFI Number", rfi.number, "Project", project?.name || "—");
+    drawAuditRow("Subject", rfi.subject);
+    drawAuditRow("Status", (rfi.status || "").replace("_", " "), "Priority", rfi.priority || "—");
+    drawAuditRow("Date Created", fmtD(rfi.createdAt), "Created By", creator[0]?.fullName || "—");
+    drawAuditRow("Date Required", fmtD(rfi.dateRequired || rfi.dueDate), "Date Answered", fmtD(rfi.dateAnswered || rfi.respondedAt));
+    drawAuditRow("Answered By", rfi.answeredBy || "—", "Cost Impact", rfi.costImpact || "—");
+    y += 6;
+
+    // ── Immutable Activity Log ────────────────────────────────────────────────
+    doc.rect(MARGIN, y, contentW, 16).fill("#0F4C75");
+    doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("IMMUTABLE ACTIVITY LOG — VIEW & ACCESS EVENTS", MARGIN + 6, y + 4.5);
+    doc.fillColor("black");
+    y += 16;
+
+    if (viewEvents.length === 0) {
+      doc.rect(MARGIN, y, contentW, 24).stroke("#E2E8F0");
+      doc.fillColor("#94A3B8").fontSize(9).font("Helvetica").text("No view events recorded.", MARGIN + 6, y + 7.5, { width: contentW - 12, lineBreak: false });
+      y += 28;
+    } else {
+      // Column headers
+      const cols = [64, 200, 180, contentW - 64 - 200 - 180 - 6];
+      const colX = [MARGIN, MARGIN + 64, MARGIN + 264, MARGIN + 444];
+      doc.rect(MARGIN, y, contentW, 14).fill("#E2E8F0");
+      ["#", "Timestamp (UTC)", "User", "Company"].forEach((h, i) => {
+        doc.fillColor("#475569").fontSize(7).font("Helvetica-Bold")
+          .text(h, colX[i] + 3, y + 3.5, { width: cols[i] - 4, lineBreak: false });
+      });
+      y += 14;
+
+      viewEvents.forEach((evt, idx) => {
+        const rowBg = idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC";
+        doc.rect(MARGIN, y, contentW, 14).fill(rowBg);
+        const vals = [String(idx + 1), fmtTs(evt.viewedAt), evt.userFullName, evt.userCompanyName];
+        vals.forEach((v, i) => {
+          doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
+            .text(v, colX[i] + 3, y + 3, { width: cols[i] - 4, lineBreak: false });
+        });
+        // vertical dividers
+        [64, 264, 444].forEach(x => {
+          doc.moveTo(MARGIN + x, y).lineTo(MARGIN + x, y + 14).stroke("#E2E8F0");
+        });
+        y += 14;
+        if (y > CONTENT_BOTTOM - 20) {
+          drawFooter(doc, `BIMLog by IgniteSmart  |  Audit Certificate: ${rfi.number}  |  Page continued`);
+          doc.addPage();
+          doc.page.margins.bottom = 0;
+          y = MARGIN;
+        }
+      });
+      y += 6;
+    }
+
+    // ── Certification block ───────────────────────────────────────────────────
+    const certH = 72;
+    if (y + certH > CONTENT_BOTTOM) {
+      drawFooter(doc, `BIMLog by IgniteSmart  |  Audit Certificate: ${rfi.number}`);
+      doc.addPage();
+      doc.page.margins.bottom = 0;
+      y = MARGIN;
+    }
+    doc.rect(MARGIN, y, contentW, certH).fillAndStroke("#F0FDF4", "#86EFAC");
+    doc.fillColor("#14532D").fontSize(8.5).font("Helvetica-Bold")
+      .text("CERTIFICATION STATEMENT", MARGIN + 10, y + 10);
+    doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
+      .text(
+        `This document certifies that the above RFI (${rfi.number}) record and its associated activity log are accurate as of ${new Date().toLocaleString()}. ` +
+        `The activity log is maintained by BIMLog by IgniteSmart as an immutable audit trail. ` +
+        `Total view events recorded: ${viewEvents.length}. ` +
+        `This certificate was generated for project: ${project?.name || projectId}.`,
+        MARGIN + 10, y + 24, { width: contentW - 20 }
+      );
+    y += certH + 8;
+
+    drawFooter(doc, `BIMLog by IgniteSmart  |  Audit Certificate: ${rfi.number}  |  Generated ${new Date().toLocaleDateString()}`);
+    doc.end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 router.post("/rfis/generate-question", authMiddleware, async (req, res) => {
   try {
     const { description, projectName, subject } = req.body as { description: string; projectName?: string; subject?: string };
