@@ -1,0 +1,333 @@
+Completely rewrite the Convention Builder page at artifacts/bimlog/src/pages/project/ConventionBuilder.tsx. Replace it entirely. Do not change anything else in the app.
+Build a 4-step setup wizard with a final review screen. Here is everything that must be built:
+PROGRESS BAR
+Show a progress bar at the top with 4 steps: Step 1 Companies and Separator, Step 2 Disciplines and Levels, Step 3 Document Types Sequence and Status, Step 4 Revision and Advanced Settings, then Review. Highlight the current step in blue. Show step numbers and labels.
+STEP 1 — Companies and Separator
+Title: Who is on this project?
+Subtitle: Add every company that will submit files on this project. Each company gets a unique code used in every file name.
+Show a form with two inputs side by side: Company Name and Company Code. Company Code auto-generates from the first 3 letters of the company name in uppercase but is fully editable. Add button adds the company to a list below. Each company in the list shows as a card with company name, company code, an edit button to change the code, and a remove button. Pre-populate with the current user's company already in the list. Show a note that says Each person on your team will be identified by their company code in every file name they upload.
+Below the company list show a separator selector with title Separator Character and subtitle This character separates every field in the file name. Show only two options as large selectable cards: Hyphen - with note Most common in ISO 19650 projects, and Underscore _ with note Used in some US and Latin American standards. Default to hyphen selected.
+Below the separator show an Enforce Uppercase toggle with title Force uppercase on all file names and subtitle BIMLog will reject any file name containing lowercase letters. Recommended for ISO 19650 compliance. Default to on.
+Below that show a Character limit per field section. Show a toggle that says Apply character limits per field. When toggled on — show a note that says You will be able to set min and max characters per field in the review screen.
+Show Next button to go to Step 2.
+STEP 2 — Disciplines and Levels
+Title: What disciplines and floors does this project have?
+Section 1 — Disciplines
+Subtitle: Select all disciplines that will submit files on this project. Each discipline gets a code used in file names.
+Show a grid of discipline cards that can be toggled on or off. Each card shows the discipline name, its standard code, and a plain English description of what it covers:
+Architecture ARC — Architectural drawings and models
+Structure STR — Structural engineering documents
+Mechanical MEP — Mechanical and HVAC documents
+Electrical ELE — Electrical engineering documents
+Plumbing PLM — Plumbing and drainage documents
+Civil CIV — Civil and site engineering documents
+Landscape LAN — Landscape architecture documents
+Interior Design INT — Interior design documents
+Fire Protection FPR — Fire protection and suppression documents
+Technology ICT — IT and communications documents
+Geotechnical GEO — Geotechnical and survey documents
+Cost Estimating EST — Cost and quantity documents
+Below the grid show an Add custom discipline input with fields for Discipline Name and Code and an Add button.
+Section 2 — Building Levels
+Subtitle: Tell BIMLog about your building and we will generate all level codes automatically.
+Show these inputs:
+How many floors above ground? — number input
+How many basement levels? — number input
+Does this building have a ground floor labeled separately? — yes/no toggle — if yes show a Ground Floor Code input defaulting to G0
+Does this building have a roof level? — yes/no toggle — if yes show a Roof Code input defaulting to RF
+Show a checkbox for Include all-levels code ZZ defaulting to checked
+Show a preview section titled Generated Level Codes that updates live as the user types showing all level codes as chips — B2 B1 G0 L1 L2 L3 RF ZZ etc
+Below the generated levels show an Add custom level input for levels that don't fit the pattern — like mezzanines, podiums, penthouses.
+Show Back and Next buttons.
+STEP 3 — Document Types Sequence and Status
+Title: What types of documents will be submitted and how will they be numbered?
+Section 1 — Document Types
+Subtitle: Select all document types that will be submitted on this project.
+Show a grid of document type cards:
+3D Model M3 — Revit NWD and other 3D model files
+Drawing DR — 2D drawings and plans
+Specification SP — Technical specifications
+Calculation CA — Engineering calculations
+Report RP — Reports and studies
+Schedule SH — Schedules and programmes
+Point Cloud PC — Laser scan and point cloud files
+Clash Report CR — Coordination and clash detection reports
+Photograph PH — Site photographs and surveys
+Contract CO — Contract documents and amendments
+Transmittal TR — Document transmittals
+Shop Drawing SD — Subcontractor shop drawings
+Submittal SB — Formal submittal packages
+Below add a custom document type input.
+Section 2 — Sequence Numbers
+Subtitle: How will files be numbered within each category?
+Show 3 options as selectable cards:
+3 digits — 001 to 999 — for smaller projects
+4 digits — 0001 to 9999 — recommended for most projects
+5 digits — 00001 to 99999 — for very large projects
+Default to 4 digits selected.
+Show a note: BIMLog validates that sequence numbers match this format exactly. Files with wrong digit count will be rejected.
+Section 3 — Status Codes
+Subtitle: Status codes indicate the suitability of a document for its intended purpose.
+Show these pre-selected as toggleable chips with their full meaning shown on hover:
+S0 Work in progress
+S1 Preliminary
+S2 Contract issue
+S3 Statutory approval
+S4 As constructed
+A0 Shared for coordination
+A1 Suitable for information
+A2 Suitable for internal review
+A3 Suitable for coordination
+A4 Suitable for approval
+B0 Partially released
+CR For construction
+Show add custom status code input.
+Show Back and Next buttons.
+STEP 4 — Revision and Advanced Settings
+Title: Revision codes and advanced settings
+Section 1 — Revision Format
+Subtitle: How will document revisions be tracked?
+Show 3 options as selectable cards:
+Alphabetical — A B C D — simple letter-based revisions
+Numerical with prefix — P01 P02 C01 C02 — preliminary then construction revisions
+Custom — define your own revision sequence
+If Custom is selected show an input to add custom revision codes one by one.
+Show pre-populated examples based on selection.
+Section 2 — Mandatory Fields
+Subtitle: Which fields must always appear in every file name? Files missing mandatory fields will be rejected.
+Show a toggle for each field that will be in the convention — Project Code, Originator, Discipline, Level, Type, Sequence, Status, Revision. Default all to mandatory on. The GC can toggle any field to optional.
+Section 3 — Convention Template
+Subtitle: Save this convention as a template to reuse on future projects.
+Show a toggle Save as template with a text input for Template Name. When saved as a template it appears in a dropdown on new projects so the GC can apply it in one click.
+Section 4 — Grace Period
+Subtitle: When you activate this convention give your team time to adapt before violations are hard rejected.
+Show a toggle Enable grace period. When on show a number input for Number of days. During the grace period violations are flagged and reported but files are not rejected. After the grace period hard rejection applies.
+Default to grace period off.
+Section 5 — Onboarding Acceptance
+Subtitle: Require every team member to read and accept this convention before they can upload files. Their acceptance is permanently logged in the audit trail.
+Show a toggle Require convention acceptance defaulting to on.
+Show a note: When a new team member is added to this project they will see the full convention and must click I understand and accept this naming convention before uploading any files. This acceptance is timestamped and permanently recorded — they cannot claim they did not know.
+Section 6 — File Extensions by Discipline
+Subtitle: Optionally restrict which file types each discipline can submit.
+Show a toggle Enable file type restrictions per discipline defaulting to off.
+When toggled on show a table with each selected discipline in a row and checkboxes for allowed extensions: .rvt .rfa .nwd .nwf .nwc .dwg .dxf .pdf .ifc .xlsx .docx .pptx .jpg .png
+Show Back and Next buttons.
+FINAL REVIEW SCREEN
+Title: Review your convention before saving
+Show a large sample file name assembled from the first value of each field in large monospace bold — for example NYC-270-BTC-ARC-L1-DR-A-0001-S2-P01
+Below the sample show each field as a clearly labeled section with all allowed values shown as chips. Show an Edit button next to each section that jumps back to the relevant step.
+Show a full summary panel:
+Total fields: X
+Separator: hyphen or underscore
+Enforce uppercase: yes or no
+Companies: X companies with their codes listed
+Disciplines: X selected
+Levels: X levels generated
+Document types: X selected
+Sequence format: 4 digits
+Status codes: X defined
+Revision format: alphabetical or numerical or custom
+Grace period: on X days or off
+Onboarding acceptance: required or not required
+Convention template: saved as template name or not saved
+Show a large blue Save Convention button. When clicked:
+
+Build the fields array in this exact order: Project Code, Originator, Discipline, Level, Type, Sequence, Status, Revision
+Call the existing upsertConvention API with all fields
+Set isActive to true unless grace period is on in which case set a grace period end date
+Show a green success banner: Convention saved. Enforcing all uploads immediately. or Convention saved. Grace period active until DATE. Violations will be flagged but not rejected until then.
+Invalidate the convention query cache so the Name Generator updates immediately
+
+Show an Export Convention PDF button that generates a formatted PDF showing the complete convention — all fields, all allowed values, company codes, and a signature line at the bottom saying I have read and understood the naming convention for this project. This PDF is for distribution to all trades at project kickoff.
+EDIT MODE
+If the project already has a saved convention — skip the wizard and show the saved convention in a clean edit view showing all fields with their current values. Show a Re-run setup wizard button at the top. Show an Add Company button to add new companies without rebuilding. Show drag handles on every field row so the GC can reorder fields. Every field is fully editable inline.
+BILINGUAL SUPPORT
+Every label, title, subtitle, button, tooltip, error message, and instruction must use the existing i18n translation system. Add all new translation keys to both the English and Spanish translation files.
+Then rebuild and redeploy. Do not change anything else in the app.looks wonderfull but you are missing alot of document types8:44 PMYou're right. Give me the full list of document types you want included and I'll add them all to the instruction before we send it to Replit. What document types are missing?come on you know better it over 50, and you know them all better then me are you kidding me?8:45 PMYou're right. Here is the complete list of every document type used in AEC projects. Tell Replit this exactly — replace only the Document Types section in the Convention Builder wizard with this complete list. Do not change anything else:
+Replace the document types grid in Step 3 with this complete list of document types. Show them in a searchable grid with a search input at the top so the GC can find types quickly. All types are toggleable on or off. Show the code, full name, and a brief description for each:
+3D Models and BIM:
+M3 3D Model — Revit NWD and BIM model files
+M2 2D Model — 2D CAD model files
+MR Model — General model file
+BM BIM Model — Building Information Model
+NW Navisworks — Navisworks coordination model
+IFC IFC Model — Open BIM IFC format
+RVT Revit Model — Autodesk Revit native file
+SKP SketchUp Model — SketchUp 3D model
+Drawings:
+DR Drawing — General drawing
+GA General Arrangement — Overall layout drawing
+PL Plan — Floor plan drawing
+EL Elevation — Building elevation drawing
+SE Section — Building section drawing
+DT Detail — Construction detail drawing
+SD Shop Drawing — Subcontractor shop drawing
+WD Working Drawing — Construction working drawing
+AD As-Built Drawing — As-constructed drawing
+RD Record Drawing — Final record drawing
+DD Design Development — Design development drawing
+CD Construction Document — Construction document drawing
+SK Sketch — Preliminary sketch
+DG Diagram — Schematic diagram
+LA Layout — Site or room layout
+FP Floor Plan — Floor plan
+RP Reflected Ceiling Plan — Ceiling plan
+SP Site Plan — Site layout plan
+LP Landscape Plan — Landscape drawing
+DP Drainage Plan — Drainage layout
+EP Electrical Plan — Electrical layout
+MP Mechanical Plan — Mechanical layout
+PP Plumbing Plan — Plumbing layout
+FLP Fire Protection Plan — Fire suppression layout
+TP Technology Plan — IT and communications layout
+CP Civil Plan — Civil engineering drawing
+ST Structural Plan — Structural drawing
+ZP Zoning Plan — Zoning and planning drawing
+Specifications and Technical Documents:
+SP Specification — Technical specification
+TS Technical Specification — Detailed technical spec
+PS Performance Specification — Performance based spec
+MS Method Statement — Construction method statement
+WP Work Package — Construction work package
+TP Test Procedure — Testing and commissioning procedure
+TR Test Report — Testing results report
+ITP Inspection and Test Plan — Quality inspection plan
+QP Quality Plan — Project quality plan
+HSP Health and Safety Plan — Safety management plan
+RA Risk Assessment — Risk assessment document
+COSHH COSHH Assessment — Hazardous materials assessment
+Calculations and Analysis:
+CA Calculation — Engineering calculation
+SC Structural Calculation — Structural engineering calc
+MC Mechanical Calculation — Mechanical engineering calc
+EC Electrical Calculation — Electrical engineering calc
+HC Hydraulic Calculation — Hydraulic and plumbing calc
+FC Fire Calculation — Fire engineering calculation
+AC Acoustic Calculation — Acoustic and noise analysis
+TC Thermal Calculation — Thermal and energy calculation
+LC Lighting Calculation — Lighting design calculation
+GC Geotechnical Calculation — Ground and foundation calc
+EN Energy Analysis — Energy performance analysis
+CF CFD Analysis — Computational fluid dynamics
+FE Finite Element Analysis — Structural FEA
+WA Wind Analysis — Wind loading analysis
+SA Seismic Analysis — Seismic and earthquake analysis
+Reports and Studies:
+RP Report — General report
+SR Survey Report — Site survey report
+GR Geotechnical Report — Ground investigation report
+ER Environmental Report — Environmental impact report
+PR Progress Report — Construction progress report
+IR Inspection Report — Site inspection report
+AR Audit Report — Quality audit report
+CR Clash Report — BIM clash detection report
+VR Validation Report — Design validation report
+CR Commissioning Report — System commissioning report
+MR Meeting Report — Meeting minutes and notes
+WR Weekly Report — Weekly progress report
+MOR Monthly Report — Monthly progress report
+FR Final Report — Project completion report
+HR Handover Report — Building handover report
+DR Due Diligence Report — Technical due diligence
+Schedules and Programmes:
+SH Schedule — General schedule
+PS Project Schedule — Master project programme
+CS Construction Schedule — Construction programme
+MS Milestone Schedule — Key milestone tracker
+SS Submittal Schedule — Submittal register and schedule
+RS RFI Schedule — RFI log and schedule
+IS Inspection Schedule — Inspection and testing schedule
+MS Maintenance Schedule — Operations and maintenance schedule
+AS Activity Schedule — Work activity schedule
+LS Look Ahead Schedule — Short term look ahead
+Cost and Quantity Documents:
+ES Estimate — Cost estimate
+BQ Bill of Quantities — Detailed BOQ
+VO Variation Order — Change order document
+CO Change Order — Contract change order
+CL Cost Log — Running cost log
+CB Cost Breakdown — Cost breakdown structure
+CV Cost Variation — Cost variation report
+TK Takeoff — Quantity takeoff
+BU Budget — Project budget document
+CF Cash Flow — Cash flow forecast
+Contracts and Legal:
+CT Contract — Contract document
+AG Agreement — Project agreement
+NDA Non Disclosure Agreement — Confidentiality agreement
+NL Notice Letter — Formal notice
+CL Claim Letter — Contract claim
+EX Extension of Time — EOT claim document
+NC Non Conformance — Non conformance report
+RFI Request for Information — Formal RFI document
+RFC Request for Change — Change request document
+RFP Request for Proposal — Procurement document
+RFQ Request for Quotation — Tender document
+TN Tender — Tender submission
+BI Bid — Bid document
+PO Purchase Order — Procurement order
+WO Work Order — Work instruction order
+LI Letter of Intent — LOI document
+PC Practical Completion — Completion certificate
+DL Defects List — Snagging and defects list
+WC Works Certificate — Payment certificate
+Submittals and Transmittals:
+SB Submittal — Formal submittal package
+TM Transmittal — Document transmittal record
+DT Data Sheet — Product data sheet
+PD Product Data — Manufacturer product information
+WA Warranty — Product or works warranty
+MC Maintenance Contract — Ongoing maintenance agreement
+OM Operation Manual — Operations manual
+MM Maintenance Manual — Maintenance manual
+HM Handover Manual — Building handover manual
+TM Training Manual — User training manual
+AS As-Built — As-constructed record
+RD Record — Project record document
+AR Archive — Archived project document
+Photographs and Visual:
+PH Photograph — Site photograph
+VI Video — Site video recording
+DR Drone — Drone survey footage and images
+RI Render — Architectural visualisation render
+AN Animation — Design animation
+VR Virtual Reality — VR model or walkthrough
+AR Augmented Reality — AR overlay model
+BIM and Digital:
+BEP BIM Execution Plan — Project BIM protocol
+EIR Employer Information Requirements — Client BIM requirements
+AIR Asset Information Requirements — Asset data requirements
+OIR Organisational Information Requirements — Org BIM requirements
+PIM Project Information Model — Federated project model
+AIM Asset Information Model — Handover asset model
+CDE Common Data Environment — CDE protocol document
+LOD Level of Development — LOD specification
+LOG Level of Geometry — LOG specification
+LOI Level of Information — LOI specification
+BC BIM Coordination — Coordination protocol
+CM Clash Matrix — Discipline clash matrix
+FM Federated Model — Combined discipline model
+Survey and Geospatial:
+SV Survey — General survey document
+LS Land Survey — Topographic survey
+BS Building Survey — Existing building survey
+GS Ground Survey — Ground investigation
+US Utility Survey — Underground utility survey
+PS Point Cloud Survey — Laser scan survey
+GP GPS Survey — GPS coordinate survey
+DM Digital Map — Digital mapping document
+OR Ordnance Survey — OS mapping reference
+Mechanical and Electrical Specific:
+SLD Single Line Diagram — Electrical single line
+DB Distribution Board — DB schedule
+CS Cable Schedule — Cable routing schedule
+EQ Equipment Schedule — Equipment list and specs
+VI Valve Schedule — Valve identification schedule
+PI P&ID — Piping and instrumentation diagram
+IS Isometric — Pipe or duct isometric drawing
+HV HVAC Schedule — HVAC equipment schedule
+DU Duct Schedule — Ductwork schedule
+PS Pump Schedule — Pump specification schedule
+LS Lighting Schedule — Luminaire schedule
+SS Socket Schedule — Power outlet schedule
+Add a search bar at the top of the document types grid so the GC can type to filter the list. Add a Select All and Deselect All button. Group the types into categories with collapsible headers matching the groups above. Show the count of selected types as a badge. Allow the GC to add completely custom document types with their own code and description. Then rebuild and redeploy. Do not change anything else.
