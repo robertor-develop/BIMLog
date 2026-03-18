@@ -804,6 +804,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   const [submitting, setSubmitting] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [rfis, setRfis] = useState<RFI[]>([]);
+  const [byEmailError, setByEmailError] = useState("");
+  const [toEmailError, setToEmailError] = useState("");
+
+  const validateEmail = (email: string) => !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const procureWarning = ["on_order", "delivered", "installed"].includes(form.procurementStatus);
 
@@ -846,23 +850,39 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   };
 
   const handleAiCheck = async () => {
-    if (!savedId) {
-      toast({ title: w("Save the submittal first, then run AI check.", "Guarda el entregable primero.", lang) });
-      return;
-    }
     setAiCheckLoading(true);
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${savedId}/ai-check`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (r.ok) setAiCheckResult(await r.json() as AiCheckResult);
+      if (!savedId) {
+        const r = await fetch(`/api/v1/projects/${projectId}/submittals/inline-ai-check`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+          body: JSON.stringify({
+            title: form.title,
+            specSection: form.specSection,
+            submittalCategory: form.submittalCategory,
+            submittedByCompany: form.submittedByCompany,
+            submittedToCompany: form.submittedToCompany,
+            description: form.description,
+            manufacturer: form.manufacturer,
+            modelNumber: form.modelNumber,
+          }),
+        });
+        if (r.ok) setAiCheckResult(await r.json() as AiCheckResult);
+      } else {
+        const r = await fetch(`/api/v1/projects/${projectId}/submittals/${savedId}/ai-check`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        if (r.ok) setAiCheckResult(await r.json() as AiCheckResult);
+      }
     } catch { toast({ title: w("AI check failed", "Error de verificación IA", lang), variant: "destructive" }); }
     finally { setAiCheckLoading(false); }
   };
 
   const handleSubmit = async () => {
     if (!form.title) { toast({ title: w("Title is required", "El título es requerido", lang), variant: "destructive" }); return; }
+    if (!validateEmail(form.submittedByEmail)) { setByEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)); return; }
+    if (!validateEmail(form.submittedToEmail)) { setToEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)); return; }
     setSubmitting(true);
     try {
       const body = {
@@ -930,7 +950,14 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           <FieldInput value={form.submittedByPhone} onChange={e => set("submittedByPhone", e.target.value)} />
         </Field>
         <Field label={w("Email", "Correo", lang)}>
-          <FieldInput type="email" value={form.submittedByEmail} onChange={e => set("submittedByEmail", e.target.value)} />
+          <FieldInput
+            type="email"
+            value={form.submittedByEmail}
+            onChange={e => { set("submittedByEmail", e.target.value); if (byEmailError) setByEmailError(""); }}
+            onBlur={() => !validateEmail(form.submittedByEmail) ? setByEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setByEmailError("")}
+            style={byEmailError ? { border: "1.5px solid #DC2626" } : undefined}
+          />
+          {byEmailError && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>{byEmailError}</p>}
         </Field>
       </div>
 
@@ -944,7 +971,14 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           <FieldInput value={form.submittedToPerson} onChange={e => set("submittedToPerson", e.target.value)} />
         </Field>
         <Field label={w("Email", "Correo", lang)}>
-          <FieldInput type="email" value={form.submittedToEmail} onChange={e => set("submittedToEmail", e.target.value)} />
+          <FieldInput
+            type="email"
+            value={form.submittedToEmail}
+            onChange={e => { set("submittedToEmail", e.target.value); if (toEmailError) setToEmailError(""); }}
+            onBlur={() => !validateEmail(form.submittedToEmail) ? setToEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setToEmailError("")}
+            style={toEmailError ? { border: "1.5px solid #DC2626" } : undefined}
+          />
+          {toEmailError && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>{toEmailError}</p>}
         </Field>
         <Field label={w("External Contact?", "¿Contacto Externo?", lang)}>
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, marginTop: 6 }}>
@@ -993,12 +1027,14 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
             <FieldInput value={form.drawingNumber} onChange={e => set("drawingNumber", e.target.value)} />
             <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingNumber", v.replace(/\.[^.]+$/, ""))} />
           </div>
+          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only — enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia — ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
         </Field>
         <Field label={w("Drawing Title", "Título de Plano", lang)}>
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
             <FieldInput value={form.drawingTitle} onChange={e => set("drawingTitle", e.target.value)} />
             <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingTitle", v.replace(/\.[^.]+$/, ""))} />
           </div>
+          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only — enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia — ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
         </Field>
         <Field label={w("Related RFI", "RFI Relacionado", lang)}>
           <FieldSelect value={form.linkedRfiId} onChange={e => set("linkedRfiId", e.target.value)}>
@@ -1056,7 +1092,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           {aiCheckLoading ? <Loader2 style={{ width: 13, height: 13, animation: "spin 1s linear infinite" }} /> : <Shield style={{ width: 13, height: 13 }} />}
           {w("Run AI Compliance Check", "Ejecutar Verificación IA", lang)}
         </button>
-        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("Save the submittal first to run the AI compliance check.", "Guarde el entregable primero para ejecutar la verificación de cumplimiento IA.", lang)}</span>}
+        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("AI will check the current form fields — save afterwards to persist the result.", "La IA verificará los campos actuales — guarde después para persistir el resultado.", lang)}</span>}
       </div>
       {aiCheckResult && <AiCheckDisplay result={aiCheckResult} lang={lang} />}
 
@@ -1261,6 +1297,13 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [aiRejectionLoading, setAiRejectionLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
+  const respondRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (respondOpen && respondRef.current) {
+      setTimeout(() => respondRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    }
+  }, [respondOpen]);
   const bic = (submittal.ballInCourtHistory || []) as Array<{ party: string; setAt: string; setBy: string }>;
 
   // Log view event on open
@@ -1291,20 +1334,29 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   };
 
   const handleAiRejectionAssist = async () => {
+    if (!rejectionReason.trim()) {
+      toast({ title: w("Enter a rejection reason first, then click AI Draft Rejection to rewrite it professionally.", "Ingrese una razón de rechazo primero.", lang), variant: "destructive" });
+      return;
+    }
     setAiRejectionLoading(true);
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/submittals/0/ai-assist-description`, {
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}/ai-draft-rejection`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({
+          existingReason: rejectionReason,
+          reviewDecision,
+          complianceNotes,
+          title: submittal.title,
           specSection: submittal.specSection,
-          submittalCategory: submittal.submittalCategory || submittal.submittalType,
-          title: `Rejection reason for: ${submittal.title}. Decision: ${reviewDecision}. Compliance notes: ${complianceNotes}`,
         }),
       });
       if (r.ok) {
         const d = await r.json() as { suggestion: string };
         setRejectionReason(d.suggestion);
+      } else {
+        const d = await r.json() as { error?: string };
+        toast({ title: d.error || w("AI assist failed", "Error de asistencia IA", lang), variant: "destructive" });
       }
     } catch { toast({ title: w("AI assist failed", "Error de asistencia IA", lang), variant: "destructive" }); }
     finally { setAiRejectionLoading(false); }
@@ -1493,7 +1545,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
 
       {/* Add Review Response form */}
       {respondOpen && canWrite && (
-        <div style={{ marginTop: 12, border: "1.5px solid #1E3A5F", borderRadius: 8, overflow: "hidden" }}>
+        <div ref={respondRef} style={{ marginTop: 12, border: "1.5px solid #1E3A5F", borderRadius: 8, overflow: "hidden" }}>
           <div style={{ padding: "8px 12px", background: "#1E3A5F", color: "white", fontSize: 12, fontWeight: 700 }}>
             {w("Review Response", "Respuesta de Revisión", lang)}
           </div>

@@ -490,6 +490,10 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setErrorDetails([]);
     setSuccess(false);
     setFileName(file.name);
+    if (!documentRelationship) {
+      toast({ title: "Declaration required", description: "Please select a declaration type — Created, Modified, Reference, or Supporting — before uploading.", variant: "destructive" });
+      return;
+    }
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     let fileContent: string | undefined;
     if (ext === "pdf" && file.size < 10 * 1024 * 1024) {

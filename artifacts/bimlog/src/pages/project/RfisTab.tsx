@@ -1226,6 +1226,20 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [schedImpact, setSchedImpact] = useState(rfi.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
+  const [rfiResponses, setRfiResponses] = useState<Array<{
+    id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
+    answeredByCompany: string | null; costImpact: string | null; scheduleImpact: string | null;
+    scheduleImpactDays: number | null; isConflictOfInterest: boolean | null; createdAt: string;
+  }>>([]);
+  const [responsesLoading, setResponsesLoading] = useState(false);
+
+  // Conflict of interest detection
+  const isCoi = !!(
+    user && (
+      (user.email && rfi.submittedByEmail && user.email.toLowerCase() === rfi.submittedByEmail.toLowerCase()) ||
+      (user.companyName && rfi.submittedByCompany && user.companyName.toLowerCase() === rfi.submittedByCompany.toLowerCase())
+    )
+  );
 
   // view tracking
   const [viewEvents, setViewEvents] = useState<{ id: number; userFullName: string; userCompanyName: string; viewedAt: string }[]>([]);
@@ -1248,6 +1262,20 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Load all responses for this RFI
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    setResponsesLoading(true);
+    fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/responses`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then((data) => { if (Array.isArray(data)) setRfiResponses(data); })
+      .catch(() => {})
+      .finally(() => setResponsesLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rfi.id]);
 
   // response documents
   const [responseDocInput, setResponseDocInput] = useState("");
@@ -1338,32 +1366,56 @@ ${hasResp ? `
       </div>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ATTACHMENTS</div>
+      <div style="font-size:9pt;">
+        &#9633; See marked up drawings<br/>&#9633; See attached specifications<br/>&#9633; See attached schedules<br/>&#9633; None
+      </div>
+    </td>
+    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SIGNATURE</div>
+      <div style="margin-bottom:6pt;"><span style="font-size:8pt;color:#64748B;">Name:</span> ${rfi.answeredBy || "—"}</div>
+      <div style="border-bottom:1pt solid #CBD5E1;min-height:24pt;margin-top:4pt;"></div>
+    </td>
+  </tr>
 </table>
 ` : `
-<div class="blank-box" style="min-height:80pt;"></div>
+<div class="blank-box" style="min-height:288pt;"></div>
 <table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
   <tr>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:40%;vertical-align:top;">
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:30%;vertical-align:top;">
       <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">ANSWERED BY (Name &amp; Company)</div>
       <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
     </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:20%;vertical-align:top;">
       <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">DATE OF RESPONSE</div>
       <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
     </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:35%;vertical-align:top;">
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
       <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
       &#9633; No Cost Impact<br/>&#9633; Cost Increase TBD<br/>&#9633; Cost Increase Known: $__________<br/>&#9633; Cost Decrease
+    </td>
+    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
+      &#9633; No Schedule Impact<br/>&#9633; Increase in Calendar Days: _______<br/>&#9633; Decrease in Calendar Days: _______
     </td>
   </tr>
   <tr>
     <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
-      &#9633; No Schedule Impact &nbsp; &#9633; Increase in Calendar Days: _______ &nbsp; &#9633; Decrease in Calendar Days: _______
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ATTACHMENTS</div>
+      &#9633; See marked up drawings &nbsp; &#9633; See attached specifications &nbsp; &#9633; See attached schedules &nbsp; &#9633; None
     </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">SIGNATURE</div>
-      <div style="border-bottom:1pt solid #CBD5E1;min-height:24pt;"></div>
+    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
+      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SIGNATURE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:4pt;font-size:8pt;">
+        <div>Name: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
+        <div>Title: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;font-size:8pt;">
+        <div>Company: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
+        <div>Date: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
+      </div>
     </td>
   </tr>
 </table>
@@ -1443,25 +1495,40 @@ ${hasResp ? `
   const isOverdue = rfi.status !== "closed" && due ? new Date(due) < new Date() : false;
   const days = differenceInDays(new Date(), new Date(rfi.createdAt));
 
-  const handleSaveResponse = () => {
-    if (closingStatus === "responded" && !answer.trim()) {
-      toast({ title: w("Official response text is required before setting status to Responded.", "Se requiere texto de respuesta oficial.", lang), variant: "destructive" });
+  const handleSaveResponse = async () => {
+    if (!answer.trim()) {
+      toast({ title: w("Official response text is required.", "Se requiere texto de respuesta oficial.", lang), variant: "destructive" });
       return;
     }
-    updateRfi({
-      projectId,
-      rfiId: rfi.id,
-      data: {
-        answer: answer || undefined,
-        answeredBy: answeredBy || undefined,
-        status: closingStatus,
-        costImpact: costImpact || undefined,
-        costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
-        scheduleImpact: schedImpact || undefined,
-        scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
-        responseAttachmentsJson: responseDocs.length > 0 ? responseDocs : undefined,
-      },
-    });
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/responses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          responseText: answer,
+          answeredBy: answeredBy || undefined,
+          costImpact: costImpact || undefined,
+          costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
+          scheduleImpact: schedImpact || undefined,
+          scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
+          closingStatus,
+          responseAttachmentsJson: responseDocs.length > 0 ? responseDocs : [],
+        }),
+      });
+      if (!r.ok) { const d = await r.json() as { error?: string }; throw new Error(d.error || "Failed"); }
+      const newResp = await r.json() as typeof rfiResponses[0];
+      setRfiResponses(prev => [...prev, newResp]);
+      if (newResp.isConflictOfInterest) {
+        toast({ title: w("Conflict of interest flagged in audit trail.", "Conflicto de interés marcado en la auditoría.", lang), variant: "destructive" });
+      } else {
+        toast({ title: w("Response saved.", "Respuesta guardada.", lang) });
+      }
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+      onUpdate({ ...rfi, answer, answeredBy, status: closingStatus });
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : w("Save failed", "Error al guardar", lang), variant: "destructive" });
+    }
   };
 
   const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => (
@@ -1669,18 +1736,49 @@ ${hasResp ? `
             </div>
           </div>
 
-          {/* Fix 5 — Response section with response documents */}
+          {/* Response section */}
           <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
               {rfi.answer || rfi.response ? <CheckCircle2 style={{ width: 15, height: 15, color: "#16A34A" }} /> : <MessageSquare style={{ width: 15, height: 15 }} />}
               {w("Response", "Respuesta", lang)}
+              {rfiResponses.length > 0 && <span style={{ marginLeft: "auto", fontSize: 11, background: "#DBEAFE", color: "#1D4ED8", padding: "1px 7px", borderRadius: 10, fontWeight: 600 }}>{rfiResponses.length} {w("response(s)", "respuesta(s)", lang)}</span>}
             </div>
 
-            {(rfi.answer || rfi.response) && (
+            {/* Responses history list */}
+            {!responsesLoading && rfiResponses.length > 0 && (
+              <div style={{ marginBottom: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                {rfiResponses.map((resp, i) => (
+                  <div key={resp.id} style={{ background: resp.isConflictOfInterest ? "#FEF3C7" : "#F8FAFC", border: `1px solid ${resp.isConflictOfInterest ? "#F59E0B" : "#E2E8F0"}`, borderRadius: 7, padding: "10px 12px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#1E3A5F" }}>
+                        {w("Response", "Respuesta", lang)} {i + 1}
+                        {resp.answeredBy && ` — ${resp.answeredBy}`}
+                        {resp.answeredByCompany && ` (${resp.answeredByCompany})`}
+                      </span>
+                      <span style={{ fontSize: 10, color: "#64748B" }}>{fmt(resp.createdAt)}</span>
+                    </div>
+                    {resp.isConflictOfInterest && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 8px", background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 5, marginBottom: 6, fontSize: 11, color: "#92400E", fontWeight: 600 }}>
+                        ⚠ {w("Conflict of interest — logged in audit trail", "Conflicto de interés — registrado en auditoría", lang)}
+                      </div>
+                    )}
+                    <p style={{ fontSize: 12, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "#1E293B" }}>{resp.responseText}</p>
+                    {(resp.costImpact || resp.scheduleImpact) && (
+                      <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11, color: "#64748B" }}>
+                        {resp.costImpact && <span>💰 {resp.costImpact}</span>}
+                        {resp.scheduleImpact && <span>📅 {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}</span>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Legacy response (before new table) — only show if no new responses but old data exists */}
+            {rfiResponses.length === 0 && (rfi.answer || rfi.response) && (
               <div style={{ marginBottom: 10 }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.answer || rfi.response}</p>
                 {rfi.answeredBy && <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Answered by:", "Respondido por:", lang)} <strong>{rfi.answeredBy}</strong> {rfi.dateAnswered ? `· ${fmt(rfi.dateAnswered)}` : ""}</p>}
-                {/* Show response documents in view */}
                 {(rfi.responseAttachmentsJson as string[] | null)?.length ? (
                   <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #BBF7D0" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 4 }}>{w("Response Documents", "Documentos de Respuesta", lang)}</div>
@@ -1695,7 +1793,20 @@ ${hasResp ? `
             )}
 
             {canWrite && rfi.status !== "closed" && (
-              <div style={{ borderTop: rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfi.answer || rfi.response ? 12 : 0 }}>
+              <div style={{ borderTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? 12 : 0 }}>
+                {isCoi && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FFFBEB", border: "1.5px solid #F59E0B", borderRadius: 7, marginBottom: 12 }}>
+                    <span style={{ fontSize: 16 }}>⚠</span>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E" }}>
+                        {w("Warning: You are responding to your own RFI.", "Advertencia: Está respondiendo a su propio RFI.", lang)}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#92400E", marginTop: 2 }}>
+                        {w("This has been flagged in the audit trail as a potential conflict of interest.", "Esto se marcará en la auditoría como un posible conflicto de interés.", lang)}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <label style={{ fontSize: 12, fontWeight: 700 }}>
                     {w("Official Response", "Respuesta Oficial", lang)}

@@ -981,4 +981,91 @@ router.delete("/projects/:projectId/submittal-register/:itemId", authMiddleware,
   }
 });
 
+// ─── POST /projects/:projectId/submittals/:submittalId/ai-draft-rejection ─────
+router.post("/projects/:projectId/submittals/:submittalId/ai-draft-rejection", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const body = req.body as { existingReason?: string; reviewDecision?: string; complianceNotes?: string; title?: string; specSection?: string };
+    if (!body.existingReason?.trim()) {
+      res.status(400).json({ error: "Enter a rejection reason first, then click AI Draft Rejection to rewrite it professionally." });
+      return;
+    }
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+    const prompt = `You are a senior construction project manager or architect. The following is a draft rejection reason for a submittal. Rewrite it as a formal, professional rejection notice specifying exactly what needs to be corrected and why. Be precise, technical, and reference the relevant spec section or standard if mentioned. Output only the rewritten rejection reason with no preamble.
+
+Submittal title: ${body.title || "Not specified"}
+Spec section: ${body.specSection || "Not specified"}
+Review decision: ${body.reviewDecision || "Not specified"}
+Compliance notes: ${body.complianceNotes || "None"}
+
+Original rejection reason:
+${body.existingReason}`;
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 4096,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const suggestion = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    res.json({ suggestion });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── POST /projects/:projectId/submittals/inline-ai-check ──────────────────────
+router.post("/projects/:projectId/submittals/inline-ai-check", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const body = req.body as {
+      title?: string; specSection?: string; submittalCategory?: string; submittedByCompany?: string;
+      submittedToCompany?: string; description?: string; manufacturer?: string; modelNumber?: string;
+    };
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+
+    const [project] = await db.select({ name: projectsTable.name }).from(projectsTable)
+      .where(eq(projectsTable.id, parseInt(projectId as string))).limit(1);
+
+    const prompt = `You are a BIM/AEC submittal compliance expert. Analyze this unsaved submittal for compliance risks and completeness BEFORE it is submitted. Return valid JSON only.
+
+Project: ${project?.name || "Unknown"}
+Title: ${body.title || "Not provided"}
+Spec Section: ${body.specSection || "Not provided"}
+Category: ${body.submittalCategory || "Not provided"}
+Submitted By: ${body.submittedByCompany || "Not provided"}
+Submitted To: ${body.submittedToCompany || "Not provided"}
+Manufacturer: ${body.manufacturer || "Not provided"}
+Model Number: ${body.modelNumber || "Not provided"}
+Description: ${body.description || "Not provided"}
+
+Analyze the above submittal information and return this exact JSON structure:
+{
+  "overall": "pass" | "warning" | "fail",
+  "summary": "One sentence summary of the compliance check result",
+  "checks": [
+    { "category": "Category name", "status": "pass" | "warning" | "fail", "message": "Specific finding" }
+  ]
+}
+
+Check for: missing required fields, spec section format (XX XX XX), naming convention adherence, completeness of product info, and any obvious compliance risks.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 4096,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const text = message.content[0].type === "text" ? message.content[0].text.trim() : "{}";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const result = jsonMatch ? JSON.parse(jsonMatch[0]) : { overall: "warning", summary: "Could not analyze submittal.", checks: [] };
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
 export default router;

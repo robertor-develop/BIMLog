@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable } from "@workspace/db/schema";
 import { eq, and, count } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -1325,6 +1325,121 @@ Write only the formal RFI question text, nothing else.`;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to generate question";
     res.status(500).json({ error: message });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId/responses ──────────────────────────
+router.get("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string);
+    const rfiId = parseInt(req.params["rfiId"] as string);
+    const responses = await db.select().from(rfiResponsesTable)
+      .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
+      .orderBy(rfiResponsesTable.createdAt);
+    res.json(responses.map(r => ({ ...r, createdAt: r.createdAt.toISOString() })));
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── POST /projects/:projectId/rfis/:rfiId/responses ─────────────────────────
+router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string);
+    const rfiId = parseInt(req.params["rfiId"] as string);
+    const userId = req.user!.userId;
+    const body = req.body as {
+      responseText: string;
+      answeredBy?: string;
+      answeredByEmail?: string;
+      answeredByCompany?: string;
+      costImpact?: string;
+      costImpactAmount?: string;
+      scheduleImpact?: string;
+      scheduleImpactDays?: number;
+      closingStatus?: string;
+      responseAttachmentsJson?: string[];
+    };
+
+    if (!body.responseText?.trim()) {
+      res.status(400).json({ error: "Response text is required." });
+      return;
+    }
+
+    const [rfi] = await db.select().from(rfisTable)
+      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+
+    const [responder] = await db.select({ email: usersTable.email, fullName: usersTable.fullName })
+      .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+
+    const responderEmail = responder?.email || (req.user as any).email || "";
+    const responderCompany = (req.user as any).companyName || "";
+
+    const isCoi = !!(
+      (responderEmail && rfi.submittedByEmail && responderEmail.toLowerCase() === rfi.submittedByEmail.toLowerCase()) ||
+      (responderCompany && rfi.submittedByCompany && responderCompany.toLowerCase() === rfi.submittedByCompany.toLowerCase())
+    );
+
+    const [newResponse] = await db.insert(rfiResponsesTable).values({
+      rfiId,
+      projectId,
+      responseText: body.responseText.trim(),
+      answeredBy: body.answeredBy || undefined,
+      answeredByEmail: body.answeredByEmail || responderEmail || undefined,
+      answeredByCompany: body.answeredByCompany || responderCompany || undefined,
+      costImpact: body.costImpact || undefined,
+      costImpactAmount: body.costImpactAmount || undefined,
+      scheduleImpact: body.scheduleImpact || undefined,
+      scheduleImpactDays: body.scheduleImpactDays || undefined,
+      isConflictOfInterest: isCoi,
+    }).returning();
+
+    // Update legacy rfi.answer for backward compat with PDF/Word export
+    await db.update(rfisTable).set({
+      answer: body.responseText.trim(),
+      answeredBy: body.answeredBy || undefined,
+      dateAnswered: new Date(),
+      costImpact: body.costImpact || undefined,
+      costImpactAmount: body.costImpactAmount || undefined,
+      scheduleImpact: body.scheduleImpact || undefined,
+      scheduleImpactDays: body.scheduleImpactDays || undefined,
+      responseAttachmentsJson: body.responseAttachmentsJson || [],
+      ...(body.closingStatus ? { status: body.closingStatus } : {}),
+      updatedAt: new Date(),
+    }).where(eq(rfisTable.id, rfiId));
+
+    // Log COI in activity trail if applicable
+    if (isCoi) {
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "warning",
+        entityType: "rfi",
+        entityId: rfiId,
+        fileNameAfter: rfi.number,
+        details: `CONFLICT OF INTEREST: ${body.answeredBy || responderEmail || "Unknown"} responded to their own RFI (${rfi.number}) — ${rfi.subject}`,
+      });
+    }
+
+    // Log normal activity
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "update",
+      entityType: "rfi",
+      entityId: rfiId,
+      fileNameAfter: rfi.number,
+      details: `RFI ${rfi.number} received official response from ${body.answeredBy || responderEmail || "Unknown"}`,
+    });
+
+    res.json({ ...newResponse, createdAt: newResponse.createdAt.toISOString(), isConflictOfInterest: isCoi });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
 
