@@ -1,0 +1,20 @@
+Do not build anything new. Run all 18 checks and report the exact output of each one.
+Check 1 — Related RFI is a dropdown not free text: grep -n "rfiOptions|listRfis|linked_rfi|rfi.*select|select.*rfi|fetchRfis" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -10
+Check 2 — Customize Name navigates to Name Generator tab: grep -n "Customize|customize|name-generator|navigate|router" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -10
+Check 3 — Integration modal has 4th OAuth option: grep -n "OAuth|oauth|token-based|secure.*token" artifacts/bimlog/src/pages/project/IntegrationsTab.tsx | head -10
+Check 4 — Integration cards have value descriptions: grep -n "Sync RFIs|validation gateway|audit trail|bidirectional|data source" artifacts/bimlog/src/pages/project/IntegrationsTab.tsx | head -10
+Check 5 — Add Integration modal shows only unlisted platforms: grep -n "BIM 360|Aconex|Primavera|Bluebeam|Fieldwire|PlanGrid|Smartsheet|Trimble" artifacts/bimlog/src/pages/project/IntegrationsTab.tsx | head -10
+Check 6 — API docs button opens modal not dead: grep -n "apiDocs|api-docs|API docs|showDocs|docsModal|ApiDocsModal" artifacts/bimlog/src/pages/project/IntegrationsTab.tsx | head -10
+Check 7 — Convention Builder has live preview: grep -n "livePreview|live.*preview|Live Name Preview|sampleName|preview.*name" artifacts/bimlog/src/pages/project/ConventionBuilderTab.tsx | head -10
+Check 8 — Name Generator has recent names list: grep -n "recentNames|recent.*names|Recent Names|sessionNames|lastGenerated" artifacts/bimlog/src/pages/project/NameGeneratorTab.tsx | head -10
+Check 9 — Team Add Member supports email invite: grep -n "invite|Invite|invitation|pendingInvite|inviteEmail|Invite by Email" artifacts/bimlog/src/pages/project/TeamTab.tsx | head -10
+Check 10 — project_invitations table exists in database: SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'project_invitations');
+Check 11 — Activity log FILE BEFORE and FILE AFTER columns populated: grep -n "file_name_before|file_name_after|fileNameBefore|fileNameAfter" artifacts/api-server/src/routes/activity.ts | head -10
+Check 12 — Activity log date range filter in frontend: grep -n "dateFrom|dateTo|date.*range|fromDate|toDate|dateFilter" artifacts/bimlog/src/pages/project/ActivityLogTab.tsx | head -10
+Check 13 — AI assist rewrite confirmed still working: grep -n "rewrite|userDescription|plain.*formal|formal.*AEC" artifacts/api-server/src/routes/submittals.ts | head -5
+Check 14 — Procurement warning includes installed confirmed: grep -n "installed|procureWarning|on_order|delivered" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -5
+Check 15 — Export all landscape PDF confirmed: grep -n "landscape|export-all|LOG_W|log.*pdf" artifacts/api-server/src/routes/submittals.ts | head -5
+Check 16 — SHA-256 hashing on upload confirmed: grep -n "createHash|sha256|file_hash|fileHash" artifacts/api-server/src/routes/files.ts | head -5
+Check 17 — Declaration panel confirmed in FilesTab: grep -n "documentRelationship|document_relationship|Created|Modified|Reference|Supporting" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -5
+Check 18 — Audit certificate endpoints confirmed for both RFIs and Submittals: grep -rn "audit-certificate" artifacts/api-server/src/routes/ | head -10
+Show me the exact output of all 18 checks. Nothing else.
