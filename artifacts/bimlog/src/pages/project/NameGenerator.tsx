@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,136 @@ import { useI18n } from "@/lib/i18n";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
+
+// ─── searchable combobox ──────────────────────────────────────────────────────
+function SearchableSelect({
+  value, onChange, options, color, placeholder, lang,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  color: { bg: string; color: string; border: string };
+  placeholder?: string;
+  lang: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = query.trim()
+    ? options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  // close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  // focus the search input when opening
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 50);
+  }, [open]);
+
+  const select = (v: string) => {
+    onChange(v);
+    setOpen(false);
+    setQuery("");
+  };
+
+  return (
+    <div ref={containerRef} style={{ position: "relative" }}>
+      {/* trigger button */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", height: 36, display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 10px", borderRadius: 6, cursor: "pointer",
+          border: `1px solid ${open ? color.color : color.border}`,
+          background: color.bg, color: color.color,
+          fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13,
+          boxShadow: open ? `0 0 0 2px ${color.border}` : "none",
+          transition: "box-shadow 0.15s",
+        }}
+      >
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {value || placeholder || w("Select…", "Seleccionar…", lang)}
+        </span>
+        <ChevronDown style={{ width: 13, height: 13, flexShrink: 0, marginLeft: 6, opacity: 0.7, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+      </button>
+
+      {/* dropdown */}
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 1000,
+          background: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
+          borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden",
+          minWidth: 180,
+        }}>
+          {/* search box */}
+          <div style={{ padding: "8px 8px 4px" }}>
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && filtered.length > 0) select(filtered[0]);
+                if (e.key === "Escape") { setOpen(false); setQuery(""); }
+              }}
+              placeholder={w("Type to search…", "Escribe para buscar…", lang)}
+              style={{
+                width: "100%", height: 30, fontSize: 12, padding: "0 8px",
+                border: "1px solid hsl(var(--border))", borderRadius: 5,
+                background: "hsl(var(--secondary))", color: "hsl(var(--foreground))",
+                outline: "none", boxSizing: "border-box",
+              }}
+            />
+          </div>
+          {/* option list */}
+          <div style={{ maxHeight: 240, overflowY: "auto", padding: "4px 4px 8px" }}>
+            {filtered.length === 0 ? (
+              <div style={{ padding: "10px 12px", fontSize: 12, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>
+                {w("No match", "Sin coincidencias", lang)}
+              </div>
+            ) : filtered.map(opt => (
+              <button
+                key={opt}
+                onClick={() => select(opt)}
+                style={{
+                  display: "block", width: "100%", textAlign: "left",
+                  padding: "7px 12px", borderRadius: 5, cursor: "pointer",
+                  fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: opt === value ? 700 : 500,
+                  background: opt === value ? color.bg : "transparent",
+                  color: opt === value ? color.color : "hsl(var(--foreground))",
+                  border: "none",
+                }}
+                onMouseEnter={e => { if (opt !== value) (e.currentTarget as HTMLButtonElement).style.background = "hsl(var(--secondary))"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = opt === value ? color.bg : "transparent"; }}
+              >
+                {opt}
+                {opt === value && <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.6 }}>✓</span>}
+              </button>
+            ))}
+          </div>
+          {/* count hint */}
+          {options.length > 10 && (
+            <div style={{ padding: "4px 12px 8px", fontSize: 10, color: "hsl(var(--muted-foreground))", borderTop: "1px solid hsl(var(--border))" }}>
+              {filtered.length} / {options.length} {w("options", "opciones", lang)}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface SavedName { name: string; savedAt: string; }
 
@@ -173,22 +303,13 @@ export function NameGenerator({ projectId, onGoToConvention }: { projectId: numb
                 {field.label}
               </label>
               {vals.length > 0 ? (
-                <select
+                <SearchableSelect
                   value={current}
-                  onChange={e => setSelections(prev => ({ ...prev, [field.label]: e.target.value }))}
-                  style={{
-                    width: "100%", height: 36, fontSize: 12,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 6, padding: "0 8px",
-                    background: c.bg, color: c.color,
-                    fontFamily: "var(--font-mono)", fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {vals.map(v => (
-                    <option key={v} value={v}>{v}</option>
-                  ))}
-                </select>
+                  onChange={v => setSelections(prev => ({ ...prev, [field.label]: v }))}
+                  options={vals}
+                  color={c}
+                  lang={lang}
+                />
               ) : (
                 <Input
                   value={current}
