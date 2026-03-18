@@ -1,0 +1,11 @@
+I need you to do two things. First verify what was actually built. Second fix the file upload naming suggestion feature.
+Verification — check these things and report back exactly what exists:
+Check 1 — Does the files table have a column called extracted_text? Run: SELECT column_name FROM information_schema.columns WHERE table_name = 'files' AND column_name = 'extracted_text';
+Check 2 — Does the files table have a column called file_metadata? Run: SELECT column_name FROM information_schema.columns WHERE table_name = 'files' AND column_name = 'file_metadata';
+Check 3 — Is pdf-parse installed? Run: cat artifacts/api-server/package.json | grep pdf-parse
+Check 4 — Does the endpoint GET /api/v1/projects/:projectId/documents/search exist? Search the API routes for this endpoint.
+Check 5 — In the file upload route — is there any code that calls pdf-parse after a successful upload? Show me the relevant section of the upload route.
+Show me the results of all 5 checks first. Then fix whatever is missing based on the results.
+Also fix this separately — the file upload naming suggestion feature is not working. When a file fails validation the system must show suggested compliant names. Here is exactly what needs to happen:
+After a file fails validation — below the error breakdown — show a section called Suggested compliant names. Take every field from the active convention. For each field show the first allowed value. Assemble a complete compliant file name using all first allowed values joined by the convention separator. Show this as a clickable chip. When clicked — copy the name to clipboard and show a green copied confirmation. Also show a button called Customize name that opens the Name Generator pre-filled with whatever values could be matched from the original file name. Also show an AI Suggest button that calls the Claude API with the original file name and the convention fields and asks Claude to suggest the most appropriate compliant name based on what it can infer. Show the AI suggestion as a separate chip with a purple AI badge.
+Then rebuild and redeploy. Do not change anything else.

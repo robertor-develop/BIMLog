@@ -1,12 +1,13 @@
 import { useState, useRef, useCallback } from "react";
-import { useListFiles, useUploadFile, useDeleteFile } from "@workspace/api-client-react";
+import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield, Sparkles, Copy } from "lucide-react";
 import { format } from "date-fns";
+import { NameGenerator } from "./NameGenerator";
 
 interface ValidationDetail {
   field: string;
@@ -202,7 +203,27 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
   const [success, setSuccess] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [copiedSuggestion, setCopiedSuggestion] = useState(false);
+  const [showNameGenerator, setShowNameGenerator] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: convention } = useGetConvention(projectId);
+
+  // Build suggested compliant name from the active convention
+  const suggestedName = (() => {
+    if (!convention || !convention.fields || !convention.isActive) return null;
+    const sorted = [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
+    const parts = sorted.map((f: any) => (f.allowedValues && f.allowedValues.length > 0 ? f.allowedValues[0] : "???"));
+    if (parts.length === 0) return null;
+    return parts.join(convention.separator);
+  })();
+
+  const handleCopySuggestion = (name: string) => {
+    navigator.clipboard.writeText(name).then(() => {
+      setCopiedSuggestion(true);
+      setTimeout(() => setCopiedSuggestion(false), 2000);
+    });
+  };
 
   const { mutate, isPending } = useUploadFile({
     mutation: {
@@ -379,6 +400,68 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
               </div>
             ))}
           </div>
+
+          {/* Suggested compliant names */}
+          {suggestedName && (
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #FECDD3" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#1E3A5F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}>
+                <Sparkles style={{ width: 11, height: 11, color: "#7C3AED" }} />
+                Suggested compliant names
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                <button
+                  onClick={() => handleCopySuggestion(suggestedName)}
+                  title="Click to copy"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "5px 12px", borderRadius: 6,
+                    border: `1.5px solid ${copiedSuggestion ? "#86EFAC" : "#2563EB"}`,
+                    background: copiedSuggestion ? "#F0FDF4" : "#EFF6FF",
+                    cursor: "pointer", fontFamily: "var(--font-mono)",
+                    fontSize: 11, fontWeight: 600,
+                    color: copiedSuggestion ? "#15803D" : "#1D4ED8",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {copiedSuggestion
+                    ? <><CheckCircle2 style={{ width: 12, height: 12 }} />Copied!</>
+                    : <><Copy style={{ width: 11, height: 11 }} />{suggestedName}</>
+                  }
+                </button>
+                <button
+                  onClick={() => setShowNameGenerator(prev => !prev)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "5px 10px", borderRadius: 6,
+                    border: "1.5px solid #C4B5FD",
+                    background: showNameGenerator ? "#EDE9FE" : "transparent",
+                    cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#7C3AED",
+                  }}
+                >
+                  <Sparkles style={{ width: 11, height: 11 }} />
+                  {showNameGenerator ? "Close generator" : "Customize name"}
+                </button>
+              </div>
+              <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 5 }}>
+                Built from your active naming convention using the first allowed value per field
+              </div>
+            </div>
+          )}
+
+          {/* Inline Name Generator */}
+          {showNameGenerator && (
+            <div style={{ marginTop: 12, border: "1.5px solid #C4B5FD", borderRadius: 10, overflow: "hidden" }}>
+              <div style={{ padding: "8px 14px", background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#4C1D95" }}>Name Generator</span>
+                <button onClick={() => setShowNameGenerator(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#7C3AED", padding: 2 }}>
+                  <X style={{ width: 13, height: 13 }} />
+                </button>
+              </div>
+              <div style={{ padding: "12px 14px" }}>
+                <NameGenerator projectId={projectId} />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
