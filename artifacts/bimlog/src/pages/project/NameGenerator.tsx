@@ -1,8 +1,13 @@
-import { useState } from "react";
-import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useGetConvention } from "@workspace/api-client-react";
+import { useI18n } from "@/lib/i18n";
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
 
 interface SavedName { name: string; savedAt: string; }
 
@@ -19,117 +24,108 @@ const CHIP_COLORS = [
   { bg: "#F3F4F6", color: "#374151", border: "#D1D5DB" },
 ];
 
-const VOLUME_OPTIONS = [
-  { code: "ZZ", label: "ZZ – Whole project" },
-  { code: "XX", label: "XX – Multiple volumes" },
-  { code: "A0", label: "A0 – Block A" },
-  { code: "B0", label: "B0 – Block B" },
-  { code: "C0", label: "C0 – Block C" },
-];
-
-const LEVEL_OPTIONS = [
-  { code: "ZZ", label: "ZZ – All levels" },
-  { code: "XX", label: "XX – Multiple levels" },
-  { code: "B2", label: "B2 – Basement 2" },
-  { code: "B1", label: "B1 – Basement 1" },
-  { code: "00", label: "00 – Ground floor" },
-  { code: "01", label: "01 – Level 1" },
-  { code: "02", label: "02 – Level 2" },
-  { code: "03", label: "03 – Level 3" },
-  { code: "04", label: "04 – Level 4" },
-  { code: "RF", label: "RF – Roof" },
-];
-
-const TYPE_OPTIONS = [
-  { code: "M3", label: "M3 – 3D model (Revit / NWD)" },
-  { code: "M2", label: "M2 – 2D model (DWG)" },
-  { code: "DR", label: "DR – Drawing" },
-  { code: "SP", label: "SP – Specification" },
-  { code: "CA", label: "CA – Calculation" },
-  { code: "RP", label: "RP – Report" },
-  { code: "CO", label: "CO – Correspondence" },
-  { code: "FO", label: "FO – Form" },
-  { code: "SH", label: "SH – Schedule" },
-];
-
-const ROLE_OPTIONS = [
-  { code: "A", label: "A – Architect" },
-  { code: "C", label: "C – Civil engineer" },
-  { code: "S", label: "S – Structural engineer" },
-  { code: "M", label: "M – Mechanical engineer" },
-  { code: "E", label: "E – Electrical engineer" },
-  { code: "P", label: "P – Plumbing engineer" },
-  { code: "L", label: "L – Landscape architect" },
-  { code: "Q", label: "Q – Quantity surveyor" },
-  { code: "X", label: "X – All disciplines" },
-];
-
-const STATUS_OPTIONS = [
-  { code: "S0", label: "S0 – Work in progress" },
-  { code: "S1", label: "S1 – Suitable for coordination" },
-  { code: "S2", label: "S2 – Suitable for information" },
-  { code: "S3", label: "S3 – Suitable for review" },
-  { code: "S4", label: "S4 – Suitable for construction" },
-  { code: "A0", label: "A0 – Approved for construction" },
-  { code: "A1", label: "A1 – Approved for manufacture" },
-  { code: "B0", label: "B0 – Partially approved" },
-];
-
-const FORMAT_OPTIONS = [
-  { code: ".rvt", label: ".rvt – Revit" },
-  { code: ".nwd", label: ".nwd – Navisworks" },
-  { code: ".dwg", label: ".dwg – AutoCAD" },
-  { code: ".ifc", label: ".ifc – IFC (openBIM)" },
-  { code: ".pdf", label: ".pdf – PDF" },
-  { code: ".xlsx", label: ".xlsx – Excel" },
-  { code: ".pptx", label: ".pptx – PowerPoint" },
-];
-
-const STRUCTURE_LABELS = ["Project", "Originator", "Volume", "Level", "Type", "Disc", "Seq", "Status", "Rev", "ext"];
-
-export function NameGenerator({ projectId: _projectId }: { projectId: number }) {
+// ─── component ───────────────────────────────────────────────────────────────
+export function NameGenerator({ projectId, onGoToConvention }: { projectId: number; onGoToConvention?: () => void }) {
   const { toast } = useToast();
-  const [projCode, setProjCode] = useState("PROJ");
-  const [originator, setOriginator] = useState("XXX");
-  const [volume, setVolume] = useState("ZZ");
-  const [level, setLevel] = useState("ZZ");
-  const [type, setType] = useState("M3");
-  const [role, setRole] = useState("A");
-  const [status, setStatus] = useState("S0");
-  const [revision, setRevision] = useState("P01");
-  const [format, setFormat] = useState(".rvt");
-  const [sequence, setSequence] = useState("001");
+  const { lang } = useI18n();
+
+  const { data: convention, isLoading, isError } = useGetConvention(projectId);
+
+  // Build fields from convention — one selected value per field
+  const [selections, setSelections] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [savedNames, setSavedNames] = useState<SavedName[]>([]);
 
-  const paddedSeq = sequence.replace(/\D/g, "").padStart(4, "0") || "0001";
-  const tokens = [projCode || "PROJ", originator || "XXX", volume, level, type, role, paddedSeq, status, revision];
-  const chipTokens = [...tokens, format];
-  const generatedName = tokens.join("-") + format;
+  // When convention loads, initialise selections with the first allowed value of each field
+  useEffect(() => {
+    if (!convention || !convention.fields) return;
+    const initial: Record<string, string> = {};
+    [...convention.fields]
+      .sort((a: any, b: any) => a.fieldOrder - b.fieldOrder)
+      .forEach((field: any) => {
+        if (field.allowedValues && field.allowedValues.length > 0) {
+          initial[field.label] = field.allowedValues[0];
+        } else {
+          initial[field.label] = "";
+        }
+      });
+    setSelections(initial);
+  }, [convention]);
+
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div style={{ textAlign: "center", padding: "48px 24px" }}>
+        <AlertCircle style={{ width: 32, height: 32, color: "#DC2626", margin: "0 auto 12px" }} />
+        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>{w("Failed to load convention","Error al cargar la convención",lang)}</div>
+      </div>
+    );
+  }
+
+  const hasConvention = convention && convention.fields && convention.fields.length > 0 && convention.isActive;
+
+  if (!hasConvention) {
+    return (
+      <div style={{ textAlign: "center", padding: "60px 24px", maxWidth: 500, margin: "0 auto" }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: "#F0F7FF", border: "1px solid #BFDBFE", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <Settings style={{ width: 24, height: 24, color: "#2563EB" }} />
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: "hsl(var(--foreground))" }}>
+          {w("No active convention set up for this project", "No hay convención activa para este proyecto", lang)}
+        </div>
+        <div style={{ fontSize: 14, color: "hsl(var(--muted-foreground))", marginBottom: 24, lineHeight: 1.6 }}>
+          {w("A naming convention defines the structure and allowed values for every file name on this project. Once set up, the Name Generator will let your team build perfectly structured file names.", "Una convención de nombres define la estructura y los valores permitidos. Una vez configurada, el Generador de Nombres permitirá crear nombres de archivo perfectamente estructurados.", lang)}
+        </div>
+        {onGoToConvention && (
+          <Button onClick={onGoToConvention} style={{ gap: 6, fontSize: 13 }}>
+            <Settings style={{ width: 14, height: 14 }} />
+            {w("Go to Convention Builder", "Ir al Constructor de Convenciones", lang)}
+          </Button>
+        )}
+        <div style={{ marginTop: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+          {w("Only the project admin (GC) can create the naming convention.", "Solo el administrador del proyecto puede crear la convención de nombres.", lang)}
+        </div>
+      </div>
+    );
+  }
+
+  const sep: string = (convention as any).separator || "-";
+
+  const fields = [...convention.fields]
+    .sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
+
+  const tokens = fields.map((field: any) => selections[field.label] || "");
+  const generatedName = tokens.join(sep);
 
   const handleCopy = () => {
+    if (!generatedName) return;
     navigator.clipboard.writeText(generatedName);
     setCopied(true);
-    toast({ title: "File name copied to clipboard" });
+    toast({ title: w("File name copied to clipboard", "Nombre de archivo copiado", lang) });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSave = () => {
+    if (!generatedName) return;
     setSavedNames(prev => [{ name: generatedName, savedAt: new Date().toISOString() }, ...prev]);
-    toast({ title: "Saved to list" });
+    toast({ title: w("Saved to list", "Guardado en la lista", lang) });
   };
 
   const handleReset = () => {
-    setProjCode("PROJ");
-    setOriginator("XXX");
-    setVolume("ZZ");
-    setLevel("ZZ");
-    setType("M3");
-    setRole("A");
-    setStatus("S0");
-    setRevision("P01");
-    setFormat(".rvt");
-    setSequence("001");
+    const initial: Record<string, string> = {};
+    fields.forEach((field: any) => {
+      initial[field.label] = field.allowedValues?.[0] || "";
+    });
+    setSelections(initial);
   };
 
   const exportList = () => {
@@ -149,34 +145,61 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 3 }}>
-          BIM file name generator
+          {w("File Name Generator", "Generador de Nombres de Archivo", lang)}
         </div>
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-          Builds structured file names following ISO 19650 / BS 1192 conventions
+          {w("Select values for each field to build a perfectly structured file name. All options come from the active naming convention.", "Selecciona valores para cada campo y construye un nombre de archivo estructurado. Todas las opciones provienen de la convención activa.", lang)}
         </div>
       </div>
 
-      {/* Input grid — 3 columns */}
+      {/* Field selectors — convention-driven */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
+        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
         gap: "12px 16px",
-        marginBottom: 14,
+        marginBottom: 20,
       }}>
-        <FieldText label="PROJECT CODE" value={projCode} onChange={v => setProjCode(v.toUpperCase())} placeholder="e.g. PROJ01" />
-        <FieldText label="ORIGINATOR" value={originator} onChange={v => setOriginator(v.toUpperCase())} placeholder="e.g. ACM" />
-        <FieldSelect label="VOLUME / SYSTEM" value={volume} onChange={setVolume} options={VOLUME_OPTIONS} />
-        <FieldSelect label="LEVEL / LOCATION" value={level} onChange={setLevel} options={LEVEL_OPTIONS} />
-        <FieldSelect label="TYPE / DOCUMENT CLASS" value={type} onChange={setType} options={TYPE_OPTIONS} />
-        <FieldSelect label="ROLE / DISCIPLINE" value={role} onChange={setRole} options={ROLE_OPTIONS} />
-        <FieldSelect label="STATUS / SUITABILITY" value={status} onChange={setStatus} options={STATUS_OPTIONS} />
-        <FieldText label="REVISION" value={revision} onChange={v => setRevision(v.toUpperCase())} placeholder="P01" mono />
-        <FieldSelect label="SOFTWARE / FORMAT" value={format} onChange={setFormat} options={FORMAT_OPTIONS} />
-      </div>
-
-      {/* Sequence number — narrow */}
-      <div style={{ maxWidth: 180, marginBottom: 20 }}>
-        <FieldText label="SEQUENCE NO." value={sequence} onChange={setSequence} placeholder="001" mono />
+        {fields.map((field: any, idx: number) => {
+          const c = CHIP_COLORS[idx % CHIP_COLORS.length];
+          const vals: string[] = field.allowedValues || [];
+          const current = selections[field.label] || "";
+          return (
+            <div key={field.label}>
+              <label style={{
+                display: "block", fontSize: 10, fontWeight: 700,
+                color: "hsl(var(--muted-foreground))",
+                textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5,
+              }}>
+                {field.label}
+              </label>
+              {vals.length > 0 ? (
+                <select
+                  value={current}
+                  onChange={e => setSelections(prev => ({ ...prev, [field.label]: e.target.value }))}
+                  style={{
+                    width: "100%", height: 36, fontSize: 12,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 6, padding: "0 8px",
+                    background: c.bg, color: c.color,
+                    fontFamily: "var(--font-mono)", fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  {vals.map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  value={current}
+                  onChange={e => setSelections(prev => ({ ...prev, [field.label]: e.target.value }))}
+                  placeholder={w("Enter value…", "Ingresa un valor…", lang)}
+                  style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 600 }}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Generated file name box */}
@@ -191,44 +214,51 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
           fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))",
           textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10,
         }}>
-          Generated file name
+          {w("Generated File Name", "Nombre de Archivo Generado", lang)}
         </div>
 
         {/* Assembled name */}
         <div style={{
-          fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700,
+          fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700,
           color: "hsl(var(--foreground))", marginBottom: 12, wordBreak: "break-all",
-          letterSpacing: "0.01em",
+          letterSpacing: "0.01em", lineHeight: 1.4,
         }}>
-          {generatedName}
+          {generatedName || <span style={{ color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>{w("Select values above to generate a file name", "Selecciona valores arriba para generar un nombre", lang)}</span>}
         </div>
 
         {/* Token chips */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3 }}>
-          {chipTokens.map((tok, i) => {
-            const c = CHIP_COLORS[i % CHIP_COLORS.length];
-            return (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-                  background: c.bg, color: c.color, border: `1px solid ${c.border}`,
-                  padding: "2px 7px", borderRadius: 4,
-                }}>
-                  {tok}
+        {tokens.some(t => t) && (
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3 }}>
+            {tokens.map((tok, i) => {
+              const c = CHIP_COLORS[i % CHIP_COLORS.length];
+              const fieldLabel = fields[i]?.label || `Field ${i+1}`;
+              return (
+                <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <span
+                    title={fieldLabel}
+                    style={{
+                      fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
+                      background: c.bg, color: c.color, border: `1px solid ${c.border}`,
+                      padding: "2px 7px", borderRadius: 4, cursor: "default",
+                    }}
+                  >
+                    {tok}
+                  </span>
+                  {i < tokens.length - 1 && (
+                    <span style={{ color: "#CBD5E1", fontSize: 13, fontWeight: 400, fontFamily: "var(--font-mono)" }}>{sep}</span>
+                  )}
                 </span>
-                {i < chipTokens.length - 1 && (
-                  <span style={{ color: "#CBD5E1", fontSize: 13, fontWeight: 400 }}>·</span>
-                )}
-              </span>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
         <Button
           onClick={handleCopy}
+          disabled={!generatedName}
           style={{
             gap: 6, fontSize: 12,
             background: copied ? "#16A34A" : undefined,
@@ -236,16 +266,17 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
           }}
         >
           {copied
-            ? <><CheckCircle2 style={{ width: 13, height: 13 }} /> Copied</>
-            : <><Copy style={{ width: 13, height: 13 }} /> Copy file name</>}
+            ? <><CheckCircle2 style={{ width: 13, height: 13 }} /> {w("Copied!","¡Copiado!",lang)}</>
+            : <><Copy style={{ width: 13, height: 13 }} /> {w("Copy file name","Copiar nombre",lang)}</>
+          }
         </Button>
-        <Button variant="outline" onClick={handleSave} style={{ gap: 6, fontSize: 12 }}>
+        <Button variant="outline" onClick={handleSave} disabled={!generatedName} style={{ gap: 6, fontSize: 12 }}>
           <Plus style={{ width: 13, height: 13 }} />
-          Save to list
+          {w("Save to list","Guardar en lista",lang)}
         </Button>
         <Button variant="ghost" onClick={handleReset} style={{ gap: 6, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
           <RotateCcw style={{ width: 12, height: 12 }} />
-          Reset
+          {w("Reset","Restablecer",lang)}
         </Button>
       </div>
 
@@ -258,10 +289,10 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
         marginBottom: 24,
       }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>
-          Naming structure
+          {w("Convention structure (from your active convention)","Estructura de la convención (de tu convención activa)",lang)}
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3 }}>
-          {STRUCTURE_LABELS.map((label, i) => {
+          {fields.map((field: any, i: number) => {
             const c = CHIP_COLORS[i % CHIP_COLORS.length];
             return (
               <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
@@ -270,14 +301,17 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
                   background: c.bg, color: c.color, border: `1px solid ${c.border}`,
                   padding: "2px 7px", borderRadius: 4,
                 }}>
-                  {label}
+                  {field.label}
                 </span>
-                {i < STRUCTURE_LABELS.length - 1 && (
-                  <span style={{ color: "#CBD5E1", fontSize: 13 }}>·</span>
+                {i < fields.length - 1 && (
+                  <span style={{ color: "#CBD5E1", fontSize: 13, fontFamily: "var(--font-mono)" }}>{sep}</span>
                 )}
               </span>
             );
           })}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+          {w(`Separator: "${sep === "-" ? "hyphen (-)" : "underscore (_)"}" • ${fields.length} fields`, `Separador: "${sep === "-" ? "guión (-)" : "guión bajo (_)"}" • ${fields.length} campos`, lang)}
         </div>
       </div>
 
@@ -285,55 +319,31 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
       {savedNames.length > 0 && (
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}>
-              Saved names{" "}
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {w("Saved names","Nombres guardados",lang)}{" "}
               <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>
-                {savedNames.length} in list
+                {savedNames.length} {w("in list","en lista",lang)}
               </span>
             </div>
             <button
               onClick={exportList}
-              style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: "5px 10px", borderRadius: 6, cursor: "pointer",
-                fontSize: 11, fontWeight: 600,
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                color: "hsl(var(--muted-foreground))",
-              }}
+              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 600, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
             >
               <Download style={{ width: 12, height: 12 }} />
-              Export .txt
+              {w("Export .txt","Exportar .txt",lang)}
             </button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {savedNames.map((entry, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "9px 12px",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: 7,
-              }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 12,
-                  color: "hsl(var(--foreground))", flex: 1,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 7 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "hsl(var(--foreground))", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {entry.name}
                 </span>
-                <button
-                  onClick={() => { navigator.clipboard.writeText(entry.name); toast({ title: "Copied" }); }}
-                  style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}
-                >
+                <button onClick={() => { navigator.clipboard.writeText(entry.name); toast({ title: w("Copied","Copiado",lang) }); }} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                   <Copy style={{ width: 12, height: 12 }} />
                 </button>
-                <button
-                  onClick={() => setSavedNames(prev => prev.filter((_, j) => j !== i))}
-                  style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}
-                >
+                <button onClick={() => setSavedNames(prev => prev.filter((_, j) => j !== i))} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
                   <Trash2 style={{ width: 12, height: 12 }} />
                 </button>
               </div>
@@ -341,60 +351,6 @@ export function NameGenerator({ projectId: _projectId }: { projectId: number }) 
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function FieldText({ label, value, onChange, placeholder, mono }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  mono?: boolean;
-}) {
-  return (
-    <div>
-      <label style={{
-        display: "block", fontSize: 10, fontWeight: 700,
-        color: "hsl(var(--muted-foreground))",
-        textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5,
-      }}>
-        {label}
-      </label>
-      <Input
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        style={{ fontSize: 13, fontFamily: mono ? "var(--font-mono)" : undefined }}
-      />
-    </div>
-  );
-}
-
-function FieldSelect({ label, value, onChange, options }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { code: string; label: string }[];
-}) {
-  return (
-    <div>
-      <label style={{
-        display: "block", fontSize: 10, fontWeight: 700,
-        color: "hsl(var(--muted-foreground))",
-        textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5,
-      }}>
-        {label}
-      </label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        style={{ width: "100%", height: 36, fontSize: 12 }}
-      >
-        {options.map(o => (
-          <option key={o.code} value={o.code}>{o.label}</option>
-        ))}
-      </select>
     </div>
   );
 }

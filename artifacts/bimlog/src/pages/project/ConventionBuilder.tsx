@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ChevronRight, ChevronLeft, Check, Plus, Trash2,
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
-  FileText, Download, RotateCcw, AlertTriangle, CheckCircle2, X
+  Download, RotateCcw, AlertTriangle, CheckCircle2, X,
+  ArrowUp, ArrowDown, RefreshCw,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -17,29 +18,30 @@ function w(en: string, es: string, lang: string) { return lang === "es" ? es : e
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
 // ─── types ───────────────────────────────────────────────────────────────────
-interface Company  { id: string; name: string; code: string; editing?: boolean; }
-interface DisciplineEntry { id: string; code: string; name: string; desc: string; selected: boolean; custom?: boolean; }
-interface DocTypeEntry    { id: string; code: string; name: string; desc: string; category: string; selected: boolean; custom?: boolean; }
-interface StatusEntry     { id: string; code: string; meaning: string; selected: boolean; custom?: boolean; }
+interface Company       { id: string; name: string; code: string; }
+interface DisciplineEntry { id: string; code: string; name: string; desc: string; selected: boolean; custom?: boolean; editingCode?: boolean; editingName?: boolean; }
+interface LevelEntry    { id: string; code: string; }
+interface DocTypeEntry  { id: string; code: string; name: string; desc: string; category: string; selected: boolean; custom?: boolean; }
+interface StatusEntry   { id: string; code: string; meaning: string; selected: boolean; custom?: boolean; }
 
 // ─── constants ────────────────────────────────────────────────────────────────
-const DEFAULT_DISCIPLINES: Omit<DisciplineEntry, "id" | "selected">[] = [
-  { code: "ARC", name: "Architecture",       desc: "Architectural drawings and models" },
-  { code: "STR", name: "Structure",          desc: "Structural engineering documents" },
-  { code: "MEP", name: "Mechanical",         desc: "Mechanical and HVAC documents" },
-  { code: "ELE", name: "Electrical",         desc: "Electrical engineering documents" },
-  { code: "PLM", name: "Plumbing",           desc: "Plumbing and drainage documents" },
-  { code: "CIV", name: "Civil",              desc: "Civil and site engineering documents" },
-  { code: "LAN", name: "Landscape",          desc: "Landscape architecture documents" },
-  { code: "INT", name: "Interior Design",    desc: "Interior design documents" },
-  { code: "FPR", name: "Fire Protection",    desc: "Fire protection and suppression documents" },
-  { code: "ICT", name: "Technology",         desc: "IT and communications documents" },
-  { code: "GEO", name: "Geotechnical",       desc: "Geotechnical and survey documents" },
-  { code: "EST", name: "Cost Estimating",    desc: "Cost and quantity documents" },
-  { code: "SHM", name: "Sheet Metal",        desc: "Sheet metal fabrication documents" },
-  { code: "MPI", name: "Mech. Piping",       desc: "Mechanical piping documents" },
-  { code: "ENV", name: "Environmental",      desc: "Environmental engineering documents" },
-  { code: "PRC", name: "Procurement",        desc: "Procurement and contracts documents" },
+const DEFAULT_DISCIPLINES: Omit<DisciplineEntry,"id"|"selected"|"editingCode"|"editingName">[] = [
+  { code: "ARC",  name: "Architecture",       desc: "Architectural drawings and models" },
+  { code: "STR",  name: "Structure",          desc: "Structural engineering documents" },
+  { code: "MEP",  name: "Mechanical",         desc: "Mechanical and HVAC documents" },
+  { code: "ELE",  name: "Electrical",         desc: "Electrical engineering documents" },
+  { code: "PLUM", name: "Plumbing",           desc: "Plumbing and drainage documents" },
+  { code: "CIV",  name: "Civil",              desc: "Civil and site engineering documents" },
+  { code: "LAN",  name: "Landscape",          desc: "Landscape architecture documents" },
+  { code: "INT",  name: "Interior Design",    desc: "Interior design documents" },
+  { code: "FPR",  name: "Fire Protection",    desc: "Fire protection and suppression documents" },
+  { code: "ICT",  name: "Technology",         desc: "IT and communications documents" },
+  { code: "GEO",  name: "Geotechnical",       desc: "Geotechnical and survey documents" },
+  { code: "EST",  name: "Cost Estimating",    desc: "Cost and quantity documents" },
+  { code: "SH",   name: "Sheet Metal",        desc: "Sheet metal fabrication documents" },
+  { code: "MP",   name: "Mech. Piping",       desc: "Mechanical piping documents" },
+  { code: "ENV",  name: "Environmental",      desc: "Environmental engineering documents" },
+  { code: "PRC",  name: "Procurement",        desc: "Procurement and contracts documents" },
 ];
 
 const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selected"|"category">[] }[] = [
@@ -72,7 +74,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "LP",  name: "Landscape Plan",        desc: "Landscape drawing" },
     { code: "DP",  name: "Drainage Plan",         desc: "Drainage layout" },
     { code: "EP",  name: "Electrical Plan",       desc: "Electrical layout" },
-    { code: "MP",  name: "Mechanical Plan",       desc: "Mechanical layout" },
+    { code: "MAP", name: "Mechanical Plan",       desc: "Mechanical layout" },
     { code: "PP",  name: "Plumbing Plan",         desc: "Plumbing layout" },
     { code: "FLP", name: "Fire Protection Plan",  desc: "Fire suppression layout" },
     { code: "TP",  name: "Technology Plan",       desc: "IT and communications layout" },
@@ -103,7 +105,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "AC",  name: "Acoustic Calc",         desc: "Acoustic and noise analysis" },
     { code: "TC",  name: "Thermal Calc",          desc: "Thermal and energy calculation" },
     { code: "LC",  name: "Lighting Calc",         desc: "Lighting design calculation" },
-    { code: "GC",  name: "Geotechnical Calc",     desc: "Ground and foundation calc" },
+    { code: "GCA", name: "Geotechnical Calc",     desc: "Ground and foundation calc" },
     { code: "EN",  name: "Energy Analysis",       desc: "Energy performance analysis" },
     { code: "CF",  name: "CFD Analysis",          desc: "Computational fluid dynamics" },
     { code: "FE",  name: "Finite Element",        desc: "Structural FEA" },
@@ -117,8 +119,8 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "ER",  name: "Environmental Report",  desc: "Environmental impact report" },
     { code: "PR",  name: "Progress Report",       desc: "Construction progress report" },
     { code: "IR",  name: "Inspection Report",     desc: "Site inspection report" },
-    { code: "AR",  name: "Audit Report",          desc: "Quality audit report" },
-    { code: "CR",  name: "Clash Report",          desc: "BIM clash detection report" },
+    { code: "AUR", name: "Audit Report",          desc: "Quality audit report" },
+    { code: "CLR", name: "Clash Report",          desc: "BIM clash detection report" },
     { code: "VR",  name: "Validation Report",     desc: "Design validation report" },
     { code: "CMR", name: "Commissioning Report",  desc: "System commissioning report" },
     { code: "MR",  name: "Meeting Report",        desc: "Meeting minutes and notes" },
@@ -129,7 +131,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "DDR", name: "Due Diligence Report",  desc: "Technical due diligence" },
   ]},
   { cat: "Schedules & Programmes", types: [
-    { code: "SH",  name: "Schedule",              desc: "General schedule" },
+    { code: "SCH", name: "Schedule",              desc: "General schedule" },
     { code: "PSC", name: "Project Schedule",      desc: "Master project programme" },
     { code: "CSC", name: "Construction Schedule", desc: "Construction programme" },
     { code: "MSC", name: "Milestone Schedule",    desc: "Key milestone tracker" },
@@ -156,7 +158,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "AG",  name: "Agreement",             desc: "Project agreement" },
     { code: "NDA", name: "Non Disclosure",        desc: "Confidentiality agreement" },
     { code: "NL",  name: "Notice Letter",         desc: "Formal notice" },
-    { code: "EX",  name: "Extension of Time",     desc: "EOT claim document" },
+    { code: "EXT", name: "Extension of Time",     desc: "EOT claim document" },
     { code: "NC",  name: "Non Conformance",       desc: "Non conformance report" },
     { code: "RFI", name: "Request for Info",      desc: "Formal RFI document" },
     { code: "RFC", name: "Request for Change",    desc: "Change request document" },
@@ -205,7 +207,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "BS",  name: "Building Survey",       desc: "Existing building survey" },
     { code: "GS",  name: "Ground Survey",         desc: "Ground investigation" },
     { code: "US",  name: "Utility Survey",        desc: "Underground utility survey" },
-    { code: "PC",  name: "Point Cloud",           desc: "Laser scan and point cloud files" },
+    { code: "PCL", name: "Point Cloud",           desc: "Laser scan and point cloud files" },
     { code: "GPS", name: "GPS Survey",            desc: "GPS coordinate survey" },
   ]},
   { cat: "Mechanical & Electrical", types: [
@@ -253,13 +255,12 @@ const CHIP_COLORS = [
 // ─── state shape ─────────────────────────────────────────────────────────────
 interface WizardState {
   step: number;
-  // step 1
   companies: Company[];
   separator: "-" | "_";
   enforceUppercase: boolean;
   applyCharLimits: boolean;
-  // step 2
   disciplines: DisciplineEntry[];
+  // level generator inputs (for regeneration)
   floorsAbove: number;
   basements: number;
   hasGroundFloor: boolean;
@@ -267,12 +268,11 @@ interface WizardState {
   hasRoof: boolean;
   roofCode: string;
   includeZZ: boolean;
-  customLevels: string[];
-  // step 3
+  // THE master level list — fully editable, ordered
+  levelList: LevelEntry[];
   docTypes: DocTypeEntry[];
   seqDigits: 3 | 4 | 5;
   statusCodes: StatusEntry[];
-  // step 4
   revisionFormat: "alpha" | "numerical" | "custom";
   customRevisions: string[];
   mandatoryFields: Record<string, boolean>;
@@ -285,25 +285,19 @@ interface WizardState {
   extRestrictions: Record<string, string[]>;
 }
 
-// ─── helper fns ──────────────────────────────────────────────────────────────
-function generateLevelCodes(
-  floorsAbove: number,
-  basements: number,
-  hasGroundFloor: boolean,
-  groundFloorCode: string,
-  hasRoof: boolean,
-  roofCode: string,
-  includeZZ: boolean,
-  customLevels: string[],
-): string[] {
+// ─── level helpers ────────────────────────────────────────────────────────────
+function buildLevelList(
+  floorsAbove: number, basements: number,
+  hasGroundFloor: boolean, groundFloorCode: string,
+  hasRoof: boolean, roofCode: string, includeZZ: boolean,
+): LevelEntry[] {
   const codes: string[] = [];
   for (let b = basements; b >= 1; b--) codes.push(`B${b}`);
   if (hasGroundFloor) codes.push(groundFloorCode || "G0");
   for (let f = 1; f <= floorsAbove; f++) codes.push(`L${f}`);
   if (hasRoof) codes.push(roofCode || "RF");
   if (includeZZ) codes.push("ZZ");
-  customLevels.forEach(cl => { if (cl && !codes.includes(cl)) codes.push(cl); });
-  return codes;
+  return codes.map(code => ({ id: uid(), code }));
 }
 
 function buildRevisionCodes(format: "alpha" | "numerical" | "custom", custom: string[]): string[] {
@@ -330,8 +324,7 @@ function Toggle({ checked, onChange, label, sub }: { checked: boolean; onChange:
         style={{
           width: 42, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
           background: checked ? "#2563EB" : "hsl(var(--border))",
-          position: "relative", flexShrink: 0, marginTop: 2,
-          transition: "background 0.2s",
+          position: "relative", flexShrink: 0, marginTop: 2, transition: "background 0.2s",
         }}
       >
         <span style={{
@@ -345,24 +338,6 @@ function Toggle({ checked, onChange, label, sub }: { checked: boolean; onChange:
         {sub && <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>{sub}</div>}
       </div>
     </div>
-  );
-}
-
-function Chip({ label, selected, onClick, title }: { label: string; selected: boolean; onClick: () => void; title?: string }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      style={{
-        padding: "5px 10px", borderRadius: 6, border: `1px solid ${selected ? "#2563EB" : "hsl(var(--border))"}`,
-        background: selected ? "#EFF6FF" : "hsl(var(--card))",
-        color: selected ? "#1D4ED8" : "hsl(var(--foreground))",
-        fontSize: 12, fontWeight: 600, cursor: "pointer",
-        fontFamily: "var(--font-mono)",
-      }}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -412,8 +387,7 @@ function ProgressBar({ step }: { step: number }) {
               {i < STEPS.length - 1 && (
                 <div style={{
                   position: "absolute", top: 14, left: "50%", width: "100%", height: 2,
-                  background: done ? "#2563EB" : "hsl(var(--border))",
-                  zIndex: 0,
+                  background: done ? "#2563EB" : "hsl(var(--border))", zIndex: 0,
                 }} />
               )}
               <div style={{
@@ -444,7 +418,9 @@ function ProgressBar({ step }: { step: number }) {
 function Step1({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
   const [newName, setNewName] = useState("");
   const [newCode, setNewCode] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
+  // per-company edit state
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const [editCode, setEditCode] = useState("");
 
   const handleAdd = () => {
@@ -454,11 +430,11 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
     setNewName(""); setNewCode("");
   };
 
-  const remove = (id: string) => setState(s => ({ ...s, companies: s.companies.filter(c => c.id !== id) }));
-
-  const saveEdit = (id: string) => {
-    setState(s => ({ ...s, companies: s.companies.map(c => c.id === id ? { ...c, code: editCode.toUpperCase() } : c) }));
-    setEditingId(null);
+  const startEdit = (c: Company) => { setEditId(c.id); setEditName(c.name); setEditCode(c.code); };
+  const saveEdit = () => {
+    if (!editId) return;
+    setState(s => ({ ...s, companies: s.companies.map(c => c.id === editId ? { ...c, name: editName.trim() || c.name, code: editCode.toUpperCase().slice(0, 8) || c.code } : c) }));
+    setEditId(null);
   };
 
   return (
@@ -467,64 +443,44 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
         title={w("Who is on this project?", "¿Quiénes participan en este proyecto?", lang)}
         sub={w("Add every company that will submit files. Each company gets a unique code used in every file name.", "Agrega cada empresa que enviará archivos. Cada empresa obtiene un código único.", lang)}
       />
-
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10, color: "hsl(var(--foreground))" }}>
-          {w("Add Company", "Agregar Empresa", lang)}
-        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>{w("Add Company", "Agregar Empresa", lang)}</div>
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <Input
-            value={newName}
-            onChange={e => { setNewName(e.target.value); setNewCode(e.target.value.slice(0, 3).toUpperCase()); }}
-            onKeyDown={e => e.key === "Enter" && handleAdd()}
-            placeholder={w("Company Name", "Nombre de Empresa", lang)}
-            style={{ flex: 2, fontSize: 13 }}
-          />
-          <Input
-            value={newCode}
-            onChange={e => setNewCode(e.target.value.toUpperCase().slice(0, 6))}
-            onKeyDown={e => e.key === "Enter" && handleAdd()}
-            placeholder={w("Code (auto)", "Código (auto)", lang)}
-            style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }}
-          />
-          <Button onClick={handleAdd} size="sm" style={{ gap: 5, fontSize: 12, flexShrink: 0 }}>
-            <Plus style={{ width: 13, height: 13 }} />
-            {w("Add", "Agregar", lang)}
-          </Button>
+          <Input value={newName} onChange={e => { setNewName(e.target.value); if (!newCode) setNewCode(e.target.value.slice(0,3).toUpperCase()); }} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder={w("Company Name", "Nombre de Empresa", lang)} style={{ flex: 2, fontSize: 13 }} />
+          <Input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase().slice(0,8))} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder={w("Code (auto)", "Código (auto)", lang)} style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }} />
+          <Button onClick={handleAdd} size="sm" style={{ gap: 5, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 13, height: 13 }} />{w("Add", "Agregar", lang)}</Button>
         </div>
         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-          {w("Each person on your team will be identified by their company code in every file name they upload.", "Cada persona se identificará por el código de su empresa en cada archivo.", lang)}
+          {w("Each person will be identified by their company code in every file name. Codes can be up to 8 characters.", "Cada persona se identificará por el código de su empresa. Los códigos pueden tener hasta 8 caracteres.", lang)}
         </div>
+
+        {/* Edit modal overlay */}
+        {editId && (
+          <div style={{ marginTop: 12, padding: "14px 16px", background: "#EFF6FF", border: "2px solid #2563EB", borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>{w("Edit Company", "Editar Empresa", lang)}</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder={w("Company Name", "Nombre", lang)} style={{ flex: 2, fontSize: 13 }} autoFocus />
+              <Input value={editCode} onChange={e => setEditCode(e.target.value.toUpperCase().slice(0,8))} placeholder="Code" style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button size="sm" onClick={saveEdit} style={{ fontSize: 12, gap: 5 }}><Check style={{ width: 12, height: 12 }} />{w("Save", "Guardar", lang)}</Button>
+              <Button size="sm" variant="outline" onClick={() => setEditId(null)} style={{ fontSize: 12 }}>{w("Cancel", "Cancelar", lang)}</Button>
+            </div>
+          </div>
+        )}
 
         {state.companies.length > 0 && (
           <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
             {state.companies.map(c => (
-              <div key={c.id} style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "10px 12px", borderRadius: 7,
-                background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))",
-              }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700,
-                  background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE",
-                  padding: "3px 8px", borderRadius: 4, flexShrink: 0, minWidth: 50, textAlign: "center",
-                }}>
-                  {editingId === c.id ? (
-                    <input
-                      value={editCode}
-                      onChange={e => setEditCode(e.target.value.toUpperCase().slice(0, 6))}
-                      onKeyDown={e => e.key === "Enter" && saveEdit(c.id)}
-                      onBlur={() => saveEdit(c.id)}
-                      autoFocus
-                      style={{ width: 60, fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, border: "none", background: "transparent", outline: "none", color: "#1D4ED8" }}
-                    />
-                  ) : c.code}
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 7, background: editId === c.id ? "#EFF6FF" : "hsl(var(--secondary))", border: `1px solid ${editId === c.id ? "#2563EB" : "hsl(var(--border))"}` }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "3px 10px", borderRadius: 4, flexShrink: 0, minWidth: 60, textAlign: "center" }}>
+                  {c.code}
                 </span>
-                <span style={{ flex: 1, fontSize: 13, color: "hsl(var(--foreground))" }}>{c.name}</span>
-                <button onClick={() => { setEditingId(c.id); setEditCode(c.code); }} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}>
+                <span style={{ flex: 1, fontSize: 13 }}>{c.name}</span>
+                <button onClick={() => startEdit(c)} title={w("Edit code and name", "Editar código y nombre", lang)} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}>
                   <Edit2 style={{ width: 13, height: 13 }} />
                 </button>
-                <button onClick={() => remove(c.id)} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}
+                <button onClick={() => setState(s => ({ ...s, companies: s.companies.filter(x => x.id !== c.id) }))} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}
                   onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
                   <Trash2 style={{ width: 13, height: 13 }} />
                 </button>
@@ -539,15 +495,7 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>{w("This character separates every field in the file name.", "Este carácter separa cada campo en el nombre de archivo.", lang)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {(["-", "_"] as const).map(sep => (
-            <button
-              key={sep}
-              onClick={() => setState(s => ({ ...s, separator: sep }))}
-              style={{
-                padding: "16px", borderRadius: 8, cursor: "pointer", textAlign: "left",
-                border: `2px solid ${state.separator === sep ? "#2563EB" : "hsl(var(--border))"}`,
-                background: state.separator === sep ? "#EFF6FF" : "hsl(var(--card))",
-              }}
-            >
+            <button key={sep} onClick={() => setState(s => ({ ...s, separator: sep }))} style={{ padding: "16px", borderRadius: 8, cursor: "pointer", textAlign: "left", border: `2px solid ${state.separator === sep ? "#2563EB" : "hsl(var(--border))"}`, background: state.separator === sep ? "#EFF6FF" : "hsl(var(--card))" }}>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 24, fontWeight: 900, color: state.separator === sep ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 4 }}>{sep}</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: state.separator === sep ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 2 }}>
                 {sep === "-" ? w("Hyphen", "Guión", lang) : w("Underscore", "Guión bajo", lang)}
@@ -561,19 +509,9 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
       </Card>
 
       <Card>
-        <Toggle
-          checked={state.enforceUppercase}
-          onChange={v => setState(s => ({ ...s, enforceUppercase: v }))}
-          label={w("Force uppercase on all file names", "Forzar mayúsculas en todos los nombres", lang)}
-          sub={w("BIMLog will reject any file name containing lowercase letters. Recommended for ISO 19650.", "BIMLog rechazará nombres con letras minúsculas. Recomendado para ISO 19650.", lang)}
-        />
+        <Toggle checked={state.enforceUppercase} onChange={v => setState(s => ({ ...s, enforceUppercase: v }))} label={w("Force uppercase on all file names", "Forzar mayúsculas en todos los nombres", lang)} sub={w("BIMLog will reject any file name containing lowercase letters. Recommended for ISO 19650.", "BIMLog rechazará nombres con letras minúsculas. Recomendado para ISO 19650.", lang)} />
         <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 12, marginTop: 4 }}>
-          <Toggle
-            checked={state.applyCharLimits}
-            onChange={v => setState(s => ({ ...s, applyCharLimits: v }))}
-            label={w("Apply character limits per field", "Aplicar límite de caracteres por campo", lang)}
-            sub={w("You will be able to set min and max characters per field in the review screen.", "Podrás establecer mínimos y máximos por campo en la pantalla de revisión.", lang)}
-          />
+          <Toggle checked={state.applyCharLimits} onChange={v => setState(s => ({ ...s, applyCharLimits: v }))} label={w("Apply character limits per field", "Aplicar límite de caracteres por campo", lang)} sub={w("You will be able to set min and max characters per field in the review screen.", "Podrás establecer mínimos y máximos por campo en la pantalla de revisión.", lang)} />
         </div>
       </Card>
     </div>
@@ -584,159 +522,267 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
 function Step2({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
   const [customDName, setCustomDName] = useState("");
   const [customDCode, setCustomDCode] = useState("");
-  const [customLevel, setCustomLevel] = useState("");
+  const [editDiscId, setEditDiscId] = useState<string | null>(null);
+  const [editDiscCode, setEditDiscCode] = useState("");
+  const [editDiscName, setEditDiscName] = useState("");
+  // Level add
+  const [newLevel, setNewLevel] = useState("");
+  const [insertAfter, setInsertAfter] = useState("__end__");
 
-  const toggleDisc = (id: string) => setState(s => ({
-    ...s,
-    disciplines: s.disciplines.map(d => d.id === id ? { ...d, selected: !d.selected } : d)
-  }));
+  const toggleDisc = (id: string) => setState(s => ({ ...s, disciplines: s.disciplines.map(d => d.id === id ? { ...d, selected: !d.selected } : d) }));
+  const removeDisc = (id: string) => setState(s => ({ ...s, disciplines: s.disciplines.filter(d => d.id !== id) }));
+
+  const startEditDisc = (d: DisciplineEntry) => { setEditDiscId(d.id); setEditDiscCode(d.code); setEditDiscName(d.name); };
+  const saveEditDisc = () => {
+    if (!editDiscId) return;
+    setState(s => ({ ...s, disciplines: s.disciplines.map(d => d.id === editDiscId ? { ...d, code: editDiscCode.toUpperCase().slice(0,8) || d.code, name: editDiscName.trim() || d.name } : d) }));
+    setEditDiscId(null);
+  };
 
   const addCustomDisc = () => {
     if (!customDName.trim() || !customDCode.trim()) return;
-    setState(s => ({
-      ...s,
-      disciplines: [...s.disciplines, { id: uid(), code: customDCode.toUpperCase().slice(0, 6), name: customDName, desc: "Custom discipline", selected: true, custom: true }]
-    }));
+    setState(s => ({ ...s, disciplines: [...s.disciplines, { id: uid(), code: customDCode.toUpperCase().slice(0,8), name: customDName, desc: "Custom discipline", selected: true, custom: true }] }));
     setCustomDName(""); setCustomDCode("");
   };
 
-  const addCustomLevel = () => {
-    if (!customLevel.trim()) return;
-    setState(s => ({ ...s, customLevels: [...s.customLevels, customLevel.toUpperCase().trim()] }));
-    setCustomLevel("");
+  // Level management
+  const regenerateLevels = () => {
+    setState(s => ({ ...s, levelList: buildLevelList(s.floorsAbove, s.basements, s.hasGroundFloor, s.groundFloorCode, s.hasRoof, s.roofCode, s.includeZZ) }));
   };
 
-  const generatedLevels = generateLevelCodes(
-    state.floorsAbove, state.basements, state.hasGroundFloor, state.groundFloorCode,
-    state.hasRoof, state.roofCode, state.includeZZ, state.customLevels
-  );
+  const removeLevel = (id: string) => setState(s => ({ ...s, levelList: s.levelList.filter(l => l.id !== id) }));
+
+  const moveLevel = (id: string, dir: -1 | 1) => {
+    setState(s => {
+      const list = [...s.levelList];
+      const idx = list.findIndex(l => l.id === id);
+      if (idx < 0) return s;
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= list.length) return s;
+      [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+      return { ...s, levelList: list };
+    });
+  };
+
+  const addLevel = () => {
+    if (!newLevel.trim()) return;
+    const entry: LevelEntry = { id: uid(), code: newLevel.toUpperCase().trim() };
+    setState(s => {
+      const list = [...s.levelList];
+      if (insertAfter === "__end__") {
+        list.push(entry);
+      } else {
+        const idx = list.findIndex(l => l.id === insertAfter);
+        list.splice(idx + 1, 0, entry);
+      }
+      return { ...s, levelList: list };
+    });
+    setNewLevel("");
+    setInsertAfter("__end__");
+  };
+
+  const editLevelCode = (id: string, code: string) => {
+    setState(s => ({ ...s, levelList: s.levelList.map(l => l.id === id ? { ...l, code: code.toUpperCase().slice(0, 10) } : l) }));
+  };
 
   return (
     <div>
-      <SectionTitle
-        title={w("What disciplines and floors does this project have?", "¿Qué disciplinas y pisos tiene este proyecto?", lang)}
-      />
+      <SectionTitle title={w("What disciplines and floors does this project have?", "¿Qué disciplinas y pisos tiene este proyecto?", lang)} />
 
       {/* Disciplines */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Disciplines", "Disciplinas", lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
-          {w("Select all disciplines that will submit files on this project.", "Selecciona todas las disciplinas que enviarán archivos.", lang)}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 700 }}>{w("Disciplines", "Disciplinas", lang)}</div>
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+            {w("Click code or name to edit — click card to select/deselect", "Clic en código o nombre para editar", lang)}
+          </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 8 }}>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
+          {w("Select all disciplines that will submit files. Edit any code or name to match your project standards.", "Selecciona todas las disciplinas. Edita cualquier código o nombre para que coincida con tus estándares.", lang)}
+        </div>
+
+        {/* Inline edit panel */}
+        {editDiscId && (
+          <div style={{ marginBottom: 12, padding: "12px 14px", background: "#EFF6FF", border: "2px solid #2563EB", borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1D4ED8", marginBottom: 8 }}>{w("Edit Discipline", "Editar Disciplina", lang)}</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <Input value={editDiscCode} onChange={e => setEditDiscCode(e.target.value.toUpperCase().slice(0,8))} placeholder={w("Code", "Código", lang)} style={{ width: 100, fontSize: 13, fontFamily: "var(--font-mono)" }} autoFocus />
+              <Input value={editDiscName} onChange={e => setEditDiscName(e.target.value)} placeholder={w("Name", "Nombre", lang)} style={{ flex: 1, fontSize: 13 }} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button size="sm" onClick={saveEditDisc} style={{ fontSize: 12, gap: 5 }}><Check style={{ width: 12, height: 12 }} />{w("Save", "Guardar", lang)}</Button>
+              <Button size="sm" variant="outline" onClick={() => setEditDiscId(null)} style={{ fontSize: 12 }}>{w("Cancel", "Cancelar", lang)}</Button>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(185px, 1fr))", gap: 8 }}>
           {state.disciplines.map(d => (
-            <button
-              key={d.id}
-              onClick={() => toggleDisc(d.id)}
-              style={{
-                padding: "10px 12px", borderRadius: 7, border: `2px solid ${d.selected ? "#2563EB" : "hsl(var(--border))"}`,
-                background: d.selected ? "#EFF6FF" : "hsl(var(--card))",
-                cursor: "pointer", textAlign: "left",
-              }}
-            >
+            <div key={d.id} style={{
+              padding: "10px 12px", borderRadius: 7, position: "relative",
+              border: `2px solid ${d.selected ? "#2563EB" : "hsl(var(--border))"}`,
+              background: d.selected ? "#EFF6FF" : "hsl(var(--card))",
+            }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.code}</span>
-                {d.selected && <Check style={{ width: 13, height: 13, color: "#1D4ED8" }} />}
+                <button onClick={() => toggleDisc(d.id)} style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+                  {d.code}
+                </button>
+                <div style={{ display: "flex", gap: 2 }}>
+                  <button onClick={() => startEditDisc(d)} title={w("Edit code / name", "Editar código / nombre", lang)} style={{ padding: 3, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 3 }}>
+                    <Edit2 style={{ width: 11, height: 11 }} />
+                  </button>
+                  <button onClick={() => removeDisc(d.id)} title={w("Remove", "Eliminar", lang)} style={{ padding: 3, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 3 }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
+                    <X style={{ width: 11, height: 11 }} />
+                  </button>
+                </div>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.name}</div>
-              <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 2, lineHeight: 1.3 }}>{d.desc}</div>
-            </button>
+              <button onClick={() => toggleDisc(d.id)} style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.name}</div>
+                <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 2, lineHeight: 1.3 }}>{d.desc}</div>
+              </button>
+              {d.selected && <div style={{ position: "absolute", top: 8, right: 32 }}><Check style={{ width: 11, height: 11, color: "#1D4ED8" }} /></div>}
+            </div>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-          <Input value={customDName} onChange={e => { setCustomDName(e.target.value); setCustomDCode(e.target.value.slice(0,4).toUpperCase()); }} placeholder={w("Discipline Name", "Nombre de disciplina", lang)} style={{ flex: 2, fontSize: 12 }} />
-          <Input value={customDCode} onChange={e => setCustomDCode(e.target.value.toUpperCase().slice(0,6))} placeholder={w("Code", "Código", lang)} style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)" }} />
+
+        <div style={{ display: "flex", gap: 8, marginTop: 14, paddingTop: 12, borderTop: "1px solid hsl(var(--border))" }}>
+          <Input value={customDName} onChange={e => { setCustomDName(e.target.value); if (!customDCode) setCustomDCode(e.target.value.slice(0,4).toUpperCase()); }} placeholder={w("Discipline Name", "Nombre de disciplina", lang)} style={{ flex: 2, fontSize: 12 }} />
+          <Input value={customDCode} onChange={e => setCustomDCode(e.target.value.toUpperCase().slice(0,8))} placeholder={w("Code (e.g. MEP)", "Código (ej. MEP)", lang)} style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)" }} />
           <Button variant="outline" size="sm" onClick={addCustomDisc} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}</Button>
         </div>
       </Card>
 
-      {/* Building Levels */}
+      {/* Building Levels — full control */}
       <Card>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Building Levels", "Pisos del Edificio", lang)}</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 700 }}>{w("Building Levels", "Pisos del Edificio", lang)}</div>
+          <span style={{ fontSize: 11, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "2px 8px", borderRadius: 10 }}>
+            {state.levelList.length} {w("levels", "niveles", lang)}
+          </span>
+        </div>
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
-          {w("Tell BIMLog about your building and we will generate all level codes automatically.", "Dinos sobre tu edificio y generaremos todos los códigos de nivel automáticamente.", lang)}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>
-              {w("Floors above ground", "Pisos sobre nivel de suelo", lang)}
-            </label>
-            <Input type="number" min={0} max={200} value={state.floorsAbove}
-              onChange={e => setState(s => ({ ...s, floorsAbove: Math.max(0, parseInt(e.target.value) || 0) }))}
-              style={{ fontSize: 13 }} />
-          </div>
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>
-              {w("Basement levels", "Niveles de sótano", lang)}
-            </label>
-            <Input type="number" min={0} max={20} value={state.basements}
-              onChange={e => setState(s => ({ ...s, basements: Math.max(0, parseInt(e.target.value) || 0) }))}
-              style={{ fontSize: 13 }} />
-          </div>
+          {w("Use the generator to auto-fill, then delete, reorder, rename, or insert levels anywhere you need.", "Usa el generador para rellenar automáticamente, luego elimina, reordena o inserta niveles donde necesites.", lang)}
         </div>
 
-        <Toggle checked={state.hasGroundFloor} onChange={v => setState(s => ({ ...s, hasGroundFloor: v }))}
-          label={w("Separate ground floor level", "Piso de planta baja separado", lang)} />
-        {state.hasGroundFloor && (
-          <div style={{ marginLeft: 54, marginTop: -6, marginBottom: 8 }}>
-            <Input value={state.groundFloorCode}
-              onChange={e => setState(s => ({ ...s, groundFloorCode: e.target.value.toUpperCase().slice(0, 4) }))}
-              placeholder="G0" style={{ width: 100, fontSize: 13, fontFamily: "var(--font-mono)" }} />
+        {/* Generator inputs */}
+        <div style={{ padding: "12px 14px", background: "hsl(var(--secondary))", borderRadius: 7, marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+            {w("Level Generator (optional)", "Generador de Niveles (opcional)", lang)}
           </div>
-        )}
-
-        <Toggle checked={state.hasRoof} onChange={v => setState(s => ({ ...s, hasRoof: v }))}
-          label={w("Include roof level", "Incluir nivel de techo", lang)} />
-        {state.hasRoof && (
-          <div style={{ marginLeft: 54, marginTop: -6, marginBottom: 8 }}>
-            <Input value={state.roofCode}
-              onChange={e => setState(s => ({ ...s, roofCode: e.target.value.toUpperCase().slice(0, 4) }))}
-              placeholder="RF" style={{ width: 100, fontSize: 13, fontFamily: "var(--font-mono)" }} />
-          </div>
-        )}
-
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", padding: "8px 0" }}>
-          <input type="checkbox" checked={state.includeZZ} onChange={e => setState(s => ({ ...s, includeZZ: e.target.checked }))}
-            style={{ width: 15, height: 15, accentColor: "#2563EB" }} />
-          {w("Include all-levels code ZZ", "Incluir código para todos los niveles ZZ", lang)}
-        </label>
-
-        {generatedLevels.length > 0 && (
-          <div style={{ marginTop: 14, padding: "12px 14px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 7 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              {w("Generated Level Codes", "Códigos de Nivel Generados", lang)} ({generatedLevels.length})
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>{w("Floors above ground", "Pisos sobre nivel de suelo", lang)}</label>
+              <Input type="number" min={0} max={300} value={state.floorsAbove || ""} placeholder="0"
+                onChange={e => setState(s => ({ ...s, floorsAbove: Math.max(0, parseInt(e.target.value) || 0) }))}
+                style={{ fontSize: 13 }} />
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {generatedLevels.map(lv => (
-                <span key={lv} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "2px 7px", borderRadius: 4 }}>
-                  {lv}
-                </span>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>{w("Basement levels", "Niveles de sótano", lang)}</label>
+              <Input type="number" min={0} max={50} value={state.basements || ""} placeholder="0"
+                onChange={e => setState(s => ({ ...s, basements: Math.max(0, parseInt(e.target.value) || 0) }))}
+                style={{ fontSize: 13 }} />
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 10 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer" }}>
+              <input type="checkbox" checked={state.hasGroundFloor} onChange={e => setState(s => ({ ...s, hasGroundFloor: e.target.checked }))} style={{ accentColor: "#2563EB" }} />
+              {w("Ground floor", "Planta baja", lang)}
+              {state.hasGroundFloor && (
+                <Input value={state.groundFloorCode} onChange={e => setState(s => ({ ...s, groundFloorCode: e.target.value.toUpperCase().slice(0,6) }))} placeholder="G0" style={{ width: 60, fontSize: 12, fontFamily: "var(--font-mono)", padding: "2px 6px", height: 28 }} />
+              )}
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer" }}>
+              <input type="checkbox" checked={state.hasRoof} onChange={e => setState(s => ({ ...s, hasRoof: e.target.checked }))} style={{ accentColor: "#2563EB" }} />
+              {w("Roof level", "Nivel de techo", lang)}
+              {state.hasRoof && (
+                <Input value={state.roofCode} onChange={e => setState(s => ({ ...s, roofCode: e.target.value.toUpperCase().slice(0,6) }))} placeholder="RF" style={{ width: 60, fontSize: 12, fontFamily: "var(--font-mono)", padding: "2px 6px", height: 28 }} />
+              )}
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, cursor: "pointer" }}>
+              <input type="checkbox" checked={state.includeZZ} onChange={e => setState(s => ({ ...s, includeZZ: e.target.checked }))} style={{ accentColor: "#2563EB" }} />
+              {w("All-levels ZZ", "Todos los niveles ZZ", lang)}
+            </label>
+          </div>
+          <Button variant="outline" size="sm" onClick={regenerateLevels} style={{ gap: 5, fontSize: 12 }}>
+            <RefreshCw style={{ width: 12, height: 12 }} />
+            {w("Generate level list", "Generar lista de niveles", lang)}
+          </Button>
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>
+            {w("This replaces the current list. Your custom edits below are preserved until you click Generate again.", "Esto reemplaza la lista actual. Tus ediciones personalizadas se preservan hasta que hagas clic en Generar.", lang)}
+          </div>
+        </div>
+
+        {/* Editable level list */}
+        {state.levelList.length > 0 ? (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+              {w("Level List — click a code to rename, use arrows to reorder, × to delete", "Lista de Niveles — clic para renombrar, flechas para reordenar, × para eliminar", lang)}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {state.levelList.map((lv, idx) => (
+                <div key={lv.id} style={{ display: "inline-flex", alignItems: "center", gap: 1, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, overflow: "hidden" }}>
+                  <input
+                    value={lv.code}
+                    onChange={e => editLevelCode(lv.id, e.target.value)}
+                    title={w("Click to rename this level", "Clic para renombrar este nivel", lang)}
+                    style={{
+                      fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: "#1D4ED8",
+                      background: "transparent", border: "none", outline: "none", padding: "3px 6px",
+                      width: Math.max(lv.code.length * 8 + 16, 30), cursor: "text",
+                    }}
+                  />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    <button onClick={() => moveLevel(lv.id, -1)} disabled={idx === 0}
+                      style={{ padding: "1px 3px", border: "none", background: "transparent", cursor: idx === 0 ? "default" : "pointer", color: idx === 0 ? "#CBD5E1" : "#1D4ED8", lineHeight: 1 }}>
+                      <ArrowUp style={{ width: 8, height: 8 }} />
+                    </button>
+                    <button onClick={() => moveLevel(lv.id, 1)} disabled={idx === state.levelList.length - 1}
+                      style={{ padding: "1px 3px", border: "none", background: "transparent", cursor: idx === state.levelList.length - 1 ? "default" : "pointer", color: idx === state.levelList.length - 1 ? "#CBD5E1" : "#1D4ED8", lineHeight: 1 }}>
+                      <ArrowDown style={{ width: 8, height: 8 }} />
+                    </button>
+                  </div>
+                  <button onClick={() => removeLevel(lv.id)}
+                    style={{ padding: "3px 5px", border: "none", borderLeft: "1px solid #BFDBFE", background: "transparent", cursor: "pointer", color: "#93C5FD", lineHeight: 1 }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "#93C5FD")}>
+                    <X style={{ width: 9, height: 9 }} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
-        )}
-
-        <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-          <Input value={customLevel} onChange={e => setCustomLevel(e.target.value.toUpperCase())}
-            onKeyDown={e => e.key === "Enter" && addCustomLevel()}
-            placeholder={w("Custom level code (e.g. MEZ, POD, PH)", "Código de nivel personalizado (ej. MEZ, POD, PH)", lang)}
-            style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)" }} />
-          <Button variant="outline" size="sm" onClick={addCustomLevel} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}>
-            <Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}
-          </Button>
-        </div>
-        {state.customLevels.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-            {state.customLevels.map((lv, i) => (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: "#F5F3FF", color: "#5B21B6", border: "1px solid #DDD6FE", padding: "2px 7px", borderRadius: 4 }}>
-                {lv}
-                <button onClick={() => setState(s => ({ ...s, customLevels: s.customLevels.filter((_, j) => j !== i) }))} style={{ border: "none", background: "transparent", cursor: "pointer", padding: 0, lineHeight: 1, color: "#7C3AED" }}>
-                  <X style={{ width: 10, height: 10 }} />
-                </button>
-              </span>
-            ))}
+        ) : (
+          <div style={{ padding: "16px", textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: 13, border: "1px dashed hsl(var(--border))", borderRadius: 7, marginBottom: 14 }}>
+            {w("No levels yet. Use the generator above or add levels manually below.", "Sin niveles aún. Usa el generador o agrega niveles manualmente.", lang)}
           </div>
         )}
+
+        {/* Add level with position selector */}
+        <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>{w("Add a level", "Agregar un nivel", lang)}</div>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
+            <div style={{ flex: "0 0 auto" }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 3 }}>{w("Level Code", "Código de Nivel", lang)}</label>
+              <Input value={newLevel} onChange={e => setNewLevel(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && addLevel()} placeholder="e.g. MEZ1, PH2, MR3, 13A" style={{ width: 160, fontSize: 12, fontFamily: "var(--font-mono)" }} />
+            </div>
+            <div style={{ flex: "0 0 auto" }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 3 }}>{w("Insert position", "Posición de inserción", lang)}</label>
+              <select value={insertAfter} onChange={e => setInsertAfter(e.target.value)} style={{ height: 36, fontSize: 12, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "0 8px", background: "hsl(var(--card))", color: "hsl(var(--foreground))" }}>
+                <option value="__end__">{w("At the end", "Al final", lang)}</option>
+                {state.levelList.map((lv, idx) => (
+                  <option key={lv.id} value={lv.id}>{w(`After ${lv.code} (position ${idx + 1})`, `Después de ${lv.code} (posición ${idx + 1})`, lang)}</option>
+                ))}
+                <option value="__start__">{w("At the beginning", "Al inicio", lang)}</option>
+              </select>
+            </div>
+            <Button variant="outline" size="sm" onClick={addLevel} style={{ gap: 4, fontSize: 12, flexShrink: 0, height: 36 }}>
+              <Plus style={{ width: 12, height: 12 }} />{w("Add Level", "Agregar Nivel", lang)}
+            </Button>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+            {w("Common additions: MEZ1, MEZ2, MER (Mechanical Equipment Room), PH1, PH2, RF2, L13A, HALF, POD, SKY", "Ejemplos: MEZ1, MEZ2, MER, PH1, PH2, RF2, L13A, MEDIO, POD", lang)}
+          </div>
+        </div>
       </Card>
     </div>
   );
@@ -746,6 +792,7 @@ function Step2({ state, setState, lang }: { state: WizardState; setState: React.
 function Step3({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [addingToCat, setAddingToCat] = useState<string | null>(null);
   const [customCode, setCustomCode] = useState("");
   const [customName, setCustomName] = useState("");
   const [customDesc, setCustomDesc] = useState("");
@@ -754,6 +801,7 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
 
   const toggleDoc = (id: string) => setState(s => ({ ...s, docTypes: s.docTypes.map(d => d.id === id ? { ...d, selected: !d.selected } : d) }));
   const toggleStatus = (id: string) => setState(s => ({ ...s, statusCodes: s.statusCodes.map(sc => sc.id === id ? { ...sc, selected: !sc.selected } : sc) }));
+  const removeDoc = (id: string) => setState(s => ({ ...s, docTypes: s.docTypes.filter(d => d.id !== id) }));
 
   const selectedCount = state.docTypes.filter(d => d.selected).length;
 
@@ -767,122 +815,112 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
 
   const categories = [...new Set(state.docTypes.map(d => d.category))];
 
-  const addCustomDoc = () => {
+  const selectAllCat = (cat: string) => setState(s => ({ ...s, docTypes: s.docTypes.map(d => d.category === cat ? { ...d, selected: true } : d) }));
+  const deselectAllCat = (cat: string) => setState(s => ({ ...s, docTypes: s.docTypes.map(d => d.category === cat ? { ...d, selected: false } : d) }));
+
+  const addCustomToCategory = (cat: string) => {
     if (!customCode.trim() || !customName.trim()) return;
-    setState(s => ({
-      ...s,
-      docTypes: [...s.docTypes, { id: uid(), code: customCode.toUpperCase(), name: customName, desc: customDesc || "Custom type", category: "Custom", selected: true, custom: true }]
-    }));
-    setCustomCode(""); setCustomName(""); setCustomDesc("");
+    setState(s => ({ ...s, docTypes: [...s.docTypes, { id: uid(), code: customCode.toUpperCase().slice(0,8), name: customName, desc: customDesc || "Custom type", category: cat, selected: true, custom: true }] }));
+    setCustomCode(""); setCustomName(""); setCustomDesc(""); setAddingToCat(null);
   };
 
   const addCustomStatus = () => {
     if (!customStatusCode.trim()) return;
-    setState(s => ({
-      ...s,
-      statusCodes: [...s.statusCodes, { id: uid(), code: customStatusCode.toUpperCase(), meaning: customStatusMeaning, selected: true, custom: true }]
-    }));
+    setState(s => ({ ...s, statusCodes: [...s.statusCodes, { id: uid(), code: customStatusCode.toUpperCase(), meaning: customStatusMeaning, selected: true, custom: true }] }));
     setCustomStatusCode(""); setCustomStatusMeaning("");
   };
 
+  const DocCard = ({ d }: { d: DocTypeEntry }) => (
+    <div style={{ position: "relative", padding: "8px 10px", borderRadius: 6, border: `2px solid ${d.selected ? "#2563EB" : "hsl(var(--border))"}`, background: d.selected ? "#EFF6FF" : "hsl(var(--card))" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <button onClick={() => toggleDoc(d.id)} style={{ display: "flex", alignItems: "center", gap: 4, background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.code}</span>
+          {d.selected && <Check style={{ width: 10, height: 10, color: "#1D4ED8" }} />}
+        </button>
+        <button onClick={() => removeDoc(d.id)} title={w("Remove", "Eliminar", lang)} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
+          <X style={{ width: 9, height: 9 }} />
+        </button>
+      </div>
+      <button onClick={() => toggleDoc(d.id)} style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", padding: 0, marginTop: 2 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.name}</div>
+        <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 1, lineHeight: 1.2 }}>{d.desc}</div>
+      </button>
+    </div>
+  );
+
   return (
     <div>
-      <SectionTitle
-        title={w("What types of documents will be submitted?", "¿Qué tipos de documentos se enviarán?", lang)}
-        sub={w("How will files be numbered and what status codes will be used?", "¿Cómo se numerarán los archivos y qué códigos de estado se usarán?", lang)}
-      />
+      <SectionTitle title={w("What types of documents will be submitted?", "¿Qué tipos de documentos se enviarán?", lang)} sub={w("How will files be numbered and what status codes will be used?", "¿Cómo se numerarán y qué códigos de estado se usarán?", lang)} />
 
       {/* Doc Types */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 700 }}>{w("Document Types", "Tipos de Documentos", lang)}</span>
-            <span style={{
-              marginLeft: 8, fontSize: 11, fontWeight: 700, background: selectedCount > 0 ? "#EFF6FF" : "hsl(var(--secondary))",
-              color: selectedCount > 0 ? "#1D4ED8" : "hsl(var(--muted-foreground))",
-              border: `1px solid ${selectedCount > 0 ? "#BFDBFE" : "hsl(var(--border))"}`,
-              padding: "1px 7px", borderRadius: 10,
-            }}>
+            <span style={{ fontSize: 11, fontWeight: 700, background: selectedCount > 0 ? "#EFF6FF" : "hsl(var(--secondary))", color: selectedCount > 0 ? "#1D4ED8" : "hsl(var(--muted-foreground))", border: `1px solid ${selectedCount > 0 ? "#BFDBFE" : "hsl(var(--border))"}`, padding: "1px 7px", borderRadius: 10 }}>
               {selectedCount} {w("selected", "seleccionados", lang)}
             </span>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => setState(s => ({ ...s, docTypes: s.docTypes.map(d => ({ ...d, selected: true })) }))}
-              style={{ fontSize: 11, fontWeight: 600, padding: "4px 9px", border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))" }}>
-              {w("Select All", "Seleccionar Todo", lang)}
-            </button>
-            <button onClick={() => setState(s => ({ ...s, docTypes: s.docTypes.map(d => ({ ...d, selected: false })) }))}
-              style={{ fontSize: 11, fontWeight: 600, padding: "4px 9px", border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))" }}>
-              {w("Deselect All", "Deseleccionar Todo", lang)}
-            </button>
+            <button onClick={() => setState(s => ({ ...s, docTypes: s.docTypes.map(d => ({ ...d, selected: true })) }))} style={{ fontSize: 11, fontWeight: 600, padding: "4px 9px", border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))" }}>{w("Select All", "Seleccionar Todo", lang)}</button>
+            <button onClick={() => setState(s => ({ ...s, docTypes: s.docTypes.map(d => ({ ...d, selected: false })) }))} style={{ fontSize: 11, fontWeight: 600, padding: "4px 9px", border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))" }}>{w("Deselect All", "Deseleccionar Todo", lang)}</button>
           </div>
         </div>
 
-        {/* Search */}
         <div style={{ position: "relative", marginBottom: 14 }}>
           <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "hsl(var(--muted-foreground))" }} />
-          <Input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={w("Search document types...", "Buscar tipos de documentos...", lang)}
-            style={{ paddingLeft: 32, fontSize: 13 }} />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={w("Search document types…", "Buscar tipos de documentos…", lang)} style={{ paddingLeft: 32, fontSize: 13 }} />
+          {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 13, height: 13 }} /></button>}
         </div>
 
         {filtered ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 6 }}>
-            {filtered.map(d => (
-              <button key={d.id} onClick={() => toggleDoc(d.id)} style={{
-                padding: "8px 10px", borderRadius: 6, textAlign: "left", cursor: "pointer",
-                border: `2px solid ${d.selected ? "#2563EB" : "hsl(var(--border))"}`,
-                background: d.selected ? "#EFF6FF" : "hsl(var(--card))",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.code}</span>
-                  {d.selected && <Check style={{ width: 11, height: 11, color: "#1D4ED8" }} />}
-                </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))", marginTop: 2 }}>{d.name}</div>
-                <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 1, lineHeight: 1.2 }}>{d.desc}</div>
-              </button>
-            ))}
+            {filtered.map(d => <DocCard key={d.id} d={d} />)}
           </div>
         ) : (
           <div>
             {categories.map(cat => {
               const catTypes = state.docTypes.filter(d => d.category === cat);
+              const catSelected = catTypes.filter(t => t.selected).length;
               const isCollapsed = collapsed[cat];
               return (
                 <div key={cat} style={{ marginBottom: 10 }}>
-                  <button
-                    onClick={() => setCollapsed(c => ({ ...c, [cat]: !c[cat] }))}
-                    style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      width: "100%", padding: "8px 10px", borderRadius: 6,
-                      background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))",
-                      cursor: "pointer", marginBottom: isCollapsed ? 0 : 6,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))" }}>{cat}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "1px 6px", borderRadius: 8 }}>
-                        {catTypes.filter(t => t.selected).length}/{catTypes.length}
-                      </span>
+                  {/* Category header */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: isCollapsed ? 0 : 6 }}>
+                    <button onClick={() => setCollapsed(c => ({ ...c, [cat]: !c[cat] }))} style={{
+                      flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "7px 10px", borderRadius: 6, background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))", cursor: "pointer",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700 }}>{cat}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "1px 6px", borderRadius: 8 }}>{catSelected}/{catTypes.length}</span>
+                      </div>
+                      {isCollapsed ? <ChevronDown style={{ width: 13, height: 13 }} /> : <ChevronUp style={{ width: 13, height: 13 }} />}
+                    </button>
+                    {/* Per-category controls */}
+                    <button onClick={() => selectAllCat(cat)} title={w("Select all in this section", "Seleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "#1D4ED8", flexShrink: 0 }}>✓ {w("All", "Todos", lang)}</button>
+                    <button onClick={() => deselectAllCat(cat)} title={w("Deselect all in this section", "Deseleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>✕ {w("None", "Ninguno", lang)}</button>
+                    <button onClick={() => setAddingToCat(addingToCat === cat ? null : cat)} title={w("Add custom type to this section", "Agregar tipo personalizado a esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
+                      <Plus style={{ width: 10, height: 10 }} />
+                    </button>
+                  </div>
+                  {/* Inline add for category */}
+                  {addingToCat === cat && !isCollapsed && (
+                    <div style={{ padding: "10px 12px", marginBottom: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 7 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 8 }}>{w(`Add to ${cat}`, `Agregar a ${cat}`, lang)}</div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <Input value={customCode} onChange={e => setCustomCode(e.target.value.toUpperCase().slice(0,8))} placeholder={w("Code", "Código", lang)} style={{ width: 80, fontSize: 12, fontFamily: "var(--font-mono)", flexShrink: 0 }} />
+                        <Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder={w("Type Name", "Nombre del tipo", lang)} style={{ flex: 1, minWidth: 120, fontSize: 12 }} />
+                        <Input value={customDesc} onChange={e => setCustomDesc(e.target.value)} placeholder={w("Description (optional)", "Descripción (opcional)", lang)} style={{ flex: 2, minWidth: 120, fontSize: 12 }} />
+                        <Button size="sm" onClick={() => addCustomToCategory(cat)} style={{ fontSize: 12, gap: 4, flexShrink: 0 }}><Plus style={{ width: 11, height: 11 }} />{w("Add", "Agregar", lang)}</Button>
+                        <Button size="sm" variant="outline" onClick={() => { setAddingToCat(null); setCustomCode(""); setCustomName(""); setCustomDesc(""); }} style={{ fontSize: 12, flexShrink: 0 }}>{w("Cancel", "Cancelar", lang)}</Button>
+                      </div>
                     </div>
-                    {isCollapsed ? <ChevronDown style={{ width: 14, height: 14 }} /> : <ChevronUp style={{ width: 14, height: 14 }} />}
-                  </button>
+                  )}
                   {!isCollapsed && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 6 }}>
-                      {catTypes.map(d => (
-                        <button key={d.id} onClick={() => toggleDoc(d.id)} style={{
-                          padding: "8px 10px", borderRadius: 6, textAlign: "left", cursor: "pointer",
-                          border: `2px solid ${d.selected ? "#2563EB" : "hsl(var(--border))"}`,
-                          background: d.selected ? "#EFF6FF" : "hsl(var(--card))",
-                        }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>{d.code}</span>
-                            {d.selected && <Check style={{ width: 11, height: 11, color: "#1D4ED8" }} />}
-                          </div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: d.selected ? "#1D4ED8" : "hsl(var(--foreground))", marginTop: 2 }}>{d.name}</div>
-                          <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 1, lineHeight: 1.2 }}>{d.desc}</div>
-                        </button>
-                      ))}
+                      {catTypes.map(d => <DocCard key={d.id} d={d} />)}
                     </div>
                   )}
                 </div>
@@ -890,46 +928,19 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
             })}
           </div>
         )}
-
-        <div style={{ display: "flex", gap: 8, marginTop: 14, borderTop: "1px solid hsl(var(--border))", paddingTop: 14 }}>
-          <Input value={customCode} onChange={e => setCustomCode(e.target.value.toUpperCase().slice(0,6))} placeholder={w("Code", "Código", lang)} style={{ width: 80, fontSize: 12, fontFamily: "var(--font-mono)", flexShrink: 0 }} />
-          <Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder={w("Type Name", "Nombre del tipo", lang)} style={{ flex: 1, fontSize: 12 }} />
-          <Input value={customDesc} onChange={e => setCustomDesc(e.target.value)} placeholder={w("Description", "Descripción", lang)} style={{ flex: 2, fontSize: 12 }} />
-          <Button variant="outline" size="sm" onClick={addCustomDoc} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}>
-            <Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}
-          </Button>
-        </div>
       </Card>
 
       {/* Sequence Numbers */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Sequence Number Format", "Formato de Número de Secuencia", lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
-          {w("How will files be numbered within each category?", "¿Cómo se numerarán los archivos dentro de cada categoría?", lang)}
-        </div>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>{w("How will files be numbered within each category?", "¿Cómo se numerarán los archivos dentro de cada categoría?", lang)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
           {([3, 4, 5] as const).map(n => (
-            <button key={n} onClick={() => setState(s => ({ ...s, seqDigits: n }))} style={{
-              padding: "12px", borderRadius: 7, cursor: "pointer", textAlign: "center",
-              border: `2px solid ${state.seqDigits === n ? "#2563EB" : "hsl(var(--border))"}`,
-              background: state.seqDigits === n ? "#EFF6FF" : "hsl(var(--card))",
-            }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 900, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 4 }}>
-                {"0".repeat(n - 1)}1
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))" }}>
-                {n} {w("digits", "dígitos", lang)}
-              </div>
-              <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
-                {n === 3 ? w("001 to 999 — smaller projects", "001 a 999 — proyectos pequeños", lang)
-                  : n === 4 ? w("0001 to 9999 — recommended", "0001 a 9999 — recomendado", lang)
-                  : w("00001 to 99999 — very large", "00001 a 99999 — proyectos muy grandes", lang)}
-              </div>
-              {n === 4 && state.seqDigits === 4 && (
-                <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: "#166534", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "1px 6px", borderRadius: 4, display: "inline-block" }}>
-                  ✓ {w("Recommended", "Recomendado", lang)}
-                </div>
-              )}
+            <button key={n} onClick={() => setState(s => ({ ...s, seqDigits: n }))} style={{ padding: "12px", borderRadius: 7, cursor: "pointer", textAlign: "center", border: `2px solid ${state.seqDigits === n ? "#2563EB" : "hsl(var(--border))"}`, background: state.seqDigits === n ? "#EFF6FF" : "hsl(var(--card))" }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 900, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 4 }}>{"0".repeat(n - 1)}1</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))" }}>{n} {w("digits", "dígitos", lang)}</div>
+              <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{n === 3 ? w("001 to 999 — smaller projects", "001 a 999 — proyectos pequeños", lang) : n === 4 ? w("0001 to 9999 — recommended", "0001 a 9999 — recomendado", lang) : w("00001 to 99999 — very large", "00001 a 99999 — proyectos muy grandes", lang)}</div>
+              {n === 4 && state.seqDigits === 4 && <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: "#166534", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "1px 6px", borderRadius: 4, display: "inline-block" }}>✓ {w("Recommended", "Recomendado", lang)}</div>}
             </button>
           ))}
         </div>
@@ -939,30 +950,25 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
       {/* Status Codes */}
       <Card>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Status Codes", "Códigos de Estado", lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
-          {w("Status codes indicate the suitability of a document for its intended purpose.", "Los códigos de estado indican la idoneidad del documento para su propósito.", lang)}
-        </div>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>{w("Status codes indicate the suitability of a document for its intended purpose.", "Los códigos de estado indican la idoneidad del documento para su propósito.", lang)}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
           {state.statusCodes.map(sc => (
-            <button key={sc.id} onClick={() => toggleStatus(sc.id)} title={sc.meaning} style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              padding: "5px 10px", borderRadius: 6, cursor: "pointer",
-              border: `1px solid ${sc.selected ? "#2563EB" : "hsl(var(--border))"}`,
-              background: sc.selected ? "#EFF6FF" : "hsl(var(--card))",
-              color: sc.selected ? "#1D4ED8" : "hsl(var(--foreground))",
-            }}>
+            <button key={sc.id} onClick={() => toggleStatus(sc.id)} title={sc.meaning} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 6, cursor: "pointer", border: `1px solid ${sc.selected ? "#2563EB" : "hsl(var(--border))"}`, background: sc.selected ? "#EFF6FF" : "hsl(var(--card))", color: sc.selected ? "#1D4ED8" : "hsl(var(--foreground))" }}>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700 }}>{sc.code}</span>
               <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{sc.meaning}</span>
-              {!sc.selected && <X style={{ width: 9, height: 9, opacity: 0.4 }} />}
+              {sc.custom && (
+                <button onClick={e => { e.stopPropagation(); setState(s => ({ ...s, statusCodes: s.statusCodes.filter(x => x.id !== sc.id) })); }} style={{ padding: 0, border: "none", background: "transparent", cursor: "pointer", color: "#93C5FD" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "#93C5FD")}>
+                  <X style={{ width: 9, height: 9 }} />
+                </button>
+              )}
             </button>
           ))}
         </div>
         <div style={{ display: "flex", gap: 8, borderTop: "1px solid hsl(var(--border))", paddingTop: 12 }}>
           <Input value={customStatusCode} onChange={e => setCustomStatusCode(e.target.value.toUpperCase().slice(0,6))} placeholder={w("Code", "Código", lang)} style={{ width: 80, fontSize: 12, fontFamily: "var(--font-mono)", flexShrink: 0 }} />
           <Input value={customStatusMeaning} onChange={e => setCustomStatusMeaning(e.target.value)} onKeyDown={e => e.key === "Enter" && addCustomStatus()} placeholder={w("Meaning / description", "Significado", lang)} style={{ flex: 1, fontSize: 12 }} />
-          <Button variant="outline" size="sm" onClick={addCustomStatus} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}>
-            <Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}
-          </Button>
+          <Button variant="outline" size="sm" onClick={addCustomStatus} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}</Button>
         </div>
       </Card>
     </div>
@@ -979,72 +985,53 @@ function Step4({ state, setState, lang }: { state: WizardState; setState: React.
     setCustomRev("");
   };
 
-  const selectedDiscs  = state.disciplines.filter(d => d.selected);
-  const selectedLevels = generateLevelCodes(state.floorsAbove, state.basements, state.hasGroundFloor, state.groundFloorCode, state.hasRoof, state.roofCode, state.includeZZ, state.customLevels);
-
-  const MANDATORY_FIELD_KEYS = ["Project Code","Originator","Discipline","Level","Type","Sequence","Status","Revision"];
-
+  const selectedDiscs = state.disciplines.filter(d => d.selected);
   const revExamples = buildRevisionCodes(state.revisionFormat, state.customRevisions);
+  const MANDATORY_FIELD_KEYS = ["Project Code","Originator","Discipline","Level","Type","Sequence","Status","Revision"];
 
   return (
     <div>
       <SectionTitle title={w("Revision codes and advanced settings", "Códigos de revisión y configuración avanzada", lang)} />
 
-      {/* Revision format */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Revision Format", "Formato de Revisión", lang)}</div>
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>{w("How will document revisions be tracked?", "¿Cómo se rastrearán las revisiones?", lang)}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
           {(["alpha","numerical","custom"] as const).map(fmt => (
-            <button key={fmt} onClick={() => setState(s => ({ ...s, revisionFormat: fmt }))} style={{
-              padding: "12px", borderRadius: 7, cursor: "pointer", textAlign: "left",
-              border: `2px solid ${state.revisionFormat === fmt ? "#2563EB" : "hsl(var(--border))"}`,
-              background: state.revisionFormat === fmt ? "#EFF6FF" : "hsl(var(--card))",
-            }}>
+            <button key={fmt} onClick={() => setState(s => ({ ...s, revisionFormat: fmt }))} style={{ padding: "12px", borderRadius: 7, cursor: "pointer", textAlign: "left", border: `2px solid ${state.revisionFormat === fmt ? "#2563EB" : "hsl(var(--border))"}`, background: state.revisionFormat === fmt ? "#EFF6FF" : "hsl(var(--card))" }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: state.revisionFormat === fmt ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 4 }}>
                 {fmt === "alpha" ? w("Alphabetical","Alfabético",lang) : fmt === "numerical" ? w("Numerical with prefix","Numérico con prefijo",lang) : w("Custom","Personalizado",lang)}
               </div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                {fmt === "alpha" ? "A  B  C  D  E…" : fmt === "numerical" ? "P01  P02  C01  C02…" : w("Define your own sequence","Define tu propia secuencia",lang)}
+                {fmt === "alpha" ? "A  B  C  D  E…" : fmt === "numerical" ? "P01  P02  C01  C02…" : w("Define your own","Define el tuyo",lang)}
               </div>
             </button>
           ))}
         </div>
         {state.revisionFormat === "custom" && (
-          <div>
+          <div style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-              <Input value={customRev} onChange={e => setCustomRev(e.target.value.toUpperCase())}
-                onKeyDown={e => e.key === "Enter" && addCustomRev()}
-                placeholder={w("Enter revision code and press Enter", "Ingresa código de revisión y presiona Enter", lang)}
-                style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)" }} />
-              <Button variant="outline" size="sm" onClick={addCustomRev} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}>
-                <Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}
-              </Button>
+              <Input value={customRev} onChange={e => setCustomRev(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && addCustomRev()} placeholder={w("Enter revision code", "Ingresa código de revisión", lang)} style={{ flex: 1, fontSize: 12, fontFamily: "var(--font-mono)" }} />
+              <Button variant="outline" size="sm" onClick={addCustomRev} style={{ gap: 4, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 12, height: 12 }} />{w("Add", "Agregar", lang)}</Button>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {state.customRevisions.map((r, i) => (
                 <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "2px 7px", borderRadius: 4 }}>
                   {r}
-                  <button onClick={() => setState(s => ({ ...s, customRevisions: s.customRevisions.filter((_,j) => j!==i) }))} style={{ border: "none", background: "transparent", cursor: "pointer", padding: 0, lineHeight: 1 }}>
-                    <X style={{ width: 10, height: 10 }} />
-                  </button>
+                  <button onClick={() => setState(s => ({ ...s, customRevisions: s.customRevisions.filter((_,j) => j!==i) }))} style={{ border: "none", background: "transparent", cursor: "pointer", padding: 0, lineHeight: 1 }}><X style={{ width: 10, height: 10 }} /></button>
                 </span>
               ))}
             </div>
           </div>
         )}
         {revExamples.length > 0 && (
-          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 4 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
             <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginRight: 4, alignSelf: "center" }}>{w("Preview:","Vista previa:",lang)}</span>
-            {revExamples.slice(0,10).map(r => (
-              <span key={r} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: "#F5F3FF", color: "#5B21B6", border: "1px solid #DDD6FE", padding: "2px 6px", borderRadius: 4 }}>{r}</span>
-            ))}
-            {revExamples.length > 10 && <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>+{revExamples.length - 10}</span>}
+            {revExamples.slice(0,12).map(r => <span key={r} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: "#F5F3FF", color: "#5B21B6", border: "1px solid #DDD6FE", padding: "2px 6px", borderRadius: 4 }}>{r}</span>)}
           </div>
         )}
       </Card>
 
-      {/* Mandatory Fields */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Mandatory Fields","Campos Obligatorios",lang)}</div>
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>{w("Files missing mandatory fields will be rejected.","Los archivos sin campos obligatorios serán rechazados.",lang)}</div>
@@ -1058,85 +1045,62 @@ function Step4({ state, setState, lang }: { state: WizardState; setState: React.
         </div>
       </Card>
 
-      {/* Grace Period */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Grace Period","Período de Gracia",lang)}</div>
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Give your team time to adapt before violations are hard rejected.","Dale a tu equipo tiempo para adaptarse antes del rechazo estricto.",lang)}</div>
         <Toggle checked={state.gracePeriod} onChange={v => setState(s => ({ ...s, gracePeriod: v }))} label={w("Enable grace period","Habilitar período de gracia",lang)} />
         {state.gracePeriod && (
           <div style={{ marginLeft: 54, display: "flex", alignItems: "center", gap: 10, marginTop: -4 }}>
-            <Input type="number" min={1} max={365} value={state.graceDays}
-              onChange={e => setState(s => ({ ...s, graceDays: Math.max(1, parseInt(e.target.value) || 7) }))}
-              style={{ width: 80, fontSize: 13 }} />
-            <span style={{ fontSize: 13, color: "hsl(var(--muted-foreground))" }}>{w("days — violations flagged but not rejected","días — las violaciones se marcan pero no se rechazan",lang)}</span>
+            <Input type="number" min={1} max={365} value={state.graceDays} onChange={e => setState(s => ({ ...s, graceDays: Math.max(1, parseInt(e.target.value) || 7) }))} style={{ width: 80, fontSize: 13 }} />
+            <span style={{ fontSize: 13, color: "hsl(var(--muted-foreground))" }}>{w("days","días",lang)}</span>
           </div>
         )}
       </Card>
 
-      {/* Onboarding Acceptance */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Onboarding Acceptance","Aceptación de Incorporación",lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Require every team member to read and accept this convention before uploading.","Requiere que cada miembro lea y acepte esta convención antes de cargar.",lang)}</div>
         <Toggle checked={state.requireAcceptance} onChange={v => setState(s => ({ ...s, requireAcceptance: v }))} label={w("Require convention acceptance","Requerir aceptación de la convención",lang)} />
-        <div style={{ marginTop: 8, padding: "10px 12px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11, color: "#1E40AF" }}>
-          {w("When a new team member is added they will see the full convention and must click 'I understand and accept' before uploading. Their acceptance is timestamped and permanently recorded.","Cuando se agrega un miembro, verá la convención completa y debe hacer clic en 'Entiendo y acepto' antes de cargar. La aceptación queda registrada de forma permanente.",lang)}
+        <div style={{ marginTop: 6, padding: "10px 12px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11, color: "#1E40AF" }}>
+          {w("Every new team member must click 'I understand and accept' before uploading. Acceptance is timestamped and permanently recorded.","Cada nuevo miembro debe hacer clic en 'Entiendo y acepto' antes de cargar. La aceptación queda registrada permanentemente.",lang)}
         </div>
       </Card>
 
-      {/* Save as Template */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("Convention Template","Plantilla de Convención",lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Save this convention as a template to reuse on future projects.","Guarda esta convención como plantilla para reutilizar en proyectos futuros.",lang)}</div>
         <Toggle checked={state.saveAsTemplate} onChange={v => setState(s => ({ ...s, saveAsTemplate: v }))} label={w("Save as template","Guardar como plantilla",lang)} />
         {state.saveAsTemplate && (
           <div style={{ marginLeft: 54, marginTop: -4 }}>
-            <Input value={state.templateName} onChange={e => setState(s => ({ ...s, templateName: e.target.value }))}
-              placeholder={w("Template name...","Nombre de la plantilla...",lang)} style={{ fontSize: 13 }} />
+            <Input value={state.templateName} onChange={e => setState(s => ({ ...s, templateName: e.target.value }))} placeholder={w("Template name…","Nombre de la plantilla…",lang)} style={{ fontSize: 13 }} />
           </div>
         )}
       </Card>
 
-      {/* File Extensions */}
       <Card>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{w("File Extensions by Discipline","Extensiones por Disciplina",lang)}</div>
-        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Optionally restrict which file types each discipline can submit.","Opcionalmente restringe qué tipos de archivo puede enviar cada disciplina.",lang)}</div>
         <div style={{ marginBottom: 8, padding: "10px 12px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11, color: "#1E40AF" }}>
-          <strong>{w("About file extensions:","Sobre las extensiones de archivo:",lang)}</strong> {w("Extensions (.rvt, .dwg, .pdf, etc.) are NOT part of the naming convention itself. They are determined by the software or format used. BIMLog validates only the filename stem — everything before the last dot.","Las extensiones (.rvt, .dwg, .pdf, etc.) NO son parte de la convención de nombres. Son determinadas por el software o formato. BIMLog valida solo el nombre del archivo sin la extensión.",lang)}
+          <strong>{w("Note:","Nota:",lang)}</strong> {w("Extensions (.rvt, .dwg, .pdf, etc.) are NOT part of the naming convention. They are determined by the software format. BIMLog validates only the filename before the extension.","Las extensiones (.rvt, .dwg, .pdf) NO son parte de la convención. Las determina el formato del software. BIMLog valida solo el nombre sin la extensión.",lang)}
         </div>
-        <Toggle checked={state.enableExtRestrictions} onChange={v => setState(s => ({ ...s, enableExtRestrictions: v }))}
-          label={w("Enable file type restrictions per discipline","Habilitar restricciones de tipo de archivo por disciplina",lang)} />
+        <Toggle checked={state.enableExtRestrictions} onChange={v => setState(s => ({ ...s, enableExtRestrictions: v }))} label={w("Enable file type restrictions per discipline","Habilitar restricciones por disciplina",lang)} />
         {state.enableExtRestrictions && selectedDiscs.length > 0 && (
           <div style={{ marginTop: 10, overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid hsl(var(--border))", fontWeight: 700, fontSize: 11 }}>
-                    {w("Discipline","Disciplina",lang)}
-                  </th>
-                  {FILE_EXTENSIONS.map(ext => (
-                    <th key={ext} style={{ textAlign: "center", padding: "6px 4px", borderBottom: "1px solid hsl(var(--border))", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{ext}</th>
-                  ))}
+                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: "1px solid hsl(var(--border))", fontWeight: 700, fontSize: 11 }}>{w("Discipline","Disciplina",lang)}</th>
+                  {FILE_EXTENSIONS.map(ext => <th key={ext} style={{ textAlign: "center", padding: "6px 4px", borderBottom: "1px solid hsl(var(--border))", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{ext}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {selectedDiscs.map(d => (
                   <tr key={d.id}>
                     <td style={{ padding: "6px 8px", borderBottom: "1px solid hsl(var(--border))", fontWeight: 600, fontSize: 12 }}>
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "1px 5px", borderRadius: 3, marginRight: 5 }}>{d.code}</span>
-                      {d.name}
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "1px 5px", borderRadius: 3, marginRight: 5 }}>{d.code}</span>{d.name}
                     </td>
                     {FILE_EXTENSIONS.map(ext => {
                       const allowed = state.extRestrictions[d.code]?.includes(ext) ?? false;
-                      return (
-                        <td key={ext} style={{ textAlign: "center", padding: "6px 4px", borderBottom: "1px solid hsl(var(--border))" }}>
-                          <input type="checkbox" checked={allowed}
-                            onChange={e => setState(s => {
-                              const cur = s.extRestrictions[d.code] || [];
-                              return { ...s, extRestrictions: { ...s.extRestrictions, [d.code]: e.target.checked ? [...cur, ext] : cur.filter(x => x !== ext) } };
-                            })}
-                            style={{ width: 13, height: 13, accentColor: "#2563EB", cursor: "pointer" }} />
-                        </td>
-                      );
+                      return <td key={ext} style={{ textAlign: "center", padding: "6px 4px", borderBottom: "1px solid hsl(var(--border))" }}>
+                        <input type="checkbox" checked={allowed} onChange={e => setState(s => { const cur = s.extRestrictions[d.code] || []; return { ...s, extRestrictions: { ...s.extRestrictions, [d.code]: e.target.checked ? [...cur, ext] : cur.filter(x => x !== ext) } }; })} style={{ width: 13, height: 13, accentColor: "#2563EB", cursor: "pointer" }} />
+                      </td>;
                     })}
                   </tr>
                 ))}
@@ -1150,25 +1114,15 @@ function Step4({ state, setState, lang }: { state: WizardState; setState: React.
 }
 
 // ─── review screen ────────────────────────────────────────────────────────────
-function ReviewScreen({
-  state, onEdit, onSave, isSaving, saved, savedMessage, lang, projectId
-}: {
-  state: WizardState;
-  onEdit: (step: number) => void;
-  onSave: () => void;
-  isSaving: boolean;
-  saved: boolean;
-  savedMessage: string;
-  lang: string;
-  projectId: number;
+function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, lang, projectId }: {
+  state: WizardState; onEdit: (step: number) => void; onSave: () => void; isSaving: boolean; saved: boolean; savedMessage: string; lang: string; projectId: number;
 }) {
-  const levels = generateLevelCodes(state.floorsAbove, state.basements, state.hasGroundFloor, state.groundFloorCode, state.hasRoof, state.roofCode, state.includeZZ, state.customLevels);
+  const levels = state.levelList.map(l => l.code);
   const revCodes = buildRevisionCodes(state.revisionFormat, state.customRevisions);
   const selectedDiscs = state.disciplines.filter(d => d.selected);
   const selectedDocs  = state.docTypes.filter(d => d.selected);
   const selectedStatus = state.statusCodes.filter(sc => sc.selected);
   const sep = state.separator;
-
   const seqSample = "0".repeat(state.seqDigits - 1) + "1";
 
   const sampleParts = [
@@ -1187,156 +1141,94 @@ function ReviewScreen({
     const win = window.open("", "_blank");
     if (!win) return;
     const graceTo = state.gracePeriod ? new Date(Date.now() + state.graceDays * 86400000).toLocaleDateString() : null;
-    win.document.write(`<!DOCTYPE html><html><head><title>Naming Convention — Project ${projectId}</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 850px; margin: 40px auto; color: #111; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  h2 { font-size: 15px; margin: 20px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
-  .sample { font-family: monospace; font-size: 20px; font-weight: 900; background: #EFF6FF; padding: 12px 16px; border-radius: 6px; margin: 12px 0; word-break: break-all; }
-  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
-  .chip { font-family: monospace; font-size: 11px; font-weight: 700; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; padding: 2px 7px; border-radius: 4px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-  .sig { margin-top: 60px; border-top: 1px solid #999; padding-top: 12px; font-size: 12px; color: #666; }
-  @media print { body { margin: 20px; } }
-</style></head><body>
+    win.document.write(`<!DOCTYPE html><html><head><title>Naming Convention</title><style>body{font-family:Arial,sans-serif;max-width:850px;margin:40px auto;color:#111}h1{font-size:22px}h2{font-size:15px;margin:18px 0 6px;border-bottom:1px solid #ccc;padding-bottom:4px}.sample{font-family:monospace;font-size:20px;font-weight:900;background:#EFF6FF;padding:12px 16px;border-radius:6px;margin:12px 0;word-break:break-all}.chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}.chip{font-family:monospace;font-size:11px;font-weight:700;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;padding:2px 7px;border-radius:4px}.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:13px}.sig{margin-top:60px;border-top:1px solid #999;padding-top:12px;font-size:12px;color:#666}@media print{body{margin:20px}}</style></head><body>
 <h1>BIMLog — Naming Convention</h1>
-<div style="font-size:13px;color:#666;margin-bottom:16px;">Project ID: ${projectId} &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString()}</div>
+<div style="font-size:13px;color:#666;margin-bottom:16px;">Project ID: ${projectId} | Generated: ${new Date().toLocaleDateString()}</div>
 <div class="sample">${sampleName}</div>
-<h2>Convention Summary</h2>
+<h2>Summary</h2>
 <div class="row"><span>Separator</span><span><strong>${sep === "-" ? "Hyphen (-)" : "Underscore (_)"}</strong></span></div>
 <div class="row"><span>Enforce Uppercase</span><span><strong>${state.enforceUppercase ? "Yes" : "No"}</strong></span></div>
 <div class="row"><span>Sequence Format</span><span><strong>${state.seqDigits} digits</strong></span></div>
 <div class="row"><span>Revision Format</span><span><strong>${state.revisionFormat}</strong></span></div>
 <div class="row"><span>Grace Period</span><span><strong>${state.gracePeriod ? `${state.graceDays} days (until ${graceTo})` : "Off"}</strong></span></div>
-<div class="row"><span>Onboarding Acceptance</span><span><strong>${state.requireAcceptance ? "Required" : "Not Required"}</strong></span></div>
-
-<h2>Companies / Originators</h2>
-<div class="chips">${state.companies.map(c => `<span class="chip">${c.code} — ${c.name}</span>`).join("")}</div>
-
-<h2>Disciplines</h2>
-<div class="chips">${selectedDiscs.map(d => `<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
-
-<h2>Building Levels (${levels.length})</h2>
-<div class="chips">${levels.map(l => `<span class="chip">${l}</span>`).join("")}</div>
-
-<h2>Document Types (${selectedDocs.length})</h2>
-<div class="chips">${selectedDocs.map(d => `<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
-
-<h2>Status Codes</h2>
-<div class="chips">${selectedStatus.map(sc => `<span class="chip">${sc.code} — ${sc.meaning}</span>`).join("")}</div>
-
-<h2>Revision Codes</h2>
-<div class="chips">${revCodes.map(r => `<span class="chip">${r}</span>`).join("")}</div>
-
-<div class="sig">
-  <p>I have read and understood the naming convention for this project.</p>
-  <br/>
-  <p>Name: _____________________________ &nbsp;&nbsp; Company: _____________________________</p>
-  <br/>
-  <p>Signature: _________________________ &nbsp;&nbsp; Date: ________________________________</p>
-</div>
+<h2>Companies</h2><div class="chips">${state.companies.map(c=>`<span class="chip">${c.code} — ${c.name}</span>`).join("")}</div>
+<h2>Disciplines</h2><div class="chips">${selectedDiscs.map(d=>`<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
+<h2>Building Levels (${levels.length})</h2><div class="chips">${levels.map(l=>`<span class="chip">${l}</span>`).join("")}</div>
+<h2>Document Types (${selectedDocs.length})</h2><div class="chips">${selectedDocs.map(d=>`<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
+<h2>Status Codes</h2><div class="chips">${selectedStatus.map(sc=>`<span class="chip">${sc.code} — ${sc.meaning}</span>`).join("")}</div>
+<h2>Revision Codes</h2><div class="chips">${revCodes.map(r=>`<span class="chip">${r}</span>`).join("")}</div>
+<div class="sig"><p>I have read and understood the naming convention for this project.</p><br/><p>Name: _____________________________ &nbsp;&nbsp; Company: _____________________________</p><br/><p>Signature: _________________________ &nbsp;&nbsp; Date: ________________________________</p></div>
 </body></html>`);
-    win.document.close();
-    win.print();
+    win.document.close(); win.print();
   };
 
   const sections = [
-    { title: w("Companies / Originators","Empresas / Originadores",lang), step: 0, chips: state.companies.map(c => c.code), detail: state.companies.map(c => `${c.code} — ${c.name}`) },
+    { title: w("Companies / Originators","Empresas / Originadores",lang), step: 0, chips: state.companies.map(c => c.code) },
     { title: w("Disciplines","Disciplinas",lang), step: 1, chips: selectedDiscs.map(d => d.code) },
     { title: w("Building Levels","Niveles del Edificio",lang), step: 1, chips: levels },
     { title: w("Document Types","Tipos de Documentos",lang), step: 2, chips: selectedDocs.map(d => d.code) },
-    { title: w("Status Codes","Códigos de Estado",lang), step: 2, chips: selectedStatus.map(sc => `${sc.code}`) },
+    { title: w("Status Codes","Códigos de Estado",lang), step: 2, chips: selectedStatus.map(sc => sc.code) },
     { title: w("Revision Codes","Códigos de Revisión",lang), step: 3, chips: revCodes },
   ];
 
   return (
     <div>
       <SectionTitle title={w("Review your convention before saving","Revisa tu convención antes de guardar",lang)} />
-
       {saved && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", marginBottom: 16, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#166534" }}>
-          <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />
-          {savedMessage}
+          <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />{savedMessage}
         </div>
       )}
-
-      {/* Large sample name */}
       <Card style={{ marginBottom: 16, background: "#F0F7FF", border: "1px solid #BFDBFE" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
-          {w("Sample File Name","Nombre de Archivo de Muestra",lang)}
-        </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 900, color: "#0F1623", wordBreak: "break-all", lineHeight: 1.3 }}>
-          {sampleName}
-        </div>
-        <div style={{ marginTop: 10, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-          {w("File extensions (.rvt, .dwg, .pdf, etc.) are not part of the convention — they are determined by the software format used.","Las extensiones (.rvt, .dwg, .pdf) no son parte de la convención — las determina el formato del software.",lang)}
-        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{w("Sample File Name","Nombre de Archivo de Muestra",lang)}</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 900, color: "#0F1623", wordBreak: "break-all", lineHeight: 1.3 }}>{sampleName}</div>
+        <div style={{ marginTop: 10, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("File extensions are not part of the convention — determined by software format.","Las extensiones no son parte de la convención — las determina el formato del software.",lang)}</div>
       </Card>
-
-      {/* Field sections */}
       {sections.map(sec => (
         <Card key={sec.title} style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 700 }}>{sec.title}</span>
-            <button onClick={() => onEdit(sec.step)} style={{
-              fontSize: 11, fontWeight: 600, padding: "4px 10px",
-              border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer",
-              background: "hsl(var(--card))", color: "hsl(var(--foreground))",
-              display: "flex", alignItems: "center", gap: 4,
-            }}>
-              <Edit2 style={{ width: 11, height: 11 }} />
-              {w("Edit","Editar",lang)}
+            <button onClick={() => onEdit(sec.step)} style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", display: "flex", alignItems: "center", gap: 4 }}>
+              <Edit2 style={{ width: 11, height: 11 }} />{w("Edit","Editar",lang)}
             </button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {sec.chips.length > 0
-              ? sec.chips.map((chip, i) => {
-                  const c = CHIP_COLORS[i % CHIP_COLORS.length];
-                  return (
-                    <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: c.bg, color: c.color, border: `1px solid ${c.border}`, padding: "2px 7px", borderRadius: 4 }}>
-                      {chip}
-                    </span>
-                  );
-                })
+              ? sec.chips.map((chip, i) => { const c = CHIP_COLORS[i % CHIP_COLORS.length]; return <span key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, background: c.bg, color: c.color, border: `1px solid ${c.border}`, padding: "2px 7px", borderRadius: 4 }}>{chip}</span>; })
               : <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("None selected","Ninguno seleccionado",lang)}</span>
             }
           </div>
         </Card>
       ))}
-
-      {/* Summary panel */}
       <Card style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>{w("Full Summary","Resumen Completo",lang)}</div>
         {[
           [w("Total fields","Total de campos",lang), "8"],
-          [w("Separator","Separador",lang), sep === "-" ? w("Hyphen (-)","Guión (-)",lang) : w("Underscore (_)","Guión bajo (_)",lang)],
+          [w("Separator","Separador",lang), sep === "-" ? "Hyphen (-)" : "Underscore (_)"],
           [w("Enforce uppercase","Mayúsculas obligatorias",lang), state.enforceUppercase ? w("Yes","Sí",lang) : "No"],
           [w("Companies","Empresas",lang), `${state.companies.length}`],
           [w("Disciplines","Disciplinas",lang), `${selectedDiscs.length} ${w("selected","seleccionadas",lang)}`],
-          [w("Levels","Niveles",lang), `${levels.length} ${w("generated","generados",lang)}`],
+          [w("Levels","Niveles",lang), `${levels.length} ${w("total","total",lang)}`],
           [w("Document types","Tipos de documentos",lang), `${selectedDocs.length} ${w("selected","seleccionados",lang)}`],
           [w("Sequence format","Formato de secuencia",lang), `${state.seqDigits} ${w("digits","dígitos",lang)}`],
           [w("Status codes","Códigos de estado",lang), `${selectedStatus.length} ${w("defined","definidos",lang)}`],
-          [w("Revision format","Formato de revisión",lang), state.revisionFormat === "alpha" ? w("Alphabetical","Alfabético",lang) : state.revisionFormat === "numerical" ? w("Numerical with prefix","Numérico con prefijo",lang) : w("Custom","Personalizado",lang)],
-          [w("Grace period","Período de gracia",lang), state.gracePeriod ? `${w("On","Activo",lang)} — ${state.graceDays} ${w("days","días",lang)}` : w("Off","Inactivo",lang)],
+          [w("Revision format","Formato de revisión",lang), state.revisionFormat],
+          [w("Grace period","Período de gracia",lang), state.gracePeriod ? `${state.graceDays} ${w("days","días",lang)}` : w("Off","Inactivo",lang)],
           [w("Onboarding acceptance","Aceptación de incorporación",lang), state.requireAcceptance ? w("Required","Requerida",lang) : w("Not required","No requerida",lang)],
-          [w("Convention template","Plantilla de convención",lang), state.saveAsTemplate && state.templateName ? state.templateName : w("Not saved","No guardada",lang)],
+          [w("Template","Plantilla",lang), state.saveAsTemplate && state.templateName ? state.templateName : w("Not saved","No guardada",lang)],
         ].map(([label, val]) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid hsl(var(--border))", fontSize: 12 }}>
             <span style={{ color: "hsl(var(--muted-foreground))" }}>{label}</span>
-            <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{val}</span>
+            <span style={{ fontWeight: 600 }}>{val}</span>
           </div>
         ))}
       </Card>
-
       <div style={{ display: "flex", gap: 10 }}>
         <Button onClick={onSave} disabled={isSaving} style={{ flex: 1, gap: 6, fontSize: 14, fontWeight: 700, height: 44 }}>
           {isSaving ? w("Saving…","Guardando…",lang) : w("Save Convention","Guardar Convención",lang)}
         </Button>
         <Button variant="outline" onClick={handleExportPDF} style={{ gap: 6, fontSize: 13, height: 44 }}>
-          <Download style={{ width: 14, height: 14 }} />
-          {w("Export PDF","Exportar PDF",lang)}
+          <Download style={{ width: 14, height: 14 }} />{w("Export PDF","Exportar PDF",lang)}
         </Button>
       </div>
     </div>
@@ -1344,47 +1236,22 @@ function ReviewScreen({
 }
 
 // ─── edit mode ────────────────────────────────────────────────────────────────
-function EditMode({ convention, onRunWizard, lang, projectId, onSaved }: {
-  convention: any;
-  onRunWizard: () => void;
-  lang: string;
-  projectId: number;
-  onSaved: () => void;
-}) {
+function EditMode({ convention, onRunWizard, lang, projectId }: { convention: any; onRunWizard: () => void; lang: string; projectId: number; }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [fields, setFields] = useState(
     [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder)
       .map((f: any) => ({ ...f, values: (f.allowedValues || []).join(", ") }))
   );
-  const [dragIdx, setDragIdx] = useState<number | null>(null);
-
   const { mutate, isPending } = useUpsertConvention({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/conventions`] });
-        toast({ title: w("Convention updated","Convención actualizada",lang) });
-        onSaved();
-      },
+      onSuccess: () => { queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/conventions`] }); toast({ title: w("Convention updated","Convención actualizada",lang) }); },
       onError: () => toast({ title: "Error saving", variant: "destructive" }),
     },
   });
-
   const handleSave = () => {
-    mutate({
-      projectId,
-      data: {
-        separator: convention.separator,
-        isActive: convention.isActive,
-        fields: fields.map((f, i) => ({
-          label: f.label,
-          fieldOrder: i,
-          allowedValues: f.values.split(",").map((v: string) => v.trim()).filter(Boolean),
-        })),
-      },
-    });
+    mutate({ projectId, data: { separator: convention.separator, isActive: convention.isActive, fields: fields.map((f, i) => ({ label: f.label, fieldOrder: i, allowedValues: f.values.split(",").map((v: string) => v.trim()).filter(Boolean) })) } });
   };
-
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
@@ -1393,47 +1260,31 @@ function EditMode({ convention, onRunWizard, lang, projectId, onSaved }: {
           <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Edit fields inline. Drag to reorder.","Edita campos en línea. Arrastra para reordenar.",lang)}</div>
         </div>
         <Button variant="outline" onClick={onRunWizard} style={{ gap: 6, fontSize: 12 }}>
-          <RotateCcw style={{ width: 13, height: 13 }} />
-          {w("Re-run setup wizard","Reejecutar asistente",lang)}
+          <RotateCcw style={{ width: 13, height: 13 }} />{w("Re-run setup wizard","Reejecutar asistente",lang)}
         </Button>
       </div>
-
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "grid", gridTemplateColumns: "24px 24px 1fr 2fr 28px", gap: 8, paddingLeft: 4, paddingRight: 4, marginBottom: 4 }}>
           <div /><div />
           <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{w("Field Label","Etiqueta",lang)}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{w("Allowed Values (comma-separated)","Valores permitidos (separados por coma)",lang)}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>{w("Allowed Values (comma-separated)","Valores permitidos",lang)}</div>
           <div />
         </div>
         {fields.map((f, idx) => {
           const c = CHIP_COLORS[idx % CHIP_COLORS.length];
           return (
-            <div key={f.id ?? idx} style={{
-              display: "grid", gridTemplateColumns: "24px 24px 1fr 2fr 28px",
-              gap: 8, alignItems: "center",
-              background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, padding: "10px 10px",
-            }}>
-              <div style={{ cursor: "grab", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}>
-                <GripVertical style={{ width: 14, height: 14 }} />
-              </div>
-              <span style={{
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                width: 22, height: 22, borderRadius: 5,
-                background: c.bg, color: c.color, border: `1px solid ${c.border}`,
-                fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
-              }}>{idx + 1}</span>
+            <div key={f.id ?? idx} style={{ display: "grid", gridTemplateColumns: "24px 24px 1fr 2fr 28px", gap: 8, alignItems: "center", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, padding: "10px 10px" }}>
+              <div style={{ cursor: "grab", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}><GripVertical style={{ width: 14, height: 14 }} /></div>
+              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 5, background: c.bg, color: c.color, border: `1px solid ${c.border}`, fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{idx + 1}</span>
               <Input value={f.label} onChange={e => setFields(prev => prev.map((x, i) => i === idx ? { ...x, label: e.target.value } : x))} style={{ fontSize: 13 }} />
               <Input value={f.values} onChange={e => setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: e.target.value } : x))} style={{ fontSize: 12, fontFamily: "var(--font-mono)" }} />
-              <button onClick={() => setFields(prev => prev.filter((_, i) => i !== idx))}
-                style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
+              <button onClick={() => setFields(prev => prev.filter((_, i) => i !== idx))} style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }} onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
                 <Trash2 style={{ width: 13, height: 13 }} />
               </button>
             </div>
           );
         })}
       </div>
-
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(var(--border))" }}>
         <Button variant="outline" onClick={() => setFields(prev => [...prev, { id: uid(), label: `Field ${prev.length + 1}`, values: "", fieldOrder: prev.length }])} style={{ gap: 5, fontSize: 12 }}>
           <Plus style={{ width: 12, height: 12 }} />{w("Add Field","Agregar Campo",lang)}
@@ -1456,20 +1307,14 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const { data: convention, isLoading, isError, refetch } = useGetConvention(projectId);
   const [forceWizard, setForceWizard] = useState(false);
 
-  const initDisciplines = (): DisciplineEntry[] =>
-    DEFAULT_DISCIPLINES.map(d => ({ ...d, id: uid(), selected: true }));
-
-  const initDocTypes = (): DocTypeEntry[] =>
-    DOC_TYPE_CATEGORIES.flatMap(cat =>
-      cat.types.map(t => ({ ...t, id: uid(), category: cat.cat, selected: false }))
-    );
-
-  const initStatusCodes = (): StatusEntry[] =>
-    DEFAULT_STATUS.map(sc => ({ ...sc, id: uid(), selected: true }));
+  const initDisciplines = (): DisciplineEntry[] => DEFAULT_DISCIPLINES.map(d => ({ ...d, id: uid(), selected: true }));
+  const initDocTypes    = (): DocTypeEntry[] => DOC_TYPE_CATEGORIES.flatMap(cat => cat.types.map(t => ({ ...t, id: uid(), category: cat.cat, selected: false })));
+  const initStatusCodes = (): StatusEntry[] => DEFAULT_STATUS.map(sc => ({ ...sc, id: uid(), selected: true }));
+  const initLevelList   = (): LevelEntry[] => buildLevelList(10, 1, true, "G0", true, "RF", true);
 
   const [ws, setWs] = useState<WizardState>(() => ({
     step: 0,
-    companies: user ? [{ id: uid(), name: user.companyName, code: user.companyName.slice(0, 3).toUpperCase() }] : [],
+    companies: user ? [{ id: uid(), name: user.companyName, code: user.companyName.slice(0,3).toUpperCase() }] : [],
     separator: "-",
     enforceUppercase: true,
     applyCharLimits: false,
@@ -1481,7 +1326,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     hasRoof: true,
     roofCode: "RF",
     includeZZ: true,
-    customLevels: [],
+    levelList: initLevelList(),
     docTypes: initDocTypes(),
     seqDigits: 4,
     statusCodes: initStatusCodes(),
@@ -1501,10 +1346,9 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const [saved, setSaved] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
 
-  // Pre-populate companies from user if user loads after initial state
   useEffect(() => {
     if (user && ws.companies.length === 0) {
-      setWs(s => ({ ...s, companies: [{ id: uid(), name: user.companyName, code: user.companyName.slice(0, 3).toUpperCase() }] }));
+      setWs(s => ({ ...s, companies: [{ id: uid(), name: user.companyName, code: user.companyName.slice(0,3).toUpperCase() }] }));
     }
   }, [user]);
 
@@ -1514,27 +1358,21 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/conventions`] });
         const graceTo = ws.gracePeriod ? new Date(Date.now() + ws.graceDays * 86400000).toLocaleDateString() : null;
         const msg = graceTo
-          ? w(`Convention saved. Grace period active until ${graceTo}. Violations will be flagged but not rejected until then.`,`Convención guardada. Período de gracia activo hasta ${graceTo}. Las violaciones se marcarán pero no se rechazarán.`, lang)
-          : w("Convention saved. Enforcing all uploads immediately.","Convención guardada. Aplicada a todas las cargas de inmediato.", lang);
-        setSavedMessage(msg);
-        setSaved(true);
-        setIsSaving(false);
+          ? w(`Convention saved. Grace period active until ${graceTo}. Violations will be flagged but not rejected until then.`, `Convención guardada. Período de gracia activo hasta ${graceTo}.`, lang)
+          : w("Convention saved. Enforcing all uploads immediately.", "Convención guardada. Aplicada a todas las cargas de inmediato.", lang);
+        setSavedMessage(msg); setSaved(true); setIsSaving(false);
       },
-      onError: () => {
-        toast({ title: "Error saving convention", variant: "destructive" });
-        setIsSaving(false);
-      },
+      onError: () => { toast({ title: "Error saving convention", variant: "destructive" }); setIsSaving(false); },
     },
   });
 
   const handleSave = () => {
-    const levels = generateLevelCodes(ws.floorsAbove, ws.basements, ws.hasGroundFloor, ws.groundFloorCode, ws.hasRoof, ws.roofCode, ws.includeZZ, ws.customLevels);
-    const selectedDiscs = ws.disciplines.filter(d => d.selected);
-    const selectedDocs  = ws.docTypes.filter(d => d.selected);
+    const levels = ws.levelList.map(l => l.code);
+    const selectedDiscs  = ws.disciplines.filter(d => d.selected);
+    const selectedDocs   = ws.docTypes.filter(d => d.selected);
     const selectedStatus = ws.statusCodes.filter(sc => sc.selected);
     const revCodes = buildRevisionCodes(ws.revisionFormat, ws.customRevisions);
-    const seqVals = Array.from({ length: Math.min(10, Math.pow(10, ws.seqDigits) - 1) }, (_, i) => String(i + 1).padStart(ws.seqDigits, "0"));
-
+    const seqVals  = Array.from({ length: Math.min(10, Math.pow(10, ws.seqDigits) - 1) }, (_, i) => String(i + 1).padStart(ws.seqDigits, "0"));
     const fields = [
       { label: "Project Code", fieldOrder: 0, allowedValues: ws.companies.map(c => c.code) },
       { label: "Originator",   fieldOrder: 1, allowedValues: ws.companies.map(c => c.code) },
@@ -1545,91 +1383,28 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       { label: "Status",       fieldOrder: 6, allowedValues: selectedStatus.map(sc => sc.code) },
       { label: "Revision",     fieldOrder: 7, allowedValues: revCodes },
     ];
-
     setIsSaving(true);
     mutate({ projectId, data: { separator: ws.separator, isActive: true, fields } });
   };
 
-  if (isLoading) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div style={{ textAlign: "center", padding: "48px 24px" }}>
-        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div>
-        <Button variant="outline" onClick={() => refetch()} style={{ gap: 6, fontSize: 12 }}>
-          {w("Retry","Reintentar",lang)}
-        </Button>
-      </div>
-    );
-  }
+  if (isLoading) return <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}</div>;
+  if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
 
   const hasExisting = convention && convention.fields && convention.fields.length > 0;
-
-  if (hasExisting && !forceWizard) {
-    return (
-      <EditMode
-        convention={convention}
-        onRunWizard={() => setForceWizard(true)}
-        lang={lang}
-        projectId={projectId}
-        onSaved={() => {}}
-      />
-    );
-  }
+  if (hasExisting && !forceWizard) return <EditMode convention={convention} onRunWizard={() => setForceWizard(true)} lang={lang} projectId={projectId} />;
 
   const step = ws.step;
-
-  const handleNext = () => setWs(s => ({ ...s, step: Math.min(s.step + 1, 4) }));
-  const handleBack = () => setWs(s => ({ ...s, step: Math.max(s.step - 1, 0) }));
-
   return (
     <div>
       <ProgressBar step={step} />
-
       {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} />}
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
       {step === 3 && <Step4 state={ws} setState={setWs} lang={lang} />}
-      {step === 4 && (
-        <ReviewScreen
-          state={ws}
-          onEdit={s => setWs(prev => ({ ...prev, step: s }))}
-          onSave={handleSave}
-          isSaving={isSaving}
-          saved={saved}
-          savedMessage={savedMessage}
-          lang={lang}
-          projectId={projectId}
-        />
-      )}
-
-      {/* Nav buttons */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))",
-      }}>
-        <div>
-          {step > 0 && (
-            <Button variant="outline" onClick={handleBack} style={{ gap: 6, fontSize: 13 }}>
-              <ChevronLeft style={{ width: 15, height: 15 }} />
-              {w("Back","Atrás",lang)}
-            </Button>
-          )}
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {step < 4 && (
-            <Button onClick={handleNext} style={{ gap: 6, fontSize: 13 }}>
-              {step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}
-              <ChevronRight style={{ width: 15, height: 15 }} />
-            </Button>
-          )}
-        </div>
+      {step === 4 && <ReviewScreen state={ws} onEdit={s => setWs(prev => ({ ...prev, step: s }))} onSave={handleSave} isSaving={isSaving} saved={saved} savedMessage={savedMessage} lang={lang} projectId={projectId} />}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
+        <div>{step > 0 && <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>}</div>
+        <div>{step < 4 && <Button onClick={() => setWs(s => ({ ...s, step: s.step + 1 }))} style={{ gap: 6, fontSize: 13 }}>{step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}<ChevronRight style={{ width: 15, height: 15 }} /></Button>}</div>
       </div>
     </div>
   );

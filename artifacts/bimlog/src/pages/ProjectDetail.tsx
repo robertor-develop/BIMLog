@@ -1,4 +1,4 @@
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 import { useGetProject, useListMembers } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
@@ -21,6 +21,7 @@ export function ProjectDetail() {
   const projectId = params?.id ? parseInt(params.id) : 0;
   const tab = params?.tab || "analytics";
 
+  const [, setLocation] = useLocation();
   const { t } = useI18n();
   const { user } = useAuthStore();
   const { adminRoles, writeRoles } = useConfig();
@@ -123,7 +124,7 @@ export function ProjectDetail() {
           {tab === "submittals"   && <SubmittalsTab     projectId={projectId} canWrite={canWrite} />}
           {tab === "activity"     && <ActivityTab       projectId={projectId} />}
           {tab === "team"         && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
-          {tab === "generator"    && <NameGenerator     projectId={projectId} />}
+          {tab === "generator"    && <NameGenerator     projectId={projectId} onGoToConvention={() => setLocation(`/projects/${projectId}/convention`)} />}
           {tab === "convention"   && isAdmin && <ConventionBuilder projectId={projectId} />}
           {tab === "integrations" && <IntegrationsTab   projectId={projectId} />}
         </div>
