@@ -1,12 +1,13 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable } from "@workspace/db/schema";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, max } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
+import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
@@ -1381,9 +1382,15 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       (responderCompany && rfi.submittedByCompany && responderCompany.toLowerCase() === rfi.submittedByCompany.toLowerCase())
     );
 
+    // Compute next response_number for this RFI
+    const [{ maxNum }] = await db.select({ maxNum: max(rfiResponsesTable.responseNumber) })
+      .from(rfiResponsesTable).where(eq(rfiResponsesTable.rfiId, rfiId));
+    const responseNumber = (maxNum ?? 0) + 1;
+
     const [newResponse] = await db.insert(rfiResponsesTable).values({
       rfiId,
       projectId,
+      responseNumber,
       responseText: body.responseText.trim(),
       answeredBy: body.answeredBy || undefined,
       answeredByEmail: body.answeredByEmail || responderEmail || undefined,
@@ -1438,6 +1445,275 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     });
 
     res.json({ ...newResponse, createdAt: newResponse.createdAt.toISOString(), isConflictOfInterest: isCoi });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId/export-word ────────────────────────
+router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string);
+    const rfiId = parseInt(req.params["rfiId"] as string);
+
+    const [rfi] = await db.select().from(rfisTable)
+      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+
+    const responses = await db.select().from(rfiResponsesTable)
+      .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
+      .orderBy(rfiResponsesTable.responseNumber);
+
+    const fmtD = (d: Date | string | null | undefined) => {
+      if (!d) return "—";
+      const dt = typeof d === "string" ? new Date(d) : d;
+      if (isNaN(dt.getTime())) return "—";
+      return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    };
+
+    // Helper: CheckBox row using SymbolRun (Wingdings font)
+    const checkRow = (label: string, checked: boolean) => new Paragraph({
+      spacing: { after: 60 },
+      children: [
+        new SymbolRun({ char: checked ? "FC" : "A8", symbolfont: "Wingdings", size: 20 }),
+        new TextRun({ text: `  ${label}`, size: 18 }),
+      ],
+    });
+
+    const cell = (text: string, opts: { bold?: boolean; shade?: boolean; width?: number } = {}) =>
+      new TableCell({
+        width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+        shading: opts.shade ? { type: ShadingType.CLEAR, fill: "F1F5F9" } : undefined,
+        children: [new Paragraph({ children: [new TextRun({ text, bold: opts.bold, size: 18 })] })],
+      });
+
+    const labelRow = (lbl: string, val: string, lbl2?: string, val2?: string) =>
+      new TableRow({
+        children: [
+          cell(lbl, { bold: true, shade: true, width: 20 }),
+          cell(val, { width: lbl2 ? 30 : 80 }),
+          ...(lbl2 ? [cell(lbl2, { bold: true, shade: true, width: 20 }), cell(val2 || "—", { width: 30 })] : []),
+        ],
+      });
+
+    const sectionHeader = (text: string) => new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 200, after: 80 },
+      children: [new TextRun({ text, bold: true, size: 22, color: "1E3A5F" })],
+    });
+
+    // Build cost impact checkbox section
+    const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
+    const costCheckboxes = costOpts.map(opt => {
+      const isChecked = rfi.costImpact === opt;
+      const label = opt === "Cost Increase Known" && rfi.costImpactAmount
+        ? `${opt}: ${rfi.costImpactAmount}`
+        : opt;
+      return checkRow(label, isChecked);
+    });
+
+    // Build schedule impact checkbox section
+    const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
+    const schedCheckboxes = schedOpts.map(opt => {
+      const isChecked = rfi.scheduleImpact === opt;
+      const label = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null
+        ? `${opt}: ${rfi.scheduleImpactDays} days`
+        : opt;
+      return checkRow(label, isChecked);
+    });
+
+    // Build attachment checkbox section
+    const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
+    const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
+
+    const hasResp = responses.length > 0 || !!(rfi.answer || rfi.response);
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            spacing: { after: 200 },
+            children: [new TextRun({ text: `REQUEST FOR INFORMATION — ${rfi.number}`, bold: true, size: 36, color: "1E3A5F" })],
+          }),
+
+          // Header table
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+            },
+            rows: [
+              labelRow("Subject", rfi.subject || "—"),
+              labelRow("Status", (rfi.status || "").replace(/_/g, " "), "Priority", rfi.priority || "—"),
+              labelRow("Date Requested", fmtD(rfi.dateRequested || rfi.createdAt), "Date Required", fmtD(rfi.dateRequired || rfi.dueDate)),
+              labelRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`),
+              labelRow("Drawing #", rfi.drawingNumber || "—", "Spec Section", rfi.specSection || "—"),
+            ],
+          }),
+
+          sectionHeader("Description of Question"),
+          new Paragraph({
+            spacing: { after: 200 },
+            children: [new TextRun({ text: rfi.question || rfi.description || "—", size: 20 })],
+          }),
+
+          sectionHeader("Official Response"),
+          ...(hasResp ? [
+            ...(responses.length > 0 ? responses.flatMap((resp, i) => [
+              new Paragraph({
+                spacing: { before: 120, after: 60 },
+                children: [new TextRun({ text: `Response ${resp.responseNumber ?? (i + 1)} — ${resp.answeredBy || ""}`, bold: true, size: 20 })],
+              }),
+              new Paragraph({
+                spacing: { after: 80 },
+                children: [new TextRun({ text: resp.responseText, size: 20 })],
+              }),
+              ...(resp.isConflictOfInterest ? [
+                new Paragraph({
+                  spacing: { after: 80 },
+                  children: [new TextRun({ text: "⚠ CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })],
+                }),
+              ] : []),
+            ]) : [
+              new Paragraph({
+                spacing: { after: 80 },
+                children: [new TextRun({ text: rfi.answer || rfi.response || "", size: 20 })],
+              }),
+            ]),
+
+            // Response metadata table
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                        ...costCheckboxes,
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                        ...schedCheckboxes,
+                      ],
+                    }),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
+                        ...attachCheckboxes,
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "ANSWERED BY", bold: true, size: 16, color: "64748B" })] }),
+                        new Paragraph({ children: [new TextRun({ text: responses.length > 0 ? (responses[responses.length - 1].answeredBy || "—") : (rfi.answeredBy || "—"), size: 18 })] }),
+                        new Paragraph({ children: [new TextRun({ text: "DATE OF RESPONSE", bold: true, size: 16, color: "64748B" })] }),
+                        new Paragraph({ children: [new TextRun({ text: fmtD(rfi.dateAnswered || rfi.respondedAt), size: 18 })] }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ] : [
+            // Blank response section
+            new Paragraph({
+              spacing: { after: 200 },
+              children: [new TextRun({ text: "(No response provided)", size: 18, color: "94A3B8" })],
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              borders: {
+                top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                        checkRow("No Cost Impact", false),
+                        checkRow("Cost Increase TBD", false),
+                        checkRow("Cost Increase Known: $__________", false),
+                        checkRow("Cost Decrease", false),
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                        checkRow("No Schedule Impact", false),
+                        checkRow("Increase in Calendar Days: _______", false),
+                        checkRow("Decrease in Calendar Days: _______", false),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
+                        checkRow("See marked up drawings", false),
+                        checkRow("See attached specifications", false),
+                        checkRow("See attached schedules", false),
+                        checkRow("None", false),
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: "SIGNATURE", bold: true, size: 16, color: "64748B" })] }),
+                        new Paragraph({ children: [new TextRun({ text: "Name: ________________________________", size: 18 })] }),
+                        new Paragraph({ children: [new TextRun({ text: "Title: ________________________________", size: 18 })] }),
+                        new Paragraph({ children: [new TextRun({ text: "Company: ________________________________", size: 18 })] }),
+                        new Paragraph({ children: [new TextRun({ text: "Date: ________________________________", size: 18 })] }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ]),
+
+          new Paragraph({
+            spacing: { before: 300 },
+            children: [new TextRun({ text: `Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}`, size: 14, color: "94A3B8" })],
+          }),
+        ],
+      }],
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.docx"`);
+    res.send(buffer);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }

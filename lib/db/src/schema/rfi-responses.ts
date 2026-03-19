@@ -6,6 +6,7 @@ export const rfiResponsesTable = pgTable("rfi_responses", {
   id: serial("id").primaryKey(),
   rfiId: integer("rfi_id").notNull().references(() => rfisTable.id),
   projectId: integer("project_id").notNull().references(() => projectsTable.id),
+  responseNumber: integer("response_number").notNull().default(1),
   responseText: text("response_text").notNull(),
   answeredBy: text("answered_by"),
   answeredByEmail: text("answered_by_email"),
