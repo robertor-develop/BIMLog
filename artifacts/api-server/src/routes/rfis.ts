@@ -7,7 +7,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
-import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
+import { Document, Paragraph, TextRun, SimpleField, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
@@ -1471,11 +1471,16 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     };
 
-    // Helper: CheckBox row using SymbolRun (Wingdings font)
+    // Real Word interactive checkbox field using FORMCHECKBOX
+    function realCheckbox(checked: boolean): SimpleField {
+      return new SimpleField({ instruction: "FORMCHECKBOX", cachedValue: checked ? "1" : "0" });
+    }
+
+    // Checkbox row: real FORMCHECKBOX field followed by label text
     const checkRow = (label: string, checked: boolean) => new Paragraph({
       spacing: { after: 60 },
       children: [
-        new SymbolRun({ char: checked ? "FC" : "A8", symbolfont: "Wingdings", size: 20 }),
+        realCheckbox(checked),
         new TextRun({ text: `  ${label}`, size: 18 }),
       ],
     });
@@ -1562,145 +1567,126 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
             children: [new TextRun({ text: rfi.question || rfi.description || "—", size: 20 })],
           }),
 
-          sectionHeader("Official Response"),
-          ...(hasResp ? [
-            ...(responses.length > 0 ? responses.flatMap((resp, i) => [
-              new Paragraph({
-                spacing: { before: 120, after: 60 },
-                children: [new TextRun({ text: `Response ${resp.responseNumber ?? (i + 1)} — ${resp.answeredBy || ""}`, bold: true, size: 20 })],
-              }),
-              new Paragraph({
-                spacing: { after: 80 },
-                children: [new TextRun({ text: resp.responseText, size: 20 })],
-              }),
-              ...(resp.isConflictOfInterest ? [
-                new Paragraph({
-                  spacing: { after: 80 },
-                  children: [new TextRun({ text: "⚠ CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })],
-                }),
-              ] : []),
-            ]) : [
-              new Paragraph({
-                spacing: { after: 80 },
-                children: [new TextRun({ text: rfi.answer || rfi.response || "", size: 20 })],
-              }),
-            ]),
+          sectionHeader("RFI RESPONSES"),
+          ...(responses.length > 0
+            ? responses.map((resp, i) => {
+                const respNum = resp.responseNumber ?? (i + 1);
+                const respDate = fmtD(resp.createdAt);
+                const respAuthor = resp.answeredBy || "—";
+                const respText = resp.responseText || "—";
+                const respAtts: string[] = Array.isArray((resp as any).attachments) ? (resp as any).attachments : [];
+                return new Table({
+                  width: { size: 100, type: WidthType.PERCENTAGE },
+                  borders: {
+                    top: { style: BorderStyle.SINGLE, size: 8, color: "1E3A5F" },
+                    bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                    left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                    right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                  },
+                  rows: [
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          width: { size: 100, type: WidthType.PERCENTAGE },
+                          shading: { type: ShadingType.CLEAR, fill: "EFF6FF" },
+                          children: [
+                            new Paragraph({
+                              spacing: { before: 80, after: 80 },
+                              children: [
+                                new TextRun({ text: `Response ${respNum}`, bold: true, size: 22, color: "1E3A5F" }),
+                                new TextRun({ text: `   |   Author: ${respAuthor}   |   Date: ${respDate}`, size: 18, color: "475569" }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    new TableRow({
+                      children: [
+                        new TableCell({
+                          width: { size: 100, type: WidthType.PERCENTAGE },
+                          children: [
+                            new Paragraph({ spacing: { before: 80, after: 60 }, children: [new TextRun({ text: "Response Text", bold: true, size: 16, color: "64748B" })] }),
+                            new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: respText, size: 20 })] }),
+                            ...(respAtts.length > 0 ? [
+                              new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
+                              ...respAtts.map(a => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `• ${a}`, size: 18 })] })),
+                            ] : []),
+                            ...(resp.isConflictOfInterest ? [
+                              new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun({ text: "CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })] }),
+                            ] : []),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                });
+              })
+            : [
+                ...(rfi.answer || rfi.response
+                  ? [
+                      new Paragraph({
+                        spacing: { after: 80 },
+                        children: [new TextRun({ text: "Response 1", bold: true, size: 20, color: "1E3A5F" })],
+                      }),
+                      new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: rfi.answer || rfi.response || "", size: 20 })] }),
+                    ]
+                  : [
+                      new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "(No response provided)", size: 18, color: "94A3B8" })] }),
+                    ]),
+              ]),
 
-            // Response metadata table
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              borders: {
-                top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                        ...costCheckboxes,
-                      ],
-                    }),
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                        ...schedCheckboxes,
-                      ],
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
-                        ...attachCheckboxes,
-                      ],
-                    }),
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "ANSWERED BY", bold: true, size: 16, color: "64748B" })] }),
-                        new Paragraph({ children: [new TextRun({ text: responses.length > 0 ? (responses[responses.length - 1].answeredBy || "—") : (rfi.answeredBy || "—"), size: 18 })] }),
-                        new Paragraph({ children: [new TextRun({ text: "DATE OF RESPONSE", bold: true, size: 16, color: "64748B" })] }),
-                        new Paragraph({ children: [new TextRun({ text: fmtD(rfi.dateAnswered || rfi.respondedAt), size: 18 })] }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ] : [
-            // Blank response section
-            new Paragraph({
-              spacing: { after: 200 },
-              children: [new TextRun({ text: "(No response provided)", size: 18, color: "94A3B8" })],
-            }),
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              borders: {
-                top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              },
-              rows: [
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                        checkRow("No Cost Impact", false),
-                        checkRow("Cost Increase TBD", false),
-                        checkRow("Cost Increase Known: $__________", false),
-                        checkRow("Cost Decrease", false),
-                      ],
-                    }),
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                        checkRow("No Schedule Impact", false),
-                        checkRow("Increase in Calendar Days: _______", false),
-                        checkRow("Decrease in Calendar Days: _______", false),
-                      ],
-                    }),
-                  ],
-                }),
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
-                        checkRow("See marked up drawings", false),
-                        checkRow("See attached specifications", false),
-                        checkRow("See attached schedules", false),
-                        checkRow("None", false),
-                      ],
-                    }),
-                    new TableCell({
-                      width: { size: 50, type: WidthType.PERCENTAGE },
-                      children: [
-                        new Paragraph({ children: [new TextRun({ text: "SIGNATURE", bold: true, size: 16, color: "64748B" })] }),
-                        new Paragraph({ children: [new TextRun({ text: "Name: ________________________________", size: 18 })] }),
-                        new Paragraph({ children: [new TextRun({ text: "Title: ________________________________", size: 18 })] }),
-                        new Paragraph({ children: [new TextRun({ text: "Company: ________________________________", size: 18 })] }),
-                        new Paragraph({ children: [new TextRun({ text: "Date: ________________________________", size: 18 })] }),
-                      ],
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ]),
+          sectionHeader("Impact & Attachments"),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+              right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+            },
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                      ...costCheckboxes,
+                    ],
+                  }),
+                  new TableCell({
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
+                      ...schedCheckboxes,
+                    ],
+                  }),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
+                      ...attachCheckboxes,
+                    ],
+                  }),
+                  new TableCell({
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({ children: [new TextRun({ text: "SIGNATURE", bold: true, size: 16, color: "64748B" })] }),
+                      new Paragraph({ children: [new TextRun({ text: "Name: ________________________________", size: 18 })] }),
+                      new Paragraph({ children: [new TextRun({ text: "Title: ________________________________", size: 18 })] }),
+                      new Paragraph({ children: [new TextRun({ text: "Company: ________________________________", size: 18 })] }),
+                      new Paragraph({ children: [new TextRun({ text: "Date: ________________________________", size: 18 })] }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
 
           new Paragraph({
             spacing: { before: 300 },
