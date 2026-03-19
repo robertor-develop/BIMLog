@@ -999,7 +999,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, r
     doc.fillColor("white").fontSize(7.5).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 3.5);
     y += 14;
 
-    const respText = rfi.answer || rfi.response || "";
+    // Strip markdown asterisks and formatting tokens from response text before rendering
+    const stripMarkdown = (text: string) =>
+      text.replace(/\*\*/g, "").replace(/\*/g, "").replace(/^#+\s*/gm, "").replace(/__/g, "").replace(/_/g, " ").trim();
+    const respText = stripMarkdown(rfi.answer || rfi.response || "");
     if (respText) {
       const respH = Math.min(doc.heightOfString(respText, { width: contentW - 12 }) + 12, 160);
       doc.rect(MARGIN, y, contentW, respH).fillAndStroke("#F0FDF4", "#86EFAC");
@@ -1253,8 +1256,13 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
         doc.rect(MARGIN, y, contentW, 14).fill(rowBg);
         const vals = [String(idx + 1), fmtTs(evt.viewedAt), evt.userFullName, evt.userCompanyName];
         vals.forEach((v, i) => {
-          doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
-            .text(truncateCol(v, columnWidths[i] - 6), colX[i] + 3, y + 3, { width: columnWidths[i] - 4, lineBreak: false });
+          doc.fillColor("#1E293B").fontSize(8).font("Helvetica");
+          if (i === 3) {
+            // company column: fixed width 120 with ellipsis truncation
+            doc.text(v, colX[i] + 3, y + 3, { width: 120, lineBreak: false, ellipsis: true });
+          } else {
+            doc.text(truncateCol(v, columnWidths[i] - 6), colX[i] + 3, y + 3, { width: columnWidths[i] - 4, lineBreak: false });
+          }
         });
         // vertical dividers
         dividerOffsets.forEach(x => {
@@ -1652,56 +1660,25 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
               ]),
 
           sectionHeader("Impact & Attachments"),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-            },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                      ...costCheckboxes,
-                    ],
-                  }),
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
-                      ...schedCheckboxes,
-                    ],
-                  }),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
-                      ...attachCheckboxes,
-                    ],
-                  }),
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ children: [new TextRun({ text: "SIGNATURE", bold: true, size: 16, color: "64748B" })] }),
-                      new Paragraph({ children: [new TextRun({ text: "Name: ________________________________", size: 18 })] }),
-                      new Paragraph({ children: [new TextRun({ text: "Title: ________________________________", size: 18 })] }),
-                      new Paragraph({ children: [new TextRun({ text: "Company: ________________________________", size: 18 })] }),
-                      new Paragraph({ children: [new TextRun({ text: "Date: ________________________________", size: 18 })] }),
-                    ],
-                  }),
-                ],
-              }),
-            ],
-          }),
+
+          // COST IMPACT — standalone checkbox paragraphs (no TableCell)
+          new Paragraph({ spacing: { before: 100, after: 40 }, children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
+          ...costCheckboxes,
+
+          // SCHEDULE IMPACT — standalone checkbox paragraphs (no TableCell)
+          new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
+          ...schedCheckboxes,
+
+          // ATTACHMENTS — standalone checkbox paragraphs (no TableCell)
+          new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
+          ...attachCheckboxes,
+
+          // Authorized by signature block with underscores
+          new Paragraph({ spacing: { before: 140, after: 40 }, children: [new TextRun({ text: "AUTHORIZED BY", bold: true, size: 16, color: "64748B" })] }),
+          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Name: ______________________________________________", size: 18 })] }),
+          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Title: ______________________________________________", size: 18 })] }),
+          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Company: ______________________________________________", size: 18 })] }),
+          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Date: ______________________________________________", size: 18 })] }),
 
           new Paragraph({
             spacing: { before: 300 },
