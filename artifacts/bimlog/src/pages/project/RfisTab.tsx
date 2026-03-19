@@ -1231,6 +1231,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [responseDocInput, setResponseDocInput] = useState("");
   const [responseDocs, setResponseDocs] = useState<string[]>(rfi.responseAttachmentsJson || []);
   const [showFileSearch, setShowFileSearch] = useState(false);
+  const [showAddResponse, setShowAddResponse] = useState(false);
 
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
@@ -1434,6 +1435,24 @@ ${hasResp ? `
     }
   };
 
+  const handleCloseRfi = async () => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: "closed" }),
+      });
+      if (!r.ok) { const d = await r.json() as { error?: string }; throw new Error(d.error || "Failed"); }
+      const updated = await r.json() as typeof rfi;
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+      toast({ title: w("RFI closed.", "RFI cerrado.", lang) });
+      onUpdate(updated);
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : w("Close failed", "Error al cerrar", lang), variant: "destructive" });
+    }
+  };
+
   const allStatusOptions = getOptions("rfi_status");
   // Fix 2 — Only project_admin can close an RFI
   const currentMember = members.find(m => m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase());
@@ -1492,6 +1511,7 @@ ${hasResp ? `
       if (!r.ok) { const d = await r.json() as { error?: string }; throw new Error(d.error || "Failed"); }
       const newResp = await r.json() as typeof rfiResponses[0];
       setRfiResponses(prev => [...prev, newResp]);
+      setShowAddResponse(false);
       if (newResp.isConflictOfInterest) {
         toast({ title: w("Conflict of interest flagged in audit trail.", "Conflicto de interés marcado en la auditoría.", lang), variant: "destructive" });
       } else {
@@ -1552,6 +1572,11 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} style={{ gap: 5, fontSize: 11, color: "#0369A1", borderColor: "#BAE6FD", background: "#F0F9FF" }}>
               <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
             </Button>
+            {isProjectAdmin && rfi.status !== "closed" && (
+              <Button variant="outline" size="sm" onClick={handleCloseRfi} style={{ gap: 5, fontSize: 11, color: "#DC2626", borderColor: "#FCA5A5" }}>
+                <X style={{ width: 12, height: 12 }} />{w("Close RFI", "Cerrar RFI", lang)}
+              </Button>
+            )}
             {rfi.status === "closed" && canWrite && (
               <Button variant="outline" size="sm" onClick={() => { onRevise(rfi); onClose(); }} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
@@ -1765,7 +1790,18 @@ ${hasResp ? `
               </div>
             )}
 
-            {canWrite && rfi.status !== "closed" && (
+            {/* Add Response button — visible when responses exist and form is hidden */}
+            {canWrite && rfi.status !== "closed" && (rfiResponses.length > 0 || rfi.answer || rfi.response) && !showAddResponse && (
+              <button
+                type="button"
+                onClick={() => setShowAddResponse(true)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "9px 0", marginTop: 4, fontSize: 13, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "1.5px dashed #93C5FD", borderRadius: 8, cursor: "pointer" }}
+              >
+                <Plus style={{ width: 14, height: 14 }} />{w("Add Response", "Agregar Respuesta", lang)}
+              </button>
+            )}
+
+            {canWrite && rfi.status !== "closed" && (rfiResponses.length === 0 && !rfi.answer && !rfi.response || showAddResponse) && (
               <div style={{ borderTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? 12 : 0 }}>
                 {isCoi && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FFFBEB", border: "1.5px solid #F59E0B", borderRadius: 7, marginBottom: 12 }}>
@@ -1879,10 +1915,15 @@ ${hasResp ? `
                     )}
                   </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
+                  {(rfiResponses.length > 0 || rfi.answer || rfi.response) && (
+                    <Button variant="outline" size="sm" onClick={() => setShowAddResponse(false)} style={{ fontSize: 12 }}>
+                      {w("Cancel", "Cancelar", lang)}
+                    </Button>
+                  )}
                   <Button onClick={handleSaveResponse} disabled={isUpdating} style={{ fontSize: 12, gap: 5 }}>
                     {isUpdating ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : null}
-                    {w("Save Response", "Guardar Respuesta", lang)}
+                    {w("Submit Response", "Enviar Respuesta", lang)}
                   </Button>
                 </div>
               </div>

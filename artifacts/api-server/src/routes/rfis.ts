@@ -7,7 +7,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
-import { Document, Paragraph, TextRun, SimpleField, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
+import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
@@ -931,6 +931,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, r
     const fmtD = (d: Date | string | null | undefined) =>
       d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
+    const rfiNumber = rfi.number;
+    const projectName = project?.name || "";
+    const responseDate = fmtD(rfi.dateAnswered || rfi.respondedAt);
+
     const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -949,7 +953,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, r
     doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
       .text("OFFICIAL RESPONSE DOCUMENT", MARGIN + 10, y + 6, { lineBreak: false });
     doc.fontSize(9).font("Helvetica")
-      .text(`${rfi.number}  |  ${project?.name || ""}`, MARGIN + 10, y + 23, { lineBreak: false });
+      .text(`${rfiNumber}  |  ${projectName}`, MARGIN + 10, y + 23, { lineBreak: false });
     doc.fillColor("black");
     y += 44;
 
@@ -1010,7 +1014,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, r
     const sigLabels = ["ANSWERED BY", "DATE OF RESPONSE", "COST IMPACT", "SCHEDULE IMPACT"];
     const sigVals = [
       rfi.answeredBy || (respText ? "—" : ""),
-      fmtD(rfi.dateAnswered || rfi.respondedAt),
+      responseDate,
       rfi.costImpact || (respText ? "—" : ""),
       rfi.scheduleImpact ? `${rfi.scheduleImpact}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays}d)` : ""}` : (respText ? "—" : ""),
     ];
@@ -1223,13 +1227,24 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
       doc.fillColor("#94A3B8").fontSize(9).font("Helvetica").text("No view events recorded.", MARGIN + 6, y + 7.5, { width: contentW - 12, lineBreak: false });
       y += 28;
     } else {
-      // Column headers
-      const cols = [64, 200, 180, contentW - 64 - 200 - 180 - 6];
-      const colX = [MARGIN, MARGIN + 64, MARGIN + 264, MARGIN + 444];
+      // Fixed column widths: #=30, Timestamp=140, User=160, Company=160
+      const columnWidths = [30, 140, 160, 160];
+      const colX = [MARGIN, MARGIN + 30, MARGIN + 170, MARGIN + 330];
+      const dividerOffsets = [30, 170, 330];
+
+      // Helper: truncate text to fit column using ellipsis
+      const truncateCol = (text: string, maxW: number): string => {
+        doc.fontSize(8).font("Helvetica");
+        if (doc.widthOfString(text) <= maxW) return text;
+        let t = text;
+        while (t.length > 1 && doc.widthOfString(t + "…") > maxW) t = t.slice(0, -1);
+        return t + "…";
+      };
+
       doc.rect(MARGIN, y, contentW, 14).fill("#E2E8F0");
       ["#", "Timestamp (UTC)", "User", "Company"].forEach((h, i) => {
         doc.fillColor("#475569").fontSize(7).font("Helvetica-Bold")
-          .text(h, colX[i] + 3, y + 3.5, { width: cols[i] - 4, lineBreak: false });
+          .text(h, colX[i] + 3, y + 3.5, { width: columnWidths[i] - 4, lineBreak: false });
       });
       y += 14;
 
@@ -1239,10 +1254,10 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
         const vals = [String(idx + 1), fmtTs(evt.viewedAt), evt.userFullName, evt.userCompanyName];
         vals.forEach((v, i) => {
           doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
-            .text(v, colX[i] + 3, y + 3, { width: cols[i] - 4, lineBreak: false });
+            .text(truncateCol(v, columnWidths[i] - 6), colX[i] + 3, y + 3, { width: columnWidths[i] - 4, lineBreak: false });
         });
         // vertical dividers
-        [64, 264, 444].forEach(x => {
+        dividerOffsets.forEach(x => {
           doc.moveTo(MARGIN + x, y).lineTo(MARGIN + x, y + 14).stroke("#E2E8F0");
         });
         y += 14;
@@ -1257,7 +1272,7 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     }
 
     // ── Certification block ───────────────────────────────────────────────────
-    const certH = 72;
+    const certH = 84;
     if (y + certH > CONTENT_BOTTOM) {
       drawFooter(doc, `BIMLog by IgniteSmart  |  Audit Certificate: ${rfi.number}`);
       doc.addPage();
@@ -1471,12 +1486,12 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     };
 
-    // Real Word interactive checkbox field using FORMCHECKBOX
-    function realCheckbox(checked: boolean): SimpleField {
-      return new SimpleField({ instruction: "FORMCHECKBOX", cachedValue: checked ? "1" : "0" });
+    // Checkbox symbol using Wingdings font — "FC" checked, "A8" unchecked
+    function realCheckbox(checked: boolean): SymbolRun {
+      return new SymbolRun({ char: checked ? "FC" : "A8", symbolfont: "Wingdings", size: 20 });
     }
 
-    // Checkbox row: real FORMCHECKBOX field followed by label text
+    // Checkbox row: Wingdings checkbox symbol followed by label text
     const checkRow = (label: string, checked: boolean) => new Paragraph({
       spacing: { after: 60 },
       children: [
