@@ -4,6 +4,27 @@
 
 BIMLog is a full-stack BIM project coordination and accountability platform for the AEC (architecture, engineering, construction) industry. Built with React + Vite frontend and Express 5 backend in a pnpm monorepo.
 
+## Email Notification System (SendGrid)
+
+- **Email service**: `artifacts/api-server/src/lib/email.ts` — 10 HTML templates (T1–T10), `sendEmail()`, `notifEnabled()`, `getUserLang()`
+- **Env vars**: `SENDGRID_API_KEY`, `BIMLOG_URL` (defaults to `https://bim-log-ignite.replit.app`)
+- **FROM address**: `notifications@ignitesmart.ai`
+- **Background job**: `artifacts/api-server/src/lib/overdue-notifier.ts` runs hourly RFI + submittal overdue checks
+
+### Email triggers wired in routes:
+- **T1** (Invitation): `members.ts` POST /invitations → invitee email on invite creation
+- **T2** (RFI Assigned): `rfis.ts` POST /rfis → `submittedToEmail` recipient on RFI creation
+- **T4** (Submittal Assigned): `submittals.ts` POST /submittals → `submittedToEmail` on creation
+- **T6** (Naming Violation): `files.ts` POST /files → uploader + project admins on 422 rejection
+- **T7** (Procurement Before Approval): `submittals.ts` PATCH → project admins when status is on_order/delivered/installed and submittal not yet approved
+- **T8** (Rapid Approval): `submittals.ts` POST /respond → project admins when approved in <60s of first open
+- **T9** (Team Member Added): `members.ts` POST /members → new member email on add
+- **T10** (Password Reset): `auth.ts` POST /auth/forgot-password + POST /auth/reset-password
+
+### Password Reset Flow:
+- Backend: POST /auth/forgot-password (generates token, saves with 1hr expiry, sends email) + POST /auth/reset-password (validates token, updates password)
+- Frontend: "Forgot password?" link on Login.tsx → `/reset-password` route → `ResetPasswordPage.tsx` (two-stage: email request + new password form)
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces

@@ -25,6 +25,8 @@ export const usersTable = pgTable("users", {
   signatureUrl: text("signature_url"),
   apiToken: text("api_token"),
   notificationPreferences: jsonb("notification_preferences"),
+  passwordResetToken: text("password_reset_token"),
+  passwordResetExpires: timestamp("password_reset_expires"),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });

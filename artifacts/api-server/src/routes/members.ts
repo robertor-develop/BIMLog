@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectMembersTable, usersTable, companiesTable, activityLogTable, projectInvitations } from "@workspace/db/schema";
+import { projectMembersTable, usersTable, companiesTable, activityLogTable, projectInvitations, projectsTable } from "@workspace/db/schema";
+import { sendEmail, makeInvitationEmail, makeTeamMemberAddedEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and } from "drizzle-orm";
 import { AddMemberBody, UpdateMemberBody, ListMembersParams, AddMemberParams, UpdateMemberParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -102,6 +103,30 @@ router.post("/projects/:projectId/members", authMiddleware, requirePermission("a
       userCompanyName: company[0]?.name || "",
       role: member.role,
       joinedAt: member.joinedAt.toISOString(),
+    });
+
+    // ── T9: Team Member Added email ──────────────────────────────────────────
+    setImmediate(async () => {
+      try {
+        const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+        const prefs = user.notificationPreferences;
+        if (!notifEnabled(prefs, "team_member_added")) return;
+        const lang = getUserLang(prefs);
+        await sendEmail({
+          to: user.email,
+          subject: lang === "es"
+            ? `Has sido añadido al proyecto: ${project[0]?.name || "Unknown Project"}`
+            : `You've been added to project: ${project[0]?.name || "Unknown Project"}`,
+          html: makeTeamMemberAddedEmail({
+            lang,
+            recipientName: user.fullName,
+            projectName: project[0]?.name || "Unknown Project",
+            role: member.role,
+            addedByName: req.user!.fullName,
+            projectId,
+          }),
+        });
+      } catch (_) {}
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
@@ -207,6 +232,29 @@ router.post("/projects/:projectId/invitations", authMiddleware, requirePermissio
       status: "pending",
     }).returning();
     res.status(201).json({ ...row, createdAt: row.createdAt.toISOString(), acceptedAt: null });
+
+    // ── T1: Invitation email ──────────────────────────────────────────────────
+    setImmediate(async () => {
+      try {
+        const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+        const projectName = project[0]?.name || "Unknown Project";
+        const inviterUser = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+        const inviterName = inviterUser[0]?.fullName || req.user!.fullName;
+        const inviteLink = `${process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app"}/register`;
+        await sendEmail({
+          to: email,
+          subject: `You've been invited to join ${projectName} on BIMLog`,
+          html: makeInvitationEmail({
+            lang: "en",
+            recipientName: fullName || email,
+            inviterName,
+            projectName,
+            role: roleValue,
+            inviteLink,
+          }),
+        });
+      } catch (_) {}
+    });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }

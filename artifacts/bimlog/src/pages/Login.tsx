@@ -82,8 +82,18 @@ export function Login() {
         </div>
       </div>
 
+      <div className="flex justify-end mt-1 mb-0">
+        <a
+          href="/reset-password"
+          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+          onClick={e => { e.preventDefault(); window.location.href = '/reset-password'; }}
+        >
+          {t('auth.forgotPassword')}
+        </a>
+      </div>
+
       <Button
-        className="w-full mt-6"
+        className="w-full mt-4"
         disabled={!email || !password || isPending}
         onClick={() => mutate({ data: { email, password } })}
       >

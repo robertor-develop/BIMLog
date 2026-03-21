@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable } from "@workspace/db/schema";
+import { sendEmail, makeRfiAssignedEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and, count, max } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -664,6 +665,36 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     });
 
     res.status(201).json(rfiToJson(rfi, { createdByName: req.user!.fullName }));
+
+    // ── T2: RFI Assigned email ──────────────────────────────────────────────
+    if (rfi.submittedToEmail) {
+      setImmediate(async () => {
+        try {
+          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+          const recipientUser = await db.select().from(usersTable).where(eq(usersTable.email, rfi.submittedToEmail!)).limit(1);
+          const prefs = recipientUser[0]?.notificationPreferences;
+          if (!notifEnabled(prefs, "rfi_assigned")) return;
+          const lang = getUserLang(prefs);
+          const dueStr = rfi.dateRequired ? new Date(rfi.dateRequired).toLocaleDateString("en-US") : null;
+          await sendEmail({
+            to: rfi.submittedToEmail!,
+            subject: lang === "es"
+              ? `Nuevo RFI Asignado: ${rfi.number} — ${rfi.subject}`
+              : `New RFI Assigned: ${rfi.number} — ${rfi.subject}`,
+            html: makeRfiAssignedEmail({
+              lang,
+              rfiNumber: rfi.number,
+              subject: rfi.subject,
+              projectName: project[0]?.name || "Unknown Project",
+              submittedByName: req.user!.fullName,
+              dateRequired: dueStr,
+              projectId,
+              rfiId: rfi.id,
+            }),
+          });
+        } catch (_) {}
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });

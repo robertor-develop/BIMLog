@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { db } from "@workspace/db";
 import { usersTable, companiesTable, projectInvitations, projectMembersTable, filesTable, rfisTable, submittalsTable } from "@workspace/db/schema";
+import { sendEmail, makePasswordResetEmail } from "../lib/email";
 import { eq, and, sql } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import { signToken, authMiddleware, type AuthPayload } from "../middlewares/auth";
@@ -326,6 +327,57 @@ router.get("/users/me/performance-score", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to compute performance score" });
+  }
+});
+
+// ─── POST /auth/forgot-password ──────────────────────────────────────────────
+router.post("/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body as { email?: string };
+    if (!email) { res.status(400).json({ error: "Email is required" }); return; }
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
+    // Always respond with success to avoid email enumeration
+    if (!user) { res.json({ message: "If an account with that email exists, a reset link has been sent." }); return; }
+    const token = randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await db.update(usersTable).set({
+      passwordResetToken: token,
+      passwordResetExpires: expires,
+    }).where(eq(usersTable.id, user.id));
+    const resetLink = `${process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app"}/reset-password?token=${token}`;
+    await sendEmail({
+      to: user.email,
+      subject: "Reset your BIMLog password",
+      html: makePasswordResetEmail({ lang: "en", recipientName: user.fullName, resetLink }),
+    });
+    res.json({ message: "If an account with that email exists, a reset link has been sent." });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+// ─── POST /auth/reset-password ────────────────────────────────────────────────
+router.post("/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body as { token?: string; password?: string };
+    if (!token || !password) { res.status(400).json({ error: "Token and password are required" }); return; }
+    if (password.length < 8) { res.status(400).json({ error: "Password must be at least 8 characters" }); return; }
+    const now = new Date();
+    const [user] = await db.select().from(usersTable)
+      .where(eq(usersTable.passwordResetToken, token)).limit(1);
+    if (!user || !user.passwordResetExpires || user.passwordResetExpires < now) {
+      res.status(400).json({ error: "Invalid or expired reset token" });
+      return;
+    }
+    const hashed = await bcrypt.hash(password, 10);
+    await db.update(usersTable).set({
+      password: hashed,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    }).where(eq(usersTable.id, user.id));
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 

@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import router from "./routes";
+import { startOverdueNotifier } from "./lib/overdue-notifier";
 
 const app: Express = express();
 
@@ -17,5 +18,7 @@ app.use("/api/v1", (_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/v1", router);
+
+startOverdueNotifier();
 
 export default app;

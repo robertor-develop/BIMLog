@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
 import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
+import { sendEmail, makeNamingViolationEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and } from "drizzle-orm";
 import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -662,6 +663,44 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
       res.status(422).json({
         error: "File name does not match the active naming convention",
         details: validation.details,
+      });
+
+      // ── T6: Naming Violation email ──────────────────────────────────────
+      setImmediate(async () => {
+        try {
+          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+          const projectName = project[0]?.name || "Unknown Project";
+          const failedFields = (validation.details || []).map((d: { field: string }) => d.field);
+          const uploaderUser = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+          const uploaderPrefs = uploaderUser[0]?.notificationPreferences;
+          if (notifEnabled(uploaderPrefs, "file_violation")) {
+            const lang = getUserLang(uploaderPrefs);
+            await sendEmail({
+              to: req.user!.email,
+              subject: lang === "es"
+                ? `Violación de Convención de Nombres: ${body.fileName} — ${projectName}`
+                : `Naming Violation Detected: ${body.fileName} — ${projectName}`,
+              html: makeNamingViolationEmail({ lang, fileName: body.fileName, projectName, failedFields, projectId, recipientName: req.user!.fullName }),
+            });
+          }
+          const admins = await db.select().from(projectMembersTable)
+            .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
+          for (const admin of admins) {
+            if (admin.userId === req.user!.userId) continue;
+            const adminUser = await db.select().from(usersTable).where(eq(usersTable.id, admin.userId)).limit(1);
+            if (!adminUser[0]?.email) continue;
+            const prefs = adminUser[0].notificationPreferences;
+            if (!notifEnabled(prefs, "file_violation")) continue;
+            const lang = getUserLang(prefs);
+            await sendEmail({
+              to: adminUser[0].email,
+              subject: lang === "es"
+                ? `Violación de Convención de Nombres: ${body.fileName} — ${projectName}`
+                : `Naming Violation Detected: ${body.fileName} — ${projectName}`,
+              html: makeNamingViolationEmail({ lang, fileName: body.fileName, projectName, failedFields, projectId, recipientName: adminUser[0].fullName }),
+            });
+          }
+        } catch (_) {}
       });
       return;
     }

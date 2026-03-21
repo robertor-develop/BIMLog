@@ -5,6 +5,7 @@ import {
   projectMembersTable, companiesTable, rfisTable,
   submittalRegisterTable, submittalViewEventsTable,
 } from "@workspace/db/schema";
+import { sendEmail, makeSubmittalAssignedEmail, makeProcurementAlertEmail, makeRapidApprovalEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and, count } from "drizzle-orm";
 import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -156,6 +157,36 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
     });
 
     res.status(201).json({ ...subToJson(submittal), submittedByName: req.user!.fullName });
+
+    // ── T4: Submittal Assigned email ────────────────────────────────────────
+    if (submittal.submittedToEmail) {
+      setImmediate(async () => {
+        try {
+          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+          const recipientUser = await db.select().from(usersTable).where(eq(usersTable.email, submittal.submittedToEmail!)).limit(1);
+          const prefs = recipientUser[0]?.notificationPreferences;
+          if (!notifEnabled(prefs, "submittal_assigned")) return;
+          const lang = getUserLang(prefs);
+          const dueStr = submittal.dateRequired ? new Date(submittal.dateRequired).toLocaleDateString("en-US") : null;
+          await sendEmail({
+            to: submittal.submittedToEmail!,
+            subject: lang === "es"
+              ? `Nuevo Entregable para Revisión: ${submittal.number} — ${submittal.title}`
+              : `New Submittal for Review: ${submittal.number} — ${submittal.title}`,
+            html: makeSubmittalAssignedEmail({
+              lang,
+              submittalNumber: submittal.number,
+              title: submittal.title,
+              specSection: submittal.specSection,
+              projectName: project[0]?.name || "Unknown Project",
+              submittedByName: req.user!.fullName,
+              dateRequired: dueStr,
+              projectId,
+            }),
+          });
+        } catch (_) {}
+      });
+    }
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "Bad request" });
   }
@@ -319,6 +350,41 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
 
     const submitter = await db.select().from(usersTable).where(eq(usersTable.id, updated.submittedById)).limit(1);
     res.json({ ...subToJson(updated), submittedByName: submitter[0]?.fullName || "" });
+
+    // ── T7: Procurement Before Approval email ───────────────────────────────
+    const procurementAlertStatuses = ["on_order", "delivered", "installed"];
+    const notApproved = !["approved", "approved_as_noted"].includes(updated.status);
+    if (procurementAlertStatuses.includes(updated.procurementStatus || "") && notApproved) {
+      setImmediate(async () => {
+        try {
+          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+          const projectName = project[0]?.name || "Unknown Project";
+          const admins = await db.select().from(projectMembersTable)
+            .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
+          for (const admin of admins) {
+            const adminUser = await db.select().from(usersTable).where(eq(usersTable.id, admin.userId)).limit(1);
+            if (!adminUser[0]?.email) continue;
+            const prefs = adminUser[0].notificationPreferences;
+            if (!notifEnabled(prefs, "procurement_alert")) continue;
+            const lang = getUserLang(prefs);
+            await sendEmail({
+              to: adminUser[0].email,
+              subject: lang === "es"
+                ? `ALERTA: Adquisición Antes de Aprobación — ${updated.number}`
+                : `ALERT: Procurement Before Approval — ${updated.number}`,
+              html: makeProcurementAlertEmail({
+                lang,
+                submittalNumber: updated.number,
+                title: updated.title,
+                procurementStatus: (updated.procurementStatus || "").replace(/_/g, " "),
+                projectName,
+                projectId,
+              }),
+            });
+          }
+        } catch (_) {}
+      });
+    }
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "Bad request" });
   }
@@ -432,6 +498,39 @@ router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddlewa
     });
 
     res.json(subToJson(updated));
+
+    // ── T8: Rapid Approval email ────────────────────────────────────────────
+    if (rapidApprovalFlag) {
+      setImmediate(async () => {
+        try {
+          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+          const projectName = project[0]?.name || "Unknown Project";
+          const admins = await db.select().from(projectMembersTable)
+            .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
+          for (const admin of admins) {
+            const adminUser = await db.select().from(usersTable).where(eq(usersTable.id, admin.userId)).limit(1);
+            if (!adminUser[0]?.email) continue;
+            const prefs = adminUser[0].notificationPreferences;
+            if (!notifEnabled(prefs, "rapid_approval")) continue;
+            const lang = getUserLang(prefs);
+            await sendEmail({
+              to: adminUser[0].email,
+              subject: lang === "es"
+                ? `ADVERTENCIA: Aprobación Rápida Detectada — ${existing.number}`
+                : `WARNING: Rapid Approval Detected — ${existing.number}`,
+              html: makeRapidApprovalEmail({
+                lang,
+                submittalNumber: existing.number,
+                title: existing.title,
+                reviewerName: req.user!.fullName,
+                projectName,
+                projectId,
+              }),
+            });
+          }
+        } catch (_) {}
+      });
+    }
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : "Bad request" });
   }

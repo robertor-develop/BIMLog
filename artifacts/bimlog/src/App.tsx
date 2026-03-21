@@ -18,6 +18,7 @@ import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
 import { DataRetention } from "@/pages/DataRetention";
+import { ResetPasswordPage } from "@/pages/ResetPassword";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* Legal pages — public */}
       <Route path="/privacy" component={Privacy} />
