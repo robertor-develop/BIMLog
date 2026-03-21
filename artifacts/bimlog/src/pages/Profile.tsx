@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Link } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,8 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   User, Building2, Lock, Bell, Zap, Key, ChevronLeft,
-  Check, Copy, RefreshCw, Pen, Upload, Trash2, AlertTriangle
+  Check, Copy, RefreshCw, Pen, Upload, Trash2, AlertTriangle,
+  FolderOpen, Clock, Activity, ExternalLink, Camera
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
@@ -46,6 +47,44 @@ interface PerformanceScore {
   namingCompliance: { rate: number | null; passed: number; total: number };
   rfiCloseRate: { rate: number | null; closed: number; total: number };
   submittalsApprovalRate: { rate: number | null; approved: number; total: number };
+}
+
+interface ProjectItem {
+  id: number;
+  name: string;
+  code: string;
+  status: string;
+  userRole: string;
+}
+
+interface PendingRfi {
+  id: number;
+  number: string;
+  subject: string;
+  projectId: number;
+  projectName: string;
+  createdAt: string;
+  status: string;
+}
+
+interface PendingSubmittal {
+  id: number;
+  number: string;
+  title: string;
+  projectId: number;
+  projectName: string;
+  createdAt: string;
+  dueDate: string | null;
+}
+
+interface ActivityEntry {
+  id: number;
+  projectId: number;
+  projectName: string;
+  actionType: string;
+  details: string | null;
+  userFullName: string;
+  createdAt: string;
 }
 
 const DEFAULT_PREFS = {
@@ -135,6 +174,19 @@ export function Profile() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
 
+  const [myProjects, setMyProjects] = useState<ProjectItem[]>([]);
+  const [pendingRfis, setPendingRfis] = useState<PendingRfi[]>([]);
+  const [pendingSubmittals, setPendingSubmittals] = useState<PendingSubmittal[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityEntry[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingPending, setLoadingPending] = useState(true);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+
+  const avatarFileInput = useRef<HTMLInputElement>(null);
+  const logoFileInput = useRef<HTMLInputElement>(null);
+
+  const [, navigate] = useLocation();
+
   const authHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -174,10 +226,91 @@ export function Profile() {
     } catch {}
   }
 
+  async function loadMyProjects() {
+    setLoadingProjects(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/projects`, { headers: authHeaders });
+      const data = await res.json();
+      setMyProjects(Array.isArray(data) ? data : []);
+    } catch {} finally {
+      setLoadingProjects(false);
+    }
+  }
+
+  async function loadPendingItems(userEmail: string) {
+    setLoadingPending(true);
+    try {
+      const projRes = await fetch(`${API_BASE}/api/v1/projects`, { headers: authHeaders });
+      const projects: ProjectItem[] = await projRes.json();
+
+      const rfis: PendingRfi[] = [];
+      const submittals: PendingSubmittal[] = [];
+
+      await Promise.all(projects.map(async (proj) => {
+        try {
+          const [rfiRes, subRes] = await Promise.all([
+            fetch(`${API_BASE}/api/v1/projects/${proj.id}/rfis`, { headers: authHeaders }),
+            fetch(`${API_BASE}/api/v1/projects/${proj.id}/submittals`, { headers: authHeaders }),
+          ]);
+          const rfiData = await rfiRes.json();
+          const subData = await subRes.json();
+
+          if (Array.isArray(rfiData)) {
+            rfiData
+              .filter((r: any) => r.submittedToEmail === userEmail && (r.status === "open" || r.status === "in_review"))
+              .forEach((r: any) => rfis.push({ id: r.id, number: r.number, subject: r.subject, projectId: proj.id, projectName: proj.name, createdAt: r.createdAt, status: r.status }));
+          }
+          if (Array.isArray(subData)) {
+            subData
+              .filter((s: any) => s.submittedToEmail === userEmail && s.status === "pending")
+              .forEach((s: any) => submittals.push({ id: s.id, number: s.number, title: s.title, projectId: proj.id, projectName: proj.name, createdAt: s.createdAt, dueDate: s.dueDate || null }));
+          }
+        } catch {}
+      }));
+
+      setPendingRfis(rfis);
+      setPendingSubmittals(submittals);
+    } catch {} finally {
+      setLoadingPending(false);
+    }
+  }
+
+  async function loadRecentActivity() {
+    setLoadingActivity(true);
+    try {
+      const projRes = await fetch(`${API_BASE}/api/v1/projects`, { headers: authHeaders });
+      const projects: ProjectItem[] = await projRes.json();
+
+      const entries: ActivityEntry[] = [];
+      await Promise.all(projects.map(async (proj) => {
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/projects/${proj.id}/activity`, { headers: authHeaders });
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            data.forEach((e: any) => entries.push({ ...e, projectId: proj.id, projectName: proj.name }));
+          }
+        } catch {}
+      }));
+
+      entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setRecentActivity(entries.slice(0, 10));
+    } catch {} finally {
+      setLoadingActivity(false);
+    }
+  }
+
   useEffect(() => {
-    loadProfile();
+    loadProfile().then(() => {});
     loadPerformance();
+    loadMyProjects();
+    loadRecentActivity();
   }, []);
+
+  useEffect(() => {
+    if (profile?.email) {
+      loadPendingItems(profile.email);
+    }
+  }, [profile?.email]);
 
   async function savePersonal() {
     setSavingPersonal(true);
@@ -354,6 +487,48 @@ export function Profile() {
     }
   }
 
+  function handleAvatarFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Avatar = reader.result as string;
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/users/me`, {
+          method: "PATCH",
+          headers: authHeaders,
+          body: JSON.stringify({ avatarUrl: base64Avatar }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        setProfile(prev => prev ? { ...prev, avatarUrl: base64Avatar } : prev);
+        toast({ title: "Profile photo updated" });
+      } catch (err) {
+        toast({ title: err instanceof Error ? err.message : "Failed to upload photo", variant: "destructive" });
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleLogoFileUpload(e: React.ChangeEvent<HTMLInputElement>) { // company logo upload via FileReader base64
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Logo = reader.result as string;
+      setCompanyForm(prev => ({ ...prev, companyLogoUrl: base64Logo }));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function daysSince(dateStr: string) {
+    return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  function daysUntil(dateStr: string | null) {
+    if (!dateStr) return null;
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  }
+
   if (loading) {
     return (
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
@@ -437,8 +612,175 @@ export function Profile() {
           )}
         </SectionCard>
 
+        {/* A. My Projects */}
+        <SectionCard title="My Projects" icon={FolderOpen}>
+          {loadingProjects ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>Loading projects…</div>
+          ) : myProjects.length === 0 ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>You are not a member of any projects yet.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {myProjects.map(proj => (
+                <div key={proj.id} style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "10px 14px",
+                  background: "hsl(var(--muted)/0.4)",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 8,
+                }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{proj.name}</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
+                      <span style={{ fontFamily: "monospace" }}>{proj.code}</span>
+                    </div>
+                  </div>
+                  <Badge variant="outline" style={{ fontSize: 10, flexShrink: 0 }}>{proj.userRole.replace(/_/g, " ")}</Badge>
+                  <Button size="sm" variant="outline" style={{ gap: 4, fontSize: 11, flexShrink: 0 }}
+                    onClick={() => navigate(`/projects/${proj.id}/analytics`)}>
+                    <ExternalLink style={{ width: 11, height: 11 }} />
+                    Go to Project
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+
+        {/* B. Pending Items */}
+        <SectionCard title="Pending Items" icon={Clock}>
+          {loadingPending ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>Loading pending items…</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* RFIs awaiting my response */}
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
+                  RFIs awaiting my response
+                  {pendingRfis.length > 0 && <Badge style={{ fontSize: 10, marginLeft: 4 }}>{pendingRfis.length}</Badge>}
+                </div>
+                {pendingRfis.length === 0 ? (
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", paddingLeft: 14 }}>No RFIs awaiting your response.</div>
+                ) : pendingRfis.map(rfi => (
+                  <div key={rfi.id} style={{
+                    display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 6,
+                    background: "hsl(var(--muted)/0.4)", border: "1px solid hsl(var(--border))", borderRadius: 7,
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600 }}>{rfi.number} — {rfi.subject}</div>
+                      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{rfi.projectName} · {daysSince(rfi.createdAt)}d outstanding</div>
+                    </div>
+                    <Button size="sm" variant="outline" style={{ fontSize: 11, flexShrink: 0 }}
+                      onClick={() => navigate(`/projects/${rfi.projectId}/rfis`)}>View</Button>
+                  </div>
+                ))}
+              </div>
+
+              <Separator />
+
+              {/* Submittals awaiting my review */}
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#3b82f6", display: "inline-block" }} />
+                  Submittals awaiting my review
+                  {pendingSubmittals.length > 0 && <Badge style={{ fontSize: 10, marginLeft: 4 }}>{pendingSubmittals.length}</Badge>}
+                </div>
+                {pendingSubmittals.length === 0 ? (
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", paddingLeft: 14 }}>No submittals awaiting your review.</div>
+                ) : pendingSubmittals.map(sub => (
+                  <div key={sub.id} style={{
+                    display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 6,
+                    background: "hsl(var(--muted)/0.4)", border: "1px solid hsl(var(--border))", borderRadius: 7,
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600 }}>{sub.number} — {sub.title}</div>
+                      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                        {sub.projectName} · {daysSince(sub.createdAt)}d outstanding
+                        {sub.dueDate && (() => { const d = daysUntil(sub.dueDate); return d !== null && d <= 7 ? <span style={{ color: "#ef4444", marginLeft: 6, fontWeight: 600 }}>Due in {d}d</span> : null; })()}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" style={{ fontSize: 11, flexShrink: 0 }}
+                      onClick={() => navigate(`/projects/${sub.projectId}/submittals`)}>View</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* C. Recent Activity */}
+        <SectionCard title="Recent Activity" icon={Activity}>
+          {loadingActivity ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>Loading activity…</div>
+          ) : recentActivity.length === 0 ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>No recent activity found.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {recentActivity.map((entry, i) => (
+                <div key={`${entry.id}-${i}`} style={{
+                  display: "flex", alignItems: "flex-start", gap: 12, padding: "8px 12px",
+                  background: "hsl(var(--muted)/0.3)", borderRadius: 7,
+                  borderLeft: "3px solid hsl(var(--primary)/0.4)",
+                }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <Badge variant="secondary" style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        {entry.actionType.replace(/_/g, " ")}
+                      </Badge>
+                      <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{entry.projectName}</span>
+                    </div>
+                    {entry.details && <div style={{ fontSize: 12, marginTop: 3, color: "hsl(var(--foreground))" }}>{entry.details}</div>}
+                  </div>
+                  <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0, whiteSpace: "nowrap" }}>
+                    {new Date(entry.createdAt).toLocaleDateString()} {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+
         {/* 2. Personal Info */}
         <SectionCard title="Personal Information" icon={User}>
+          {/* Avatar upload */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <div
+              onClick={() => avatarFileInput.current?.click()}
+              style={{
+                width: 72, height: 72, borderRadius: "50%", cursor: "pointer", position: "relative",
+                background: profile?.avatarUrl
+                  ? `url(${profile.avatarUrl}) center/cover no-repeat`
+                  : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.7))",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 28, fontWeight: 700, color: "white", flexShrink: 0,
+                border: "2px dashed hsl(var(--border))",
+              }}
+              title="Click to upload profile photo"
+            >
+              {!profile?.avatarUrl && (profile?.fullName?.charAt(0).toUpperCase() || <Camera style={{ width: 24, height: 24 }} />)}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: 0, transition: "opacity 0.15s",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0")}
+              >
+                <Camera style={{ width: 20, height: 20, color: "white" }} />
+              </div>
+            </div>
+            <input
+              ref={avatarFileInput}
+              type="file"
+              accept="image/jpeg,image/png"
+              style={{ display: "none" }}
+              onChange={handleAvatarFileUpload}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>Profile Photo</div>
+              <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Click the avatar to upload a JPG or PNG photo</div>
+            </div>
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Full Name</Label>
@@ -603,12 +945,44 @@ export function Profile() {
               />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Company Logo URL</Label>
-              <Input
-                value={companyForm.companyLogoUrl}
-                onChange={e => setCompanyForm(p => ({ ...p, companyLogoUrl: e.target.value }))}
-                placeholder="https://..."
-              />
+              <Label style={{ fontSize: 12, marginBottom: 8, display: "block" }}>Company Logo</Label>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  style={{ gap: 6 }}
+                  onClick={() => logoFileInput.current?.click()}
+                >
+                  <Upload style={{ width: 13, height: 13 }} />
+                  Upload Logo (JPG / PNG)
+                </Button>
+                <input
+                  ref={logoFileInput}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  style={{ display: "none" }}
+                  onChange={handleLogoFileUpload}
+                />
+                {companyForm.companyLogoUrl && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <img
+                      src={companyForm.companyLogoUrl}
+                      alt="Company logo preview"
+                      style={{ height: 36, maxWidth: 120, objectFit: "contain", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 2, background: "#fff" }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setCompanyForm(p => ({ ...p, companyLogoUrl: "" }))}
+                      style={{ padding: "2px 6px" }}
+                    >
+                      <Trash2 style={{ width: 12, height: 12 }} />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
