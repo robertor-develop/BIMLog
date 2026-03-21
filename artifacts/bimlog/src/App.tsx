@@ -19,6 +19,7 @@ import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
 import { DataRetention } from "@/pages/DataRetention";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
+import { AdminPanel } from "@/pages/AdminPanel";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -61,6 +62,9 @@ function Router() {
       <Route path="/setup-guide" component={SetupGuide} />
       <Route path="/profile">
         {() => <ProtectedRoute component={Profile} />}
+      </Route>
+      <Route path="/admin">
+        {() => <ProtectedRoute component={AdminPanel} />}
       </Route>
 
       <Route component={NotFound} />

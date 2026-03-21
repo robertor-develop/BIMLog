@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
-import { projectMembersTable } from "@workspace/db/schema";
+import { projectMembersTable, usersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getRolesByPermission } from "./config-validator";
 
@@ -26,6 +26,7 @@ export interface AuthPayload {
   companyId: number;
   fullName: string;
   companyName: string;
+  isSuperAdmin?: boolean;
 }
 
 declare global {
@@ -93,6 +94,13 @@ export function requireProjectMember(...allowedRoles: string[]) {
 
     next();
   };
+}
+
+export async function isSuperAdminMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  if (!req.user) { res.status(401).json({ error: "Authentication required" }); return; }
+  const [u] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user.userId)).limit(1);
+  if (!u?.isSuperAdmin) { res.status(403).json({ error: "Super admin access required" }); return; }
+  next();
 }
 
 export function requirePermission(...permissionLevels: string[]) {

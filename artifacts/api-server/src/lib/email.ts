@@ -1,4 +1,6 @@
 import sgMail from "@sendgrid/mail";
+import { db } from "@workspace/db";
+import { emailLogTable } from "@workspace/db/schema";
 
 const FROM = "notifications@ignitesmart.ai";
 const APP_URL = process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app";
@@ -14,9 +16,15 @@ export async function sendEmail(params: {
   subject: string;
   html: string;
   replyTo?: string;
+  triggerType?: string;
 }): Promise<void> {
   if (!process.env.SENDGRID_API_KEY) {
     console.warn(`[email] Skipping send to ${params.to} — SENDGRID_API_KEY not set.`);
+    setImmediate(async () => {
+      try {
+        await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "skipped", errorMessage: "SENDGRID_API_KEY not set" });
+      } catch (_) {}
+    });
     return;
   }
   try {
@@ -28,8 +36,19 @@ export async function sendEmail(params: {
       replyTo: params.replyTo,
     });
     console.log(`[email] Sent "${params.subject}" to ${params.to}`);
+    setImmediate(async () => {
+      try {
+        await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "sent" });
+      } catch (_) {}
+    });
   } catch (err) {
-    console.error(`[email] Failed to send to ${params.to}:`, err instanceof Error ? err.message : err);
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[email] Failed to send to ${params.to}:`, errMsg);
+    setImmediate(async () => {
+      try {
+        await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "failed", errorMessage: errMsg });
+      } catch (_) {}
+    });
   }
 }
 

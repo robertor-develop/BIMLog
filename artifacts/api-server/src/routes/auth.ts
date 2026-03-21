@@ -105,6 +105,7 @@ router.post("/auth/login", async (req, res) => {
       companyId: user.companyId,
       fullName: user.fullName,
       companyName,
+      isSuperAdmin: user.isSuperAdmin,
     };
 
     const token = signToken(payload);
@@ -118,6 +119,7 @@ router.post("/auth/login", async (req, res) => {
         companyName,
         companyId: user.companyId,
         createdAt: user.createdAt.toISOString(),
+        isSuperAdmin: user.isSuperAdmin,
       },
     });
   } catch (error) {
@@ -151,6 +153,7 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
     signatureUrl: u.signatureUrl || null,
     apiToken: u.apiToken || null,
     notificationPreferences: u.notificationPreferences || null,
+    isSuperAdmin: u.isSuperAdmin,
     company: c ? {
       id: c.id,
       name: c.name,
