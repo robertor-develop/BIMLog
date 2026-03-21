@@ -12,6 +12,7 @@ import configRouter from "./config";
 import downloadsRouter from "./downloads";
 import documentsRouter from "./documents";
 import adminRouter from "./admin";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(activityRouter);
 router.use(conventionsRouter);
 router.use(membersRouter);
 router.use(adminRouter);
+router.use(contactRouter);
 
 export default router;

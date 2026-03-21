@@ -20,6 +20,9 @@ import { Disclaimer } from "@/pages/Disclaimer";
 import { DataRetention } from "@/pages/DataRetention";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
 import { AdminPanel } from "@/pages/AdminPanel";
+import { Pricing } from "@/pages/Pricing";
+import { About } from "@/pages/About";
+import { Contact } from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -66,6 +69,9 @@ function Router() {
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}
       </Route>
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/about" component={About} />
+      <Route path="/contact" component={Contact} />
 
       <Route component={NotFound} />
     </Switch>

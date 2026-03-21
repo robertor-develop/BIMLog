@@ -15,3 +15,4 @@ export * from "./rfi-ball-in-court-history";
 export * from "./email-log";
 export * from "./feature-flags";
 export * from "./admin-actions-log";
+export * from "./contact-submissions";

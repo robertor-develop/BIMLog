@@ -1,0 +1,147 @@
+Perfect. Clear instructions. Let me address each one:
+1. Remove Help button — Information dropdown replaces it completely ✓
+2. Pricing page — needs real content, sell it properly. Before I send to Replit let me write the complete pricing page content so Replit has exact text.
+3. About — add to Information dropdown
+4. Contact — add to Information dropdown with a contact form
+
+Here is the complete Pricing page content. Review it and tell me if you want to change anything before I send to Replit:
+
+PRICING
+Simple, transparent pricing that scales with your projects.
+Start free. Upgrade when you are ready. No credit card required to get started.
+
+FREE
+Perfect for getting started
+
+1 active project
+3 months full access
+Naming convention builder
+Name generator
+File upload with server-side validation
+RFI tracking and management
+Submittal register
+Activity log — immutable audit trail
+Team management — up to 5 members
+Bilingual EN/ES
+BIMLog Sync Agent — desktop app
+Email support
+
+Start Free — no credit card required
+
+PROFESSIONAL
+For active project teams
+Contact us for pricing
+Everything in Free plus:
+
+Unlimited active projects
+Document Integrity System — SHA-256 cryptographic fingerprinting
+Mandatory declaration logging on every upload
+Duplicate content detection
+Superseded version tracking
+AI Pre-Submission Compliance Check — reduces rejection rates significantly
+Procurement Before Approval warning — catches the most expensive mistake in construction
+Rapid Approval Detection — flags reviews completed in under 60 seconds
+Full RFI lifecycle — ball-in-court tracking, multiple responses, conflict detection
+Submittal Register with lead time management
+Audit Certificate PDF — legally formatted, UUID certified, tamper-evident
+AI-assisted RFI question and response drafting
+AI-assisted submittal description rewriting
+Convention Builder — 4-step wizard, ISO 19650 defaults, onboarding acceptance
+Automated email notifications — overdue RFIs, naming violations, procurement warnings
+Analytics dashboard — compliance rate, violations by company, RFI aging
+Export to Excel — RFI log, Submittal log
+Export to Word and PDF — individual RFIs and Submittals with checkboxes
+Team invite by email
+Up to 25 team members per project
+Priority email support
+
+Contact Us for Pricing
+
+BUSINESS
+For firms running multiple concurrent projects
+Contact us for pricing
+Everything in Professional plus:
+
+Unlimited team members
+Transmittal Manager
+Meeting Minutes and Action Items tracker
+AI Report Assistant — natural language queries across all project data
+Coordination Accountability Report
+Discipline Performance Report
+BIMLog Performance Score — company-level verified rating
+Compliance Badge — verifiable digital award on project completion
+Direct platform integrations — Procore, Autodesk ACC, OneDrive, SharePoint
+MS Project schedule import
+Delay Attribution reporting
+Drawing Register
+Change Order Log
+Punch List and Snagging
+Daily Reports
+PowerBI connector
+Dedicated onboarding support
+Phone and email support
+SLA guaranteed uptime
+
+Contact Us for Pricing
+
+ENTERPRISE
+For large GCs, developers, and institutions managing multiple concurrent projects across any size portfolio
+Custom pricing — contact us for a proposal
+Everything in Business plus:
+
+White-label option — your logo and branding
+Custom report templates tailored to your requirements
+BIMLog Sync Agent — enterprise folder watching and automatic validation
+OAuth connections — secure token-based direct integrations
+Full API access with webhooks
+Custom data retention policy
+Dedicated account manager
+Custom SLA and uptime guarantees
+Bulk seat pricing
+Priority feature development — your requests go to the top of the roadmap
+Founding Partner designation — if signing before public launch
+Locked pricing for 36 months
+
+Contact Us — we build a proposal around your portfolio
+
+WHY BIMLOG PAYS FOR ITSELF
+Industry research across thousands of AEC professionals shows:
+
+30 to 40 percent of submittals are rejected on first submission
+Each rejection costs an average of $805 in administrative time and delay
+On a project with 2,000 submittals at 35 percent rejection — that is over $500,000 lost
+Each rejection adds 2 to 4 weeks to the project schedule
+
+BIMLog's AI pre-submission check catches the 7 most common rejection causes before the submittal leaves your hands. One prevented rejection on a complex submittal pays for BIMLog for an entire year.
+And that is before you count the value of having a legally defensible audit trail when a dispute arises.
+
+FREQUENTLY ASKED QUESTIONS
+Do I need to ask my GC's permission to use BIMLog?
+No. Subcontractors and coordinators can sign up and use BIMLog on any project independently. You do not need permission from anyone above you in the project hierarchy. Start building your project record today for free.
+Does BIMLog replace Procore or Autodesk?
+No. BIMLog works with the tools your team already uses. It connects to Procore, Autodesk, OneDrive, and others — adding the governance and accountability layer those platforms do not provide. You keep using the tools you know. BIMLog makes them accountable.
+What happens to my data after 3 months on the free tier?
+Your project moves to read-only mode. All data and audit trails are permanently retained. You can still view and export everything. You just cannot upload new files or create new RFIs without upgrading.
+Is my data secure?
+All data is encrypted in transit using TLS 1.3 and at rest using AES-256. Infrastructure is hosted on AWS with US-East and São Paulo regions. We do not store physical files — only metadata and audit records. Full details in our Privacy Policy.
+Can I export my data?
+Yes. Every log, every RFI, every submittal, every audit certificate is exportable at any time. Your data belongs to you. We are a recording system, not a lock-in.
+What is the Founding Partner program?
+We are currently accepting a limited number of founding partners — GCs and BIM coordination firms who will help shape the platform and receive locked pricing for 3 years. Contact us at info@ignitesmart.ai to discuss.
+
+Now tell Replit this exactly — nothing else:
+Make these changes to the navbar and create the Pricing and Contact pages. Do not change anything else.
+Change 1 — Remove the Help button from the navbar completely. The Information dropdown replaces it.
+Change 2 — Add About and Contact to the Information dropdown. The complete dropdown should be in this order: How It Works, Pricing, About, Contact, Privacy Policy, Terms of Service, Platform Disclaimer, Data Retention. How It Works links to /setup-guide. Pricing links to /pricing. About links to /about. Contact links to /contact. Privacy Policy links to /privacy. Terms of Service links to /terms. Platform Disclaimer links to /disclaimer. Data Retention links to /data-retention.
+Change 3 — Create the Pricing page at route /pricing with this exact content. Use the same clean layout as the legal pages — BIMLog navbar at top, page title, content sections, footer at bottom. Show 4 pricing tier cards side by side — Free, Professional, Business, Enterprise. Each card shows the tier name, subtitle, feature list with checkmarks, and a call to action button. Free tier button says Start Free and links to /register. All other tier buttons say Contact Us and link to /contact. Below the 4 cards show the Why BIMLog Pays For Itself section with the industry statistics. Below that show the FAQ section with all 6 questions and answers as expandable accordion items. Register the route in App.tsx.
+Change 4 — Create the About page at route /about. Content: BIMLog by IgniteSmart is a product of BIMCapital Partners INC, operated through its IgniteSmart technology division. Founded by Roberto Rodriguez, BIMLog was built by practitioners who lived the pain of BIM coordination firsthand. Every feature exists because someone on a real project felt that pain and had no tool to solve it. Show the company details — BIMCapital Partners INC, 7901 4th Street North STE 300, St. Petersburg FL 33702, info@ignitesmart.ai, ignitesmart.ai. Show the standards alignment — ISO 19650, openBIM, buildingSMART, IFC. Show the technology partners — ACCA Software, AWS, AI powered by Claude Gemini or the provider of your choice. Register the route in App.tsx.
+Change 5 — Create the Contact page at route /contact. Show contact information on the left side — email info@ignitesmart.ai, phone US +1 332 900 9180, phone Bolivia +591 71054305, website ignitesmart.ai, address BIMCapital Partners INC 7901 4th Street North STE 300 St. Petersburg FL 33702. On the right side show a contact form with these fields — Full Name required, Email required, Company Name required, Country required, Message required, and a dropdown called I am interested in with options: General Inquiry, Founding Partner Program, Enterprise Pricing, Technical Support, Partnership or Integration, Press or Media. Submit button sends a POST request to a new endpoint POST /api/v1/contact that saves the submission to a new table called contact_submissions with columns id, full_name, email, company_name, country, message, interest_type, created_at. Run migration immediately. After successful submission show a thank you message — Thank you for reaching out. We will respond within 1 business day. Register the route in App.tsx.
+Then rebuild and redeploy. Show exact output of these checks:
+Check 1 — Help button removed: grep -n "Help|help.*button|button.*help" artifacts/bimlog/src/components/layout/Navbar.tsx | head -5
+Check 2 — About and Contact in Information dropdown: grep -n "About|Contact|/about|/contact|/pricing" artifacts/bimlog/src/components/layout/Navbar.tsx | head -10
+Check 3 — Pricing page exists: find artifacts/bimlog/src/pages -name "Pricing.tsx"
+Check 4 — About page exists: find artifacts/bimlog/src/pages -name "About.tsx"
+Check 5 — Contact page with form exists: find artifacts/bimlog/src/pages -name "Contact.tsx"
+Check 6 — Contact submissions table exists: SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'contact_submissions');
+Check 7 — All new routes in App.tsx: grep -n "pricing|about|contact" artifacts/bimlog/src/App.tsx | head -10
+Show exact output of all 7 checks. Nothing else.
