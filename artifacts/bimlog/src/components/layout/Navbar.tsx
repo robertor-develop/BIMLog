@@ -72,6 +72,9 @@ export function Navbar() {
             <Link href="/dashboard">
               <Button variant="ghost" size="sm" style={{ fontSize: 12 }}>{t("nav.dashboard")}</Button>
             </Link>
+            <Link href="/profile">
+              <Button variant="ghost" size="sm" style={{ fontSize: 12 }}>Profile</Button>
+            </Link>
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               {t("nav.logout")}
             </Button>

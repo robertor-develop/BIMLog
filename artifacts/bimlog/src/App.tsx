@@ -13,6 +13,7 @@ import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
 import { ProjectDetail } from "@/pages/ProjectDetail";
 import { SetupGuide } from "@/pages/SetupGuide";
+import { Profile } from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -46,6 +47,9 @@ function Router() {
         {() => <ProtectedRoute component={ProjectDetail} />}
       </Route>
       <Route path="/setup-guide" component={SetupGuide} />
+      <Route path="/profile">
+        {() => <ProtectedRoute component={Profile} />}
+      </Route>
 
       <Route component={NotFound} />
     </Switch>

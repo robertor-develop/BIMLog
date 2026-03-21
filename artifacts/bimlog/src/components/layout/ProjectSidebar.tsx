@@ -147,15 +147,21 @@ export function ProjectSidebar({
 
         {/* User footer */}
         {user && (
-          <div className="sidebar-footer">
+          <a
+            href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/profile`}
+            className="sidebar-footer"
+            style={{ textDecoration: "none", cursor: "pointer" }}
+            title="My Profile"
+          >
             <div className="avatar avatar-sm av-blue">
               {user.fullName?.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#fff" }}>{user.fullName}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>{user.companyName}</div>
             </div>
-          </div>
+            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>Profile →</div>
+          </a>
         )}
       </div>
     </>

@@ -62,6 +62,10 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 
 Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
 
+**users columns**: id, email, password_hash, full_name, company_id, created_at, job_title, phone, avatar_url, signature_url, api_token, notification_preferences (jsonb)
+
+**companies columns**: id, name, created_at, website, address, phone, company_logo_url
+
 The `config_options` table stores all configurable domain values (roles, statuses, separators, priorities, submittal types) with an optional `meta` JSON column for permission metadata. It serves as the single source of truth. Values are exposed via `GET /api/v1/config` and used by both frontend and backend validation. Backend RBAC uses `requirePermission("admin", "write")` which resolves allowed roles from DB at runtime (cached 60s).
 
 ## API Endpoints (v1)
@@ -70,7 +74,12 @@ All endpoints are versioned under `/api/v1/`.
 
 - `POST /api/v1/auth/register` — Register with email, password, fullName, companyName
 - `POST /api/v1/auth/login` — Login, returns JWT token
-- `GET /api/v1/auth/me` — Get current user (requires auth)
+- `GET /api/v1/auth/me` — Get current user (requires auth); returns all profile fields including jobTitle, phone, avatarUrl, signatureUrl, apiToken, notificationPreferences, company object
+- `PATCH /api/v1/users/me` — Update personal profile (fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences)
+- `PATCH /api/v1/users/me/company` — Update company info (name, website, address, phone, companyLogoUrl)
+- `PATCH /api/v1/users/me/password` — Change password (requires currentPassword)
+- `POST /api/v1/users/me/api-token` — Generate/regenerate personal API token
+- `GET /api/v1/users/me/performance-score` — Performance metrics (naming compliance, RFI close rate, submittal approval rate)
 - `GET /api/v1/config` — Get app configuration (roles, statuses, separators, priorities) from DB
 - `GET/POST /api/v1/projects` — List/create projects (member-scoped)
 - `GET /api/v1/projects/:id` — Project details (requires membership)
