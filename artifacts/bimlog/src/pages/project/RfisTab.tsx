@@ -90,47 +90,29 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
   );
 }
 
-// ─── ExportModal ──────────────────────────────────────────────────────────────
-function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
-  projectId: number;
-  projectName?: string;
-  rfis: Rfi[];
-  lang: string;
-  view: "list" | "log";
-  onClose: () => void;
-}) {
+// ─── main export ─────────────────────────────────────────────────────────────
+export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
+  const { lang } = useI18n();
+  const { getLabel, getOptions } = useConfig();
+  const { user } = useAuthStore();
+  const { data: rfis, isLoading } = useListRfis(projectId);
+  const { data: members } = useListMembers(projectId);
   const { toast } = useToast();
-  const [loading, setLoading] = useState<string | null>(null);
-  const isLog = view === "log";
 
-  const handlePdf = async () => {
-    setLoading("pdf");
-    try {
-      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const qs = isLog ? "" : "?view=list";
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all${qs}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!resp.ok) throw new Error("Export failed");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const label = isLog ? "RFI-Log" : "RFI-Summary";
-      const a = document.createElement("a"); a.href = url; a.download = `${label}-${projectId}.pdf`; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: w("PDF exported", "PDF exportado", lang) });
-      onClose();
-    } catch {
-      toast({ title: w("PDF export failed", "Error al exportar PDF", lang), variant: "destructive" });
-    } finally { setLoading(null); }
-  };
+  const [view, setView] = useState<"list" | "log">("list");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showCreate, setShowCreate] = useState(false);
+  const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
+  const [revising, setRevising] = useState<Rfi | null>(null);
 
-  const handleExcel = () => {
-    setLoading("excel");
+  const handleExportAllExcel = () => {
+    if (!rfis) return;
+    const isLog = view === "log";
+    const rows = isLog ? filtered.length > 0 ? filtered : rfis : filtered.length > 0 ? filtered : rfis;
     try {
       const wb = XLSX.utils.book_new();
-
       if (isLog) {
-        // Log view — full register (all fields)
         const headerRow = [
           "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
           "Submitted By Company", "Submitted By Contact", "Submitted By Email",
@@ -139,7 +121,7 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
           "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
           "Ball In Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
         ];
-        const rows = rfis.map(r => {
+        const data = rows.map(r => {
           const bic = getBallInCourt(r);
           const days = differenceInDays(new Date(), new Date(r.createdAt));
           return [
@@ -156,185 +138,40 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
           ];
         });
         const ws = XLSX.utils.aoa_to_sheet([
-          [`BIMLog by IgniteSmart — RFI Log${projectName ? `: ${projectName}` : ""}`],
+          [`BIMLog by IgniteSmart — RFI Log`],
           [`Exported: ${new Date().toLocaleDateString()}`],
           [],
           headerRow,
-          ...rows,
+          ...data,
         ]);
         ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
         ws["!cols"] = headerRow.map((_, i) => ({ wch: i < 2 ? 12 : i < 5 ? 18 : 20 }));
         XLSX.utils.book_append_sheet(wb, ws, "RFI Log");
         XLSX.writeFile(wb, `RFI-Log-${projectId}.xlsx`);
       } else {
-        // List view — card-style summary (6 key columns)
         const headerRow = ["RFI #", "Subject", "Status", "Priority", "Ball In Court", "Days Outstanding"];
-        const rows = rfis.map(r => {
+        const data = rows.map(r => {
           const bic = getBallInCourt(r);
           const days = differenceInDays(new Date(), new Date(r.createdAt));
           return [r.number, r.subject, r.status, r.priority, bic?.label || "Closed", days];
         });
         const ws = XLSX.utils.aoa_to_sheet([
-          [`BIMLog by IgniteSmart — RFI Summary${projectName ? `: ${projectName}` : ""}`],
+          [`BIMLog by IgniteSmart — RFI Summary`],
           [`Exported: ${new Date().toLocaleDateString()}`],
           [],
           headerRow,
-          ...rows,
+          ...data,
         ]);
         ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
         ws["!cols"] = [{ wch: 12 }, { wch: 40 }, { wch: 14 }, { wch: 12 }, { wch: 28 }, { wch: 14 }];
         XLSX.utils.book_append_sheet(wb, ws, "RFI Summary");
         XLSX.writeFile(wb, `RFI-Summary-${projectId}.xlsx`);
       }
-
       toast({ title: w("Excel exported", "Excel exportado", lang) });
-      onClose();
     } catch {
       toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
-    } finally { setLoading(null); }
+    }
   };
-
-  const handleWord = async () => {
-    setLoading("word");
-    try {
-      if (isLog) {
-        // Use backend endpoint — server-side docx with dynamic DXA column widths
-        const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-        const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all?format=word`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!resp.ok) throw new Error("Word export failed");
-        const blob = await resp.blob();
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.docx`; a.click();
-        URL.revokeObjectURL(url);
-        toast({ title: w("Word document exported", "Documento Word exportado", lang) });
-        onClose();
-        return;
-      }
-
-      // Summary (list) view — client-side HTML Word export
-      const th = (s: string) => `<th style="background:#1E3A5F;color:white;padding:5pt 6pt;font-size:9pt;text-align:left;border:1pt solid #334155;">${s}</th>`;
-      const td = (s: string, color?: string) => `<td style="padding:4pt 6pt;font-size:9pt;border:1pt solid #E2E8F0;${color ? `color:${color};font-weight:bold;` : ""}">${s || "—"}</td>`;
-
-      let tableHtml: string;
-      let sheetTitle: string;
-      let filename: string;
-
-      {
-        sheetTitle = `RFI Summary — ${projectName || `Project ${projectId}`}`;
-        filename = `RFI-Summary-${projectId}.doc`;
-        const headerHtml = `<tr>${["RFI #","Subject","Status","Priority","Ball In Court","Days Outstanding"].map(th).join("")}</tr>`;
-        const dataRows = rfis.map(r => {
-          const bic = getBallInCourt(r);
-          const days = differenceInDays(new Date(), new Date(r.createdAt));
-          const statusColor = r.status === "closed" ? "#16A34A" : r.status === "responded" ? "#7C3AED" : "#D97706";
-          return `<tr>${[
-            td(r.number, "#2563EB"),
-            td(r.subject),
-            td((r.status || "").replace("_", " "), statusColor),
-            td(r.priority || "—"),
-            td(bic?.label || "Closed"),
-            td(String(days)),
-          ].join("")}</tr>`;
-        }).join("");
-        tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
-      }
-
-      const pageCSS = isLog ? "@page { size: letter landscape; margin: 14pt; } " : "";
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>${pageCSS}body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#1E293B;margin:24pt;}
-h1{color:#1E3A5F;font-size:14pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
-</style></head><body>
-<h1>${sheetTitle}</h1>
-<p style="font-size:9pt;color:#64748B;">BIMLog by IgniteSmart | Generated ${new Date().toLocaleDateString()} | ${rfis.length} RFIs</p>
-${tableHtml}
-</body></html>`;
-
-      const blob = new Blob([html], { type: "application/msword" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: w("Word document exported", "Documento Word exportado", lang) });
-      onClose();
-    } catch {
-      toast({ title: w("Word export failed", "Error al exportar Word", lang), variant: "destructive" });
-    } finally { setLoading(null); }
-  };
-
-  const pdfDesc = isLog
-    ? w("Full RFI register — all columns, landscape (PDF)", "Registro completo — todas las columnas, paisaje", lang)
-    : w("RFI summary — 6 key columns, portrait (PDF)", "Resumen RFI — 6 columnas clave, retrato", lang);
-  const xlDesc = isLog
-    ? w("Full register spreadsheet — all 27 fields", "Hoja registro completo — 27 campos", lang)
-    : w("Summary spreadsheet — 6 key columns", "Hoja resumen — 6 columnas clave", lang);
-  const wdDesc = isLog
-    ? w("Full register table — all columns as Word table", "Tabla registro completo en Word", lang)
-    : w("Summary table — 6 key columns as Word table", "Tabla resumen en Word", lang);
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.45)" }} onClick={onClose}>
-      <div style={{ background: "hsl(var(--card))", borderRadius: 12, padding: "28px 28px 24px", width: 420, boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>{w("Export All RFIs", "Exportar todos los RFIs", lang)}</div>
-          <button onClick={onClose} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 16, height: 16 }} /></button>
-        </div>
-        <div style={{ fontSize: 11, color: "#7C3AED", fontWeight: 600, marginBottom: 14, padding: "4px 10px", background: "#F5F3FF", borderRadius: 6, display: "inline-block" }}>
-          {isLog ? w("Log view export", "Exportar vista registro", lang) : w("List view export", "Exportar vista lista", lang)}
-        </div>
-        <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
-          {w(`${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}`, `${rfis.length} RFI${rfis.length !== 1 ? "s" : ""}`, lang)}
-        </p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <button onClick={handlePdf} disabled={!!loading}
-            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #2563EB", background: "#EFF6FF", cursor: "pointer", textAlign: "left" }}>
-            <FileText style={{ width: 20, height: 20, color: "#2563EB", flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1E3A5F" }}>PDF</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{pdfDesc}</div>
-            </div>
-            {loading === "pdf" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
-          </button>
-          <button onClick={handleExcel} disabled={!!loading}
-            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #16A34A", background: "#F0FDF4", cursor: "pointer", textAlign: "left" }}>
-            <Download style={{ width: 20, height: 20, color: "#16A34A", flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#14532D" }}>Excel (.xlsx)</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{xlDesc}</div>
-            </div>
-            {loading === "excel" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
-          </button>
-          <button onClick={handleWord} disabled={!!loading}
-            style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 8, border: "1.5px solid #7C3AED", background: "#F5F3FF", cursor: "pointer", textAlign: "left" }}>
-            <FileText style={{ width: 20, height: 20, color: "#7C3AED", flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#4C1D95" }}>Word (.doc)</div>
-              <div style={{ fontSize: 11, color: "#64748B" }}>{wdDesc}</div>
-            </div>
-            {loading === "word" && <Loader2 style={{ width: 14, height: 14, marginLeft: "auto" }} className="animate-spin" />}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── main export ─────────────────────────────────────────────────────────────
-export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
-  const { lang } = useI18n();
-  const { getLabel, getOptions } = useConfig();
-  const { user } = useAuthStore();
-  const { data: rfis, isLoading } = useListRfis(projectId);
-  const { data: members } = useListMembers(projectId);
-  const { toast } = useToast();
-
-  const [view, setView] = useState<"list" | "log">("list");
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [showCreate, setShowCreate] = useState(false);
-  const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
-  const [revising, setRevising] = useState<Rfi | null>(null);
-  const [showExportModal, setShowExportModal] = useState(false);
 
   const filtered = useMemo(() => {
     if (!rfis) return [];
@@ -401,16 +238,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 
   return (
     <div style={{ position: "relative" }}>
-      {showExportModal && rfis && (
-        <ExportModal
-          projectId={projectId}
-          rfis={filtered.length > 0 ? filtered : rfis}
-          lang={lang}
-          view={view}
-          onClose={() => setShowExportModal(false)}
-        />
-      )}
-
       {/* Header */}
       <div className="section-header" style={{ marginBottom: 12 }}>
         <div>
@@ -429,7 +256,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             </button>
           </div>
           {rfis && rfis.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)} style={{ gap: 5, fontSize: 11 }}>
+            <Button variant="outline" size="sm" onClick={handleExportAllExcel} style={{ gap: 5, fontSize: 11 }}>
               <Download style={{ width: 12, height: 12 }} />{w("Export All", "Exportar Todo", lang)}
             </Button>
           )}

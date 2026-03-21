@@ -292,7 +292,7 @@ function measureColWidths(
   });
 }
 
-function makeRfiLogPdf(
+function _makeRfiLogPdf_REMOVED(
   doc: PDFKit.PDFDocument,
   rfis: (typeof rfisTable.$inferSelect)[],
   project: { name: string } | undefined,
@@ -857,7 +857,7 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
     const revNum = (orig.revisionNumber ?? 0) + 1;
     const newNumber = `${orig.number.replace(/-R\d+$/, "")}-R${revNum}`;
     const defaultStatus = await getDefaultValue("rfi_status");
-    const revisionSubject = `Revision of RFI-${orig.number}: ${orig.subject}`;
+    const revisionSubject = `Revision of ${orig.number}: ${orig.subject}`;
 
     const [newRfi] = await db.insert(rfisTable).values({
       projectId,
@@ -1120,74 +1120,6 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       entityId: rfiId,
       details: `PDF exported: ${rfi.number}`,
     }).catch(() => {});
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
-  }
-});
-
-// ─── GET /projects/:projectId/rfis/export-all  (RFI log, summary, or word log) ─
-router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
-  try {
-    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const isList    = req.query.view === "list";
-    const isWordLog = req.query.format === "word";
-
-    const rfis = await db.query.rfisTable.findMany({
-      where: eq(rfisTable.projectId, projectId),
-      orderBy: (t, { asc }) => [asc(t.createdAt)],
-    });
-
-    if (rfis.length === 0) {
-      res.status(404).json({ error: "No RFIs found" });
-      return;
-    }
-
-    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-
-    const creatorMap = new Map<number, string>();
-    for (const rfi of rfis) {
-      if (!creatorMap.has(rfi.createdById)) {
-        const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
-        creatorMap.set(rfi.createdById, creator[0]?.fullName || "—");
-      }
-    }
-
-    // Word log export — server-side docx with dynamic DXA column widths
-    if (isWordLog) {
-      const wordDoc   = makeRfiLogWord(rfis, project, creatorMap);
-      const wordBuf   = await Packer.toBuffer(wordDoc);
-      const filename  = `RFI-Log-${project?.name || projectId}.docx`;
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-      res.setHeader("Content-Length", wordBuf.length);
-      res.send(wordBuf);
-      return;
-    }
-
-    // PDF log / summary export
-    const docOptions = isList
-      ? { margin: MARGIN, size: "LETTER" as const, autoFirstPage: true }
-      : { margin: LOG_MARGIN, size: "LETTER" as const, layout: "landscape" as const, autoFirstPage: true };
-
-    const doc = new PDFDocument(docOptions);
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("end", () => {
-      const pdfBuffer = Buffer.concat(chunks);
-      res.setHeader("Content-Type", "application/pdf");
-      const label = isList ? "RFI-Summary" : "RFI-Log";
-      res.setHeader("Content-Disposition", `attachment; filename="${label}-${project?.name || projectId}.pdf"`);
-      res.setHeader("Content-Length", pdfBuffer.length);
-      res.send(pdfBuffer);
-    });
-
-    if (isList) {
-      makeRfiListPdf(doc, rfis, project, creatorMap);
-    } else {
-      makeRfiLogPdf(doc, rfis, project, creatorMap);
-    }
-    doc.end();
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

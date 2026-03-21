@@ -161,7 +161,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
   }
 });
 
-// ─── GET /projects/:projectId/submittals/export-all (landscape log PDF) ─────
+// ─── GET /projects/:projectId/submittals/export-all (REMOVED — Excel is client-side) ─
 router.get("/projects/:projectId/submittals/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const projectId = parseInt(String(req.params.projectId));

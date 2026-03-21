@@ -679,11 +679,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
         </select>
         <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => handleExport("excel")}>
           <Download style={{ width: 12, height: 12 }} />
-          Excel
-        </Button>
-        <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => handleExport("pdf")}>
-          <FileText style={{ width: 12, height: 12 }} />
-          PDF
+          {w("Export All", "Exportar Todo", lang)}
         </Button>
       </div>
 
