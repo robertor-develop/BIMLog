@@ -1,0 +1,49 @@
+Do not build anything. Run all these checks and report exact output of each one. Nothing else.
+DATABASE CHECKS:
+Check 1 — All critical tables exist:
+SELECT table_name FROM information_schema.tables WHERE table_name IN ('users', 'companies', 'projects', 'project_members', 'files', 'rfis', 'rfi_responses', 'rfi_view_events', 'rfi_ball_in_court_history', 'submittals', 'submittal_register', 'submittal_view_events', 'activity_log', 'naming_conventions', 'naming_fields', 'project_invitations') ORDER BY table_name;
+Check 2 — All critical columns on files table:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'files' AND column_name IN ('file_hash', 'document_relationship', 'is_superseded', 'convention_version', 'content_verification_result', 'source', 'linked_rfi_id') ORDER BY column_name;
+Check 3 — All critical columns on rfis table:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'rfis' AND column_name IN ('revision_of', 'answer', 'response', 'ball_in_court', 'cost_impact', 'schedule_impact') ORDER BY column_name;
+Check 4 — All critical columns on submittals table:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'submittals' AND column_name IN ('procurement_status', 'rapid_approval_flag', 'ball_in_court', 'ai_check_result', 'linked_rfi_id', 'revision_number', 'distribution_list') ORDER BY column_name;
+Check 5 — All critical columns on users table:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name IN ('avatar_url', 'signature_url', 'api_token', 'notification_preferences') ORDER BY column_name;
+BACKEND API CHECKS:
+Check 6 — RFI endpoints exist:
+grep -n "audit-certificate|rfi.*view|export-word|rfi_responses|revision_of|project_admin.*close|Only a Project Admin" artifacts/api-server/src/routes/rfis.ts | head -20
+Check 7 — Submittal endpoints exist:
+grep -n "audit-certificate|inline-ai-check|rapid_approval|export-all|submittal.*view" artifacts/api-server/src/routes/submittals.ts | head -20
+Check 8 — Files integrity system:
+grep -n "createHash|sha256|document_relationship|is_superseded|content_verification|suggest-name" artifacts/api-server/src/routes/files.ts | head -20
+Check 9 — Auth routes for profile:
+grep -n "PATCH.*me|users.*me|avatar|signature|api_token|notification" artifacts/api-server/src/routes/auth.ts | head -20
+Check 10 — Project invitations endpoint:
+grep -n "invitations|invitation" artifacts/api-server/src/routes/members.ts | head -10
+FRONTEND CHECKS:
+Check 11 — RFI tab completeness:
+grep -n "Close RFI|Revise RFI|rfiResponses|isProjectAdmin|stripMarkdown|exportAllExcel|auditCert|conflictOfInterest|revision_of" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -20
+Check 12 — Submittal tab completeness:
+grep -n "procureWarning|rapidApproval|aiCheck|exportAllExcel|auditCert|distributionList|linkedRfi|reviewResponse|scrollIntoView" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -20
+Check 13 — Files tab completeness:
+grep -n "documentRelationship|declaration|suggestedName|askAi|is_superseded|contentVerification|setLocation.*name-generator" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -20
+Check 14 — Convention Builder live preview:
+grep -rn "livePreview|Live Name Preview|sampleName|sampleParts" artifacts/bimlog/src/pages/project/ | head -10
+Check 15 — Name Generator recent names:
+grep -rn "recentNames|Recent Names|setRecentNames" artifacts/bimlog/src/pages/project/ | head -10
+Check 16 — Activity log date filter and FILE BEFORE AFTER:
+grep -rn "dateFrom|dateTo|fileNameBefore|fileNameAfter|file_name_before" artifacts/bimlog/src/pages/project/ | head -10
+Check 17 — Team invite by email:
+grep -n "invite|Invite by Email|pendingInvit|handleInvite" artifacts/bimlog/src/pages/project/TeamTab.tsx | head -10
+Check 18 — Integrations OAuth and API docs:
+grep -n "OAuth|oauth|ApiDocsModal|showApiDocs|BIM 360|Aconex|Primavera" artifacts/bimlog/src/pages/project/IntegrationsTab.tsx | head -10
+Check 19 — Analytics dashboard exists:
+grep -rn "compliance.*rate|violationsByCompany|rfiAging|ganttChart|analyticsData" artifacts/bimlog/src/pages/project/ | head -10
+Check 20 — Bilingual i18n throughout:
+grep -rn "function w|const w =|i18n|lang.*EN|lang.*ES" artifacts/bimlog/src/lib/ | head -10
+Check 21 — Sync Agent download exists:
+grep -rn "syncAgent|Sync Agent|sync-agent|electron" artifacts/bimlog/src/pages/ | head -10
+Check 22 — Landing page exists with correct messaging:
+grep -rn "Stop eating|accountability layer|shield|BIMLog" artifacts/bimlog/src/pages/Landing.tsx | head -10
+Show exact output of all 22 checks. Nothing else.
