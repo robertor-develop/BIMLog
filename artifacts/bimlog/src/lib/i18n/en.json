@@ -162,5 +162,31 @@
 
   "notFound.title": "404 - Page Not Found",
   "notFound.message": "The page you're looking for doesn't exist or has been moved.",
-  "notFound.backHome": "Back to Home"
+  "notFound.backHome": "Back to Home",
+
+  "footer.tagline": "The project intelligence and accountability operating system for the AEC industry",
+  "footer.copyright": "© 2026 BIMCapital Partners INC. All rights reserved.",
+  "footer.product": "Product",
+  "footer.howItWorks": "How It Works",
+  "footer.pricing": "Pricing",
+  "footer.features": "Features",
+  "footer.company": "Company",
+  "footer.about": "About",
+  "footer.contact": "Contact",
+  "footer.legal": "Legal",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Service",
+  "footer.disclaimer": "Platform Disclaimer",
+  "footer.dataRetention": "Data Retention Policy",
+  "footer.connect": "Connect",
+  "footer.website": "Website",
+
+  "legal.effectiveDate": "Effective Date",
+  "legal.lastUpdated": "Last Updated",
+  "legal.contact": "Contact",
+  "legal.backToHome": "Back to Home",
+  "legal.privacy.title": "Privacy Policy",
+  "legal.terms.title": "Terms of Service",
+  "legal.disclaimer.title": "Platform Disclaimer",
+  "legal.dataRetention.title": "Data Retention Policy"
 }

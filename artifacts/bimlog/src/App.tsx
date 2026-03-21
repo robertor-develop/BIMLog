@@ -14,6 +14,10 @@ import { Dashboard } from "@/pages/Dashboard";
 import { ProjectDetail } from "@/pages/ProjectDetail";
 import { SetupGuide } from "@/pages/SetupGuide";
 import { Profile } from "@/pages/Profile";
+import { Privacy } from "@/pages/Privacy";
+import { Terms } from "@/pages/Terms";
+import { Disclaimer } from "@/pages/Disclaimer";
+import { DataRetention } from "@/pages/DataRetention";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -38,7 +42,13 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      
+
+      {/* Legal pages — public */}
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/disclaimer" component={Disclaimer} />
+      <Route path="/data-retention" component={DataRetention} />
+
       {/* Protected Routes */}
       <Route path="/dashboard">
         {() => <ProtectedRoute component={Dashboard} />}

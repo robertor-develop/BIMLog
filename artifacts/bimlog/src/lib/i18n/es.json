@@ -162,5 +162,31 @@
 
   "notFound.title": "404 - Página No Encontrada",
   "notFound.message": "La página que busca no existe o ha sido movida.",
-  "notFound.backHome": "Volver al Inicio"
+  "notFound.backHome": "Volver al Inicio",
+
+  "footer.tagline": "El sistema operativo de inteligencia y responsabilidad de proyectos para la industria AEC",
+  "footer.copyright": "© 2026 BIMCapital Partners INC. Todos los derechos reservados.",
+  "footer.product": "Producto",
+  "footer.howItWorks": "Cómo Funciona",
+  "footer.pricing": "Precios",
+  "footer.features": "Funciones",
+  "footer.company": "Empresa",
+  "footer.about": "Acerca de",
+  "footer.contact": "Contacto",
+  "footer.legal": "Legal",
+  "footer.privacy": "Política de Privacidad",
+  "footer.terms": "Términos de Servicio",
+  "footer.disclaimer": "Aviso Legal de la Plataforma",
+  "footer.dataRetention": "Política de Retención de Datos",
+  "footer.connect": "Contacto",
+  "footer.website": "Sitio Web",
+
+  "legal.effectiveDate": "Fecha de Vigencia",
+  "legal.lastUpdated": "Última Actualización",
+  "legal.contact": "Contacto",
+  "legal.backToHome": "Volver al Inicio",
+  "legal.privacy.title": "Política de Privacidad",
+  "legal.terms.title": "Términos de Servicio",
+  "legal.disclaimer.title": "Aviso Legal de la Plataforma",
+  "legal.dataRetention.title": "Política de Retención de Datos"
 }

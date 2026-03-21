@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/layout/Footer";
 import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2 } from "lucide-react";
 
 export function Landing() {
@@ -277,18 +278,7 @@ export function Landing() {
         </Link>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-secondary/40">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-foreground">BIMLog</span>
-            <span className="text-muted-foreground text-sm">by IgniteSmart</span>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            ignitesmart.ai · ISO 19650 · openBIM · buildingSMART
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
