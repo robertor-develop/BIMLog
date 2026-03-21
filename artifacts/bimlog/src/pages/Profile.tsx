@@ -382,50 +382,62 @@ export function Profile() {
         <span style={{ fontSize: 14, fontWeight: 600 }}>My Profile</span>
       </div>
 
-      {/* Avatar + name hero */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 20,
-        marginBottom: 28,
-        padding: "20px 24px",
-        background: "hsl(var(--card))",
-        border: "1px solid hsl(var(--border))",
-        borderRadius: 12,
-      }}>
-        <div style={{
-          width: 64,
-          height: 64,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.7))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 26,
-          fontWeight: 700,
-          color: "white",
-          flexShrink: 0,
-        }}>
-          {profile?.fullName?.charAt(0).toUpperCase()}
-        </div>
-        <div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "hsl(var(--foreground))" }}>{profile?.fullName}</div>
-          <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
-            {profile?.jobTitle ? `${profile.jobTitle} · ` : ""}{profile?.companyName}
-          </div>
-          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>{profile?.email}</div>
-        </div>
-        {overallPct !== null && (
-          <div style={{ marginLeft: "auto", textAlign: "center" }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: scoreColor }}>{overallPct}%</div>
-            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>Performance</div>
-          </div>
-        )}
-      </div>
-
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* 1. Personal Info */}
+        {/* 1. Performance Score */}
+        <SectionCard title="Performance Score" icon={Zap}>
+          {perfScore ? (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  border: `4px solid ${scoreColor}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: scoreColor }}>
+                    {perfScore.overallScore !== null ? perfScore.overallScore : "—"}
+                  </span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>
+                    {perfScore.overallScore === null ? "No data yet" :
+                     perfScore.overallScore >= 80 ? "Excellent Performance" :
+                     perfScore.overallScore >= 60 ? "Good Performance" : "Needs Improvement"}
+                  </div>
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                    Based on your activity across projects
+                  </div>
+                </div>
+              </div>
+              <ScoreBar
+                label="Naming Compliance"
+                rate={perfScore.namingCompliance.rate}
+                detail={`${perfScore.namingCompliance.passed} of ${perfScore.namingCompliance.total} files passed validation`}
+              />
+              <ScoreBar
+                label="RFI Close Rate"
+                rate={perfScore.rfiCloseRate.rate}
+                detail={`${perfScore.rfiCloseRate.closed} of ${perfScore.rfiCloseRate.total} RFIs closed`}
+              />
+              <ScoreBar
+                label="Submittal Approval Rate"
+                rate={perfScore.submittalsApprovalRate.rate}
+                detail={`${perfScore.submittalsApprovalRate.approved} of ${perfScore.submittalsApprovalRate.total} submittals approved`}
+              />
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
+              Loading performance data…
+            </div>
+          )}
+        </SectionCard>
+
+        {/* 2. Personal Info */}
         <SectionCard title="Personal Information" icon={User}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
@@ -604,59 +616,6 @@ export function Profile() {
               {savingCompany ? "Saving…" : "Save Company Info"}
             </Button>
           </div>
-        </SectionCard>
-
-        {/* 4. Performance Score */}
-        <SectionCard title="Performance Score" icon={Zap}>
-          {perfScore ? (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <div style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: "50%",
-                  border: `4px solid ${scoreColor}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: scoreColor }}>
-                    {perfScore.overallScore !== null ? perfScore.overallScore : "—"}
-                  </span>
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>
-                    {perfScore.overallScore === null ? "No data yet" :
-                     perfScore.overallScore >= 80 ? "Excellent Performance" :
-                     perfScore.overallScore >= 60 ? "Good Performance" : "Needs Improvement"}
-                  </div>
-                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                    Based on your activity across projects
-                  </div>
-                </div>
-              </div>
-              <ScoreBar
-                label="Naming Compliance"
-                rate={perfScore.namingCompliance.rate}
-                detail={`${perfScore.namingCompliance.passed} of ${perfScore.namingCompliance.total} files passed validation`}
-              />
-              <ScoreBar
-                label="RFI Close Rate"
-                rate={perfScore.rfiCloseRate.rate}
-                detail={`${perfScore.rfiCloseRate.closed} of ${perfScore.rfiCloseRate.total} RFIs closed`}
-              />
-              <ScoreBar
-                label="Submittal Approval Rate"
-                rate={perfScore.submittalsApprovalRate.rate}
-                detail={`${perfScore.submittalsApprovalRate.approved} of ${perfScore.submittalsApprovalRate.total} submittals approved`}
-              />
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
-              Loading performance data…
-            </div>
-          )}
         </SectionCard>
 
         {/* 5. Security */}
