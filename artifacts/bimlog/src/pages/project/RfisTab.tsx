@@ -1231,14 +1231,19 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setAiAssistLoading(true);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const userDraft = answer.trim();
       const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/generate-response`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ userDraft }),
       });
       if (!resp.ok) throw new Error("AI request failed");
       const data = await resp.json() as { response: string };
       setAnswer(data.response);
-      toast({ title: w("AI draft ready — review before saving", "Borrador listo — revise antes de guardar", lang) });
+      const msg = userDraft.length > 0
+        ? w("AI rewrote your draft — review before saving", "IA reescribió tu borrador — revise antes de guardar", lang)
+        : w("AI draft ready — review before saving", "Borrador listo — revise antes de guardar", lang);
+      toast({ title: msg });
     } catch {
       toast({ title: w("AI assist failed", "Asistencia IA falló", lang), variant: "destructive" });
     } finally {

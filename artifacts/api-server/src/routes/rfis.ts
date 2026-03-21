@@ -1205,35 +1205,19 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-response", authMiddleware
       return;
     }
 
-    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    // userDraft is the text the user has typed in the Official Response field (may be empty)
+    const userDraft: string = (req.body?.userDraft ?? "").toString().trim();
+
+    const questionText = stripMarkdown(rfi.question || rfi.description || "");
 
     const anthropic = new Anthropic({
       apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
       baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
     });
 
-    const prompt = `You are a senior construction project manager responding to an RFI (Request for Information) on behalf of the design or engineering team. Draft a professional, formal official response to the following RFI.
-
-Project: ${project?.name || "Construction Project"}
-RFI Number: ${rfi.number}
-Subject: ${rfi.subject}
-${rfi.drawingNumber ? `Drawing Number: ${rfi.drawingNumber}` : ""}
-${rfi.specSection ? `Spec Section: ${rfi.specSection}` : ""}
-${rfi.locationDescription ? `Location: ${rfi.locationDescription}` : ""}
-${rfi.costImpact ? `Cost Impact: ${rfi.costImpact}${rfi.costImpactAmount ? ` — ${rfi.costImpactAmount}` : ""}` : ""}
-${rfi.scheduleImpact ? `Schedule Impact: ${rfi.scheduleImpact}${rfi.scheduleImpactDays ? ` — ${rfi.scheduleImpactDays} days` : ""}` : ""}
-
-Description of Question:
-${rfi.question || rfi.description || "No question text provided."}
-
-Write a professional official response that:
-- Directly addresses the question with a clear, actionable answer
-- Uses formal construction industry language
-- Acknowledges any cost or schedule impact implications
-- Is concise yet complete (2-4 paragraphs)
-- Ends with a clear directive or clarification
-
-Write only the response text itself, no headers or labels.`;
+    const prompt = userDraft.length > 0
+      ? `You are responding to an AEC construction RFI. The RFI subject is ${rfi.subject}. The question asked is ${questionText}. The user has drafted the following response: ${userDraft}. Rewrite this draft as a professional formal RFI response. Fix spelling and grammar. Improve technical language. Keep all the user's actual content and intent — do not add new technical details that the user did not mention. Do not invent answers. Output only the rewritten response text with no preamble.`
+      : `You are responding to an AEC construction RFI. The RFI subject is ${rfi.subject}. The question asked is ${questionText}. Draft a professional formal response acknowledging the question and requesting the specific clarifications or information needed to provide a complete answer. Keep it concise. Output only the response text with no preamble.`;
 
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5",
