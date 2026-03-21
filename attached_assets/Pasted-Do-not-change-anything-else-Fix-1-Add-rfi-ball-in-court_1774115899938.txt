@@ -1,0 +1,16 @@
+Do not change anything else.
+Fix 1 — Add rfi_ball_in_court_history table and ball_in_court column on rfis. Create table rfi_ball_in_court_history with columns: id serial primary key, rfi_id integer not null references rfis id, held_by text not null, held_by_company text not null, from_date timestamp not null default now, to_date timestamp nullable, days_held integer nullable. Add column ball_in_court text nullable to the rfis table. Run pnpm db push immediately after.
+Fix 2 — Verify and fix RFI Export All Excel. Find the Export All button in RfisTab.tsx. Confirm it calls an Excel export function directly with no modal. If it is not Excel only fix it now.
+Fix 3 — Verify and fix Submittal Export All Excel. Find the Export All button in SubmittalsTab.tsx. Confirm it calls an Excel export function directly with no modal. If it is not Excel only fix it now.
+Fix 4 — Verify Submittal Audit Certificate button exists in detail panel. Find the submittal detail panel and confirm the Audit Certificate button exists and calls the audit-certificate endpoint. If missing add it.
+Fix 5 — Verify Add Review Response scrolls to form. Find the Add Review Response button in SubmittalsTab.tsx and confirm clicking it scrolls to the review response form using scrollIntoView. If missing add it.
+Fix 6 — Customize Name button navigates to Name Generator. Find the Customize Name button in FilesTab.tsx and confirm its onClick calls setLocation with the name-generator route. If missing fix it.
+Then run TypeScript check on both. Then rebuild and redeploy. Show exact output of these checks:
+Check 1 — rfi_ball_in_court_history table exists: SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'rfi_ball_in_court_history');
+Check 2 — ball_in_court column on rfis: SELECT column_name FROM information_schema.columns WHERE table_name = 'rfis' AND column_name = 'ball_in_court';
+Check 3 — RFI Export All is Excel direct: grep -n "exportAllExcel|handleExportAll|Export.*All" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -5
+Check 4 — Submittal Export All is Excel direct: grep -n "exportAllExcel|handleExportAll|Export.*All" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -5
+Check 5 — Submittal Audit Certificate button exists: grep -n "audit-certificate|auditCert|Audit Cert" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -5
+Check 6 — Review Response scrolls: grep -n "scrollIntoView|respondRef|reviewRef|scroll.*review" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -5
+Check 7 — Customize Name navigates: grep -n "setLocation|name-generator|Customize" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -5
+Show exact output of all 7 checks. Nothing else.

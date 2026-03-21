@@ -11,3 +11,4 @@ export * from "./submittal-register";
 export * from "./submittal-view-events";
 export * from "./invitations";
 export * from "./rfi-responses";
+export * from "./rfi-ball-in-court-history";

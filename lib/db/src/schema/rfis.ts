@@ -59,6 +59,8 @@ export const rfisTable = pgTable("rfis", {
   revisionOf: integer("revision_of"),
 
   projectAddress: text("project_address"),
+
+  ballInCourt: text("ball_in_court"),
 });
 
 export type Rfi = typeof rfisTable.$inferSelect;
