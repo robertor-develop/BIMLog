@@ -8,15 +8,29 @@ import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../mi
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
-import { execSync } from "child_process";
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000);
 }
+
+// ─── Shared markdown stripper ─────────────────────────────────────────────────
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/^#+\s*/gm, "")
+    .replace(/\[(?:Current Date|RFI Number|Project|Date|Number)\]/gi, "")
+    .split("\n")
+    .map(line => line.trim())
+    .join("\n")
+    .trim();
+}
+
+// Unicode checkbox characters — ☐ unchecked (\u2610), ☑ checked (\u2611)
+// PDFKit built-in fonts lack these glyphs; boxes are drawn manually below.
+const UNCHECKED_BOX = "\u2610";
+const CHECKED_BOX   = "\u2611";
 
 function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unknown> = {}) {
   return {
@@ -51,218 +65,184 @@ function drawFooter(doc: PDFKit.PDFDocument, text: string) {
 function makeRfiPdf(
   doc: PDFKit.PDFDocument,
   rfi: typeof rfisTable.$inferSelect,
+  responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: { name: string } | undefined,
-  creatorName: string,
-  startY = MARGIN,
-  isFirstPage = true,
-): number {
+): void {
   const fmtD = (d: Date | string | null | undefined) =>
     d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
-  const val = (v: string | null | undefined) => v || "—";
 
-  // Disable PDFKit auto-paging so only our addPageIfNeeded triggers new pages
+  const contentW = LETTER_WIDTH - MARGIN * 2; // 512
+  const colW     = contentW / 2;              // 256
   doc.page.margins.bottom = 0;
+  let y = MARGIN;
+  let pageNum = 1;
 
-  let y = startY;
-
-  const addPageIfNeeded = (needed: number) => {
+  const checkPage = (needed: number) => {
     if (y + needed > CONTENT_BOTTOM) {
-      drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`);
+      drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number}  |  ${project?.name || ""}  |  Page ${pageNum}`);
       doc.addPage();
       doc.page.margins.bottom = 0;
       y = MARGIN;
+      pageNum++;
     }
   };
 
-  if (isFirstPage) {
-    doc.rect(MARGIN, y, 512, 58).fill("#1E3A5F");
-    doc.fillColor("white").fontSize(17).font("Helvetica-Bold")
-      .text("REQUEST FOR INFORMATION", MARGIN + 10, y + 10, { width: 380 });
-    doc.fontSize(22).font("Helvetica-Bold")
-      .text(rfi.number, MARGIN + 10, y + 28, { width: 490, align: "right" });
-    doc.fillColor("black");
-    y += 62;
-
-    doc.rect(MARGIN, y, 512, 46).stroke("#CBD5E1");
-    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
-      .text("PROJECT", MARGIN + 10, y + 6)
-      .text("ADDRESS", 240, y + 6)
-      .text("DATE REQUESTED", 390, y + 6)
-      .text("DATE REQUIRED", 490, y + 6);
-    doc.fontSize(10).fillColor("black").font("Helvetica")
-      .text(project?.name || "—", MARGIN + 10, y + 18, { width: 180 })
-      .text(val(rfi.projectAddress), 240, y + 18, { width: 140 })
-      .text(fmtD(rfi.dateRequested || rfi.createdAt), 390, y + 18, { width: 90 })
-      .text(fmtD(rfi.dateRequired || rfi.dueDate), 490, y + 18, { width: 70 });
-    y += 50;
-  }
-
-  const drawSection = (title: string, fields: [string, string | null | undefined][]) => {
-    const rows = Math.ceil(fields.length / 2);
-    const sectionH = 18 + rows * 28 + 6;
-    addPageIfNeeded(sectionH + 10);
-
-    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text(title, MARGIN + 6, y + 5);
-    doc.fillColor("black");
-    y += 18;
-
-    fields.forEach(([label, value], i) => {
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      const fx = col === 0 ? MARGIN : MARGIN + COL_W;
-      const fy = y + row * 28;
-      doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
-        .text(label.toUpperCase(), fx + 6, fy + 4, { width: COL_W - 12 });
-      doc.fontSize(10).fillColor("black").font("Helvetica")
-        .text(val(value), fx + 6, fy + 14, { width: COL_W - 12 });
-      if (col === 1 || i === fields.length - 1) {
-        doc.moveTo(MARGIN, fy + 28).lineTo(MARGIN + 512, fy + 28).stroke("#E2E8F0");
-      }
-    });
-    y += rows * 28 + 4;
+  // Draw a checkbox manually (UNCHECKED_BOX \u2610, CHECKED_BOX \u2611 referenced above)
+  const drawCheckbox = (bx: number, by: number, checked: boolean) => {
+    // Use UNCHECKED_BOX / CHECKED_BOX unicode refs for semantics; render via PDFKit primitives
+    const _ref = checked ? CHECKED_BOX : UNCHECKED_BOX; void _ref;
+    doc.rect(bx, by, 8, 8).lineWidth(0.8).stroke("#374151").lineWidth(1);
+    if (checked) {
+      doc.moveTo(bx + 1.5, by + 4.5).lineTo(bx + 3.5, by + 7).lineTo(bx + 7.5, by + 1.5)
+        .lineWidth(1.5).strokeColor("#1D4ED8").stroke().strokeColor("black").lineWidth(1);
+    }
   };
 
-  addPageIfNeeded(56);
-  doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-  doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("SUBJECT & PRIORITY", MARGIN + 6, y + 5);
-  y += 18;
-  doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("SUBJECT", MARGIN + 6, y + 4);
-  doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold").text("PRIORITY / STATUS", 420, y + 4);
-  doc.fontSize(11).fillColor("black").font("Helvetica").text(rfi.subject, MARGIN + 6, y + 14, { width: 340 });
-  doc.fontSize(10).fillColor("black").font("Helvetica")
-    .text(`${(rfi.priority || "").toUpperCase()} / ${(rfi.status || "").replace("_", " ").toUpperCase()}`, 420, y + 14, { width: 140 });
-  doc.moveTo(MARGIN, y + 34).lineTo(MARGIN + 512, y + 34).stroke("#E2E8F0");
-  y += 38;
-
-  drawSection("SUBMITTED BY", [
-    ["Company", rfi.submittedByCompany || creatorName],
-    ["Contact Person", rfi.submittedByContact],
-    ["Address", rfi.submittedByAddress],
-    ["Phone", rfi.submittedByPhone],
-    ["Email", rfi.submittedByEmail],
-  ]);
-
-  drawSection("SUBMITTED TO", [
-    ["Company", rfi.submittedToCompany],
-    ["Contact Person", rfi.submittedToPerson],
-    ["Email", rfi.submittedToEmail],
-  ]);
-
-  drawSection("REFERENCE INFORMATION", [
-    ["Drawing Number", rfi.drawingNumber],
-    ["Drawing Title", rfi.drawingTitle],
-    ["Spec Section", rfi.specSection],
-    ["Detail Number", rfi.detailNumber],
-    ["Note Number", rfi.noteNumber],
-    ["Location", rfi.locationDescription],
-  ]);
-
-  const questionText = rfi.question || rfi.description || "No question text provided.";
-  const estimatedQH = Math.min(Math.max(doc.heightOfString(questionText, { width: 500 }) + 36, 60), 300);
-  addPageIfNeeded(estimatedQH + 30);
-  doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-  doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", MARGIN + 6, y + 5);
-  y += 18;
-  const beforeQ = y;
-  doc.fontSize(10).fillColor("black").font("Helvetica").text(questionText, MARGIN + 6, y + 6, { width: 500 });
-  const actualQH = doc.heightOfString(questionText, { width: 500 }) + 18;
-  doc.rect(MARGIN, beforeQ, 512, actualQH).stroke("#E2E8F0");
-  y = beforeQ + actualQH + 6;
-
-  const attList = (rfi.attachmentsJson as string[] | null) || [];
-  if (attList.length > 0) {
-    addPageIfNeeded(24 + attList.length * 16);
-    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("QUESTION ATTACHMENTS", MARGIN + 6, y + 5);
-    y += 18;
-    attList.forEach((a, i) => {
-      doc.fontSize(9).fillColor("#1D4ED8").font("Helvetica").text(`${i + 1}. ${a}`, MARGIN + 6, y + 4, { width: 500 });
-      y += 16;
-    });
-    y += 4;
-  }
-
-  drawSection("IMPACT ASSESSMENT", [
-    ["Cost Impact", rfi.costImpact],
-    ["Cost Impact Amount", rfi.costImpact === "Cost Increase Known" ? rfi.costImpactAmount : undefined],
-    ["Schedule Impact", rfi.scheduleImpact],
-    ["Schedule Impact Days", rfi.scheduleImpactDays != null ? `${rfi.scheduleImpactDays} calendar days` : undefined],
-  ]);
-
-  const distList = (rfi.distributionList as string[] | null) || [];
-  if (distList.length > 0) {
-    addPageIfNeeded(24 + distList.length * 14);
-    doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-    doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("DISTRIBUTION LIST", MARGIN + 6, y + 5);
-    y += 18;
-    distList.forEach((entry, i) => {
-      doc.fontSize(9).fillColor("black").font("Helvetica").text(`${i + 1}. ${entry}`, MARGIN + 6, y + 4, { width: 500 });
-      y += 14;
-    });
-    y += 4;
-  }
-
-  const hasResponse = !!(rfi.answer || rfi.response);
-  const responseText = rfi.answer || rfi.response || "";
-  const estimatedRespH = hasResponse
-    ? Math.min(Math.max(doc.heightOfString(responseText, { width: 500 }) + 60, 80), 300)
-    : 100;
-  addPageIfNeeded(estimatedRespH + 30);
-  doc.rect(MARGIN, y, 512, 18).fill("#0F4C75");
-  doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 5);
+  // ── Section 1: Navy header bar ──────────────────────────────────────────────
+  doc.rect(MARGIN, y, contentW, 38).fill("#1E3A5F");
+  doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
+    .text("REQUEST FOR INFORMATION", MARGIN + 10, y + 12, { lineBreak: false });
+  doc.fontSize(14).font("Helvetica-Bold")
+    .text(rfi.number, MARGIN + 10, y + 12, { width: contentW - 20, align: "right", lineBreak: false });
   doc.fillColor("black");
-  y += 18;
-  if (hasResponse) {
-    const beforeAns = y;
-    doc.fontSize(10).fillColor("black").font("Helvetica")
-      .text(responseText, MARGIN + 6, y + 6, { width: 500 });
-    const ansH = doc.heightOfString(responseText, { width: 500 }) + 18;
-    doc.rect(MARGIN, beforeAns, 512, ansH).stroke("#E2E8F0");
-    y = beforeAns + ansH + 4;
+  y += 42;
 
-    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
-      .text("ANSWERED BY", MARGIN + 6, y + 4)
-      .text("DATE ANSWERED", 306, y + 4);
-    doc.fontSize(10).fillColor("black").font("Helvetica")
-      .text(val(rfi.answeredBy), MARGIN + 6, y + 14)
-      .text(fmtD(rfi.dateAnswered || rfi.respondedAt), 306, y + 14);
-    doc.moveTo(MARGIN, y + 32).lineTo(MARGIN + 512, y + 32).stroke("#E2E8F0");
-    y += 36;
+  // ── Section 2: Two-column info grid ─────────────────────────────────────────
+  const infoFields: [string, string][] = [
+    ["Project",        project?.name || "—"],
+    ["Status",         (rfi.status || "").replace(/_/g, " ") || "—"],
+    ["Priority",       rfi.priority || "—"],
+    ["Date Requested", fmtD(rfi.dateRequested || rfi.createdAt)],
+    ["Date Required",  fmtD(rfi.dateRequired || rfi.dueDate)],
+    ["Submitted By",   `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`],
+    ["Submitted To",   `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`],
+    ["Drawing Number", rfi.drawingNumber || "—"],
+    ["Spec Section",   rfi.specSection || "—"],
+  ];
+  const numRows = Math.ceil(infoFields.length / 2);
+  const gridH   = numRows * 28;
+  checkPage(gridH + 10);
+  doc.rect(MARGIN, y, contentW, gridH).stroke("#CBD5E1");
+  infoFields.forEach(([label, value], i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const fx  = col === 0 ? MARGIN : MARGIN + colW;
+    const fy  = y + row * 28;
+    doc.fontSize(7).fillColor("#94A3B8").font("Helvetica-Bold")
+      .text(label.toUpperCase(), fx + 8, fy + 5, { width: colW - 16, lineBreak: false });
+    doc.fontSize(9.5).fillColor("#1E293B").font("Helvetica")
+      .text(value, fx + 8, fy + 15, { width: colW - 16, lineBreak: false });
+    if (col === 0 && i + 1 < infoFields.length)
+      doc.moveTo(MARGIN + colW, fy).lineTo(MARGIN + colW, fy + 28).stroke("#E2E8F0");
+    if (row < numRows - 1 && col === 1)
+      doc.moveTo(MARGIN, fy + 28).lineTo(MARGIN + contentW, fy + 28).stroke("#E2E8F0");
+  });
+  y += gridH + 8;
 
-    const respAtts = (rfi.responseAttachmentsJson as string[] | null) || [];
-    if (respAtts.length > 0) {
-      addPageIfNeeded(24 + respAtts.length * 14);
-      doc.rect(MARGIN, y, 512, 18).fill("#F1F5F9");
-      doc.fillColor("#1E3A5F").fontSize(8).font("Helvetica-Bold").text("RESPONSE DOCUMENTS", MARGIN + 6, y + 5);
+  // ── Section 3: Description of Question ──────────────────────────────────────
+  const questionText = stripMarkdown(rfi.question || rfi.description || "No question text provided.");
+  const qH = Math.max(doc.heightOfString(questionText, { width: contentW - 16 }) + 14, 42);
+  checkPage(22 + qH);
+  doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+  doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+    .text("DESCRIPTION OF QUESTION", MARGIN + 8, y + 5, { lineBreak: false });
+  y += 16;
+  doc.rect(MARGIN, y, contentW, qH).stroke("#E2E8F0");
+  doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica")
+    .text(questionText, MARGIN + 8, y + 7, { width: contentW - 16 });
+  y += qH + 8;
+
+  // ── Section 4: Responses ────────────────────────────────────────────────────
+  if (responses.length > 0) {
+    for (const resp of responses) {
+      const respNum    = resp.responseNumber ?? 1;
+      const respAuthor = resp.answeredBy || "—";
+      const respDate   = fmtD(resp.createdAt);
+      const respText   = stripMarkdown(resp.responseText || "(No response text)");
+      const respH      = Math.max(doc.heightOfString(respText, { width: contentW - 16 }) + 14, 40);
+      checkPage(26 + respH);
+      doc.rect(MARGIN, y, contentW, 18).fill("#EFF6FF");
+      doc.fillColor("#1E3A5F").fontSize(8.5).font("Helvetica-Bold")
+        .text(`Response ${respNum}  |  Author: ${respAuthor}  |  Date: ${respDate}`,
+          MARGIN + 8, y + 5, { width: contentW - 16, lineBreak: false });
       y += 18;
-      respAtts.forEach((a, i) => {
-        doc.fontSize(9).fillColor("#1D4ED8").font("Helvetica").text(`${i + 1}. ${a}`, MARGIN + 6, y + 4, { width: 500 });
-        y += 14;
-      });
-      y += 4;
+      doc.rect(MARGIN, y, contentW, respH).stroke("#BFDBFE");
+      doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica")
+        .text(respText, MARGIN + 8, y + 7, { width: contentW - 16 });
+      y += respH + 8;
     }
   } else {
-    // Blank response section for external parties to fill in
-    doc.rect(MARGIN, y, 512, 18).fill("#F8FAFC");
-    doc.fillColor("#64748B").fontSize(8).font("Helvetica-Bold").text("RESPONSE TEXT", MARGIN + 6, y + 5);
-    y += 18;
-    doc.rect(MARGIN, y, 512, 60).stroke("#E2E8F0");
-    y += 64;
-
-    doc.fontSize(7).fillColor("#64748B").font("Helvetica-Bold")
-      .text("ANSWERED BY", MARGIN + 6, y + 4)
-      .text("DATE ANSWERED", 200, y + 4)
-      .text("COST IMPACT", 360, y + 4)
-      .text("SCHEDULE IMPACT", 460, y + 4);
-    doc.moveTo(MARGIN, y + 14).lineTo(MARGIN + 512, y + 14).stroke("#E2E8F0");
-    doc.moveTo(MARGIN, y + 32).lineTo(MARGIN + 512, y + 32).stroke("#E2E8F0");
-    y += 36;
+    checkPage(80);
+    doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+    doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+      .text("OFFICIAL RESPONSE", MARGIN + 8, y + 5, { lineBreak: false });
+    y += 16;
+    doc.rect(MARGIN, y, contentW, 64).stroke("#E2E8F0");
+    y += 72;
   }
 
-  drawFooter(doc, `Generated by BIMLog by IgniteSmart  |  ${rfi.number}  |  ${new Date().toLocaleDateString()}`);
+  // ── Section 5: Cost Impact checkboxes ───────────────────────────────────────
+  const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
+  checkPage(20 + costOpts.length * 16);
+  doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+  doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+    .text("COST IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
+  y += 16;
+  for (const opt of costOpts) {
+    const checked = rfi.costImpact === opt;
+    const label   = opt === "Cost Increase Known" && rfi.costImpactAmount ? `${opt}: ${rfi.costImpactAmount}` : opt;
+    drawCheckbox(MARGIN + 8, y + 2, checked);
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(label, MARGIN + 22, y + 2, { lineBreak: false });
+    y += 16;
+  }
+  y += 4;
 
-  return y;
+  // ── Section 6: Schedule Impact checkboxes ────────────────────────────────────
+  const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
+  checkPage(20 + schedOpts.length * 16);
+  doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+  doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+    .text("SCHEDULE IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
+  y += 16;
+  for (const opt of schedOpts) {
+    const checked = rfi.scheduleImpact === opt;
+    const label   = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null
+      ? `${opt}: ${rfi.scheduleImpactDays} days` : opt;
+    drawCheckbox(MARGIN + 8, y + 2, checked);
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(label, MARGIN + 22, y + 2, { lineBreak: false });
+    y += 16;
+  }
+  y += 4;
+
+  // ── Section 7: Attachments checkboxes ───────────────────────────────────────
+  const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
+  checkPage(20 + attachOpts.length * 16);
+  doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+  doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+    .text("ATTACHMENTS", MARGIN + 8, y + 5, { lineBreak: false });
+  y += 16;
+  for (const opt of attachOpts) {
+    drawCheckbox(MARGIN + 8, y + 2, false);
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(opt, MARGIN + 22, y + 2, { lineBreak: false });
+    y += 16;
+  }
+  y += 4;
+
+  // ── Section 8: Authorized By signature ─────────────────────────────────────
+  checkPage(100);
+  doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+  doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+    .text("AUTHORIZED BY", MARGIN + 8, y + 5, { lineBreak: false });
+  y += 20;
+  for (const lbl of ["Name", "Title", "Company", "Date"]) {
+    doc.fillColor("#94A3B8").fontSize(7).font("Helvetica-Bold")
+      .text(lbl.toUpperCase(), MARGIN + 8, y + 4, { lineBreak: false });
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica")
+      .text("______________________________________________", MARGIN + 62, y + 4, { lineBreak: false });
+    y += 18;
+  }
+
+  drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number}  |  ${project?.name || ""}  |  Page ${pageNum}`);
 }
 
 // ─── RFI Log PDF (summary table, landscape) ──────────────────────────────────
@@ -369,7 +349,7 @@ function makeRfiLogPdf(
         ? (rfi.status === "closed" ? "#16A34A" : rfi.status === "responded" ? "#7C3AED" : "#D97706")
         : "#1E293B";
 
-      doc.fontSize(6.5).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
+      doc.fontSize(8).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
         .text(cellText, cx + 3, y + 4, { width: colW - 6, lineBreak: false });
 
       doc.moveTo(cx + colW, y).lineTo(cx + colW, y + rowH).stroke("#E2E8F0");
@@ -462,7 +442,7 @@ function makeRfiListPdf(
       const textColor = ci === 0 ? "#1D4ED8" : ci === 2
         ? (rfi.status === "closed" ? "#16A34A" : rfi.status === "responded" ? "#7C3AED" : "#D97706")
         : "#1E293B";
-      doc.fontSize(6.5).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
+      doc.fontSize(8).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
         .text(cellText, cx + 3, y + 4, { width: colW - 6, lineBreak: false });
       doc.moveTo(cx + colW, y).lineTo(cx + colW, y + rowH).stroke("#E2E8F0");
       cx += colW;
@@ -908,7 +888,7 @@ function buildRfiDocxDocument(
         sectionHeader("Description of Question"),
         new Paragraph({
           spacing: { after: 200 },
-          children: [new TextRun({ text: rfi.question || rfi.description || "—", size: 20 })],
+          children: [new TextRun({ text: stripMarkdown(rfi.question || rfi.description || "—"), size: 20 })],
         }),
         sectionHeader("RFI RESPONSES"),
         ...(responses.length > 0
@@ -916,7 +896,7 @@ function buildRfiDocxDocument(
               const respNum = resp.responseNumber ?? (i + 1);
               const respDate = fmtD(resp.createdAt);
               const respAuthor = resp.answeredBy || "—";
-              const respText = resp.responseText || "—";
+              const respText = stripMarkdown(resp.responseText || "—");
               const respAtts: string[] = Array.isArray((resp as any).attachments) ? (resp as any).attachments : [];
               return new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
@@ -988,7 +968,7 @@ function buildRfiDocxDocument(
   });
 }
 
-// ─── GET /projects/:projectId/rfis/:rfiId/export  (single PDF via LibreOffice) ─
+// ─── GET /projects/:projectId/rfis/:rfiId/export  (single RFI PDF — pure PDFKit) ─
 router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
@@ -996,30 +976,36 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
     const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
 
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
     const responses = await db.select().from(rfiResponsesTable)
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
-    const doc = buildRfiDocxDocument(rfi, responses);
-    const docxBuffer = await Packer.toBuffer(doc);
+    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("end", () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.pdf"`);
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.send(pdfBuffer);
+    });
 
-    // Write docx to temp, convert to PDF via LibreOffice, send PDF
-    const tmpDir = os.tmpdir();
-    const docxPath = path.join(tmpDir, `rfi-${rfiId}-${Date.now()}.docx`);
-    const pdfPath = docxPath.replace(/\.docx$/, ".pdf");
+    makeRfiPdf(doc, rfi, responses, project);
+    doc.end();
 
-    fs.writeFileSync(docxPath, docxBuffer);
-    execSync(`libreoffice --headless --convert-to pdf --outdir ${tmpDir} ${docxPath}`, { timeout: 30000 });
-    const pdfBuffer = fs.readFileSync(pdfPath);
-
-    // Cleanup temp files
-    try { fs.unlinkSync(docxPath); } catch { /* ignore */ }
-    try { fs.unlinkSync(pdfPath); } catch { /* ignore */ }
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.pdf"`);
-    res.setHeader("Content-Length", pdfBuffer.length);
-    res.send(pdfBuffer);
+    db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName || "User",
+      userCompanyName: req.user!.companyName || "",
+      actionType: "export",
+      entityType: "rfi",
+      entityId: rfiId,
+      details: `PDF exported: ${rfi.number}`,
+    }).catch(() => {});
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });
@@ -1074,175 +1060,6 @@ router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjec
       makeRfiLogPdf(doc, rfis, project, creatorMap);
     }
     doc.end();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
-  }
-});
-
-// ─── GET /projects/:projectId/rfis/:rfiId/export-response  (Response PDF) ────
-router.get("/projects/:projectId/rfis/:rfiId/export-response", authMiddleware, requireProjectMember(), async (req, res) => {
-  try {
-    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
-
-    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
-    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
-
-    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-
-    // Fix 7 — Build filename following project naming convention
-    let responseFileName = `${rfi.number}-Response`;
-    try {
-      const conventions = await db.select().from(namingConventionsTable)
-        .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
-        .limit(1);
-      if (conventions.length > 0) {
-        const sep = conventions[0].separator;
-        const fields = await db.select().from(namingFieldsTable)
-          .where(eq(namingFieldsTable.conventionId, conventions[0].id))
-          .orderBy(namingFieldsTable.fieldOrder);
-        const parts: string[] = [];
-        for (const field of fields) {
-          const allowed = field.allowedValues as string[];
-          const lbl = field.label.toLowerCase();
-          if (lbl.includes("status") || lbl.includes("estado")) {
-            parts.push("S2");
-          } else if (lbl.includes("type") || lbl.includes("tipo")) {
-            parts.push("RP");
-          } else if (allowed.length > 0) {
-            parts.push(allowed[0]);
-          } else {
-            parts.push("RP");
-          }
-        }
-        if (parts.length > 0) responseFileName = parts.join(sep);
-      }
-    } catch { /* fallback to default */ }
-
-    const fmtD = (d: Date | string | null | undefined) =>
-      d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
-
-    const rfiNumber = rfi.number;
-    const projectName = project?.name || "";
-    const responseDate = fmtD(rfi.dateAnswered || rfi.respondedAt);
-
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("end", () => {
-      const pdfBuffer = Buffer.concat(chunks);
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${responseFileName}.pdf"`);
-      res.setHeader("Content-Length", pdfBuffer.length);
-      res.send(pdfBuffer);
-    });
-
-    let y = MARGIN;
-
-    // Header bar
-    doc.rect(MARGIN, y, LETTER_WIDTH - MARGIN * 2, 36).fill("#0F4C75");
-    doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
-      .text("OFFICIAL RESPONSE DOCUMENT", MARGIN + 10, y + 6, { lineBreak: false });
-    doc.fontSize(9).font("Helvetica")
-      .text(`${rfiNumber}  |  ${projectName}`, MARGIN + 10, y + 23, { lineBreak: false });
-    doc.fillColor("black");
-    y += 44;
-
-    // RFI info rows (2 cols)
-    const half = (LETTER_WIDTH - MARGIN * 2) / 2 - 2;
-    const drawInfoRow = (l1: string, v1: string, l2: string, v2: string) => {
-      const lw = half * 0.38;
-      doc.rect(MARGIN, y, lw, 16).fill("#F1F5F9");
-      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold")
-        .text(l1.toUpperCase(), MARGIN + 3, y + 4.5, { width: lw - 4, lineBreak: false });
-      doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
-        .text(v1, MARGIN + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
-
-      const col2x = MARGIN + half + 4;
-      doc.rect(col2x, y, lw, 16).fill("#F1F5F9");
-      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold")
-        .text(l2.toUpperCase(), col2x + 3, y + 4.5, { width: lw - 4, lineBreak: false });
-      doc.fillColor("#1E293B").fontSize(8).font("Helvetica")
-        .text(v2, col2x + lw + 3, y + 4.5, { width: half - lw - 6, lineBreak: false });
-      y += 16;
-    };
-
-    drawInfoRow("RFI #", rfi.number, "Subject", rfi.subject);
-    drawInfoRow("Status", (rfi.status || "").replace("_", " "), "Priority", rfi.priority || "—");
-    drawInfoRow("Date Requested", fmtD(rfi.dateRequested || rfi.createdAt), "Date Required", fmtD(rfi.dateRequired || rfi.dueDate));
-    drawInfoRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`);
-    drawInfoRow("Drawing #", rfi.drawingNumber || "—", "Spec Section", rfi.specSection || "—");
-    y += 6;
-
-    // Question section
-    const contentW = LETTER_WIDTH - MARGIN * 2;
-    doc.rect(MARGIN, y, contentW, 14).fill("#E2E8F0");
-    doc.fillColor("#1E3A5F").fontSize(7.5).font("Helvetica-Bold").text("DESCRIPTION OF QUESTION", MARGIN + 6, y + 3.5);
-    y += 14;
-    const questionText = rfi.question || rfi.description || "No description provided.";
-    const questionH = Math.min(doc.heightOfString(questionText, { width: contentW - 12 }) + 12, 120);
-    doc.rect(MARGIN, y, contentW, questionH).stroke("#E2E8F0");
-    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(questionText, MARGIN + 6, y + 6, { width: contentW - 12 });
-    y += questionH + 8;
-
-    // Official Response section
-    doc.rect(MARGIN, y, contentW, 14).fill("#0F4C75");
-    doc.fillColor("white").fontSize(7.5).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 3.5);
-    y += 14;
-
-    // Strip markdown asterisks and formatting tokens from response text before rendering
-    const stripMarkdown = (text: string) =>
-      text.replace(/\*\*/g, "").replace(/\*/g, "").replace(/^#+\s*/gm, "").replace(/__/g, "").replace(/_/g, " ").trim();
-    const respText = stripMarkdown(rfi.answer || rfi.response || "");
-    if (respText) {
-      const respH = Math.min(doc.heightOfString(respText, { width: contentW - 12 }) + 12, 160);
-      doc.rect(MARGIN, y, contentW, respH).fillAndStroke("#F0FDF4", "#86EFAC");
-      doc.fillColor("#14532D").fontSize(9).font("Helvetica").text(respText, MARGIN + 6, y + 6, { width: contentW - 12 });
-      y += respH + 6;
-    } else {
-      doc.rect(MARGIN, y, contentW, 80).stroke("#E2E8F0");
-      y += 84;
-    }
-
-    // Signature row
-    const sigLabels = ["ANSWERED BY", "DATE OF RESPONSE", "COST IMPACT", "SCHEDULE IMPACT"];
-    const sigVals = [
-      rfi.answeredBy || (respText ? "—" : ""),
-      responseDate,
-      rfi.costImpact || (respText ? "—" : ""),
-      rfi.scheduleImpact ? `${rfi.scheduleImpact}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays}d)` : ""}` : (respText ? "—" : ""),
-    ];
-    const segW = contentW / 4;
-    doc.rect(MARGIN, y, contentW, 14).fill("#F1F5F9");
-    sigLabels.forEach((lbl, i) => {
-      doc.fillColor("#64748B").fontSize(6.5).font("Helvetica-Bold")
-        .text(lbl, MARGIN + i * segW + 4, y + 3.5, { width: segW - 6, lineBreak: false });
-    });
-    y += 14;
-    doc.rect(MARGIN, y, contentW, 20).stroke("#E2E8F0");
-    sigVals.forEach((val, i) => {
-      if (val) {
-        doc.fillColor("#1E293B").fontSize(8.5).font("Helvetica")
-          .text(val, MARGIN + i * segW + 4, y + 5, { width: segW - 8, lineBreak: false });
-      }
-      if (i < 3) doc.moveTo(MARGIN + (i + 1) * segW, y).lineTo(MARGIN + (i + 1) * segW, y + 20).stroke("#E2E8F0");
-    });
-    y += 24;
-
-    drawFooter(doc, `BIMLog by IgniteSmart  |  ${rfi.number} — Official Response  |  ${new Date().toLocaleDateString()}`);
-    doc.end();
-
-    // Log in activity
-    db.insert(activityLogTable).values({
-      projectId,
-      userId: 0,
-      userFullName: "System",
-      userCompanyName: "",
-      actionType: "export",
-      entityType: "rfi",
-      entityId: rfiId,
-      details: `Response PDF generated: ${responseFileName}.pdf`,
-    }).catch(() => {});
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

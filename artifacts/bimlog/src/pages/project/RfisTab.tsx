@@ -1398,26 +1398,6 @@ ${hasResp ? `
     toast({ title: w("Word document exported", "Documento Word exportado", lang) });
   };
 
-  const handleDownloadResponsePdf = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-response`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!resp.ok) throw new Error("Export failed");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const contentDisposition = resp.headers.get("Content-Disposition") || "";
-      const match = contentDisposition.match(/filename="(.+?)"/);
-      const filename = match ? match[1] : `${rfi.number}-Response.pdf`;
-      const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: w("Response PDF downloaded", "PDF de respuesta descargado", lang) });
-    } catch {
-      toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
-    }
-  };
-
   const handleDownloadAuditCert = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -1561,11 +1541,6 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#C4B5FD" }}>
               <FileText style={{ width: 12, height: 12 }} />{w("Word", "Word", lang)}
             </Button>
-            {(rfi.answer || rfi.response) && (
-              <Button variant="outline" size="sm" onClick={handleDownloadResponsePdf} style={{ gap: 5, fontSize: 11, color: "#16A34A", borderColor: "#86EFAC", background: "#F0FDF4" }}>
-                <FileText style={{ width: 12, height: 12 }} />{w("Resp. PDF", "PDF Resp.", lang)}
-              </Button>
-            )}
             <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11, color: "#6D28D9", borderColor: "#C4B5FD", background: "#F5F3FF" }}>
               <Shield style={{ width: 12, height: 12 }} />{w("Audit Cert", "Cert. Auditoría", lang)}
             </Button>
