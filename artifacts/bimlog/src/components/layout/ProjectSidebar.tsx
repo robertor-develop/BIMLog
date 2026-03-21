@@ -129,18 +129,11 @@ export function ProjectSidebar({
               key={int.name}
               className="sidebar-nav-item"
               onClick={() => setSelectedIntegration(int)}
-              style={{
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-                width: "100%",
-                textAlign: "left",
-                padding: 0,
-              }}
+              style={{ cursor: "pointer", background: "none", border: "none", width: "100%", textAlign: "left" }}
             >
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6B7280", flexShrink: 0 }} />
+              <div className="nav-dot" />
               <span style={{ flex: 1 }}>{int.name}</span>
-              <span style={{ fontSize: 9, fontWeight: 600, color: "#6B7280" }}>Connect</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "hsl(var(--primary))", opacity: 0.8 }}>Connect</span>
             </button>
           ))}
         </div>

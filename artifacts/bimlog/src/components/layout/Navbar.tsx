@@ -13,6 +13,7 @@ export function Navbar() {
   const [location] = useLocation();
   const isLanding = location === "/";
   const isProjectPage = location.startsWith("/projects/");
+  const isDashboard = location === "/dashboard";
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,7 +82,14 @@ export function Navbar() {
 
         {user ? (
           <>
-            {/* Avatar circle (photo or initial) + Profile link side by side */}
+            {/* Fix 1+2: Dashboard shown only when NOT on /dashboard, positioned before avatar */}
+            {!isDashboard && (
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" style={{ fontSize: 12 }}>{t("nav.dashboard")}</Button>
+              </Link>
+            )}
+
+            {/* Avatar circle + Profile label immediately to its right */}
             <Link href="/profile" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
               <div
                 style={{
@@ -99,9 +107,6 @@ export function Navbar() {
               <span style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>Profile</span>
             </Link>
 
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" style={{ fontSize: 12 }}>{t("nav.dashboard")}</Button>
-            </Link>
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               {t("nav.logout")}
             </Button>

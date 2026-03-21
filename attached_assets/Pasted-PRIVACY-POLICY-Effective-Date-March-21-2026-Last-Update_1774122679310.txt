@@ -1,0 +1,151 @@
+PRIVACY POLICY
+Effective Date: March 21, 2026
+Last Updated: March 21, 2026
+BIMCapital Partners INC
+7901 4th Street North, STE 300
+St. Petersburg, FL 33702
+United States
+info@ignitesmart.ai
+1. Who We Are
+BIMCapital Partners INC ("BIMCapital", "we", "us", "our") operates BIMLog, a cloud-based project intelligence and accountability platform for the architecture, engineering, and construction industry. BIMLog is developed and operated through our IgniteSmart technology division.
+2. What Data We Collect
+Account Data: Full name, email address, company name, job title, phone number, and password stored as a secure hash. We never store plain text passwords.
+Profile Data: Profile photo, digital signature, company logo stored as encoded images. Job title, phone number, notification preferences, and API token.
+Project Data: Project names, project codes, naming conventions, file metadata including file names, upload timestamps, uploader identity, convention compliance results, SHA-256 cryptographic hashes, and document relationship declarations. We do not store physical project files — only the metadata and audit records associated with them.
+RFI and Submittal Data: Full lifecycle data for every RFI and submittal — parties, dates, status history, ball-in-court records, response attempts, view events, and AI compliance check results.
+Activity Data: An immutable timestamped record of every action taken on the platform by every user — uploads, status changes, responses, and team changes.
+Usage Data: Browser type, IP address, pages visited, and session duration collected for platform security and performance monitoring.
+3. What We Do NOT Store
+BIMLog does not permanently store physical project files. All files uploaded through BIMLog are validated and routed to the client's designated storage environment such as Procore, OneDrive, or their designated CDE. BIMLog retains no copy of the physical file after routing is complete. BIMLog stores only the metadata, audit trail, and analytical outputs associated with each file event.
+4. How We Use Your Data
+We use your data to operate and improve the BIMLog platform, send notifications you have configured, generate audit trails and compliance reports, calculate your BIMLog Performance Score, and provide customer support. We do not use your data for advertising. We do not sell your data to any third party under any circumstances.
+5. How We Store and Protect Your Data
+All data is hosted on Amazon Web Services with primary infrastructure in US-East and a secondary region in South America for Latin American data residency. All data is encrypted in transit using TLS 1.3 and encrypted at rest using AES-256. Access to production data is restricted to authorized IgniteSmart engineering personnel only.
+6. Data Retention
+We retain your account data for as long as your account is active. Project data and audit trails are retained for the life of the project plus seven years to support potential legal and contractual obligations of our clients. Completed projects move to read-only archive status and are never deleted. You may request export of your data at any time by contacting info@ignitesmart.ai.
+7. Your Rights
+You have the right to access the personal data we hold about you, correct inaccurate data, request deletion of your account data subject to legal retention requirements, export your data in a machine-readable format, and withdraw consent for non-essential data processing. To exercise any of these rights contact info@ignitesmart.ai.
+8. Third Party Services
+BIMLog uses the following third party services: Amazon Web Services for infrastructure and hosting, AI API providers for AI-powered features where only anonymized project content is processed, and Resend for transactional email delivery. Each third party is bound by a data processing agreement consistent with applicable privacy law.
+9. Cookies
+BIMLog uses essential cookies only for session authentication. We do not use advertising cookies or third party tracking cookies.
+10. Changes to This Policy
+We may update this Privacy Policy from time to time. We will notify registered users by email of any material changes. Continued use of BIMLog after notification constitutes acceptance of the updated policy.
+11. Contact
+info@ignitesmart.ai
+BIMCapital Partners INC
+7901 4th Street North STE 300
+St. Petersburg FL 33702
+
+TERMS OF SERVICE
+Effective Date: March 21, 2026
+Last Updated: March 21, 2026
+BIMCapital Partners INC
+7901 4th Street North, STE 300
+St. Petersburg, FL 33702
+United States
+info@ignitesmart.ai
+1. Agreement
+By creating an account or using BIMLog you agree to these Terms of Service. If you do not agree do not use the platform. These Terms constitute a legally binding agreement between you and BIMCapital Partners INC.
+2. What BIMLog Is
+BIMLog is a data recording, tracking, and reporting platform for the AEC industry. BIMLog records, organizes, and presents project data provided by platform users and connected third-party systems. BIMLog is not a legal authority. BIMLog does not provide legal advice, legal determinations, or legal conclusions. Reports, audit trails, delay attribution analyses, and all other outputs generated by BIMLog constitute informational records based on data submitted to the platform. They do not constitute legal findings, binding determinations of liability, or admissions by any party.
+3. Your Account
+You are responsible for maintaining the confidentiality of your account credentials. You are responsible for all activity that occurs under your account. You must be at least 18 years old to use BIMLog. You must provide accurate and complete information when creating your account.
+4. Acceptable Use
+You agree not to use BIMLog for any unlawful purpose, upload malicious files or code, attempt to gain unauthorized access to other accounts or platform infrastructure, use the platform to harass or harm other users, scrape or extract platform data in bulk without written permission, or resell or sublicense access to the platform without written permission from BIMCapital Partners INC.
+5. Data Ownership
+All project data submitted to BIMLog belongs to the project owner and the submitting organization. BIMCapital Partners INC does not claim ownership of any project data, files, RFIs, submittals, or any other content submitted by users. BIMCapital Partners INC may use anonymized and aggregated data for platform improvement and industry benchmarking purposes only, with no personally identifiable information included.
+6. Subscription and Payment
+BIMLog offers a free tier and paid subscription tiers. Free tier access is provided as-is with no service level guarantee. Paid subscriptions are billed in advance on a monthly or annual basis. Refunds are not provided for partial periods. BIMCapital Partners INC reserves the right to change pricing with 30 days written notice to active subscribers.
+7. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, BIMCAPITAL PARTNERS INC SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF BIMLOG. THE TOTAL LIABILITY OF BIMCAPITAL PARTNERS INC TO YOU FOR ANY CLAIM ARISING FROM THESE TERMS OR YOUR USE OF THE PLATFORM SHALL NOT EXCEED THE AMOUNT YOU PAID TO BIMCAPITAL PARTNERS INC IN THE THREE MONTHS PRECEDING THE CLAIM.
+8. Use of Reports and Audit Certificates in Legal Proceedings
+Any use of BIMLog data, reports, Audit Certificates, or any other platform output in legal proceedings, arbitration, contract dispute resolution, or backcharge proceedings is undertaken solely at the user's risk. BIMCapital Partners INC expressly disclaims all liability arising from such use. Users are solely responsible for verifying the accuracy and completeness of all data submitted to BIMLog before relying on platform outputs for any purpose.
+9. Service Availability
+BIMCapital Partners INC will make reasonable efforts to maintain platform availability but does not guarantee uninterrupted access. Scheduled maintenance will be communicated in advance where possible.
+10. Termination
+BIMCapital Partners INC reserves the right to suspend or terminate accounts that violate these Terms. Upon termination your access to the platform will cease but your data will be retained according to our Data Retention Policy.
+11. Governing Law
+These Terms of Service are governed by the laws of the State of Florida, United States, without regard to conflict of law principles. Any disputes shall be resolved in the courts of Pinellas County, Florida.
+12. Changes to These Terms
+We may update these Terms from time to time. We will notify registered users by email of any material changes. Continued use of BIMLog after notification constitutes acceptance of the updated terms.
+13. Contact
+info@ignitesmart.ai
+BIMCapital Partners INC
+7901 4th Street North STE 300
+St. Petersburg FL 33702
+
+PLATFORM DISCLAIMER
+Effective Date: March 21, 2026
+BIMCapital Partners INC
+7901 4th Street North, STE 300
+St. Petersburg, FL 33702
+United States
+info@ignitesmart.ai
+Important Notice Regarding the Use of BIMLog Data and Reports
+BIMLog is a data recording, tracking, and reporting platform operated by BIMCapital Partners INC through its IgniteSmart technology division. The following disclaimer applies to all data, reports, audit certificates, delay attribution analyses, compliance summaries, and any other outputs generated by the BIMLog platform.
+1. BIMLog Is Not a Legal Authority
+BIMLog records, organizes, and presents project data provided by platform users and connected third-party systems. BIMLog does not provide legal advice, legal determinations, or legal conclusions of any kind. Nothing on the BIMLog platform constitutes legal advice or creates an attorney-client relationship.
+2. Informational Records Only
+All reports, audit trails, delay attribution analyses, audit certificates, compliance summaries, and all other outputs generated by BIMLog constitute informational records based on data submitted to and processed by the platform. They do not constitute legal findings, binding determinations of liability, fault, or contractual responsibility, and they do not constitute admissions by any party.
+3. Timestamp Integrity
+All timestamps recorded by BIMLog reflect the actual date and time of each recorded event as registered by BIMLog servers in Coordinated Universal Time (UTC). Timestamps are recorded server-side and cannot be modified by users. BIMLog certifies that all audit trail entries are append-only and cannot be altered after recording.
+4. SHA-256 Document Integrity
+File integrity is verified by SHA-256 cryptographic hash where technically applicable. For Revit, Navisworks, and other proprietary BIM file formats, file identity is verified by hash of the submitted file. Content comparison is not available without the originating software license. The SHA-256 hash proves that a specific file was submitted at a specific time by a specific user but does not verify the accuracy or completeness of the file's content.
+5. User Responsibility
+Users are solely responsible for the accuracy, completeness, and appropriateness of all data submitted to BIMLog. BIMCapital Partners INC makes no representation that BIMLog outputs are accurate, complete, or suitable for use in legal proceedings, arbitration, or contract dispute resolution without independent verification by qualified professionals.
+6. Use in Legal Proceedings
+Any use of BIMLog data, reports, Audit Certificates, or any other platform output in legal proceedings, arbitration, contract administration, dispute resolution, backcharge proceedings, or any other legal or quasi-legal context is undertaken solely at the user's risk. BIMCapital Partners INC expressly disclaims all liability arising from such use. Users are advised to consult qualified legal counsel before using any BIMLog output in any legal or contractual proceeding.
+7. Contact
+info@ignitesmart.ai
+BIMCapital Partners INC
+7901 4th Street North STE 300
+St. Petersburg FL 33702
+
+DATA RETENTION POLICY
+Effective Date: March 21, 2026
+Last Updated: March 21, 2026
+BIMCapital Partners INC
+7901 4th Street North, STE 300
+St. Petersburg, FL 33702
+United States
+info@ignitesmart.ai
+1. Overview
+This Data Retention Policy explains what data BIMLog retains, for how long, and how it is managed. BIMLog is operated by BIMCapital Partners INC through its IgniteSmart technology division.
+2. What BIMLog Does Not Retain
+BIMLog does not permanently store physical project files. All files uploaded through BIMLog are validated and immediately routed to the client's designated storage environment. BIMLog retains no copy of any physical file after routing is complete. This includes Revit models, Navisworks composites, AutoCAD drawings, PDFs, Word documents, Excel files, and all other file types.
+3. What BIMLog Retains
+Account Data: User profiles, company profiles, authentication credentials, notification preferences, and API tokens are retained for the lifetime of the account. Upon account deletion account data is removed within 30 days subject to the exceptions below.
+Project Metadata: Project names, codes, settings, naming conventions, and team membership records are retained for the lifetime of the project plus seven years from the project's marked completion date.
+File Metadata and Audit Records: File names, upload timestamps, uploader identity, SHA-256 hashes, document relationship declarations, convention compliance results, and content verification results are retained for the lifetime of the project plus seven years.
+RFI and Submittal Records: Complete lifecycle data including all status changes, responses, ball-in-court history, view events, and AI check results are retained for the lifetime of the project plus seven years.
+Activity Log: The immutable activity log for each project is retained permanently and is never deleted regardless of project status. This log constitutes the core audit trail of the platform.
+Generated Reports: Audit Certificates, delay attribution reports, compliance summaries, and other generated documents are retained for 90 days after generation and then purged. Users are responsible for downloading and retaining copies of any generated reports they require for legal or contractual purposes.
+4. Project Archive Policy
+When a project is marked as complete it moves to read-only archive status. Archived projects cannot be modified but all data, audit trails, and records remain fully accessible. Archived projects are never deleted. Project Admins and users with read access can continue to view and export data from archived projects at any time. Audit Certificates can be generated on archived projects indefinitely.
+5. Account Deletion
+When a user requests account deletion their personal profile data is removed within 30 days. However activity log entries attributed to that user within projects they participated in are retained as part of the project's immutable audit trail. These entries are anonymized — the user's name is replaced with "Deleted User" — but the actions they performed remain in the record to preserve audit trail integrity.
+6. Data Export
+Users may request a full export of their personal data at any time by contacting info@ignitesmart.ai. Project data exports are available to Project Admins through the platform's built-in export functions. For bulk data exports or custom export requests contact info@ignitesmart.ai.
+7. Legal Hold
+In the event of litigation, regulatory investigation, or formal legal dispute involving a project on BIMLog, BIMCapital Partners INC will place a legal hold on all data associated with that project, suspending normal retention schedules until the matter is resolved. Users should notify BIMCapital Partners INC immediately if they anticipate legal proceedings involving a BIMLog project by contacting info@ignitesmart.ai.
+8. Changes to This Policy
+We may update this Data Retention Policy from time to time. We will notify registered users by email of any material changes.
+9. Contact
+info@ignitesmart.ai
+BIMCapital Partners INC
+7901 4th Street North STE 300
+St. Petersburg FL 33702
+
+That is all 4 complete legal pages with full content. No invented emails — only info@ignitesmart.ai throughout.
+Now tell Replit this exactly — nothing else — and paste all of the above content directly into the instruction so Replit has the exact text to display:
+Build a footer for the landing page and create 4 legal pages using exactly the content provided below. Do not invent or add any content. Use exactly what is written here.
+Then paste everything above and add these instructions at the end:
+Footer on the landing page — 5 columns. Column 1: BIMLog by IgniteSmart logo text, tagline "The project intelligence and accountability operating system for the AEC industry", copyright "© 2026 BIMCapital Partners INC. All rights reserved." Column 2 — Product: How It Works links to setup-guide, Pricing scrolls to pricing section, Features scrolls to features section. Column 3 — Company: About links to landing page, Contact links to mailto info@ignitesmart.ai. Column 4 — Legal: Privacy Policy links to /privacy, Terms of Service links to /terms, Platform Disclaimer links to /disclaimer, Data Retention Policy links to /data-retention. Column 5 — Connect: shows email info@ignitesmart.ai, phone +1 332 900 9180, phone +591 71054305, website ignitesmart.ai.
+Create 4 pages at routes /privacy, /terms, /disclaimer, /data-retention using the exact content above. Each page has the standard BIMLog navbar at top, clean readable layout with the page title, sections with headings, paragraphs of text, and the standard footer at bottom. Register all 4 routes in App.tsx.
+All pages and footer must be bilingual EN/ES using the existing i18n system.
+Then rebuild and redeploy. Show exact output of these checks:
+Check 1 — Footer in landing page: grep -n "BIMCapital Partners INC|Privacy Policy|Terms of Service|footer|Footer" artifacts/bimlog/src/pages/Landing.tsx | head -10
+Check 2 — All 4 legal pages exist: find artifacts/bimlog/src/pages -name "Privacy.tsx" -o -name "Terms.tsx" -o -name "Disclaimer.tsx" -o -name "DataRetention.tsx"
+Check 3 — All 4 routes in App.tsx: grep -n "privacy|terms|disclaimer|data-retention" artifacts/bimlog/src/App.tsx | head -10
+Show exact output of all 3 checks. Nothing else.

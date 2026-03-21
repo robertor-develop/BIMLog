@@ -89,15 +89,17 @@ export function ProjectDetail() {
 
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{
+              display: "inline-flex", alignItems: "center",
+              height: 30, padding: "0 12px",
               fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
-              background: "rgba(245,158,11,0.1)", color: "#D97706",
-              border: "1px solid rgba(245,158,11,0.25)",
-              padding: "3px 10px", borderRadius: 5
+              background: "rgba(245,158,11,0.12)", color: "#D97706",
+              border: "1px solid rgba(245,158,11,0.3)",
+              borderRadius: 999,
             }}>{project.code}</span>
             <Link href={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${tab}`)}`}>
               <button style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: "5px 10px", borderRadius: 6,
+                display: "inline-flex", alignItems: "center", gap: 5,
+                height: 30, padding: "0 12px", borderRadius: 6,
                 fontSize: 11, fontWeight: 600,
                 color: "hsl(var(--muted-foreground))",
                 background: "hsl(var(--secondary))",
@@ -110,7 +112,7 @@ export function ProjectDetail() {
             </Link>
             {canWrite && (
               <Link href={`/projects/${projectId}/files`}>
-                <Button size="sm" style={{ fontSize: 12 }}>+ Upload File</Button>
+                <Button size="sm" style={{ fontSize: 12, height: 30, paddingLeft: 14, paddingRight: 14 }}>+ Upload File</Button>
               </Link>
             )}
           </div>
