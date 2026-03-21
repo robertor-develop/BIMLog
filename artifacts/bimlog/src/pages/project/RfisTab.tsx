@@ -207,7 +207,7 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
       if (isLog) {
         sheetTitle = `RFI Log — ${projectName || `Project ${projectId}`}`;
         filename = `RFI-Log-${projectId}.doc`;
-        const headerHtml = `<tr>${["RFI #","Subject","Status","Priority","Submitted By","Submitted To","Forwarded","Answered","Days Out","Ball in Court","Sched. Impact"].map(th).join("")}</tr>`;
+        const headerHtml = `<tr>${["RFI Number","Subject","Status","Priority","Submitted By","Submitted To","Date Requested","Date Required","Days Outstanding","Ball In Court","Schedule Impact"].map(th).join("")}</tr>`;
         const dataRows = rfis.map(r => {
           const bic = getBallInCourt(r);
           const days = differenceInDays(new Date(), new Date(r.createdAt));
@@ -220,10 +220,10 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
             td(`${r.submittedByCompany || "—"}`),
             td(`${r.submittedToCompany || r.submittedToPerson || "—"}`),
             td(fmt(r.dateRequested || r.createdAt)),
-            td(fmt(r.dateAnswered || r.respondedAt)),
+            td(fmt(r.dateRequired || r.dueDate)),
             td(String(days)),
             td(bic?.label || "Closed"),
-            td(r.scheduleImpact || "None"),
+            td(r.scheduleImpact || "—"),
           ].join("")}</tr>`;
         }).join("");
         tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
@@ -1457,8 +1457,6 @@ ${hasResp ? `
   // Only project_admin can close an RFI
   const currentMember = members.find(m => m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase());
   const isProjectAdmin = currentMember?.role === "project_admin";
-  // Debug: log currentMember role to help diagnose Close RFI button visibility
-  console.log("[BIMLog] currentMember:", currentMember, "role:", currentMember?.role, "isProjectAdmin:", isProjectAdmin);
   const statusOptions = isProjectAdmin
     ? allStatusOptions
     : allStatusOptions.filter(o => o.value !== "closed");
@@ -1574,14 +1572,13 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} style={{ gap: 5, fontSize: 11, color: "#0369A1", borderColor: "#BAE6FD", background: "#F0F9FF" }}>
               <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
             </Button>
-            {/* Close RFI: visible for project_admin, or as fallback when role not yet loaded */}
-            {(isProjectAdmin || (canWrite && !currentMember)) && rfi.status !== "closed" && (
+            {isProjectAdmin && rfi.status !== "closed" && (
               <Button variant="outline" size="sm" onClick={handleCloseRfi} style={{ gap: 5, fontSize: 11, color: "#DC2626", borderColor: "#FCA5A5" }}>
                 <X style={{ width: 12, height: 12 }} />{w("Close RFI", "Cerrar RFI", lang)}
               </Button>
             )}
             {rfi.status === "closed" && canWrite && (
-              <Button variant="outline" size="sm" onClick={() => { onRevise(rfi); onClose(); }} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
+              <Button variant="outline" size="sm" onClick={() => reviseRfi({ projectId, rfiId: rfi.id, data: {} })} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
               </Button>
             )}

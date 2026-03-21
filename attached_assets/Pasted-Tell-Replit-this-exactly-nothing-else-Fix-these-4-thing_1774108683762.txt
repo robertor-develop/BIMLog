@@ -1,0 +1,26 @@
+Tell Replit this exactly — nothing else:
+
+Fix these 4 things for RFIs only. Do not touch Submittals or Files or any other part of the app.
+
+Fix 1 — Close RFI restricted to Project Admin only. Currently any user can close an RFI. Fix this so only users with role project_admin in the project_members table can close an RFI. On the frontend — the Close RFI button must only render if isProjectAdmin is true. isProjectAdmin is already computed as currentMember role equals project_admin. If currentMember is undefined or role is not project_admin the button must not appear at all — no fallback, no debug override. On the backend — the PATCH route for RFIs must check the requesting user's role in project_members before allowing a status change to closed. If the user's role is not project_admin return 403 with message Only a Project Admin can close an RFI. This enforcement must exist on both frontend and backend independently.
+
+Fix 2 — Revise RFI creates a new linked RFI. When a user clicks Revise RFI on a closed RFI — do not reopen the original. Instead create a new RFI automatically with these values: number auto-incremented as the next RFI number on the project, subject copied from the original with prefix Revision of RFI-XXXX added at the start, all other fields copied from the original — submitted by, submitted to, reference documents, spec section, drawing number, priority, cost impact, schedule impact, distribution list. Add a new nullable column to the rfis table called revision_of integer references rfis id. Set revision_of to the original RFI id on the new RFI. Run migration immediately. On the frontend — in the RFI detail panel for any RFI that has revision_of set — show a blue banner at the top that says This RFI is a revision of RFI-XXXX with a link to the original. On the original closed RFI — show a gray banner that says This RFI has been superseded by RFI-XXXX with a link to the new one. The Revise RFI button must only show on closed RFIs. After creating the revision — navigate the user directly to the new RFI detail panel so they can see it was created and edit the question if needed.
+
+Fix 3 — PDF and Word exports must be identical. The Word document is the master layout. The PDF must be a rendered version of the exact same content. Remove the separate PDFKit-based individual RFI PDF generation. Instead the individual RFI PDF export button must call the same server-side docx generation endpoint, receive the .docx buffer, convert it to PDF using LibreOffice on the server via a child_process exec call running libreoffice --headless --convert-to pdf --outdir /tmp followed by reading the output PDF and returning it. If LibreOffice conversion fails fall back to the existing PDFKit PDF. This way the PDF and Word are guaranteed to have identical content and layout including checkboxes, signature lines, and all sections.
+
+Fix 4 — RFI Log PDF and Word must match Excel exactly. The Excel RFI log export is the correct reference — it shows all columns with no cutoff. The PDF log and Word log must match it exactly. The columns in the correct order are: RFI Number, Subject, Status, Priority, Submitted By, Submitted To, Date Requested, Date Required, Days Outstanding, Ball In Court, Schedule Impact. Both PDF and Word log exports must be landscape orientation. The PDF log must use the same column widths as the Excel — calculate the total content width for landscape letter which is 720 points and divide proportionally across all 11 columns. The Word log must also be landscape and show all 11 columns. No column may be cut off. If the subject text is too long truncate with ellipsis to fit the column. Test with the existing RFI-0001 data and make sure the PDF log output matches the Excel output exactly.
+
+Then run TypeScript check on both frontend and backend with zero errors. Then rebuild and redeploy. Show me exact output of these checks:
+
+Check 1 — Close RFI backend enforcement: grep -n "project_admin|403|Only a Project Admin|close.*forbidden|forbidden.*close" artifacts/api-server/src/routes/rfis.ts | head -10
+
+Check 2 — revision_of column exists in database: SELECT column_name FROM information_schema.columns WHERE table_name = 'rfis' AND column_name = 'revision_of';
+
+Check 3 — Revise RFI creates new linked RFI in frontend: grep -n "revision_of|revisionOf|Revision of|Revise RFI|createRevision" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+
+Check 4 — PDF uses LibreOffice conversion or same docx: grep -n "libreoffice|LibreOffice|convert-to pdf|docx.*pdf|pdf.*docx" artifacts/api-server/src/routes/rfis.ts | head -10
+
+Check 5 — RFI log has all 11 columns: grep -n "Ball In Court|Schedule Impact|Days Outstanding|Submitted To|11.*column|column.*11" artifacts/api-server/src/routes/rfis.ts | head -10
+
+Show exact output of all 5 checks. Nothing else.
+

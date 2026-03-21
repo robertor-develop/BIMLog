@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable } from "@workspace/db/schema";
 import { eq, and, count, max } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -8,6 +8,10 @@ import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../mi
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
@@ -283,19 +287,20 @@ function makeRfiLogPdf(
     return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
   };
 
-  // Column definitions: [header, width, getter]
+  // Column definitions: [header, width, getter] — 11 columns matching Excel export exactly
+  // Widths sum to LOG_CONTENT_W = 720px (landscape LETTER: 792 - 36*2 margins)
   const cols: [string, number, (r: typeof rfisTable.$inferSelect) => string][] = [
-    ["RFI #",       54,  r => r.number],
-    ["Subject",     130, r => r.subject],
-    ["Status",      52,  r => (r.status || "").replace("_", " ")],
-    ["Priority",    46,  r => r.priority || "—"],
-    ["Submitted By",72,  r => r.submittedByCompany || creatorMap.get(r.createdById) || "—"],
-    ["Submitted To",72,  r => r.submittedToCompany || r.submittedToPerson || "—"],
-    ["Date Req.",   50,  r => fmtD(r.dateRequested || r.createdAt)],
-    ["Date Req'd",  50,  r => fmtD(r.dateRequired || r.dueDate)],
-    ["Days Out",    42,  r => String(daysSince(r.createdAt))],
-    ["Ball in Court",72, r => getBic(r)],
-    ["Sched. Impact",62, r => r.scheduleImpact || "—"],
+    ["RFI Number",       56,  r => r.number],
+    ["Subject",          130, r => r.subject],
+    ["Status",           52,  r => (r.status || "").replace("_", " ")],
+    ["Priority",         46,  r => r.priority || "—"],
+    ["Submitted By",     72,  r => r.submittedByCompany || creatorMap.get(r.createdById) || "—"],
+    ["Submitted To",     72,  r => r.submittedToCompany || r.submittedToPerson || "—"],
+    ["Date Requested",   56,  r => fmtD(r.dateRequested || r.createdAt)],
+    ["Date Required",    56,  r => fmtD(r.dateRequired || r.dueDate)],
+    ["Days Outstanding", 44,  r => String(daysSince(r.createdAt))],
+    ["Ball In Court",    72,  r => getBic(r)],
+    ["Schedule Impact",  64,  r => r.scheduleImpact || "—"],
   ];
 
   let y = LOG_MARGIN;
@@ -587,6 +592,17 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       res.status(422).json({ error: `Invalid status value: ${body.status}` });
       return;
     }
+
+    // Only a Project Admin can close an RFI
+    if (body.status === "closed") {
+      const [member] = await db.select().from(projectMembersTable)
+        .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId)))
+        .limit(1);
+      if (!member || member.role !== "project_admin") {
+        res.status(403).json({ error: "Only a Project Admin can close an RFI" });
+        return;
+      }
+    }
     if (body.priority && !(await validateConfigValue("rfi_priority", body.priority))) {
       res.status(422).json({ error: `Invalid priority value: ${body.priority}` });
       return;
@@ -747,11 +763,12 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
     const revNum = (orig.revisionNumber ?? 0) + 1;
     const newNumber = `${orig.number.replace(/-R\d+$/, "")}-R${revNum}`;
     const defaultStatus = await getDefaultValue("rfi_status");
+    const revisionSubject = `Revision of RFI-${orig.number}: ${orig.subject}`;
 
     const [newRfi] = await db.insert(rfisTable).values({
       projectId,
       number: newNumber,
-      subject: orig.subject,
+      subject: revisionSubject,
       description: orig.description,
       status: defaultStatus,
       priority: orig.priority,
@@ -782,6 +799,7 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
       projectAddress: orig.projectAddress,
       parentRfiId: parentId,
       revisionNumber: revNum,
+      revisionOf: orig.id,
     }).returning();
 
     await db.insert(activityLogTable).values({
@@ -802,33 +820,206 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
   }
 });
 
-// ─── GET /projects/:projectId/rfis/:rfiId/export  (single PDF) ──────────────
+// ─── Shared helper: build single-RFI Word Document object ────────────────────
+function buildRfiDocxDocument(
+  rfi: typeof rfisTable.$inferSelect,
+  responses: (typeof rfiResponsesTable.$inferSelect)[],
+): Document {
+  const fmtD = (d: Date | string | null | undefined) => {
+    if (!d) return "—";
+    const dt = typeof d === "string" ? new Date(d) : d;
+    if (isNaN(dt.getTime())) return "—";
+    return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
+
+  function realCheckbox(checked: boolean): SymbolRun {
+    return new SymbolRun({ char: checked ? "FC" : "A8", symbolfont: "Wingdings", size: 20 });
+  }
+
+  const checkRow = (label: string, checked: boolean) => new Paragraph({
+    spacing: { after: 60 },
+    children: [realCheckbox(checked), new TextRun({ text: `  ${label}`, size: 18 })],
+  });
+
+  const cell = (text: string, opts: { bold?: boolean; shade?: boolean; width?: number } = {}) =>
+    new TableCell({
+      width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+      shading: opts.shade ? { type: ShadingType.CLEAR, fill: "F1F5F9" } : undefined,
+      children: [new Paragraph({ children: [new TextRun({ text, bold: opts.bold, size: 18 })] })],
+    });
+
+  const labelRow = (lbl: string, val: string, lbl2?: string, val2?: string) =>
+    new TableRow({
+      children: [
+        cell(lbl, { bold: true, shade: true, width: 20 }),
+        cell(val, { width: lbl2 ? 30 : 80 }),
+        ...(lbl2 ? [cell(lbl2, { bold: true, shade: true, width: 20 }), cell(val2 || "—", { width: 30 })] : []),
+      ],
+    });
+
+  const sectionHeader = (text: string) => new Paragraph({
+    heading: HeadingLevel.HEADING_2,
+    spacing: { before: 200, after: 80 },
+    children: [new TextRun({ text, bold: true, size: 22, color: "1E3A5F" })],
+  });
+
+  const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
+  const costCheckboxes = costOpts.map(opt => {
+    const isChecked = rfi.costImpact === opt;
+    const label = opt === "Cost Increase Known" && rfi.costImpactAmount ? `${opt}: ${rfi.costImpactAmount}` : opt;
+    return checkRow(label, isChecked);
+  });
+
+  const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
+  const schedCheckboxes = schedOpts.map(opt => {
+    const isChecked = rfi.scheduleImpact === opt;
+    const label = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null ? `${opt}: ${rfi.scheduleImpactDays} days` : opt;
+    return checkRow(label, isChecked);
+  });
+
+  const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
+  const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
+
+  return new Document({
+    sections: [{
+      properties: {},
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 200 },
+          children: [new TextRun({ text: `REQUEST FOR INFORMATION — ${rfi.number}`, bold: true, size: 36, color: "1E3A5F" })],
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+            left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+            right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+          },
+          rows: [
+            labelRow("Subject", rfi.subject || "—"),
+            labelRow("Status", (rfi.status || "").replace(/_/g, " "), "Priority", rfi.priority || "—"),
+            labelRow("Date Requested", fmtD(rfi.dateRequested || rfi.createdAt), "Date Required", fmtD(rfi.dateRequired || rfi.dueDate)),
+            labelRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`),
+            labelRow("Drawing #", rfi.drawingNumber || "—", "Spec Section", rfi.specSection || "—"),
+          ],
+        }),
+        sectionHeader("Description of Question"),
+        new Paragraph({
+          spacing: { after: 200 },
+          children: [new TextRun({ text: rfi.question || rfi.description || "—", size: 20 })],
+        }),
+        sectionHeader("RFI RESPONSES"),
+        ...(responses.length > 0
+          ? responses.map((resp, i) => {
+              const respNum = resp.responseNumber ?? (i + 1);
+              const respDate = fmtD(resp.createdAt);
+              const respAuthor = resp.answeredBy || "—";
+              const respText = resp.responseText || "—";
+              const respAtts: string[] = Array.isArray((resp as any).attachments) ? (resp as any).attachments : [];
+              return new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: BorderStyle.SINGLE, size: 8, color: "1E3A5F" },
+                  bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                  left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                  right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
+                },
+                rows: [
+                  new TableRow({
+                    children: [new TableCell({
+                      width: { size: 100, type: WidthType.PERCENTAGE },
+                      shading: { type: ShadingType.CLEAR, fill: "EFF6FF" },
+                      children: [new Paragraph({
+                        spacing: { before: 80, after: 80 },
+                        children: [
+                          new TextRun({ text: `Response ${respNum}`, bold: true, size: 22, color: "1E3A5F" }),
+                          new TextRun({ text: `   |   Author: ${respAuthor}   |   Date: ${respDate}`, size: 18, color: "475569" }),
+                        ],
+                      })],
+                    })],
+                  }),
+                  new TableRow({
+                    children: [new TableCell({
+                      width: { size: 100, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ spacing: { before: 80, after: 60 }, children: [new TextRun({ text: "Response Text", bold: true, size: 16, color: "64748B" })] }),
+                        new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: respText, size: 20 })] }),
+                        ...(respAtts.length > 0 ? [
+                          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
+                          ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `• ${a}`, size: 18 })] })),
+                        ] : []),
+                        ...(resp.isConflictOfInterest ? [
+                          new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun({ text: "CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })] }),
+                        ] : []),
+                      ],
+                    })],
+                  }),
+                ],
+              });
+            })
+          : [
+              ...(rfi.answer || rfi.response
+                ? [
+                    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: "Response 1", bold: true, size: 20, color: "1E3A5F" })] }),
+                    new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: rfi.answer || rfi.response || "", size: 20 })] }),
+                  ]
+                : [new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "(No response provided)", size: 18, color: "94A3B8" })] })]),
+            ]),
+        sectionHeader("Impact & Attachments"),
+        new Paragraph({ spacing: { before: 100, after: 40 }, children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
+        ...costCheckboxes,
+        new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
+        ...schedCheckboxes,
+        new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
+        ...attachCheckboxes,
+        new Paragraph({ spacing: { before: 140, after: 40 }, children: [new TextRun({ text: "AUTHORIZED BY", bold: true, size: 16, color: "64748B" })] }),
+        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Name: ______________________________________________", size: 18 })] }),
+        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Title: ______________________________________________", size: 18 })] }),
+        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Company: ______________________________________________", size: 18 })] }),
+        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Date: ______________________________________________", size: 18 })] }),
+        new Paragraph({
+          spacing: { before: 300 },
+          children: [new TextRun({ text: `Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}`, size: 14, color: "94A3B8" })],
+        }),
+      ],
+    }],
+  });
+}
+
+// ─── GET /projects/:projectId/rfis/:rfiId/export  (single PDF via LibreOffice) ─
 router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
 
     const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
-    if (!rfi) {
-      res.status(404).json({ error: "RFI not found" });
-      return;
-    }
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
 
-    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-    const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
+    const responses = await db.select().from(rfiResponsesTable)
+      .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
+      .orderBy(rfiResponsesTable.responseNumber);
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("end", () => {
-      const pdfBuffer = Buffer.concat(chunks);
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.pdf"`);
-      res.setHeader("Content-Length", pdfBuffer.length);
-      res.send(pdfBuffer);
-    });
+    const doc = buildRfiDocxDocument(rfi, responses);
+    const docxBuffer = await Packer.toBuffer(doc);
 
-    makeRfiPdf(doc, rfi, project, creator[0]?.fullName || "", MARGIN, true);
-    doc.end();
+    // Write docx to temp, convert to PDF via LibreOffice, send PDF
+    const tmpDir = os.tmpdir();
+    const docxPath = path.join(tmpDir, `rfi-${rfiId}-${Date.now()}.docx`);
+    const pdfPath = docxPath.replace(/\.docx$/, ".pdf");
+
+    fs.writeFileSync(docxPath, docxBuffer);
+    execSync(`libreoffice --headless --convert-to pdf --outdir ${tmpDir} ${docxPath}`, { timeout: 30000 });
+    const pdfBuffer = fs.readFileSync(pdfPath);
+
+    // Cleanup temp files
+    try { fs.unlinkSync(docxPath); } catch { /* ignore */ }
+    try { fs.unlinkSync(pdfPath); } catch { /* ignore */ }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.pdf"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.send(pdfBuffer);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });
@@ -1487,207 +1678,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
-    const fmtD = (d: Date | string | null | undefined) => {
-      if (!d) return "—";
-      const dt = typeof d === "string" ? new Date(d) : d;
-      if (isNaN(dt.getTime())) return "—";
-      return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    };
-
-    // Checkbox symbol using Wingdings font — "FC" checked, "A8" unchecked
-    function realCheckbox(checked: boolean): SymbolRun {
-      return new SymbolRun({ char: checked ? "FC" : "A8", symbolfont: "Wingdings", size: 20 });
-    }
-
-    // Checkbox row: Wingdings checkbox symbol followed by label text
-    const checkRow = (label: string, checked: boolean) => new Paragraph({
-      spacing: { after: 60 },
-      children: [
-        realCheckbox(checked),
-        new TextRun({ text: `  ${label}`, size: 18 }),
-      ],
-    });
-
-    const cell = (text: string, opts: { bold?: boolean; shade?: boolean; width?: number } = {}) =>
-      new TableCell({
-        width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
-        shading: opts.shade ? { type: ShadingType.CLEAR, fill: "F1F5F9" } : undefined,
-        children: [new Paragraph({ children: [new TextRun({ text, bold: opts.bold, size: 18 })] })],
-      });
-
-    const labelRow = (lbl: string, val: string, lbl2?: string, val2?: string) =>
-      new TableRow({
-        children: [
-          cell(lbl, { bold: true, shade: true, width: 20 }),
-          cell(val, { width: lbl2 ? 30 : 80 }),
-          ...(lbl2 ? [cell(lbl2, { bold: true, shade: true, width: 20 }), cell(val2 || "—", { width: 30 })] : []),
-        ],
-      });
-
-    const sectionHeader = (text: string) => new Paragraph({
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 200, after: 80 },
-      children: [new TextRun({ text, bold: true, size: 22, color: "1E3A5F" })],
-    });
-
-    // Build cost impact checkbox section
-    const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
-    const costCheckboxes = costOpts.map(opt => {
-      const isChecked = rfi.costImpact === opt;
-      const label = opt === "Cost Increase Known" && rfi.costImpactAmount
-        ? `${opt}: ${rfi.costImpactAmount}`
-        : opt;
-      return checkRow(label, isChecked);
-    });
-
-    // Build schedule impact checkbox section
-    const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
-    const schedCheckboxes = schedOpts.map(opt => {
-      const isChecked = rfi.scheduleImpact === opt;
-      const label = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null
-        ? `${opt}: ${rfi.scheduleImpactDays} days`
-        : opt;
-      return checkRow(label, isChecked);
-    });
-
-    // Build attachment checkbox section
-    const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
-    const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
-
-    const hasResp = responses.length > 0 || !!(rfi.answer || rfi.response);
-
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          new Paragraph({
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 200 },
-            children: [new TextRun({ text: `REQUEST FOR INFORMATION — ${rfi.number}`, bold: true, size: 36, color: "1E3A5F" })],
-          }),
-
-          // Header table
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              top: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-              right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-            },
-            rows: [
-              labelRow("Subject", rfi.subject || "—"),
-              labelRow("Status", (rfi.status || "").replace(/_/g, " "), "Priority", rfi.priority || "—"),
-              labelRow("Date Requested", fmtD(rfi.dateRequested || rfi.createdAt), "Date Required", fmtD(rfi.dateRequired || rfi.dueDate)),
-              labelRow("Submitted By", `${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || "—"}`, "Submitted To", `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`),
-              labelRow("Drawing #", rfi.drawingNumber || "—", "Spec Section", rfi.specSection || "—"),
-            ],
-          }),
-
-          sectionHeader("Description of Question"),
-          new Paragraph({
-            spacing: { after: 200 },
-            children: [new TextRun({ text: rfi.question || rfi.description || "—", size: 20 })],
-          }),
-
-          sectionHeader("RFI RESPONSES"),
-          ...(responses.length > 0
-            ? responses.map((resp, i) => {
-                const respNum = resp.responseNumber ?? (i + 1);
-                const respDate = fmtD(resp.createdAt);
-                const respAuthor = resp.answeredBy || "—";
-                const respText = resp.responseText || "—";
-                const respAtts: string[] = Array.isArray((resp as any).attachments) ? (resp as any).attachments : [];
-                return new Table({
-                  width: { size: 100, type: WidthType.PERCENTAGE },
-                  borders: {
-                    top: { style: BorderStyle.SINGLE, size: 8, color: "1E3A5F" },
-                    bottom: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                    left: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                    right: { style: BorderStyle.SINGLE, size: 4, color: "CBD5E1" },
-                  },
-                  rows: [
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          width: { size: 100, type: WidthType.PERCENTAGE },
-                          shading: { type: ShadingType.CLEAR, fill: "EFF6FF" },
-                          children: [
-                            new Paragraph({
-                              spacing: { before: 80, after: 80 },
-                              children: [
-                                new TextRun({ text: `Response ${respNum}`, bold: true, size: 22, color: "1E3A5F" }),
-                                new TextRun({ text: `   |   Author: ${respAuthor}   |   Date: ${respDate}`, size: 18, color: "475569" }),
-                              ],
-                            }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          width: { size: 100, type: WidthType.PERCENTAGE },
-                          children: [
-                            new Paragraph({ spacing: { before: 80, after: 60 }, children: [new TextRun({ text: "Response Text", bold: true, size: 16, color: "64748B" })] }),
-                            new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: respText, size: 20 })] }),
-                            ...(respAtts.length > 0 ? [
-                              new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
-                              ...respAtts.map(a => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `• ${a}`, size: 18 })] })),
-                            ] : []),
-                            ...(resp.isConflictOfInterest ? [
-                              new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun({ text: "CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })] }),
-                            ] : []),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                });
-              })
-            : [
-                ...(rfi.answer || rfi.response
-                  ? [
-                      new Paragraph({
-                        spacing: { after: 80 },
-                        children: [new TextRun({ text: "Response 1", bold: true, size: 20, color: "1E3A5F" })],
-                      }),
-                      new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: rfi.answer || rfi.response || "", size: 20 })] }),
-                    ]
-                  : [
-                      new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "(No response provided)", size: 18, color: "94A3B8" })] }),
-                    ]),
-              ]),
-
-          sectionHeader("Impact & Attachments"),
-
-          // COST IMPACT — standalone checkbox paragraphs (no TableCell)
-          new Paragraph({ spacing: { before: 100, after: 40 }, children: [new TextRun({ text: "COST IMPACT", bold: true, size: 16, color: "64748B" })] }),
-          ...costCheckboxes,
-
-          // SCHEDULE IMPACT — standalone checkbox paragraphs (no TableCell)
-          new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "SCHEDULE IMPACT", bold: true, size: 16, color: "64748B" })] }),
-          ...schedCheckboxes,
-
-          // ATTACHMENTS — standalone checkbox paragraphs (no TableCell)
-          new Paragraph({ spacing: { before: 120, after: 40 }, children: [new TextRun({ text: "ATTACHMENTS", bold: true, size: 16, color: "64748B" })] }),
-          ...attachCheckboxes,
-
-          // Authorized by signature block with underscores
-          new Paragraph({ spacing: { before: 140, after: 40 }, children: [new TextRun({ text: "AUTHORIZED BY", bold: true, size: 16, color: "64748B" })] }),
-          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Name: ______________________________________________", size: 18 })] }),
-          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Title: ______________________________________________", size: 18 })] }),
-          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Company: ______________________________________________", size: 18 })] }),
-          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Date: ______________________________________________", size: 18 })] }),
-
-          new Paragraph({
-            spacing: { before: 300 },
-            children: [new TextRun({ text: `Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}`, size: 14, color: "94A3B8" })],
-          }),
-        ],
-      }],
-    });
-
+    const doc = buildRfiDocxDocument(rfi, responses);
     const buffer = await Packer.toBuffer(doc);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.docx"`);

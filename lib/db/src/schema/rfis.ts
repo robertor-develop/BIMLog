@@ -56,6 +56,7 @@ export const rfisTable = pgTable("rfis", {
 
   parentRfiId: integer("parent_rfi_id"),
   revisionNumber: integer("revision_number").default(0),
+  revisionOf: integer("revision_of"),
 
   projectAddress: text("project_address"),
 });
