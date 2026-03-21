@@ -252,6 +252,46 @@ const LOG_MARGIN = 36;
 const LOG_CONTENT_W = LOG_W - LOG_MARGIN * 2;
 const LOG_CONTENT_BOTTOM = LOG_H - 50;
 
+// ─── Shared log column definitions (header + getter, no hardcoded widths) ─────
+function buildLogColDefs(
+  fmtD: (d: Date | string | null | undefined) => string,
+  getBic: (r: typeof rfisTable.$inferSelect) => string,
+  creatorMap: Map<number, string>,
+): [string, (r: typeof rfisTable.$inferSelect) => string][] {
+  return [
+    ["RFI Number",       r => r.number],
+    ["Subject",          r => r.subject],
+    ["Status",           r => (r.status || "").replace("_", " ")],
+    ["Priority",         r => r.priority || "—"],
+    ["Submitted By",     r => r.submittedByCompany || creatorMap.get(r.createdById) || "—"],
+    ["Submitted To",     r => r.submittedToCompany || r.submittedToPerson || "—"],
+    ["Date Requested",   r => fmtD(r.dateRequested || r.createdAt)],
+    ["Date Required",    r => fmtD(r.dateRequired || r.dueDate)],
+    ["Days Outstanding", r => String(daysSince(r.createdAt))],
+    ["Ball In Court",    r => getBic(r)],
+    ["Schedule Impact",  r => r.scheduleImpact || "—"],
+  ];
+}
+
+// ─── Measure natural column widths via PDFKit widthOfString at font size 8 ────
+function measureColWidths(
+  measDoc: PDFKit.PDFDocument,
+  colDefs: [string, (r: typeof rfisTable.$inferSelect) => string][],
+  rfis: (typeof rfisTable.$inferSelect)[],
+  pad = 12,
+): number[] {
+  return colDefs.map(([header, getter]) => {
+    measDoc.font("Helvetica-Bold").fontSize(8);
+    let maxWidth = measDoc.widthOfString(header.toUpperCase());
+    measDoc.font("Helvetica").fontSize(8);
+    for (const rfi of rfis) {
+      const w = measDoc.widthOfString(getter(rfi));
+      if (w > maxWidth) maxWidth = w;
+    }
+    return maxWidth + pad;
+  });
+}
+
 function makeRfiLogPdf(
   doc: PDFKit.PDFDocument,
   rfis: (typeof rfisTable.$inferSelect)[],
@@ -267,21 +307,19 @@ function makeRfiLogPdf(
     return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
   };
 
-  // Column definitions: [header, width, getter] — 11 columns matching Excel export exactly
-  // Widths sum to LOG_CONTENT_W = 720px (landscape LETTER: 792 - 36*2 margins)
-  const cols: [string, number, (r: typeof rfisTable.$inferSelect) => string][] = [
-    ["RFI Number",       56,  r => r.number],
-    ["Subject",          130, r => r.subject],
-    ["Status",           52,  r => (r.status || "").replace("_", " ")],
-    ["Priority",         46,  r => r.priority || "—"],
-    ["Submitted By",     72,  r => r.submittedByCompany || creatorMap.get(r.createdById) || "—"],
-    ["Submitted To",     72,  r => r.submittedToCompany || r.submittedToPerson || "—"],
-    ["Date Requested",   56,  r => fmtD(r.dateRequested || r.createdAt)],
-    ["Date Required",    56,  r => fmtD(r.dateRequired || r.dueDate)],
-    ["Days Outstanding", 44,  r => String(daysSince(r.createdAt))],
-    ["Ball In Court",    72,  r => getBic(r)],
-    ["Schedule Impact",  64,  r => r.scheduleImpact || "—"],
-  ];
+  const colDefs = buildLogColDefs(fmtD, getBic, creatorMap);
+
+  // ── Dynamic width calculation — no hardcoded values ──────────────────────────
+  const naturalWidths = measureColWidths(doc, colDefs, rfis);
+  const totalNatural  = naturalWidths.reduce((s, w) => s + w, 0);
+  // Scale proportionally so all columns fit within LOG_CONTENT_W = 720
+  const scaleFactor   = totalNatural > LOG_CONTENT_W ? LOG_CONTENT_W / totalNatural : 1;
+  const colWidths     = naturalWidths.map(w => Math.floor(w * scaleFactor));
+
+  // Build final cols: [header, computedWidth, getter]
+  const cols = colDefs.map(([header, getter], i) =>
+    [header, colWidths[i], getter] as [string, number, (r: typeof rfisTable.$inferSelect) => string],
+  );
 
   let y = LOG_MARGIN;
 
@@ -307,13 +345,12 @@ function makeRfiLogPdf(
   doc.fillColor("black");
   y += 36;
 
-  // Draw header row
   const drawHeader = (atY: number) => {
     doc.rect(LOG_MARGIN, atY, LOG_CONTENT_W, 16).fill("#334155");
     let cx = LOG_MARGIN;
     cols.forEach(([header, colW]) => {
       doc.fontSize(6).fillColor("white").font("Helvetica-Bold")
-        .text(header.toUpperCase(), cx + 3, atY + 5, { width: colW - 4, lineBreak: false });
+        .text(header.toUpperCase(), cx + 3, atY + 5, { width: colW - 4, lineBreak: false, ellipsis: true });
       cx += colW;
     });
     return atY + 16;
@@ -325,9 +362,7 @@ function makeRfiLogPdf(
   let rowIndex = 0;
 
   for (const rfi of rfis) {
-    // estimate row height
-    const subjectH = Math.min(doc.heightOfString(rfi.subject, { width: 127 }), 30);
-    const rowH = Math.max(subjectH + 8, 18);
+    const rowH = 18;
 
     if (y + rowH > LOG_CONTENT_BOTTOM) {
       drawLogFooter(pageNum);
@@ -341,7 +376,6 @@ function makeRfiLogPdf(
     const isEven = rowIndex % 2 === 0;
     doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).fill(isEven ? "#F8FAFC" : "white");
 
-    // draw gridlines
     let cx = LOG_MARGIN;
     cols.forEach(([, colW, getter], ci) => {
       const cellText = getter(rfi);
@@ -350,23 +384,103 @@ function makeRfiLogPdf(
         : "#1E293B";
 
       doc.fontSize(8).fillColor(textColor).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
-        .text(cellText, cx + 3, y + 4, { width: colW - 6, lineBreak: false });
+        .text(cellText, cx + 3, y + 4, { width: colW - 6, lineBreak: false, ellipsis: true });
 
       doc.moveTo(cx + colW, y).lineTo(cx + colW, y + rowH).stroke("#E2E8F0");
       cx += colW;
     });
 
-    // horizontal rule
     doc.moveTo(LOG_MARGIN, y + rowH).lineTo(LOG_MARGIN + LOG_CONTENT_W, y + rowH).stroke("#E2E8F0");
-    // left border
     doc.moveTo(LOG_MARGIN, y).lineTo(LOG_MARGIN, y + rowH).stroke("#E2E8F0");
 
     y += rowH;
     rowIndex++;
   }
 
-  // outer border
   drawLogFooter(pageNum);
+}
+
+// ─── Word log export — dynamic DXA widths from PDFKit measurements ─────────────
+function makeRfiLogWord(
+  rfis: (typeof rfisTable.$inferSelect)[],
+  project: { name: string } | undefined,
+  creatorMap: Map<number, string>,
+): Document {
+  const fmtD = (d: Date | string | null | undefined) =>
+    d ? new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }) : "—";
+
+  const getBic = (rfi: typeof rfisTable.$inferSelect) => {
+    if (rfi.status === "closed") return "Closed";
+    if (rfi.status === "responded") return rfi.submittedByCompany || creatorMap.get(rfi.createdById) || "Submitter";
+    return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
+  };
+
+  const colDefs = buildLogColDefs(fmtD, getBic, creatorMap);
+
+  // Measure natural widths using a temporary PDFKit doc (same font size 8 approach)
+  const measDoc = new PDFDocument({ autoFirstPage: false });
+  const naturalWidths = measureColWidths(measDoc, colDefs, rfis);
+  const totalNatural  = naturalWidths.reduce((s, w) => s + w, 0);
+  // Scale proportionally to fit LOG_CONTENT_W = 720 pt
+  const scaleFactor   = totalNatural > LOG_CONTENT_W ? LOG_CONTENT_W / totalNatural : 1;
+  // Convert from points to DXA by multiplying by 15
+  const WORD_TABLE_W  = 10368; // landscape Letter minus margins in DXA
+  const colDxa        = naturalWidths.map(w => Math.round(w * scaleFactor * 15));
+
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: colDefs.map(([header], i) => new TableCell({
+      width: { size: colDxa[i], type: WidthType.DXA },
+      shading: { type: ShadingType.CLEAR, fill: "1E3A5F" },
+      children: [new Paragraph({
+        spacing: { before: 60, after: 60 },
+        children: [new TextRun({ text: header.toUpperCase(), bold: true, size: 14, color: "FFFFFF" })],
+      })],
+    })),
+  });
+
+  const dataRows = rfis.map((rfi, rowIdx) => new TableRow({
+    children: colDefs.map(([, getter], i) => {
+      const ci = i;
+      const val = getter(rfi);
+      const color = ci === 0 ? "2563EB"
+        : ci === 2 ? (rfi.status === "closed" ? "16A34A" : rfi.status === "responded" ? "7C3AED" : "D97706")
+        : "1E293B";
+      return new TableCell({
+        width: { size: colDxa[i], type: WidthType.DXA },
+        shading: { type: ShadingType.CLEAR, fill: rowIdx % 2 === 0 ? "F8FAFC" : "FFFFFF" },
+        children: [new Paragraph({
+          spacing: { before: 40, after: 40 },
+          children: [new TextRun({ text: val, size: 16, color, bold: ci === 0 })],
+        })],
+      });
+    }),
+  }));
+
+  return new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: { width: 15840, height: 12240 }, // landscape Letter: 11" × 8.5" in DXA
+          margin: { top: 720, right: 720, bottom: 720, left: 720 },
+        },
+      },
+      children: [
+        new Paragraph({
+          spacing: { after: 100 },
+          children: [new TextRun({ text: `RFI Log${project ? ` — ${project.name}` : ""}`, bold: true, size: 28, color: "1E3A5F" })],
+        }),
+        new Paragraph({
+          spacing: { after: 200 },
+          children: [new TextRun({ text: `Exported: ${new Date().toLocaleDateString()}  |  ${rfis.length} RFIs`, size: 16, color: "94A3B8" })],
+        }),
+        new Table({
+          width: { size: WORD_TABLE_W, type: WidthType.DXA },
+          rows: [headerRow, ...dataRows],
+        }),
+      ],
+    }],
+  });
 }
 
 // ─── List-view PDF (portrait, 6-column summary) ───────────────────────────────
@@ -1012,11 +1126,12 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
   }
 });
 
-// ─── GET /projects/:projectId/rfis/export-all  (RFI log or summary) ──────────
+// ─── GET /projects/:projectId/rfis/export-all  (RFI log, summary, or word log) ─
 router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const isList = req.query.view === "list";
+    const isList    = req.query.view === "list";
+    const isWordLog = req.query.format === "word";
 
     const rfis = await db.query.rfisTable.findMany({
       where: eq(rfisTable.projectId, projectId),
@@ -1038,6 +1153,19 @@ router.get("/projects/:projectId/rfis/export-all", authMiddleware, requireProjec
       }
     }
 
+    // Word log export — server-side docx with dynamic DXA column widths
+    if (isWordLog) {
+      const wordDoc   = makeRfiLogWord(rfis, project, creatorMap);
+      const wordBuf   = await Packer.toBuffer(wordDoc);
+      const filename  = `RFI-Log-${project?.name || projectId}.docx`;
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.setHeader("Content-Length", wordBuf.length);
+      res.send(wordBuf);
+      return;
+    }
+
+    // PDF log / summary export
     const docOptions = isList
       ? { margin: MARGIN, size: "LETTER" as const, autoFirstPage: true }
       : { margin: LOG_MARGIN, size: "LETTER" as const, layout: "landscape" as const, autoFirstPage: true };

@@ -194,9 +194,26 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
     } finally { setLoading(null); }
   };
 
-  const handleWord = () => {
+  const handleWord = async () => {
     setLoading("word");
     try {
+      if (isLog) {
+        // Use backend endpoint — server-side docx with dynamic DXA column widths
+        const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+        const resp = await fetch(`/api/v1/projects/${projectId}/rfis/export-all?format=word`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resp.ok) throw new Error("Word export failed");
+        const blob = await resp.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement("a"); a.href = url; a.download = `RFI-Log-${projectId}.docx`; a.click();
+        URL.revokeObjectURL(url);
+        toast({ title: w("Word document exported", "Documento Word exportado", lang) });
+        onClose();
+        return;
+      }
+
+      // Summary (list) view — client-side HTML Word export
       const th = (s: string) => `<th style="background:#1E3A5F;color:white;padding:5pt 6pt;font-size:9pt;text-align:left;border:1pt solid #334155;">${s}</th>`;
       const td = (s: string, color?: string) => `<td style="padding:4pt 6pt;font-size:9pt;border:1pt solid #E2E8F0;${color ? `color:${color};font-weight:bold;` : ""}">${s || "—"}</td>`;
 
@@ -204,30 +221,7 @@ function ExportModal({ projectId, projectName, rfis, lang, view, onClose }: {
       let sheetTitle: string;
       let filename: string;
 
-      if (isLog) {
-        sheetTitle = `RFI Log — ${projectName || `Project ${projectId}`}`;
-        filename = `RFI-Log-${projectId}.doc`;
-        const headerHtml = `<tr>${["RFI Number","Subject","Status","Priority","Submitted By","Submitted To","Date Requested","Date Required","Days Outstanding","Ball In Court","Schedule Impact"].map(th).join("")}</tr>`;
-        const dataRows = rfis.map(r => {
-          const bic = getBallInCourt(r);
-          const days = differenceInDays(new Date(), new Date(r.createdAt));
-          const statusColor = r.status === "closed" ? "#16A34A" : r.status === "responded" ? "#7C3AED" : "#D97706";
-          return `<tr>${[
-            td(r.number, "#2563EB"),
-            td(r.subject),
-            td((r.status || "").replace("_", " "), statusColor),
-            td(r.priority || "—"),
-            td(`${r.submittedByCompany || "—"}`),
-            td(`${r.submittedToCompany || r.submittedToPerson || "—"}`),
-            td(fmt(r.dateRequested || r.createdAt)),
-            td(fmt(r.dateRequired || r.dueDate)),
-            td(String(days)),
-            td(bic?.label || "Closed"),
-            td(r.scheduleImpact || "—"),
-          ].join("")}</tr>`;
-        }).join("");
-        tableHtml = `<table style="width:100%;border-collapse:collapse;">${headerHtml}${dataRows}</table>`;
-      } else {
+      {
         sheetTitle = `RFI Summary — ${projectName || `Project ${projectId}`}`;
         filename = `RFI-Summary-${projectId}.doc`;
         const headerHtml = `<tr>${["RFI #","Subject","Status","Priority","Ball In Court","Days Outstanding"].map(th).join("")}</tr>`;
