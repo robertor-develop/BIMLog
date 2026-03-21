@@ -559,55 +559,254 @@ export function Profile() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* 1. Performance Score */}
-        <SectionCard title="Performance Score" icon={Zap}>
-          {perfScore ? (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <div style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: "50%",
-                  border: `4px solid ${scoreColor}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: scoreColor }}>
-                    {perfScore.overallScore !== null ? perfScore.overallScore : "—"}
-                  </span>
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>
-                    {perfScore.overallScore === null ? "No data yet" :
-                     perfScore.overallScore >= 80 ? "Excellent Performance" :
-                     perfScore.overallScore >= 60 ? "Good Performance" : "Needs Improvement"}
-                  </div>
-                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                    Based on your activity across projects
-                  </div>
-                </div>
+        {/* 2. Personal Info */}
+        <SectionCard title="Personal Information" icon={User}>
+          {/* Avatar upload */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <div
+              onClick={() => avatarFileInput.current?.click()}
+              style={{
+                width: 72, height: 72, borderRadius: "50%", cursor: "pointer", position: "relative",
+                background: profile?.avatarUrl
+                  ? `url(${profile.avatarUrl}) center/cover no-repeat`
+                  : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.7))",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 28, fontWeight: 700, color: "white", flexShrink: 0,
+                border: "2px dashed hsl(var(--border))",
+              }}
+              title="Click to upload profile photo"
+            >
+              {!profile?.avatarUrl && (profile?.fullName?.charAt(0).toUpperCase() || <Camera style={{ width: 24, height: 24 }} />)}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: 0, transition: "opacity 0.15s",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0")}
+              >
+                <Camera style={{ width: 20, height: 20, color: "white" }} />
               </div>
-              <ScoreBar
-                label="Naming Compliance"
-                rate={perfScore.namingCompliance.rate}
-                detail={`${perfScore.namingCompliance.passed} of ${perfScore.namingCompliance.total} files passed validation`}
-              />
-              <ScoreBar
-                label="RFI Close Rate"
-                rate={perfScore.rfiCloseRate.rate}
-                detail={`${perfScore.rfiCloseRate.closed} of ${perfScore.rfiCloseRate.total} RFIs closed`}
-              />
-              <ScoreBar
-                label="Submittal Approval Rate"
-                rate={perfScore.submittalsApprovalRate.rate}
-                detail={`${perfScore.submittalsApprovalRate.approved} of ${perfScore.submittalsApprovalRate.total} submittals approved`}
+            </div>
+            <input
+              ref={avatarFileInput}
+              type="file"
+              accept="image/jpeg,image/png"
+              style={{ display: "none" }}
+              onChange={handleAvatarFileUpload}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>Profile Photo</div>
+              <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Click the avatar to upload a JPG or PNG photo</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Full Name</Label>
+              <Input
+                value={personalForm.fullName}
+                onChange={e => setPersonalForm(p => ({ ...p, fullName: e.target.value }))}
+                placeholder="Your full name"
               />
             </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Email</Label>
+              <Input value={profile?.email || ""} disabled style={{ opacity: 0.6 }} />
+            </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Job Title</Label>
+              <Input
+                value={personalForm.jobTitle}
+                onChange={e => setPersonalForm(p => ({ ...p, jobTitle: e.target.value }))}
+                placeholder="e.g. BIM Manager"
+              />
+            </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Phone</Label>
+              <Input
+                value={personalForm.phone}
+                onChange={e => setPersonalForm(p => ({ ...p, phone: e.target.value }))}
+                placeholder="+1 555 000 0000"
+              />
+            </div>
+          </div>
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+            <Button onClick={savePersonal} disabled={savingPersonal} size="sm">
+              {savingPersonal ? "Saving…" : "Save Changes"}
+            </Button>
+          </div>
+        </SectionCard>
+
+        {/* 3. Company Info */}
+        <SectionCard title="Company Information" icon={Building2}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Company Name</Label>
+              <Input
+                value={companyForm.name}
+                onChange={e => setCompanyForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="Company name"
+              />
+            </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Website</Label>
+              <Input
+                value={companyForm.website}
+                onChange={e => setCompanyForm(p => ({ ...p, website: e.target.value }))}
+                placeholder="https://company.com"
+              />
+            </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Phone</Label>
+              <Input
+                value={companyForm.phone}
+                onChange={e => setCompanyForm(p => ({ ...p, phone: e.target.value }))}
+                placeholder="+1 555 000 0000"
+              />
+            </div>
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Address</Label>
+              <Input
+                value={companyForm.address}
+                onChange={e => setCompanyForm(p => ({ ...p, address: e.target.value }))}
+                placeholder="123 Main St, City, State"
+              />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <Label style={{ fontSize: 12, marginBottom: 8, display: "block" }}>Company Logo</Label>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  style={{ gap: 6 }}
+                  onClick={() => logoFileInput.current?.click()}
+                >
+                  <Upload style={{ width: 13, height: 13 }} />
+                  Upload Logo (JPG / PNG)
+                </Button>
+                <input
+                  ref={logoFileInput}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  style={{ display: "none" }}
+                  onChange={handleLogoFileUpload}
+                />
+                {companyForm.companyLogoUrl && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <img
+                      src={companyForm.companyLogoUrl}
+                      alt="Company logo preview"
+                      style={{ height: 36, maxWidth: 120, objectFit: "contain", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 2, background: "#fff" }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setCompanyForm(p => ({ ...p, companyLogoUrl: "" }))}
+                      style={{ padding: "2px 6px" }}
+                    >
+                      <Trash2 style={{ width: 12, height: 12 }} />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+            <Button onClick={saveCompany} disabled={savingCompany} size="sm">
+              {savingCompany ? "Saving…" : "Save Company Info"}
+            </Button>
+          </div>
+        </SectionCard>
+
+        {/* 2. Signature */}
+        <SectionCard title="Digital Signature" icon={Pen}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            <Button
+              size="sm"
+              variant={signatureMode === "canvas" ? "default" : "outline"}
+              onClick={() => setSignatureMode("canvas")}
+              style={{ gap: 4, fontSize: 12 }}
+            >
+              <Pen style={{ width: 12, height: 12 }} />
+              Draw
+            </Button>
+            <Button
+              size="sm"
+              variant={signatureMode === "upload" ? "default" : "outline"}
+              onClick={() => setSignatureMode("upload")}
+              style={{ gap: 4, fontSize: 12 }}
+            >
+              <Upload style={{ width: 12, height: 12 }} />
+              Upload Image
+            </Button>
+          </div>
+
+          {signatureMode === "canvas" ? (
+            <>
+              <div style={{ border: "1px dashed hsl(var(--border))", borderRadius: 8, overflow: "hidden", background: "#fff", marginBottom: 10 }}>
+                <canvas
+                  ref={canvasRef}
+                  width={680}
+                  height={140}
+                  style={{ width: "100%", height: 140, cursor: "crosshair", display: "block", touchAction: "none" }}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Button size="sm" variant="outline" onClick={clearSignature} style={{ gap: 4, fontSize: 12 }}>
+                  <Trash2 style={{ width: 12, height: 12 }} />
+                  Clear
+                </Button>
+                <Button size="sm" onClick={saveSignature} disabled={!hasSignature || savingSignature} style={{ gap: 4, fontSize: 12 }}>
+                  {savingSignature ? "Saving…" : "Save Signature"}
+                </Button>
+              </div>
+            </>
           ) : (
-            <div style={{ textAlign: "center", padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
-              Loading performance data…
+            <div>
+              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Signature Image URL</Label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Input
+                  placeholder="https://..."
+                  defaultValue={profile?.signatureUrl?.startsWith("data:") ? "" : (profile?.signatureUrl || "")}
+                  onBlur={async e => {
+                    const url = e.target.value.trim();
+                    if (!url) return;
+                    setSavingSignature(true);
+                    try {
+                      const res = await fetch(`${API_BASE}/api/v1/users/me`, {
+                        method: "PATCH",
+                        headers: authHeaders,
+                        body: JSON.stringify({ signatureUrl: url }),
+                      });
+                      if (!res.ok) throw new Error((await res.json()).error);
+                      setProfile(prev => prev ? { ...prev, signatureUrl: url } : prev);
+                      toast({ title: "Signature URL saved" });
+                    } catch {
+                      toast({ title: "Failed to save signature URL", variant: "destructive" });
+                    } finally {
+                      setSavingSignature(false);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {profile?.signatureUrl && (
+            <div style={{ marginTop: 14 }}>
+              <Label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 4, display: "block" }}>Current signature on file</Label>
+              <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, background: "#fff", display: "inline-block" }}>
+                <img src={profile.signatureUrl} alt="Signature" style={{ height: 48, maxWidth: 280, objectFit: "contain" }} />
+              </div>
             </div>
           )}
         </SectionCard>
@@ -740,254 +939,82 @@ export function Profile() {
           )}
         </SectionCard>
 
-        {/* 2. Personal Info */}
-        <SectionCard title="Personal Information" icon={User}>
-          {/* Avatar upload */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-            <div
-              onClick={() => avatarFileInput.current?.click()}
-              style={{
-                width: 72, height: 72, borderRadius: "50%", cursor: "pointer", position: "relative",
-                background: profile?.avatarUrl
-                  ? `url(${profile.avatarUrl}) center/cover no-repeat`
-                  : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.7))",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 28, fontWeight: 700, color: "white", flexShrink: 0,
-                border: "2px dashed hsl(var(--border))",
-              }}
-              title="Click to upload profile photo"
-            >
-              {!profile?.avatarUrl && (profile?.fullName?.charAt(0).toUpperCase() || <Camera style={{ width: 24, height: 24 }} />)}
-              <div style={{
-                position: "absolute", inset: 0, borderRadius: "50%",
-                background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center",
-                opacity: 0, transition: "opacity 0.15s",
-              }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0")}
-              >
-                <Camera style={{ width: 20, height: 20, color: "white" }} />
-              </div>
-            </div>
-            <input
-              ref={avatarFileInput}
-              type="file"
-              accept="image/jpeg,image/png"
-              style={{ display: "none" }}
-              onChange={handleAvatarFileUpload}
-            />
+        {/* 1. Performance Score */}
+        <SectionCard title="Performance Score" icon={Zap}>
+          {perfScore ? (
             <div>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>Profile Photo</div>
-              <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Click the avatar to upload a JPG or PNG photo</div>
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Full Name</Label>
-              <Input
-                value={personalForm.fullName}
-                onChange={e => setPersonalForm(p => ({ ...p, fullName: e.target.value }))}
-                placeholder="Your full name"
-              />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Email</Label>
-              <Input value={profile?.email || ""} disabled style={{ opacity: 0.6 }} />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Job Title</Label>
-              <Input
-                value={personalForm.jobTitle}
-                onChange={e => setPersonalForm(p => ({ ...p, jobTitle: e.target.value }))}
-                placeholder="e.g. BIM Manager"
-              />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Phone</Label>
-              <Input
-                value={personalForm.phone}
-                onChange={e => setPersonalForm(p => ({ ...p, phone: e.target.value }))}
-                placeholder="+1 555 000 0000"
-              />
-            </div>
-          </div>
-          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={savePersonal} disabled={savingPersonal} size="sm">
-              {savingPersonal ? "Saving…" : "Save Changes"}
-            </Button>
-          </div>
-        </SectionCard>
-
-        {/* 2. Signature */}
-        <SectionCard title="Digital Signature" icon={Pen}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-            <Button
-              size="sm"
-              variant={signatureMode === "canvas" ? "default" : "outline"}
-              onClick={() => setSignatureMode("canvas")}
-              style={{ gap: 4, fontSize: 12 }}
-            >
-              <Pen style={{ width: 12, height: 12 }} />
-              Draw
-            </Button>
-            <Button
-              size="sm"
-              variant={signatureMode === "upload" ? "default" : "outline"}
-              onClick={() => setSignatureMode("upload")}
-              style={{ gap: 4, fontSize: 12 }}
-            >
-              <Upload style={{ width: 12, height: 12 }} />
-              Upload Image
-            </Button>
-          </div>
-
-          {signatureMode === "canvas" ? (
-            <>
-              <div style={{ border: "1px dashed hsl(var(--border))", borderRadius: 8, overflow: "hidden", background: "#fff", marginBottom: 10 }}>
-                <canvas
-                  ref={canvasRef}
-                  width={680}
-                  height={140}
-                  style={{ width: "100%", height: 140, cursor: "crosshair", display: "block", touchAction: "none" }}
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDrawing}
-                />
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Button size="sm" variant="outline" onClick={clearSignature} style={{ gap: 4, fontSize: 12 }}>
-                  <Trash2 style={{ width: 12, height: 12 }} />
-                  Clear
-                </Button>
-                <Button size="sm" onClick={saveSignature} disabled={!hasSignature || savingSignature} style={{ gap: 4, fontSize: 12 }}>
-                  {savingSignature ? "Saving…" : "Save Signature"}
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Signature Image URL</Label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Input
-                  placeholder="https://..."
-                  defaultValue={profile?.signatureUrl?.startsWith("data:") ? "" : (profile?.signatureUrl || "")}
-                  onBlur={async e => {
-                    const url = e.target.value.trim();
-                    if (!url) return;
-                    setSavingSignature(true);
-                    try {
-                      const res = await fetch(`${API_BASE}/api/v1/users/me`, {
-                        method: "PATCH",
-                        headers: authHeaders,
-                        body: JSON.stringify({ signatureUrl: url }),
-                      });
-                      if (!res.ok) throw new Error((await res.json()).error);
-                      setProfile(prev => prev ? { ...prev, signatureUrl: url } : prev);
-                      toast({ title: "Signature URL saved" });
-                    } catch {
-                      toast({ title: "Failed to save signature URL", variant: "destructive" });
-                    } finally {
-                      setSavingSignature(false);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {profile?.signatureUrl && (
-            <div style={{ marginTop: 14 }}>
-              <Label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 4, display: "block" }}>Current signature on file</Label>
-              <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, background: "#fff", display: "inline-block" }}>
-                <img src={profile.signatureUrl} alt="Signature" style={{ height: 48, maxWidth: 280, objectFit: "contain" }} />
-              </div>
-            </div>
-          )}
-        </SectionCard>
-
-        {/* 3. Company Info */}
-        <SectionCard title="Company Information" icon={Building2}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Company Name</Label>
-              <Input
-                value={companyForm.name}
-                onChange={e => setCompanyForm(p => ({ ...p, name: e.target.value }))}
-                placeholder="Company name"
-              />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Website</Label>
-              <Input
-                value={companyForm.website}
-                onChange={e => setCompanyForm(p => ({ ...p, website: e.target.value }))}
-                placeholder="https://company.com"
-              />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Phone</Label>
-              <Input
-                value={companyForm.phone}
-                onChange={e => setCompanyForm(p => ({ ...p, phone: e.target.value }))}
-                placeholder="+1 555 000 0000"
-              />
-            </div>
-            <div>
-              <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Address</Label>
-              <Input
-                value={companyForm.address}
-                onChange={e => setCompanyForm(p => ({ ...p, address: e.target.value }))}
-                placeholder="123 Main St, City, State"
-              />
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <Label style={{ fontSize: 12, marginBottom: 8, display: "block" }}>Company Logo</Label>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  style={{ gap: 6 }}
-                  onClick={() => logoFileInput.current?.click()}
-                >
-                  <Upload style={{ width: 13, height: 13 }} />
-                  Upload Logo (JPG / PNG)
-                </Button>
-                <input
-                  ref={logoFileInput}
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  style={{ display: "none" }}
-                  onChange={handleLogoFileUpload}
-                />
-                {companyForm.companyLogoUrl && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <img
-                      src={companyForm.companyLogoUrl}
-                      alt="Company logo preview"
-                      style={{ height: 36, maxWidth: 120, objectFit: "contain", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 2, background: "#fff" }}
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setCompanyForm(p => ({ ...p, companyLogoUrl: "" }))}
-                      style={{ padding: "2px 6px" }}
-                    >
-                      <Trash2 style={{ width: 12, height: 12 }} />
-                    </Button>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  border: `4px solid ${scoreColor}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: scoreColor }}>
+                    {perfScore.overallScore !== null ? perfScore.overallScore : "—"}
+                  </span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>
+                    {perfScore.overallScore === null ? "No data yet" :
+                     perfScore.overallScore >= 80 ? "Excellent Performance" :
+                     perfScore.overallScore >= 60 ? "Good Performance" : "Needs Improvement"}
                   </div>
-                )}
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                    Based on your activity across projects
+                  </div>
+                </div>
               </div>
+              <ScoreBar
+                label="Naming Compliance"
+                rate={perfScore.namingCompliance.rate}
+                detail={`${perfScore.namingCompliance.passed} of ${perfScore.namingCompliance.total} files passed validation`}
+              />
+              <ScoreBar
+                label="RFI Close Rate"
+                rate={perfScore.rfiCloseRate.rate}
+                detail={`${perfScore.rfiCloseRate.closed} of ${perfScore.rfiCloseRate.total} RFIs closed`}
+              />
+              <ScoreBar
+                label="Submittal Approval Rate"
+                rate={perfScore.submittalsApprovalRate.rate}
+                detail={`${perfScore.submittalsApprovalRate.approved} of ${perfScore.submittalsApprovalRate.total} submittals approved`}
+              />
             </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
+              Loading performance data…
+            </div>
+          )}
+        </SectionCard>
+
+        {/* 6. Notification Preferences */}
+        <SectionCard title="Notification Preferences" icon={Bell}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              { key: "emailRfiAssigned", label: "Email when RFI is assigned to me" },
+              { key: "emailSubmittalAssigned", label: "Email when submittal is assigned to me" },
+              { key: "emailMentioned", label: "Email when I am mentioned" },
+              { key: "emailWeeklyDigest", label: "Weekly email digest" },
+              { key: "inAppRfiUpdates", label: "In-app notifications for RFI updates" },
+              { key: "inAppSubmittalUpdates", label: "In-app notifications for submittal updates" },
+            ].map(({ key, label }) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Label style={{ fontSize: 13, cursor: "pointer" }}>{label}</Label>
+                <Switch
+                  checked={!!prefs[key]}
+                  onCheckedChange={v => setPrefs(p => ({ ...p, [key]: v }))}
+                />
+              </div>
+            ))}
           </div>
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={saveCompany} disabled={savingCompany} size="sm">
-              {savingCompany ? "Saving…" : "Save Company Info"}
+            <Button onClick={saveNotificationPrefs} disabled={savingPrefs} size="sm" variant="outline">
+              {savingPrefs ? "Saving…" : "Save Preferences"}
             </Button>
           </div>
         </SectionCard>
@@ -1037,33 +1064,6 @@ export function Profile() {
               variant="destructive"
             >
               {savingPassword ? "Updating…" : "Update Password"}
-            </Button>
-          </div>
-        </SectionCard>
-
-        {/* 6. Notification Preferences */}
-        <SectionCard title="Notification Preferences" icon={Bell}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {[
-              { key: "emailRfiAssigned", label: "Email when RFI is assigned to me" },
-              { key: "emailSubmittalAssigned", label: "Email when submittal is assigned to me" },
-              { key: "emailMentioned", label: "Email when I am mentioned" },
-              { key: "emailWeeklyDigest", label: "Weekly email digest" },
-              { key: "inAppRfiUpdates", label: "In-app notifications for RFI updates" },
-              { key: "inAppSubmittalUpdates", label: "In-app notifications for submittal updates" },
-            ].map(({ key, label }) => (
-              <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Label style={{ fontSize: 13, cursor: "pointer" }}>{label}</Label>
-                <Switch
-                  checked={!!prefs[key]}
-                  onCheckedChange={v => setPrefs(p => ({ ...p, [key]: v }))}
-                />
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={saveNotificationPrefs} disabled={savingPrefs} size="sm" variant="outline">
-              {savingPrefs ? "Saving…" : "Save Preferences"}
             </Button>
           </div>
         </SectionCard>
@@ -1118,7 +1118,7 @@ export function Profile() {
           )}
         </SectionCard>
 
-      </div>
+            </div>
     </div>
   );
 }
