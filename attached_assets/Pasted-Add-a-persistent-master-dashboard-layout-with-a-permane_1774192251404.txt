@@ -1,0 +1,16 @@
+Add a persistent master dashboard layout with a permanent sidebar. Do not change any existing project pages, routes, or functionality. Only add the new master layout around the existing dashboard page.
+Step 1 --- Create a new master sidebar component at artifacts/bimlog/src/components/layout/MasterSidebar.tsx. This sidebar is shown on the main dashboard page only --- not inside project pages which already have their own sidebar. The master sidebar has this structure:
+Top --- BIMLog logo and "by IgniteSmart" text, same style as the project sidebar logo.
+Navigation section with these items: Dashboard linking to /dashboard, Projects linking to /dashboard scrolling to project list, Profile linking to /profile. If the logged in user is super admin also show Admin linking to /admin.
+Bottom --- user avatar circle with initial or photo, user full name, company name, Profile link.
+Style it identically to the existing project sidebar --- same dark background color, same width, same font sizes, same hover states. Use the existing CSS variables and classes already defined in index.css for the sidebar.
+Step 2 --- Update the Dashboard page at artifacts/bimlog/src/pages/Dashboard.tsx. Wrap the existing content in a two-column layout --- master sidebar on the left, main content on the right. The main content area keeps everything exactly as it is now --- the Your Projects heading, the stat cards, the project grid, the New Project button. Do not change any of the existing dashboard content or functionality.
+Add a new platform stats bar above the existing content showing these 4 numbers calculated from real data: Total Projects count, Total Files across all projects, Open RFIs across all projects, Overall Compliance Rate as percentage of valid files across all projects. Fetch these from existing API endpoints --- GET /api/v1/projects for project list, then aggregate file and RFI counts from the project data already returned. Show them as 4 clean stat cards matching the style of the project-level stat cards.
+Step 3 --- Make sure the existing Navbar on the dashboard page does not conflict with the new sidebar. If the Navbar currently shows on the dashboard --- hide it on the dashboard route only since the master sidebar replaces its functionality. On all other public pages --- landing, pricing, about, contact, legal pages --- keep the Navbar exactly as it is.
+Step 4 --- Do not touch any project pages, project sidebar, project routes, RFIs, Submittals, Files, or any other existing functionality. Only the Dashboard page gets the new master sidebar wrapper.
+Then run TypeScript check on the frontend only. Then rebuild and redeploy. Show exact output of these checks:
+Check 1 --- MasterSidebar component exists: find artifacts/bimlog/src/components/layout -name "MasterSidebar.tsx"
+Check 2 --- Dashboard uses MasterSidebar: grep -n "MasterSidebar" artifacts/bimlog/src/pages/Dashboard.tsx | head -5
+Check 3 --- Platform stats fetched from real data: grep -n "totalProjects|totalFiles|openRfis|compliance|aggregate" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+Check 4 --- No existing project files were modified: git diff --name-only | grep -v "Dashboard.tsx|MasterSidebar.tsx"
+Show exact output of all 4 checks. Nothing else.
