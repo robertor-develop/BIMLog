@@ -5,30 +5,34 @@ import { useAuthStore } from "@/store/auth";
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export function MasterSidebar() {
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, setAuth } = useAuthStore();
   const [, setLocation] = useLocation();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
 
-  const isSuperAdminFromStore = (user as any)?.isSuperAdmin === true;
+  // Read isSuperAdmin directly from persisted user — set immediately, no flash
+  const isSuperAdmin = (user as any)?.isSuperAdmin === true;
 
   useEffect(() => {
-    if (!user || !token) { setIsSuperAdmin(false); setAvatarUrl(null); setCompanyName(""); return; }
-    if ((user as any)?.isSuperAdmin) setIsSuperAdmin(true);
+    if (!user || !token) return;
     fetch(`${API_BASE}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.isSuperAdmin) setIsSuperAdmin(true);
-        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl);
-        if (data?.companyName) setCompanyName(data.companyName);
+        if (!data) return;
+        // If the stored user is missing isSuperAdmin (old session), fix it now
+        // by writing the fresh value back into the persisted auth store.
+        if (data.isSuperAdmin && !(user as any).isSuperAdmin) {
+          setAuth(token, { ...user, isSuperAdmin: true } as any);
+        }
+        if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
+        if (data.companyName) setCompanyName(data.companyName);
       })
       .catch(() => {});
   }, [user?.id, token]);
 
-  const showAdmin = isSuperAdmin || isSuperAdminFromStore;
+  const showAdmin = isSuperAdmin;
 
   return (
     <div className="sidebar">
@@ -41,14 +45,14 @@ export function MasterSidebar() {
         </div>
       </div>
 
-      {/* Middle nav — spacer only */}
+      {/* Middle nav — spacer */}
       <div className="sidebar-nav" style={{ flex: 1 }} />
 
       {/* Bottom section */}
       {user && (
         <div style={{ padding: "0 0 8px" }}>
 
-          {/* Admin links — sit directly above the divider */}
+          {/* Admin links — right above the divider/profile */}
           {showAdmin && (
             <div style={{ padding: "0 14px 8px" }}>
               <button
