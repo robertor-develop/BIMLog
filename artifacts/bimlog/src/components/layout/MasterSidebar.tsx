@@ -11,10 +11,13 @@ export function MasterSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
 
-  const isAdmin = (user as any)?.role === "project_admin" || (user as any)?.isAdmin;
+  // Read isSuperAdmin from the auth store directly (present since login response includes it)
+  const isSuperAdminFromStore = (user as any)?.isSuperAdmin === true;
 
   useEffect(() => {
     if (!user || !token) { setIsSuperAdmin(false); setAvatarUrl(null); setCompanyName(""); return; }
+    // Seed immediately from what the auth store already has
+    if ((user as any)?.isSuperAdmin) setIsSuperAdmin(true);
     fetch(`${API_BASE}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -40,7 +43,7 @@ export function MasterSidebar() {
 
       {/* Middle nav — admin links */}
       <div className="sidebar-nav" style={{ flex: 1 }}>
-        {(isAdmin || isSuperAdmin) && (
+        {(isSuperAdmin || isSuperAdminFromStore) && (
           <button
             className="sidebar-nav-item"
             style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -51,7 +54,7 @@ export function MasterSidebar() {
           </button>
         )}
 
-        {isSuperAdmin && (
+        {(isSuperAdmin || isSuperAdminFromStore) && (
           <button
             className="sidebar-nav-item"
             style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
