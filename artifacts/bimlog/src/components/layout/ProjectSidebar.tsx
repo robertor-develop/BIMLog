@@ -4,9 +4,8 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
-  Users, Settings2, Wand2, BarChart2, Puzzle
+  Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail
 } from "lucide-react";
-import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 
 interface SidebarProps {
   projectId: number;
@@ -30,12 +29,45 @@ const NAV_ITEMS = [
   { id: "integrations", label: "Integrations",                icon: Puzzle,        section: "Tools" },
 ];
 
-const SIDEBAR_INTEGRATIONS: (IntegrationInfo & { status: "live" | "sync" | "idle" })[] = [
-  { name: "Procore",    status: "live", logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC" },
-  { name: "OneDrive",  status: "live", logoBg: "#E0F2FE", logoColor: "#0067B8", logoText: "OD" },
-  { name: "Speckle",   status: "sync", logoBg: "#DCFCE7", logoColor: "#166534", logoText: "SP" },
-  { name: "MS Project",status: "idle", logoBg: "#FFF7ED", logoColor: "#C2410C", logoText: "MP" },
+const PLATFORM_ITEMS = [
+  { name: "Procore",       logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC" },
+  { name: "Autodesk ACC",  logoBg: "#FEF3C7", logoColor: "#92400E", logoText: "AD" },
+  { name: "OneDrive",      logoBg: "#EFF6FF", logoColor: "#0067B8", logoText: "OD" },
 ];
+
+function SidebarModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(0,0,0,0.45)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "white", borderRadius: 12, padding: "28px 28px 24px",
+          maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+          position: "relative",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute", top: 14, right: 14,
+            background: "none", border: "none", cursor: "pointer",
+            color: "#6B7280", padding: 4, borderRadius: 4,
+          }}
+        >
+          <X style={{ width: 16, height: 16 }} />
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export function ProjectSidebar({
   projectId, projectCode, projectName, projectDesc,
@@ -44,7 +76,9 @@ export function ProjectSidebar({
   const { t } = useI18n();
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
-  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
+  const [showSyncAgent, setShowSyncAgent] = useState(false);
+  const [showManaged, setShowManaged] = useState(false);
+  const [showOAuth, setShowOAuth] = useState(false);
 
   const getLabel = (id: string, label: string) => {
     try { return t(label as Parameters<typeof t>[0]); } catch { return label; }
@@ -53,15 +87,96 @@ export function ProjectSidebar({
   const sections = ["Project", "Tools"];
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
 
+  const sidebarBtnStyle: React.CSSProperties = {
+    cursor: "pointer", background: "none", border: "none",
+    width: "100%", textAlign: "left",
+  };
+
   return (
     <>
-      {selectedIntegration && (
-        <ConnectModal
-          integration={selectedIntegration}
-          onClose={() => setSelectedIntegration(null)}
-          projectId={projectId}
-          onNavigate={navigate}
-        />
+      {showSyncAgent && (
+        <SidebarModal onClose={() => setShowSyncAgent(false)}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>BIMLog Sync Agent</div>
+            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+              BIMLog Sync Agent is available on <strong>Professional plans and up</strong>. Download the installer or upgrade your plan.
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <a
+              href="/api/v1/downloads/sync-agent-windows"
+              download="BIMLog Sync Agent Setup 1.0.0.exe"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 16px", borderRadius: 7,
+                background: "#1D4ED8", color: "white",
+                fontSize: 12, fontWeight: 600, textDecoration: "none",
+              }}
+            >
+              <Download style={{ width: 13, height: 13 }} />
+              Download for Windows
+            </a>
+            <a
+              href="mailto:info@ignitesmart.ai"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 16px", borderRadius: 7,
+                border: "1.5px solid #E2E8F0",
+                color: "#374151", fontSize: 12, fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <Mail style={{ width: 13, height: 13 }} />
+              Contact Us
+            </a>
+          </div>
+        </SidebarModal>
+      )}
+
+      {showManaged && (
+        <SidebarModal onClose={() => setShowManaged(false)}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>Managed Connection</div>
+            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+              Managed Connection is available on <strong>Team plans and up</strong>. Our team logs in on your behalf and configures everything. Contact us to get started.
+            </div>
+          </div>
+          <a
+            href="mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 16px", borderRadius: 7,
+              background: "#1D4ED8", color: "white",
+              fontSize: 12, fontWeight: 600, textDecoration: "none",
+            }}
+          >
+            <Mail style={{ width: 13, height: 13 }} />
+            Get Started
+          </a>
+        </SidebarModal>
+      )}
+
+      {showOAuth && (
+        <SidebarModal onClose={() => setShowOAuth(false)}>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>OAuth Connection</div>
+            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+              OAuth Connection is available on <strong>Business plans and up</strong>. Secure token-based direct integration. No API tokens to manage.
+            </div>
+          </div>
+          <a
+            href="mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 16px", borderRadius: 7,
+              background: "#1D4ED8", color: "white",
+              fontSize: 12, fontWeight: 600, textDecoration: "none",
+            }}
+          >
+            <Mail style={{ width: 13, height: 13 }} />
+            Contact Us
+          </a>
+        </SidebarModal>
       )}
 
       <div className="sidebar">
@@ -122,18 +237,76 @@ export function ProjectSidebar({
             );
           })}
 
-          {/* Integration status — clickable */}
+          {/* INTEGRATIONS section */}
           <span className="sidebar-section-label" style={{ marginTop: 8 }}>Integrations</span>
-          {SIDEBAR_INTEGRATIONS.map(int => (
+
+          {/* Item 1: Validate and Download */}
+          <button
+            className="sidebar-nav-item"
+            style={sidebarBtnStyle}
+            onClick={() => navigate(`/projects/${projectId}/files`)}
+          >
+            <div className="nav-dot" />
+            Validate and Download
+          </button>
+
+          {/* Item 2: BIMLog Sync Agent */}
+          <button
+            className="sidebar-nav-item"
+            style={sidebarBtnStyle}
+            onClick={() => setShowSyncAgent(true)}
+          >
+            <div className="nav-dot" />
+            BIMLog Sync Agent
+          </button>
+
+          {/* Item 3: Managed Connection */}
+          <button
+            className="sidebar-nav-item"
+            style={sidebarBtnStyle}
+            onClick={() => setShowManaged(true)}
+          >
+            <div className="nav-dot" />
+            Managed Connection
+          </button>
+
+          {/* Item 4: OAuth Connection */}
+          <button
+            className="sidebar-nav-item"
+            style={sidebarBtnStyle}
+            onClick={() => setShowOAuth(true)}
+          >
+            <div className="nav-dot" />
+            OAuth Connection
+          </button>
+
+          {/* Item 5: API Platform Integrations — sub-header */}
+          <div style={{
+            paddingLeft: 20, paddingTop: 10, paddingBottom: 4,
+            fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+            letterSpacing: "0.07em", color: "rgba(255,255,255,0.3)",
+          }}>
+            API Platform Integrations
+          </div>
+
+          {/* Items 6–8: Procore, Autodesk ACC, OneDrive */}
+          {PLATFORM_ITEMS.map(p => (
             <button
-              key={int.name}
+              key={p.name}
               className="sidebar-nav-item"
-              onClick={() => setSelectedIntegration(int)}
-              style={{ cursor: "pointer", background: "none", border: "none", width: "100%", textAlign: "left" }}
+              style={{ ...sidebarBtnStyle, paddingLeft: 24 }}
+              onClick={() => navigate(`/projects/${projectId}/integrations`)}
             >
               <div className="nav-dot" />
-              <span style={{ flex: 1 }}>{int.name}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "hsl(var(--primary))", opacity: 0.8 }}>Connect</span>
+              <span style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 18, height: 18, borderRadius: 3, flexShrink: 0,
+                background: p.logoBg, color: p.logoColor,
+                fontSize: 7, fontWeight: 800, fontFamily: "var(--font-mono)",
+              }}>
+                {p.logoText}
+              </span>
+              {p.name}
             </button>
           ))}
         </div>

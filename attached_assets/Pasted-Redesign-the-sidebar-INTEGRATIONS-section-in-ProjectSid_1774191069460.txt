@@ -1,0 +1,13 @@
+Redesign the sidebar INTEGRATIONS section in ProjectSidebar.tsx. Do not change anything else.
+Replace the current sidebar integrations section with this exact structure:
+Section header: INTEGRATIONS --- same style as current section headers.
+Item 1 --- Validate and Download. When clicked navigate to the files tab for this project using setLocation to /projects/:projectId/files. No plan check needed --- available to everyone.
+Item 2 --- BIMLog Sync Agent. When clicked check the user's plan from the auth store. For now since plan enforcement is not fully built --- show a modal that says "BIMLog Sync Agent is available on Professional plans and up. Download the installer or upgrade your plan." with a Download for Windows button that calls GET /api/v1/downloads/sync-agent-windows and a Contact Us button that opens mailto:info@ignitesmart.ai. Style the modal consistently with the rest of the app.
+Item 3 --- Managed Connection. When clicked show a modal that says "Managed Connection is available on Team plans and up. Our team logs in on your behalf and configures everything. Contact us to get started." with a Get Started button that opens mailto:info@ignitesmart.ai with subject "BIMLog Managed Connection Request".
+Item 4 --- OAuth Connection. When clicked show a modal that says "OAuth Connection is available on Business plans and up. Secure token-based direct integration. No API tokens to manage." with a Contact Us button that opens mailto:info@ignitesmart.ai with subject "BIMLog OAuth Connection Request".
+Item 5 --- API Platform Integrations. This is a sub-header, not clickable. Style it slightly smaller and grayed out compared to the items above, with a small indent.
+Items 6, 7, 8 --- indented under API Platform Integrations, show these 3 platforms with their logos or colored initials: Procore, Autodesk ACC, OneDrive. When any of them is clicked navigate to the integrations tab for this project using setLocation to /projects/:projectId/integrations. These are the entry points to the full integrations page with all 12 platforms.
+Style all sidebar items consistently with the existing sidebar navigation items --- same font size, same padding, same hover state, same left padding. The 3 platform items under API Platform Integrations should have slightly more left padding to show they are sub-items.
+Then rebuild and redeploy. Show exact output of this check:
+grep -n "Validate and Download|Sync Agent|Managed Connection|OAuth|API Platform|Procore|Autodesk|OneDrive" artifacts/bimlog/src/components/layout/ProjectSidebar.tsx | head -20
+Show exact output. Nothing else.
