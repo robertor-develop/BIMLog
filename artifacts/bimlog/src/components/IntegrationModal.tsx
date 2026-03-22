@@ -94,15 +94,15 @@ function SyncAgentScreen({ onBack }: { onBack: () => void }) {
       {[
         {
           num: 1,
-          title: "Download the BIMLog Sync Agent for Windows. Extract the ZIP and run BIMLog Sync Agent.exe.",
+          title: "Click Download for Windows and run the installer.",
           extra: (
             <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
               <a
                 href="/api/v1/downloads/sync-agent-windows"
-                download="BIMLog-Sync-Agent-Windows-Portable.zip"
+                download="BIMLog Sync Agent Setup 1.0.0.exe"
                 style={{ padding: "6px 14px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: "#2563EB", color: "#fff", border: "none", textDecoration: "none", display: "inline-block" }}
               >
-                ⬇ Windows Portable (ZIP)
+                ⬇ Download for Windows
               </a>
               <a
                 href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Mac%20Installer&body=Hello%2C%0A%0AI%20would%20like%20to%20receive%20the%20BIMLog%20Sync%20Agent%20installer%20for%20Mac."
@@ -113,9 +113,10 @@ function SyncAgentScreen({ onBack }: { onBack: () => void }) {
             </div>
           ),
         },
-        { num: 2, title: "Install the app and open it.", extra: null },
-        { num: 3, title: "Enter your BIMLog API token and select the folder you want to watch.", extra: null },
-        { num: 4, title: "Drop any file in the folder and BIMLog validates and routes it automatically.", extra: null },
+        { num: 2, title: "Open BIMLog Sync Agent from your Start menu.", extra: null },
+        { num: 3, title: "Enter your BIMLog API token from your Profile page.", extra: null },
+        { num: 4, title: "Select the folder you want to watch.", extra: null },
+        { num: 5, title: "Drop any file in that folder and BIMLog validates and routes it automatically.", extra: null },
       ].map(step => (
         <div key={step.num} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
           <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#F5F3FF", color: "#7C3AED", fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
