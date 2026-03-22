@@ -548,13 +548,17 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 router.post("/projects/:projectId/files/suggest-name", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
-    const { fileName, fileContent } = req.body as { fileName?: string; fileContent?: string };
+    const { fileName, fileContent, validationDetails } = req.body as {
+      fileName?: string;
+      fileContent?: string;
+      validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }>;
+    };
     if (!fileName || typeof fileName !== "string") {
       res.status(400).json({ error: "fileName is required" });
       return;
     }
 
-    // Extract text from PDF if content provided
+    // Extract text from PDF if content provided (Case A: new file)
     let extractedText = "";
     if (fileContent && fileName.toLowerCase().endsWith(".pdf")) {
       try {
@@ -608,9 +612,14 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       return parts.join(sep) + ext;
     };
 
+    // Case B: existing rejected file — include field-level violation details in prompt
+    const violationSection = (validationDetails && validationDetails.length > 0 && !extractedText)
+      ? `\n\nKnown naming violations:\n${validationDetails.map(d => `- ${d.field}: ${d.message}${d.expected && d.expected.length > 0 ? ` (allowed: ${d.expected.join(", ")})` : ""} — received: "${d.received}"`).join("\n")}`
+      : "";
+
     const contentSection = extractedText
       ? `\n\nExtracted file content (first 2000 chars):\n${extractedText}`
-      : "";
+      : violationSection;
 
     // Try AI suggestion, fall back to smart builder on any error
     try {
@@ -697,6 +706,7 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
         documentRelationshipDeclaredAt: new Date(),
         fileTypeTier: rejectedTier,
         source: "user-uploaded",
+        rejectionDetails: validation.details ?? [],
       }).returning();
 
       await db.insert(activityLogTable).values({

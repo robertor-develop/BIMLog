@@ -110,11 +110,6 @@ export function ProjectDetail() {
                 Help
               </button>
             </Link>
-            {canWrite && (
-              <Link href={`/projects/${projectId}/files`}>
-                <Button size="sm" style={{ fontSize: 12, height: 30, paddingLeft: 14, paddingRight: 14 }}>+ Upload File</Button>
-              </Link>
-            )}
           </div>
         </div>
 

@@ -3,9 +3,8 @@ import { useLocation } from "wouter";
 import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, X, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History } from "lucide-react";
 import { format } from "date-fns";
 
 interface ValidationDetail {
@@ -56,6 +55,7 @@ interface FileRow {
   source?: string | null;
   linkedRfiId?: number | null;
   contentVerificationResult?: string | null;
+  rejectionDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -92,12 +92,57 @@ function versionColor(v: number): string {
 
 export function FilesTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
   const { data: files, isLoading } = useListFiles(projectId);
-  const [showUpload, setShowUpload] = useState(false);
+  const { data: convention } = useGetConvention(projectId);
+  const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
+  const [rejAiLoading, setRejAiLoading] = useState<Set<number>>(new Set());
+  const [rejAiResults, setRejAiResults] = useState<Map<number, { name: string; reason: string }>>(new Map());
+  const [rejCopied, setRejCopied] = useState<number | null>(null);
 
   const toggleFamily = (rootId: number) =>
     setExpanded(prev => { const s = new Set(prev); s.has(rootId) ? s.delete(rootId) : s.add(rootId); return s; });
+
+  const toggleRejected = (fileId: number) =>
+    setExpandedRejected(prev => { const s = new Set(prev); s.has(fileId) ? s.delete(fileId) : s.add(fileId); return s; });
+
+  const suggestedNameFromConvention = (() => {
+    if (!convention || !convention.fields || !convention.isActive) return null;
+    const sorted = [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
+    const parts = sorted.map((f: any) => (f.allowedValues && f.allowedValues.length > 0 ? f.allowedValues[0] : "???"));
+    if (parts.length === 0) return null;
+    return parts.join(convention.separator);
+  })();
+
+  const handleCopyRej = (fileId: number, name: string) => {
+    navigator.clipboard.writeText(name).then(() => {
+      setRejCopied(fileId);
+      setTimeout(() => setRejCopied(null), 2000);
+    });
+  };
+
+  const handleAiSuggestExisting = async (fileId: number, fileName: string, validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null) => {
+    setRejAiLoading(prev => { const s = new Set(prev); s.add(fileId); return s; });
+    setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ fileName, validationDetails: validationDetails ?? [] }),
+      });
+      const data = await resp.json() as { suggestedName: string; reason: string };
+      if (data.suggestedName) {
+        setRejAiResults(prev => { const m = new Map(prev); m.set(fileId, { name: data.suggestedName, reason: data.reason || "" }); return m; });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setRejAiLoading(prev => { const s = new Set(prev); s.delete(fileId); return s; });
+    }
+  };
 
   const validCount    = files?.filter(f => f.status !== "rejected").length ?? 0;
   const rejectedCount = files?.filter(f => f.status === "rejected").length ?? 0;
@@ -118,12 +163,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
             {versionedCount > 0 && <> · <span style={{ color: "#7C3AED", fontWeight: 600 }}>{versionedCount} versioned</span></>}
           </div>
         </div>
-        {canWrite && !showUpload && (
-          <Button size="sm" onClick={() => setShowUpload(true)} style={{ gap: 6, fontSize: 12 }}>
-            <Upload style={{ width: 13, height: 13 }} />
-            {t("files.upload")}
-          </Button>
-        )}
       </div>
 
       {/* Inline compliance notice */}
@@ -140,8 +179,8 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       )}
 
       {/* Upload form */}
-      {showUpload && (
-        <UploadForm projectId={projectId} onClose={() => setShowUpload(false)} />
+      {showUpload && canWrite && (
+        <UploadForm projectId={projectId} onClose={() => {}} />
       )}
 
       {/* Loading */}
@@ -175,14 +214,21 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                   const isMulti = versions.length > 1;
                   const isExp = expanded.has(root.id);
                   const isRejected = latest.status === "rejected";
+                  const isRejExp = expandedRejected.has(root.id);
 
                   return (
                     <>
                       {/* ── Primary document row ── */}
                       <tr
                         key={`root-${root.id}`}
-                        style={{ cursor: isMulti ? "pointer" : "default", background: isExp ? "hsl(var(--secondary) / 0.4)" : undefined }}
-                        onClick={isMulti ? () => toggleFamily(root.id) : undefined}
+                        style={{
+                          cursor: (isMulti || isRejected) ? "pointer" : "default",
+                          background: isExp ? "hsl(var(--secondary) / 0.4)" : isRejExp ? "#FFF1F2" : undefined,
+                        }}
+                        onClick={() => {
+                          if (isRejected) toggleRejected(root.id);
+                          else if (isMulti) toggleFamily(root.id);
+                        }}
                       >
                         {/* Expand chevron */}
                         <td style={{ paddingRight: 0, width: 28, textAlign: "center" }}>
@@ -190,6 +236,10 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                             isExp
                               ? <ChevronDown style={{ width: 13, height: 13, color: "hsl(var(--muted-foreground))" }} />
                               : <ChevronRight style={{ width: 13, height: 13, color: "hsl(var(--muted-foreground))" }} />
+                          ) : isRejected ? (
+                            isRejExp
+                              ? <ChevronDown style={{ width: 13, height: 13, color: "#BE123C" }} />
+                              : <ChevronRight style={{ width: 13, height: 13, color: "#BE123C" }} />
                           ) : null}
                         </td>
 
@@ -304,6 +354,139 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                           </td>
                         )}
                       </tr>
+
+                      {/* ── Rejection accordion row ── */}
+                      {isRejected && isRejExp && (() => {
+                        const rejDetails = latest.rejectionDetails ?? [];
+                        const aiResult = rejAiResults.get(root.id);
+                        const isAiLoading = rejAiLoading.has(root.id);
+                        const colCount = canWrite ? 7 : 6;
+                        return (
+                          <tr key={`rej-${root.id}`}>
+                            <td colSpan={colCount} style={{ padding: 0 }}>
+                              <div style={{
+                                margin: "0 0 4px 0",
+                                padding: "16px 20px",
+                                background: "#FFF1F2",
+                                border: "1px solid #FECDD3",
+                                borderTop: "none",
+                              }}>
+                                {/* Full file name */}
+                                <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#9F1239", marginBottom: 12, wordBreak: "break-all", fontWeight: 600 }}>
+                                  {latest.fileName}
+                                </div>
+
+                                {/* Field-by-field breakdown */}
+                                {rejDetails.length > 0 && (
+                                  <div style={{ marginBottom: 14 }}>
+                                    <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                      Rejection reason
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                      {rejDetails.map((detail, i) => (
+                                        <div key={i} style={{ fontSize: 11, color: "#9F1239" }}>
+                                          <span style={{ fontWeight: 600 }}>{detail.field}:</span> {detail.message}
+                                          {detail.expected && detail.expected.length > 0 && (
+                                            <span style={{ marginLeft: 6 }}>
+                                              <span style={{ color: "#6B7280" }}>Allowed: </span>
+                                              {detail.expected.map(v => (
+                                                <span key={v} style={{
+                                                  fontFamily: "var(--font-mono)", fontSize: 10,
+                                                  background: "#FEE2E2", color: "#991B1B",
+                                                  border: "1px solid #FECDD3",
+                                                  padding: "1px 5px", borderRadius: 3,
+                                                  marginRight: 3, display: "inline-block"
+                                                }}>{v}</span>
+                                              ))}
+                                            </span>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Suggested Compliant Name + AI + Customize */}
+                                <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                  Suggested Compliant Name
+                                </div>
+                                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+                                  {suggestedNameFromConvention && (
+                                    <button
+                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, suggestedNameFromConvention); }}
+                                      style={{
+                                        display: "inline-flex", alignItems: "center", gap: 6,
+                                        padding: "6px 16px", borderRadius: 20,
+                                        border: `2px solid ${rejCopied === root.id ? "#86EFAC" : "#1D4ED8"}`,
+                                        background: rejCopied === root.id ? "#F0FDF4" : "#EFF6FF",
+                                        cursor: "pointer", fontFamily: "var(--font-mono)",
+                                        fontSize: 12, fontWeight: 700,
+                                        color: rejCopied === root.id ? "#15803D" : "#1D4ED8",
+                                        wordBreak: "break-all",
+                                      }}
+                                    >
+                                      {rejCopied === root.id
+                                        ? <><CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />Copied!</>
+                                        : <><Copy style={{ width: 11, height: 11, flexShrink: 0 }} />{suggestedNameFromConvention}</>
+                                      }
+                                    </button>
+                                  )}
+
+                                  {aiResult && (
+                                    <button
+                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name); }}
+                                      style={{
+                                        display: "inline-flex", alignItems: "center", gap: 6,
+                                        padding: "6px 16px", borderRadius: 20,
+                                        border: "2px solid #7C3AED",
+                                        background: "#F5F3FF",
+                                        cursor: "pointer", fontFamily: "var(--font-mono)",
+                                        fontSize: 12, fontWeight: 700, color: "#6D28D9",
+                                        wordBreak: "break-all",
+                                      }}
+                                    >
+                                      <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
+                                      {aiResult.name}
+                                    </button>
+                                  )}
+
+                                  <button
+                                    onClick={e => { e.stopPropagation(); handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails); }}
+                                    disabled={isAiLoading}
+                                    style={{
+                                      display: "inline-flex", alignItems: "center", gap: 5,
+                                      padding: "6px 13px", borderRadius: 6, border: "none",
+                                      background: isAiLoading ? "#A78BFA" : "#7C3AED",
+                                      cursor: isAiLoading ? "not-allowed" : "pointer",
+                                      fontSize: 11, fontWeight: 600, color: "white",
+                                    }}
+                                  >
+                                    <Sparkles style={{ width: 11, height: 11 }} />
+                                    {isAiLoading ? "Asking AI…" : "Ask AI"}
+                                  </button>
+
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setLocation(`/projects/${projectId}/generator`); }}
+                                    style={{
+                                      display: "inline-flex", alignItems: "center", gap: 5,
+                                      padding: "6px 13px", borderRadius: 6,
+                                      border: "1.5px solid #2563EB",
+                                      background: "transparent",
+                                      cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#2563EB",
+                                    }}
+                                  >
+                                    Customize Name
+                                  </button>
+                                </div>
+
+                                {aiResult?.reason && (
+                                  <div style={{ marginTop: 8, fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>{aiResult.reason}</div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })()}
 
                       {/* ── Version history rows (expanded) ── */}
                       {isExp && versions.map((ver, idx) => {
@@ -538,15 +721,6 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-        <button
-          onClick={onClose}
-          style={{ padding: 5, borderRadius: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}
-        >
-          <X style={{ width: 13, height: 13 }} />
-        </button>
-      </div>
-
       {/* Document Relationship Declaration */}
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
@@ -705,7 +879,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => setLocation(`/projects/${projectId}/name-generator`)}
+                onClick={() => setLocation(`/projects/${projectId}/generator`)}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,

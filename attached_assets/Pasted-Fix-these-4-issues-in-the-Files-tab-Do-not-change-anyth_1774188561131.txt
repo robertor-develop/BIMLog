@@ -1,0 +1,11 @@
+Fix these 4 issues in the Files tab. Do not change anything else.
+Fix 1 --- The rejected file row in the file list is not clickable. Make each file row expandable as an accordion. When clicked --- expand inline to show: full file name, rejection reason with field-by-field breakdown, Suggested Compliant Name blue chip with copy button, Ask AI purple button, and Customize Name button. Click again to collapse.
+Fix 2 --- Ask AI is not reading file content. Fix the suggest-name endpoint and frontend to handle two cases. Case A --- new file just dropped by the user: read the file bytes, send as base64 in the request body, the endpoint extracts text from PDF and uses it to suggest a better name based on actual content. Case B --- existing rejected file already in the list: send only the fileName and validationDetails, the endpoint uses those to suggest the best compliant name. In both cases use whatever AI provider is already configured and working in this project --- do not change or specify the AI provider, just use what is already there.
+Fix 3 --- Customize Name blanks the screen. The Name Generator renders blank when navigated to via setLocation. Fix the Name Generator page to read projectId from URL params using useParams or useRoute from wouter rather than from props so navigation works correctly.
+Fix 4 --- Remove the Upload File blue button from the top right corner of the Files tab header completely. The drag and drop zone is the only upload interface.
+Then run TypeScript check on both frontend and backend. Then rebuild and redeploy. Show exact output of these 4 checks:
+Check 1 --- accordion expand on file rows: grep -n "expand|accordion|isExpanded|toggleExpand" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -10
+Check 2 --- suggest-name handles both cases: grep -n "fileContent|validationDetails|Case A|Case B|fallback" artifacts/api-server/src/routes/files.ts | head -10
+Check 3 --- Name Generator reads projectId from URL: grep -n "useParams|useRoute|params|projectId" artifacts/bimlog/src/pages/project/NameGenerator.tsx | head -10
+Check 4 --- Upload File button removed: grep -n "Upload File|UploadFile" artifacts/bimlog/src/pages/project/FilesTab.tsx | head -5
+Show exact output of all 4 checks. Nothing else.

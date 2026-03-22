@@ -29,6 +29,7 @@ export const filesTable = pgTable("files", {
   contentVerificationResult: text("content_verification_result"),
   isSuperseded: boolean("is_superseded").default(false).notNull(),
   conventionVersion: text("convention_version"),
+  rejectionDetails: json("rejection_details").$type<Array<{ field: string; message: string; expected?: string[]; received: string }>>(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

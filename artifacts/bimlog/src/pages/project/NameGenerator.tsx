@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useRoute } from "wouter";
 import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -155,9 +156,19 @@ const CHIP_COLORS = [
 ];
 
 // ─── component ───────────────────────────────────────────────────────────────
-export function NameGenerator({ projectId, onGoToConvention }: { projectId: number; onGoToConvention?: () => void }) {
+export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { projectId?: number; onGoToConvention?: () => void }) {
   const { toast } = useToast();
   const { lang } = useI18n();
+
+  // Read projectId from URL params as fallback (supports direct navigation via setLocation)
+  const [matchGenerator, paramsGenerator] = useRoute("/projects/:id/generator");
+  const [matchTab, paramsTab] = useRoute("/projects/:id/:tab");
+  const urlProjectId = matchGenerator
+    ? parseInt(paramsGenerator!.id)
+    : matchTab
+      ? parseInt(paramsTab!.id)
+      : 0;
+  const projectId = projectIdProp ?? urlProjectId;
 
   const { data: convention, isLoading, isError } = useGetConvention(projectId);
 
