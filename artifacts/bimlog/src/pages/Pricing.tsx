@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, Check } from "lucide-react";
@@ -19,7 +20,7 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   "Everything in Free, plus:",
-  "Unlimited active projects",
+  "Up to 3 active projects",
   "Document Integrity System — SHA-256 cryptographic fingerprinting",
   "Mandatory declaration logging on every upload",
   "Duplicate content detection",
@@ -42,23 +43,29 @@ const PRO_FEATURES = [
   "Priority email support",
 ];
 
-const BUSINESS_FEATURES = [
+const TEAM_FEATURES = [
   "Everything in Professional, plus:",
+  "Up to 5 active projects",
+  "BIMLog Performance Score — company-level verified rating",
+  "Drawing Register",
+  "Change Order Log",
+  "Punch List and Snagging",
+  "Daily Reports",
+];
+
+const BUSINESS_FEATURES = [
+  "Everything in Team, plus:",
+  "Up to 10 active projects",
   "Unlimited team members",
   "Transmittal Manager",
   "Meeting Minutes and Action Items tracker",
   "AI Report Assistant — natural language queries across all project data",
   "Coordination Accountability Report",
   "Discipline Performance Report",
-  "BIMLog Performance Score — company-level verified rating",
   "Compliance Badge — verifiable digital award on project completion",
   "Direct platform integrations — Procore, Autodesk ACC, OneDrive, SharePoint",
   "MS Project schedule import",
   "Delay Attribution reporting",
-  "Drawing Register",
-  "Change Order Log",
-  "Punch List and Snagging",
-  "Daily Reports",
   "PowerBI connector",
   "Dedicated onboarding support",
   "Phone and email support",
@@ -67,6 +74,7 @@ const BUSINESS_FEATURES = [
 
 const ENTERPRISE_FEATURES = [
   "Everything in Business, plus:",
+  "Unlimited active projects",
   "White-label option — your logo and branding",
   "Custom report templates tailored to your requirements",
   "BIMLog Sync Agent — enterprise folder watching and automatic validation",
@@ -111,22 +119,28 @@ const FAQS = [
 interface TierCardProps {
   name: string;
   subtitle: string;
-  price: string;
+  monthlyPrice: string;
+  annualPrice?: string;
+  annualNote?: string;
   priceNote?: string;
   features: string[];
   ctaLabel: string;
   ctaHref: string;
   highlight?: boolean;
+  annual: boolean;
 }
 
-function TierCard({ name, subtitle, price, priceNote, features, ctaLabel, ctaHref, highlight }: TierCardProps) {
+function TierCard({ name, subtitle, monthlyPrice, annualPrice, annualNote, priceNote, features, ctaLabel, ctaHref, highlight, annual }: TierCardProps) {
+  const displayPrice = annual && annualPrice ? annualPrice : monthlyPrice;
+  const displayNote = annual && annualNote ? annualNote : priceNote;
+
   return (
     <div style={{
-      flex: 1, minWidth: 240,
+      flex: 1, minWidth: 220,
       background: highlight ? "hsl(var(--primary))" : "hsl(var(--card))",
       border: highlight ? "2px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
       borderRadius: 14,
-      padding: "28px 24px",
+      padding: "28px 22px",
       display: "flex", flexDirection: "column",
       position: "relative",
     }}>
@@ -137,9 +151,11 @@ function TierCard({ name, subtitle, price, priceNote, features, ctaLabel, ctaHre
       )}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: highlight ? "rgba(255,255,255,0.7)" : "hsl(var(--primary))", marginBottom: 6 }}>{name}</div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: highlight ? "white" : "hsl(var(--foreground))", marginBottom: 8 }}>{subtitle}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: highlight ? "white" : "hsl(var(--foreground))" }}>{price}</div>
-        {priceNote && <div style={{ fontSize: 12, color: highlight ? "rgba(255,255,255,0.65)" : "hsl(var(--muted-foreground))", marginTop: 2 }}>{priceNote}</div>}
+        <div style={{ fontSize: 14, fontWeight: 600, color: highlight ? "rgba(255,255,255,0.85)" : "hsl(var(--foreground))", marginBottom: 10, lineHeight: 1.4 }}>{subtitle}</div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: highlight ? "white" : "hsl(var(--foreground))" }}>{displayPrice}</div>
+        {displayNote && (
+          <div style={{ fontSize: 12, color: highlight ? "rgba(255,255,255,0.65)" : "hsl(var(--muted-foreground))", marginTop: 4 }}>{displayNote}</div>
+        )}
       </div>
 
       <div style={{ flex: 1, marginBottom: 24 }}>
@@ -149,7 +165,7 @@ function TierCard({ name, subtitle, price, priceNote, features, ctaLabel, ctaHre
               <span style={{ fontSize: 12, fontWeight: 700, color: highlight ? "rgba(255,255,255,0.6)" : "hsl(var(--muted-foreground))", marginTop: 4, display: "block" }}>{f}</span>
             ) : (
               <>
-                <Check style={{ width: 14, height: 14, flexShrink: 0, marginTop: 2, color: highlight ? "rgba(255,255,255,0.9)" : "#22c55e" }} />
+                <Check style={{ width: 13, height: 13, flexShrink: 0, marginTop: 2, color: highlight ? "rgba(255,255,255,0.9)" : "#22c55e" }} />
                 <span style={{ fontSize: 13, color: highlight ? "rgba(255,255,255,0.85)" : "hsl(var(--foreground))", lineHeight: 1.5 }}>{f}</span>
               </>
             )}
@@ -160,8 +176,8 @@ function TierCard({ name, subtitle, price, priceNote, features, ctaLabel, ctaHre
       <a
         href={ctaHref}
         style={{
-          display: "block", textAlign: "center", padding: "11px 20px",
-          borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none",
+          display: "block", textAlign: "center", padding: "11px 16px",
+          borderRadius: 8, fontWeight: 700, fontSize: 13, textDecoration: "none",
           background: highlight ? "white" : "hsl(var(--primary))",
           color: highlight ? "hsl(var(--primary))" : "white",
           transition: "opacity 0.15s",
@@ -176,63 +192,169 @@ function TierCard({ name, subtitle, price, priceNote, features, ctaLabel, ctaHre
 }
 
 export function Pricing() {
+  const [annual, setAnnual] = useState(false);
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "40px 24px", flex: 1, width: "100%" }}>
+      <div style={{ maxWidth: 1240, margin: "0 auto", padding: "40px 24px", flex: 1, width: "100%" }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 40 }}>
           <ChevronLeft style={{ width: 14, height: 14 }} />
           Back to home
         </Link>
 
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ marginBottom: 12 }}>
             <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)", padding: "3px 10px", borderRadius: 4 }}>Pricing</span>
           </div>
           <h1 style={{ fontSize: 36, fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: 14, fontFamily: "var(--font-display)" }}>
             Simple, transparent pricing that scales with your projects
           </h1>
-          <p style={{ fontSize: 16, color: "hsl(var(--muted-foreground))", maxWidth: 560, margin: "0 auto" }}>
+          <p style={{ fontSize: 16, color: "hsl(var(--muted-foreground))", maxWidth: 560, margin: "0 auto 28px" }}>
             Start free. Upgrade when you are ready. No credit card required to get started.
           </p>
+
+          {/* Monthly / Annual Toggle */}
+          <div style={{ display: "inline-flex", alignItems: "center", background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))", borderRadius: 99, padding: 4, gap: 2 }}>
+            <button
+              onClick={() => setAnnual(false)}
+              style={{
+                padding: "7px 20px", borderRadius: 99, border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 600,
+                background: !annual ? "hsl(var(--background))" : "transparent",
+                color: !annual ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                boxShadow: !annual ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                transition: "all 0.15s",
+              }}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setAnnual(true)}
+              style={{
+                padding: "7px 20px", borderRadius: 99, border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 600,
+                background: annual ? "hsl(var(--background))" : "transparent",
+                color: annual ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                boxShadow: annual ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                transition: "all 0.15s",
+                display: "flex", alignItems: "center", gap: 6,
+              }}
+            >
+              Annual
+              <span style={{ background: "#22c55e", color: "white", fontSize: 10, fontWeight: 800, padding: "1px 7px", borderRadius: 99, letterSpacing: "0.04em" }}>SAVE 2 MO</span>
+            </button>
+          </div>
         </div>
 
         {/* Tier Cards */}
-        <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 72, alignItems: "flex-start" }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 48, alignItems: "flex-start" }}>
           <TierCard
             name="Free"
             subtitle="Perfect for getting started"
-            price="$0"
+            monthlyPrice="$0"
             priceNote="No credit card required"
             features={FREE_FEATURES}
             ctaLabel="Start Free — no credit card required"
             ctaHref="/register"
+            annual={annual}
           />
           <TierCard
             name="Professional"
-            subtitle="For active project teams"
-            price="Contact us for pricing"
+            subtitle="For small coordination firms and independent BIM coordinators. Up to 3 active projects."
+            monthlyPrice="$149 / month"
+            annualPrice="$1,490 / year"
+            annualNote="Save 2 months — best value"
             features={PRO_FEATURES}
-            ctaLabel="Contact Us for Pricing"
+            ctaLabel="Get Started"
             ctaHref="/contact"
             highlight
+            annual={annual}
+          />
+          <TierCard
+            name="Team"
+            subtitle="For mid-size firms running multiple projects simultaneously. Up to 5 active projects."
+            monthlyPrice="$249 / month"
+            annualPrice="$2,490 / year"
+            annualNote="Save 2 months — best value"
+            features={TEAM_FEATURES}
+            ctaLabel="Get Started"
+            ctaHref="/contact"
+            annual={annual}
           />
           <TierCard
             name="Business"
-            subtitle="For firms running multiple concurrent projects"
-            price="Contact us for pricing"
+            subtitle="For established GCs and BIM management firms. Up to 10 active projects."
+            monthlyPrice="$399 / month"
+            annualPrice="$3,990 / year"
+            annualNote="Save 2 months — best value"
             features={BUSINESS_FEATURES}
-            ctaLabel="Contact Us for Pricing"
+            ctaLabel="Get Started"
             ctaHref="/contact"
+            annual={annual}
           />
           <TierCard
             name="Enterprise"
-            subtitle="For large GCs, developers, and institutions"
-            price="Custom pricing"
-            priceNote="Contact us for a proposal"
+            subtitle="For large GCs, developers, and institutions managing unlimited projects."
+            monthlyPrice="Custom pricing"
+            priceNote="Starting at $2,000 / month"
             features={ENTERPRISE_FEATURES}
-            ctaLabel="Contact Us — we build a proposal around your portfolio"
+            ctaLabel="Contact Us — we build a proposal"
             ctaHref="/contact"
+            annual={annual}
           />
+        </div>
+
+        {/* Founding Partner Banner */}
+        <div style={{
+          background: "linear-gradient(135deg, #fffbeb, #fef3c7)",
+          border: "2px solid #f59e0b",
+          borderRadius: 14,
+          padding: "32px 36px",
+          marginBottom: 56,
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: "#f59e0b11", borderRadius: "0 0 0 120px" }} />
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 28 }}>⭐</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#92400e", marginBottom: 6 }}>Limited Availability</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: "#78350f", marginBottom: 10, fontFamily: "var(--font-display)" }}>
+                Founding Partner Program
+              </h2>
+              <p style={{ fontSize: 14, color: "#92400e", lineHeight: 1.7, marginBottom: 16 }}>
+                Sign before public launch and lock your pricing for 36 months. Founding Partners receive:
+              </p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+                {[
+                  { tier: "Professional", price: "$99 / month" },
+                  { tier: "Team", price: "$179 / month" },
+                  { tier: "Business", price: "$299 / month" },
+                  { tier: "Enterprise", price: "Negotiated individually" },
+                ].map(item => (
+                  <div key={item.tier} style={{ background: "white", border: "1px solid #f59e0b", borderRadius: 8, padding: "10px 16px", minWidth: 160 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#92400e", marginBottom: 2 }}>{item.tier}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#78350f" }}>{item.price}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 13, color: "#92400e", lineHeight: 1.7, marginBottom: 20 }}>
+                Founding Partners also receive priority feature development — your requests go to the top of the roadmap — and the Founding Partner designation on your company profile visible to all BIMLog users.
+              </p>
+              <a
+                href="/contact"
+                style={{
+                  display: "inline-block", background: "#f59e0b", color: "white",
+                  padding: "10px 22px", borderRadius: 8, fontWeight: 700, fontSize: 14,
+                  textDecoration: "none", transition: "opacity 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                Apply for Founding Partner Status
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* ROI Section */}
