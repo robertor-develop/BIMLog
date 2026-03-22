@@ -43,6 +43,12 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 }
 
 function Router() {
+  const [location] = useLocation();
+  // Track last visited project ID so MasterSidebar can link to it
+  if (typeof window !== "undefined") {
+    const m = location.match(/^\/projects\/(\d+)/);
+    if (m) localStorage.setItem("bimlog-last-project-id", m[1]);
+  }
   return (
     <Switch>
       <Route path="/" component={Landing} />

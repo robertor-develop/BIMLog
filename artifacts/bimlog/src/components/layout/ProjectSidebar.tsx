@@ -141,18 +141,18 @@ export function ProjectSidebar({
               Managed Connection is available on <strong>Team plans and up</strong>. Our team logs in on your behalf and configures everything. Contact us to get started.
             </div>
           </div>
-          <button
-            onClick={() => { window.location.href = "mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request"; }}
+          <a
+            href="mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request"
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 7,
               background: "#1D4ED8", color: "white",
-              fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
+              fontSize: 12, fontWeight: 600, textDecoration: "none",
             }}
           >
             <Mail style={{ width: 13, height: 13 }} />
             Get Started
-          </button>
+          </a>
         </SidebarModal>
       )}
 
@@ -164,18 +164,18 @@ export function ProjectSidebar({
               OAuth Connection is available on <strong>Business plans and up</strong>. Secure token-based direct integration. No API tokens to manage.
             </div>
           </div>
-          <button
-            onClick={() => { window.location.href = "mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request"; }}
+          <a
+            href="mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request"
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 7,
               background: "#1D4ED8", color: "white",
-              fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
+              fontSize: 12, fontWeight: 600, textDecoration: "none",
             }}
           >
             <Mail style={{ width: 13, height: 13 }} />
             Contact Us
-          </button>
+          </a>
         </SidebarModal>
       )}
 
