@@ -341,9 +341,115 @@ export function Dashboard() {
             </div>
           )}
 
-          {/* SECTION 4 — Recent Activity + Top Naming Violators */}
+          {/* SECTION 4 — Your Projects */}
+          <div style={{ marginBottom: 28 }}>
+            {/* Header row with heading + New Project button */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
+              <div>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4 }}>
+                  {t("dashboard.title")}
+                </h2>
+                <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                  {projects?.length ?? 0} project{(projects?.length ?? 0) !== 1 ? "s" : ""} · {totalFiles} files · {totalMembers} team members
+                </p>
+              </div>
+              <Button onClick={() => setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>
+                <Plus style={{ width: 14, height: 14 }} />
+                {t("dashboard.newProject")}
+              </Button>
+            </div>
+
+            {/* Create project form */}
+            {showCreate && (
+              <CreateProjectForm onClose={() => setShowCreate(false)} />
+            )}
+
+            {/* Error state */}
+            {isError && (
+              <div style={{
+                display: "flex", alignItems: "flex-start", gap: 12,
+                padding: "14px 16px", marginBottom: 20,
+                background: "hsl(var(--destructive) / 0.06)",
+                border: "1px solid hsl(var(--destructive) / 0.3)",
+                borderRadius: 8
+              }}>
+                <AlertCircle style={{ width: 16, height: 16, color: "hsl(var(--destructive))", flexShrink: 0, marginTop: 1 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))", marginBottom: 3 }}>
+                    Could not load projects
+                  </div>
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10, fontFamily: "var(--font-mono)" }}>
+                    {error instanceof Error ? error.message : "Unknown error — try signing out and back in"}
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => refetch()} style={{ gap: 5, fontSize: 11 }}>
+                    <RefreshCw style={{ width: 11, height: 11 }} />
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Loading skeletons */}
+            {isLoading && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 14 }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="card" style={{ padding: 20 }}>
+                    <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 10, marginBottom: 14 }} />
+                    <div className="skeleton" style={{ height: 16, width: "70%", marginBottom: 8 }} />
+                    <div className="skeleton" style={{ height: 12, width: "50%" }} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Projects grid */}
+            {!isLoading && (
+              <>
+                {(projects?.length ?? 0) > 0 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+                    {projects!.map(project => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                ) : !showCreate && (
+                  <div className="empty-state">
+                    <div className="empty-icon">
+                      <FolderOpen style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} />
+                    </div>
+                    <div className="empty-title">{t("dashboard.empty")}</div>
+                    <div className="empty-desc" style={{ marginBottom: 16 }}>{t("dashboard.emptyDesc")}</div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <Button onClick={() => setShowCreate(true)} variant="outline" style={{ gap: 6, fontSize: 12 }}>
+                        <Plus style={{ width: 13, height: 13 }} />
+                        {t("dashboard.createProject")}
+                      </Button>
+                      <button
+                        onClick={clearSessionAndRetry}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 5,
+                          fontSize: 11, color: "hsl(var(--muted-foreground))",
+                          background: "none", border: "none", cursor: "pointer",
+                          padding: "4px 8px", borderRadius: 4,
+                          textDecoration: "underline", textUnderlineOffset: 3,
+                        }}
+                      >
+                        <LogOut style={{ width: 11, height: 11 }} />
+                        Clear session &amp; sign in again
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* SECTION 5 — Recent Activity + Top Naming Violators */}
           {!isLoading && (projects?.length ?? 0) > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
 
               {/* Recent Activity */}
               <div style={panel}>
