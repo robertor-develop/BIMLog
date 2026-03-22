@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { useLocation } from "wouter";
 import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -412,7 +411,6 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
   const [fileName, setFileName] = useState("");
   const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
   const [success, setSuccess] = useState(false);
@@ -476,6 +474,8 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         setTimeout(() => onClose(), 1200);
       },
       onError: (err: ApiError) => {
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
         const data = err.data || err.response?.data;
         if (data?.details) {
           setErrorDetails(data.details);
@@ -622,10 +622,10 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
             {/* Name chip + action buttons in one flex row */}
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              {(aiSuggestedName || suggestedName) && (
+              {suggestedName && (
                 <button
-                  onClick={() => handleCopySuggestion(aiSuggestedName || suggestedName || "")}
-                  title="Click to copy"
+                  onClick={() => handleCopySuggestion(suggestedName)}
+                  title="Click to copy convention suggestion"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 6,
                     padding: "7px 18px", borderRadius: 20,
@@ -640,8 +640,31 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
                 >
                   {copiedSuggestion
                     ? <><CheckCircle2 style={{ width: 13, height: 13, flexShrink: 0 }} />Copied!</>
-                    : <><Copy style={{ width: 12, height: 12, flexShrink: 0 }} />{aiSuggestedName || suggestedName}</>
+                    : <><Copy style={{ width: 12, height: 12, flexShrink: 0 }} />{suggestedName}</>
                   }
+                </button>
+              )}
+
+              {/* AI suggested name — purple chip */}
+              {aiSuggestedName && (
+                <button
+                  onClick={() => handleCopySuggestion(aiSuggestedName)}
+                  title="Click to copy AI suggestion"
+                  className="ai-chip"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "7px 18px", borderRadius: 20,
+                    border: "2px solid #7C3AED",
+                    background: "#F5F3FF",
+                    cursor: "pointer", fontFamily: "var(--font-mono)",
+                    fontSize: 13, fontWeight: 700,
+                    color: "#6D28D9",
+                    transition: "all 0.15s",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  <Sparkles style={{ width: 12, height: 12, flexShrink: 0 }} />
+                  {aiSuggestedName}
                 </button>
               )}
 
@@ -666,7 +689,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => setLocation(`/projects/${projectId}/name-generator`)}
+                onClick={() => window.open(`/projects/${projectId}/name-generator`, "_blank")}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,
