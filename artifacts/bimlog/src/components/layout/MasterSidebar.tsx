@@ -11,12 +11,10 @@ export function MasterSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
 
-  // Read isSuperAdmin from the auth store directly (present since login response includes it)
   const isSuperAdminFromStore = (user as any)?.isSuperAdmin === true;
 
   useEffect(() => {
     if (!user || !token) { setIsSuperAdmin(false); setAvatarUrl(null); setCompanyName(""); return; }
-    // Seed immediately from what the auth store already has
     if ((user as any)?.isSuperAdmin) setIsSuperAdmin(true);
     fetch(`${API_BASE}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -30,9 +28,11 @@ export function MasterSidebar() {
       .catch(() => {});
   }, [user?.id, token]);
 
+  const showAdmin = isSuperAdmin || isSuperAdminFromStore;
+
   return (
     <div className="sidebar">
-      {/* Logo — exact copy from ProjectSidebar */}
+      {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-mark">B</div>
         <div>
@@ -41,34 +41,35 @@ export function MasterSidebar() {
         </div>
       </div>
 
-      {/* Middle nav — admin links */}
-      <div className="sidebar-nav" style={{ flex: 1 }}>
-        {(isSuperAdmin || isSuperAdminFromStore) && (
-          <button
-            className="sidebar-nav-item"
-            style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-            onClick={() => setLocation("/admin")}
-          >
-            <div className="nav-dot" />
-            Admin Panel
-          </button>
-        )}
-
-        {(isSuperAdmin || isSuperAdminFromStore) && (
-          <button
-            className="sidebar-nav-item"
-            style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-            onClick={() => setLocation("/admin")}
-          >
-            <div className="nav-dot" />
-            Total Control
-          </button>
-        )}
-      </div>
+      {/* Middle nav — spacer only */}
+      <div className="sidebar-nav" style={{ flex: 1 }} />
 
       {/* Bottom section */}
       {user && (
         <div style={{ padding: "0 0 8px" }}>
+
+          {/* Admin links — sit directly above the divider */}
+          {showAdmin && (
+            <div style={{ padding: "0 14px 8px" }}>
+              <button
+                className="sidebar-nav-item"
+                style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                onClick={() => setLocation("/admin")}
+              >
+                <div className="nav-dot" />
+                Admin Panel
+              </button>
+              <button
+                className="sidebar-nav-item"
+                style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                onClick={() => setLocation("/admin")}
+              >
+                <div className="nav-dot" />
+                Total Control
+              </button>
+            </div>
+          )}
+
           {/* Divider */}
           <div style={{ height: 1, background: "var(--sidebar-border)", margin: "0 14px 10px" }} />
 
