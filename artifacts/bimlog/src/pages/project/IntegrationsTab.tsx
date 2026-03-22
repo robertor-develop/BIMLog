@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
-import { ExternalLink, Zap, Monitor, X, Plus, Code2 } from "lucide-react";
+import { ExternalLink, Zap, X, Plus, Code2 } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 
 interface IntegrationsTabProps { projectId: number; }
@@ -400,53 +400,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           <div className="kpi-value" style={{ fontSize: 18, color: "#0369A1" }}>ISO</div>
           <div className="kpi-sub">19650 · openBIM · IFC</div>
           <div className="pill pill-blue">buildingSMART</div>
-        </div>
-      </div>
-
-      {/* Download Sync Agent banner */}
-      <div style={{
-        marginBottom: 16, padding: "12px 16px",
-        background: "#F5F3FF", border: "1px solid #DDD6FE",
-        borderRadius: 10, display: "flex", alignItems: "center", gap: 12,
-        flexWrap: "wrap",
-      }}>
-        <div style={{ width: 32, height: 32, background: "#EDE9FE", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Monitor style={{ width: 15, height: 15, color: "#7C3AED" }} />
-        </div>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#5B21B6", marginBottom: 1 }}>
-            BIMLog Sync Agent — Desktop App
-          </div>
-          <div style={{ fontSize: 11, color: "#6D28D9" }}>
-            Windows and Mac · Watch a folder, validate automatically, no upload needed
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
-          <a
-            href="/api/v1/downloads/sync-agent-windows"
-            download="BIMLog-Sync-Agent-Windows-Portable.zip"
-            style={{
-              padding: "7px 14px", borderRadius: 6,
-              fontSize: 11, fontWeight: 600,
-              background: "#7C3AED", color: "#fff",
-              border: "none", cursor: "pointer",
-              textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5,
-            }}
-          >
-            ⬇ Windows (ZIP)
-          </a>
-          <a
-            href="mailto:info@ignitesmart.ai?subject=BIMLog%20Sync%20Agent%20Mac%20Installer&body=Hello%2C%0A%0AI%20would%20like%20to%20receive%20the%20BIMLog%20Sync%20Agent%20installer%20for%20Mac."
-            style={{
-              padding: "7px 14px", borderRadius: 6,
-              fontSize: 11, fontWeight: 600,
-              background: "#EDE9FE", color: "#7C3AED",
-              border: "1px solid #DDD6FE", cursor: "pointer",
-              textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5,
-            }}
-          >
-            Mac — Coming Soon
-          </a>
         </div>
       </div>
 

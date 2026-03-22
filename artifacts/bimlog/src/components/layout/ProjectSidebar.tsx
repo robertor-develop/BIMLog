@@ -31,7 +31,7 @@ const NAV_ITEMS = [
 
 const PLATFORM_ITEMS = [
   { name: "Procore",       logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC" },
-  { name: "Autodesk ACC",  logoBg: "#FEF3C7", logoColor: "#92400E", logoText: "AD" },
+  { name: "Autodesk BIM 360", logoBg: "#FEF3C7", logoColor: "#92400E", logoText: "B360" },
   { name: "OneDrive",      logoBg: "#EFF6FF", logoColor: "#0067B8", logoText: "OD" },
 ];
 
@@ -141,18 +141,18 @@ export function ProjectSidebar({
               Managed Connection is available on <strong>Team plans and up</strong>. Our team logs in on your behalf and configures everything. Contact us to get started.
             </div>
           </div>
-          <a
-            href="mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request"
+          <button
+            onClick={() => { window.location.href = "mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request"; }}
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 7,
               background: "#1D4ED8", color: "white",
-              fontSize: 12, fontWeight: 600, textDecoration: "none",
+              fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
             }}
           >
             <Mail style={{ width: 13, height: 13 }} />
             Get Started
-          </a>
+          </button>
         </SidebarModal>
       )}
 
@@ -164,18 +164,18 @@ export function ProjectSidebar({
               OAuth Connection is available on <strong>Business plans and up</strong>. Secure token-based direct integration. No API tokens to manage.
             </div>
           </div>
-          <a
-            href="mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request"
+          <button
+            onClick={() => { window.location.href = "mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request"; }}
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 7,
               background: "#1D4ED8", color: "white",
-              fontSize: 12, fontWeight: 600, textDecoration: "none",
+              fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
             }}
           >
             <Mail style={{ width: 13, height: 13 }} />
             Contact Us
-          </a>
+          </button>
         </SidebarModal>
       )}
 
