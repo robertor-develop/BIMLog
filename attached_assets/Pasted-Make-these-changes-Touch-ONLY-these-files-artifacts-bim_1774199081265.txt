@@ -1,0 +1,44 @@
+Make these changes. Touch ONLY these files: artifacts/bimlog/src/pages/Dashboard.tsx and create ONE new file artifacts/bimlog/src/components/layout/MasterSidebar.tsx. Do not touch App.tsx. Do not touch Navbar.tsx. Do not touch any routing files. Do not touch any project pages. Do not touch ProjectSidebar.tsx.
+PART 1 --- Create artifacts/bimlog/src/components/layout/MasterSidebar.tsx
+This component takes no props. It reads the current user from the existing useAuthStore hook already used throughout the app. It fetches isSuperAdmin from GET /api/v1/auth/me using the existing token from useAuthStore.
+The sidebar has this exact structure and must use ONLY the existing CSS variables and class names already defined in index.css for the project sidebar. Do not create any new colors, no gradients, no new font sizes. Copy the exact same background color, text color, font family, font size, padding, and width from the existing ProjectSidebar component.
+Structure top to bottom:
+Top section --- BIMLog logo and "by IgniteSmart" text. Copy the exact same logo markup and styles from ProjectSidebar.tsx.
+Middle section --- empty for regular users. No navigation links here.
+Bottom section --- in this exact order from top to bottom:
+Item 1 --- "Admin Panel" link to /admin. Visible only when the user's role is project_admin OR isAdmin OR isSuperAdmin. Use the same sidebar nav item style as the existing ProjectSidebar nav items --- same padding, same font size, same color, same hover state. No icons unless the existing sidebar already uses icons for nav items. Use setLocation from wouter when clicked.
+Item 2 --- "Total Control" link to /admin. Visible ONLY when isSuperAdmin is true. Same exact style as Admin Panel item above it.
+Item 3 --- A thin horizontal divider line. Same style as any existing dividers in ProjectSidebar.
+Item 4 --- User avatar circle showing the user's initial letter or profile photo if they have one uploaded. Same style as the existing user avatar in ProjectSidebar.
+Item 5 --- User full name in the same font and color as the existing ProjectSidebar user name.
+Item 6 --- Company name in the same subtle gray as the existing ProjectSidebar company name.
+Item 7 --- "Profile →" link that navigates to /profile using setLocation. Same style as the existing Profile link in ProjectSidebar.
+Item 8 --- "Sign Out" text that calls the existing logout function from useAuthStore. Same style as existing sign out in the app.
+PART 2 --- Modify artifacts/bimlog/src/pages/Dashboard.tsx
+Keep every single existing import, hook, and function that currently exists in this file. Do not remove anything that currently works. Add the following:
+Add import for MasterSidebar at the top: import { MasterSidebar } from "@/components/layout/MasterSidebar"
+Add import for useAuthStore if not already imported.
+The Dashboard component return must wrap everything in a flex row div with height 100vh and overflow hidden. The first child is MasterSidebar. The second child is a div with flex 1, overflow-y auto, containing all the dashboard content.
+The dashboard content area contains these sections in this exact order:
+SECTION 1 --- Page heading. A simple heading that says "Command Center" in the same font size and weight as other page headings in the app. Below it a subtitle showing "X projects · Y files processed" using real counts from the projects data.
+SECTION 2 --- Platform stats row. 5 cards in a horizontal row. Use the exact same card markup and CSS classes as the stat cards that appear inside project pages. The 5 cards are:
+Card 1 --- label "Active Projects" --- value is projects.length from the existing useListProjects hook.
+Card 2 --- label "Files Processed" --- value is the sum of each project's fileCount if that field is returned in the project list API response, otherwise fetch GET /api/v1/projects for each project and sum the file counts. Show 0 if unavailable.
+Card 3 --- label "Open RFIs" --- value is sum of openRfiCount across all projects if available in project data, otherwise 0.
+Card 4 --- label "Pending Submittals" --- value is sum of pendingSubmittalCount if available, otherwise 0.
+Card 5 --- label "Compliance Rate" --- value calculated as total valid files divided by total files across all projects as a percentage. Show 0% if no file data.
+SECTION 3 --- Two column row. Both columns use the same card styling as existing cards in the app. Same background, same border, same border radius, same padding.
+Left column heading "Needs Attention" --- Build this list from the projects array. For each project where openRfiCount is greater than 0 show an amber row with the project name and "Has open RFIs" and a button "Go to Project" that calls setLocation to /projects/[projectId]/rfis. For each project where fileCount exists and rejectedFileCount exists and rejectedFileCount is greater than 0 show an amber row with project name and "Naming violations detected" and a "Go to Project" button to /projects/[projectId]/files. If the needs attention list is empty show a single green row that says "All projects on track". Use the same text colors and badge styles already in the app --- amber for warnings, green for clear. No new colors.
+Right column heading "Your Pending Items" --- Fetch activity across all projects using Promise.all --- for each project in the projects array call GET /api/v1/projects/[id]/rfis and GET /api/v1/projects/[id]/submittals. Filter RFIs where submittedToEmail matches the current user's email and status is open or in_review. Filter submittals where submittedToEmail matches and status is pending. Show each as a row with the project name, RFI or submittal number, days outstanding calculated from createdAt, and a "View" button using setLocation. If nothing pending show "Nothing waiting on you" in green.
+SECTION 4 --- Two column row. Same card styling.
+Left column heading "Recent Activity" with subtitle "across all projects". Fetch activity by calling GET /api/v1/projects/[id]/activity for every project using Promise.all. Combine all results into one array. Sort by createdAt descending. Take the first 15 entries. For each entry show: a colored action badge using the exact same badge styles already used in the ActivityTab component, the user's full name, the project name, the action details text, and a relative timestamp calculated from createdAt showing "X minutes ago" or "X hours ago" or "X days ago". Use the same badge colors already defined in the app for action types.
+Right column heading "Top Naming Violators" --- From the combined files data across all projects group rejected files by companyName. Count rejections per company. Sort descending by rejection count. Show top 5 as rows with company name, rejection count as a red badge, and number of projects affected. If no violations show "All companies compliant" in green.
+SECTION 5 --- Full width section heading "Your Projects" using the same heading style as the existing dashboard. Below it the EXACT EXISTING project cards grid with the EXACT EXISTING New Project button. Do not change the project cards in any way. Do not change the New Project functionality. Copy the entire existing project cards JSX exactly as it currently is and place it here.
+Then run TypeScript check on the frontend only with zero errors. Then rebuild and redeploy.
+Show exact output of these checks:
+Check 1 --- MasterSidebar created with Admin Panel and Total Control: grep -n "Admin Panel|Total Control|isSuperAdmin|isAdmin" artifacts/bimlog/src/components/layout/MasterSidebar.tsx | head -10
+Check 2 --- Dashboard imports MasterSidebar and wraps in flex row: grep -n "MasterSidebar|flex.*row|100vh" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+Check 3 --- All 5 stat cards exist: grep -n "Active Projects|Files Processed|Open RFIs|Pending Submittals|Compliance Rate" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+Check 4 --- Needs Attention and Recent Activity sections exist: grep -n "Needs Attention|Recent Activity|Your Pending|Top Naming" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+Check 5 --- No other files modified: git diff --name-only HEAD | grep -v "Dashboard.tsx|MasterSidebar.tsx"
+Show exact output of all 5 checks. Nothing else.
