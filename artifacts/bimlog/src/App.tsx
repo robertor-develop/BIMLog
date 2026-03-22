@@ -23,6 +23,7 @@ import { AdminPanel } from "@/pages/AdminPanel";
 import { Pricing } from "@/pages/Pricing";
 import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
+import { Features } from "@/pages/Features";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -70,6 +71,7 @@ function Router() {
         {() => <ProtectedRoute component={AdminPanel} />}
       </Route>
       <Route path="/pricing" component={Pricing} />
+      <Route path="/features" component={Features} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
 

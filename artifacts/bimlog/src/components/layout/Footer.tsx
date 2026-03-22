@@ -43,15 +43,15 @@ export function Footer() {
           <div>
             {colHead(t("footer.product"))}
             {hoverLink("/setup-guide", t("footer.howItWorks"))}
-            <a href="/#pricing" style={linkStyle}>{t("footer.pricing")}</a>
-            <a href="/#features" style={linkStyle}>{t("footer.features")}</a>
+            {hoverLink("/pricing", t("footer.pricing"))}
+            {hoverLink("/features", t("footer.features"))}
           </div>
 
           {/* Column 3 — Company */}
           <div>
             {colHead(t("footer.company"))}
-            {hoverLink("/", t("footer.about"))}
-            <a href="mailto:info@ignitesmart.ai" style={linkStyle}>{t("footer.contact")}</a>
+            {hoverLink("/about", t("footer.about"))}
+            {hoverLink("/contact", t("footer.contact"))}
           </div>
 
           {/* Column 4 — Legal */}

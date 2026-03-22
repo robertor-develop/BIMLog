@@ -10,6 +10,7 @@ const API_BASE = import.meta.env.VITE_API_URL ?? "";
 const INFO_LINKS = [
   { label: "How It Works", href: "/setup-guide" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Features", href: "/features" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "Privacy Policy", href: "/privacy" },

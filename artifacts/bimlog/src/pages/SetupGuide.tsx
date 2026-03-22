@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor } from "lucide-react";
 import { useState } from "react";
+import { Footer } from "@/components/layout/Footer";
 
 function useFromParam(): string | null {
   const search = typeof window !== "undefined" ? window.location.search : "";
@@ -222,7 +223,8 @@ export function SetupGuide() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px" }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px", flex: 1, width: "100%" }}>
       {/* Back */}
       <SetupGuideBackButton />
 
@@ -232,7 +234,7 @@ export function SetupGuide() {
           fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700,
           color: "hsl(var(--foreground))", marginBottom: 6,
         }}>
-          Setup Guide
+          How It Works
         </h1>
         <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
           Everything you need to get BIMLog running on your project — from account setup to integrations.
@@ -380,6 +382,8 @@ export function SetupGuide() {
           {" "}— we respond within one business day.
         </div>
       </div>
+    </div>
+    <Footer />
     </div>
   );
 }
