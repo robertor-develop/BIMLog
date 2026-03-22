@@ -132,26 +132,26 @@ const sections = [
     options: [
       {
         title: "Validate and Download",
-        badge: null,
+        badge: "Free",
         desc: "Upload your file through BIMLog. We validate it instantly and return the approved file with a full audit record. You then upload it yourself to Procore, OneDrive, Google Drive, or wherever your project lives. Works today. Zero setup required.",
       },
       {
-        title: "Managed Connection",
-        badge: null,
-        desc: "Our team logs in on your behalf using your API token or credentials and configures the connection for you. White-glove setup is included with founding partner onboarding. Contact info@ignitesmart.ai.",
-      },
-      {
         title: "BIMLog Sync Agent",
-        badge: "Enterprise",
+        badge: "Professional",
         desc: "A lightweight desktop app watches a folder on your computer or server. Drop any file into the folder and BIMLog validates and routes it to the right platform automatically. No manual upload, no API setup, just a folder you already know how to use.",
       },
       {
+        title: "Managed Connection",
+        badge: "Team and up",
+        desc: "Our team logs in on your behalf using your API token or credentials and configures the connection for you. White-glove setup is included with founding partner onboarding. Contact info@ignitesmart.ai.",
+      },
+      {
         title: "OAuth Connection",
-        badge: "Enterprise",
-        desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project.",
+        badge: "Business and up",
+        desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project. Available on Business plans and up.",
       },
     ],
-    note: "For Enterprise options (Sync Agent and OAuth Connection), contact info@ignitesmart.ai.",
+    note: "For Managed and OAuth connections, contact info@ignitesmart.ai.",
   },
 ];
 
@@ -354,7 +354,7 @@ export function SetupGuide() {
 
                   {"note" in section && section.note && (
                     <div style={{ marginTop: 12, fontSize: 11, color: "hsl(var(--muted-foreground))", lineHeight: 1.5 }}>
-                      <strong>Enterprise options:</strong>{" "}
+                      {section.note}{" "}
                       <a href="mailto:info@ignitesmart.ai" style={{ color: "#0369A1" }}>info@ignitesmart.ai</a>
                     </div>
                   )}
