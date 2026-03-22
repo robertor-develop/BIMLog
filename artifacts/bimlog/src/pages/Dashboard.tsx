@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { MasterSidebar } from "@/components/layout/MasterSidebar";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -56,6 +57,9 @@ export function Dashboard() {
   }
 
   return (
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <MasterSidebar />
+      <div style={{ flex: 1, overflowY: "auto" }}>
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px" }}>
 
       {/* Header */}
@@ -144,6 +148,7 @@ export function Dashboard() {
       )}
 
       {/* Projects grid */}
+      {!isLoading && <div id="projects" style={{ scrollMarginTop: 16 }} />}
       {!isLoading && (
         <>
           {(projects?.length ?? 0) > 0 ? (
@@ -186,6 +191,8 @@ export function Dashboard() {
           )}
         </>
       )}
+    </div>
+      </div>
     </div>
   );
 }

@@ -52,7 +52,7 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  if (isProjectPage) return null;
+  if (isProjectPage || isDashboard) return null;
 
   const langBtn = (
     <button
