@@ -548,10 +548,24 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 router.post("/projects/:projectId/files/suggest-name", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
-    const { fileName } = req.body as { fileName?: string };
+    const { fileName, fileContent } = req.body as { fileName?: string; fileContent?: string };
     if (!fileName || typeof fileName !== "string") {
       res.status(400).json({ error: "fileName is required" });
       return;
+    }
+
+    // Extract text from PDF if content provided
+    let extractedText = "";
+    if (fileContent && fileName.toLowerCase().endsWith(".pdf")) {
+      try {
+        const buf = Buffer.from(fileContent, "base64");
+        const parser = new PDFParse({ data: buf, verbosity: 0 });
+        const result = await parser.getText();
+        await parser.destroy();
+        extractedText = (result.text || "").trim().slice(0, 2000);
+      } catch {
+        extractedText = "";
+      }
     }
 
     // Load active convention fields
@@ -594,6 +608,10 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       return parts.join(sep) + ext;
     };
 
+    const contentSection = extractedText
+      ? `\n\nExtracted file content (first 2000 chars):\n${extractedText}`
+      : "";
+
     // Try AI suggestion, fall back to smart builder on any error
     try {
       const anthropic = new Anthropic({
@@ -609,12 +627,13 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
 
 Original file name: ${fileName}
 
-Project naming convention: ${conventionSummary}
+Project naming convention: ${conventionSummary}${contentSection}
 
 Your task: Suggest a single corrected file name that:
 1. Keeps as much of the original name's intent as possible
 2. Strictly complies with the naming convention (uses the correct separator, correct field order, and only allowed values where specified)
 3. Uses the first or most appropriate allowed value for any field that cannot be inferred from the original name
+4. If file content is provided, use it to infer the most relevant allowed values for each field
 
 Respond with ONLY a JSON object in this exact format (no other text):
 {
@@ -660,6 +679,39 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
 
     const validation = await validateFileName(projectId, body.fileName);
     if (!validation.valid) {
+      // Save rejected file record to DB so it appears in the list with status "rejected"
+      const rejectedHash = createHash("sha256").update(body.fileName + String(Date.now())).digest("hex");
+      const rejectedTier = getFileTypeTier(body.fileName);
+      const [rejectedFile] = await db.insert(filesTable).values({
+        projectId,
+        fileName: body.fileName,
+        fileSize: body.fileSize,
+        fileType: body.fileType,
+        version: 1,
+        parentFileId: null,
+        status: "rejected",
+        uploadedById: req.user!.userId,
+        fileHash: rejectedHash,
+        fileSizeBytes: body.fileSize,
+        documentRelationship: body.documentRelationship as "created" | "modified" | "reference" | "supporting",
+        documentRelationshipDeclaredAt: new Date(),
+        fileTypeTier: rejectedTier,
+        source: "user-uploaded",
+      }).returning();
+
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "upload",
+        entityType: "file",
+        entityId: rejectedFile.id,
+        fileNameBefore: null,
+        fileNameAfter: body.fileName,
+        details: `Naming violation — file rejected: ${body.fileName}`,
+      });
+
       res.status(422).json({
         error: "File name does not match the active naming convention",
         details: validation.details,

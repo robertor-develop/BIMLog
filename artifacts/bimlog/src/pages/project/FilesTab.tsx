@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useLocation } from "wouter";
 import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -411,7 +412,9 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [fileName, setFileName] = useState("");
+  const [fileRef, setFileRef] = useState<File | null>(null);
   const [errorDetails, setErrorDetails] = useState<ValidationDetail[]>([]);
   const [success, setSuccess] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -448,10 +451,22 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setAiSuggestReason("");
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+
+      // Read file bytes if available and file is a PDF under 10 MB
+      let fileContent: string | undefined;
+      if (fileRef && fileRef.name.toLowerCase().endsWith(".pdf") && fileRef.size < 10 * 1024 * 1024) {
+        try {
+          const buf = await fileRef.arrayBuffer();
+          fileContent = btoa(String.fromCharCode(...new Uint8Array(buf)));
+        } catch {
+          fileContent = undefined;
+        }
+      }
+
       const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ fileName }),
+        body: JSON.stringify({ fileName, ...(fileContent ? { fileContent } : {}) }),
       });
       const data = await resp.json() as { suggestedName: string; reason: string };
       if (data.suggestedName) {
@@ -490,6 +505,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setErrorDetails([]);
     setSuccess(false);
     setFileName(file.name);
+    setFileRef(file);
     if (!documentRelationship) {
       toast({ title: "Declaration required", description: "Please select a declaration type — Created, Modified, Reference, or Supporting — before uploading.", variant: "destructive" });
       return;
@@ -689,7 +705,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => window.open(`/projects/${projectId}/name-generator`, "_blank")}
+                onClick={() => setLocation(`/projects/${projectId}/name-generator`)}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,
