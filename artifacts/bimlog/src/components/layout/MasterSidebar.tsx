@@ -31,9 +31,7 @@ export function MasterSidebar() {
         if (data.companyName) setCompanyName(data.companyName);
       })
       .catch(() => {});
-  // Run once on mount — token is stable for the lifetime of a session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.id, token]);
 
   return (
     <div className="sidebar">
