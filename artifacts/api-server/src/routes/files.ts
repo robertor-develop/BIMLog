@@ -548,19 +548,23 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 router.post("/projects/:projectId/files/suggest-name", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
-    const { fileName, fileContent, validationDetails } = req.body as {
+    const { fileName, fileContent, validationDetails, extractedText: bodyExtractedText, contentVerificationResult: bodyContentVerification } = req.body as {
       fileName?: string;
       fileContent?: string;
       validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }>;
+      extractedText?: string;
+      contentVerificationResult?: string;
     };
     if (!fileName || typeof fileName !== "string") {
       res.status(400).json({ error: "fileName is required" });
       return;
     }
 
-    // Extract text from PDF if content provided (Case A: new file)
+    // Use extractedText from body if provided (Case B: existing file); otherwise extract from PDF content (Case A: new file)
     let extractedText = "";
-    if (fileContent && fileName.toLowerCase().endsWith(".pdf")) {
+    if (bodyExtractedText && bodyExtractedText.trim()) {
+      extractedText = bodyExtractedText.trim().slice(0, 2000);
+    } else if (fileContent && fileName.toLowerCase().endsWith(".pdf")) {
       try {
         const buf = Buffer.from(fileContent, "base64");
         const parser = new PDFParse({ data: buf, verbosity: 0 });
@@ -612,14 +616,14 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       return parts.join(sep) + ext;
     };
 
-    // Case B: existing rejected file — include field-level violation details in prompt
+    // Build prompt sections
     const violationSection = (validationDetails && validationDetails.length > 0 && !extractedText)
       ? `\n\nKnown naming violations:\n${validationDetails.map(d => `- ${d.field}: ${d.message}${d.expected && d.expected.length > 0 ? ` (allowed: ${d.expected.join(", ")})` : ""} — received: "${d.received}"`).join("\n")}`
       : "";
 
-    const contentSection = extractedText
-      ? `\n\nExtracted file content (first 2000 chars):\n${extractedText}`
-      : violationSection;
+    const mismatchNote = (bodyContentVerification === "possible_mismatch" || bodyContentVerification === "clear_mismatch")
+      ? `\n\nNote: A prior content verification check flagged this document as a "${bodyContentVerification}" — the document content may not match the file name. Take this into account when evaluating relevance.`
+      : "";
 
     // Try AI suggestion, fall back to smart builder on any error
     try {
@@ -627,33 +631,65 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
         apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
         baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
       });
-      const message = await anthropic.messages.create({
-        model: "claude-haiku-4-5",
-        max_tokens: 8192,
-        messages: [{
-          role: "user",
-          content: `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
+
+      let promptContent: string;
+      if (extractedText) {
+        promptContent = `You are a BIM document naming assistant. Use the document content below to determine the document type, project relevance, and correct BIM naming. Do not rely on the file name alone.
 
 Original file name: ${fileName}
 
-Project naming convention: ${conventionSummary}${contentSection}
+Project naming convention: ${conventionSummary}${mismatchNote}
+
+Extracted document content (first 2000 chars):
+${extractedText}
+
+First, determine whether the document content is relevant to this project based on the naming convention context. Then, if relevant, suggest a corrected file name.
+
+Respond with ONLY a JSON object in this exact format (no other text):
+{
+  "suggestedName": "the-corrected-file-name.ext",
+  "reason": "brief explanation",
+  "isRelevant": true
+}
+
+If the document content does not match the project context, respond with:
+{
+  "suggestedName": null,
+  "reason": "Document content does not match project context",
+  "isRelevant": false
+}`;
+      } else {
+        promptContent = `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
+
+Original file name: ${fileName}
+
+Project naming convention: ${conventionSummary}${violationSection}
 
 Your task: Suggest a single corrected file name that:
 1. Keeps as much of the original name's intent as possible
 2. Strictly complies with the naming convention (uses the correct separator, correct field order, and only allowed values where specified)
 3. Uses the first or most appropriate allowed value for any field that cannot be inferred from the original name
-4. If file content is provided, use it to infer the most relevant allowed values for each field
 
 Respond with ONLY a JSON object in this exact format (no other text):
 {
   "suggestedName": "the-corrected-file-name.ext",
-  "reason": "brief explanation of what was changed and why"
-}`,
-        }],
+  "reason": "brief explanation of what was changed and why",
+  "isRelevant": true
+}`;
+      }
+
+      const message = await anthropic.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 8192,
+        messages: [{ role: "user", content: promptContent }],
       });
       const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-      const parsed = JSON.parse(rawText) as { suggestedName: string; reason: string };
-      res.json({ suggestedName: parsed.suggestedName, reason: parsed.reason });
+      const parsed = JSON.parse(rawText) as { suggestedName: string | null; reason: string; isRelevant?: boolean };
+      if (parsed.isRelevant === false) {
+        res.json({ suggestedName: null, reason: parsed.reason || "Document content does not match project context", isRelevant: false });
+      } else {
+        res.json({ suggestedName: parsed.suggestedName, reason: parsed.reason, isRelevant: true });
+      }
     } catch {
       // AI unavailable or bad response — build smart suggestion from convention
       if (convention) {

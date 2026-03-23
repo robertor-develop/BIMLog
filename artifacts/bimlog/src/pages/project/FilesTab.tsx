@@ -99,7 +99,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
   const [rejAiLoading, setRejAiLoading] = useState<Set<number>>(new Set());
-  const [rejAiResults, setRejAiResults] = useState<Map<number, { name: string; reason: string }>>(new Map());
+  const [rejAiResults, setRejAiResults] = useState<Map<number, { name: string | null; reason: string; isRelevant?: boolean }>>(new Map());
   const [rejCopied, setRejCopied] = useState<number | null>(null);
 
   const toggleFamily = (rootId: number) =>
@@ -123,7 +123,13 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
     });
   };
 
-  const handleAiSuggestExisting = async (fileId: number, fileName: string, validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null) => {
+  const handleAiSuggestExisting = async (
+    fileId: number,
+    fileName: string,
+    validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null,
+    extractedText?: string | null,
+    contentVerificationResult?: string | null,
+  ) => {
     setRejAiLoading(prev => { const s = new Set(prev); s.add(fileId); return s; });
     setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
     try {
@@ -131,12 +137,19 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ fileName, validationDetails: validationDetails ?? [] }),
+        body: JSON.stringify({
+          fileName,
+          validationDetails: validationDetails ?? [],
+          ...(extractedText ? { extractedText } : {}),
+          ...(contentVerificationResult ? { contentVerificationResult } : {}),
+        }),
       });
-      const data = await resp.json() as { suggestedName: string; reason: string };
-      if (data.suggestedName) {
-        setRejAiResults(prev => { const m = new Map(prev); m.set(fileId, { name: data.suggestedName, reason: data.reason || "" }); return m; });
-      }
+      const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
+      setRejAiResults(prev => {
+        const m = new Map(prev);
+        m.set(fileId, { name: data.suggestedName, reason: data.reason || "", isRelevant: data.isRelevant });
+        return m;
+      });
     } catch {
       // silently ignore
     } finally {
@@ -406,6 +419,35 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </div>
                                 )}
 
+                                {/* Content Analysis section */}
+                                {(() => {
+                                  let cvr: { result?: string; reason?: string; confidence?: string; detectedProject?: string; documentType?: string; isRelevant?: boolean } | null = null;
+                                  try { cvr = JSON.parse(latest.contentVerificationResult ?? ""); } catch { cvr = null; }
+                                  return (
+                                    <div style={{ marginBottom: 14 }}>
+                                      <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                        AI Analysis
+                                      </div>
+                                      {cvr ? (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11, color: "#374151" }}>
+                                          {cvr.reason && <div><span style={{ fontWeight: 600 }}>Reason:</span> {cvr.reason}</div>}
+                                          {cvr.confidence && <div><span style={{ fontWeight: 600 }}>Confidence:</span> {cvr.confidence}</div>}
+                                          {(cvr.detectedProject || cvr.documentType) && (
+                                            <div><span style={{ fontWeight: 600 }}>Detected Context:</span> {cvr.detectedProject || cvr.documentType}</div>
+                                          )}
+                                          {cvr.isRelevant === false && (
+                                            <div style={{ color: "#DC2626", fontWeight: 600, marginTop: 4 }}>
+                                              This document appears unrelated to this project
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <div style={{ fontSize: 11, color: "#9CA3AF", fontStyle: "italic" }}>Content analysis not available</div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+
                                 {/* Suggested Compliant Name + AI + Customize */}
                                 <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                   Suggested Compliant Name
@@ -432,9 +474,14 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                     </button>
                                   )}
 
-                                  {aiResult && (
+                                  {aiResult && aiResult.isRelevant === false ? (
+                                    <div style={{ fontSize: 11, color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                                      <AlertCircle style={{ width: 12, height: 12 }} />
+                                      {aiResult.reason || "Document content does not match project context"}
+                                    </div>
+                                  ) : aiResult && aiResult.name ? (
                                     <button
-                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name); }}
+                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name!); }}
                                       style={{
                                         display: "inline-flex", alignItems: "center", gap: 6,
                                         padding: "6px 16px", borderRadius: 20,
@@ -448,10 +495,10 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                       <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
                                       {aiResult.name}
                                     </button>
-                                  )}
+                                  ) : null}
 
                                   <button
-                                    onClick={e => { e.stopPropagation(); handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails); }}
+                                    onClick={e => { e.stopPropagation(); handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult); }}
                                     disabled={isAiLoading}
                                     style={{
                                       display: "inline-flex", alignItems: "center", gap: 5,
@@ -466,7 +513,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
 
                                   <button
-                                    onClick={e => { e.stopPropagation(); setLocation(`/projects/${projectId}/generator`); }}
+                                    onClick={e => { e.stopPropagation(); setLocation(`/projects/${projectId}/generator?returnTo=${encodeURIComponent(`/projects/${projectId}/files`)}`); }}
                                     style={{
                                       display: "inline-flex", alignItems: "center", gap: 5,
                                       padding: "6px 13px", borderRadius: 6,
@@ -479,7 +526,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
                                 </div>
 
-                                {aiResult?.reason && (
+                                {aiResult?.reason && aiResult.isRelevant !== false && (
                                   <div style={{ marginTop: 8, fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>{aiResult.reason}</div>
                                 )}
                               </div>
@@ -879,7 +926,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => setLocation(`/projects/${projectId}/generator`)}
+                onClick={() => setLocation(`/projects/${projectId}/generator?returnTo=${encodeURIComponent(`/projects/${projectId}/files`)}`)}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useRoute } from "wouter";
-import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown, Clock } from "lucide-react";
+import { useRoute, useLocation, useSearch } from "wouter";
+import { Copy, CheckCircle2, Plus, RotateCcw, Download, Trash2, Settings, AlertCircle, ChevronDown, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -159,6 +159,11 @@ const CHIP_COLORS = [
 export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { projectId?: number; onGoToConvention?: () => void }) {
   const { toast } = useToast();
   const { lang } = useI18n();
+  const [, setLocation] = useLocation();
+  const search = useSearch();
+
+  // Read returnTo from query params
+  const returnTo = new URLSearchParams(search).get("returnTo");
 
   // Read projectId from URL params as fallback (supports direct navigation via setLocation)
   const [matchGenerator, paramsGenerator] = useRoute("/projects/:id/generator");
@@ -286,6 +291,23 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
 
   return (
     <div>
+      {/* Back button — only shown when returnTo is provided */}
+      {returnTo && (
+        <button
+          onClick={() => setLocation(returnTo)}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            marginBottom: 16, padding: "6px 12px", borderRadius: 6,
+            border: "1px solid hsl(var(--border))",
+            background: "transparent", cursor: "pointer",
+            fontSize: 12, fontWeight: 500, color: "hsl(var(--muted-foreground))",
+          }}
+        >
+          <ArrowLeft style={{ width: 13, height: 13 }} />
+          {w("Back to Files", "Volver a Archivos", lang)}
+        </button>
+      )}
+
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 3 }}>

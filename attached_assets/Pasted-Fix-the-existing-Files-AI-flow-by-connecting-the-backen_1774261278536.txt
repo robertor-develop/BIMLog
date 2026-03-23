@@ -1,0 +1,103 @@
+Fix the existing Files AI flow by connecting the backend content analysis to the UI. Do not create new endpoints. Do not redesign the page. Use what already exists.
+
+The backend already extracts PDF text and runs AI verification using extractAndStoreContent and runContentVerification. It stores the result in extractedText and contentVerificationResult in filesTable. The frontend is currently ignoring this.
+
+Modify ONLY artifacts/bimlog/src/pages/project/FilesTab.tsx and the existing suggest-name endpoint in artifacts/api-server/src/routes/files.ts.
+
+In FilesTab.tsx:
+
+When loading files, include extractedText and contentVerificationResult from the API response.
+
+Parse contentVerificationResult into an object. If parsing fails, treat it as null.
+
+In the rejected file expanded view, add a content analysis section.
+
+If contentVerificationResult exists:
+
+Show:
+AI Analysis
+Reason: contentVerificationResult.reason
+Confidence: contentVerificationResult.confidence
+Detected Context: contentVerificationResult.detectedProject or documentType if present
+
+If contentVerificationResult.isRelevant is false, show a warning line:
+"This document appears unrelated to this project"
+
+If contentVerificationResult is null, show:
+"Content analysis not available"
+
+Do not remove the existing rejectionDetails display. Show both naming violations and content analysis.
+
+Now fix Ask AI behavior.
+
+In FilesTab.tsx, modify handleAiSuggestExisting and the upload-time AI call so that they send:
+
+fileId
+extractedText (if available from the file record)
+contentVerificationResult
+
+Update the POST body to /api/v1/projects/:projectId/files/suggest-name to include these fields.
+
+In artifacts/api-server/src/routes/files.ts, modify the suggest-name route.
+
+If extractedText is provided and not empty, the AI prompt must use extractedText as the primary input.
+
+Replace the prompt text with:
+
+"You are a BIM document naming assistant. Use the document content below to determine the document type, project relevance, and correct BIM naming. Do not rely on the file name alone."
+
+Append extractedText to the prompt.
+
+If contentVerificationResult exists and indicates mismatch, include that context in the prompt.
+
+If AI determines the document is not relevant, return:
+
+suggestedName: null
+reason: "Document content does not match project context"
+isRelevant: false
+
+If relevant, return:
+
+suggestedName
+reason
+isRelevant: true
+
+Back in FilesTab.tsx:
+
+If isRelevant is false, do not display a suggested name. Display the mismatch warning and reason instead.
+
+If isRelevant is true, display the suggested name as before.
+
+Now fix Customize Name navigation.
+
+In FilesTab.tsx, when navigating to Name Generator, append:
+?returnTo=/projects/${projectId}/files
+
+In artifacts/bimlog/src/pages/project/NameGenerator.tsx:
+
+Read returnTo from query params.
+
+If present, the Back button must navigate to returnTo.
+
+If not present, keep existing behavior.
+
+Do not modify routing elsewhere.
+
+Rebuild and run these checks:
+
+=== Check 1 ===
+grep -n "contentVerificationResult" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "extractedText" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "suggest-name" artifacts/api-server/src/routes/files.ts
+
+=== Check 4 ===
+grep -n "Use the document content below" artifacts/api-server/src/routes/files.ts
+
+=== Check 5 ===
+grep -n "returnTo" artifacts/bimlog/src/pages/project/FilesTab.tsx artifacts/bimlog/src/pages/project/NameGenerator.tsx
+
+Show exact output of all 5 checks. Do not explain.
