@@ -5,34 +5,35 @@ import { useAuthStore } from "@/store/auth";
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export function MasterSidebar() {
-  const { user, token, logout, setAuth } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
   const [, setLocation] = useLocation();
+  const [showAdmin, setShowAdmin] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
 
-  // Read isSuperAdmin directly from persisted user — set immediately, no flash
-  const isSuperAdmin = (user as any)?.isSuperAdmin === true;
-
   useEffect(() => {
-    if (!user || !token) return;
+    // Check the stored user first (covers fresh logins immediately)
+    if ((user as any)?.isSuperAdmin === true) {
+      setShowAdmin(true);
+    }
+
+    if (!token) return;
+
+    // Always re-verify from the server regardless of local cache
     fetch(`${API_BASE}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.ok ? r.json() : null)
-      .then(data => {
+      .then((data: any) => {
         if (!data) return;
-        // If the stored user is missing isSuperAdmin (old session), fix it now
-        // by writing the fresh value back into the persisted auth store.
-        if (data.isSuperAdmin && !(user as any).isSuperAdmin) {
-          setAuth(token, { ...user, isSuperAdmin: true } as any);
-        }
+        if (data.isSuperAdmin === true) setShowAdmin(true);
         if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
         if (data.companyName) setCompanyName(data.companyName);
       })
       .catch(() => {});
-  }, [user?.id, token]);
-
-  const showAdmin = isSuperAdmin;
+  // Run once on mount — token is stable for the lifetime of a session
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="sidebar">
