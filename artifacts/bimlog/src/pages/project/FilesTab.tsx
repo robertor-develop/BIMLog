@@ -150,15 +150,23 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         }),
       });
       const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
-      setRejAiResults(prev => {
-        const m = new Map(prev);
-        m.set(fileId, { name: data.suggestedName, reason: data.reason || "", isRelevant: data.isRelevant });
-        return m;
-      });
-      // If a manual explanation was provided and a name came back, auto-accept the mismatch
-      if (manualExplanation && data.suggestedName) {
-        setMismatchOverride(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
-        setExplainOpen(prev => { const m = new Map(prev); m.delete(fileId); return m; });
+      if (data.isRelevant === false) {
+        setRejAiResults(prev => {
+          const m = new Map(prev);
+          m.set(fileId, { name: null, reason: data.reason || "", isRelevant: false });
+          return m;
+        });
+      } else {
+        setRejAiResults(prev => {
+          const m = new Map(prev);
+          m.set(fileId, { name: data.suggestedName ?? null, reason: data.reason || "", isRelevant: true });
+          return m;
+        });
+        // If a manual explanation was provided and a name came back, auto-accept the mismatch
+        if (manualExplanation && data.suggestedName) {
+          setMismatchOverride(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
+          setExplainOpen(prev => { const m = new Map(prev); m.delete(fileId); return m; });
+        }
       }
     } catch {
       // silently ignore
@@ -389,10 +397,10 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                         const isOverride = mismatchOverride.get(root.id) ?? false;
                         const isExplainOpen = explainOpen.get(root.id) ?? false;
                         const explainText = explanationText.get(root.id) ?? "";
-                        // Show name chip only when no mismatch OR user has accepted override
-                        const showNameChip = !!(aiResult?.name && (!isMismatch || isOverride));
-                        // Show mismatch control actions when AI returned result AND mismatch AND not yet overridden
-                        const showMismatchActions = !!(aiResult && isMismatch && !isOverride);
+                        // Show name chip only when AI says relevant AND (no mismatch OR override accepted)
+                        const showNameChip = !!(aiResult?.isRelevant === true && aiResult.name && (!isMismatch || isOverride));
+                        // Show mismatch controls when AI returned irrelevant OR cvr is mismatch — and not yet overridden
+                        const showMismatchActions = !!(aiResult && (isMismatch || aiResult.isRelevant === false) && !isOverride);
 
                         const CVR_MAP: Record<string, { isRelevant: boolean; message: string; color: string }> = {
                           match: { isRelevant: true, message: "Document content matches project context", color: "#16A34A" },
@@ -451,7 +459,19 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                     AI Analysis
                                   </div>
-                                  {mappedCvr ? (
+                                  {isAiLoading ? (
+                                    <div style={{ fontSize: 11, color: "#7C3AED", fontStyle: "italic", display: "flex", alignItems: "center", gap: 5 }}>
+                                      <Sparkles style={{ width: 12, height: 12, flexShrink: 0 }} />
+                                      Analyzing document content...
+                                    </div>
+                                  ) : aiResult ? (
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: aiResult.isRelevant ? "#16A34A" : "#DC2626", display: "flex", alignItems: "center", gap: 5 }}>
+                                      {aiResult.isRelevant
+                                        ? <CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />
+                                        : <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />}
+                                      {aiResult.reason}
+                                    </div>
+                                  ) : mappedCvr ? (
                                     <div style={{ fontSize: 11, fontWeight: 600, color: mappedCvr.color, display: "flex", alignItems: "center", gap: 5 }}>
                                       {!mappedCvr.isRelevant && <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />}
                                       {mappedCvr.isRelevant && <CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />}
@@ -617,10 +637,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
                                 </div>
 
-                                {/* AI reason — only when no mismatch or override accepted */}
-                                {aiResult?.reason && (!isMismatch || isOverride) && (
-                                  <div style={{ marginTop: 8, fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>{aiResult.reason}</div>
-                                )}
                               </div>
                             </td>
                           </tr>
