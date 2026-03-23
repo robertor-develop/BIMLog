@@ -136,6 +136,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   ) => {
     setAiLoadingMap(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
     setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
+    console.log("[frontend] extractedText:", extractedText?.slice(0, 200));
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
@@ -150,6 +151,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         }),
       });
       const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
+      console.log("[AI RAW RESPONSE]", data);
       if (data.isRelevant === false) {
         setRejAiResults(prev => {
           const m = new Map(prev);

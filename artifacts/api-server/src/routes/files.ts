@@ -577,6 +577,7 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       }
     }
 
+    console.log("[suggest-name] extractedText length:", extractedText?.length || 0);
     if (!extractedText) {
       console.warn(`[suggest-name] extractedText missing for fileName "${fileName}"`);
     }
