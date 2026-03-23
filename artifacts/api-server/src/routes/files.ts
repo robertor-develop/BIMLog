@@ -313,22 +313,38 @@ Rules:
     });
 
     const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-    let result: "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable" = "not_applicable";
-    let reason = "";
 
-    try {
-      const parsed = JSON.parse(rawText) as { result: string; reason: string };
-      if (["match", "possible_mismatch", "clear_mismatch"].includes(parsed.result)) {
-        result = parsed.result as "match" | "possible_mismatch" | "clear_mismatch";
-        reason = parsed.reason || "";
-      }
-    } catch {
-      console.warn(`[files] AI verification: could not parse Claude response for file ${fileId}: ${rawText.slice(0, 100)}`);
-      result = "not_applicable";
+    let cleaned = rawText.trim();
+    if (cleaned.startsWith("```")) {
+      cleaned = cleaned.replace(/^```json/, "").replace(/^```/, "").replace(/```$/, "").trim();
     }
 
-    // Update file record
-    await db.update(filesTable).set({ contentVerificationResult: result, updatedAt: new Date() }).where(eq(filesTable.id, fileId));
+    let parsedRaw: { result: string; reason: string } | undefined;
+    try {
+      parsedRaw = JSON.parse(cleaned) as { result: string; reason: string };
+    } catch (err) {
+      console.error("[files] JSON parse failed after cleaning:", cleaned);
+      await db.update(filesTable)
+        .set({ contentVerificationResult: "not_applicable", hashComparisonNote: "AI returned invalid JSON", updatedAt: new Date() })
+        .where(eq(filesTable.id, fileId));
+      return;
+    }
+
+    if (!parsedRaw || !parsedRaw.result) {
+      await db.update(filesTable)
+        .set({ contentVerificationResult: "not_applicable", hashComparisonNote: "AI response missing result field", updatedAt: new Date() })
+        .where(eq(filesTable.id, fileId));
+      return;
+    }
+
+    await db.update(filesTable)
+      .set({ contentVerificationResult: parsedRaw.result as "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable", hashComparisonNote: parsedRaw.reason || null, updatedAt: new Date() })
+      .where(eq(filesTable.id, fileId));
+
+    const result = (["match", "possible_mismatch", "clear_mismatch"].includes(parsedRaw.result)
+      ? parsedRaw.result
+      : "not_applicable") as "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable";
+    const reason = parsedRaw.reason || "";
     console.log(`[files] AI content verification for file ${fileId} (${fileName}): ${result}`);
 
     // ── Flag mismatch: insert activity log + notify project admins ───────────
