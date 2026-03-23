@@ -1,0 +1,35 @@
+Good. Now fix the broken part: contentVerificationResult is NOT JSON, it is a string enum ("match", "possible_mismatch", "clear_mismatch", "not_applicable"), so the current JSON.parse logic is wrong and will always fail. Do not parse it as JSON.
+
+Modify ONLY artifacts/bimlog/src/pages/project/FilesTab.tsx.
+
+Remove JSON.parse usage and treat contentVerificationResult as a string. Create a mapping in the frontend:
+
+"match" → isRelevant true, message "Document content matches project context"
+"possible_mismatch" → isRelevant false, message "Content may not match this project — review required"
+"clear_mismatch" → isRelevant false, message "This document appears unrelated to this project"
+"not_applicable" → no analysis available
+
+In the rejected file expanded section, replace the current AI Analysis block so it uses this mapping. If contentVerificationResult is "possible_mismatch" or "clear_mismatch", show the warning message using the mapped text. Do not show "Content analysis not available" in those cases. Only show "Content analysis not available" when the value is null or "not_applicable".
+
+Now fix Ask AI behavior in the frontend. When calling handleAiSuggestExisting, if contentVerificationResult is "clear_mismatch", do NOT display a suggested name even if the API returns one. Instead show only the mismatch warning message. If it is "possible_mismatch", allow suggestion but show the warning above it.
+
+Do not change backend logic for this step.
+
+Keep extractedText passing as already implemented.
+
+Rebuild and run these checks:
+
+=== Check 1 ===
+grep -n "JSON.parse" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "possible_mismatch|clear_mismatch|match|not_applicable" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "Content analysis not available" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 4 ===
+grep -n "handleAiSuggestExisting" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 5 ===
+grep -n "This document appears unrelated to this project" artifacts/bimlog/src/pages/project/FilesTab.tsx

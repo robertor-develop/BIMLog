@@ -421,25 +421,23 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
 
                                 {/* Content Analysis section */}
                                 {(() => {
-                                  let cvr: { result?: string; reason?: string; confidence?: string; detectedProject?: string; documentType?: string; isRelevant?: boolean } | null = null;
-                                  try { cvr = JSON.parse(latest.contentVerificationResult ?? ""); } catch { cvr = null; }
+                                  const cvVal = latest.contentVerificationResult;
+                                  const CVR_MAP: Record<string, { isRelevant: boolean; message: string; color: string }> = {
+                                    match: { isRelevant: true, message: "Document content matches project context", color: "#16A34A" },
+                                    possible_mismatch: { isRelevant: false, message: "Content may not match this project — review required", color: "#D97706" },
+                                    clear_mismatch: { isRelevant: false, message: "This document appears unrelated to this project", color: "#DC2626" },
+                                  };
+                                  const mapped = cvVal ? CVR_MAP[cvVal] ?? null : null;
                                   return (
                                     <div style={{ marginBottom: 14 }}>
                                       <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                         AI Analysis
                                       </div>
-                                      {cvr ? (
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11, color: "#374151" }}>
-                                          {cvr.reason && <div><span style={{ fontWeight: 600 }}>Reason:</span> {cvr.reason}</div>}
-                                          {cvr.confidence && <div><span style={{ fontWeight: 600 }}>Confidence:</span> {cvr.confidence}</div>}
-                                          {(cvr.detectedProject || cvr.documentType) && (
-                                            <div><span style={{ fontWeight: 600 }}>Detected Context:</span> {cvr.detectedProject || cvr.documentType}</div>
-                                          )}
-                                          {cvr.isRelevant === false && (
-                                            <div style={{ color: "#DC2626", fontWeight: 600, marginTop: 4 }}>
-                                              This document appears unrelated to this project
-                                            </div>
-                                          )}
+                                      {mapped ? (
+                                        <div style={{ fontSize: 11, fontWeight: 600, color: mapped.color, display: "flex", alignItems: "center", gap: 5 }}>
+                                          {!mapped.isRelevant && <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />}
+                                          {mapped.isRelevant && <CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />}
+                                          {mapped.message}
                                         </div>
                                       ) : (
                                         <div style={{ fontSize: 11, color: "#9CA3AF", fontStyle: "italic" }}>Content analysis not available</div>
@@ -474,28 +472,46 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                     </button>
                                   )}
 
-                                  {aiResult && aiResult.isRelevant === false ? (
-                                    <div style={{ fontSize: 11, color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
-                                      <AlertCircle style={{ width: 12, height: 12 }} />
-                                      {aiResult.reason || "Document content does not match project context"}
-                                    </div>
-                                  ) : aiResult && aiResult.name ? (
-                                    <button
-                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name!); }}
-                                      style={{
-                                        display: "inline-flex", alignItems: "center", gap: 6,
-                                        padding: "6px 16px", borderRadius: 20,
-                                        border: "2px solid #7C3AED",
-                                        background: "#F5F3FF",
-                                        cursor: "pointer", fontFamily: "var(--font-mono)",
-                                        fontSize: 12, fontWeight: 700, color: "#6D28D9",
-                                        wordBreak: "break-all",
-                                      }}
-                                    >
-                                      <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
-                                      {aiResult.name}
-                                    </button>
-                                  ) : null}
+                                  {aiResult && (() => {
+                                    const cvVal = latest.contentVerificationResult;
+                                    const isClearMismatch = cvVal === "clear_mismatch";
+                                    const isPossibleMismatch = cvVal === "possible_mismatch";
+                                    if (isClearMismatch) {
+                                      return (
+                                        <div style={{ fontSize: 11, color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
+                                          <AlertCircle style={{ width: 12, height: 12 }} />
+                                          This document appears unrelated to this project
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <>
+                                        {isPossibleMismatch && (
+                                          <div style={{ fontSize: 11, color: "#D97706", fontWeight: 600, display: "flex", alignItems: "center", gap: 5, width: "100%" }}>
+                                            <AlertCircle style={{ width: 12, height: 12 }} />
+                                            Content may not match this project — review required
+                                          </div>
+                                        )}
+                                        {aiResult.name && (
+                                          <button
+                                            onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name!); }}
+                                            style={{
+                                              display: "inline-flex", alignItems: "center", gap: 6,
+                                              padding: "6px 16px", borderRadius: 20,
+                                              border: "2px solid #7C3AED",
+                                              background: "#F5F3FF",
+                                              cursor: "pointer", fontFamily: "var(--font-mono)",
+                                              fontSize: 12, fontWeight: 700, color: "#6D28D9",
+                                              wordBreak: "break-all",
+                                            }}
+                                          >
+                                            <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
+                                            {aiResult.name}
+                                          </button>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
 
                                   <button
                                     onClick={e => { e.stopPropagation(); handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult); }}
@@ -526,7 +542,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
                                 </div>
 
-                                {aiResult?.reason && aiResult.isRelevant !== false && (
+                                {aiResult?.reason && latest.contentVerificationResult !== "clear_mismatch" && (
                                   <div style={{ marginTop: 8, fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>{aiResult.reason}</div>
                                 )}
                               </div>
