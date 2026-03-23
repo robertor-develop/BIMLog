@@ -1,0 +1,71 @@
+Good. The diagnostics confirm the real problem. Stop patching the current upload flow. Replace the transport layer cleanly.
+
+Modify ONLY the existing file upload system in:
+artifacts/bimlog/src/pages/project/FilesTab.tsx
+artifacts/api-server/src/routes/files.ts
+artifacts/api-server/src/app.ts
+
+Keep the current Files UI and current database behavior as much as possible. Do not redesign the page. Do not change the accepted/rejected/versioned display logic. Only replace the upload transport and processing pipeline underneath it.
+
+Implement this:
+
+Frontend upload must stop using arrayBuffer + base64 JSON for normal file upload. Replace the actual upload flow with FormData multipart upload. Append:
+file
+fileName
+documentRelationship
+and any existing metadata already required by the endpoint
+
+Do not use arrayBuffer for the real upload path anymore.
+
+Backend files POST route must accept multipart/form-data using multer or equivalent. Save the uploaded binary to:
+uploads/projects/:projectId/files/:storedFileName
+Create directories if missing.
+Keep express.json() for normal APIs, but file upload route must not depend on JSON body parsing for file bytes.
+Compute real SHA-256 hash from the uploaded file bytes after saving to disk. Store real hash in file_hash and real byte size in file_size_bytes.
+For PDFs:
+read the saved file from disk
+extract text from the saved file
+store extracted_text
+run content verification
+store content_verification_result
+For non-PDF BIM files:
+do not leave content_verification_result null
+run fallback verification based on fileName, extension, project code match, and naming decomposition
+store one of:
+match
+possible_mismatch
+clear_mismatch
+not_applicable only if truly nothing can be inferred
+Remove the hidden 10MB frontend guard from the real upload path. If you need a temporary limit, make it explicit and consistent on both frontend and backend.
+Do not swallow extraction errors. If processing fails, log it and store a readable note in hash_comparison_note or equivalent existing field. Do not pretend analysis succeeded.
+Keep suggest-name endpoint as-is for now except that it should use extractedText from the DB once uploads are working correctly.
+After the new multipart upload is working, the same rejected PDF must produce non-null extracted_text and non-null content_verification_result.
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "arrayBuffer" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "FormData" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "express.json" artifacts/api-server/src/app.ts
+
+=== Check 4 ===
+grep -n "multer\|multipart" artifacts/api-server/src/routes/files.ts artifacts/api-server/src/app.ts
+
+=== Check 5 ===
+grep -n "createHash\|sha256\|fileHash" artifacts/api-server/src/routes/files.ts
+
+=== Check 6 ===
+grep -n "uploads/projects" artifacts/api-server/src/routes/files.ts
+
+=== Check 7 ===
+Upload the same PDF again, then run:
+SELECT id, file_name, file_hash, file_size_bytes, content_verification_result, LENGTH(extracted_text) as text_len
+FROM files
+ORDER BY id DESC
+LIMIT 10;
+
+Show exact output only.

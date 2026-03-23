@@ -1,10 +1,13 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
+import fs from "fs";
+import path from "path";
+import multer from "multer";
 import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
 import { sendEmail, makeNamingViolationEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and } from "drizzle-orm";
-import { UploadFileBody, ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
+import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { PDFParse } from "pdf-parse";
@@ -12,6 +15,23 @@ import PDFDocument from "pdfkit";
 import Anthropic from "@anthropic-ai/sdk";
 
 const router: IRouter = Router();
+
+const uploadsRoot = path.resolve("uploads");
+const uploadMiddleware = multer({
+  storage: multer.diskStorage({
+    destination: (req, _file, cb) => {
+      const projectId = (req.params as { projectId: string }).projectId;
+      const dir = path.join(uploadsRoot, "projects", projectId, "files");
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (_req, file, cb) => {
+      const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const ext = path.extname(file.originalname) || "";
+      cb(null, `${unique}${ext}`);
+    },
+  }),
+});
 
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
 
@@ -209,46 +229,48 @@ async function parseFileNameMetadata(projectId: number, fileName: string): Promi
   };
 }
 
-// Async background extraction — called after upload response is sent
-async function extractAndStoreContent(fileId: number, projectId: number, fileName: string, fileContent: string | undefined, uploadedById: number): Promise<void> {
-  try {
-    const ext = fileName.split(".").pop()?.toLowerCase() || "";
-    let extractedText: string | null = null;
-    let fileMetadata: Record<string, unknown> | null = null;
+// Async background extraction — reads file from disk, called after upload response is sent
+async function extractAndStoreFromDisk(fileId: number, projectId: number, fileName: string, filePath: string, uploadedById: number): Promise<void> {
+  const ext = fileName.split(".").pop()?.toLowerCase() || "";
+  let extractedText: string | null = null;
+  let fileMetadata: Record<string, unknown> | null = null;
 
-    if (ext === "pdf" && fileContent) {
-      try {
-        const buffer = Buffer.from(fileContent, "base64");
-        const parser = new PDFParse({ data: buffer, verbosity: 0 });
-        const result = await parser.getText();
-        await parser.destroy();
-        extractedText = result.text?.trim() || null;
-      } catch (err) {
-        console.error(`[files] pdf-parse failed for file ${fileId}:`, err instanceof Error ? err.message : err);
-      }
+  if (ext === "pdf") {
+    try {
+      const buffer = await fs.promises.readFile(filePath);
+      const parser = new PDFParse({ data: buffer, verbosity: 0 });
+      const result = await parser.getText();
+      await parser.destroy();
+      extractedText = result.text?.trim() || null;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[files] pdf-parse failed for file ${fileId}: ${msg}`);
+      await db.update(filesTable).set({
+        hashComparisonNote: `PDF text extraction failed: ${msg}`,
+        contentVerificationResult: "not_applicable",
+        updatedAt: new Date(),
+      }).where(eq(filesTable.id, fileId));
+      return;
     }
+  }
 
-    if (BIM_EXTENSIONS.has(ext)) {
-      fileMetadata = await parseFileNameMetadata(projectId, fileName);
-    }
+  if (BIM_EXTENSIONS.has(ext)) {
+    fileMetadata = await parseFileNameMetadata(projectId, fileName);
+  }
 
-    if (extractedText !== null || fileMetadata !== null) {
-      const updates: Record<string, unknown> = { updatedAt: new Date() };
-      if (extractedText !== null) updates.extractedText = extractedText;
-      if (fileMetadata !== null) updates.fileMetadata = fileMetadata;
-      await db.update(filesTable).set(updates).where(eq(filesTable.id, fileId));
-      console.log(`[files] content indexed for file ${fileId} (${fileName}): pdf=${extractedText !== null}, bim=${fileMetadata !== null}`);
-    }
+  if (extractedText !== null || fileMetadata !== null) {
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (extractedText !== null) updates.extractedText = extractedText;
+    if (fileMetadata !== null) updates.fileMetadata = fileMetadata;
+    await db.update(filesTable).set(updates).where(eq(filesTable.id, fileId));
+    console.log(`[files] content indexed for file ${fileId} (${fileName}): pdf=${extractedText !== null}, bim=${fileMetadata !== null}`);
+  }
 
-    // ── AI content verification (PDFs with extracted text only) ─────────────
-    if (ext === "pdf" && extractedText) {
-      await runContentVerification(fileId, projectId, fileName, extractedText, uploadedById);
-    } else if (ext === "pdf") {
-      // PDF but no text extracted — mark not_applicable
-      await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
-    }
-  } catch (err) {
-    console.error(`[files] background extraction failed for file ${fileId}:`, err instanceof Error ? err.message : err);
+  // ── AI content verification (PDFs with extracted text only) ─────────────
+  if (ext === "pdf" && extractedText) {
+    await runContentVerification(fileId, projectId, fileName, extractedText, uploadedById);
+  } else if (ext === "pdf") {
+    await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
   }
 }
 
@@ -365,6 +387,30 @@ Rules:
     console.error(`[files] AI content verification failed for file ${fileId}:`, err instanceof Error ? err.message : err);
     await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId)).catch(() => {});
   }
+}
+
+// BIM file CVR fallback — uses naming convention validation result (no text extraction needed)
+async function runBimFallbackCvr(
+  fileId: number,
+  validation: { valid: boolean; details?: Array<{ field: string; message: string }> },
+): Promise<void> {
+  let cvr: "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable";
+  if (validation.valid) {
+    cvr = "match";
+  } else {
+    const violationCount = validation.details?.length ?? 0;
+    if (violationCount === 0) {
+      cvr = "not_applicable";
+    } else if (violationCount <= 2) {
+      cvr = "possible_mismatch";
+    } else {
+      cvr = "clear_mismatch";
+    }
+  }
+  await db.update(filesTable)
+    .set({ contentVerificationResult: cvr, updatedAt: new Date() })
+    .where(eq(filesTable.id, fileId));
+  console.log(`[files] BIM fallback CVR for file ${fileId}: ${cvr}`);
 }
 
 // ─── GET /projects/:projectId/files ─────────────────────────────────────────
@@ -577,11 +623,6 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       }
     }
 
-    console.log("[suggest-name] extractedText length:", extractedText?.length || 0);
-    if (!extractedText) {
-      console.warn(`[suggest-name] extractedText missing for fileName "${fileName}"`);
-    }
-
     // Load active convention fields
     const conventions = await db.select().from(namingConventionsTable)
       .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
@@ -723,42 +764,209 @@ Return ONLY JSON in this format:
 });
 
 // ─── POST /projects/:projectId/files ─────────────────────────────────────────
-router.post("/projects/:projectId/files", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  try {
-    const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
-    const body = UploadFileBody.parse(req.body);
+router.post(
+  "/projects/:projectId/files",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  (req, res, next) => uploadMiddleware.single("file")(req, res, next),
+  async (req, res) => {
+    try {
+      const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
+      const fileName: string = (req.body.fileName as string) || req.file?.originalname || "";
+      const documentRelationship: string = (req.body.documentRelationship as string) || "";
 
-    // ── document_relationship is required for user-uploaded files ────────────
-    if (!body.documentRelationship) {
-      res.status(400).json({
-        error: "document_relationship is required. Declare whether this document is 'created', 'modified', 'reference', or 'supporting'.",
-      });
-      return;
-    }
+      if (!req.file) {
+        res.status(400).json({ error: "No file uploaded. Send a multipart/form-data request with a 'file' field." });
+        return;
+      }
+      if (!documentRelationship) {
+        fs.unlink(req.file.path, () => {});
+        res.status(400).json({
+          error: "document_relationship is required. Declare whether this document is 'created', 'modified', 'reference', or 'supporting'.",
+        });
+        return;
+      }
 
-    const validation = await validateFileName(projectId, body.fileName);
-    if (!validation.valid) {
-      // Save rejected file record to DB so it appears in the list with status "rejected"
-      const rejectedHash = createHash("sha256").update(body.fileName + String(Date.now())).digest("hex");
-      const rejectedTier = getFileTypeTier(body.fileName);
-      const [rejectedFile] = await db.insert(filesTable).values({
+      const filePath = req.file.path;
+      const actualFileSize = req.file.size;
+      const fileType = req.file.mimetype || "application/octet-stream";
+      const ext = (fileName.split(".").pop() || "").toLowerCase();
+      const isBimFile = BIM_EXTENSIONS.has(ext);
+
+      // Compute real SHA-256 from the actual file bytes on disk
+      const fileBytes = fs.readFileSync(filePath);
+      const fileHash = createHash("sha256").update(fileBytes).digest("hex");
+
+      const validation = await validateFileName(projectId, fileName);
+
+      if (!validation.valid) {
+        const rejectedTier = getFileTypeTier(fileName);
+        const [rejectedFile] = await db.insert(filesTable).values({
+          projectId,
+          fileName,
+          fileSize: actualFileSize,
+          fileType,
+          version: 1,
+          parentFileId: null,
+          status: "rejected",
+          uploadedById: req.user!.userId,
+          fileHash,
+          fileSizeBytes: actualFileSize,
+          documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting",
+          documentRelationshipDeclaredAt: new Date(),
+          fileTypeTier: rejectedTier,
+          source: "user-uploaded",
+          rejectionDetails: validation.details ?? [],
+        }).returning();
+
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "upload",
+          entityType: "file",
+          entityId: rejectedFile.id,
+          fileNameBefore: null,
+          fileNameAfter: fileName,
+          details: `Naming violation — file rejected: ${fileName}`,
+        });
+
+        // BIM fallback CVR for rejected non-PDF BIM files
+        if (isBimFile) {
+          await runBimFallbackCvr(rejectedFile.id, validation).catch(err =>
+            console.error(`[files] BIM fallback CVR failed for file ${rejectedFile.id}:`, err),
+          );
+        }
+
+        res.status(422).json({
+          error: "File name does not match the active naming convention",
+          details: validation.details,
+        });
+
+        // ── T6: Naming Violation email ──────────────────────────────────────
+        setImmediate(async () => {
+          try {
+            const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+            const projectName = project[0]?.name || "Unknown Project";
+            const failedFields = (validation.details || []).map((d: { field: string }) => d.field);
+            const uploaderUser = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+            const uploaderPrefs = uploaderUser[0]?.notificationPreferences;
+            if (notifEnabled(uploaderPrefs, "file_violation")) {
+              const lang = getUserLang(uploaderPrefs);
+              await sendEmail({
+                to: req.user!.email,
+                subject: lang === "es"
+                  ? `Violación de Convención de Nombres: ${fileName} — ${projectName}`
+                  : `Naming Violation Detected: ${fileName} — ${projectName}`,
+                html: makeNamingViolationEmail({ lang, fileName, projectName, failedFields, projectId, recipientName: req.user!.fullName }),
+              });
+            }
+            const admins = await db.select().from(projectMembersTable)
+              .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
+            for (const admin of admins) {
+              if (admin.userId === req.user!.userId) continue;
+              const adminUser = await db.select().from(usersTable).where(eq(usersTable.id, admin.userId)).limit(1);
+              if (!adminUser[0]?.email) continue;
+              const prefs = adminUser[0].notificationPreferences;
+              if (!notifEnabled(prefs, "file_violation")) continue;
+              const lang = getUserLang(prefs);
+              await sendEmail({
+                to: adminUser[0].email,
+                subject: lang === "es"
+                  ? `Violación de Convención de Nombres: ${fileName} — ${projectName}`
+                  : `Naming Violation Detected: ${fileName} — ${projectName}`,
+                html: makeNamingViolationEmail({ lang, fileName, projectName, failedFields, projectId, recipientName: adminUser[0].fullName }),
+              });
+            }
+          } catch (_) {}
+        });
+
+        // Background PDF extraction for rejected PDFs
+        if (ext === "pdf") {
+          setImmediate(() => {
+            extractAndStoreFromDisk(rejectedFile.id, projectId, fileName, filePath, req.user!.userId).catch(err =>
+              console.error(`[files] background extraction failed for rejected file ${rejectedFile.id}:`, err),
+            );
+          });
+        }
+
+        return;
+      }
+
+      // ── Duplicate detection (content-based) ─────────────────────────────────
+      const duplicates = await db.select({ id: filesTable.id, fileName: filesTable.fileName })
+        .from(filesTable)
+        .where(and(eq(filesTable.projectId, projectId), eq(filesTable.fileHash, fileHash)))
+        .limit(1);
+      if (duplicates.length > 0) {
+        fs.unlink(filePath, () => {});
+        res.status(409).json({
+          error: "Duplicate file detected",
+          details: `An identical file already exists in this project: "${duplicates[0].fileName}" (file ID ${duplicates[0].id}). The uploaded content matches an existing document.`,
+        });
+        return;
+      }
+
+      // ── Version detection ────────────────────────────────────────────────────
+      const incomingBase = getBaseName(fileName);
+      const existingFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+      const family = existingFiles.filter(f => getBaseName(f.fileName) === incomingBase);
+
+      let newVersion = 1;
+      let parentFileId: number | null = null;
+
+      if (family.length > 0) {
+        const root = family.find(f => f.parentFileId === null) ?? family[0];
+        parentFileId = root.id;
+        newVersion = Math.max(...family.map(f => f.version)) + 1;
+      }
+
+      const fileTypeTier = getFileTypeTier(fileName);
+      const defaultFileStatus = await getDefaultValue("file_status");
+      const [file] = await db.insert(filesTable).values({
         projectId,
-        fileName: body.fileName,
-        fileSize: body.fileSize,
-        fileType: body.fileType,
-        version: 1,
-        parentFileId: null,
-        status: "rejected",
+        fileName,
+        fileSize: actualFileSize,
+        fileType,
+        version: newVersion,
+        parentFileId,
+        status: defaultFileStatus,
         uploadedById: req.user!.userId,
-        fileHash: rejectedHash,
-        fileSizeBytes: body.fileSize,
-        documentRelationship: body.documentRelationship as "created" | "modified" | "reference" | "supporting",
+        fileHash,
+        fileSizeBytes: actualFileSize,
+        documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting",
         documentRelationshipDeclaredAt: new Date(),
-        fileTypeTier: rejectedTier,
+        fileTypeTier,
         source: "user-uploaded",
-        rejectionDetails: validation.details ?? [],
       }).returning();
 
+      // BIM fallback CVR for accepted non-PDF BIM files
+      if (isBimFile) {
+        await runBimFallbackCvr(file.id, validation).catch(err =>
+          console.error(`[files] BIM fallback CVR failed for file ${file.id}:`, err),
+        );
+      }
+
+      // ── Auto-supersede all previous versions in the same document family ────
+      if (newVersion > 1) {
+        await db.update(filesTable)
+          .set({ isSuperseded: true, updatedAt: new Date() })
+          .where(and(
+            eq(filesTable.projectId, projectId),
+            eq(filesTable.parentFileId, parentFileId!),
+          ));
+        if (parentFileId) {
+          await db.update(filesTable)
+            .set({ isSuperseded: true, updatedAt: new Date() })
+            .where(and(
+              eq(filesTable.projectId, projectId),
+              eq(filesTable.id, parentFileId),
+            ));
+        }
+      }
+
+      const isNewVersion = newVersion > 1;
       await db.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
@@ -766,166 +974,34 @@ router.post("/projects/:projectId/files", authMiddleware, requirePermission("adm
         userCompanyName: req.user!.companyName,
         actionType: "upload",
         entityType: "file",
-        entityId: rejectedFile.id,
+        entityId: file.id,
         fileNameBefore: null,
-        fileNameAfter: body.fileName,
-        details: `Naming violation — file rejected: ${body.fileName}`,
+        fileNameAfter: fileName,
+        details: isNewVersion
+          ? `Uploaded Version ${newVersion} of document: ${fileName}`
+          : `Uploaded file: ${fileName} [${documentRelationship}]`,
       });
 
-      res.status(422).json({
-        error: "File name does not match the active naming convention",
-        details: validation.details,
+      res.status(201).json({
+        ...file,
+        uploadedByName: req.user!.fullName,
+        uploadedByCompany: req.user!.companyName,
+        createdAt: file.createdAt.toISOString(),
+        updatedAt: file.updatedAt.toISOString(),
+        documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
       });
 
-      // ── T6: Naming Violation email ──────────────────────────────────────
-      setImmediate(async () => {
-        try {
-          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-          const projectName = project[0]?.name || "Unknown Project";
-          const failedFields = (validation.details || []).map((d: { field: string }) => d.field);
-          const uploaderUser = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
-          const uploaderPrefs = uploaderUser[0]?.notificationPreferences;
-          if (notifEnabled(uploaderPrefs, "file_violation")) {
-            const lang = getUserLang(uploaderPrefs);
-            await sendEmail({
-              to: req.user!.email,
-              subject: lang === "es"
-                ? `Violación de Convención de Nombres: ${body.fileName} — ${projectName}`
-                : `Naming Violation Detected: ${body.fileName} — ${projectName}`,
-              html: makeNamingViolationEmail({ lang, fileName: body.fileName, projectName, failedFields, projectId, recipientName: req.user!.fullName }),
-            });
-          }
-          const admins = await db.select().from(projectMembersTable)
-            .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.role, "admin")));
-          for (const admin of admins) {
-            if (admin.userId === req.user!.userId) continue;
-            const adminUser = await db.select().from(usersTable).where(eq(usersTable.id, admin.userId)).limit(1);
-            if (!adminUser[0]?.email) continue;
-            const prefs = adminUser[0].notificationPreferences;
-            if (!notifEnabled(prefs, "file_violation")) continue;
-            const lang = getUserLang(prefs);
-            await sendEmail({
-              to: adminUser[0].email,
-              subject: lang === "es"
-                ? `Violación de Convención de Nombres: ${body.fileName} — ${projectName}`
-                : `Naming Violation Detected: ${body.fileName} — ${projectName}`,
-              html: makeNamingViolationEmail({ lang, fileName: body.fileName, projectName, failedFields, projectId, recipientName: adminUser[0].fullName }),
-            });
-          }
-        } catch (_) {}
+      setImmediate(() => {
+        extractAndStoreFromDisk(file.id, projectId, fileName, filePath, req.user!.userId).catch(err =>
+          console.error(`[files] background extraction failed for file ${file.id}:`, err),
+        );
       });
-      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Bad request";
+      res.status(400).json({ error: message });
     }
-
-    // ── SHA-256 hash ─────────────────────────────────────────────────────────
-    let fileHash: string;
-    if (body.fileContent) {
-      const contentBytes = Buffer.from(body.fileContent, "base64");
-      fileHash = createHash("sha256").update(contentBytes).digest("hex");
-    } else {
-      fileHash = createHash("sha256").update(body.fileName).digest("hex");
-    }
-
-    // ── Duplicate detection (content-based only) ─────────────────────────────
-    if (body.fileContent) {
-      const duplicates = await db.select({ id: filesTable.id, fileName: filesTable.fileName })
-        .from(filesTable)
-        .where(and(eq(filesTable.projectId, projectId), eq(filesTable.fileHash, fileHash)))
-        .limit(1);
-      if (duplicates.length > 0) {
-        res.status(409).json({
-          error: "Duplicate file detected",
-          details: `An identical file already exists in this project: "${duplicates[0].fileName}" (file ID ${duplicates[0].id}). The uploaded content matches an existing document.`,
-        });
-        return;
-      }
-    }
-
-    // ── Version detection ────────────────────────────────────────────────────
-    const incomingBase = getBaseName(body.fileName);
-    const existingFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
-    const family = existingFiles.filter(f => getBaseName(f.fileName) === incomingBase);
-
-    let newVersion = 1;
-    let parentFileId: number | null = null;
-
-    if (family.length > 0) {
-      const root = family.find(f => f.parentFileId === null) ?? family[0];
-      parentFileId = root.id;
-      newVersion = Math.max(...family.map(f => f.version)) + 1;
-    }
-
-    const fileTypeTier = getFileTypeTier(body.fileName);
-    const defaultFileStatus = await getDefaultValue("file_status");
-    const [file] = await db.insert(filesTable).values({
-      projectId,
-      fileName: body.fileName,
-      fileSize: body.fileSize,
-      fileType: body.fileType,
-      version: newVersion,
-      parentFileId,
-      status: defaultFileStatus,
-      uploadedById: req.user!.userId,
-      fileHash,
-      fileSizeBytes: body.fileSize,
-      documentRelationship: body.documentRelationship,
-      documentRelationshipDeclaredAt: new Date(),
-      fileTypeTier,
-      source: "user-uploaded",
-    }).returning();
-
-    // ── Auto-supersede all previous versions in the same document family ────
-    if (newVersion > 1) {
-      await db.update(filesTable)
-        .set({ isSuperseded: true, updatedAt: new Date() })
-        .where(and(
-          eq(filesTable.projectId, projectId),
-          eq(filesTable.parentFileId, parentFileId!),
-        ));
-      // Also mark the root (which has no parentFileId) as superseded
-      if (parentFileId) {
-        await db.update(filesTable)
-          .set({ isSuperseded: true, updatedAt: new Date() })
-          .where(and(
-            eq(filesTable.projectId, projectId),
-            eq(filesTable.id, parentFileId),
-          ));
-      }
-    }
-
-    const isNewVersion = newVersion > 1;
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "upload",
-      entityType: "file",
-      entityId: file.id,
-      fileNameBefore: null,
-      fileNameAfter: body.fileName,
-      details: isNewVersion
-        ? `Uploaded Version ${newVersion} of document: ${body.fileName}`
-        : `Uploaded file: ${body.fileName} [${body.documentRelationship}]`,
-    });
-
-    res.status(201).json({
-      ...file,
-      uploadedByName: req.user!.fullName,
-      uploadedByCompany: req.user!.companyName,
-      createdAt: file.createdAt.toISOString(),
-      updatedAt: file.updatedAt.toISOString(),
-      documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
-    });
-
-    setImmediate(() => {
-      extractAndStoreContent(file.id, projectId, body.fileName, body.fileContent, req.user!.userId).catch(() => {});
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Bad request";
-    res.status(400).json({ error: message });
-  }
-});
+  },
+);
 
 // ─── PATCH /projects/:projectId/files/:fileId ─────────────────────────────────
 router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {

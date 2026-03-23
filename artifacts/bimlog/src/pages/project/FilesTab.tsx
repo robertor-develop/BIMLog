@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
+import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
@@ -136,7 +136,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   ) => {
     setAiLoadingMap(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
     setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
-    console.log("[frontend] extractedText:", extractedText?.slice(0, 200));
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const resp = await fetch(`/api/v1/projects/${projectId}/files/suggest-name`, {
@@ -151,7 +150,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         }),
       });
       const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
-      console.log("[AI RAW RESPONSE]", data);
       if (data.isRelevant === false) {
         setRejAiResults(prev => {
           const m = new Map(prev);
@@ -779,6 +777,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
   const [showErrors, setShowErrors] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
@@ -835,27 +834,6 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     }
   };
 
-  const { mutate, isPending } = useUploadFile({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
-        setSuccess(true);
-        setTimeout(() => onClose(), 1200);
-      },
-      onError: (err: ApiError) => {
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
-        const data = err.data || err.response?.data;
-        if (data?.details) {
-          setErrorDetails(data.details);
-        } else {
-          toast({ title: t("common.error"), description: data?.error || err.message, variant: "destructive" });
-        }
-      },
-    },
-  });
-
   const handleFile = useCallback(async (file: File) => {
     setErrorDetails([]);
     setSuccess(false);
@@ -865,18 +843,35 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       toast({ title: "Declaration required", description: "Please select a declaration type — Created, Modified, Reference, or Supporting — before uploading.", variant: "destructive" });
       return;
     }
-    const ext = file.name.split(".").pop()?.toLowerCase() || "";
-    let fileContent: string | undefined;
-    if (ext === "pdf" && file.size < 10 * 1024 * 1024) {
-      try {
-        const buf = await file.arrayBuffer();
-        fileContent = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      } catch {
-        fileContent = undefined;
+    setIsUploading(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", file.name);
+      formData.append("documentRelationship", documentRelationship);
+      const resp = await fetch(`/api/v1/projects/${projectId}/files`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await resp.json() as { error?: string; details?: ValidationDetail[] };
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
+      if (resp.status === 422 && data.details) {
+        setErrorDetails(data.details);
+      } else if (resp.status === 201) {
+        setSuccess(true);
+        setTimeout(() => onClose(), 1200);
+      } else {
+        toast({ title: t("common.error"), description: data?.error || "Upload failed", variant: "destructive" });
       }
+    } catch {
+      toast({ title: t("common.error"), description: "Upload failed", variant: "destructive" });
+    } finally {
+      setIsUploading(false);
     }
-    mutate({ projectId, data: { fileName: file.name, fileSize: file.size || 1024, fileType: file.type || "application/octet-stream", fileContent, documentRelationship: documentRelationship as "created" | "modified" | "reference" | "supporting" || undefined } });
-  }, [mutate, projectId, documentRelationship]);
+  }, [projectId, documentRelationship, queryClient, toast, t, onClose]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -955,7 +950,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       >
         <Upload style={{ width: 20, height: 20, color: dragOver ? "#2563EB" : "hsl(var(--muted-foreground))" }} />
         <div style={{ fontSize: 12, fontWeight: 600, color: dragOver ? "#1D4ED8" : "hsl(var(--foreground))" }}>
-          {isPending ? "Validating…" : "Drag and drop your file here or click to browse"}
+          {isUploading ? "Uploading…" : "Drag and drop your file here or click to browse"}
         </div>
         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
           Only the file name is validated — no content is stored
