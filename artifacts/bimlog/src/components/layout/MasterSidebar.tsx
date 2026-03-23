@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+import { getMe } from "@workspace/api-client-react";
 
 export function MasterSidebar() {
   const { user, token, logout } = useAuthStore();
@@ -12,20 +11,9 @@ export function MasterSidebar() {
   const [companyName, setCompanyName] = useState<string>("");
 
   useEffect(() => {
-    // Check the stored user first (covers fresh logins immediately)
-    if ((user as any)?.isSuperAdmin === true) {
-      setShowAdmin(true);
-    }
-
     if (!token) return;
-
-    // Always re-verify from the server regardless of local cache
-    fetch(`${API_BASE}/api/v1/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then((data: any) => {
-        if (!data) return;
+    getMe()
+      .then((data) => {
         if (data.isSuperAdmin === true) setShowAdmin(true);
         if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
         if (data.companyName) setCompanyName(data.companyName);
@@ -99,7 +87,7 @@ export function MasterSidebar() {
                 {user.fullName}
               </div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>
-                {companyName || (user as any).companyName || ""}
+                {companyName || user.companyName || ""}
               </div>
             </div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>Profile →</div>

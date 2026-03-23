@@ -62,6 +62,8 @@ export interface User {
   companyName: string;
   companyId: number;
   createdAt: string;
+  isSuperAdmin?: boolean;
+  avatarUrl?: string | null;
 }
 
 export interface AuthResponse {

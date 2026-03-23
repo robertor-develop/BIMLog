@@ -4,8 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { Globe, Info, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef } from "react";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+import { getMe } from "@workspace/api-client-react";
 
 const INFO_LINKS = [
   { label: "How It Works", href: "/setup-guide" },
@@ -33,13 +32,10 @@ export function Navbar() {
 
   useEffect(() => {
     if (!user || !token) { setAvatarUrl(null); setIsSuperAdmin(false); return; }
-    fetch(`${API_BASE}/api/v1/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : null)
+    getMe()
       .then(data => {
-        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl);
-        if (data?.isSuperAdmin) setIsSuperAdmin(true);
+        if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
+        if (data.isSuperAdmin) setIsSuperAdmin(true);
       })
       .catch(() => {});
   }, [user?.id, token]);
