@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useListFiles, useUploadFile, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -174,6 +174,21 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       setRejAiLoading(prev => { const s = new Set(prev); s.delete(fileId); return s; });
     }
   };
+
+  // Auto-trigger AI analysis when a mismatch-flagged rejected row is expanded
+  useEffect(() => {
+    if (!files) return;
+    expandedRejected.forEach(rootId => {
+      const family = files.filter(f => f.id === rootId || f.rootFileId === rootId);
+      if (family.length === 0) return;
+      const latest = family.reduce((a, b) => ((a.version ?? 0) >= (b.version ?? 0) ? a : b));
+      if (latest.status !== "rejected") return;
+      const cvVal = latest.contentVerificationResult;
+      if (cvVal !== "possible_mismatch" && cvVal !== "clear_mismatch") return;
+      if (rejAiResults.has(rootId) || rejAiLoading.has(rootId)) return;
+      handleAiSuggestExisting(rootId, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult);
+    });
+  }, [expandedRejected, files]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validCount    = files?.filter(f => f.status !== "rejected").length ?? 0;
   const rejectedCount = files?.filter(f => f.status === "rejected").length ?? 0;

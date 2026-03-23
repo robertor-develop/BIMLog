@@ -1,0 +1,52 @@
+Good. One last fix. The backend is now correct and the frontend is using isRelevant, but the UI is still showing “Content analysis not available” before Ask AI runs, and users don’t see the reason until they click Ask AI. We already have contentVerificationResult from upload-time analysis — use it.
+
+Modify ONLY artifacts/bimlog/src/pages/project/FilesTab.tsx.
+
+In the rejected file expanded section:
+
+If latest.contentVerificationResult is "possible_mismatch" or "clear_mismatch" AND aiResult does not exist yet:
+
+Show the warning message immediately (same mapping already implemented) and DO NOT show “Content analysis not available”.
+
+Do not wait for Ask AI to display mismatch context.
+
+Now improve Ask AI trigger:
+
+If latest.contentVerificationResult is mismatch AND aiResult does not exist:
+
+Auto-trigger handleAiSuggestExisting once when the row is expanded (useEffect tied to expanded state and file id). This ensures the reason appears without requiring the user to click Ask AI.
+
+Do not re-trigger if aiResult already exists for that file.
+
+Now fix display priority:
+
+If aiResult exists:
+
+use aiResult.reason (this is already correct)
+
+If aiResult does not exist but contentVerificationResult indicates mismatch:
+
+show only the mapped warning message (no placeholder text)
+
+Now remove the “Content analysis not available” message for mismatch cases entirely. It should only appear when contentVerificationResult is null or "not_applicable".
+
+Do not change any other logic. Do not change backend. Do not change override flow.
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "Content analysis not available" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "contentVerificationResult" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "useEffect" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 4 ===
+grep -n "handleAiSuggestExisting" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 5 ===
+grep -n "possible_mismatch|clear_mismatch" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+Show exact output only.
