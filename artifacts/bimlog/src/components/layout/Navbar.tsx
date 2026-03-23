@@ -136,22 +136,6 @@ export function Navbar() {
               </Link>
             )}
 
-            {isSuperAdmin && (
-              <Link href="/admin">
-                <button style={{
-                  display: "flex", alignItems: "center", gap: 5,
-                  padding: "4px 10px", borderRadius: 6,
-                  fontSize: 11, fontWeight: 700,
-                  color: "#ef4444",
-                  background: "#ef444415",
-                  border: "1px solid #ef444444",
-                  cursor: "pointer",
-                  letterSpacing: "0.03em",
-                }}>
-                  ⚙ Admin
-                </button>
-              </Link>
-            )}
 
             <Link href="/profile" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
               <div
