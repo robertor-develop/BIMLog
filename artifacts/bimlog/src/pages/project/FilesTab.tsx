@@ -98,7 +98,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
-  const [rejAiLoading, setRejAiLoading] = useState<Set<number>>(new Set());
+  const [aiLoadingMap, setAiLoadingMap] = useState<Map<number, boolean>>(new Map());
   const [rejAiResults, setRejAiResults] = useState<Map<number, { name: string | null; reason: string; isRelevant?: boolean }>>(new Map());
   const [rejCopied, setRejCopied] = useState<number | null>(null);
   const [mismatchOverride, setMismatchOverride] = useState<Map<number, boolean>>(new Map());
@@ -134,7 +134,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
     contentVerificationResult?: string | null,
     manualExplanation?: string,
   ) => {
-    setRejAiLoading(prev => { const s = new Set(prev); s.add(fileId); return s; });
+    setAiLoadingMap(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
     setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -171,7 +171,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
     } catch {
       // silently ignore
     } finally {
-      setRejAiLoading(prev => { const s = new Set(prev); s.delete(fileId); return s; });
+      setAiLoadingMap(prev => { const m = new Map(prev); m.delete(fileId); return m; });
     }
   };
 
@@ -185,7 +185,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       if (latest.status !== "rejected") return;
       const cvVal = latest.contentVerificationResult;
       if (cvVal !== "possible_mismatch" && cvVal !== "clear_mismatch") return;
-      if (rejAiResults.has(rootId) || rejAiLoading.has(rootId)) return;
+      if (rejAiResults.has(rootId) || aiLoadingMap.get(rootId) === true) return;
       handleAiSuggestExisting(rootId, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult);
     });
   }, [expandedRejected, files]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -405,7 +405,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                       {isRejected && isRejExp && (() => {
                         const rejDetails = latest.rejectionDetails ?? [];
                         const aiResult = rejAiResults.get(root.id);
-                        const isAiLoading = rejAiLoading.has(root.id);
+                        const isAiLoading = aiLoadingMap.get(root.id) === true;
                         const colCount = canWrite ? 7 : 6;
                         const cvVal = latest.contentVerificationResult;
                         const isMismatch = cvVal === "clear_mismatch" || cvVal === "possible_mismatch";
