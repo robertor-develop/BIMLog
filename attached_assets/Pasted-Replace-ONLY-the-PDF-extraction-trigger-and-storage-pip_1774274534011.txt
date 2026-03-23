@@ -1,0 +1,70 @@
+Replace ONLY the PDF extraction trigger and storage pipeline inside artifacts/api-server/src/routes/files.ts. Do not modify frontend. Do not modify upload transport. Do not touch multer or hashing. Only fix extraction + CVR trigger reliability.
+
+The issue is not file type. The issue is that extraction runs in a fire-and-forget async block and fails silently. That is why extracted_text is NULL even for PDFs.
+
+Fix it like this:
+
+In the POST /files route, AFTER the file is saved and DB row is created, REMOVE the fire-and-forget call:
+
+extractAndStoreContent(...).catch(() => {})
+
+Replace it with an awaited processing call:
+
+await processFileFromDisk(file.id, filePath, fileName, projectId)
+
+Create a new function processFileFromDisk that does ALL of this synchronously in sequence:
+detect extension from fileName
+if ext === "pdf":
+read file from disk using fs.readFileSync(filePath)
+run pdf-parse on buffer
+if text exists and length > 50:
+update DB extracted_text
+run runContentVerification immediately
+store content_verification_result
+else:
+update DB content_verification_result = "not_applicable"
+update DB hash_comparison_note = "PDF parsed but no usable text"
+if ext !== "pdf":
+call runBimFallbackCvr(fileName, projectId)
+store content_verification_result (never leave NULL)
+REMOVE all silent catches. If extraction fails, log:
+
+console.error([files] extraction failed fileId=${fileId}, err)
+
+and store:
+
+content_verification_result = "not_applicable"
+hash_comparison_note = "Extraction failed"
+
+Guarantee this invariant:
+AFTER upload completes, every file MUST have:
+content_verification_result NOT NULL
+
+No exceptions.
+
+Do NOT rely on background jobs. Do NOT rely on async detached promises. Everything must complete inside the request cycle for now.
+Do NOT change DB schema. Use existing fields only.
+Do NOT touch suggest-name yet.
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "extractAndStoreContent" artifacts/api-server/src/routes/files.ts
+
+=== Check 2 ===
+grep -n "processFileFromDisk" artifacts/api-server/src/routes/files.ts
+
+=== Check 3 ===
+grep -n "await processFileFromDisk" artifacts/api-server/src/routes/files.ts
+
+=== Check 4 ===
+grep -n "catch(() =>" artifacts/api-server/src/routes/files.ts
+
+=== Check 5 ===
+Upload the SAME PDF again, then run:
+SELECT id, file_name, content_verification_result, LENGTH(extracted_text) as text_len
+FROM files
+ORDER BY id DESC
+LIMIT 5;
+
+Show exact output only. Do not explain.

@@ -229,48 +229,47 @@ async function parseFileNameMetadata(projectId: number, fileName: string): Promi
   };
 }
 
-// Async background extraction — reads file from disk, called after upload response is sent
-async function extractAndStoreFromDisk(fileId: number, projectId: number, fileName: string, filePath: string, uploadedById: number): Promise<void> {
-  const ext = fileName.split(".").pop()?.toLowerCase() || "";
-  let extractedText: string | null = null;
-  let fileMetadata: Record<string, unknown> | null = null;
-
-  if (ext === "pdf") {
-    try {
-      const buffer = await fs.promises.readFile(filePath);
-      const parser = new PDFParse({ data: buffer, verbosity: 0 });
-      const result = await parser.getText();
-      await parser.destroy();
-      extractedText = result.text?.trim() || null;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[files] pdf-parse failed for file ${fileId}: ${msg}`);
-      await db.update(filesTable).set({
-        hashComparisonNote: `PDF text extraction failed: ${msg}`,
-        contentVerificationResult: "not_applicable",
-        updatedAt: new Date(),
-      }).where(eq(filesTable.id, fileId));
-      return;
+// Synchronous processing — runs inside the request cycle, guarantees CVR is non-null on exit
+async function processFileFromDisk(fileId: number, filePath: string, fileName: string, projectId: number): Promise<void> {
+  const ext = (fileName.split(".").pop() || "").toLowerCase();
+  try {
+    if (ext === "pdf") {
+      const buffer = fs.readFileSync(filePath);
+      let extractedText: string | null = null;
+      try {
+        const parser = new PDFParse({ data: buffer, verbosity: 0 });
+        const result = await parser.getText();
+        await parser.destroy();
+        extractedText = result.text?.trim() || null;
+      } catch (err) {
+        console.error(`[files] extraction failed fileId=${fileId}`, err);
+        await db.update(filesTable).set({
+          contentVerificationResult: "not_applicable",
+          hashComparisonNote: "Extraction failed",
+          updatedAt: new Date(),
+        }).where(eq(filesTable.id, fileId));
+        return;
+      }
+      if (extractedText && extractedText.length > 50) {
+        await db.update(filesTable).set({ extractedText, updatedAt: new Date() }).where(eq(filesTable.id, fileId));
+        await runContentVerification(fileId, projectId, fileName, extractedText, 0);
+      } else {
+        await db.update(filesTable).set({
+          contentVerificationResult: "not_applicable",
+          hashComparisonNote: "PDF parsed but no usable text",
+          updatedAt: new Date(),
+        }).where(eq(filesTable.id, fileId));
+      }
+    } else {
+      await runBimFallbackCvr(fileId, fileName, projectId);
     }
-  }
-
-  if (BIM_EXTENSIONS.has(ext)) {
-    fileMetadata = await parseFileNameMetadata(projectId, fileName);
-  }
-
-  if (extractedText !== null || fileMetadata !== null) {
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (extractedText !== null) updates.extractedText = extractedText;
-    if (fileMetadata !== null) updates.fileMetadata = fileMetadata;
-    await db.update(filesTable).set(updates).where(eq(filesTable.id, fileId));
-    console.log(`[files] content indexed for file ${fileId} (${fileName}): pdf=${extractedText !== null}, bim=${fileMetadata !== null}`);
-  }
-
-  // ── AI content verification (PDFs with extracted text only) ─────────────
-  if (ext === "pdf" && extractedText) {
-    await runContentVerification(fileId, projectId, fileName, extractedText, uploadedById);
-  } else if (ext === "pdf") {
-    await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
+  } catch (err) {
+    console.error(`[files] extraction failed fileId=${fileId}`, err);
+    await db.update(filesTable).set({
+      contentVerificationResult: "not_applicable",
+      hashComparisonNote: "Extraction failed",
+      updatedAt: new Date(),
+    }).where(eq(filesTable.id, fileId));
   }
 }
 
@@ -385,15 +384,13 @@ Rules:
     }
   } catch (err) {
     console.error(`[files] AI content verification failed for file ${fileId}:`, err instanceof Error ? err.message : err);
-    await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId)).catch(() => {});
+    await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
   }
 }
 
-// BIM file CVR fallback — uses naming convention validation result (no text extraction needed)
-async function runBimFallbackCvr(
-  fileId: number,
-  validation: { valid: boolean; details?: Array<{ field: string; message: string }> },
-): Promise<void> {
+// BIM file CVR fallback — re-validates naming convention and maps violation count to CVR
+async function runBimFallbackCvr(fileId: number, fileName: string, projectId: number): Promise<void> {
+  const validation = await validateFileName(projectId, fileName);
   let cvr: "match" | "possible_mismatch" | "clear_mismatch" | "not_applicable";
   if (validation.valid) {
     cvr = "match";
@@ -832,12 +829,7 @@ router.post(
           details: `Naming violation — file rejected: ${fileName}`,
         });
 
-        // BIM fallback CVR for rejected non-PDF BIM files
-        if (isBimFile) {
-          await runBimFallbackCvr(rejectedFile.id, validation).catch(err =>
-            console.error(`[files] BIM fallback CVR failed for file ${rejectedFile.id}:`, err),
-          );
-        }
+        await processFileFromDisk(rejectedFile.id, filePath, fileName, projectId);
 
         res.status(422).json({
           error: "File name does not match the active naming convention",
@@ -881,15 +873,6 @@ router.post(
             }
           } catch (_) {}
         });
-
-        // Background PDF extraction for rejected PDFs
-        if (ext === "pdf") {
-          setImmediate(() => {
-            extractAndStoreFromDisk(rejectedFile.id, projectId, fileName, filePath, req.user!.userId).catch(err =>
-              console.error(`[files] background extraction failed for rejected file ${rejectedFile.id}:`, err),
-            );
-          });
-        }
 
         return;
       }
@@ -941,12 +924,7 @@ router.post(
         source: "user-uploaded",
       }).returning();
 
-      // BIM fallback CVR for accepted non-PDF BIM files
-      if (isBimFile) {
-        await runBimFallbackCvr(file.id, validation).catch(err =>
-          console.error(`[files] BIM fallback CVR failed for file ${file.id}:`, err),
-        );
-      }
+      await processFileFromDisk(file.id, filePath, fileName, projectId);
 
       // ── Auto-supersede all previous versions in the same document family ────
       if (newVersion > 1) {
@@ -989,12 +967,6 @@ router.post(
         createdAt: file.createdAt.toISOString(),
         updatedAt: file.updatedAt.toISOString(),
         documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
-      });
-
-      setImmediate(() => {
-        extractAndStoreFromDisk(file.id, projectId, fileName, filePath, req.user!.userId).catch(err =>
-          console.error(`[files] background extraction failed for file ${file.id}:`, err),
-        );
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bad request";
@@ -1057,12 +1029,7 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
     });
 
     if (body.fileName) {
-      const newExt = body.fileName.split(".").pop()?.toLowerCase() || "";
-      if (BIM_EXTENSIONS.has(newExt)) {
-        setImmediate(() => {
-          extractAndStoreContent(fileId, projectId, body.fileName!, undefined, req.user!.userId).catch(() => {});
-        });
-      }
+      await runBimFallbackCvr(fileId, body.fileName, projectId);
     }
 
     res.json({
