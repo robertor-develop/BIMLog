@@ -13,6 +13,7 @@ import downloadsRouter from "./downloads";
 import documentsRouter from "./documents";
 import adminRouter from "./admin";
 import contactRouter from "./contact";
+import prodSeedRouter from "./prod-seed";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(conventionsRouter);
 router.use(membersRouter);
 router.use(adminRouter);
 router.use(contactRouter);
+router.use(prodSeedRouter);
 
 export default router;

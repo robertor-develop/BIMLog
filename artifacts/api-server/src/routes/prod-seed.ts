@@ -185,4 +185,23 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
   }
 });
 
+router.post("/system/set-super-admin", async (req, res) => {
+  const { key, email } = req.body;
+  if (key !== SEED_KEY) {
+    res.status(403).json({ error: "Invalid key" });
+    return;
+  }
+  if (!email) {
+    res.status(400).json({ error: "email required" });
+    return;
+  }
+  try {
+    const result = await db.execute(sql`UPDATE users SET is_super_admin = true WHERE email = ${email}`);
+    res.json({ success: true, updated: (result as any).rowCount ?? 0 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed";
+    res.status(500).json({ error: message });
+  }
+});
+
 export default router;
