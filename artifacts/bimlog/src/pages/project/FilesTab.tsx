@@ -101,6 +101,9 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const [rejAiLoading, setRejAiLoading] = useState<Set<number>>(new Set());
   const [rejAiResults, setRejAiResults] = useState<Map<number, { name: string | null; reason: string; isRelevant?: boolean }>>(new Map());
   const [rejCopied, setRejCopied] = useState<number | null>(null);
+  const [mismatchOverride, setMismatchOverride] = useState<Map<number, boolean>>(new Map());
+  const [explainOpen, setExplainOpen] = useState<Map<number, boolean>>(new Map());
+  const [explanationText, setExplanationText] = useState<Map<number, string>>(new Map());
 
   const toggleFamily = (rootId: number) =>
     setExpanded(prev => { const s = new Set(prev); s.has(rootId) ? s.delete(rootId) : s.add(rootId); return s; });
@@ -129,6 +132,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
     validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null,
     extractedText?: string | null,
     contentVerificationResult?: string | null,
+    manualExplanation?: string,
   ) => {
     setRejAiLoading(prev => { const s = new Set(prev); s.add(fileId); return s; });
     setRejAiResults(prev => { const m = new Map(prev); m.delete(fileId); return m; });
@@ -142,6 +146,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
           validationDetails: validationDetails ?? [],
           ...(extractedText ? { extractedText } : {}),
           ...(contentVerificationResult ? { contentVerificationResult } : {}),
+          ...(manualExplanation ? { manualExplanation } : {}),
         }),
       });
       const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
@@ -150,6 +155,11 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         m.set(fileId, { name: data.suggestedName, reason: data.reason || "", isRelevant: data.isRelevant });
         return m;
       });
+      // If a manual explanation was provided and a name came back, auto-accept the mismatch
+      if (manualExplanation && data.suggestedName) {
+        setMismatchOverride(prev => { const m = new Map(prev); m.set(fileId, true); return m; });
+        setExplainOpen(prev => { const m = new Map(prev); m.delete(fileId); return m; });
+      }
     } catch {
       // silently ignore
     } finally {
@@ -374,6 +384,23 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                         const aiResult = rejAiResults.get(root.id);
                         const isAiLoading = rejAiLoading.has(root.id);
                         const colCount = canWrite ? 7 : 6;
+                        const cvVal = latest.contentVerificationResult;
+                        const isMismatch = cvVal === "clear_mismatch" || cvVal === "possible_mismatch";
+                        const isOverride = mismatchOverride.get(root.id) ?? false;
+                        const isExplainOpen = explainOpen.get(root.id) ?? false;
+                        const explainText = explanationText.get(root.id) ?? "";
+                        // Show name chip only when no mismatch OR user has accepted override
+                        const showNameChip = !!(aiResult?.name && (!isMismatch || isOverride));
+                        // Show mismatch control actions when AI returned result AND mismatch AND not yet overridden
+                        const showMismatchActions = !!(aiResult && isMismatch && !isOverride);
+
+                        const CVR_MAP: Record<string, { isRelevant: boolean; message: string; color: string }> = {
+                          match: { isRelevant: true, message: "Document content matches project context", color: "#16A34A" },
+                          possible_mismatch: { isRelevant: false, message: "Content may not match this project — review required", color: "#D97706" },
+                          clear_mismatch: { isRelevant: false, message: "This document appears unrelated to this project", color: "#DC2626" },
+                        };
+                        const mappedCvr = cvVal ? CVR_MAP[cvVal] ?? null : null;
+
                         return (
                           <tr key={`rej-${root.id}`}>
                             <td colSpan={colCount} style={{ padding: 0 }}>
@@ -420,38 +447,108 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                 )}
 
                                 {/* Content Analysis section */}
-                                {(() => {
-                                  const cvVal = latest.contentVerificationResult;
-                                  const CVR_MAP: Record<string, { isRelevant: boolean; message: string; color: string }> = {
-                                    match: { isRelevant: true, message: "Document content matches project context", color: "#16A34A" },
-                                    possible_mismatch: { isRelevant: false, message: "Content may not match this project — review required", color: "#D97706" },
-                                    clear_mismatch: { isRelevant: false, message: "This document appears unrelated to this project", color: "#DC2626" },
-                                  };
-                                  const mapped = cvVal ? CVR_MAP[cvVal] ?? null : null;
-                                  return (
-                                    <div style={{ marginBottom: 14 }}>
-                                      <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                        AI Analysis
-                                      </div>
-                                      {mapped ? (
-                                        <div style={{ fontSize: 11, fontWeight: 600, color: mapped.color, display: "flex", alignItems: "center", gap: 5 }}>
-                                          {!mapped.isRelevant && <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />}
-                                          {mapped.isRelevant && <CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />}
-                                          {mapped.message}
-                                        </div>
-                                      ) : (
-                                        <div style={{ fontSize: 11, color: "#9CA3AF", fontStyle: "italic" }}>Content analysis not available</div>
-                                      )}
+                                <div style={{ marginBottom: 14 }}>
+                                  <div style={{ fontSize: 10, fontWeight: 700, color: "#9F1239", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                    AI Analysis
+                                  </div>
+                                  {mappedCvr ? (
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: mappedCvr.color, display: "flex", alignItems: "center", gap: 5 }}>
+                                      {!mappedCvr.isRelevant && <AlertCircle style={{ width: 12, height: 12, flexShrink: 0 }} />}
+                                      {mappedCvr.isRelevant && <CheckCircle2 style={{ width: 12, height: 12, flexShrink: 0 }} />}
+                                      {mappedCvr.message}
                                     </div>
-                                  );
-                                })()}
+                                  ) : (
+                                    <div style={{ fontSize: 11, color: "#9CA3AF", fontStyle: "italic" }}>Content analysis not available</div>
+                                  )}
+                                </div>
+
+                                {/* Mismatch control layer — shown after Ask AI when mismatch and not yet overridden */}
+                                {showMismatchActions && (
+                                  <div style={{ marginBottom: 14, padding: "12px 14px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+                                    <div style={{ fontSize: 11, color: "#92400E", marginBottom: 2, fontWeight: 600 }}>
+                                      {aiResult!.reason || mappedCvr?.message}
+                                    </div>
+                                    <div style={{ fontSize: 10, color: "#B45309", marginBottom: 10 }}>
+                                      How would you like to proceed?
+                                    </div>
+                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                      <button
+                                        onClick={e => { e.stopPropagation(); setMismatchOverride(prev => { const m = new Map(prev); m.set(root.id, true); return m; }); }}
+                                        style={{
+                                          display: "inline-flex", alignItems: "center", gap: 5,
+                                          padding: "6px 13px", borderRadius: 6, border: "1.5px solid #D97706",
+                                          background: "#FFFBEB", cursor: "pointer",
+                                          fontSize: 11, fontWeight: 600, color: "#92400E",
+                                        }}
+                                      >
+                                        Continue Anyway
+                                      </button>
+                                      <button
+                                        onClick={e => { e.stopPropagation(); setExplainOpen(prev => { const m = new Map(prev); m.set(root.id, !isExplainOpen); return m; }); }}
+                                        style={{
+                                          display: "inline-flex", alignItems: "center", gap: 5,
+                                          padding: "6px 13px", borderRadius: 6, border: "1.5px solid #6B7280",
+                                          background: "white", cursor: "pointer",
+                                          fontSize: 11, fontWeight: 600, color: "#374151",
+                                        }}
+                                      >
+                                        Explain Manually
+                                      </button>
+                                    </div>
+                                    {isExplainOpen && (
+                                      <div style={{ marginTop: 10 }}>
+                                        <textarea
+                                          onClick={e => e.stopPropagation()}
+                                          value={explainText}
+                                          onChange={e => { const v = e.target.value; setExplanationText(prev => { const m = new Map(prev); m.set(root.id, v); return m; }); }}
+                                          placeholder="Explain why this document belongs to this project"
+                                          rows={3}
+                                          style={{
+                                            width: "100%", padding: "8px 10px", borderRadius: 6,
+                                            border: "1.5px solid #D1D5DB", fontSize: 11,
+                                            fontFamily: "inherit", resize: "vertical",
+                                            outline: "none", boxSizing: "border-box",
+                                          }}
+                                        />
+                                        <button
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (!explainText.trim()) return;
+                                            handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult, explainText.trim());
+                                          }}
+                                          disabled={isAiLoading || !explainText.trim()}
+                                          style={{
+                                            marginTop: 8,
+                                            display: "inline-flex", alignItems: "center", gap: 5,
+                                            padding: "6px 14px", borderRadius: 6, border: "none",
+                                            background: isAiLoading || !explainText.trim() ? "#A78BFA" : "#7C3AED",
+                                            cursor: isAiLoading || !explainText.trim() ? "not-allowed" : "pointer",
+                                            fontSize: 11, fontWeight: 600, color: "white",
+                                          }}
+                                        >
+                                          <Sparkles style={{ width: 11, height: 11 }} />
+                                          {isAiLoading ? "Asking AI…" : "Submit Explanation"}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Override accepted note */}
+                                {isOverride && (
+                                  <div style={{ fontSize: 10, color: "#D97706", fontWeight: 600, marginBottom: 10, display: "flex", alignItems: "center", gap: 4 }}>
+                                    <AlertCircle style={{ width: 11, height: 11 }} />
+                                    User accepted mismatch
+                                  </div>
+                                )}
 
                                 {/* Suggested Compliant Name + AI + Customize */}
                                 <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                   Suggested Compliant Name
                                 </div>
                                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-                                  {suggestedNameFromConvention && (
+                                  {/* Convention suggestion — hidden once AI result exists */}
+                                  {!aiResult && suggestedNameFromConvention && (
                                     <button
                                       onClick={e => { e.stopPropagation(); handleCopyRej(root.id, suggestedNameFromConvention); }}
                                       style={{
@@ -472,46 +569,24 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                     </button>
                                   )}
 
-                                  {aiResult && (() => {
-                                    const cvVal = latest.contentVerificationResult;
-                                    const isClearMismatch = cvVal === "clear_mismatch";
-                                    const isPossibleMismatch = cvVal === "possible_mismatch";
-                                    if (isClearMismatch) {
-                                      return (
-                                        <div style={{ fontSize: 11, color: "#DC2626", fontWeight: 600, display: "flex", alignItems: "center", gap: 5 }}>
-                                          <AlertCircle style={{ width: 12, height: 12 }} />
-                                          This document appears unrelated to this project
-                                        </div>
-                                      );
-                                    }
-                                    return (
-                                      <>
-                                        {isPossibleMismatch && (
-                                          <div style={{ fontSize: 11, color: "#D97706", fontWeight: 600, display: "flex", alignItems: "center", gap: 5, width: "100%" }}>
-                                            <AlertCircle style={{ width: 12, height: 12 }} />
-                                            Content may not match this project — review required
-                                          </div>
-                                        )}
-                                        {aiResult.name && (
-                                          <button
-                                            onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult.name!); }}
-                                            style={{
-                                              display: "inline-flex", alignItems: "center", gap: 6,
-                                              padding: "6px 16px", borderRadius: 20,
-                                              border: "2px solid #7C3AED",
-                                              background: "#F5F3FF",
-                                              cursor: "pointer", fontFamily: "var(--font-mono)",
-                                              fontSize: 12, fontWeight: 700, color: "#6D28D9",
-                                              wordBreak: "break-all",
-                                            }}
-                                          >
-                                            <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
-                                            {aiResult.name}
-                                          </button>
-                                        )}
-                                      </>
-                                    );
-                                  })()}
+                                  {/* AI name chip — only shown when override accepted or no mismatch */}
+                                  {showNameChip && (
+                                    <button
+                                      onClick={e => { e.stopPropagation(); handleCopyRej(root.id, aiResult!.name!); }}
+                                      style={{
+                                        display: "inline-flex", alignItems: "center", gap: 6,
+                                        padding: "6px 16px", borderRadius: 20,
+                                        border: "2px solid #7C3AED",
+                                        background: "#F5F3FF",
+                                        cursor: "pointer", fontFamily: "var(--font-mono)",
+                                        fontSize: 12, fontWeight: 700, color: "#6D28D9",
+                                        wordBreak: "break-all",
+                                      }}
+                                    >
+                                      <Sparkles style={{ width: 11, height: 11, flexShrink: 0 }} />
+                                      {aiResult!.name}
+                                    </button>
+                                  )}
 
                                   <button
                                     onClick={e => { e.stopPropagation(); handleAiSuggestExisting(root.id, latest.fileName, latest.rejectionDetails, latest.extractedText, latest.contentVerificationResult); }}
@@ -542,7 +617,8 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
                                 </div>
 
-                                {aiResult?.reason && latest.contentVerificationResult !== "clear_mismatch" && (
+                                {/* AI reason — only when no mismatch or override accepted */}
+                                {aiResult?.reason && (!isMismatch || isOverride) && (
                                   <div style={{ marginTop: 8, fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>{aiResult.reason}</div>
                                 )}
                               </div>

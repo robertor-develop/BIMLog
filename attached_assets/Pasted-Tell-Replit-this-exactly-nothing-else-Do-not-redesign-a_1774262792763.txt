@@ -1,0 +1,49 @@
+Tell Replit this exactly, nothing else:
+
+Do not redesign anything. Do not change backend. Extend the existing FilesTab rejected flow to match the intended behavior.
+
+When contentVerificationResult is "possible_mismatch" or "clear_mismatch", do not treat it as a simple rejection. Keep the existing rejection UI but add a control layer.
+
+In the rejected file expanded section, under the existing warning and aiResult.reason, add two actions:
+
+"Continue Anyway" and "Explain Manually".
+
+Continue Anyway:
+On click, set a local flag for that file (mismatchOverride = true). When this flag is true, allow the AI suggestion to be shown normally and allow naming flow to continue. Also show a small inline note "User accepted mismatch".
+
+Explain Manually:
+On click, reveal a textarea directly below with placeholder "Explain why this document belongs to this project" and a button "Submit Explanation".
+
+On submit, call handleAiSuggestExisting again and pass an additional field manualExplanation with the textarea value. Replace the current aiResult with the new response. If AI now returns a valid suggestion, show it normally. If still mismatch, keep the warning and update the reason.
+
+Do not remove the existing rejectionDetails. Do not remove existing AI call. Extend it.
+
+Now fix Ask AI behavior:
+
+If contentVerificationResult is mismatch and mismatchOverride is false, clicking Ask AI must not immediately show a suggested name. It must show the warning + reason + the two actions above. Only after Continue Anyway or a successful manual explanation should the suggested name be shown.
+
+If aiResult exists, hide suggestedNameFromConvention completely.
+
+Now fix navigation:
+
+In FilesTab.tsx, every navigation to Name Generator must append:
+?returnTo=/projects/${projectId}/files
+
+In NameGenerator.tsx, read returnTo from query params and if present, Back button must navigate to it.
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "Continue Anyway" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "Explain Manually" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "manualExplanation" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 4 ===
+grep -n "mismatchOverride" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 5 ===
+grep -n "returnTo" artifacts/bimlog/src/pages/project/FilesTab.tsx artifacts/bimlog/src/pages/project/NameGenerator.tsx

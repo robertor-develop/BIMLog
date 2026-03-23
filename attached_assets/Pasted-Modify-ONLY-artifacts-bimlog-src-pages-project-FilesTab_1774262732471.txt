@@ -1,0 +1,88 @@
+Modify ONLY artifacts/bimlog/src/pages/project/FilesTab.tsx. Do not change backend. Do not redesign layout. Extend the existing rejected file expanded section and Ask AI behavior.
+
+Goal: when contentVerificationResult is "possible_mismatch" or "clear_mismatch", do NOT behave like a normal rejection. Show the mismatch warning, show the AI reason, and give the user control to proceed or explain.
+
+Implement this behavior:
+
+When contentVerificationResult is "possible_mismatch" or "clear_mismatch":
+
+In the rejected file expanded panel, show:
+
+Warning message:
+If clear_mismatch → "This document appears unrelated to this project"
+If possible_mismatch → "Content may not match this project — review required"
+
+Below that, always show aiResult.reason if available.
+
+Now add three actions (buttons) directly in this panel:
+
+Button 1: "Continue Anyway"
+On click:
+
+Mark this file as approved locally (do not change backend status yet)
+Store a local flag mismatchOverride = true for this file
+Show a small note: "User accepted mismatch"
+
+Button 2: "Explain Manually"
+On click:
+
+Show a textarea input directly under the buttons
+Placeholder: "Explain why this document belongs to this project"
+
+Add a submit button: "Submit Explanation"
+
+On submit:
+
+Call handleAiSuggestExisting again, but include an additional field:
+manualExplanation (the textarea value)
+Replace current aiResult with new response
+If AI now determines it is valid, allow suggested name to appear
+If still mismatch, keep warning and show updated reason
+
+Button 3: "Reject"
+
+Keep current behavior (no change)
+
+Now fix Ask AI behavior:
+
+When user clicks Ask AI:
+
+If contentVerificationResult is mismatch, do NOT immediately show suggested name
+First show warning + reason + the 3 options above
+Only after Continue Anyway or successful manual explanation should suggested name be shown
+
+Now fix naming suggestion:
+
+When AI returns suggestedName after explanation or valid case:
+
+It must be displayed normally
+suggestedNameFromConvention must be hidden if aiResult exists
+
+Now fix navigation:
+
+In FilesTab.tsx, when navigating to Name Generator, always append:
+?returnTo=/projects/${projectId}/files
+
+In NameGenerator.tsx:
+
+If returnTo exists, Back button must use it
+Do not default to dashboard
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "Continue Anyway" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 2 ===
+grep -n "Explain Manually" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 3 ===
+grep -n "manualExplanation" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 4 ===
+grep -n "mismatchOverride" artifacts/bimlog/src/pages/project/FilesTab.tsx
+
+=== Check 5 ===
+grep -n "returnTo" artifacts/bimlog/src/pages/project/FilesTab.tsx artifacts/bimlog/src/pages/project/NameGenerator.tsx
+
+Show exact output only.
