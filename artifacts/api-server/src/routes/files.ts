@@ -548,19 +548,20 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 router.post("/projects/:projectId/files/suggest-name", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
-    const { fileName, fileContent, validationDetails, extractedText: bodyExtractedText, contentVerificationResult: bodyContentVerification } = req.body as {
+    const { fileName, fileContent, validationDetails, extractedText: bodyExtractedText, contentVerificationResult: bodyContentVerification, manualExplanation } = req.body as {
       fileName?: string;
       fileContent?: string;
       validationDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }>;
       extractedText?: string;
       contentVerificationResult?: string;
+      manualExplanation?: string;
     };
     if (!fileName || typeof fileName !== "string") {
       res.status(400).json({ error: "fileName is required" });
       return;
     }
 
-    // Use extractedText from body if provided (Case B: existing file); otherwise extract from PDF content (Case A: new file)
+    // Resolve extractedText — prefer body-provided value (existing file), fall back to PDF parsing (new upload)
     let extractedText = "";
     if (bodyExtractedText && bodyExtractedText.trim()) {
       extractedText = bodyExtractedText.trim().slice(0, 2000);
@@ -576,6 +577,10 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       }
     }
 
+    if (!extractedText) {
+      console.warn(`[suggest-name] extractedText missing for fileName "${fileName}"`);
+    }
+
     // Load active convention fields
     const conventions = await db.select().from(namingConventionsTable)
       .where(and(eq(namingConventionsTable.projectId, projectId), eq(namingConventionsTable.isActive, true)))
@@ -583,100 +588,113 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
 
     const convention = conventions[0] ?? null;
     let conventionSummary = "No active naming convention found for this project.";
+    let conventionFields: Array<{ allowedValues: string[] | null; fieldOrder: number }> = [];
+    let conventionSep = "-";
     if (convention) {
       const fields = await db.select().from(namingFieldsTable)
         .where(eq(namingFieldsTable.conventionId, convention.id))
         .orderBy(namingFieldsTable.fieldOrder);
-      const sep = convention.separator || "-";
+      conventionFields = fields;
+      conventionSep = convention.separator || "-";
       const fieldDescriptions = fields.map((f: any) => {
         const allowed = f.allowedValues && f.allowedValues.length > 0
           ? `allowed values: [${f.allowedValues.join(", ")}]`
           : "free text";
         return `${f.fieldName} (${allowed})`;
       });
-      conventionSummary = `Separator: "${sep}". Fields in order: ${fieldDescriptions.join(` ${sep} `)}`;
+      conventionSummary = `Separator: "${conventionSep}". Fields in order: ${fieldDescriptions.join(` ${conventionSep} `)}`;
     }
 
-    // Helper: build a smart fallback name by matching fileName tokens against allowed values
-    const buildFallbackName = (
-      fName: string,
-      fields: Array<{ allowedValues: string[] | null; fieldOrder: number }>,
-      sep: string
-    ): string => {
+    // Helper: build a smart fallback name from convention fields (filename-based, no AI)
+    const buildFallbackName = (fName: string): string => {
       const extMatch = fName.match(/\.[^.]+$/);
       const ext = extMatch ? extMatch[0] : "";
       const namePart = fName.replace(/\.[^.]+$/, "").toLowerCase();
-      const sorted = [...fields].sort((a, b) => a.fieldOrder - b.fieldOrder);
+      const sorted = [...conventionFields].sort((a, b) => a.fieldOrder - b.fieldOrder);
       const parts = sorted.map(field => {
         const allowed = field.allowedValues && field.allowedValues.length > 0 ? field.allowedValues : null;
         if (!allowed) return namePart.split(/[-_.]/)[0] || "val";
         const match = allowed.find(v => namePart.includes(v.toLowerCase()));
         return match || allowed[0];
       });
-      return parts.join(sep) + ext;
+      return parts.join(conventionSep) + ext;
     };
 
-    // Build prompt sections
-    const violationSection = (validationDetails && validationDetails.length > 0 && !extractedText)
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+
+    // ── PATH A: extractedText available — content-first analysis ─────────────
+    if (extractedText) {
+      const manualNote = manualExplanation
+        ? `\n\nUser explanation: ${manualExplanation}`
+        : "";
+
+      const promptContent = `You are analyzing a BIM document. Based on the document content below, determine if this document belongs to the current project and generate a correct BIM file name.
+
+Return ONLY JSON in this format:
+{
+  "isRelevant": boolean,
+  "reason": string,
+  "suggestedName": string | null
+}
+
+If the content is clearly from a different project, set isRelevant to false, suggestedName to null, and explain why.
+
+If it belongs to the project, set isRelevant to true and generate the correct BIM name based on the detected document type and content.
+
+Reference file name (secondary): ${fileName}
+Project naming convention: ${conventionSummary}${manualNote}
+
+Document content:
+${extractedText}`;
+
+      try {
+        const message = await anthropic.messages.create({
+          model: "claude-haiku-4-5",
+          max_tokens: 8192,
+          messages: [{ role: "user", content: promptContent }],
+        });
+        const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+        let parsed: { isRelevant: boolean; reason: string; suggestedName: string | null };
+        try {
+          parsed = JSON.parse(rawText) as { isRelevant: boolean; reason: string; suggestedName: string | null };
+        } catch {
+          res.json({ isRelevant: false, suggestedName: null, reason: "AI parsing failed" });
+          return;
+        }
+        res.json({ isRelevant: parsed.isRelevant, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason });
+      } catch {
+        res.json({ isRelevant: false, suggestedName: null, reason: "AI parsing failed" });
+      }
+      return;
+    }
+
+    // ── PATH B: no extractedText — filename-based naming suggestion ───────────
+    const violationSection = validationDetails && validationDetails.length > 0
       ? `\n\nKnown naming violations:\n${validationDetails.map(d => `- ${d.field}: ${d.message}${d.expected && d.expected.length > 0 ? ` (allowed: ${d.expected.join(", ")})` : ""} — received: "${d.received}"`).join("\n")}`
       : "";
 
     const mismatchNote = (bodyContentVerification === "possible_mismatch" || bodyContentVerification === "clear_mismatch")
-      ? `\n\nNote: A prior content verification check flagged this document as a "${bodyContentVerification}" — the document content may not match the file name. Take this into account when evaluating relevance.`
+      ? `\n\nNote: A prior content verification check flagged this document as a "${bodyContentVerification}".`
       : "";
 
-    // Try AI suggestion, fall back to smart builder on any error
     try {
-      const anthropic = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
-      });
-
-      let promptContent: string;
-      if (extractedText) {
-        promptContent = `You are a BIM document naming assistant. Use the document content below to determine the document type, project relevance, and correct BIM naming. Do not rely on the file name alone.
+      const promptContent = `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
 
 Original file name: ${fileName}
 
-Project naming convention: ${conventionSummary}${mismatchNote}
+Project naming convention: ${conventionSummary}${violationSection}${mismatchNote}
 
-Extracted document content (first 2000 chars):
-${extractedText}
+Your task: Suggest a single corrected file name that strictly complies with the naming convention.
 
-First, determine whether the document content is relevant to this project based on the naming convention context. Then, if relevant, suggest a corrected file name.
-
-Respond with ONLY a JSON object in this exact format (no other text):
+Return ONLY JSON in this format:
 {
-  "suggestedName": "the-corrected-file-name.ext",
-  "reason": "brief explanation",
-  "isRelevant": true
-}
-
-If the document content does not match the project context, respond with:
-{
-  "suggestedName": null,
-  "reason": "Document content does not match project context",
-  "isRelevant": false
+  "isRelevant": boolean,
+  "reason": string,
+  "suggestedName": string | null
 }`;
-      } else {
-        promptContent = `You are a BIM document naming assistant. A user is trying to upload a file that does not comply with the project naming convention.
-
-Original file name: ${fileName}
-
-Project naming convention: ${conventionSummary}${violationSection}
-
-Your task: Suggest a single corrected file name that:
-1. Keeps as much of the original name's intent as possible
-2. Strictly complies with the naming convention (uses the correct separator, correct field order, and only allowed values where specified)
-3. Uses the first or most appropriate allowed value for any field that cannot be inferred from the original name
-
-Respond with ONLY a JSON object in this exact format (no other text):
-{
-  "suggestedName": "the-corrected-file-name.ext",
-  "reason": "brief explanation of what was changed and why",
-  "isRelevant": true
-}`;
-      }
 
       const message = await anthropic.messages.create({
         model: "claude-haiku-4-5",
@@ -684,24 +702,19 @@ Respond with ONLY a JSON object in this exact format (no other text):
         messages: [{ role: "user", content: promptContent }],
       });
       const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-      const parsed = JSON.parse(rawText) as { suggestedName: string | null; reason: string; isRelevant?: boolean };
-      if (parsed.isRelevant === false) {
-        res.json({ suggestedName: null, reason: parsed.reason || "Document content does not match project context", isRelevant: false });
-      } else {
-        res.json({ suggestedName: parsed.suggestedName, reason: parsed.reason, isRelevant: true });
+      let parsed: { isRelevant: boolean; reason: string; suggestedName: string | null };
+      try {
+        parsed = JSON.parse(rawText) as { isRelevant: boolean; reason: string; suggestedName: string | null };
+      } catch {
+        // AI response unparseable — use convention fallback
+        res.json({ isRelevant: true, suggestedName: buildFallbackName(fileName), reason: "Built by matching your file name against allowed convention values." });
+        return;
       }
+      res.json({ isRelevant: parsed.isRelevant, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason });
     } catch {
-      // AI unavailable or bad response — build smart suggestion from convention
-      if (convention) {
-        const fields = await db.select().from(namingFieldsTable)
-          .where(eq(namingFieldsTable.conventionId, convention.id))
-          .orderBy(namingFieldsTable.fieldOrder);
-        const sep = convention.separator || "-";
-        const suggested = buildFallbackName(fileName, fields, sep);
-        res.json({ suggestedName: suggested, reason: "Built by matching your file name against allowed convention values." });
-      } else {
-        res.json({ suggestedName: fileName, reason: "No active convention found — original name returned." });
-      }
+      // AI unavailable — use convention fallback
+      const suggested = conventionFields.length > 0 ? buildFallbackName(fileName) : fileName;
+      res.json({ isRelevant: true, suggestedName: suggested, reason: "Built by matching your file name against allowed convention values." });
     }
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

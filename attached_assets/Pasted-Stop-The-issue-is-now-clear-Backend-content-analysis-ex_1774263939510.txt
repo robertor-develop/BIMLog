@@ -1,0 +1,65 @@
+Stop. The issue is now clear. Backend content analysis exists but is not being used by suggest-name. Ask AI is still using filename-based logic instead of extractedText. Fix ONLY that connection.
+
+Modify ONLY artifacts/api-server/src/routes/files.ts. Do not change UI yet.
+
+In /projects/:projectId/files/suggest-name:
+
+Currently it uses fileName and validationDetails. That must change.
+
+If extractedText exists and is not empty:
+
+Build the AI prompt using extractedText as the PRIMARY input. Do not use fileName except as secondary reference.
+
+Replace the prompt with:
+
+"You are analyzing a BIM document. Based on the document content below, determine if this document belongs to the current project and generate a correct BIM file name.
+
+Return ONLY JSON in this format:
+{
+"isRelevant": boolean,
+"reason": string,
+"suggestedName": string | null
+}
+
+If the content is clearly from a different project, set isRelevant to false, suggestedName to null, and explain why.
+
+If it belongs to the project, set isRelevant to true and generate the correct BIM name based on the detected document type and content."
+
+Append extractedText to the prompt.
+
+Do not allow fallback to filename-only logic if extractedText exists.
+
+Now fix request handling:
+
+Ensure extractedText is actually being read from req.body and passed into the AI call.
+
+If extractedText is missing, log:
+"[suggest-name] extractedText missing for fileId X"
+
+Now fix response handling:
+
+After AI returns, parse JSON strictly.
+
+If parsing fails:
+return isRelevant false, suggestedName null, reason "AI parsing failed"
+
+Return the parsed structure directly to frontend.
+
+Do not wrap or alter fields.
+
+Rebuild and run:
+
+=== Check 1 ===
+grep -n "Return ONLY JSON" artifacts/api-server/src/routes/files.ts
+
+=== Check 2 ===
+grep -n "extractedText" artifacts/api-server/src/routes/files.ts
+
+=== Check 3 ===
+grep -n "fileName" artifacts/api-server/src/routes/files.ts
+
+=== Check 4 ===
+grep -n "isRelevant" artifacts/api-server/src/routes/files.ts
+
+=== Check 5 ===
+grep -n "suggestedName" artifacts/api-server/src/routes/files.ts
