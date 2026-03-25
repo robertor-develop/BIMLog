@@ -10,9 +10,16 @@ import { eq, and } from "drizzle-orm";
 import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
-import { PDFParse } from "pdf-parse";
+import { PDFParse as PDFParseClass } from "pdf-parse";
 import PDFDocument from "pdfkit";
 import Anthropic from "@anthropic-ai/sdk";
+
+async function pdfParse(buffer: Buffer) {
+  const parser = new PDFParseClass({ data: buffer, verbosity: 0 });
+  const result = await parser.getText();
+  await parser.destroy();
+  return result;
+}
 
 const router: IRouter = Router();
 
@@ -230,16 +237,14 @@ async function parseFileNameMetadata(projectId: number, fileName: string): Promi
 }
 
 // Synchronous processing — runs inside the request cycle, guarantees CVR is non-null on exit
-async function processFileFromDisk(fileId: number, filePath: string, fileName: string, projectId: number): Promise<void> {
+async function processFileFromDisk(fileId: number, filePath: string, fileName: string, projectId: number, uploadedById: number): Promise<void> {
   const ext = (fileName.split(".").pop() || "").toLowerCase();
   try {
     if (ext === "pdf") {
       const buffer = fs.readFileSync(filePath);
       let extractedText: string | null = null;
       try {
-        const parser = new PDFParse({ data: buffer, verbosity: 0 });
-        const result = await parser.getText();
-        await parser.destroy();
+        const result = await pdfParse(buffer);
         extractedText = result.text?.trim() || null;
       } catch (err) {
         console.error(`[files] extraction failed fileId=${fileId}`, err);
@@ -252,7 +257,7 @@ async function processFileFromDisk(fileId: number, filePath: string, fileName: s
       }
       if (extractedText && extractedText.length > 50) {
         await db.update(filesTable).set({ extractedText, updatedAt: new Date() }).where(eq(filesTable.id, fileId));
-        await runContentVerification(fileId, projectId, fileName, extractedText, 0);
+        await runContentVerification(fileId, projectId, fileName, extractedText, uploadedById);
       } else {
         await db.update(filesTable).set({
           contentVerificationResult: "not_applicable",
@@ -290,24 +295,22 @@ async function runContentVerification(fileId: number, projectId: number, fileNam
       messages: [
         {
           role: "user",
-          content: `You are a BIM document coordinator assistant. Your task is to verify whether a document's content matches what its file name suggests.
+          content: `You are a BIM document integrity checker. Your ONLY job is to compare a file name against extracted document content and return one of exactly three results.
 
 File name: ${fileName}
-First 500 words of extracted text:
+Extracted content (first 500 words):
 ${snippet}
 
-Analyze whether the content of this document matches what the file name suggests it should contain.
+You MUST return exactly one of these three results:
+- "match" — the content clearly matches what the filename describes
+- "possible_mismatch" — there is some doubt, partial match, or insufficient content to confirm
+- "clear_mismatch" — the content is clearly unrelated to the filename
 
-Respond with ONLY a JSON object in this exact format (no other text):
-{
-  "result": "match" | "possible_mismatch" | "clear_mismatch",
-  "reason": "brief explanation in one sentence"
-}
-
-Rules:
-- "match": Content clearly matches the file name (same subject, type, or context)
-- "possible_mismatch": Content is partially related but there are inconsistencies or insufficient content to confirm
-- "clear_mismatch": Content is clearly unrelated to what the file name suggests`,
+CRITICAL RULES:
+- ALWAYS return valid JSON. Never return markdown, never wrap in backticks, never add text outside the JSON.
+- NEVER return "not_applicable". That value does not exist. Use "possible_mismatch" if unsure.
+- Return ONLY this exact JSON object, nothing else before or after it:
+{"result": "match" | "possible_mismatch" | "clear_mismatch", "reason": "one sentence explanation"}`,
         },
       ],
     });
@@ -335,6 +338,12 @@ Rules:
         .set({ contentVerificationResult: "not_applicable", hashComparisonNote: "AI response missing result field", updatedAt: new Date() })
         .where(eq(filesTable.id, fileId));
       return;
+    }
+
+    const validResults = ["match", "possible_mismatch", "clear_mismatch"];
+    if (!validResults.includes(parsedRaw.result)) {
+      parsedRaw.result = "possible_mismatch";
+      parsedRaw.reason = "Result normalized — AI returned unexpected value: " + parsedRaw.result;
     }
 
     await db.update(filesTable)
@@ -845,7 +854,7 @@ router.post(
           details: `Naming violation — file rejected: ${fileName}`,
         });
 
-        await processFileFromDisk(rejectedFile.id, filePath, fileName, projectId);
+        await processFileFromDisk(rejectedFile.id, filePath, fileName, projectId, req.user!.userId);
 
         res.status(422).json({
           error: "File name does not match the active naming convention",
@@ -940,7 +949,7 @@ router.post(
         source: "user-uploaded",
       }).returning();
 
-      await processFileFromDisk(file.id, filePath, fileName, projectId);
+      await processFileFromDisk(file.id, filePath, fileName, projectId, req.user!.userId);
 
       // ── Auto-supersede all previous versions in the same document family ────
       if (newVersion > 1) {
