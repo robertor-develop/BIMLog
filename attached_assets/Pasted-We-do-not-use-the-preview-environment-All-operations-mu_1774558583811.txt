@@ -1,0 +1,51 @@
+We do not use the preview environment. All operations must run against the production database only.
+Stop. Do not build anything. Using Roberto's JWT token run every single one of these checks against https://bim-log-ignite.replit.app and show exact output for each.
+AUTH AND USER
+Check 1 — Login works: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/auth/login -H "Content-Type: application/json" -d '{"email":"robertor@rryasociados.com","password":"Newstart123$45"}'
+Check 2 — Me endpoint: curl -s https://bim-log-ignite.replit.app/api/v1/auth/me -H "Authorization: Bearer [JWT]"
+Check 3 — Profile endpoint: curl -s https://bim-log-ignite.replit.app/api/v1/users/profile -H "Authorization: Bearer [JWT]"
+PROJECTS
+Check 4 — List projects: curl -s https://bim-log-ignite.replit.app/api/v1/projects -H "Authorization: Bearer [JWT]"
+Check 5 — Get NYC-270 detail: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2 -H "Authorization: Bearer [JWT]"
+Check 6 — Get IBQ-LIT detail: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8 -H "Authorization: Bearer [JWT]"
+FILES
+Check 7 — Files list NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/files -H "Authorization: Bearer [JWT]"
+Check 8 — Files list IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/files -H "Authorization: Bearer [JWT]"
+Check 9 — Naming conventions NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/naming-conventions -H "Authorization: Bearer [JWT]"
+Check 10 — Suggest name endpoint exists: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/projects/2/files/suggest-name -H "Authorization: Bearer [JWT]" -H "Content-Type: application/json" -d '{"fileName":"test.pdf"}'
+Check 11 — CVR proceed endpoint exists: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/projects/2/files/1/cvr-proceed -H "Authorization: Bearer [JWT]" -H "Content-Type: application/json" -d '{"reason":"test"}'
+Check 12 — CVR approve endpoint exists: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/projects/2/files/1/cvr-approve -H "Authorization: Bearer [JWT]" -H "Content-Type: application/json" -d '{"reason":"test"}'
+Check 13 — CVR reject endpoint exists: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/projects/2/files/1/cvr-reject -H "Authorization: Bearer [JWT]" -H "Content-Type: application/json" -d '{"reason":"test"}'
+Check 14 — CVR report NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/cvr-report -H "Authorization: Bearer [JWT]"
+Check 15 — CVR health platform: curl -s https://bim-log-ignite.replit.app/api/v1/cvr-health -H "Authorization: Bearer [JWT]"
+RFIS
+Check 16 — RFI list NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/rfis -H "Authorization: Bearer [JWT]"
+Check 17 — RFI list IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/rfis -H "Authorization: Bearer [JWT]"
+Check 18 — RFI export endpoint exists: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/rfis/export -H "Authorization: Bearer [JWT]"
+SUBMITTALS
+Check 19 — Submittals list NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/submittals -H "Authorization: Bearer [JWT]"
+Check 20 — Submittals list IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/submittals -H "Authorization: Bearer [JWT]"
+Check 21 — Submittals export exists: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/submittals/export -H "Authorization: Bearer [JWT]"
+ACTIVITY AND REPORTING
+Check 22 — Activity log NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/activity -H "Authorization: Bearer [JWT]"
+Check 23 — Activity log IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/activity -H "Authorization: Bearer [JWT]"
+Check 24 — CVR report IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/cvr-report -H "Authorization: Bearer [JWT]"
+TEAM AND MEMBERS
+Check 25 — Team members NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/members -H "Authorization: Bearer [JWT]"
+Check 26 — Team members IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/members -H "Authorization: Bearer [JWT]"
+Check 27 — Invitations NYC-270: curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/invitations -H "Authorization: Bearer [JWT]"
+NAMING AND CONVENTIONS
+Check 28 — Naming conventions IBQ-LIT: curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/naming-conventions -H "Authorization: Bearer [JWT]"
+Check 29 — Config options: curl -s https://bim-log-ignite.replit.app/api/v1/config -H "Authorization: Bearer [JWT]"
+ADMIN
+Check 30 — Admin users list: curl -s https://bim-log-ignite.replit.app/api/v1/admin/users -H "Authorization: Bearer [JWT]"
+Check 31 — Admin companies list: curl -s https://bim-log-ignite.replit.app/api/v1/admin/companies -H "Authorization: Bearer [JWT]"
+Check 32 — Admin projects list: curl -s https://bim-log-ignite.replit.app/api/v1/admin/projects -H "Authorization: Bearer [JWT]"
+Check 33 — Admin activity feed: curl -s https://bim-log-ignite.replit.app/api/v1/admin/activity -H "Authorization: Bearer [JWT]"
+Check 34 — Admin email log: curl -s https://bim-log-ignite.replit.app/api/v1/admin/email-log -H "Authorization: Bearer [JWT]"
+Check 35 — Admin feature flags: curl -s https://bim-log-ignite.replit.app/api/v1/admin/feature-flags -H "Authorization: Bearer [JWT]"
+EMAIL AND NOTIFICATIONS
+Check 36 — Password reset endpoint exists: curl -s -X POST https://bim-log-ignite.replit.app/api/v1/auth/forgot-password -H "Content-Type: application/json" -d '{"email":"robertor@rryasociados.com"}'
+INTEGRATIONS AND DOWNLOADS
+Check 37 — Sync agent download exists: curl -s -o /dev/null -w "%{http_code}" https://bim-log-ignite.replit.app/api/v1/downloads/sync-agent-windows
+Show exact output of all 37 checks. For each one show the check number, the HTTP status code, and the first 200 characters of the response body. Nothing else.
