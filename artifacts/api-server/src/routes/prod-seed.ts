@@ -1,18 +1,6 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
-import {
-  companiesTable,
-  usersTable,
-  projectsTable,
-  projectMembersTable,
-  filesTable,
-  namingConventionsTable,
-  namingFieldsTable,
-  rfisTable,
-  submittalsTable,
-  activityLogTable,
-} from "@workspace/db/schema";
 import { sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 
@@ -21,36 +9,36 @@ const router: IRouter = Router();
 const SEED_KEY = "bimlog-prod-seed-2026-ignite";
 
 const CONFIG_OPTIONS = [
-  { category: "file_status",      value: "active",        label: "Active",          labelEs: "Activo",                   sortOrder: 1, meta: null },
-  { category: "file_status",      value: "superseded",    label: "Superseded",      labelEs: "Reemplazado",              sortOrder: 2, meta: null },
-  { category: "file_status",      value: "archived",      label: "Archived",        labelEs: "Archivado",                sortOrder: 3, meta: null },
-  { category: "member_role",      value: "project_admin", label: "Project Admin",   labelEs: "Administrador de Proyecto",sortOrder: 1, meta: JSON.stringify({ permission: "admin" }) },
-  { category: "member_role",      value: "company_lead",  label: "Company Lead",    labelEs: "Líder de Empresa",         sortOrder: 2, meta: JSON.stringify({ permission: "write" }) },
-  { category: "member_role",      value: "drafter",       label: "Drafter",         labelEs: "Dibujante",                sortOrder: 3, meta: JSON.stringify({ permission: "write" }) },
-  { category: "member_role",      value: "project_manager",label:"Project Manager", labelEs: "Gerente de Proyecto",      sortOrder: 4, meta: JSON.stringify({ permission: "write" }) },
-  { category: "member_role",      value: "read_only",     label: "Read Only",       labelEs: "Solo Lectura",             sortOrder: 5, meta: JSON.stringify({ permission: "read" }) },
-  { category: "project_status",   value: "active",        label: "Active",          labelEs: "Activo",                   sortOrder: 1, meta: null },
-  { category: "project_status",   value: "on_hold",       label: "On Hold",         labelEs: "En Pausa",                 sortOrder: 2, meta: null },
-  { category: "project_status",   value: "completed",     label: "Completed",       labelEs: "Completado",               sortOrder: 3, meta: null },
-  { category: "project_status",   value: "archived",      label: "Archived",        labelEs: "Archivado",                sortOrder: 4, meta: null },
-  { category: "rfi_priority",     value: "low",           label: "Low",             labelEs: "Baja",                     sortOrder: 1, meta: null },
-  { category: "rfi_priority",     value: "medium",        label: "Medium",          labelEs: "Media",                    sortOrder: 2, meta: null },
-  { category: "rfi_priority",     value: "high",          label: "High",            labelEs: "Alta",                     sortOrder: 3, meta: null },
-  { category: "rfi_status",       value: "open",          label: "Open",            labelEs: "Abierto",                  sortOrder: 1, meta: null },
-  { category: "rfi_status",       value: "in_review",     label: "In Review",       labelEs: "En Revisión",              sortOrder: 2, meta: null },
-  { category: "rfi_status",       value: "responded",     label: "Responded",       labelEs: "Respondido",               sortOrder: 3, meta: JSON.stringify({ setsRespondedAt: "true" }) },
-  { category: "rfi_status",       value: "closed",        label: "Closed",          labelEs: "Cerrado",                  sortOrder: 4, meta: null },
-  { category: "separator",        value: "-",             label: "Hyphen (-)",      labelEs: "Guión (-)",                sortOrder: 1, meta: null },
-  { category: "separator",        value: "_",             label: "Underscore (_)",  labelEs: "Guión bajo (_)",           sortOrder: 2, meta: null },
-  { category: "separator",        value: ".",             label: "Period (.)",      labelEs: "Punto (.)",                sortOrder: 3, meta: null },
-  { category: "submittal_status", value: "pending",       label: "Pending",         labelEs: "Pendiente",                sortOrder: 1, meta: null },
-  { category: "submittal_status", value: "submitted",     label: "Submitted",       labelEs: "Enviado",                  sortOrder: 2, meta: null },
-  { category: "submittal_status", value: "approved",      label: "Approved",        labelEs: "Aprobado",                 sortOrder: 3, meta: null },
-  { category: "submittal_status", value: "rejected",      label: "Rejected",        labelEs: "Rechazado",                sortOrder: 4, meta: null },
-  { category: "submittal_status", value: "resubmit",      label: "Resubmit",        labelEs: "Reenviar",                 sortOrder: 5, meta: null },
-  { category: "submittal_type",   value: "shop_drawing",  label: "Shop Drawing",    labelEs: "Plano de Taller",          sortOrder: 1, meta: null },
-  { category: "submittal_type",   value: "product_data",  label: "Product Data",    labelEs: "Datos de Producto",        sortOrder: 2, meta: null },
-  { category: "submittal_type",   value: "sample",        label: "Sample",          labelEs: "Muestra",                  sortOrder: 3, meta: null },
+  { category: "file_status",      value: "active",         label: "Active",           labelEs: "Activo",                    sortOrder: 1, meta: null as string | null },
+  { category: "file_status",      value: "superseded",     label: "Superseded",       labelEs: "Reemplazado",               sortOrder: 2, meta: null },
+  { category: "file_status",      value: "archived",       label: "Archived",         labelEs: "Archivado",                 sortOrder: 3, meta: null },
+  { category: "member_role",      value: "project_admin",  label: "Project Admin",    labelEs: "Administrador de Proyecto", sortOrder: 1, meta: JSON.stringify({ permission: "admin" }) },
+  { category: "member_role",      value: "company_lead",   label: "Company Lead",     labelEs: "Líder de Empresa",          sortOrder: 2, meta: JSON.stringify({ permission: "write" }) },
+  { category: "member_role",      value: "drafter",        label: "Drafter",          labelEs: "Dibujante",                 sortOrder: 3, meta: JSON.stringify({ permission: "write" }) },
+  { category: "member_role",      value: "project_manager",label: "Project Manager",  labelEs: "Gerente de Proyecto",       sortOrder: 4, meta: JSON.stringify({ permission: "write" }) },
+  { category: "member_role",      value: "read_only",      label: "Read Only",        labelEs: "Solo Lectura",              sortOrder: 5, meta: JSON.stringify({ permission: "read" }) },
+  { category: "project_status",   value: "active",         label: "Active",           labelEs: "Activo",                    sortOrder: 1, meta: null },
+  { category: "project_status",   value: "on_hold",        label: "On Hold",          labelEs: "En Pausa",                  sortOrder: 2, meta: null },
+  { category: "project_status",   value: "completed",      label: "Completed",        labelEs: "Completado",                sortOrder: 3, meta: null },
+  { category: "project_status",   value: "archived",       label: "Archived",         labelEs: "Archivado",                 sortOrder: 4, meta: null },
+  { category: "rfi_priority",     value: "low",            label: "Low",              labelEs: "Baja",                      sortOrder: 1, meta: null },
+  { category: "rfi_priority",     value: "medium",         label: "Medium",           labelEs: "Media",                     sortOrder: 2, meta: null },
+  { category: "rfi_priority",     value: "high",           label: "High",             labelEs: "Alta",                      sortOrder: 3, meta: null },
+  { category: "rfi_status",       value: "open",           label: "Open",             labelEs: "Abierto",                   sortOrder: 1, meta: null },
+  { category: "rfi_status",       value: "in_review",      label: "In Review",        labelEs: "En Revisión",               sortOrder: 2, meta: null },
+  { category: "rfi_status",       value: "responded",      label: "Responded",        labelEs: "Respondido",                sortOrder: 3, meta: JSON.stringify({ setsRespondedAt: "true" }) },
+  { category: "rfi_status",       value: "closed",         label: "Closed",           labelEs: "Cerrado",                   sortOrder: 4, meta: null },
+  { category: "separator",        value: "-",              label: "Hyphen (-)",       labelEs: "Guión (-)",                 sortOrder: 1, meta: null },
+  { category: "separator",        value: "_",              label: "Underscore (_)",   labelEs: "Guión bajo (_)",            sortOrder: 2, meta: null },
+  { category: "separator",        value: ".",              label: "Period (.)",       labelEs: "Punto (.)",                 sortOrder: 3, meta: null },
+  { category: "submittal_status", value: "pending",        label: "Pending",          labelEs: "Pendiente",                 sortOrder: 1, meta: null },
+  { category: "submittal_status", value: "submitted",      label: "Submitted",        labelEs: "Enviado",                   sortOrder: 2, meta: null },
+  { category: "submittal_status", value: "approved",       label: "Approved",         labelEs: "Aprobado",                  sortOrder: 3, meta: null },
+  { category: "submittal_status", value: "rejected",       label: "Rejected",         labelEs: "Rechazado",                 sortOrder: 4, meta: null },
+  { category: "submittal_status", value: "resubmit",       label: "Resubmit",         labelEs: "Reenviar",                  sortOrder: 5, meta: null },
+  { category: "submittal_type",   value: "shop_drawing",   label: "Shop Drawing",     labelEs: "Plano de Taller",           sortOrder: 1, meta: null },
+  { category: "submittal_type",   value: "product_data",   label: "Product Data",     labelEs: "Datos de Producto",         sortOrder: 2, meta: null },
+  { category: "submittal_type",   value: "sample",         label: "Sample",           labelEs: "Muestra",                   sortOrder: 3, meta: null },
 ];
 
 router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
@@ -64,7 +52,6 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
   const log: string[] = [];
 
   try {
-    // 1. Seed config_options (skip if already seeded)
     const existing = await db.execute(sql`SELECT COUNT(*) as cnt FROM config_options`);
     const cnt = Number((existing.rows[0] as { cnt: string }).cnt);
 
@@ -81,24 +68,20 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
       log.push(`Config options already seeded (${cnt} rows)`);
     }
 
-    // 2. Ensure demo companies exist
     const [bimtech] = await db
-      .insert(companiesTable)
-      .values({ name: "BIMtech Corp" })
-      .onConflictDoNothing()
-      .returning();
+      .execute(sql`INSERT INTO companies (name) VALUES ('BIMtech Corp') ON CONFLICT DO NOTHING RETURNING id`)
+      .then(r => r.rows as any[]);
     const [dds] = await db
-      .insert(companiesTable)
-      .values({ name: "DDS Mechanical" })
-      .onConflictDoNothing()
-      .returning();
+      .execute(sql`INSERT INTO companies (name) VALUES ('DDS Mechanical') ON CONFLICT DO NOTHING RETURNING id`)
+      .then(r => r.rows as any[]);
 
-    const allCompanies = await db.execute(sql`SELECT id, name FROM companies WHERE name IN ('BIMtech Corp', 'DDS Mechanical')`);
-    const bimtechId = (allCompanies.rows.find((r: any) => r.name === "BIMtech Corp") as any)?.id;
-    const ddsId = (allCompanies.rows.find((r: any) => r.name === "DDS Mechanical") as any)?.id;
-    log.push(`Companies ready: BIMtech Corp (${bimtechId}), DDS Mechanical (${ddsId})`);
+    const allCompanies = await db.execute(sql`SELECT id, name FROM companies WHERE name IN ('BIMtech Corp', 'DDS Mechanical') ORDER BY id LIMIT 2`);
+    const bimtechRow = (allCompanies.rows as any[]).find(r => r.name === "BIMtech Corp");
+    const ddsRow = (allCompanies.rows as any[]).find(r => r.name === "DDS Mechanical");
+    const bimtechId = bimtechRow?.id;
+    const ddsId = ddsRow?.id;
+    log.push(`Companies: BIMtech Corp (${bimtechId}), DDS Mechanical (${ddsId})`);
 
-    // 3. Create demo users
     const hash = await bcrypt.hash("Demo1234!", 10);
     if (bimtechId) {
       await db.execute(sql`
@@ -117,7 +100,6 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
     }
     log.push(`Demo users ensured`);
 
-    // 4. Get demo user IDs
     const demoUsers = await db.execute(sql`
       SELECT id, email FROM users WHERE email IN ('roberto@bimtechcorp.com','maria@bimtechcorp.com','tom@ddsmechanical.com')
     `);
@@ -126,7 +108,6 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
       userMap[u.email] = u.id;
     }
 
-    // 5. Create demo projects (check before insert — no unique constraint on code)
     const projectDefs = [
       { name: "Downtown Tower",      code: "DT-2026", description: "Mixed-use downtown development", status: "active" },
       { name: "270 Park Avenue",     code: "NYC-270",  description: "Full MEP coordination and BIM management for the new JPMorgan Chase HQ tower, New York", status: "active" },
@@ -137,8 +118,8 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
 
     let createdCount = 0;
     for (const p of projectDefs) {
-      const existing = await db.execute(sql`SELECT id FROM projects WHERE code = ${p.code} LIMIT 1`);
-      if (existing.rows.length === 0) {
+      const ex = await db.execute(sql`SELECT id FROM projects WHERE code = ${p.code} LIMIT 1`);
+      if (ex.rows.length === 0) {
         await db.execute(sql`
           INSERT INTO projects (name, code, description, status, created_by_id)
           VALUES (${p.name}, ${p.code}, ${p.description}, ${p.status}, ${callingUserId})
@@ -148,31 +129,28 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
     }
     log.push(`Created ${createdCount} new projects (skipped existing)`);
 
-    // 6. Get ALL projects
     const allProjects = await db.execute(sql`SELECT id, code FROM projects`);
     const projectIds = (allProjects.rows as any[]).map((r: any) => r.id);
     log.push(`Total projects in DB: ${projectIds.length}`);
 
-    // 7. Add calling user as project_admin on every project
     let membershipsAdded = 0;
     for (const pid of projectIds) {
-      const r = await db.execute(sql`
+      await db.execute(sql`DELETE FROM project_members WHERE project_id = ${pid} AND user_id = ${callingUserId}`);
+      await db.execute(sql`
         INSERT INTO project_members (project_id, user_id, role)
         VALUES (${pid}, ${callingUserId}, 'project_admin')
-        ON CONFLICT (project_id, user_id) DO UPDATE SET role = 'project_admin'
       `);
       membershipsAdded++;
     }
     log.push(`Set calling user (id=${callingUserId}) as project_admin on ${membershipsAdded} projects`);
 
-    // 8. Add demo users to 270 Park Avenue project
     const park270 = (allProjects.rows as any[]).find((r: any) => r.code === "NYC-270");
     if (park270) {
       for (const [email, uid] of Object.entries(userMap)) {
+        await db.execute(sql`DELETE FROM project_members WHERE project_id = ${park270.id} AND user_id = ${uid}`);
         await db.execute(sql`
           INSERT INTO project_members (project_id, user_id, role)
           VALUES (${park270.id}, ${uid}, 'drafter')
-          ON CONFLICT (project_id, user_id) DO NOTHING
         `);
       }
       log.push(`Added demo users to 270 Park Avenue`);
@@ -202,50 +180,86 @@ router.post("/system/full-seed", async (req, res) => {
         ON CONFLICT DO NOTHING
       `);
     }
-    log.push(`Config options: ${CONFIG_OPTIONS.length} processed (ON CONFLICT DO NOTHING)`);
+    log.push(`Config options: ${CONFIG_OPTIONS.length} processed`);
 
-    // 2. Companies
+    // 2. Ensure IgniteSmart company exists (for Alejandro)
     await db.execute(sql`
-      INSERT INTO companies (id, name)
-      VALUES (14,'IgniteSmart'),(15,'ABC Contractors'),(16,'BIMtech Corp'),(17,'Test Corp')
-      ON CONFLICT (id) DO NOTHING
-    `);
-    await db.execute(sql`SELECT setval(pg_get_serial_sequence('companies','id'), 17, true)`);
-    log.push("Companies: ON CONFLICT DO NOTHING");
-
-    // 3. Users
-    const robertoHash = "$2b$10$KQteBKLRHMWh/FHl8scESemZM/tydxjRn1lYaQICF2KVJ51TqzRVa";
-    const alejandroHash = "$2b$10$YhQrZhx7UXi0mVZI9ZXBeuikBFzO.cWU8nOGPRbvkeSzVg098pn1i";
-    await db.execute(sql`
-      INSERT INTO users (id, full_name, email, password_hash, company_id, is_super_admin)
-      VALUES
-        (16, 'Roberto Rodriguez', 'robertor@rryasociados.com', ${robertoHash}, 14, true),
-        (17, 'Alejandro',        'robertor9876@gmail.com',     ${alejandroHash}, 15, false)
-      ON CONFLICT (id) DO NOTHING
-    `);
-    await db.execute(sql`SELECT setval(pg_get_serial_sequence('users','id'), 17, true)`);
-    log.push("Users: ON CONFLICT DO NOTHING");
-
-    // 4. Projects
-    await db.execute(sql`
-      INSERT INTO projects (id, name, code, description, status, created_by_id)
-      VALUES
-        (8, 'IBQ Lithium Extraction Plant', 'IBQ-LIT',
-         'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants.', 'active', 16),
-        (9, '270 Park Avenue', 'NYC-270',
-         'JPMorgan Chase Headquarters redevelopment at 270 Park Avenue, New York City.', 'active', 16)
-      ON CONFLICT (id) DO NOTHING
-    `);
-    await db.execute(sql`SELECT setval(pg_get_serial_sequence('projects','id'), 9, true)`);
-    log.push("Projects: ON CONFLICT DO NOTHING");
-
-    // 5. Project members
-    await db.execute(sql`
-      INSERT INTO project_members (project_id, user_id, role)
-      VALUES (8,16,'project_admin'),(8,17,'viewer'),(9,16,'project_admin'),(9,17,'viewer')
+      INSERT INTO companies (name) VALUES ('IgniteSmart')
       ON CONFLICT DO NOTHING
     `);
-    log.push("Project members: ON CONFLICT DO NOTHING");
+    const igniteSmart = await db.execute(sql`SELECT id FROM companies WHERE name = 'IgniteSmart' LIMIT 1`);
+    const igniteSmartId = (igniteSmart.rows[0] as any)?.id;
+    log.push(`IgniteSmart company id=${igniteSmartId}`);
+
+    // 3. Ensure Alejandro exists (lookup by email, create if missing)
+    const alejandroHash = "$2b$10$YhQrZhx7UXi0mVZI9ZXBeuikBFzO.cWU8nOGPRbvkeSzVg098pn1i";
+    await db.execute(sql`
+      INSERT INTO users (full_name, email, password_hash, company_id, is_super_admin)
+      VALUES ('Alejandro', 'robertor9876@gmail.com', ${alejandroHash}, ${igniteSmartId}, false)
+      ON CONFLICT (email) DO NOTHING
+    `);
+    log.push("Alejandro user ensured");
+
+    // 4. Get Roberto and Alejandro IDs by email
+    const robertoRow = await db.execute(sql`SELECT id FROM users WHERE email = 'robertor@rryasociados.com' LIMIT 1`);
+    const alejandroRow = await db.execute(sql`SELECT id FROM users WHERE email = 'robertor9876@gmail.com' LIMIT 1`);
+    const robertoId: number | null = (robertoRow.rows[0] as any)?.id ?? null;
+    const alejandroId: number | null = (alejandroRow.rows[0] as any)?.id ?? null;
+    log.push(`Roberto id=${robertoId}, Alejandro id=${alejandroId}`);
+
+    if (!robertoId) {
+      res.status(500).json({ error: "Roberto not found in users table", log });
+      return;
+    }
+
+    // 5. Ensure IBQ-LIT project exists (lookup by code)
+    const ibqExisting = await db.execute(sql`SELECT id FROM projects WHERE code = 'IBQ-LIT' LIMIT 1`);
+    let ibqId: number;
+    if (ibqExisting.rows.length === 0) {
+      const ibqCreated = await db.execute(sql`
+        INSERT INTO projects (name, code, description, status, created_by_id)
+        VALUES (
+          'IBQ Lithium Extraction Plant', 'IBQ-LIT',
+          'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants. Contract between SEDEM/IBQ and ECEC.',
+          'active', ${robertoId}
+        )
+        RETURNING id
+      `);
+      ibqId = (ibqCreated.rows[0] as any).id;
+      log.push(`IBQ-LIT project created with id=${ibqId}`);
+    } else {
+      ibqId = (ibqExisting.rows[0] as any).id;
+      log.push(`IBQ-LIT project exists with id=${ibqId}`);
+    }
+
+    // 6. Get NYC-270 project ID by code
+    const nyc270Row = await db.execute(sql`SELECT id FROM projects WHERE code = 'NYC-270' LIMIT 1`);
+    const nyc270Id: number | null = (nyc270Row.rows[0] as any)?.id ?? null;
+    log.push(`NYC-270 id=${nyc270Id}`);
+
+    if (!nyc270Id) {
+      res.status(500).json({ error: "NYC-270 project not found", log });
+      return;
+    }
+
+    // 7. Clear project_members for IBQ-LIT and NYC-270, then re-insert correctly
+    await db.execute(sql`DELETE FROM project_members WHERE project_id IN (${ibqId}, ${nyc270Id})`);
+
+    const memberRows: Array<[number, number, string]> = [
+      [ibqId,    robertoId,   "project_admin"],
+      [nyc270Id, robertoId,   "project_admin"],
+    ];
+    if (alejandroId) {
+      memberRows.push([ibqId,    alejandroId, "read_only"]);
+      memberRows.push([nyc270Id, alejandroId, "read_only"]);
+    }
+
+    for (const [pid, uid, role] of memberRows) {
+      await db.execute(sql`
+        INSERT INTO project_members (project_id, user_id, role) VALUES (${pid}, ${uid}, ${role})
+      `);
+    }
+    log.push(`Project members: inserted ${memberRows.length} rows for IBQ-LIT and NYC-270`);
 
     res.json({ success: true, log });
   } catch (error) {
