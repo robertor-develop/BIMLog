@@ -13,6 +13,7 @@ import { ConventionBuilder } from "./project/ConventionBuilder";
 import { NameGenerator } from "./project/NameGenerator";
 import { AnalyticsTab } from "./project/AnalyticsTab";
 import { IntegrationsTab } from "./project/IntegrationsTab";
+import { ReportsTab } from "./project/ReportsTab";
 import { ChevronLeft, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -123,6 +124,7 @@ export function ProjectDetail() {
           {tab === "team"         && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
           {tab === "generator"    && <NameGenerator     projectId={projectId} onGoToConvention={() => setLocation(`/projects/${projectId}/convention`)} />}
           {tab === "convention"   && isAdmin && <ConventionBuilder projectId={projectId} />}
+          {tab === "reports"      && isAdmin && <ReportsTab        projectId={projectId} isAdmin={isAdmin} />}
           {tab === "integrations" && <IntegrationsTab   projectId={projectId} />}
         </div>
       </div>

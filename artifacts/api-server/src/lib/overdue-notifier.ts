@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { rfisTable, submittalsTable, projectsTable, usersTable } from "@workspace/db/schema";
+import { rfisTable, submittalsTable, projectsTable, usersTable, filesTable, activityLogTable } from "@workspace/db/schema";
 import { and, eq, lt, isNull, or, isNotNull } from "drizzle-orm";
 import { sendEmail, makeRfiOverdueEmail, makeSubmittalOverdueEmail, getUserLang, notifEnabled } from "./email";
 
@@ -103,6 +103,47 @@ async function checkOverdueSubmittals(): Promise<void> {
   }
 }
 
+async function checkCvrReminders(): Promise<void> {
+  try {
+    const now = new Date();
+    const reminderThreshold = new Date(now.getTime() - ONE_DAY_MS);
+    const reminderCooldown = new Date(now.getTime() - ONE_DAY_MS);
+
+    const pendingFiles = await db.select().from(filesTable)
+      .where(and(
+        eq(filesTable.cvrWorkflowStatus, "pending_admin_review"),
+        lt(filesTable.createdAt, reminderThreshold),
+        or(isNull(filesTable.cvrReminderSentAt), lt(filesTable.cvrReminderSentAt, reminderCooldown)),
+      ));
+
+    for (const file of pendingFiles) {
+      await db.insert(activityLogTable).values({
+        projectId: file.projectId,
+        userId: file.uploadedById,
+        userFullName: "System",
+        userCompanyName: "",
+        actionType: "cvr_reminder_sent",
+        entityType: "file",
+        entityId: file.id,
+        fileNameAfter: file.fileName,
+        details: `CVR review reminder: file "${file.fileName}" has been pending admin review for more than 24 hours.`,
+      });
+
+      await db.update(filesTable)
+        .set({ cvrReminderSentAt: now, updatedAt: now })
+        .where(eq(filesTable.id, file.id));
+    }
+
+    if (pendingFiles.length > 0) {
+      console.log(`[overdue-notifier] CVR reminders sent for ${pendingFiles.length} file(s)`);
+    }
+  } catch (err) {
+    console.error("[overdue-notifier] CVR reminder check failed:", err instanceof Error ? err.message : err);
+  }
+}
+
+const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+
 export function startOverdueNotifier(): void {
   console.log("[overdue-notifier] Starting hourly overdue check...");
   const run = async () => {
@@ -111,4 +152,8 @@ export function startOverdueNotifier(): void {
   };
   run().catch(() => {});
   setInterval(run, ONE_HOUR_MS);
+
+  const runCvr = async () => { await checkCvrReminders(); };
+  runCvr().catch(() => {});
+  setInterval(runCvr, SIX_HOURS_MS);
 }

@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
-  Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail
+  Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2
 } from "lucide-react";
 
 interface SidebarProps {
@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { id: "team",         label: "project.tabs.team",           icon: Users,         section: "Project" },
   { id: "generator",    label: "project.tabs.generator",      icon: Wand2,         section: "Tools" },
   { id: "convention",   label: "project.tabs.convention",     icon: Settings2,     section: "Tools", adminOnly: true },
+  { id: "reports",      label: "CVR Reports",                 icon: FileBarChart2, section: "Tools", adminOnly: true },
   { id: "integrations", label: "Integrations",                icon: Puzzle,        section: "Tools" },
 ];
 

@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2 } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 
@@ -96,6 +96,16 @@ export function Dashboard() {
   const [showCreate, setShowCreate] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // ── CVR Platform Health ────────────────────────────────────────────────────
+  const [cvrHealth, setCvrHealth] = useState<{ healthStatus: "green" | "amber" | "red"; totalPendingReview: number; totalFlagged: number } | null>(null);
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${API_BASE}/api/v1/cvr-health`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setCvrHealth(data); })
+      .catch(() => {});
+  }, [token]);
 
   // ── Cross-project data ─────────────────────────────────────────────────────
   const [agg, setAgg] = useState<AggState>({ rfis: [], submittals: [], activity: [], files: [], loading: false });
@@ -265,6 +275,77 @@ export function Dashboard() {
                 <div className="kpi-label">Compliance Rate</div>
                 <div className="kpi-value">{agg.loading ? "…" : `${complianceRate}%`}</div>
                 <div className="kpi-sub">Valid / total files</div>
+              </div>
+            </div>
+          )}
+
+          {/* CVR Platform Health Ring */}
+          {cvrHealth && (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                ...panel,
+                display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
+                borderLeft: `4px solid ${cvrHealth.healthStatus === "green" ? "#16A34A" : cvrHealth.healthStatus === "amber" ? "#D97706" : "#DC2626"}`,
+              }}>
+                {/* Ring */}
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <svg width={72} height={72} style={{ transform: "rotate(-90deg)" }}>
+                    <circle cx={36} cy={36} r={28} fill="none" stroke="hsl(var(--border))" strokeWidth={6} />
+                    <circle
+                      cx={36} cy={36} r={28} fill="none"
+                      stroke={cvrHealth.healthStatus === "green" ? "#16A34A" : cvrHealth.healthStatus === "amber" ? "#D97706" : "#DC2626"}
+                      strokeWidth={6}
+                      strokeDasharray={`${(cvrHealth.healthStatus === "green" ? 100 : cvrHealth.healthStatus === "amber" ? 60 : 25) / 100 * 2 * Math.PI * 28} ${2 * Math.PI * 28}`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div style={{
+                    position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    {cvrHealth.healthStatus === "green"
+                      ? <CheckCircle2 style={{ width: 18, height: 18, color: "#16A34A" }} />
+                      : cvrHealth.healthStatus === "amber"
+                        ? <Clock style={{ width: 18, height: 18, color: "#D97706" }} />
+                        : <AlertCircle style={{ width: 18, height: 18, color: "#DC2626" }} />}
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <Shield style={{ width: 14, height: 14, color: "hsl(var(--muted-foreground))" }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))" }}>
+                      CVR Platform Health
+                    </span>
+                    <span style={{
+                      padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+                      background: cvrHealth.healthStatus === "green" ? "#F0FDF4" : cvrHealth.healthStatus === "amber" ? "#FFFBEB" : "#FEF2F2",
+                      color: cvrHealth.healthStatus === "green" ? "#16A34A" : cvrHealth.healthStatus === "amber" ? "#D97706" : "#DC2626",
+                      border: `1px solid ${cvrHealth.healthStatus === "green" ? "#BBF7D0" : cvrHealth.healthStatus === "amber" ? "#FDE68A" : "#FECACA"}`,
+                    }}>
+                      {cvrHealth.healthStatus === "green" ? "All Clear" : cvrHealth.healthStatus === "amber" ? "Attention" : "Action Required"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
+                    {cvrHealth.healthStatus === "green"
+                      ? "No content verification issues pending — all files are clear."
+                      : cvrHealth.healthStatus === "amber"
+                        ? `${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} pending admin review after a content mismatch flag.`
+                        : `${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} have been pending review for over 24 hours — immediate action required.`}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 24, flexShrink: 0 }}>
+                  <div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: "hsl(var(--foreground))" }}>{cvrHealth.totalFlagged}</div>
+                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>AI Flagged</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: cvrHealth.totalPendingReview > 0 ? "#7C3AED" : "hsl(var(--foreground))" }}>
+                      {cvrHealth.totalPendingReview}
+                    </div>
+                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>Pending Review</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

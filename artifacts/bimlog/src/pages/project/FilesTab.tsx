@@ -4,7 +4,8 @@ import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-cl
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
 
 interface ValidationDetail {
@@ -55,6 +56,11 @@ interface FileRow {
   source?: string | null;
   linkedRfiId?: number | null;
   contentVerificationResult?: string | null;
+  cvrWorkflowStatus?: string | null;
+  cvrUserReason?: string | null;
+  cvrAdminAction?: string | null;
+  cvrAdminActionAt?: string | null;
+  cvrAdminActionBy?: number | null;
   rejectionDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null;
   createdAt: string;
   updatedAt: string;
@@ -314,10 +320,28 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   Naming violation — upload rejected
                                 </div>
                               )}
-                              {(latest.contentVerificationResult === "possible_mismatch" || latest.contentVerificationResult === "clear_mismatch") && (
+                              {(latest.contentVerificationResult === "possible_mismatch" || latest.contentVerificationResult === "clear_mismatch") && latest.cvrWorkflowStatus !== "admin_approved" && latest.cvrWorkflowStatus !== "admin_rejected" && (
                                 <div style={{ fontSize: 10, color: latest.contentVerificationResult === "clear_mismatch" ? "#DC2626" : "#D97706", marginTop: 1, display: "flex", alignItems: "center", gap: 3 }}>
                                   <AlertCircle style={{ width: 10, height: 10 }} />
                                   Content may not match file name — flagged for coordinator review
+                                </div>
+                              )}
+                              {latest.cvrWorkflowStatus === "pending_admin_review" && (
+                                <div style={{ fontSize: 10, color: "#7C3AED", marginTop: 1, display: "flex", alignItems: "center", gap: 3 }}>
+                                  <Clock style={{ width: 10, height: 10 }} />
+                                  Pending admin review
+                                </div>
+                              )}
+                              {latest.cvrWorkflowStatus === "admin_approved" && (
+                                <div style={{ fontSize: 10, color: "#16A34A", marginTop: 1, display: "flex", alignItems: "center", gap: 3 }}>
+                                  <ThumbsUp style={{ width: 10, height: 10 }} />
+                                  Admin approved
+                                </div>
+                              )}
+                              {latest.cvrWorkflowStatus === "admin_rejected" && (
+                                <div style={{ fontSize: 10, color: "#DC2626", marginTop: 1, display: "flex", alignItems: "center", gap: 3 }}>
+                                  <ThumbsDown style={{ width: 10, height: 10 }} />
+                                  Admin rejected
                                 </div>
                               )}
                             </div>
@@ -778,6 +802,8 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
   const [showErrors, setShowErrors] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [cvrModalOpen, setCvrModalOpen] = useState(false);
+  const [cvrModalFile, setCvrModalFile] = useState<{ id: number; fileName: string; cvrResult: "possible_mismatch" | "clear_mismatch"; cvrReason: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
@@ -855,14 +881,25 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-      const data = await resp.json() as { error?: string; details?: ValidationDetail[] };
+      const data = await resp.json() as { error?: string; details?: ValidationDetail[]; id?: number; fileName?: string; contentVerificationResult?: string; hashComparisonNote?: string };
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
       if (resp.status === 422 && data.details) {
         setErrorDetails(data.details);
       } else if (resp.status === 201) {
-        setSuccess(true);
-        setTimeout(() => onClose(), 1200);
+        const cvr = data.contentVerificationResult;
+        if ((cvr === "possible_mismatch" || cvr === "clear_mismatch") && data.id) {
+          setCvrModalFile({
+            id: data.id,
+            fileName: data.fileName || file.name,
+            cvrResult: cvr as "possible_mismatch" | "clear_mismatch",
+            cvrReason: data.hashComparisonNote || "",
+          });
+          setCvrModalOpen(true);
+        } else {
+          setSuccess(true);
+          setTimeout(() => onClose(), 1200);
+        }
       } else {
         toast({ title: t("common.error"), description: data?.error || "Upload failed", variant: "destructive" });
       }
@@ -872,6 +909,32 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       setIsUploading(false);
     }
   }, [projectId, documentRelationship, queryClient, toast, t, onClose]);
+
+  const handleCvrProceed = useCallback(async (reason: string) => {
+    if (!cvrModalFile) return;
+    setCvrModalOpen(false);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      await fetch(`/api/v1/projects/${projectId}/files/${cvrModalFile.id}/cvr-proceed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ reason }),
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
+      toast({ title: "File submitted for review", description: "The project administrator will be notified." });
+    } catch {
+      toast({ title: "Failed to submit for review", variant: "destructive" });
+    }
+    setCvrModalFile(null);
+    onClose();
+  }, [cvrModalFile, projectId, queryClient, toast, onClose]);
+
+  const handleCvrCancel = useCallback(() => {
+    setCvrModalOpen(false);
+    setCvrModalFile(null);
+    onClose();
+  }, [onClose]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -1156,6 +1219,19 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
             <div style={{ fontSize: 11, color: "#166534", fontFamily: "var(--font-mono)", marginTop: 1 }}>{fileName}</div>
           </div>
         </div>
+      )}
+
+      {cvrModalFile && (
+        <CvrMismatchModal
+          isOpen={cvrModalOpen}
+          onClose={handleCvrCancel}
+          onProceed={handleCvrProceed}
+          fileName={cvrModalFile.fileName}
+          cvrResult={cvrModalFile.cvrResult}
+          cvrReason={cvrModalFile.cvrReason}
+          fileId={cvrModalFile.id}
+          projectId={projectId}
+        />
       )}
     </div>
   );

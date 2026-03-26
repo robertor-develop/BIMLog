@@ -1,0 +1,76 @@
+ Read every word before touching anything. Make all changes in the exact order listed. Do not skip steps. Do not improvise anything not explicitly described.
+PART 1 — DATABASE SCHEMA CHANGES
+File: lib/db/src/schema/files.ts
+Add these two new columns to the files table after the contentVerificationResult column:
+cvrWorkflowStatus: text("cvr_workflow_status") — possible values are "clean", "pending_admin_review", "admin_approved", "admin_rejected". Default is "clean".
+cvrUserReason: text("cvr_user_reason") — stores the reason the user typed when proceeding despite a mismatch warning.
+cvrAdminAction: text("cvr_admin_action") — stores the admin's typed reason when approving or rejecting.
+cvrAdminActionAt: timestamp("cvr_admin_action_at") — when the admin acted.
+cvrAdminActionBy: integer("cvr_admin_action_by") — user ID of the admin who acted.
+cvrReminderSentAt: timestamp("cvr_reminder_sent_at") — when the overdue reminder was last sent.
+File: lib/db/src/schema/activity.ts
+No changes needed — the existing actionType text field already handles all new action types we will add.
+After editing the schema files run: cd lib/db && npx drizzle-kit push --force
+Confirm the migration ran clean before continuing.
+PART 2 — BACKEND: NEW API ENDPOINTS
+File: artifacts/api-server/src/routes/files.ts
+Add these four new endpoints after the existing DELETE route.
+Endpoint 1 — User proceeds despite mismatch warning:
+POST /api/v1/projects/:projectId/files/:fileId/cvr-proceed
+This endpoint is called when a user sees the mismatch popup and chooses to proceed anyway. It requires authentication. It accepts a JSON body with one field: reason (string, required only when contentVerificationResult is "clear_mismatch", optional for "possible_mismatch").
+It does the following in order: Fetch the file row and confirm it belongs to this project. If contentVerificationResult is "clear_mismatch" and reason is missing or empty, return 400 with message "A reason is required when content clearly does not match." Update the file row: set cvrWorkflowStatus to "pending_admin_review", set cvrUserReason to the provided reason or null. Insert an activity log entry with actionType "cvr_user_proceeded", entityType "file", entityId fileId, details showing the file name, the CVR result, and the user's reason if provided. Fetch all project members with role "admin" or "project_admin". For each admin who is not the uploader, insert an activity log entry with actionType "cvr_admin_notification", entityType "file", entityId fileId, details: "File [fileName] uploaded by [uploaderName] from [uploaderCompany] is pending your review. CVR result: [result]. User reason: [reason or 'none provided']. Uploaded at: [timestamp]." Return 200 with the updated file row.
+Endpoint 2 — Admin approves a flagged file:
+POST /api/v1/projects/:projectId/files/:fileId/cvr-approve
+Requires authentication. Requires the requesting user to have role "admin" or "project_admin" on this project, OR be super admin. Accepts JSON body with one field: reason (string, optional).
+It does the following: Fetch the file row. If cvrWorkflowStatus is not "pending_admin_review" return 400 "File is not pending review." Update file row: set cvrWorkflowStatus to "admin_approved", set cvrAdminAction to provided reason or "Approved", set cvrAdminActionAt to now, set cvrAdminActionBy to req.user.userId. Insert activity log entry with actionType "cvr_admin_approved", details showing who approved it, when, and their reason. Return 200 with updated file row.
+Endpoint 3 — Admin rejects a flagged file:
+POST /api/v1/projects/:projectId/files/:fileId/cvr-reject
+Same auth requirements as approve. Accepts JSON body with one required field: reason (string, required — admin must explain rejection).
+If reason is missing return 400 "A reason is required to reject a file." Update file row: set cvrWorkflowStatus to "admin_rejected", set status to "rejected", set cvrAdminAction to reason, set cvrAdminActionAt to now, set cvrAdminActionBy to req.user.userId. Insert activity log entry with actionType "cvr_admin_rejected". Return 200 with updated file row.
+Endpoint 4 — Get project CVR report data:
+GET /api/v1/projects/:projectId/cvr-report
+Requires authentication and project membership. Accepts optional query params: from (date string) and to (date string) for historical range. If no date params provided, returns current issues only (cvrWorkflowStatus = "pending_admin_review").
+Returns a JSON object with these fields: projectId, generatedAt (now), totalFilesProcessed (count of all files in project), totalFlagged (count where contentVerificationResult is "possible_mismatch" or "clear_mismatch"), totalPendingReview (count where cvrWorkflowStatus is "pending_admin_review"), totalAdminApproved (count where cvrWorkflowStatus is "admin_approved"), totalAdminRejected (count where cvrWorkflowStatus is "admin_rejected"), issues (array of file rows where contentVerificationResult is not "match" and not null, each including id, fileName, contentVerificationResult, hashComparisonNote, cvrWorkflowStatus, cvrUserReason, cvrAdminAction, cvrAdminActionAt, cvrAdminActionBy, uploadedById, uploaderName, uploaderCompany, createdAt).
+Endpoint 5 — Get platform-wide CVR health summary:
+GET /api/v1/cvr-health
+Requires authentication. Returns: totalFilesProcessed across all projects the user has access to, totalFlagged, totalPendingReview, totalAdminApproved, totalAdminRejected, healthStatus which is "green" if totalPendingReview is 0 and totalFlagged is 0, "amber" if totalPendingReview is greater than 0, "red" if any file has cvrWorkflowStatus "pending_admin_review" and was created more than 24 hours ago without admin action.
+PART 3 — BACKEND: CVR REMINDER JOB
+In the existing background jobs file (wherever the overdue RFI job lives), add a new job that runs every 6 hours. It queries all files where cvrWorkflowStatus is "pending_admin_review" and createdAt is more than the project's configured reminder threshold ago (default 24 hours) and cvrReminderSentAt is either null or more than 24 hours ago. For each such file it inserts an activity log entry with actionType "cvr_reminder_sent" and updates cvrReminderSentAt to now. Do not send actual emails yet — just log it. We will wire emails separately.
+PART 4 — FRONTEND: MISMATCH POPUP COMPONENT
+Create new file artifacts/bimlog/src/components/project/CvrMismatchModal.tsx
+This component receives these props: isOpen (boolean), onClose (function), onProceed (function that receives reason string), fileName (string), cvrResult ("possible_mismatch" or "clear_mismatch"), cvrReason (string — Claude's explanation of what the content actually is), fileId (number), projectId (number).
+The modal renders differently based on cvrResult:
+For "possible_mismatch": Title is "Content Warning". Show an amber warning icon. Show the fileName. Show Claude's cvrReason in plain English — this is the content preview so the user understands what Claude found. Show a text area labeled "Optional: explain why you're proceeding" — not required. Show two buttons: "Cancel Upload" (calls onClose) and "Proceed Anyway" (calls onProceed with the typed reason or empty string). The proceed button is amber colored using existing app styles.
+For "clear_mismatch": Title is "Content Mismatch — Action Required". Show a red warning icon. Show the fileName. Show Claude's cvrReason prominently. Show a text area labeled "You must explain why this file belongs on this project" — this field is REQUIRED. The proceed button is disabled until the user has typed at least 20 characters. Show two buttons: "Cancel Upload" (calls onClose) and "Proceed — I Take Responsibility" (calls onProceed with reason). The proceed button is red using existing app styles.
+Both variants show at the bottom in small gray text: "Your decision will be logged with full attribution and sent to the project administrator for review."
+Use the existing modal/dialog component already used elsewhere in the app for the container. Use existing app styles only — no new colors except the amber and red which should use the same CSS variables already defined for warnings and errors in the app.
+PART 5 — FRONTEND: UPDATE FilesTab.tsx
+In FilesTab.tsx make these changes:
+After a file is uploaded and the server returns the file row, check the contentVerificationResult field on the response. If it is "possible_mismatch" or "clear_mismatch", do NOT immediately show the file as rejected in the list. Instead open the CvrMismatchModal with the fileName, cvrResult, and cvrReason (hashComparisonNote) from the server response.
+When the user clicks "Cancel Upload" in the modal: call the existing delete endpoint for that file to remove it. Close the modal. Show a toast notification "Upload cancelled."
+When the user clicks "Proceed" or "Proceed — I Take Responsibility": call POST /api/v1/projects/:projectId/files/:fileId/cvr-proceed with the reason. Close the modal. Refresh the file list. Show a toast notification "File flagged for administrator review."
+In the file list, add a new visual state for files where cvrWorkflowStatus is "pending_admin_review". These files show an amber badge that says "Pending Admin Review" instead of the standard green or red status badge. The file row background should use the existing amber/warning background variable. Below the file name show the text "Awaiting administrator approval before this file can be used."
+For files where cvrWorkflowStatus is "admin_approved" show a green badge "Admin Approved" with the admin's name and date below the file name.
+For files where cvrWorkflowStatus is "admin_rejected" show a red badge "Admin Rejected" with the admin's reason below the file name.
+PART 6 — FRONTEND: REPORTS PAGE
+Create new file artifacts/bimlog/src/pages/project/ReportsTab.tsx
+This page has two sections selectable by two tabs at the top: "Current Issues" and "Audit History".
+Current Issues tab: Calls GET /api/v1/projects/:projectId/cvr-report with no date params. Shows a summary row at the top: X files processed, X flagged, X pending review, X approved, X rejected — using the same stat card style as the rest of the app. Below that shows a table of all current issues. Each row shows: file name, CVR verdict badge (amber for possible_mismatch, red for clear_mismatch), Claude's reason, who uploaded it and when, the user's reason if they proceeded, the current workflow status badge, and if the requesting user is an admin — two action buttons: "Approve" and "Reject". Approve opens a small confirm dialog. Reject opens a dialog requiring a typed reason. Both call the respective endpoints and refresh the data.
+Audit History tab: Shows a date range picker (from / to). On search calls GET /api/v1/projects/:projectId/cvr-report?from=X&to=Y. Shows the same table but for the historical range. Shows a "Print Report" button that calls window.print() on the report table. The print stylesheet should hide everything except the report table and a header showing BIMLog, project name, date range, and generated by.
+Add a "Reports" link to the existing project sidebar navigation. It navigates to /projects/:projectId/reports using setLocation from wouter. Use the same nav item style as the existing sidebar items.
+Add the ReportsTab route in App.tsx: /projects/:projectId/reports renders ReportsTab.
+PART 7 — FRONTEND: PLATFORM HEALTH RING ON MAIN DASHBOARD
+In Dashboard.tsx add a platform health ring component inline (do not create a separate file for this). Place it at the very top of the content area above the 5 stat cards, right-aligned or centered — wherever it looks cleanest with the existing layout.
+The ring is an SVG circle showing overall platform health. It shows three numbers stacked inside or below it: total files processed, total flagged, total pending review. The ring color is: green (using existing success CSS variable) when healthStatus is "green", amber (using existing warning CSS variable) when "amber", red (using existing destructive CSS variable) when "red". Below or beside the ring show the label "Platform Health" and the healthStatus text. The ring is clickable — clicking it navigates to /reports using setLocation (this will be a future master reports page, for now just navigate there and show a coming soon message if the route doesn't exist yet).
+Fetch the data from GET /api/v1/cvr-health using the existing fetch pattern in Dashboard.tsx.
+PART 8 — FRONTEND: AI NAME SUGGESTION FIX
+In FilesTab.tsx find the "Ask AI" button handler that calls the suggest-name endpoint. Currently it sends only the file name. Change it to also send the extractedText if available from the uploaded file response, and the cvrReason (hashComparisonNote) if available. Update the suggest-name endpoint in files.ts to accept these two optional fields and include them in the Claude prompt so the suggested name reflects what the content actually is, not just the convention structure.
+Then rebuild, run TypeScript check with zero errors, redeploy, and show exact output of these checks:
+Check 1 — New schema columns exist: grep -n "cvrWorkflowStatus|cvr_workflow_status|cvrUserReason|cvrAdminAction" lib/db/src/schema/files.ts | head -10
+Check 2 — New endpoints exist: grep -n "cvr-proceed|cvr-approve|cvr-reject|cvr-report|cvr-health" artifacts/api-server/src/routes/files.ts | head -10
+Check 3 — CvrMismatchModal exists: find artifacts/bimlog/src/components/project -name "CvrMismatchModal*"
+Check 4 — ReportsTab exists: find artifacts/bimlog/src/pages/project -name "ReportsTab*"
+Check 5 — Reports route in App.tsx: grep -n "reports|ReportsTab" artifacts/bimlog/src/App.tsx | head -5
+Check 6 — Health ring in Dashboard: grep -n "cvr-health|healthStatus|Platform Health" artifacts/bimlog/src/pages/Dashboard.tsx | head -5
+Check 7 — TypeScript check: npx tsc --noEmit 2>&1 | head -20
+Show exact output of all 7 checks. Nothing else.

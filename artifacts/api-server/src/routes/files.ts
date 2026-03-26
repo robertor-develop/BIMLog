@@ -6,7 +6,7 @@ import multer from "multer";
 import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
 import { sendEmail, makeNamingViolationEmail, getUserLang, notifEnabled } from "../lib/email";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, gte, lte, isNull, count, inArray } from "drizzle-orm";
 import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
@@ -721,14 +721,15 @@ ${extractedText}`;
           messages: [{ role: "user", content: promptContent }],
         });
         const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+        const cleanText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
         let parsed: { isRelevant: boolean; reason: string; suggestedName: string | null };
         try {
-          parsed = JSON.parse(rawText) as { isRelevant: boolean; reason: string; suggestedName: string | null };
+          parsed = JSON.parse(cleanText) as { isRelevant: boolean; reason: string; suggestedName: string | null };
         } catch {
           res.json({ isRelevant: false, suggestedName: null, reason: "AI parsing failed" });
           return;
         }
-        res.json({ isRelevant: parsed.isRelevant, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason });
+        res.json({ isRelevant: parsed.isRelevant ?? true, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason ?? "" });
       } catch {
         res.json({ isRelevant: false, suggestedName: null, reason: "AI parsing failed" });
       }
@@ -766,15 +767,16 @@ Return ONLY JSON in this format:
         messages: [{ role: "user", content: promptContent }],
       });
       const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+      const cleanTextB = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
       let parsed: { isRelevant: boolean; reason: string; suggestedName: string | null };
       try {
-        parsed = JSON.parse(rawText) as { isRelevant: boolean; reason: string; suggestedName: string | null };
+        parsed = JSON.parse(cleanTextB) as { isRelevant: boolean; reason: string; suggestedName: string | null };
       } catch {
         // AI response unparseable — use convention fallback
         res.json({ isRelevant: true, suggestedName: buildFallbackName(fileName), reason: "Built by matching your file name against allowed convention values." });
         return;
       }
-      res.json({ isRelevant: parsed.isRelevant, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason });
+      res.json({ isRelevant: parsed.isRelevant ?? true, suggestedName: parsed.suggestedName ?? null, reason: parsed.reason ?? "" });
     } catch {
       // AI unavailable — use convention fallback
       const suggested = conventionFields.length > 0 ? buildFallbackName(fileName) : fileName;
@@ -1101,6 +1103,210 @@ router.delete("/projects/:projectId/files/:fileId", authMiddleware, requirePermi
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });
+  }
+});
+
+// ─── POST /projects/:projectId/files/:fileId/cvr-proceed ──────────────────────
+router.post("/projects/:projectId/files/:fileId/cvr-proceed", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+    const fileId = parseInt(req.params.fileId);
+    const { reason } = req.body as { reason?: string };
+
+    const [file] = await db.select().from(filesTable)
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
+    if (!file) { res.status(404).json({ error: "File not found" }); return; }
+
+    if (file.contentVerificationResult === "clear_mismatch" && (!reason || reason.trim().length === 0)) {
+      res.status(400).json({ error: "A reason is required when content clearly does not match." });
+      return;
+    }
+
+    const [updated] = await db.update(filesTable)
+      .set({ cvrWorkflowStatus: "pending_admin_review", cvrUserReason: reason?.trim() || null, updatedAt: new Date() })
+      .where(eq(filesTable.id, fileId)).returning();
+
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "cvr_user_proceeded",
+      entityType: "file",
+      entityId: fileId,
+      fileNameAfter: file.fileName,
+      details: `User proceeded despite ${file.contentVerificationResult} warning. Reason: ${reason?.trim() || "(none provided)"}`,
+    });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ─── POST /projects/:projectId/files/:fileId/cvr-approve ──────────────────────
+router.post("/projects/:projectId/files/:fileId/cvr-approve", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+    const fileId = parseInt(req.params.fileId);
+    const { reason } = req.body as { reason?: string };
+
+    const member = await db.select().from(projectMembersTable)
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId))).limit(1);
+    const role = member[0]?.role || "";
+    if (!req.user!.isSuperAdmin && !["admin", "project_admin"].includes(role)) {
+      res.status(403).json({ error: "Admin access required." }); return;
+    }
+
+    const [file] = await db.select().from(filesTable)
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
+    if (!file) { res.status(404).json({ error: "File not found" }); return; }
+    if (file.cvrWorkflowStatus !== "pending_admin_review") {
+      res.status(400).json({ error: "File is not pending review." }); return;
+    }
+
+    const now = new Date();
+    const [updated] = await db.update(filesTable)
+      .set({ cvrWorkflowStatus: "admin_approved", cvrAdminAction: reason?.trim() || "Approved", cvrAdminActionAt: now, cvrAdminActionBy: req.user!.userId, updatedAt: now })
+      .where(eq(filesTable.id, fileId)).returning();
+
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "cvr_admin_approved",
+      entityType: "file",
+      entityId: fileId,
+      fileNameAfter: file.fileName,
+      details: `Admin approved file "${file.fileName}". Reason: ${reason?.trim() || "Approved"}. Approved by ${req.user!.fullName} at ${now.toISOString()}.`,
+    });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ─── POST /projects/:projectId/files/:fileId/cvr-reject ───────────────────────
+router.post("/projects/:projectId/files/:fileId/cvr-reject", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+    const fileId = parseInt(req.params.fileId);
+    const { reason } = req.body as { reason?: string };
+
+    const member = await db.select().from(projectMembersTable)
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId))).limit(1);
+    const role = member[0]?.role || "";
+    if (!req.user!.isSuperAdmin && !["admin", "project_admin"].includes(role)) {
+      res.status(403).json({ error: "Admin access required." }); return;
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      res.status(400).json({ error: "A reason is required to reject a file." }); return;
+    }
+
+    const [file] = await db.select().from(filesTable)
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
+    if (!file) { res.status(404).json({ error: "File not found" }); return; }
+
+    const now = new Date();
+    const [updated] = await db.update(filesTable)
+      .set({ cvrWorkflowStatus: "admin_rejected", status: "rejected", cvrAdminAction: reason.trim(), cvrAdminActionAt: now, cvrAdminActionBy: req.user!.userId, updatedAt: now })
+      .where(eq(filesTable.id, fileId)).returning();
+
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "cvr_admin_rejected",
+      entityType: "file",
+      entityId: fileId,
+      fileNameAfter: file.fileName,
+      details: `Admin rejected file "${file.fileName}". Reason: ${reason.trim()}. Rejected by ${req.user!.fullName} at ${now.toISOString()}.`,
+    });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ─── GET /projects/:projectId/cvr-report ──────────────────────────────────────
+router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+    const { from, to } = req.query as { from?: string; to?: string };
+
+    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+
+    const totalFilesProcessed = allFiles.length;
+    const totalFlagged = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch").length;
+    const totalPendingReview = allFiles.filter(f => f.cvrWorkflowStatus === "pending_admin_review").length;
+    const totalAdminApproved = allFiles.filter(f => f.cvrWorkflowStatus === "admin_approved").length;
+    const totalAdminRejected = allFiles.filter(f => f.cvrWorkflowStatus === "admin_rejected").length;
+
+    let issues = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch");
+
+    if (from || to) {
+      const fromDate = from ? new Date(from) : null;
+      const toDate = to ? new Date(to) : null;
+      issues = issues.filter(f => {
+        const created = new Date(f.createdAt);
+        if (fromDate && created < fromDate) return false;
+        if (toDate && created > toDate) return false;
+        return true;
+      });
+    } else {
+      issues = issues.filter(f => f.cvrWorkflowStatus === "pending_admin_review");
+    }
+
+    res.json({
+      projectId,
+      generatedAt: new Date().toISOString(),
+      totalFilesProcessed,
+      totalFlagged,
+      totalPendingReview,
+      totalAdminApproved,
+      totalAdminRejected,
+      issues,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ─── GET /cvr-health ──────────────────────────────────────────────────────────
+router.get("/cvr-health", authMiddleware, async (req, res) => {
+  try {
+    const userProjects = await db.select({ projectId: projectMembersTable.projectId })
+      .from(projectMembersTable).where(eq(projectMembersTable.userId, req.user!.userId));
+    const projectIds = userProjects.map(p => p.projectId);
+
+    if (projectIds.length === 0) {
+      res.json({ totalFilesProcessed: 0, totalFlagged: 0, totalPendingReview: 0, totalAdminApproved: 0, totalAdminRejected: 0, healthStatus: "green" });
+      return;
+    }
+
+    const allFiles = await db.select().from(filesTable).where(inArray(filesTable.projectId, projectIds));
+
+    const totalFilesProcessed = allFiles.length;
+    const totalFlagged = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch").length;
+    const totalPendingReview = allFiles.filter(f => f.cvrWorkflowStatus === "pending_admin_review").length;
+    const totalAdminApproved = allFiles.filter(f => f.cvrWorkflowStatus === "admin_approved").length;
+    const totalAdminRejected = allFiles.filter(f => f.cvrWorkflowStatus === "admin_rejected").length;
+
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const hasOverdue = allFiles.some(f => f.cvrWorkflowStatus === "pending_admin_review" && new Date(f.createdAt) < oneDayAgo);
+
+    let healthStatus: "green" | "amber" | "red" = "green";
+    if (hasOverdue) healthStatus = "red";
+    else if (totalPendingReview > 0) healthStatus = "amber";
+
+    res.json({ totalFilesProcessed, totalFlagged, totalPendingReview, totalAdminApproved, totalAdminRejected, healthStatus });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
 
