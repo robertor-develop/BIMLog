@@ -1,0 +1,44 @@
+Stop. Do not build anything. Execute these database operations in exact order. Use raw SQL. Show the output of every step.
+STEP 1 — Delete all existing data in this exact order to respect foreign keys:
+DELETE FROM activity_log;
+DELETE FROM files;
+DELETE FROM project_invitations;
+DELETE FROM project_members;
+DELETE FROM naming_fields;
+DELETE FROM naming_conventions;
+DELETE FROM submittals;
+DELETE FROM rfis;
+DELETE FROM projects;
+DELETE FROM users;
+DELETE FROM companies;
+Show row counts deleted for each table.
+STEP 2 — Create companies:
+INSERT INTO companies (name, created_at, updated_at) VALUES ('IgniteSmart', NOW(), NOW()) RETURNING id, name;
+INSERT INTO companies (name, created_at, updated_at) VALUES ('ABC Contractors', NOW(), NOW()) RETURNING id, name;
+INSERT INTO companies (name, created_at, updated_at) VALUES ('BIMtech Corp', NOW(), NOW()) RETURNING id, name;
+INSERT INTO companies (name, created_at, updated_at) VALUES ('Test Corp', NOW(), NOW()) RETURNING id, name;
+Show exact output of each insert.
+STEP 3 — Create users. Use bcrypt hash of 'Newstart123$45' for Roberto and '12345678' for Alejandro. Run this Node script to generate both hashes then use them in the inserts:
+node -e "const bcrypt = require('bcryptjs'); Promise.all([bcrypt.hash('Newstart123$45', 10), bcrypt.hash('12345678', 10)]).then(([h1, h2]) => console.log('ROBERTO:', h1, 'ALEJANDRO:', h2));"
+Show exact hash output then use those hashes in these inserts:
+INSERT INTO users (email, full_name, password_hash, company_id, is_super_admin, created_at, updated_at) VALUES ('robertor@rryasociados.com', 'Roberto Rodriguez', '[ROBERTO_HASH]', [IGNITESMART_ID], true, NOW(), NOW()) RETURNING id, email, full_name;
+INSERT INTO users (email, full_name, password_hash, company_id, is_super_admin, created_at, updated_at) VALUES ('robertor9876@gmail.com', 'Alejandro', '[ALEJANDRO_HASH]', [ABC_CONTRACTORS_ID], false, NOW(), NOW()) RETURNING id, email, full_name;
+Show exact output of each insert.
+STEP 4 — Create the two projects:
+INSERT INTO projects (name, code, description, company_id, created_by, status, created_at, updated_at) VALUES ('IBQ Lithium Extraction Plant', 'IBQ-LIT', 'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants. Contract between SEDEM/IBQ and ECEC.', [IGNITESMART_ID], [ROBERTO_ID], 'active', NOW(), NOW()) RETURNING id, name, code;
+INSERT INTO projects (name, code, description, company_id, created_by, status, created_at, updated_at) VALUES ('270 Park Avenue', 'NYC-270', 'JPMorgan Chase Headquarters redevelopment at 270 Park Avenue, New York City. BIM coordination and document management.', [BIMTECH_ID], [ROBERTO_ID], 'active', NOW(), NOW()) RETURNING id, name, code;
+Show exact output of each insert.
+STEP 5 — Add project members:
+For IBQ Lithium project — Roberto as project_admin, Alejandro as viewer:
+INSERT INTO project_members (project_id, user_id, role, created_at, updated_at) VALUES ([IBQ_PROJECT_ID], [ROBERTO_ID], 'project_admin', NOW(), NOW());
+INSERT INTO project_members (project_id, user_id, role, created_at, updated_at) VALUES ([IBQ_PROJECT_ID], [ALEJANDRO_ID], 'viewer', NOW(), NOW());
+For 270 Park Avenue project — Roberto as project_admin, Alejandro as viewer:
+INSERT INTO project_members (project_id, user_id, role, created_at, updated_at) VALUES ([NYC270_PROJECT_ID], [ROBERTO_ID], 'project_admin', NOW(), NOW());
+INSERT INTO project_members (project_id, user_id, role, created_at, updated_at) VALUES ([NYC270_PROJECT_ID], [ALEJANDRO_ID], 'viewer', NOW(), NOW());
+Show exact output of each insert.
+STEP 6 — Verify final state:
+SELECT id, name, code FROM projects ORDER BY id;
+SELECT id, email, full_name, company_id, is_super_admin FROM users ORDER BY id;
+SELECT id, name FROM companies ORDER BY id;
+SELECT project_id, user_id, role FROM project_members ORDER BY project_id;
+Show exact output of all 4 verification queries.
