@@ -194,42 +194,26 @@ router.post("/system/full-seed", async (req, res) => {
 
   const log: string[] = [];
   try {
-    // 1. Wipe in FK-safe order
-    const tables = [
-      "activity_log","files","project_invitations","submittals","rfis",
-      "project_members","naming_fields","naming_conventions","projects","users","companies"
-    ];
-    for (const t of tables) {
-      try {
-        await db.execute(sql.raw(`DELETE FROM ${t}`));
-        log.push(`Cleared: ${t}`);
-      } catch {
-        log.push(`Skipped (not found): ${t}`);
-      }
+    // 1. Config options
+    for (const opt of CONFIG_OPTIONS) {
+      await db.execute(sql`
+        INSERT INTO config_options (category, value, label, label_es, sort_order, meta)
+        VALUES (${opt.category}, ${opt.value}, ${opt.label}, ${opt.labelEs}, ${opt.sortOrder}, ${opt.meta ? sql`${opt.meta}::json` : sql`NULL`})
+        ON CONFLICT DO NOTHING
+      `);
     }
+    log.push(`Config options: ${CONFIG_OPTIONS.length} processed (ON CONFLICT DO NOTHING)`);
 
-    // 2. Seed config_options
-    const existing = await db.execute(sql`SELECT COUNT(*) as cnt FROM config_options`);
-    const cnt = Number((existing.rows[0] as { cnt: string }).cnt);
-    if (cnt === 0) {
-      for (const opt of CONFIG_OPTIONS) {
-        await db.execute(sql`
-          INSERT INTO config_options (category, value, label, label_es, sort_order, meta)
-          VALUES (${opt.category}, ${opt.value}, ${opt.label}, ${opt.labelEs}, ${opt.sortOrder}, ${opt.meta ? sql`${opt.meta}::json` : sql`NULL`})
-          ON CONFLICT DO NOTHING
-        `);
-      }
-      log.push(`Seeded ${CONFIG_OPTIONS.length} config options`);
-    } else {
-      log.push(`Config options already present (${cnt})`);
-    }
-
-    // 3. Companies — exact dev IDs
-    await db.execute(sql`INSERT INTO companies (id, name) VALUES (14, 'IgniteSmart'), (15, 'ABC Contractors'), (16, 'BIMtech Corp'), (17, 'Test Corp')`);
+    // 2. Companies
+    await db.execute(sql`
+      INSERT INTO companies (id, name)
+      VALUES (14,'IgniteSmart'),(15,'ABC Contractors'),(16,'BIMtech Corp'),(17,'Test Corp')
+      ON CONFLICT (id) DO NOTHING
+    `);
     await db.execute(sql`SELECT setval(pg_get_serial_sequence('companies','id'), 17, true)`);
-    log.push("Companies inserted (ids 14-17)");
+    log.push("Companies: ON CONFLICT DO NOTHING");
 
-    // 4. Users — exact hashes, Roberto super admin
+    // 3. Users
     const robertoHash = "$2b$10$KQteBKLRHMWh/FHl8scESemZM/tydxjRn1lYaQICF2KVJ51TqzRVa";
     const alejandroHash = "$2b$10$YhQrZhx7UXi0mVZI9ZXBeuikBFzO.cWU8nOGPRbvkeSzVg098pn1i";
     await db.execute(sql`
@@ -237,30 +221,31 @@ router.post("/system/full-seed", async (req, res) => {
       VALUES
         (16, 'Roberto Rodriguez', 'robertor@rryasociados.com', ${robertoHash}, 14, true),
         (17, 'Alejandro',        'robertor9876@gmail.com',     ${alejandroHash}, 15, false)
+      ON CONFLICT (id) DO NOTHING
     `);
     await db.execute(sql`SELECT setval(pg_get_serial_sequence('users','id'), 17, true)`);
-    log.push("Users inserted (ids 16-17)");
+    log.push("Users: ON CONFLICT DO NOTHING");
 
-    // 5. Projects
+    // 4. Projects
     await db.execute(sql`
       INSERT INTO projects (id, name, code, description, status, created_by_id)
       VALUES
-        (8, 'IBQ Lithium Extraction Plant', 'IBQ-LIT', 'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants. Contract between SEDEM/IBQ and ECEC.', 'active', 16),
-        (9, '270 Park Avenue',              'NYC-270',  'JPMorgan Chase Headquarters redevelopment at 270 Park Avenue, New York City. BIM coordination and document management.', 'active', 16)
+        (8, 'IBQ Lithium Extraction Plant', 'IBQ-LIT',
+         'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants.', 'active', 16),
+        (9, '270 Park Avenue', 'NYC-270',
+         'JPMorgan Chase Headquarters redevelopment at 270 Park Avenue, New York City.', 'active', 16)
+      ON CONFLICT (id) DO NOTHING
     `);
     await db.execute(sql`SELECT setval(pg_get_serial_sequence('projects','id'), 9, true)`);
-    log.push("Projects inserted (ids 8-9)");
+    log.push("Projects: ON CONFLICT DO NOTHING");
 
-    // 6. Project members — both users on both projects
+    // 5. Project members
     await db.execute(sql`
       INSERT INTO project_members (project_id, user_id, role)
-      VALUES
-        (8, 16, 'project_admin'),
-        (8, 17, 'viewer'),
-        (9, 16, 'project_admin'),
-        (9, 17, 'viewer')
+      VALUES (8,16,'project_admin'),(8,17,'viewer'),(9,16,'project_admin'),(9,17,'viewer')
+      ON CONFLICT DO NOTHING
     `);
-    log.push("Project members inserted");
+    log.push("Project members: ON CONFLICT DO NOTHING");
 
     res.json({ success: true, log });
   } catch (error) {
