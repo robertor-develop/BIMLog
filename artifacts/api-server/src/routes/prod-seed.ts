@@ -185,6 +185,90 @@ router.post("/admin/prod-seed", authMiddleware, async (req, res) => {
   }
 });
 
+router.post("/system/full-seed", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) {
+    res.status(403).json({ error: "Invalid seed key" });
+    return;
+  }
+
+  const log: string[] = [];
+  try {
+    // 1. Wipe in FK-safe order
+    await db.execute(sql`DELETE FROM activity_log`);
+    await db.execute(sql`DELETE FROM files`);
+    await db.execute(sql`DELETE FROM project_invitations`);
+    await db.execute(sql`DELETE FROM project_members`);
+    await db.execute(sql`DELETE FROM naming_fields`);
+    await db.execute(sql`DELETE FROM naming_conventions`);
+    await db.execute(sql`DELETE FROM submittals`);
+    await db.execute(sql`DELETE FROM rfis`);
+    await db.execute(sql`DELETE FROM projects`);
+    await db.execute(sql`DELETE FROM users`);
+    await db.execute(sql`DELETE FROM companies`);
+    log.push("All tables cleared");
+
+    // 2. Seed config_options
+    const existing = await db.execute(sql`SELECT COUNT(*) as cnt FROM config_options`);
+    const cnt = Number((existing.rows[0] as { cnt: string }).cnt);
+    if (cnt === 0) {
+      for (const opt of CONFIG_OPTIONS) {
+        await db.execute(sql`
+          INSERT INTO config_options (category, value, label, label_es, sort_order, meta)
+          VALUES (${opt.category}, ${opt.value}, ${opt.label}, ${opt.labelEs}, ${opt.sortOrder}, ${opt.meta ? sql`${opt.meta}::json` : sql`NULL`})
+          ON CONFLICT DO NOTHING
+        `);
+      }
+      log.push(`Seeded ${CONFIG_OPTIONS.length} config options`);
+    } else {
+      log.push(`Config options already present (${cnt})`);
+    }
+
+    // 3. Companies — exact dev IDs
+    await db.execute(sql`INSERT INTO companies (id, name) VALUES (14, 'IgniteSmart'), (15, 'ABC Contractors'), (16, 'BIMtech Corp'), (17, 'Test Corp')`);
+    await db.execute(sql`SELECT setval(pg_get_serial_sequence('companies','id'), 17, true)`);
+    log.push("Companies inserted (ids 14-17)");
+
+    // 4. Users — exact hashes, Roberto super admin
+    const robertoHash = "$2b$10$KQteBKLRHMWh/FHl8scESemZM/tydxjRn1lYaQICF2KVJ51TqzRVa";
+    const alejandroHash = "$2b$10$YhQrZhx7UXi0mVZI9ZXBeuikBFzO.cWU8nOGPRbvkeSzVg098pn1i";
+    await db.execute(sql`
+      INSERT INTO users (id, full_name, email, password_hash, company_id, is_super_admin)
+      VALUES
+        (16, 'Roberto Rodriguez', 'robertor@rryasociados.com', ${robertoHash}, 14, true),
+        (17, 'Alejandro',        'robertor9876@gmail.com',     ${alejandroHash}, 15, false)
+    `);
+    await db.execute(sql`SELECT setval(pg_get_serial_sequence('users','id'), 17, true)`);
+    log.push("Users inserted (ids 16-17)");
+
+    // 5. Projects
+    await db.execute(sql`
+      INSERT INTO projects (id, name, code, description, status, created_by_id)
+      VALUES
+        (8, 'IBQ Lithium Extraction Plant', 'IBQ-LIT', 'Implementation of Basic Chemical Industry in Bolivia - Lithium Extraction Industrial Plants. Contract between SEDEM/IBQ and ECEC.', 'active', 16),
+        (9, '270 Park Avenue',              'NYC-270',  'JPMorgan Chase Headquarters redevelopment at 270 Park Avenue, New York City. BIM coordination and document management.', 'active', 16)
+    `);
+    await db.execute(sql`SELECT setval(pg_get_serial_sequence('projects','id'), 9, true)`);
+    log.push("Projects inserted (ids 8-9)");
+
+    // 6. Project members — both users on both projects
+    await db.execute(sql`
+      INSERT INTO project_members (project_id, user_id, role)
+      VALUES
+        (8, 16, 'project_admin'),
+        (8, 17, 'viewer'),
+        (9, 16, 'project_admin'),
+        (9, 17, 'viewer')
+    `);
+    log.push("Project members inserted");
+
+    res.json({ success: true, log });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Seed failed";
+    res.status(500).json({ error: message, log });
+  }
+});
+
 router.post("/system/set-super-admin", async (req, res) => {
   const { key, email } = req.body;
   if (key !== SEED_KEY) {
