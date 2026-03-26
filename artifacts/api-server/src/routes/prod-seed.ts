@@ -195,18 +195,18 @@ router.post("/system/full-seed", async (req, res) => {
   const log: string[] = [];
   try {
     // 1. Wipe in FK-safe order
-    await db.execute(sql`DELETE FROM activity_log`);
-    await db.execute(sql`DELETE FROM files`);
-    await db.execute(sql`DELETE FROM project_invitations`);
-    await db.execute(sql`DELETE FROM project_members`);
-    await db.execute(sql`DELETE FROM naming_fields`);
-    await db.execute(sql`DELETE FROM naming_conventions`);
-    await db.execute(sql`DELETE FROM submittals`);
-    await db.execute(sql`DELETE FROM rfis`);
-    await db.execute(sql`DELETE FROM projects`);
-    await db.execute(sql`DELETE FROM users`);
-    await db.execute(sql`DELETE FROM companies`);
-    log.push("All tables cleared");
+    const tables = [
+      "activity_log","files","project_invitations","submittals","rfis",
+      "project_members","naming_fields","naming_conventions","projects","users","companies"
+    ];
+    for (const t of tables) {
+      try {
+        await db.execute(sql.raw(`DELETE FROM ${t}`));
+        log.push(`Cleared: ${t}`);
+      } catch {
+        log.push(`Skipped (not found): ${t}`);
+      }
+    }
 
     // 2. Seed config_options
     const existing = await db.execute(sql`SELECT COUNT(*) as cnt FROM config_options`);
