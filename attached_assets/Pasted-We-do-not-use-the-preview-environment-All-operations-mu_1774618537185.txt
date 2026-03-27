@@ -1,0 +1,56 @@
+We do not use the preview environment. All operations must run against the production database only.
+Stop. Do not build anything. Do all of the following in exact order. This is one complete instruction — read every word before touching anything.
+PART 1 — CLEAN OLD DATA
+Using the production database, delete all of the following via SQL through the live server. Add a temporary cleanup endpoint to prod-seed.ts that runs these deletes in safe order:
+DELETE FROM activity_log;
+DELETE FROM email_log (if table exists, otherwise skip);
+DELETE FROM files;
+DELETE FROM rfis CASCADE;
+DELETE FROM submittals CASCADE;
+DELETE FROM project_invitations;
+Keep projects, users, companies, project_members, config_options, naming_conventions, naming_fields, feature_flags all untouched.
+PART 2 — CREATE NEW USERS AND COMPANY
+Using bcrypt hash password Test1234$ for both new users. Create these via the live API or direct SQL:
+Company: Constructora CI (new company)
+Company: Design Studio (new company)
+User 1: Carlos Mendoza, email carlos@constructora-ci.com, password Test1234$, company Constructora CI, is_super_admin false
+User 2: Sofia Vargas, email sofia@designstudio.com, password Test1234$, company Design Studio, is_super_admin false
+PART 3 — CREATE PROJECT 3
+Create project: name Calle I 183, code CI-183, description Mixed-use residential and commercial development at Calle I 183, status active, created_by_id 1 (Roberto)
+Add members:
+Carlos Mendoza as project_admin on CI-183
+Sofia Vargas as viewer on CI-183
+Roberto (id=1) as project_admin on CI-183
+Do NOT add Roberto or Alejandro to CI-183 as members automatically — only add them if explicitly listed above.
+PART 4 — FIX ADMIN PANEL UI
+Modify ONLY artifacts/bimlog/src/pages/AdminPanel.tsx:
+Fix 1 — Remove the red SUPER ADMIN badge completely from the page header. The title should just say BIMLog Admin Panel with no badge, no chip, no colored label next to it.
+Fix 2 — Change the subtitle from Platform management — restricted access to Platform Administration.
+Fix 3 — Fix the stat cards so the numbers are properly aligned and consistent. All stat cards should use the same width, the same font size for the label and value, and the same padding. Use the existing CSS variables. Make sure TOTAL SUBMITTALS label fits on one line — shorten it to SUBMITTALS if needed. Make sure all 8 cards sit in a clean responsive grid row.
+Fix 4 — The Live Activity Feed on the Overview tab currently queries the activity_log table. After we wipe it in Part 1 it will be empty — that is correct and expected. Add a message when empty: No activity yet. Actions taken in projects will appear here. Same for the Admin Log tab — when empty show No admin actions recorded yet.
+Fix 5 — In the Users tab, rename the column header SUPER ADMIN to ROLE. Instead of showing Yes/No for super admin, show a role badge: show SUPER ADMIN badge (using existing warning or accent color — not red) only for users where isSuperAdmin is true. For all other users show their project role or just USER in a neutral gray badge.
+Fix 6 — Wire the Admin Log so that when an admin deletes a user, deletes a project, deletes a company, resets a password, or toggles a feature flag — insert a record into the admin_actions_log table. Check if this table exists in the schema at lib/db/src/schema/. If it does not exist add it with these columns: id serial primary key, admin_id integer references users, admin_email text, action text, target_type text, target_id text, details text, created_at timestamp default now(). Run the migration. Then insert a log entry for each of those admin actions.
+PART 5 — ADD MISSING FEATURE FLAGS
+Insert these feature flags into the feature_flags table via the live API or SQL if they don't already exist. Use ON CONFLICT DO NOTHING:
+meeting_minutes — enabled false — appliesTo global
+transmittal_manager — enabled false — appliesTo global
+cvr_mismatch_workflow — enabled true — appliesTo global
+automated_accountability_emails — enabled false — appliesTo global
+weekly_compliance_report — enabled false — appliesTo global
+PART 6 — SENDGRID
+Check if SENDGRID_API_KEY exists as an environment variable in the production deployment. Show its current value (masked — show only first 5 chars). Do not change it. Just report whether it is set or not.
+Then rebuild, publish, and run these checks:
+Check 1 — Old data wiped:
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/rfis -H "Authorization: Bearer [ROBERTO_JWT]"
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/submittals -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 2 — New project exists:
+curl -s https://bim-log-ignite.replit.app/api/v1/projects -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 3 — New users exist:
+curl -s https://bim-log-ignite.replit.app/api/v1/admin/users -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 4 — SUPER ADMIN badge gone from AdminPanel:
+grep -n "SUPER ADMIN|super_admin|superAdmin" artifacts/bimlog/src/pages/AdminPanel.tsx | head -5
+Check 5 — Feature flags:
+curl -s https://bim-log-ignite.replit.app/api/v1/admin/feature-flags -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 6 — SendGrid key status:
+printenv | grep -i sendgrid | sed 's/=.*/=MASKED/'
+Show exact output of all 6 checks. Nothing else.

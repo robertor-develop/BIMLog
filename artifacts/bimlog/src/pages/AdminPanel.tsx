@@ -22,6 +22,23 @@ const FLAG_LABELS: Record<string, string> = {
   email_notifications: "Email Notifications",
   rapid_approval_detection: "Rapid Approval Detection",
   procurement_before_approval_warning: "Procurement Before Approval Warning",
+  meeting_minutes: "Meeting Minutes",
+  transmittal_manager: "Transmittal Manager",
+  cvr_mismatch_workflow: "CVR Mismatch Workflow",
+  automated_accountability_emails: "Automated Accountability Emails",
+  weekly_compliance_report: "Weekly Compliance Report",
+};
+
+const STAT_LABELS: Record<string, string> = {
+  totalUsers: "Users",
+  totalCompanies: "Companies",
+  totalProjects: "Projects",
+  totalFiles: "Files",
+  totalRfis: "RFIs",
+  totalSubmittals: "Submittals",
+  activeProjects: "Active Projects",
+  filesLast24h: "Files (24h)",
+  rfisLast7d: "RFIs (7d)",
 };
 
 const statusColor: Record<string, string> = {
@@ -54,9 +71,9 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px", flex: 1, minWidth: 140 }}>
-      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, color: "hsl(var(--foreground))" }}>{value}</div>
+    <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px", width: 160, minWidth: 140, flexShrink: 0, boxSizing: "border-box" }}>
+      <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 800, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</div>
     </div>
   );
 }
@@ -77,27 +94,32 @@ function OverviewTab({ token }: { token: string }) {
     <div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
         {Object.entries(data.stats).map(([k, v]) => (
-          <StatCard key={k} label={k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
+          <StatCard key={k} label={STAT_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
         ))}
       </div>
       <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Live Activity Feed (last 50)</h3>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><Th>Project</Th><Th>User</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
-          <tbody>
-            {data.activity.map((a: Record<string, unknown>) => (
-              <tr key={String(a.id)}>
-                <Td><span style={{ fontWeight: 500 }}>{String(a.projectName || "")}</span></Td>
-                <Td><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></Td>
-                <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
-                <Td>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</Td>
-                <Td style={{ maxWidth: 240 }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></Td>
-                <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {data.activity.length === 0
+        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No activity yet. Actions taken in projects will appear here.</div>
+        : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead><tr><Th>Project</Th><Th>User</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
+              <tbody>
+                {data.activity.map((a: Record<string, unknown>) => (
+                  <tr key={String(a.id)}>
+                    <Td><span style={{ fontWeight: 500 }}>{String(a.projectName || "")}</span></Td>
+                    <Td><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></Td>
+                    <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
+                    <Td>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</Td>
+                    <Td style={{ maxWidth: 240 }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></Td>
+                    <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
     </div>
   );
 }
@@ -153,7 +175,7 @@ function UsersTab({ token }: { token: string }) {
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><Th>Name</Th><Th>Email</Th><Th>Company</Th><Th>Projects</Th><Th>Super Admin</Th><Th>Joined</Th><Th>Actions</Th></tr></thead>
+          <thead><tr><Th>Name</Th><Th>Email</Th><Th>Company</Th><Th>Projects</Th><Th>Role</Th><Th>Joined</Th><Th>Actions</Th></tr></thead>
           <tbody>
             {users.map((u: Record<string, unknown>) => (
               <tr key={String(u.id)}>
@@ -163,8 +185,8 @@ function UsersTab({ token }: { token: string }) {
                 <Td>{String(u.projectCount || 0)}</Td>
                 <Td>
                   <button onClick={() => toggleSuperAdmin(u.id as number, u.isSuperAdmin as boolean)}
-                    style={{ background: u.isSuperAdmin ? "#ef444422" : "hsl(var(--secondary))", border: `1px solid ${u.isSuperAdmin ? "#ef444444" : "hsl(var(--border))"}`, borderRadius: 6, padding: "2px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, color: u.isSuperAdmin ? "#ef4444" : "hsl(var(--muted-foreground))" }}>
-                    {u.isSuperAdmin ? "Yes" : "No"}
+                    style={{ background: u.isSuperAdmin ? "#f59e0b22" : "hsl(var(--secondary))", border: `1px solid ${u.isSuperAdmin ? "#f59e0b44" : "hsl(var(--border))"}`, borderRadius: 9999, padding: "2px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: u.isSuperAdmin ? "#b45309" : "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
+                    {u.isSuperAdmin ? "SUPER ADMIN" : "USER"}
                   </button>
                 </Td>
                 <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</Td>
@@ -486,23 +508,28 @@ function AdminActionsLogTab({ token }: { token: string }) {
   return (
     <div>
       <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} admin actions (immutable log)</div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><Th>Admin</Th><Th>Action</Th><Th>Target Type</Th><Th>Target ID</Th><Th>Details</Th><Th>When</Th></tr></thead>
-          <tbody>
-            {logs.map((l: Record<string, unknown>) => (
-              <tr key={String(l.id)}>
-                <Td style={{ fontSize: 12 }}>{String(l.adminEmail || "")}</Td>
-                <Td><Badge label={String(l.action || "")} color="#f59e0b" /></Td>
-                <Td style={{ fontSize: 12 }}>{String(l.targetType || "—")}</Td>
-                <Td style={{ fontSize: 12, fontFamily: "monospace" }}>{String(l.targetId || "—")}</Td>
-                <Td style={{ maxWidth: 200, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</Td>
-                <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.createdAt)).toLocaleString()}</Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {logs.length === 0
+        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No admin actions recorded yet.</div>
+        : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead><tr><Th>Admin</Th><Th>Action</Th><Th>Target Type</Th><Th>Target ID</Th><Th>Details</Th><Th>When</Th></tr></thead>
+              <tbody>
+                {logs.map((l: Record<string, unknown>) => (
+                  <tr key={String(l.id)}>
+                    <Td style={{ fontSize: 12 }}>{String(l.adminEmail || "")}</Td>
+                    <Td><Badge label={String(l.action || "")} color="#f59e0b" /></Td>
+                    <Td style={{ fontSize: 12 }}>{String(l.targetType || "—")}</Td>
+                    <Td style={{ fontSize: 12, fontFamily: "monospace" }}>{String(l.targetId || "—")}</Td>
+                    <Td style={{ maxWidth: 200, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</Td>
+                    <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.createdAt)).toLocaleString()}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
       {total > 50 && (
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 16 }}>
           <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
@@ -536,11 +563,8 @@ export function AdminPanel() {
       <div style={{ borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--card))", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, paddingTop: 20, paddingBottom: 0 }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ background: "#ef4444", color: "white", fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 4, letterSpacing: "0.08em" }}>SUPER ADMIN</span>
-              <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>BIMLog Admin Panel</h1>
-            </div>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Platform management — restricted access</p>
+            <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>BIMLog Admin Panel</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Platform Administration</p>
           </div>
           <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>← Back to Dashboard</Button>
         </div>

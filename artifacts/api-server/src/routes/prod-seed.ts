@@ -268,6 +268,42 @@ router.post("/system/full-seed", async (req, res) => {
   }
 });
 
+router.post("/system/wipe-transactional", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
+  const log: string[] = [];
+  try {
+    try { const r = await db.execute(sql`DELETE FROM rfi_responses`); log.push(`rfi_responses: ${(r as any).rowCount}`); } catch { log.push("rfi_responses: skipped"); }
+    try { const r = await db.execute(sql`DELETE FROM rfi_view_events`); log.push(`rfi_view_events: ${(r as any).rowCount}`); } catch { log.push("rfi_view_events: skipped"); }
+    try { const r = await db.execute(sql`DELETE FROM rfi_ball_in_court_history`); log.push(`rfi_ball_in_court_history: ${(r as any).rowCount}`); } catch { log.push("rfi_ball_in_court_history: skipped"); }
+    try { const r = await db.execute(sql`DELETE FROM submittal_view_events`); log.push(`submittal_view_events: ${(r as any).rowCount}`); } catch { log.push("submittal_view_events: skipped"); }
+    try { const r = await db.execute(sql`DELETE FROM submittal_register`); log.push(`submittal_register: ${(r as any).rowCount}`); } catch { log.push("submittal_register: skipped"); }
+    const r1 = await db.execute(sql`DELETE FROM rfis`); log.push(`rfis: ${(r1 as any).rowCount}`);
+    const r2 = await db.execute(sql`DELETE FROM submittals`); log.push(`submittals: ${(r2 as any).rowCount}`);
+    const r3 = await db.execute(sql`DELETE FROM activity_log`); log.push(`activity_log: ${(r3 as any).rowCount}`);
+    const r4 = await db.execute(sql`DELETE FROM files`); log.push(`files: ${(r4 as any).rowCount}`);
+    const r5 = await db.execute(sql`DELETE FROM project_invitations`); log.push(`project_invitations: ${(r5 as any).rowCount}`);
+    try { const r = await db.execute(sql`DELETE FROM email_log`); log.push(`email_log: ${(r as any).rowCount}`); } catch { log.push("email_log: skipped"); }
+
+    // Part 5: ensure feature flags exist
+    const newFlags = [
+      { flagName: "meeting_minutes",                   enabled: false, appliesTo: "global" },
+      { flagName: "transmittal_manager",               enabled: false, appliesTo: "global" },
+      { flagName: "cvr_mismatch_workflow",             enabled: true,  appliesTo: "global" },
+      { flagName: "automated_accountability_emails",   enabled: false, appliesTo: "global" },
+      { flagName: "weekly_compliance_report",          enabled: false, appliesTo: "global" },
+    ];
+    for (const f of newFlags) {
+      await db.execute(sql`INSERT INTO feature_flags (flag_name, enabled, applies_to) VALUES (${f.flagName}, ${f.enabled}, ${f.appliesTo}) ON CONFLICT (flag_name) DO NOTHING`);
+    }
+    log.push(`feature_flags: upserted ${newFlags.length}`);
+
+    res.json({ success: true, log });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Wipe failed", log });
+  }
+});
+
 router.post("/system/cleanup", async (req, res) => {
   const key = req.headers["x-seed-key"];
   if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
