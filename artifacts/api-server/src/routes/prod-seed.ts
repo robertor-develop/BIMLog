@@ -268,12 +268,6 @@ router.post("/system/full-seed", async (req, res) => {
   }
 });
 
-router.get("/system/dburl", async (req, res) => {
-  const key = req.headers["x-seed-key"];
-  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
-  res.json({ url: process.env.DATABASE_URL });
-});
-
 router.post("/system/set-super-admin", async (req, res) => {
   const { key, email } = req.body;
   if (key !== SEED_KEY) {
