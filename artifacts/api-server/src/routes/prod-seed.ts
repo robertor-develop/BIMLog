@@ -268,6 +268,115 @@ router.post("/system/full-seed", async (req, res) => {
   }
 });
 
+router.post("/system/cleanup", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
+
+  const log: string[] = [];
+  const keepProjects = [2, 8];
+  const keepUsers    = [1, 8];
+
+  try {
+    // 1. Delete child rows for projects being removed
+    const r1 = await db.execute(sql`DELETE FROM activity_log WHERE project_id NOT IN (2, 8)`);
+    log.push(`activity_log deleted: ${(r1 as any).rowCount}`);
+
+    const r2 = await db.execute(sql`DELETE FROM files WHERE project_id NOT IN (2, 8)`);
+    log.push(`files deleted: ${(r2 as any).rowCount}`);
+
+    const r3 = await db.execute(sql`DELETE FROM project_invitations WHERE project_id NOT IN (2, 8)`);
+    log.push(`project_invitations deleted: ${(r3 as any).rowCount}`);
+
+    const r4 = await db.execute(sql`DELETE FROM project_members WHERE project_id NOT IN (2, 8)`);
+    log.push(`project_members (bad projects) deleted: ${(r4 as any).rowCount}`);
+
+    // rfi_responses references rfis — delete responses first if table exists
+    try {
+      const r5 = await db.execute(sql`DELETE FROM rfi_responses WHERE rfi_id IN (SELECT id FROM rfis WHERE project_id NOT IN (2, 8))`);
+      log.push(`rfi_responses deleted: ${(r5 as any).rowCount}`);
+    } catch { log.push("rfi_responses: skipped (table may not exist)"); }
+
+    const r6 = await db.execute(sql`DELETE FROM rfis WHERE project_id NOT IN (2, 8)`);
+    log.push(`rfis deleted: ${(r6 as any).rowCount}`);
+
+    const r7 = await db.execute(sql`DELETE FROM submittals WHERE project_id NOT IN (2, 8)`);
+    log.push(`submittals deleted: ${(r7 as any).rowCount}`);
+
+    try {
+      const r8 = await db.execute(sql`DELETE FROM naming_fields WHERE convention_id IN (SELECT id FROM naming_conventions WHERE project_id NOT IN (2, 8))`);
+      log.push(`naming_fields deleted: ${(r8 as any).rowCount}`);
+    } catch { log.push("naming_fields: skipped"); }
+
+    const r9 = await db.execute(sql`DELETE FROM naming_conventions WHERE project_id NOT IN (2, 8)`);
+    log.push(`naming_conventions deleted: ${(r9 as any).rowCount}`);
+
+    // 2. Delete the unwanted projects
+    const r10 = await db.execute(sql`DELETE FROM projects WHERE id NOT IN (2, 8)`);
+    log.push(`projects deleted: ${(r10 as any).rowCount}`);
+
+    // 3. Delete project_members for removed users (on kept projects)
+    const r11 = await db.execute(sql`DELETE FROM project_members WHERE user_id NOT IN (1, 8)`);
+    log.push(`project_members (bad users) deleted: ${(r11 as any).rowCount}`);
+
+    // 4. Null out any FK references to users being deleted in rfis/submittals
+    try {
+      await db.execute(sql`UPDATE rfis SET assigned_to_id = NULL WHERE assigned_to_id NOT IN (1, 8) AND assigned_to_id IS NOT NULL`);
+      await db.execute(sql`UPDATE rfis SET created_by_id = 1 WHERE created_by_id NOT IN (1, 8)`);
+      log.push("rfis: reassigned foreign keys");
+    } catch { log.push("rfis FK update: skipped"); }
+
+    try {
+      await db.execute(sql`UPDATE submittals SET created_by_id = 1 WHERE created_by_id NOT IN (1, 8)`);
+      log.push("submittals: reassigned foreign keys");
+    } catch { log.push("submittals FK update: skipped"); }
+
+    try {
+      await db.execute(sql`UPDATE files SET uploaded_by_id = 1 WHERE uploaded_by_id NOT IN (1, 8)`);
+      log.push("files: reassigned foreign keys");
+    } catch { log.push("files FK update: skipped"); }
+
+    try {
+      await db.execute(sql`UPDATE activity_log SET user_id = 1 WHERE user_id NOT IN (1, 8)`);
+      log.push("activity_log: reassigned foreign keys");
+    } catch { log.push("activity_log FK update: skipped"); }
+
+    // 5. Delete unwanted users
+    const r12 = await db.execute(sql`DELETE FROM users WHERE id NOT IN (1, 8)`);
+    log.push(`users deleted: ${(r12 as any).rowCount}`);
+
+    // 6. Delete companies with no remaining users
+    const r13 = await db.execute(sql`DELETE FROM companies WHERE id NOT IN (SELECT DISTINCT company_id FROM users WHERE company_id IS NOT NULL)`);
+    log.push(`companies deleted: ${(r13 as any).rowCount}`);
+
+    // 7. Ensure both users are members of both projects
+    for (const pid of [2, 8]) {
+      for (const [uid, role] of [[1, "project_admin"], [8, "read_only"]] as [number, string][]) {
+        const exists = await db.execute(sql`SELECT 1 FROM project_members WHERE project_id = ${pid} AND user_id = ${uid}`);
+        if (exists.rows.length === 0) {
+          await db.execute(sql`INSERT INTO project_members (project_id, user_id, role) VALUES (${pid}, ${uid}, ${role})`);
+          log.push(`Inserted member: project=${pid} user=${uid} role=${role}`);
+        } else {
+          log.push(`Member already exists: project=${pid} user=${uid}`);
+        }
+      }
+    }
+
+    // 8. Final counts
+    const [pu, pp, pc, pm] = await Promise.all([
+      db.execute(sql`SELECT COUNT(*) as n FROM users`),
+      db.execute(sql`SELECT COUNT(*) as n FROM projects`),
+      db.execute(sql`SELECT COUNT(*) as n FROM companies`),
+      db.execute(sql`SELECT COUNT(*) as n FROM project_members`),
+    ]);
+    log.push(`FINAL — users:${(pu.rows[0] as any).n} projects:${(pp.rows[0] as any).n} companies:${(pc.rows[0] as any).n} members:${(pm.rows[0] as any).n}`);
+
+    res.json({ success: true, log });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Cleanup failed";
+    res.status(500).json({ error: message, log });
+  }
+});
+
 router.post("/system/set-super-admin", async (req, res) => {
   const { key, email } = req.body;
   if (key !== SEED_KEY) {
