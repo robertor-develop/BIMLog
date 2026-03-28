@@ -1,0 +1,104 @@
+We do not use the preview environment. All operations must run against the production database only.
+Stop. Do not build anything. Read every single word before touching anything. This is one complete instruction covering everything.
+PART 1 — CREATE NEW USERS
+Generate bcrypt hashes for password Test1234$ for both new users. Run:
+node -e "const bcrypt = require('bcryptjs'); Promise.all([bcrypt.hash('Test1234$', 10), bcrypt.hash('Test1234$', 10)]).then(([h1, h2]) => console.log('MIGUEL:', h1, 'ANA:', h2));"
+Then create via the live API using Roberto's JWT:
+POST https://bim-log-ignite.replit.app/api/v1/auth/register with body: email miguel@mepsolutions.com, password Test1234$, fullName Miguel Torres, companyName MEP Solutions
+POST https://bim-log-ignite.replit.app/api/v1/auth/register with body: email ana@structuralgroup.com, password Test1234$, fullName Ana Reyes, companyName Structural Group
+Show the IDs returned for both new users.
+PART 2 — FIX ALL PROJECT MEMBERS
+Using a temporary endpoint in prod-seed.ts, run these exact SQL operations to set the correct project membership for all 3 projects. Delete all existing project_members first then reinsert correctly:
+DELETE FROM project_members;
+IBQ-LIT (id=8):
+INSERT INTO project_members (project_id, user_id, role) VALUES (8, 1, 'project_admin') — Roberto
+INSERT INTO project_members (project_id, user_id, role) VALUES (8, [MIGUEL_ID], 'drafter') — Miguel Torres
+270 Park Avenue (id=2):
+INSERT INTO project_members (project_id, user_id, role) VALUES (2, 8, 'project_admin') — Alejandro
+INSERT INTO project_members (project_id, user_id, role) VALUES (2, [MIGUEL_ID], 'drafter') — Miguel Torres
+CI-183 (id=9):
+INSERT INTO project_members (project_id, user_id, role) VALUES (9, 8, 'project_admin') — Alejandro
+INSERT INTO project_members (project_id, user_id, role) VALUES (9, 9, 'drafter') — Carlos Mendoza
+INSERT INTO project_members (project_id, user_id, role) VALUES (9, 10, 'viewer') — Sofia Vargas
+INSERT INTO project_members (project_id, user_id, role) VALUES (9, [ANA_ID], 'drafter') — Ana Reyes
+Roberto (id=1) is NOT a member of 270 Park Avenue or CI-183 at the project level. He sees them only via Total Control.
+PART 3 — CREATE NAMING CONVENTIONS FOR ALL 3 PROJECTS
+For each project create a complete ISO 19650 naming convention with all required fields. Use the existing conventions and naming_fields tables. Delete any existing conventions for these projects first then reinsert.
+DELETE FROM naming_fields WHERE convention_id IN (SELECT id FROM naming_conventions WHERE project_id IN (2, 8, 9));
+DELETE FROM naming_conventions WHERE project_id IN (2, 8, 9);
+Then insert conventions via the live API using the correct project admin JWT for each project:
+For IBQ-LIT (id=8) — use Roberto's JWT:
+POST https://bim-log-ignite.replit.app/api/v1/projects/8/conventions with this body:
+separator: "-"
+isActive: true
+fields: [
+{name: "ProjectCode", label: "Project Code", required: true, allowedValues: ["IBQ-LIT"], sortOrder: 1},
+{name: "Originator", label: "Originator", required: true, allowedValues: ["BTC", "ECEC", "IBQ", "SEDEM"], sortOrder: 2},
+{name: "Volume", label: "Volume/Zone", required: true, allowedValues: ["Z1", "Z2", "Z3", "ALL"], sortOrder: 3},
+{name: "Level", label: "Level", required: true, allowedValues: ["L1", "L2", "L3", "GF", "RF"], sortOrder: 4},
+{name: "Type", label: "Document Type", required: true, allowedValues: ["DR", "SP", "CA", "RP", "MS", "RFI", "SUB"], sortOrder: 5},
+{name: "Role", label: "Discipline", required: true, allowedValues: ["A", "S", "M", "E", "P", "C"], sortOrder: 6},
+{name: "Sequence", label: "Sequence Number", required: true, allowedValues: [], sortOrder: 7},
+{name: "Status", label: "Status", required: true, allowedValues: ["S0", "S1", "S2", "S3", "S4"], sortOrder: 8},
+{name: "Revision", label: "Revision", required: true, allowedValues: ["P01", "P02", "C01", "C02"], sortOrder: 9}
+]
+For 270 Park Avenue (id=2) — use Alejandro's JWT (get it by logging in as robertor9876@gmail.com / 12345678):
+POST https://bim-log-ignite.replit.app/api/v1/projects/2/conventions with same structure but:
+allowedValues for ProjectCode: ["NYC-270"]
+allowedValues for Originator: ["BTC", "SOM", "WSP", "AECOM", "TURNER"]
+allowedValues for Volume: ["A0", "A1", "B1", "B2", "C0"]
+Same fields otherwise.
+For CI-183 (id=9) — use Alejandro's JWT:
+POST https://bim-log-ignite.replit.app/api/v1/projects/9/conventions with same structure but:
+allowedValues for ProjectCode: ["CI-183"]
+allowedValues for Originator: ["CI", "ARQ", "EST", "MEP"]
+allowedValues for Volume: ["V1", "V2", "V3"]
+Same fields otherwise.
+PART 4 — LOAD DEMO DATA FOR ALL 3 PROJECTS
+Using Roberto's JWT for IBQ-LIT, Alejandro's JWT for 270 Park and CI-183, create the following demo data via the live API:
+IBQ-LIT RFIs (use Roberto's JWT, POST /api/v1/projects/8/rfis):
+RFI 1: subject "Dual Calcination Furnace Design Clarification", description "Contractor requests clarification on the dual-operation calcination furnace system design requirements per Adenda N2. Which operating mode takes priority during commissioning phase?", priority "high", status "open", assignedToEmail "miguel@mepsolutions.com"
+RFI 2: subject "EDTP Study Scope Confirmation", description "Please confirm the updated scope of the EDTP study following the 55-day extension approved in Adenda N2. Are all deliverables from the original scope still required?", priority "medium", status "open", assignedToEmail "miguel@mepsolutions.com"
+270 Park Avenue RFIs (use Alejandro's JWT, POST /api/v1/projects/2/rfis):
+RFI 1: subject "MEP Coordination Clash at Level 14 Grid C3", description "Mechanical ductwork conflicts with structural beam at grid intersection C3 Level 14. Structural drawing S-214 shows beam at elevation 186'-6" while MEP drawing M-114 shows duct centerline at 186'-4". Request structural team confirmation on beam elevation or approved duct reroute.", priority "high", status "open", assignedToEmail "miguel@mepsolutions.com"
+RFI 2: subject "Curtain Wall Anchor Spacing Variance", description "Architect of record drawing A-312 specifies curtain wall anchor spacing at 5'-0" OC however structural engineering report SE-2024-047 requires 4'-6" OC maximum for wind load compliance at floors 42-58. Confirm governing document.", priority "medium", status "in_review", assignedToEmail "miguel@mepsolutions.com"
+CI-183 RFIs (use Alejandro's JWT, POST /api/v1/projects/9/rfis):
+RFI 1: subject "Foundation Depth Confirmation at Axis B", description "Geotechnical report recommends minimum foundation depth of 2.5m at axis B however architectural layout conflicts with basement parking level. Request structural engineer confirmation on acceptable foundation depth reduction with compensating measures.", priority "high", status "open", assignedToEmail "ana@structuralgroup.com"
+IBQ-LIT Submittals (use Roberto's JWT, POST /api/v1/projects/8/submittals):
+Submittal 1: title "Calcination Furnace Technical Specifications", description "Technical specifications and manufacturer data sheets for dual-operation calcination furnace system as specified in contract scope", submittalType "product_data", status "pending", assignedToEmail "miguel@mepsolutions.com"
+270 Park Avenue Submittals (use Alejandro's JWT, POST /api/v1/projects/2/submittals):
+Submittal 1: title "Level 14 Mechanical Ductwork Shop Drawings", description "Shop drawings for Level 14 HVAC ductwork coordination including revised routing to resolve clash at grid C3", submittalType "shop_drawing", status "pending", assignedToEmail "miguel@mepsolutions.com"
+Submittal 2: title "Curtain Wall System Submittal", description "Complete curtain wall system submittal including anchor calculations, wind load analysis, and manufacturer certifications for floors 42-58", submittalType "shop_drawing", status "in_review", assignedToEmail "miguel@mepsolutions.com"
+CI-183 Submittals (use Alejandro's JWT, POST /api/v1/projects/9/submittals):
+Submittal 1: title "Foundation Reinforcement Shop Drawings", description "Reinforcement shop drawings for foundation at axis B including compensating measures for reduced depth", submittalType "shop_drawing", status "pending", assignedToEmail "ana@structuralgroup.com"
+PART 5 — CLEAN UP ORPHANED FILES ON DISK
+Delete all files in the uploads directory that belong to old project IDs that no longer exist:
+find artifacts/api-server/uploads/projects -mindepth 1 -maxdepth 1 -type d | grep -v "/2∥/8\|/8
+∥/8\|/9$" | xargs rm -rf
+
+Also delete all rows from the files table in the database that reference project IDs not in (2, 8, 9):
+Add to the temporary endpoint: DELETE FROM files WHERE project_id NOT IN (2, 8, 9);
+PART 6 — FIX ADMIN PANEL OVERVIEW STATS SCOPING
+In artifacts/api-server/src/routes/admin.ts find the overview stats endpoint — GET /admin/stats or GET /admin/overview. Add scope=mine support so when called with scope=mine it only counts users, projects, companies, files, RFIs, and submittals that belong to the requesting user's scoped projects.
+In artifacts/bimlog/src/pages/AdminPanel.tsx find where the overview stats are fetched and add ?scope=mine to that fetch call.
+PART 7 — FIX TOTAL CONTROL PROJECT COMPANY DISPLAY
+In Total Control projects tab all 3 projects show "BIMCapital Partners" as the company. This is because projects don't have a company_id column — the company shown is the creator's company. This is technically correct but misleading. Update the projects list in TotalControl.tsx to show the primary project admin's company name instead of the creator's company. Fetch project members for each project and show the project_admin's company name in the Company column.
+Then rebuild both artifacts, publish, and run these verification checks:
+Check 1 — New users created:
+curl -s https://bim-log-ignite.replit.app/api/v1/admin/users -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 2 — Project members correct:
+Run SQL: SELECT pm.project_id, pm.user_id, pm.role, u.full_name FROM project_members pm JOIN users u ON u.id = pm.user_id ORDER BY pm.project_id;
+Check 3 — Conventions exist and active for all 3 projects:
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/conventions -H "Authorization: Bearer [ROBERTO_JWT]"
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/conventions -H "Authorization: Bearer [ALEJANDRO_JWT]"
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/9/conventions -H "Authorization: Bearer [ALEJANDRO_JWT]"
+Check 4 — RFIs exist:
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/rfis -H "Authorization: Bearer [ROBERTO_JWT]"
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/2/rfis -H "Authorization: Bearer [ALEJANDRO_JWT]"
+Check 5 — Submittals exist:
+curl -s https://bim-log-ignite.replit.app/api/v1/projects/8/submittals -H "Authorization: Bearer [ROBERTO_JWT]"
+Check 6 — Orphaned files cleaned:
+find artifacts/api-server/uploads/projects -mindepth 1 -maxdepth 1 -type d
+Check 7 — TypeScript zero new errors:
+npx tsc --noEmit 2>&1 | grep -v "MasterSidebar|Navbar|AdminPanel" | head -10
+Show exact output of all 7 checks. Nothing else.

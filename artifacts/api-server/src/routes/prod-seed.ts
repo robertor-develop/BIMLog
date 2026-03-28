@@ -268,6 +268,37 @@ router.post("/system/full-seed", async (req, res) => {
   }
 });
 
+router.post("/system/rebuild-members", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
+  const log: string[] = [];
+  try {
+    await db.execute(sql`DELETE FROM project_members`);
+    log.push("Deleted all project_members");
+    const inserts = [
+      [8, 1, "project_admin"],   // IBQ-LIT: Roberto
+      [8, 11, "drafter"],        // IBQ-LIT: Miguel Torres
+      [2, 8, "project_admin"],   // NYC-270: Alejandro
+      [2, 11, "drafter"],        // NYC-270: Miguel Torres
+      [9, 8, "project_admin"],   // CI-183: Alejandro
+      [9, 9, "drafter"],         // CI-183: Carlos Mendoza
+      [9, 10, "viewer"],         // CI-183: Sofia Vargas
+      [9, 12, "drafter"],        // CI-183: Ana Reyes
+    ];
+    for (const [pid, uid, role] of inserts) {
+      await db.execute(sql`INSERT INTO project_members (project_id, user_id, role) VALUES (${pid}, ${uid}, ${role})`);
+      log.push(`Inserted project=${pid} user=${uid} role=${role}`);
+    }
+    await db.execute(sql`DELETE FROM files WHERE project_id NOT IN (2, 8, 9)`);
+    log.push("Deleted orphaned file rows from DB");
+    const members = await db.execute(sql`SELECT pm.project_id, pm.user_id, pm.role, u.full_name FROM project_members pm JOIN users u ON u.id = pm.user_id ORDER BY pm.project_id`);
+    log.push("Final: " + JSON.stringify(members.rows));
+    res.json({ success: true, log });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Failed", log });
+  }
+});
+
 router.post("/system/fix-members", async (req, res) => {
   const key = req.headers["x-seed-key"];
   if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }

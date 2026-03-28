@@ -43,8 +43,56 @@ async function logAdminAction(params: {
 // ── Tab 1: Platform Overview ──────────────────────────────────────────────────
 router.get("/admin/overview", async (req, res) => {
   try {
+    const scope = String(req.query.scope || "");
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const last7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    if (scope === "mine") {
+      const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      if (myProjectIds.length === 0) {
+        res.json({ stats: { totalUsers: 0, totalCompanies: 0, totalProjects: 0, totalFiles: 0, totalRfis: 0, totalSubmittals: 0, activeProjects: 0, filesLast24h: 0, rfisLast7d: 0 }, activity: [] });
+        return;
+      }
+      const pArr = sql.raw(myProjectIds.join(","));
+      const pFilter = sql`${projectsTable.id} = ANY(ARRAY[${pArr}]::int[])`;
+      const fFilter = sql`${filesTable.projectId} = ANY(ARRAY[${pArr}]::int[])`;
+      const rFilter = sql`${rfisTable.projectId} = ANY(ARRAY[${pArr}]::int[])`;
+      const sFilter = sql`${submittalsTable.projectId} = ANY(ARRAY[${pArr}]::int[])`;
+      const scopedUserIds = [...new Set((await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
+        .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${pArr}]::int[])`)).map(r => r.uid))];
+      const uArr = scopedUserIds.length > 0 ? sql.raw(scopedUserIds.join(",")) : sql.raw("0");
+      const uFilter = sql`${usersTable.id} = ANY(ARRAY[${uArr}]::int[])`;
+      const scopedCompanyIds = [...new Set((await db.select({ cid: usersTable.companyId }).from(usersTable).where(uFilter)).map(r => r.cid))];
+      const cArr = scopedCompanyIds.length > 0 ? sql.raw(scopedCompanyIds.join(",")) : sql.raw("0");
+      const cFilter = sql`${companiesTable.id} = ANY(ARRAY[${cArr}]::int[])`;
+      const [
+        [{ c: tU }], [{ c: tC }], [{ c: tP }], [{ c: tF }],
+        [{ c: tR }], [{ c: tS }], [{ c: aP }], [{ c: f24 }], [{ c: r7 }],
+      ] = await Promise.all([
+        db.select({ c: count() }).from(usersTable).where(uFilter),
+        db.select({ c: count() }).from(companiesTable).where(cFilter),
+        db.select({ c: count() }).from(projectsTable).where(pFilter),
+        db.select({ c: count() }).from(filesTable).where(fFilter),
+        db.select({ c: count() }).from(rfisTable).where(rFilter),
+        db.select({ c: count() }).from(submittalsTable).where(sFilter),
+        db.select({ c: count() }).from(projectsTable).where(and(pFilter, eq(projectsTable.status, "active"))),
+        db.select({ c: count() }).from(filesTable).where(and(fFilter, gte(filesTable.createdAt, last24h))),
+        db.select({ c: count() }).from(rfisTable).where(and(rFilter, gte(rfisTable.createdAt, last7d))),
+      ]);
+      const activity = await db.select().from(activityLogTable)
+        .where(sql`${activityLogTable.projectId} = ANY(ARRAY[${pArr}]::int[])`)
+        .orderBy(desc(activityLogTable.createdAt)).limit(50);
+      const actProjIds = [...new Set(activity.map(a => a.projectId))];
+      const actProjects = actProjIds.length > 0 ? await db.select({ id: projectsTable.id, name: projectsTable.name }).from(projectsTable).where(sql`${projectsTable.id} = ANY(${sql.raw(`ARRAY[${actProjIds.join(",")}]`)})`) : [];
+      const projectMap = Object.fromEntries(actProjects.map(p => [p.id, p.name]));
+      res.json({
+        stats: { totalUsers: Number(tU), totalCompanies: Number(tC), totalProjects: Number(tP), totalFiles: Number(tF), totalRfis: Number(tR), totalSubmittals: Number(tS), activeProjects: Number(aP), filesLast24h: Number(f24), rfisLast7d: Number(r7) },
+        activity: activity.map(a => ({ ...a, projectName: projectMap[a.projectId] || `Project #${a.projectId}`, createdAt: a.createdAt.toISOString() })),
+      });
+      return;
+    }
+
     const [
       [totalUsers], [totalCompanies], [totalProjects], [totalFiles],
       [totalRfis], [totalSubmittals], [activeProjects], [filesLast24h], [rfisLast7d],
@@ -67,14 +115,10 @@ router.get("/admin/overview", async (req, res) => {
     const projectMap = Object.fromEntries(projects.map(p => [p.id, p.name]));
     res.json({
       stats: {
-        totalUsers: Number(totalUsers?.c || 0),
-        totalCompanies: Number(totalCompanies?.c || 0),
-        totalProjects: Number(totalProjects?.c || 0),
-        totalFiles: Number(totalFiles?.c || 0),
-        totalRfis: Number(totalRfis?.c || 0),
-        totalSubmittals: Number(totalSubmittals?.c || 0),
-        activeProjects: Number(activeProjects?.c || 0),
-        filesLast24h: Number(filesLast24h?.c || 0),
+        totalUsers: Number(totalUsers?.c || 0), totalCompanies: Number(totalCompanies?.c || 0),
+        totalProjects: Number(totalProjects?.c || 0), totalFiles: Number(totalFiles?.c || 0),
+        totalRfis: Number(totalRfis?.c || 0), totalSubmittals: Number(totalSubmittals?.c || 0),
+        activeProjects: Number(activeProjects?.c || 0), filesLast24h: Number(filesLast24h?.c || 0),
         rfisLast7d: Number(rfisLast7d?.c || 0),
       },
       activity: activity.map(a => ({ ...a, projectName: projectMap[a.projectId] || `Project #${a.projectId}`, createdAt: a.createdAt.toISOString() })),
@@ -294,9 +338,24 @@ router.get("/admin/projects", async (req, res) => {
         db.select({ rfiCount: count() }).from(rfisTable).where(eq(rfisTable.projectId, p.id)),
         db.select({ submittalCount: count() }).from(submittalsTable).where(eq(submittalsTable.projectId, p.id)),
       ]);
-      const creator = (await db.select({ fullName: usersTable.fullName, companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, p.createdById)).limit(1))[0];
-      const company = creator ? (await db.select({ name: companiesTable.name }).from(companiesTable).where(eq(companiesTable.id, creator.companyId)).limit(1))[0] : null;
-      return { ...p, createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(), memberCount: Number(memberCount), fileCount: Number(fileCount), rfiCount: Number(rfiCount), submittalCount: Number(submittalCount), companyName: company?.name || "" };
+      const adminMember = (await db.select({ userId: projectMembersTable.userId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.projectId, p.id), eq(projectMembersTable.role, "project_admin"))).limit(1))[0];
+      let companyName = "";
+      if (adminMember) {
+        const adminUser = (await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, adminMember.userId)).limit(1))[0];
+        if (adminUser) {
+          const adminCo = (await db.select({ name: companiesTable.name }).from(companiesTable).where(eq(companiesTable.id, adminUser.companyId)).limit(1))[0];
+          if (adminCo) companyName = adminCo.name;
+        }
+      }
+      if (!companyName) {
+        const creator = (await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, p.createdById)).limit(1))[0];
+        if (creator) {
+          const co = (await db.select({ name: companiesTable.name }).from(companiesTable).where(eq(companiesTable.id, creator.companyId)).limit(1))[0];
+          if (co) companyName = co.name;
+        }
+      }
+      return { ...p, createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(), memberCount: Number(memberCount), fileCount: Number(fileCount), rfiCount: Number(rfiCount), submittalCount: Number(submittalCount), companyName };
     }));
     res.json(result);
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
