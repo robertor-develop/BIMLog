@@ -20,6 +20,7 @@ import { Disclaimer } from "@/pages/Disclaimer";
 import { DataRetention } from "@/pages/DataRetention";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
 import { AdminPanel } from "@/pages/AdminPanel";
+import { TotalControl } from "@/pages/TotalControl";
 import { Pricing } from "@/pages/Pricing";
 import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
@@ -69,6 +70,9 @@ function Router() {
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}
+      </Route>
+      <Route path="/total-control">
+        {() => <ProtectedRoute component={TotalControl} />}
       </Route>
       <Route path="/pricing" component={Pricing} />
       <Route path="/features" component={Features} />

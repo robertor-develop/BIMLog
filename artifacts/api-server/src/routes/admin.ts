@@ -85,11 +85,22 @@ router.get("/admin/overview", async (req, res) => {
 // ── Tab 6: Full Platform Activity Feed ────────────────────────────────────────
 router.get("/admin/activity", async (req, res) => {
   try {
+    const scope = String(req.query.scope || "");
     const page = Math.max(1, parseInt(String(req.query.page || "1")));
     const limit = 50;
     const offset = (page - 1) * limit;
-    const activity = await db.select().from(activityLogTable).orderBy(desc(activityLogTable.createdAt)).limit(limit).offset(offset);
-    const [{ total }] = await db.select({ total: count() }).from(activityLogTable);
+    let activity, total;
+    if (scope === "mine") {
+      const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      if (myProjectIds.length === 0) { res.json({ data: [], total: 0, page, pages: 0 }); return; }
+      const where = sql`${activityLogTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`;
+      activity = await db.select().from(activityLogTable).where(where).orderBy(desc(activityLogTable.createdAt)).limit(limit).offset(offset);
+      [{ total }] = await db.select({ total: count() }).from(activityLogTable).where(where);
+    } else {
+      activity = await db.select().from(activityLogTable).orderBy(desc(activityLogTable.createdAt)).limit(limit).offset(offset);
+      [{ total }] = await db.select({ total: count() }).from(activityLogTable);
+    }
     const projectIds = [...new Set(activity.map(a => a.projectId))];
     let projectMap: Record<number, { name: string; companyId: number }> = {};
     if (projectIds.length > 0) {
@@ -103,13 +114,27 @@ router.get("/admin/activity", async (req, res) => {
 // ── Tab 2: Users ──────────────────────────────────────────────────────────────
 router.get("/admin/users", async (req, res) => {
   try {
+    const scope = String(req.query.scope || "");
     const search = String(req.query.search || "").trim();
     const page = Math.max(1, parseInt(String(req.query.page || "1")));
     const limit = 50;
     const offset = (page - 1) * limit;
-    const where = search
-      ? or(ilike(usersTable.fullName, `%${search}%`), ilike(usersTable.email, `%${search}%`))
-      : undefined;
+
+    let scopedUserIds: number[] | null = null;
+    if (scope === "mine") {
+      const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      if (myProjectIds.length === 0) { res.json({ data: [], total: 0, page: 1, pages: 0 }); return; }
+      scopedUserIds = (await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
+        .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)
+      ).map(r => r.uid);
+      if (scopedUserIds.length === 0) { res.json({ data: [], total: 0, page: 1, pages: 0 }); return; }
+    }
+
+    const scopeFilter = scopedUserIds ? sql`${usersTable.id} = ANY(ARRAY[${sql.raw([...new Set(scopedUserIds)].join(","))}]::int[])` : undefined;
+    const searchFilter = search ? or(ilike(usersTable.fullName, `%${search}%`), ilike(usersTable.email, `%${search}%`)) : undefined;
+    const where = scopeFilter && searchFilter ? and(scopeFilter, searchFilter) : scopeFilter || searchFilter;
+
     const users = await db.select({
       id: usersTable.id, fullName: usersTable.fullName, email: usersTable.email,
       companyId: usersTable.companyId, createdAt: usersTable.createdAt,
@@ -192,7 +217,24 @@ router.post("/admin/users/:id/reset-password", async (req, res) => {
 // ── Tab 3: Companies ──────────────────────────────────────────────────────────
 router.get("/admin/companies", async (req, res) => {
   try {
-    const companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
+    const scope = String(req.query.scope || "");
+    let companies;
+    if (scope === "mine") {
+      const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      if (myProjectIds.length === 0) { res.json([]); return; }
+      const scopedUserIds = [...new Set((await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
+        .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)).map(r => r.uid))];
+      if (scopedUserIds.length === 0) { res.json([]); return; }
+      const scopedCompanyIds = [...new Set((await db.select({ cid: usersTable.companyId }).from(usersTable)
+        .where(sql`${usersTable.id} = ANY(ARRAY[${sql.raw(scopedUserIds.join(","))}]::int[])`)).map(r => r.cid))];
+      if (scopedCompanyIds.length === 0) { res.json([]); return; }
+      companies = await db.select().from(companiesTable)
+        .where(sql`${companiesTable.id} = ANY(ARRAY[${sql.raw(scopedCompanyIds.join(","))}]::int[])`)
+        .orderBy(desc(companiesTable.createdAt));
+    } else {
+      companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
+    }
     const result = await Promise.all(companies.map(async (c) => {
       const [{ userCount }] = await db.select({ userCount: count() }).from(usersTable).where(eq(usersTable.companyId, c.id));
       const [{ projectCount }] = await db.select({ projectCount: count() }).from(projectsTable).where(
@@ -233,7 +275,18 @@ router.delete("/admin/companies/:id", async (req, res) => {
 // ── Tab 4: Projects ───────────────────────────────────────────────────────────
 router.get("/admin/projects", async (req, res) => {
   try {
-    const projects = await db.select().from(projectsTable).orderBy(desc(projectsTable.createdAt));
+    const scope = String(req.query.scope || "");
+    let projects;
+    if (scope === "mine") {
+      const myIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      if (myIds.length === 0) { res.json([]); return; }
+      projects = await db.select().from(projectsTable)
+        .where(sql`${projectsTable.id} = ANY(ARRAY[${sql.raw(myIds.join(","))}]::int[])`)
+        .orderBy(desc(projectsTable.createdAt));
+    } else {
+      projects = await db.select().from(projectsTable).orderBy(desc(projectsTable.createdAt));
+    }
     const result = await Promise.all(projects.map(async (p) => {
       const [[{ memberCount }], [{ fileCount }], [{ rfiCount }], [{ submittalCount }]] = await Promise.all([
         db.select({ memberCount: count() }).from(projectMembersTable).where(eq(projectMembersTable.projectId, p.id)),

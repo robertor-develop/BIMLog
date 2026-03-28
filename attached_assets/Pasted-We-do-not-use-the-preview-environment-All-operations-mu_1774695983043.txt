@@ -1,0 +1,42 @@
+We do not use the preview environment. All operations must run against the production database only.
+Stop. Do not build anything. Read every word before touching anything. This is one complete instruction.
+PART 1 — UPDATE PROJECT OWNERSHIP AND MEMBERS VIA SQL
+Add a temporary endpoint to prod-seed.ts that runs these exact SQL operations in order:
+Update project company assignments — projects table does not have company_id so skip that. Instead update project_members to reflect correct ownership:
+Remove Roberto (id=1) from project CI-183 (id=9) — DELETE FROM project_members WHERE project_id=9 AND user_id=1
+Remove Alejandro (id=8) from project IBQ-LIT (id=8) — DELETE FROM project_members WHERE project_id=8 AND user_id=8
+Make Alejandro (id=8) project_admin on NYC-270 (id=2) — UPDATE project_members SET role='project_admin' WHERE project_id=2 AND user_id=8
+Make sure Roberto (id=1) is project_admin on IBQ-LIT (id=8) only — he should NOT be a member of NYC-270 or CI-183 at the project_members level.
+Final state should be:
+IBQ-LIT (id=8): Roberto = project_admin
+NYC-270 (id=2): Alejandro = project_admin
+CI-183 (id=9): Carlos = project_admin, Sofia = viewer
+PART 2 — CREATE TWO SEPARATE PAGES: ADMIN PANEL AND TOTAL CONTROL
+Create a brand new file artifacts/bimlog/src/pages/TotalControl.tsx. This is a full copy of the current AdminPanel.tsx with these differences: the title says Total Control, the subtitle says Full Platform Administration — Super Admin Only, and every API call fetches ALL data with no scoping — all users, all companies, all projects, all activity, all emails, all feature flags, all admin logs across the entire platform. This page is the god view.
+Modify AdminPanel.tsx so it only shows data scoped to the logged in user's own projects where they are project_admin. Every API call must pass scope=mine as a query parameter. The title stays BIMLog Admin Panel, subtitle stays Platform Administration.
+PART 3 — UPDATE BACKEND ADMIN ROUTES
+In artifacts/api-server/src/routes/admin.ts update these routes to support scope=mine query parameter:
+GET /admin/projects — if scope=mine, return only projects where req.user.userId is a project_admin in project_members. Otherwise return all projects (for super admin Total Control calls).
+GET /admin/users — if scope=mine, return only users who are members of projects where req.user.userId is project_admin. Otherwise return all users.
+GET /admin/companies — if scope=mine, return only companies associated with users on scoped projects. Otherwise return all companies.
+GET /admin/activity — if scope=mine, return only activity from scoped projects. Otherwise return all activity.
+PART 4 — UPDATE SIDEBAR LINKS
+In artifacts/bimlog/src/components/layout/MasterSidebar.tsx and artifacts/bimlog/src/components/layout/ProjectSidebar.tsx:
+Admin Panel link — visible to any user who is project_admin on at least one project OR isSuperAdmin. Links to /admin. Label: Admin Panel.
+Total Control link — visible ONLY when isSuperAdmin is true. Links to /total-control. Label: Total Control.
+PART 5 — ADD ROUTE FOR TOTAL CONTROL
+In artifacts/bimlog/src/App.tsx add route: /total-control renders TotalControl component. Import TotalControl from the new page file. This route should be protected — only accessible when isSuperAdmin is true, otherwise redirect to /dashboard.
+Then rebuild both artifacts, publish, and run these checks:
+Check 1 — Project members final state via SQL:
+SELECT project_id, user_id, role FROM project_members ORDER BY project_id;
+Check 2 — Total Control page exists:
+find artifacts/bimlog/src/pages -name "TotalControl*"
+Check 3 — Route added to App.tsx:
+grep -n "total-control|TotalControl" artifacts/bimlog/src/App.tsx | head -5
+Check 4 — Sidebar links correct:
+grep -n "total-control|Total Control|Admin Panel" artifacts/bimlog/src/components/layout/MasterSidebar.tsx | head -10
+Check 5 — Backend scope=mine support:
+grep -n "scope.*mine|scope=mine" artifacts/api-server/src/routes/admin.ts | head -10
+Check 6 — Roberto scoped admin call:
+curl -s "https://bim-log-ignite.replit.app/api/v1/admin/projects?scope=mine" -H "Authorization: Bearer [ROBERTO_JWT]"
+Show exact output of all 6 checks. Nothing else.

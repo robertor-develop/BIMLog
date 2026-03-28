@@ -268,6 +268,27 @@ router.post("/system/full-seed", async (req, res) => {
   }
 });
 
+router.post("/system/fix-members", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
+  const log: string[] = [];
+  try {
+    await db.execute(sql`DELETE FROM project_members WHERE project_id=2 AND user_id=1`);
+    log.push("Removed Roberto from NYC-270");
+    await db.execute(sql`DELETE FROM project_members WHERE project_id=9 AND user_id=1`);
+    log.push("Removed Roberto from CI-183");
+    await db.execute(sql`DELETE FROM project_members WHERE project_id=8 AND user_id=8`);
+    log.push("Removed Alejandro from IBQ-LIT");
+    await db.execute(sql`UPDATE project_members SET role='project_admin' WHERE project_id=2 AND user_id=8`);
+    log.push("Made Alejandro project_admin on NYC-270");
+    const members = await db.execute(sql`SELECT project_id, user_id, role FROM project_members ORDER BY project_id`);
+    log.push("Final: " + JSON.stringify(members.rows));
+    res.json({ success: true, log });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Failed", log });
+  }
+});
+
 router.post("/system/wipe-transactional", async (req, res) => {
   const key = req.headers["x-seed-key"];
   if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }

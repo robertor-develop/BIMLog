@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2
@@ -75,11 +76,17 @@ export function ProjectSidebar({
   activeTab, isAdmin, memberRole
 }: SidebarProps) {
   const { t } = useI18n();
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
   const [showManaged, setShowManaged] = useState(false);
   const [showOAuth, setShowOAuth] = useState(false);
+  const [isSuperAdminState, setIsSuperAdminState] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    getMe().then((data) => { if (data.isSuperAdmin) setIsSuperAdminState(true); }).catch(() => {});
+  }, [token]);
 
   const getLabel = (id: string, label: string) => {
     try { return t(label as Parameters<typeof t>[0]); } catch { return label; }
@@ -311,6 +318,32 @@ export function ProjectSidebar({
             </button>
           ))}
         </div>
+
+        {/* Admin links */}
+        {(isAdmin || isSuperAdminState) && (
+          <div style={{ padding: "8px 0 0" }}>
+            {isAdmin && (
+              <button
+                className="sidebar-nav-item"
+                style={{ cursor: "pointer", background: "none", border: "none", width: "100%", textAlign: "left" }}
+                onClick={() => navigate("/admin")}
+              >
+                <div className="nav-dot" />
+                Admin Panel
+              </button>
+            )}
+            {isSuperAdminState && (
+              <button
+                className="sidebar-nav-item"
+                style={{ cursor: "pointer", background: "none", border: "none", width: "100%", textAlign: "left" }}
+                onClick={() => navigate("/total-control")}
+              >
+                <div className="nav-dot" />
+                Total Control
+              </button>
+            )}
+          </div>
+        )}
 
         {/* User footer */}
         {user && (
