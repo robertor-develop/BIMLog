@@ -112,7 +112,7 @@ function TCOverviewTab({ token }: { token: string }) {
                     <TCTd><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></TCTd>
                     <TCTd><TCBadge label={String(a.actionType || "")} color="#3b82f6" /></TCTd>
                     <TCTd>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</TCTd>
-                    <TCTd style={{ maxWidth: 240 }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></TCTd>
+                    <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere" }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></TCTd>
                     <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
                   </tr>
                 ))}
@@ -442,7 +442,7 @@ function TCActivityFeedTab({ token }: { token: string }) {
                 <TCTd style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</TCTd>
                 <TCTd><TCBadge label={String(a.actionType || "")} color="#3b82f6" /></TCTd>
                 <TCTd style={{ fontSize: 12 }}>{String(a.entityType || "")}</TCTd>
-                <TCTd style={{ maxWidth: 200, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</TCTd>
+                <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</TCTd>
                 <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
               </tr>
             ))}
@@ -523,7 +523,7 @@ function TCAdminActionsLogTab({ token }: { token: string }) {
                     <TCTd><TCBadge label={String(l.action || "")} color="#f59e0b" /></TCTd>
                     <TCTd style={{ fontSize: 12 }}>{String(l.targetType || "—")}</TCTd>
                     <TCTd style={{ fontSize: 12, fontFamily: "monospace" }}>{String(l.targetId || "—")}</TCTd>
-                    <TCTd style={{ maxWidth: 200, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</TCTd>
+                    <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</TCTd>
                     <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.createdAt)).toLocaleString()}</TCTd>
                   </tr>
                 ))}

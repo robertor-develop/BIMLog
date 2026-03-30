@@ -11,7 +11,11 @@ import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 
 const router = Router();
 
-router.use("/admin", authMiddleware, isSuperAdminMiddleware);
+router.use("/admin", authMiddleware, (req, res, next) => {
+  if (req.method === "GET" && req.query.scope === "mine") return next();
+  if (!req.user?.isSuperAdmin) return res.status(403).json({ error: "Super admin access required" });
+  next();
+});
 
 const DEFAULT_FLAGS = [
   { flagName: "ai_presubmission_check", enabled: true },

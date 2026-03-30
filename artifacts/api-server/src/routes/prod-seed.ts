@@ -320,6 +320,18 @@ router.post("/system/fix-members", async (req, res) => {
   }
 });
 
+router.post("/system/fix-alejandro-roles", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
+  try {
+    await db.execute(sql`UPDATE project_members SET role = 'project_admin' WHERE user_id = 8 AND project_id IN (2, 9)`);
+    const rows = await db.execute(sql`SELECT project_id, user_id, role FROM project_members WHERE user_id = 8 ORDER BY project_id`);
+    res.json({ success: true, rows: rows.rows });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Failed" });
+  }
+});
+
 router.post("/system/wipe-transactional", async (req, res) => {
   const key = req.headers["x-seed-key"];
   if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid key" }); return; }
