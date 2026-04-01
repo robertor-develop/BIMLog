@@ -550,7 +550,7 @@ export function AdminPanel() {
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
-    apiFetch("/admin/overview", token)
+    apiFetch("/admin/overview?scope=mine", token)
       .then(r => { if (r.status === 403 || r.status === 401) setLocation("/dashboard"); })
       .catch(() => setLocation("/dashboard"))
       .finally(() => setChecking(false));
