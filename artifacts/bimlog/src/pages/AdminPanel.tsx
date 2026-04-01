@@ -373,7 +373,7 @@ function EmailLogTab({ token }: { token: string }) {
 
   const load = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/email-log?scope=mine&${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
   }, [token, page, filters]);
   useEffect(() => { load(); }, [load]);
 
@@ -463,7 +463,7 @@ function ActivityFeedTab({ token }: { token: string }) {
 function FeatureFlagsTab({ token }: { token: string }) {
   const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
   const [msg, setMsg] = useState("");
-  const load = () => apiFetch("/admin/feature-flags", token).then(r => r.json()).then(setFlags).catch(() => {});
+  const load = () => apiFetch("/admin/feature-flags?scope=mine", token).then(r => r.json()).then(setFlags).catch(() => {});
   useEffect(() => { load(); }, [token]);
   const toggle = async (id: number, enabled: boolean) => {
     await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
@@ -502,7 +502,7 @@ function AdminActionsLogTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const load = useCallback(() => {
-    apiFetch(`/admin/actions-log?page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (

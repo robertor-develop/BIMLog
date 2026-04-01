@@ -13,6 +13,7 @@ const router = Router();
 
 router.use("/admin", authMiddleware, (req, res, next) => {
   if (req.method === "GET" && req.query.scope === "mine") return next();
+  if (req.method === "GET" && req.path.includes("feature-flags")) return next();
   if (!req.user?.isSuperAdmin) return res.status(403).json({ error: "Super admin access required" });
   next();
 });
@@ -405,6 +406,11 @@ router.post("/admin/projects/:id/transfer", async (req, res) => {
 // ── Tab 5: Email Log ──────────────────────────────────────────────────────────
 router.get("/admin/email-log", async (req, res) => {
   try {
+    const scope = String(req.query.scope || "");
+    if (scope === "mine" && !req.user?.isSuperAdmin) {
+      res.json({ data: [], total: 0, page: 1, pages: 0 });
+      return;
+    }
     const { status, triggerType, from, to } = req.query as Record<string, string>;
     const page = Math.max(1, parseInt(String(req.query.page || "1")));
     const limit = 50;
@@ -453,11 +459,15 @@ router.patch("/admin/feature-flags/:id", async (req, res) => {
 // ── Tab 8: Admin Actions Log ──────────────────────────────────────────────────
 router.get("/admin/actions-log", async (req, res) => {
   try {
+    const scope = String(req.query.scope || "");
     const page = Math.max(1, parseInt(String(req.query.page || "1")));
     const limit = 50;
     const offset = (page - 1) * limit;
-    const logs = await db.select().from(adminActionsLogTable).orderBy(desc(adminActionsLogTable.createdAt)).limit(limit).offset(offset);
-    const [{ total }] = await db.select({ total: count() }).from(adminActionsLogTable);
+    const where = scope === "mine" ? eq(adminActionsLogTable.adminUserId, req.user!.userId) : undefined;
+    const logs = await db.select().from(adminActionsLogTable).where(where).orderBy(desc(adminActionsLogTable.createdAt)).limit(limit).offset(offset);
+    const [{ total }] = where
+      ? await db.select({ total: count() }).from(adminActionsLogTable).where(where)
+      : await db.select({ total: count() }).from(adminActionsLogTable);
     res.json({ data: logs.map(l => ({ ...l, createdAt: l.createdAt.toISOString() })), total: Number(total), page, pages: Math.ceil(Number(total) / limit) });
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
 });

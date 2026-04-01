@@ -1,0 +1,24 @@
+We do not use the preview environment. All operations must run against the production database only.
+Stop. Do not build anything. Read every word. This fixes everything in one shot.
+In artifacts/api-server/src/routes/admin.ts make these changes to every single admin route. The rule is simple: if the request has scope=mine in the query, ANY authenticated user can access the route and data is filtered to their projects. If scope=mine is NOT present, only super admins can access.
+Fix every single route in this file using this exact pattern:
+For GET /admin/overview — already fixed. Leave it.
+For GET /admin/users — when scope=mine: find all project_ids where req.user.userId is project_admin in project_members. Then return only users who are members of those projects. Do NOT include the requesting user themselves unless they appear in those projects.
+For GET /admin/companies — when scope=mine: find all project_ids where req.user.userId is project_admin. Find all user_ids who are members of those projects. Return only companies where at least one of those users has that company_id.
+For GET /admin/projects — already fixed. Leave it.
+For GET /admin/activity — when scope=mine: return only activity_log entries where project_id is in the list of projects where req.user.userId is project_admin.
+For GET /admin/email-log — when scope=mine: return only email log entries related to projects where req.user.userId is project_admin. If no email log scoping exists just return empty array for non-super-admins with scope=mine.
+For GET /admin/feature-flags — remove the super admin requirement completely. Any authenticated user can read feature flags. Only toggling flags requires super admin. Find the POST or PATCH route for feature flags and keep the super admin check there only.
+For GET /admin/admin-log or GET /admin/actions-log — when scope=mine: return only admin actions taken by the requesting user themselves.
+For GET /admin/stats or any other GET route — when scope=mine allow through, filter to scoped projects.
+In artifacts/bimlog/src/pages/AdminPanel.tsx find every single apiFetch call and make sure every single one passes ?scope=mine as a query parameter. Go through the entire file — Overview, Users, Companies, Projects, Email Log, Activity Feed, Feature Flags, Admin Log — every single fetch must have ?scope=mine appended.
+Then rebuild both artifacts, publish, and confirm with these checks:
+Check 1 — Feature flags accessible without super admin:
+curl -s https://bim-log-ignite.replit.app/api/v1/admin/feature-flags -H "Authorization: Bearer [ALEJANDRO_JWT]"
+Check 2 — Users scoped correctly for Alejandro:
+curl -s "https://bim-log-ignite.replit.app/api/v1/admin/users?scope=mine" -H "Authorization: Bearer [ALEJANDRO_JWT]"
+Check 3 — Companies scoped correctly for Alejandro:
+curl -s "https://bim-log-ignite.replit.app/api/v1/admin/companies?scope=mine" -H "Authorization: Bearer [ALEJANDRO_JWT]"
+Check 4 — All apiFetch calls in AdminPanel have scope=mine:
+grep -c "scope=mine" artifacts/bimlog/src/pages/AdminPanel.tsx
+Show exact output of all 4 checks. Nothing else.
