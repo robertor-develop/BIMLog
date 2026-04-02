@@ -10,6 +10,7 @@ import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2,
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -163,6 +164,9 @@ export function Dashboard() {
   const [showCreate, setShowCreate] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { shouldShow: showOnboarding, markDone: doneOnboarding } = useOnboarding();
+  const [onboardingVisible, setOnboardingVisible] = useState(false);
+  useEffect(() => { if (showOnboarding) setOnboardingVisible(true); }, [showOnboarding]);
 
   // ── CVR Platform Health ────────────────────────────────────────────────────
   const [cvrHealth, setCvrHealth] = useState<{ healthStatus: "green" | "amber" | "red"; totalPendingReview: number; totalFlagged: number } | null>(null);
@@ -310,6 +314,9 @@ export function Dashboard() {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {onboardingVisible && (
+        <OnboardingFlow onDone={() => { setOnboardingVisible(false); doneOnboarding(); }} />
+      )}
       <MasterSidebar />
 
       {/* Main scrollable area */}
@@ -327,7 +334,7 @@ export function Dashboard() {
           </div>
 
           {/* AI Briefing banner */}
-          <AiBriefingCard token={token} />
+          <AiBriefingCard token={token ?? undefined} />
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (projects?.length ?? 0) > 0 && (

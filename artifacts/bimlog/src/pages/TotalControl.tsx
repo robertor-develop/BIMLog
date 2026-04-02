@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { getMe } from "@workspace/api-client-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -14,55 +12,27 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log"];
+/* ── Helper sub-components ─────────────────────────────────────────────────── */
 
-const FLAG_LABELS: Record<string, string> = {
-  ai_presubmission_check: "AI Pre-Submission Check",
-  ai_name_suggestion: "AI Name Suggestion",
-  audit_certificate: "Audit Certificate",
-  email_notifications: "Email Notifications",
-  rapid_approval_detection: "Rapid Approval Detection",
-  procurement_before_approval_warning: "Procurement Before Approval Warning",
-  meeting_minutes: "Meeting Minutes",
-  transmittal_manager: "Transmittal Manager",
-  cvr_mismatch_workflow: "CVR Mismatch Workflow",
-  automated_accountability_emails: "Automated Accountability Emails",
-  weekly_compliance_report: "Weekly Compliance Report",
-};
-
-const STAT_LABELS: Record<string, string> = {
-  totalUsers: "Users",
-  totalCompanies: "Companies",
-  totalProjects: "Projects",
-  totalFiles: "Files",
-  totalRfis: "RFIs",
-  totalSubmittals: "Submittals",
-  activeProjects: "Active Projects",
-  filesLast24h: "Files (24h)",
-  rfisLast7d: "RFIs (7d)",
-};
-
-const statusColor: Record<string, string> = {
-  active: "#22c55e", archived: "#f59e0b", inactive: "#94a3b8",
-  sent: "#22c55e", failed: "#ef4444", skipped: "#f59e0b", pending: "#94a3b8",
-  approved: "#22c55e", rejected: "#ef4444", under_review: "#3b82f6",
-};
-
-function TCBadge({ label, color }: { label: string; color?: string }) {
+function Pill({ label, color }: { label: string; color?: string }) {
   return (
-    <span style={{ display: "inline-block", padding: "1px 8px", borderRadius: 9999, fontSize: 11, fontWeight: 600, background: color ? `${color}22` : "hsl(var(--secondary))", color: color || "hsl(var(--foreground))", border: `1px solid ${color ? `${color}44` : "hsl(var(--border))"}` }}>
-      {label}
-    </span>
+    <span style={{
+      display: "inline-block", padding: "2px 9px", borderRadius: 9999,
+      fontSize: 11, fontWeight: 700,
+      background: color ? `${color}22` : "#F3F4F6",
+      color: color ?? "#374151",
+      border: `1px solid ${color ? `${color}44` : "#E5E7EB"}`,
+    }}>{label}</span>
   );
 }
 
-function TCModal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 24, minWidth: 400, maxWidth: 560, width: "90vw", maxHeight: "85vh", overflowY: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ fontWeight: 700, fontSize: 16, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "hsl(var(--muted-foreground))" }}>✕</button>
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#fff", borderRadius: 14, padding: 28, maxWidth: wide ? 760 : 540, width: "92vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <h3 style={{ fontWeight: 800, fontSize: 16, margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "#9CA3AF", lineHeight: 1 }}>✕</button>
         </div>
         {children}
       </div>
@@ -70,530 +40,567 @@ function TCModal({ title, onClose, children }: { title: string; onClose: () => v
   );
 }
 
-function TCStatCard({ label, value }: { label: string; value: number | string }) {
+const STATUS_COLOR: Record<string, string> = {
+  active: "#16A34A", archived: "#D97706", inactive: "#9CA3AF",
+  approved: "#16A34A", rejected: "#DC2626", pending: "#D97706", under_review: "#2563EB",
+  sent: "#16A34A", failed: "#DC2626", skipped: "#D97706",
+};
+
+/* ── Types ─────────────────────────────────────────────────────────────────── */
+
+interface PlatformStats { totalUsers: number; totalCompanies: number; totalProjects: number; totalFiles: number; totalRfis: number; totalSubmittals: number; activeProjects: number; filesLast24h: number; rfisLast7d: number; }
+interface Company { id: number; name: string; status: string; plan?: string; projectCount: number; userCount: number; fileCount: number; createdAt: string; }
+interface Project { id: number; code: string; name: string; status: string; companyName?: string; memberCount: number; fileCount: number; rfiCount?: number; submittalCount?: number; createdAt: string; }
+interface UserRow { id: number; fullName: string; email: string; role: string; status: string; companyName?: string; lastLoginAt?: string; createdAt: string; }
+interface EmailLogRow { id: number; to: string; subject: string; status: string; createdAt: string; errorMessage?: string; }
+interface ActivityRow { id: number; userId?: number; userName?: string; projectId?: number; projectCode?: string; action: string; entity?: string; entityId?: number; createdAt: string; }
+interface BriefData { summary: string; criticalItems: string[]; todaysDate: string; highlights?: string[]; }
+
+/* ── Layer 1: Platform Health Bar ─────────────────────────────────────────── */
+
+function HealthBar({ stats, onExpand }: { stats: PlatformStats; onExpand: (tab: string) => void }) {
+  const items = [
+    { key: "totalUsers",     label: "Users",          value: stats.totalUsers,     tab: "users",    color: "#2563EB", icon: "👤" },
+    { key: "totalCompanies", label: "Companies",      value: stats.totalCompanies, tab: "companies",color: "#7C3AED", icon: "🏢" },
+    { key: "totalProjects",  label: "Projects",       value: stats.totalProjects,  tab: "projects", color: "#0891B2", icon: "📁" },
+    { key: "activeProjects", label: "Active",         value: stats.activeProjects, tab: "projects", color: "#16A34A", icon: "🟢" },
+    { key: "totalFiles",     label: "Files",          value: stats.totalFiles,     tab: "projects", color: "#D97706", icon: "📄" },
+    { key: "filesLast24h",   label: "Files 24h",      value: stats.filesLast24h,   tab: "projects", color: "#EA580C", icon: "⚡" },
+    { key: "totalRfis",      label: "RFIs",           value: stats.totalRfis,      tab: "projects", color: "#DC2626", icon: "💬" },
+    { key: "totalSubmittals",label: "Submittals",     value: stats.totalSubmittals,tab: "projects", color: "#9333EA", icon: "📋" },
+    { key: "rfisLast7d",     label: "RFIs (7d)",      value: stats.rfisLast7d,     tab: "projects", color: "#DB2777", icon: "📈" },
+  ];
+
   return (
-    <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px", width: 160, minWidth: 140, flexShrink: 0, boxSizing: "border-box" }}>
-      <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginBottom: 6, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 800, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</div>
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28 }}>
+      {items.map(i => (
+        <button
+          key={i.key}
+          onClick={() => onExpand(i.tab)}
+          style={{
+            flex: "1 0 120px", minWidth: 110, padding: "14px 16px",
+            border: "1.5px solid #E5E7EB", borderRadius: 12,
+            background: "white", cursor: "pointer", textAlign: "left",
+            transition: "border-color 0.15s, box-shadow 0.15s",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = i.color; e.currentTarget.style.boxShadow = `0 0 0 3px ${i.color}18`; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"; }}
+        >
+          <div style={{ fontSize: 18, marginBottom: 6 }}>{i.icon}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: i.color, lineHeight: 1 }}>{i.value.toLocaleString()}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF", marginTop: 4 }}>{i.label}</div>
+        </button>
+      ))}
     </div>
   );
 }
 
-function TCTh({ children }: { children: React.ReactNode }) {
-  return <th style={{ textAlign: "left", padding: "8px 12px", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid hsl(var(--border))", whiteSpace: "nowrap" }}>{children}</th>;
-}
-function TCTd({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return <td style={{ padding: "10px 12px", fontSize: 13, borderBottom: "1px solid hsl(var(--border))", verticalAlign: "middle", ...style }}>{children}</td>;
-}
+/* ── Layer 2: Company Performance Panel ───────────────────────────────────── */
 
-// ── Overview Tab ──────────────────────────────────────────────────────────────
-function TCOverviewTab({ token }: { token: string }) {
-  const [data, setData] = useState<{ stats: Record<string, number>; activity: Record<string, unknown>[] } | null>(null);
-  useEffect(() => { apiFetch("/admin/overview", token).then(r => r.json()).then(setData).catch(() => {}); }, [token]);
-  if (!data) return <div style={{ padding: 32, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
-  return (
-    <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
-        {Object.entries(data.stats).map(([k, v]) => (
-          <TCStatCard key={k} label={STAT_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
-        ))}
-      </div>
-      <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Live Activity Feed (last 50)</h3>
-      {data.activity.length === 0
-        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No activity yet. Actions taken in projects will appear here.</div>
-        : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><TCTh>Project</TCTh><TCTh>User</TCTh><TCTh>Action</TCTh><TCTh>Entity</TCTh><TCTh>Details</TCTh><TCTh>When</TCTh></tr></thead>
-              <tbody>
-                {data.activity.map((a: Record<string, unknown>) => (
-                  <tr key={String(a.id)}>
-                    <TCTd><span style={{ fontWeight: 500 }}>{String(a.projectName || "")}</span></TCTd>
-                    <TCTd><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></TCTd>
-                    <TCTd><TCBadge label={String(a.actionType || "")} color="#3b82f6" /></TCTd>
-                    <TCTd>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</TCTd>
-                    <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere" }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></TCTd>
-                    <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )
-      }
-    </div>
-  );
-}
-
-// ── Users Tab ─────────────────────────────────────────────────────────────────
-function TCUsersTab({ token }: { token: string }) {
-  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
-  const [resetModal, setResetModal] = useState<number | null>(null);
-  const [newPw, setNewPw] = useState("");
-  const [createForm, setCreateForm] = useState({ fullName: "", email: "", password: "", companyName: "" });
-  const [msg, setMsg] = useState("");
-
-  const load = useCallback(() => {
-    setLoading(true);
-    apiFetch(`/admin/users?search=${encodeURIComponent(search)}`, token)
-      .then(r => r.json()).then(d => setUsers(d.data || [])).finally(() => setLoading(false));
-  }, [search, token]);
-  useEffect(() => { load(); }, [load]);
-
-  const deleteUser = async (id: number, name: string) => {
-    if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/users/${id}`, token, { method: "DELETE" });
-    setMsg("User deleted."); load();
-  };
-  const toggleSuperAdmin = async (id: number, cur: boolean) => {
-    await apiFetch(`/admin/users/${id}`, token, { method: "PATCH", body: JSON.stringify({ isSuperAdmin: !cur }) });
-    load();
-  };
-  const doResetPw = async () => {
-    if (!resetModal) return;
-    const r = await apiFetch(`/admin/users/${resetModal}/reset-password`, token, { method: "POST", body: JSON.stringify({ password: newPw }) });
-    const d = await r.json();
-    if (d.success) { setResetModal(null); setNewPw(""); setMsg("Password reset."); }
-    else setMsg(d.error || "Failed");
-  };
-  const doCreate = async () => {
-    const r = await apiFetch("/admin/users", token, { method: "POST", body: JSON.stringify(createForm) });
-    const d = await r.json();
-    if (d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "" }); setMsg("User created."); load(); }
-    else setMsg(d.error || "Failed");
-  };
+function CompanyPanel({ companies, onSelect }: { companies: Company[]; onSelect: (c: Company) => void }) {
+  const [sortKey, setSortKey] = useState<keyof Company>("projectCount");
+  const sorted = [...companies].sort((a, b) => {
+    const av = a[sortKey]; const bv = b[sortKey];
+    if (typeof av === "number" && typeof bv === "number") return bv - av;
+    return String(av).localeCompare(String(bv));
+  });
 
   return (
-    <div>
-      {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <Input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
-        <Button size="sm" onClick={load}>Search</Button>
-        <Button size="sm" style={{ marginLeft: "auto" }} onClick={() => setShowCreate(true)}>+ Create User</Button>
-      </div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Name</TCTh><TCTh>Email</TCTh><TCTh>Company</TCTh><TCTh>Projects</TCTh><TCTh>Role</TCTh><TCTh>Joined</TCTh><TCTh>Actions</TCTh></tr></thead>
-          <tbody>
-            {users.map((u: Record<string, unknown>) => (
-              <tr key={String(u.id)}>
-                <TCTd><span style={{ fontWeight: 500 }}>{String(u.fullName || "")}</span></TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(u.email || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(u.companyName || "")}</TCTd>
-                <TCTd>{String(u.projectCount || 0)}</TCTd>
-                <TCTd>
-                  <button onClick={() => toggleSuperAdmin(u.id as number, u.isSuperAdmin as boolean)}
-                    style={{ background: u.isSuperAdmin ? "#f59e0b22" : "hsl(var(--secondary))", border: `1px solid ${u.isSuperAdmin ? "#f59e0b44" : "hsl(var(--border))"}`, borderRadius: 9999, padding: "2px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: u.isSuperAdmin ? "#b45309" : "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
-                    {u.isSuperAdmin ? "SUPER ADMIN" : "USER"}
-                  </button>
-                </TCTd>
-                <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</TCTd>
-                <TCTd>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => { setResetModal(u.id as number); setNewPw(""); }}>Reset PW</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => deleteUser(u.id as number, String(u.fullName))}>Delete</Button>
-                  </div>
-                </TCTd>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {loading && <div style={{ padding: 16, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading...</div>}
-      {resetModal && (
-        <TCModal title="Reset Password" onClose={() => setResetModal(null)}>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>New Password (min 8 chars)</label>
-            <Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} />
-          </div>
-          <Button onClick={doResetPw} disabled={newPw.length < 8}>Set Password</Button>
-        </TCModal>
-      )}
-      {showCreate && (
-        <TCModal title="Create User" onClose={() => setShowCreate(false)}>
-          {["fullName", "email", "password", "companyName"].map(field => (
-            <div key={field} style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>{field.replace(/([A-Z])/g, " $1")}</label>
-              <Input type={field === "password" ? "password" : "text"} value={(createForm as Record<string, string>)[field]} onChange={e => setCreateForm(f => ({ ...f, [field]: e.target.value }))} />
-            </div>
-          ))}
-          <Button onClick={doCreate}>Create</Button>
-        </TCModal>
-      )}
-    </div>
-  );
-}
-
-// ── Companies Tab ─────────────────────────────────────────────────────────────
-function TCCompaniesTab({ token }: { token: string }) {
-  const [companies, setCompanies] = useState<Record<string, unknown>[]>([]);
-  const [editModal, setEditModal] = useState<Record<string, unknown> | null>(null);
-  const [msg, setMsg] = useState("");
-
-  const load = () => apiFetch("/admin/companies", token).then(r => r.json()).then(setCompanies).catch(() => {});
-  useEffect(() => { load(); }, [token]);
-
-  const doDelete = async (id: number, name: string, userCount: number) => {
-    if (!confirm(`Delete company "${name}"? This will affect ${userCount} user(s).`)) return;
-    await apiFetch(`/admin/companies/${id}`, token, { method: "DELETE" });
-    setMsg("Company deleted."); load();
-  };
-  const doSave = async () => {
-    if (!editModal) return;
-    await apiFetch(`/admin/companies/${editModal.id}`, token, { method: "PATCH", body: JSON.stringify({ name: editModal.name, website: editModal.website, address: editModal.address, phone: editModal.phone }) });
-    setEditModal(null); setMsg("Company updated."); load();
-  };
-
-  return (
-    <div>
-      {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Company</TCTh><TCTh>Users</TCTh><TCTh>Projects</TCTh><TCTh>Created</TCTh><TCTh>Actions</TCTh></tr></thead>
-          <tbody>
-            {companies.map((c: Record<string, unknown>) => (
-              <tr key={String(c.id)}>
-                <TCTd><span style={{ fontWeight: 600 }}>{String(c.name || "")}</span></TCTd>
-                <TCTd>{String(c.userCount || 0)}</TCTd>
-                <TCTd>{String(c.projectCount || 0)}</TCTd>
-                <TCTd style={{ fontSize: 11 }}>{new Date(String(c.createdAt)).toLocaleDateString()}</TCTd>
-                <TCTd>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => setEditModal({ ...c })}>Edit</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(c.id as number, String(c.name), c.userCount as number)}>Delete</Button>
-                  </div>
-                </TCTd>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {editModal && (
-        <TCModal title="Edit Company" onClose={() => setEditModal(null)}>
-          {["name", "website", "address", "phone"].map(field => (
-            <div key={field} style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-              <Input value={String((editModal as Record<string, unknown>)[field] || "")} onChange={e => setEditModal(m => ({ ...m!, [field]: e.target.value }))} />
-            </div>
-          ))}
-          <Button onClick={doSave}>Save</Button>
-        </TCModal>
-      )}
-    </div>
-  );
-}
-
-// ── Projects Tab ──────────────────────────────────────────────────────────────
-function TCProjectsTab({ token }: { token: string }) {
-  const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
-  const [allUsers, setAllUsers] = useState<Record<string, unknown>[]>([]);
-  const [transferModal, setTransferModal] = useState<number | null>(null);
-  const [newOwnerId, setNewOwnerId] = useState("");
-  const [msg, setMsg] = useState("");
-
-  const load = () => {
-    apiFetch("/admin/projects", token).then(r => r.json()).then(setProjects).catch(() => {});
-    apiFetch("/admin/users", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch(() => {});
-  };
-  useEffect(() => { load(); }, [token]);
-
-  const doDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete project "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/projects/${id}`, token, { method: "DELETE" });
-    setMsg("Project deleted."); load();
-  };
-  const doArchive = async (id: number, status: string) => {
-    const newStatus = status === "archived" ? "active" : "archived";
-    await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
-    setMsg(`Project ${newStatus}.`); load();
-  };
-  const doTransfer = async () => {
-    if (!transferModal || !newOwnerId) return;
-    const r = await apiFetch(`/admin/projects/${transferModal}/transfer`, token, { method: "POST", body: JSON.stringify({ newOwnerId: parseInt(newOwnerId) }) });
-    const d = await r.json();
-    if (d.id) { setTransferModal(null); setNewOwnerId(""); setMsg("Ownership transferred."); load(); }
-    else setMsg(d.error || "Failed");
-  };
-
-  return (
-    <div>
-      {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Project</TCTh><TCTh>Code</TCTh><TCTh>Company</TCTh><TCTh>Status</TCTh><TCTh>Members</TCTh><TCTh>Files</TCTh><TCTh>RFIs</TCTh><TCTh>Submittals</TCTh><TCTh>Created</TCTh><TCTh>Actions</TCTh></tr></thead>
-          <tbody>
-            {projects.map((p: Record<string, unknown>) => (
-              <tr key={String(p.id)}>
-                <TCTd><span style={{ fontWeight: 600 }}>{String(p.name || "")}</span></TCTd>
-                <TCTd style={{ fontSize: 12, fontFamily: "monospace" }}>{String(p.code || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(p.companyName || "")}</TCTd>
-                <TCTd><TCBadge label={String(p.status || "")} color={statusColor[String(p.status)] || undefined} /></TCTd>
-                <TCTd>{String(p.memberCount || 0)}</TCTd>
-                <TCTd>{String(p.fileCount || 0)}</TCTd>
-                <TCTd>{String(p.rfiCount || 0)}</TCTd>
-                <TCTd>{String(p.submittalCount || 0)}</TCTd>
-                <TCTd style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</TCTd>
-                <TCTd>
-                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <a href={`/projects/${p.id}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline">View</Button></a>
-                    <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(p.id as number, String(p.name))}>Delete</Button>
-                  </div>
-                </TCTd>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {transferModal && (
-        <TCModal title="Transfer Ownership" onClose={() => setTransferModal(null)}>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>New Owner</label>
-            <select value={newOwnerId} onChange={e => setNewOwnerId(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }}>
-              <option value="">Select user...</option>
-              {allUsers.map((u: Record<string, unknown>) => <option key={String(u.id)} value={String(u.id)}>{String(u.fullName)} ({String(u.email)})</option>)}
-            </select>
-          </div>
-          <Button onClick={doTransfer} disabled={!newOwnerId}>Transfer</Button>
-        </TCModal>
-      )}
-    </div>
-  );
-}
-
-// ── Email Log Tab ─────────────────────────────────────────────────────────────
-function TCEmailLogTab({ token }: { token: string }) {
-  const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({ status: "", triggerType: "", from: "", to: "" });
-
-  const load = useCallback(() => {
-    const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
-  }, [token, page, filters]);
-  useEffect(() => { load(); }, [load]);
-
-  return (
-    <div>
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-        <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 12 }}>
-          <option value="">All Status</option>
-          <option value="sent">Sent</option><option value="failed">Failed</option><option value="skipped">Skipped</option>
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>🏢 Company Performance</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{companies.length} companies on platform · click any row to drill in</div>
+        </div>
+        <select
+          value={String(sortKey)}
+          onChange={e => setSortKey(e.target.value as keyof Company)}
+          style={{ fontSize: 12, padding: "5px 10px", border: "1px solid #E5E7EB", borderRadius: 6, cursor: "pointer" }}
+        >
+          <option value="projectCount">Sort: Projects</option>
+          <option value="fileCount">Sort: Files</option>
+          <option value="userCount">Sort: Users</option>
+          <option value="name">Sort: Name</option>
+          <option value="createdAt">Sort: Newest</option>
         </select>
-        <Input placeholder="Trigger type..." value={filters.triggerType} onChange={e => setFilters(f => ({ ...f, triggerType: e.target.value }))} style={{ width: 160 }} />
-        <Input type="date" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} style={{ width: 140 }} />
-        <Input type="date" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} style={{ width: 140 }} />
-        <Button size="sm" onClick={load}>Filter</Button>
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "hsl(var(--muted-foreground))", alignSelf: "center" }}>{total} records</span>
       </div>
-      <div style={{ overflowX: "auto" }}>
+      <div style={{ border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>To</TCTh><TCTh>Subject</TCTh><TCTh>Trigger</TCTh><TCTh>Status</TCTh><TCTh>Error</TCTh><TCTh>Sent At</TCTh></tr></thead>
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              {["Company", "Plan", "Status", "Projects", "Users", "Files", "Joined"].map(h => (
+                <th key={h} style={{ textAlign: "left", padding: "10px 14px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3AF", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
           <tbody>
-            {logs.map((l: Record<string, unknown>) => (
-              <tr key={String(l.id)}>
-                <TCTd style={{ fontSize: 12 }}>{String(l.toEmail || "")}</TCTd>
-                <TCTd style={{ maxWidth: 240, fontSize: 12 }}>{String(l.subject || "")}</TCTd>
-                <TCTd><TCBadge label={String(l.triggerType || "—")} /></TCTd>
-                <TCTd><TCBadge label={String(l.status || "")} color={statusColor[String(l.status)] || undefined} /></TCTd>
-                <TCTd style={{ fontSize: 11, color: "#ef4444" }}>{String(l.errorMessage || "")}</TCTd>
-                <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.sentAt)).toLocaleString()}</TCTd>
+            {sorted.map((c, i) => (
+              <tr
+                key={c.id}
+                onClick={() => onSelect(c)}
+                style={{ cursor: "pointer", background: i % 2 === 0 ? "white" : "#FAFAFA" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#EFF6FF")}
+                onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 0 ? "white" : "#FAFAFA")}
+              >
+                <td style={{ padding: "10px 14px", fontWeight: 600, fontSize: 13, borderBottom: "1px solid #F3F4F6" }}>{c.name}</td>
+                <td style={{ padding: "10px 14px", fontSize: 12, borderBottom: "1px solid #F3F4F6" }}><Pill label={c.plan ?? "free"} color="#7C3AED" /></td>
+                <td style={{ padding: "10px 14px", fontSize: 12, borderBottom: "1px solid #F3F4F6" }}><Pill label={c.status} color={STATUS_COLOR[c.status]} /></td>
+                <td style={{ padding: "10px 14px", fontSize: 13, fontWeight: 700, color: "#2563EB", borderBottom: "1px solid #F3F4F6" }}>{c.projectCount}</td>
+                <td style={{ padding: "10px 14px", fontSize: 13, borderBottom: "1px solid #F3F4F6" }}>{c.userCount}</td>
+                <td style={{ padding: "10px 14px", fontSize: 13, borderBottom: "1px solid #F3F4F6" }}>{c.fileCount.toLocaleString()}</td>
+                <td style={{ padding: "10px 14px", fontSize: 11, color: "#9CA3AF", borderBottom: "1px solid #F3F4F6" }}>{new Date(c.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {total > 50 && (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 16 }}>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
-          <span style={{ fontSize: 12, alignSelf: "center" }}>Page {page} of {Math.ceil(total / 50)}</span>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / 50)}>Next</Button>
-        </div>
-      )}
     </div>
   );
 }
 
-// ── Activity Feed Tab ─────────────────────────────────────────────────────────
-function TCActivityFeedTab({ token }: { token: string }) {
-  const [items, setItems] = useState<Record<string, unknown>[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const load = useCallback(() => {
-    apiFetch(`/admin/activity?page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch(() => {});
-  }, [token, page]);
-  useEffect(() => { load(); }, [load]);
-  return (
-    <div>
-      <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} total events across all projects</div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Project</TCTh><TCTh>User</TCTh><TCTh>Company</TCTh><TCTh>Action</TCTh><TCTh>Entity</TCTh><TCTh>Details</TCTh><TCTh>When</TCTh></tr></thead>
-          <tbody>
-            {items.map((a: Record<string, unknown>) => (
-              <tr key={String(a.id)}>
-                <TCTd style={{ fontWeight: 500, fontSize: 12 }}>{String(a.projectName || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.userFullName || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</TCTd>
-                <TCTd><TCBadge label={String(a.actionType || "")} color="#3b82f6" /></TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.entityType || "")}</TCTd>
-                <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</TCTd>
-                <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {total === 0 && <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No activity yet. Actions taken in projects will appear here.</div>}
-      {total > 50 && (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 16 }}>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
-          <span style={{ fontSize: 12, alignSelf: "center" }}>Page {page} of {Math.ceil(total / 50)}</span>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / 50)}>Next</Button>
-        </div>
-      )}
-    </div>
-  );
+/* ── Layer 3: Active Projects Grid ────────────────────────────────────────── */
+
+function getProjectHealth(p: Project): { color: string; label: string } {
+  if (p.status === "archived") return { color: "#D97706", label: "Archived" };
+  if (p.status !== "active") return { color: "#9CA3AF", label: "Inactive" };
+  const rfi = p.rfiCount ?? 0;
+  const sub = p.submittalCount ?? 0;
+  if (rfi > 10 || sub > 20) return { color: "#DC2626", label: "High Load" };
+  if (rfi > 5 || sub > 10) return { color: "#F59E0B", label: "Watch" };
+  return { color: "#16A34A", label: "Healthy" };
 }
 
-// ── Feature Flags Tab ─────────────────────────────────────────────────────────
-function TCFeatureFlagsTab({ token }: { token: string }) {
-  const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
-  const [msg, setMsg] = useState("");
-  const load = () => apiFetch("/admin/feature-flags", token).then(r => r.json()).then(setFlags).catch(() => {});
-  useEffect(() => { load(); }, [token]);
-  const toggle = async (id: number, enabled: boolean) => {
-    await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
-    setMsg(`Flag updated.`); load();
-  };
+function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (p: Project) => void }) {
+  const [filter, setFilter] = useState("all");
+  const filtered = filter === "all" ? projects : projects.filter(p => getProjectHealth(p).label.toLowerCase() === filter);
+
   return (
-    <div>
-      {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {flags.map((f: Record<string, unknown>) => (
-          <div key={String(f.id)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px" }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>{FLAG_LABELS[String(f.flagName)] || String(f.flagName)}</div>
-              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Applies to: {String(f.appliesTo)} · Last updated: {new Date(String(f.updatedAt)).toLocaleString()}</div>
-            </div>
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>📁 Active Projects Grid</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{projects.length} total projects · color-coded by health · click to inspect</div>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {["all", "healthy", "watch", "high load", "archived"].map(f => (
             <button
-              onClick={() => toggle(f.id as number, f.enabled as boolean)}
+              key={f}
+              onClick={() => setFilter(f)}
               style={{
-                width: 48, height: 26, borderRadius: 13, border: "none", cursor: "pointer",
-                background: f.enabled ? "#22c55e" : "#94a3b8",
-                transition: "background 0.2s", position: "relative",
+                padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, border: "1px solid #E5E7EB",
+                background: filter === f ? "#1D4ED8" : "white", color: filter === f ? "white" : "#374151", cursor: "pointer",
               }}
             >
-              <span style={{ position: "absolute", top: 3, left: f.enabled ? "calc(100% - 22px)" : 3, width: 20, height: 20, borderRadius: "50%", background: "white", transition: "left 0.2s" }} />
+              {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Admin Actions Log Tab ─────────────────────────────────────────────────────
-function TCAdminActionsLogTab({ token }: { token: string }) {
-  const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const load = useCallback(() => {
-    apiFetch(`/admin/actions-log?page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
-  }, [token, page]);
-  useEffect(() => { load(); }, [load]);
-  return (
-    <div>
-      <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} admin actions (immutable log)</div>
-      {logs.length === 0
-        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No admin actions recorded yet.</div>
-        : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><TCTh>Admin</TCTh><TCTh>Action</TCTh><TCTh>Target Type</TCTh><TCTh>Target ID</TCTh><TCTh>Details</TCTh><TCTh>When</TCTh></tr></thead>
-              <tbody>
-                {logs.map((l: Record<string, unknown>) => (
-                  <tr key={String(l.id)}>
-                    <TCTd style={{ fontSize: 12 }}>{String(l.adminEmail || "")}</TCTd>
-                    <TCTd><TCBadge label={String(l.action || "")} color="#f59e0b" /></TCTd>
-                    <TCTd style={{ fontSize: 12 }}>{String(l.targetType || "—")}</TCTd>
-                    <TCTd style={{ fontSize: 12, fontFamily: "monospace" }}>{String(l.targetId || "—")}</TCTd>
-                    <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</TCTd>
-                    <TCTd style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.createdAt)).toLocaleString()}</TCTd>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )
-      }
-      {total > 50 && (
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 16 }}>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
-          <span style={{ fontSize: 12, alignSelf: "center" }}>Page {page} of {Math.ceil(total / 50)}</span>
-          <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / 50)}>Next</Button>
+          ))}
         </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
+        {filtered.map(p => {
+          const health = getProjectHealth(p);
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelect(p)}
+              style={{
+                border: `2px solid ${health.color}44`,
+                borderLeft: `4px solid ${health.color}`,
+                borderRadius: 10, padding: "14px 14px",
+                background: `${health.color}08`,
+                cursor: "pointer", textAlign: "left",
+                transition: "box-shadow 0.15s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 0 0 3px ${health.color}28`)}
+              onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 800, color: health.color, background: `${health.color}18`, padding: "1px 7px", borderRadius: 4 }}>{p.code}</span>
+                <Pill label={health.label} color={health.color} />
+              </div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "#111", marginBottom: 6, lineHeight: 1.3 }}>{p.name}</div>
+              {p.companyName && <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 6 }}>🏢 {p.companyName}</div>}
+              <div style={{ display: "flex", gap: 10, fontSize: 11, color: "#6B7280" }}>
+                <span>👥 {p.memberCount}</span>
+                <span>📄 {p.fileCount.toLocaleString()}</span>
+                {p.rfiCount !== undefined && <span>💬 {p.rfiCount}</span>}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF", fontSize: 13 }}>No projects match this filter</div>
       )}
     </div>
   );
 }
 
-// ── Main TotalControl ─────────────────────────────────────────────────────────
+/* ── Layer 4: Brain Daily Brief ───────────────────────────────────────────── */
+
+function BrainBrief({ token }: { token: string }) {
+  const [brief, setBrief] = useState<BriefData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  const load = async () => {
+    if (shown) return;
+    setLoading(true); setShown(true);
+    try {
+      const r = await apiFetch("/dashboard/briefing?platform=1", token);
+      if (r.ok) setBrief(await r.json());
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div style={{
+      border: "1.5px solid #BFDBFE", borderRadius: 14,
+      background: "linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%)",
+      overflow: "hidden",
+    }}>
+      <div style={{ padding: "16px 20px", borderBottom: "1px solid #DBEAFE", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#1D4ED8" }}>🧠 Brain Daily Brief</div>
+          <div style={{ fontSize: 12, color: "#3B82F6", marginTop: 2 }}>AI-powered platform intelligence snapshot</div>
+        </div>
+        {!shown && (
+          <button
+            onClick={load}
+            style={{ padding: "8px 16px", background: "#2563EB", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+          >
+            Generate Brief
+          </button>
+        )}
+      </div>
+      <div style={{ padding: "16px 20px" }}>
+        {loading && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#2563EB", fontSize: 13 }}>
+            <span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⚙️</span>
+            Generating AI brief…
+          </div>
+        )}
+        {!loading && !brief && !shown && (
+          <div style={{ color: "#9CA3AF", fontSize: 13 }}>Click "Generate Brief" to get an AI-powered summary of platform activity, risks, and recommended actions.</div>
+        )}
+        {!loading && brief && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontSize: 11, color: "#6B7280" }}>Generated: {brief.todaysDate}</span>
+              <button onClick={() => { setBrief(null); setShown(false); }} style={{ fontSize: 11, color: "#3B82F6", background: "none", border: "none", cursor: "pointer" }}>Regenerate</button>
+            </div>
+            <p style={{ fontSize: 13, color: "#1E3A5F", lineHeight: 1.7, marginBottom: 14 }}>{brief.summary}</p>
+            {brief.criticalItems?.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Critical Items</div>
+                <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
+                  {brief.criticalItems.map((item, i) => (
+                    <li key={i} style={{ fontSize: 13, color: "#374151", marginBottom: 5, lineHeight: 1.5 }}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(brief.highlights ?? []).length > 0 && (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#16A34A", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Highlights</div>
+                <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
+                  {(brief.highlights ?? []).map((item, i) => (
+                    <li key={i} style={{ fontSize: 13, color: "#374151", marginBottom: 5, lineHeight: 1.5 }}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Drill-in Modals ──────────────────────────────────────────────────────── */
+
+function UsersModal({ token, onClose }: { token: string; onClose: () => void }) {
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    apiFetch("/admin/users", token).then(r => r.json()).then(setUsers).catch(() => {}).finally(() => setLoading(false));
+  }, [token]);
+
+  const filtered = users.filter(u =>
+    !search || u.fullName.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <Modal title={`Users (${users.length})`} onClose={onClose} wide>
+      <input
+        placeholder="Search by name or email…"
+        value={search} onChange={e => setSearch(e.target.value)}
+        style={{ width: "100%", padding: "7px 12px", border: "1px solid #E5E7EB", borderRadius: 7, fontSize: 12, marginBottom: 14, boxSizing: "border-box" }}
+      />
+      {loading ? <div style={{ padding: 20, textAlign: "center", color: "#9CA3AF" }}>Loading…</div> : (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              {["Name", "Email", "Role", "Company", "Status", "Joined"].map(h => (
+                <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(u => (
+              <tr key={u.id}>
+                <td style={{ padding: "9px 10px", fontSize: 12, fontWeight: 600, borderBottom: "1px solid #F3F4F6" }}>{u.fullName}</td>
+                <td style={{ padding: "9px 10px", fontSize: 11, color: "#6B7280", borderBottom: "1px solid #F3F4F6" }}>{u.email}</td>
+                <td style={{ padding: "9px 10px", borderBottom: "1px solid #F3F4F6" }}><Pill label={u.role} color="#2563EB" /></td>
+                <td style={{ padding: "9px 10px", fontSize: 11, color: "#6B7280", borderBottom: "1px solid #F3F4F6" }}>{u.companyName ?? "—"}</td>
+                <td style={{ padding: "9px 10px", borderBottom: "1px solid #F3F4F6" }}><Pill label={u.status} color={STATUS_COLOR[u.status]} /></td>
+                <td style={{ padding: "9px 10px", fontSize: 11, color: "#9CA3AF", borderBottom: "1px solid #F3F4F6" }}>{new Date(u.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Modal>
+  );
+}
+
+function EmailLogModal({ token, onClose }: { token: string; onClose: () => void }) {
+  const [rows, setRows] = useState<EmailLogRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiFetch("/admin/email-log", token).then(r => r.json()).then(setRows).catch(() => {}).finally(() => setLoading(false));
+  }, [token]);
+  return (
+    <Modal title="Email Log" onClose={onClose} wide>
+      {loading ? <div style={{ padding: 20, textAlign: "center", color: "#9CA3AF" }}>Loading…</div> : (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              {["To", "Subject", "Status", "Sent At"].map(h => (
+                <th key={h} style={{ textAlign: "left", padding: "8px 10px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(r => (
+              <tr key={r.id}>
+                <td style={{ padding: "9px 10px", fontSize: 12, borderBottom: "1px solid #F3F4F6" }}>{r.to}</td>
+                <td style={{ padding: "9px 10px", fontSize: 11, color: "#6B7280", borderBottom: "1px solid #F3F4F6" }}>{r.subject}</td>
+                <td style={{ padding: "9px 10px", borderBottom: "1px solid #F3F4F6" }}><Pill label={r.status} color={STATUS_COLOR[r.status]} /></td>
+                <td style={{ padding: "9px 10px", fontSize: 11, color: "#9CA3AF", borderBottom: "1px solid #F3F4F6" }}>{new Date(r.createdAt).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Modal>
+  );
+}
+
+function ActivityModal({ token, onClose }: { token: string; onClose: () => void }) {
+  const [rows, setRows] = useState<ActivityRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiFetch("/admin/activity", token).then(r => r.json()).then(d => setRows(Array.isArray(d) ? d : d.activity ?? [])).catch(() => {}).finally(() => setLoading(false));
+  }, [token]);
+  return (
+    <Modal title="Platform Activity Feed" onClose={onClose} wide>
+      {loading ? <div style={{ padding: 20, textAlign: "center", color: "#9CA3AF" }}>Loading…</div> : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {rows.map(r => (
+            <div key={r.id} style={{ padding: "8px 12px", border: "1px solid #F3F4F6", borderRadius: 7, fontSize: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span><strong>{r.userName ?? `User #${r.userId}`}</strong> · {r.action} {r.entity ? `(${r.entity})` : ""} {r.projectCode ? `@ ${r.projectCode}` : ""}</span>
+                <span style={{ fontSize: 10, color: "#9CA3AF" }}>{new Date(r.createdAt).toLocaleString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function ProjectDetailModal({ project, token, onClose }: { project: Project; token: string; onClose: () => void }) {
+  const [, setLocation] = useLocation();
+  return (
+    <Modal title={`${project.code} — ${project.name}`} onClose={onClose}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+        {[
+          ["Company", project.companyName ?? "—"],
+          ["Status", project.status],
+          ["Members", String(project.memberCount)],
+          ["Files", project.fileCount.toLocaleString()],
+          ["RFIs", String(project.rfiCount ?? "—")],
+          ["Submittals", String(project.submittalCount ?? "—")],
+          ["Created", new Date(project.createdAt).toLocaleDateString()],
+        ].map(([k, v]) => (
+          <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => { onClose(); setLocation(`/projects/${project.id}/analytics`); }}
+        style={{ width: "100%", padding: "10px 0", background: "#1D4ED8", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700 }}
+      >
+        Open Project →
+      </button>
+    </Modal>
+  );
+}
+
+/* ── Main TotalControl Component ──────────────────────────────────────────── */
+
 export function TotalControl() {
   const [, setLocation] = useLocation();
   const { token } = useAuthStore();
-  const [activeTab, setActiveTab] = useState(0);
-  const [checking, setChecking] = useState(true);
+
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Modal state
+  const [showUsers, setShowUsers] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
     getMe()
       .then((data) => {
-        if (!data.isSuperAdmin) { setLocation("/dashboard"); return; }
-        setChecking(false);
+        const d = data as typeof data & { isSuperAdmin?: boolean };
+        if (!d.isSuperAdmin) { setLocation("/dashboard"); return; }
+        setAuthorized(true);
+        loadAll();
       })
-      .catch(() => setLocation("/dashboard"));
-  }, [token, setLocation]);
+      .catch(() => { setLocation("/dashboard"); });
+  }, [token]);
 
-  if (checking || !token) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "hsl(var(--muted-foreground))" }}>Checking access...</div>;
+  const loadAll = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const [overviewRes, companiesRes, projectsRes] = await Promise.all([
+        apiFetch("/admin/overview", token),
+        apiFetch("/admin/companies", token),
+        apiFetch("/admin/projects", token),
+      ]);
+      if (overviewRes.ok) {
+        const d = await overviewRes.json();
+        setStats(d.stats ?? d);
+      }
+      if (companiesRes.ok) setCompanies(await companiesRes.json());
+      if (projectsRes.ok) {
+        const d = await projectsRes.json();
+        setProjects(Array.isArray(d) ? d : d.projects ?? []);
+      }
+    } finally { setLoading(false); }
+  }, [token]);
 
-  return (
-    <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
-      <div style={{ borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--card))", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, paddingTop: 20, paddingBottom: 0 }}>
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Total Control</h1>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Full Platform Administration — Super Admin Only</p>
-          </div>
-          <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>← Back to Dashboard</Button>
-        </div>
-        <div style={{ display: "flex", gap: 0, marginTop: 16, overflowX: "auto" }}>
-          {TABS.map((tab, i) => (
-            <button key={tab} onClick={() => setActiveTab(i)} style={{
-              padding: "10px 18px", fontSize: 13, fontWeight: activeTab === i ? 700 : 500, border: "none",
-              borderBottom: activeTab === i ? "2px solid #ef4444" : "2px solid transparent",
-              background: "none", cursor: "pointer", color: activeTab === i ? "#ef4444" : "hsl(var(--muted-foreground))",
-              whiteSpace: "nowrap", transition: "all 0.15s",
-            }}>
-              {tab}
-            </button>
-          ))}
+  const handleHealthBarExpand = (tab: string) => {
+    if (tab === "users") setShowUsers(true);
+    else if (tab === "companies") { /* already visible in Layer 2 */ }
+    else if (tab === "projects") { /* already visible in Layer 3 */ }
+  };
+
+  if (authorized === null) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
+        <div style={{ textAlign: "center", color: "#9CA3AF" }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🔐</div>
+          <div>Verifying access…</div>
         </div>
       </div>
-      <div style={{ padding: "28px 32px", maxWidth: 1400, margin: "0 auto" }}>
-        {activeTab === 0 && <TCOverviewTab token={token} />}
-        {activeTab === 1 && <TCUsersTab token={token} />}
-        {activeTab === 2 && <TCCompaniesTab token={token} />}
-        {activeTab === 3 && <TCProjectsTab token={token} />}
-        {activeTab === 4 && <TCEmailLogTab token={token} />}
-        {activeTab === 5 && <TCActivityFeedTab token={token} />}
-        {activeTab === 6 && <TCFeatureFlagsTab token={token} />}
-        {activeTab === 7 && <TCAdminActionsLogTab token={token} />}
+    );
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
+      {/* Modals */}
+      {showUsers && token && <UsersModal token={token} onClose={() => setShowUsers(false)} />}
+      {showEmail && token && <EmailLogModal token={token} onClose={() => setShowEmail(false)} />}
+      {showActivity && token && <ActivityModal token={token} onClose={() => setShowActivity(false)} />}
+      {selectedProject && token && <ProjectDetailModal project={selectedProject} token={token} onClose={() => setSelectedProject(null)} />}
+      {selectedCompany && (
+        <Modal title={`${selectedCompany.name} — Details`} onClose={() => setSelectedCompany(null)}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {[["Plan", selectedCompany.plan ?? "free"], ["Status", selectedCompany.status], ["Projects", String(selectedCompany.projectCount)], ["Users", String(selectedCompany.userCount)], ["Files", selectedCompany.fileCount.toLocaleString()], ["Joined", new Date(selectedCompany.createdAt).toLocaleDateString()]].map(([k, v]) => (
+              <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </Modal>
+      )}
+
+      {/* Page header */}
+      <div style={{ background: "#111827", padding: "0 32px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 32, height: 32, background: "#2563EB", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white" }}>TC</div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "white", lineHeight: 1 }}>Total Control</div>
+            <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>Super Admin · IgniteSmart Platform</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => setShowActivity(true)} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, color: "rgba(255,255,255,0.7)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>Activity Feed</button>
+          <button onClick={() => setShowEmail(true)} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, color: "rgba(255,255,255,0.7)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>Email Log</button>
+          <button onClick={() => setLocation("/dashboard")} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, color: "rgba(255,255,255,0.7)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>← Dashboard</button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 28px" }}>
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} style={{ height: 80, background: "#E5E7EB", borderRadius: 12, animation: "pulse 1.5s infinite" }} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* ── Layer 1: Platform Health Bar ─── */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
+                LAYER 1 · PLATFORM HEALTH · click any metric to drill in
+              </div>
+              {stats && <HealthBar stats={stats} onExpand={handleHealthBarExpand} />}
+            </div>
+
+            {/* ── Layer 2: Company Performance ─── */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
+                LAYER 2 · COMPANY PERFORMANCE
+              </div>
+              <CompanyPanel companies={companies} onSelect={setSelectedCompany} />
+            </div>
+
+            {/* ── Layer 3: Active Projects Grid ─── */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
+                LAYER 3 · ACTIVE PROJECTS GRID
+              </div>
+              <ProjectsGrid projects={projects} onSelect={setSelectedProject} />
+            </div>
+
+            {/* ── Layer 4: Brain Daily Brief ─── */}
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
+                LAYER 4 · BRAIN DAILY BRIEF
+              </div>
+              {token && <BrainBrief token={token} />}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

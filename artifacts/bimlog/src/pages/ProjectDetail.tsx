@@ -136,6 +136,25 @@ export function ProjectDetail() {
           {tab === "change-orders"  && <ChangeOrdersTab   projectId={projectId} canWrite={canWrite} />}
           {tab === "meetings"       && <MeetingsTab       projectId={projectId} canWrite={canWrite} />}
           {tab === "schedule"       && <ScheduleTab       projectId={projectId} canWrite={canWrite} />}
+          {tab === "clash-reports"  && (
+            <div style={{ textAlign: "center", padding: "80px 40px" }}>
+              <div style={{ fontSize: 52, marginBottom: 16 }}>🔗</div>
+              <h2 style={{ fontWeight: 800, fontSize: 20, color: "#111827", marginBottom: 8 }}>Clash Reports</h2>
+              <div style={{
+                display: "inline-block", padding: "4px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                background: "#FEF3C7", color: "#D97706", border: "1px solid #FDE68A", marginBottom: 16,
+              }}>Coming Soon</div>
+              <p style={{ fontSize: 14, color: "#6B7280", maxWidth: 440, margin: "0 auto 24px", lineHeight: 1.7 }}>
+                Clash Detection Integration — automated detection of geometric conflicts
+                across Revit, IFC, and NWD models. Full audit trail with resolution tracking.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                {["Revit Integration", "IFC Support", "NWD/NWC", "Auto-grouping", "Resolution Workflow", "PDF Reports"].map(f => (
+                  <span key={f} style={{ padding: "5px 12px", background: "#F3F4F6", borderRadius: 20, fontSize: 12, color: "#374151", border: "1px solid #E5E7EB" }}>{f}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

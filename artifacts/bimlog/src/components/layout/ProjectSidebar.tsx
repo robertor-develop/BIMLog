@@ -34,6 +34,7 @@ const NAV_ITEMS = [
   { id: "generator",     label: "project.tabs.generator",      icon: Wand2,         section: "Tools" },
   { id: "convention",    label: "project.tabs.convention",     icon: Settings2,     section: "Tools", adminOnly: true },
   { id: "reports",       label: "Reports & PDF",               icon: FileBarChart2, section: "Tools" },
+  { id: "clash-reports", label: "Clash Reports",               icon: BarChart2,     section: "Tools" },
   { id: "integrations",  label: "Integrations",                icon: Puzzle,        section: "Tools" },
 ];
 
