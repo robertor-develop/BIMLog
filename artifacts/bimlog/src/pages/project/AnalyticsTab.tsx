@@ -2,11 +2,13 @@ import { useGetProject, useListFiles, useListRfis, useListActivity, useListMembe
 import { useI18n } from "@/lib/i18n";
 import { Shield, TrendingUp, AlertTriangle, Clock, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 
 interface AnalyticsTabProps { projectId: number; }
 
 export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
   const { data: project } = useGetProject(projectId);
   const { data: files = [] } = useListFiles(projectId);
   const { data: rfis = [] } = useListRfis(projectId);
@@ -65,7 +67,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
     <div>
       {/* KPI row */}
       <div className="kpi-grid-5" style={{ marginBottom: 18 }}>
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
           <div className="kpi-label">Compliance Rate</div>
           <div className="kpi-value" style={{ color: complianceColor }}>{complianceRate}<span style={{ fontSize: 16 }}>%</span></div>
           <div className="kpi-bar" style={{ marginTop: 8 }}>
@@ -76,14 +78,14 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           </div>
         </div>
 
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
           <div className="kpi-label">Total Files</div>
           <div className="kpi-value">{totalFiles}</div>
           <div className="kpi-sub">{validFiles} valid · {rejectedFiles} rejected</div>
           <div className="pill pill-blue">{members.length} contributors</div>
         </div>
 
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/rfis`)}>
           <div className="kpi-label">Open RFIs</div>
           <div className="kpi-value" style={{ color: openRfis > 0 ? "#C2410C" : "#16A34A" }}>{openRfis}</div>
           <div className="kpi-sub">{overdueRfis} overdue · {rfis.length} total</div>
@@ -92,7 +94,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           </div>
         </div>
 
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
           <div className="kpi-label">Naming Violations</div>
           <div className="kpi-value" style={{ color: rejectedFiles > 0 ? "#B45309" : "#16A34A" }}>{rejectedFiles}</div>
           <div className="kpi-sub">{violationEntries.length} companies affected</div>
@@ -101,7 +103,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           </div>
         </div>
 
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/team`)}>
           <div className="kpi-label">Team Members</div>
           <div className="kpi-value">{members.length}</div>
           <div className="kpi-sub">Across {new Set(members.map(m => m.userCompanyName)).size} companies</div>
@@ -113,7 +115,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
       <div className="col-3" style={{ marginBottom: 18 }}>
 
         {/* Compliance ring */}
-        <div className="card-padded">
+        <div className="card-padded" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
           <div className="section-header">
             <div>
               <div className="section-title">File compliance</div>
@@ -153,7 +155,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
         </div>
 
         {/* Violations by company */}
-        <div className="card-padded">
+        <div className="card-padded" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
           <div className="section-header">
             <div>
               <div className="section-title">Violations by company</div>
@@ -192,7 +194,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
         </div>
 
         {/* RFI status breakdown */}
-        <div className="card-padded">
+        <div className="card-padded" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/rfis`)}>
           <div className="section-header">
             <div>
               <div className="section-title">RFI status</div>
@@ -260,7 +262,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           {recentActivity.length > 0 ? (
             <div>
               {recentActivity.map((act) => (
-                <div key={act.id} className="timeline-item">
+                <div key={act.id} className="timeline-item" style={{ cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/activity`)}>
                   <div className="timeline-time">{format(new Date(act.createdAt), "HH:mm:ss")}</div>
                   <div
                     className="timeline-dot"
@@ -314,7 +316,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
                   const isRejected = file.status === "rejected";
 
                   return (
-                    <div key={file.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                    <div key={file.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid hsl(var(--border))", cursor: "pointer" }} onClick={() => setLocation(`/projects/${projectId}/files`)}>
                       <div className={`file-icon ${iconClass}`}>{ext.toUpperCase().slice(0, 3)}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className={isRejected ? "file-name-rejected" : "file-name"} style={{ fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -356,10 +358,10 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
 
         <div style={{ padding: "20px 0" }}>
           {[
-            { label: "MEP Rough-in L3",     baseline: 55, delay: 15, company: "DDS Mech." },
+            { label: "MEP Rough-in L3",     baseline: 55, delay: 15, company: "ABC Mech." },
             { label: "Structural steel L4",  baseline: 70, delay: 5,  company: "Pace GC" },
             { label: "Arch. drawings",       baseline: 80, delay: 0,  company: "ACM Arch." },
-            { label: "MEP Coordination",     baseline: 40, delay: 20, company: "DDS Mech." },
+            { label: "MEP Coordination",     baseline: 40, delay: 20, company: "ABC Mech." },
           ].map(row => (
             <div key={row.label} className="gantt-row">
               <div className="gantt-label">{row.label}</div>
@@ -393,7 +395,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
               Sample data shown — connect MS Project to see live schedule
             </span>
             <span style={{ fontSize: 11, fontWeight: 700, color: "#DC2626" }}>
-              Total estimated delay: 5 days attributed to DDS Mechanical
+              Total estimated delay: 5 days attributed to ABC Mechanical
             </span>
           </div>
         </div>

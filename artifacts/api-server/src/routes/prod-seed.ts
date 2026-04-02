@@ -496,4 +496,16 @@ router.post("/system/set-super-admin", async (req, res) => {
   }
 });
 
+router.post("/system/rename-dds-mechanical", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid seed key" }); return; }
+  try {
+    await db.execute(sql`INSERT INTO companies (name) VALUES ('DDS Mechanical') ON CONFLICT DO NOTHING`);
+    const result = await db.execute(sql`UPDATE companies SET name = 'ABC Mechanical' WHERE name = 'DDS Mechanical'`);
+    res.json({ success: true, updated: (result as any).rowCount ?? 0 });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Failed" });
+  }
+});
+
 export default router;
