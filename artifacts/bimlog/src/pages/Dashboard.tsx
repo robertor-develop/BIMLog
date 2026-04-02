@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useListProjects, useCreateProject } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -89,6 +89,7 @@ function actionStyle(type: string) {
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export function Dashboard() {
   const { t } = useI18n();
+  const [, setLocation] = useLocation();
   const { data: projects, isLoading, isError, error, refetch } = useListProjects();
   const logout = useAuthStore(s => s.logout);
   const token = useAuthStore(s => s.token);
@@ -251,27 +252,27 @@ export function Dashboard() {
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (projects?.length ?? 0) > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
-              <div className="kpi-card">
+              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
                 <div className="kpi-label">Active Projects</div>
                 <div className="kpi-value">{activeProjects.length}</div>
                 <div className="kpi-sub">{projects?.length ?? 0} total</div>
               </div>
-              <div className="kpi-card">
+              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
                 <div className="kpi-label">Files Processed</div>
                 <div className="kpi-value">{agg.loading ? "…" : (totalFilesReal || totalFiles)}</div>
                 <div className="kpi-sub">Across all projects</div>
               </div>
-              <div className="kpi-card">
+              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(projects && projects.length > 0 ? `/projects/${projects[0].id}/rfis` : "/dashboard")}>
                 <div className="kpi-label">Open RFIs</div>
                 <div className="kpi-value">{agg.loading ? "…" : openRfis.length}</div>
                 <div className="kpi-sub">Across all projects</div>
               </div>
-              <div className="kpi-card">
+              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
                 <div className="kpi-label">Pending Submittals</div>
                 <div className="kpi-value">{agg.loading ? "…" : pendingSubmits.length}</div>
                 <div className="kpi-sub">Awaiting review</div>
               </div>
-              <div className="kpi-card">
+              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
                 <div className="kpi-label">Compliance Rate</div>
                 <div className="kpi-value">{agg.loading ? "…" : `${complianceRate}%`}</div>
                 <div className="kpi-sub">Valid / total files</div>
@@ -366,7 +367,7 @@ export function Dashboard() {
                   const proj = projectMap.get(row.pid);
                   if (!proj) return null;
                   return (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 6, border: `1px solid ${row.color}30`, background: `${row.color}08`, marginBottom: 6 }}>
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 6, border: `1px solid ${row.color}30`, background: `${row.color}08`, marginBottom: 6, cursor: "pointer" }} onClick={() => setLocation(row.href)}>
                       <div style={{ width: 7, height: 7, borderRadius: "50%", background: row.color, flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{proj.name}</div>
@@ -394,7 +395,7 @@ export function Dashboard() {
                       const proj = projectMap.get(rfi.projectId);
                       const days = rfi.dueDate ? Math.ceil((new Date(rfi.dueDate).getTime() - now) / 86400000) : null;
                       return (
-                        <div key={rfi.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A" }}>
+                        <div key={rfi.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A", cursor: "pointer" }} onClick={() => setLocation(`/projects/${rfi.projectId}/rfis`)}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rfi.number} — {rfi.subject}</div>
                             <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{proj?.name} · RFI{days !== null ? ` · ${days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}` : ""}</div>
@@ -407,7 +408,7 @@ export function Dashboard() {
                       const proj = projectMap.get(sub.projectId);
                       const days = sub.dueDate ? Math.ceil((new Date(sub.dueDate).getTime() - now) / 86400000) : null;
                       return (
-                        <div key={sub.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+                        <div key={sub.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", cursor: "pointer" }} onClick={() => setLocation(`/projects/${sub.projectId}/submittals`)}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.number} — {sub.title}</div>
                             <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{proj?.name} · {sub.status.replace(/_/g, " ")}{days !== null ? ` · ${days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}` : ""}</div>
@@ -555,7 +556,7 @@ export function Dashboard() {
                               {entry.userFullName}
                               {entry.userCompanyName ? <span style={{ color: "hsl(var(--muted-foreground))", fontWeight: 400 }}> · {entry.userCompanyName}</span> : null}
                             </div>
-                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", maxWidth: 500, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere" }}>
                               {proj ? <span style={{ fontWeight: 500 }}>{proj.name}</span> : null}
                               {entry.details ? ` — ${entry.details}` : ""}
                             </div>
