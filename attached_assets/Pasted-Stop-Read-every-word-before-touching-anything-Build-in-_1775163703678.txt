@@ -1,0 +1,598 @@
+Stop. Read every word before touching anything.
+Build in exact order. Do not skip steps.
+After every major step run the check and confirm before continuing.
+Do not publish until every step is confirmed.
+
+═══════════════════════════════════════════════════════════════════════
+PART 1 — DATABASE SCHEMA (DO THIS FIRST, EVERYTHING DEPENDS ON IT)
+═══════════════════════════════════════════════════════════════════════
+
+Open the Drizzle schema file and make ALL of these changes in one pass.
+Push to DB once after all changes are made.
+
+─── 1A. UPDATE EXISTING TABLES ───────────────────────────────────────
+
+PROJECTS TABLE — add these columns:
+  entry_type: text default 'fresh_start'
+    values: fresh_start | takeover
+  client_name: text nullable
+  client_company: text nullable
+  location: text nullable
+  contract_value: text nullable
+  start_date: timestamp nullable
+  expected_end_date: timestamp nullable
+  project_type: text nullable
+    values: coordination | design_build | handover | owner_rep | specialty
+
+PROJECT_MEMBERS TABLE — add:
+  permissions_override: jsonb nullable
+  status: text default 'active'
+    values: active | invited | suspended
+
+COMPANIES TABLE — add:
+  industry: text nullable
+  company_type: text nullable
+  is_public_profile: boolean default false
+  profile_description: text nullable
+  verified_projects_count: integer default 0
+
+FILES TABLE — add:
+  is_compliant: boolean default false
+  superseded_by_file_id: integer nullable references files.id
+  source_location: text nullable
+    values: procore | acc | sharepoint | google_drive | local | other
+  is_historical_record: boolean default false
+
+EMAIL_LOG TABLE — add:
+  project_id: integer nullable
+  user_id: integer nullable
+  role_context: text nullable
+
+─── 1B. CREATE NEW TABLES ────────────────────────────────────────────
+
+TABLE: project_directory
+  id: serial primary key
+  project_id: integer not null references projects.id
+  full_name: text not null
+  email: text not null
+  company_name: text nullable
+  role: text not null
+  bimlog_status: text default 'none'
+    values: none | invited | active
+  notes: text nullable
+  added_by_id: integer nullable references users.id
+  linked_user_id: integer nullable references users.id
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+
+TABLE: notifications
+  id: serial primary key
+  user_id: integer not null references users.id
+  project_id: integer nullable references projects.id
+  type: text not null
+    values: overdue | ball_in_court | cvr_flag | naming_violation |
+    invite | superseded | action_item_due | change_order_pending |
+    transmittal_received | meeting_action_due | dispute_filed | general
+  title: text not null
+  message: text not null
+  is_read: boolean default false
+  action_url: text nullable
+  created_at: timestamp default now()
+
+TABLE: transmittals
+  id: serial primary key
+  project_id: integer not null references projects.id
+  number: text not null
+  title: text not null
+  purpose: text nullable
+  sent_by_id: integer not null references users.id
+  sent_to: jsonb nullable
+  status: text default 'draft'
+    values: draft | sent | acknowledged
+  company_logo_url: text nullable
+  ai_draft_used: boolean default false
+  sent_at: timestamp nullable
+  acknowledged_at: timestamp nullable
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+
+TABLE: transmittal_items
+  id: serial primary key
+  transmittal_id: integer not null references transmittals.id
+  file_id: integer nullable references files.id
+  description: text nullable
+  revision: text nullable
+  created_at: timestamp default now()
+
+TABLE: change_orders
+  id: serial primary key
+  project_id: integer not null references projects.id
+  number: text not null
+  title: text not null
+  description: text nullable
+  status: text default 'draft'
+    values: draft | pending_approval | approved | rejected | void
+  initiated_by_id: integer not null references users.id
+  approved_by_id: integer nullable references users.id
+  contract_value_impact: text nullable
+  schedule_impact_days: integer nullable
+  linked_rfi_ids: jsonb nullable
+  linked_submittal_ids: jsonb nullable
+  company_logo_url: text nullable
+  ai_draft_used: boolean default false
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+  approved_at: timestamp nullable
+
+TABLE: change_order_documents
+  id: serial primary key
+  change_order_id: integer not null references change_orders.id
+  file_id: integer nullable references files.id
+  description: text nullable
+  created_at: timestamp default now()
+
+TABLE: meeting_minutes
+  id: serial primary key
+  project_id: integer not null references projects.id
+  title: text not null
+  meeting_date: timestamp not null
+  location: text nullable
+  created_by_id: integer not null references users.id
+  notes: text nullable
+  ai_summary: text nullable
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+
+TABLE: meeting_attendees
+  id: serial primary key
+  meeting_id: integer not null references meeting_minutes.id
+  user_id: integer nullable references users.id
+  external_email: text nullable
+  full_name: text not null
+  company: text nullable
+  role: text nullable
+
+TABLE: action_items
+  id: serial primary key
+  meeting_id: integer nullable references meeting_minutes.id
+  project_id: integer not null references projects.id
+  description: text not null
+  assigned_to_id: integer nullable references users.id
+  assigned_to_external_email: text nullable
+  assigned_to_name: text nullable
+  due_date: timestamp nullable
+  status: text default 'open'
+    values: open | in_progress | completed | cancelled
+  linked_rfi_id: integer nullable
+  linked_submittal_id: integer nullable
+  linked_file_id: integer nullable
+  completed_at: timestamp nullable
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+
+TABLE: project_milestones
+  id: serial primary key
+  project_id: integer not null references projects.id
+  title: text not null
+  due_date: timestamp not null
+  status: text default 'pending'
+    values: pending | in_progress | completed | overdue
+  linked_module: text nullable
+    values: rfi | submittal | transmittal | change_order | action_item | file
+  linked_id: integer nullable
+  created_by_id: integer nullable references users.id
+  created_at: timestamp default now()
+  updated_at: timestamp default now()
+
+─── PUSH ALL SCHEMA CHANGES TO DB NOW ────────────────────────────────
+
+Run: drizzle-kit push
+
+Then run this check:
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public' ORDER BY table_name;
+
+Expected: 32 tables total. If not 32 — stop and fix before continuing.
+
+═══════════════════════════════════════════════════════════════════════
+PART 2 — BACKEND ROUTES
+═══════════════════════════════════════════════════════════════════════
+
+Create these new route files. Register all in routes/index.ts.
+
+─── 2A. project_directory.ts ─────────────────────────────────────────
+
+GET    /projects/:projectId/directory
+POST   /projects/:projectId/directory
+  Body: { full_name, email, company_name, role, notes }
+  Auto-check if email matches existing BIMLog user
+  Set linked_user_id and bimlog_status='active' if found
+PATCH  /projects/:projectId/directory/:entryId
+DELETE /projects/:projectId/directory/:entryId
+POST   /projects/:projectId/directory/:entryId/invite
+  Send BIMLog invitation email via SendGrid
+  Update bimlog_status to 'invited'
+  Create project_invitations record
+  Log to activity_log
+
+─── 2B. notifications.ts ─────────────────────────────────────────────
+
+GET    /notifications
+  Returns all notifications for logged-in user ordered by created_at DESC
+PATCH  /notifications/:id/read
+PATCH  /notifications/read-all
+DELETE /notifications/:id
+
+Create helper function createNotification(userId, projectId, type, title, message, actionUrl)
+Export it and import in rfis.ts, submittals.ts, files.ts
+Call it when: ball_in_court changes, items go overdue, CVR flags created
+
+─── 2C. transmittals.ts ──────────────────────────────────────────────
+
+GET    /projects/:projectId/transmittals
+POST   /projects/:projectId/transmittals
+  Auto-generate number: T-[projectCode]-[4 digit sequence]
+GET    /projects/:projectId/transmittals/:transmittalId
+PATCH  /projects/:projectId/transmittals/:transmittalId
+POST   /projects/:projectId/transmittals/:transmittalId/send
+  Send email via SendGrid to all recipients
+  External recipients get email with read-only link
+  Create notifications for BIMLog users
+POST   /projects/:projectId/transmittals/:transmittalId/acknowledge
+POST   /projects/:projectId/transmittals/:transmittalId/ai-draft
+  Call Claude API — draft purpose from project context and file list
+  Return: { purpose, description }
+GET    /projects/:projectId/transmittals/:transmittalId/export
+  PDF export using PDFKit — same pattern as RFI export
+
+─── 2D. change_orders.ts ─────────────────────────────────────────────
+
+GET    /projects/:projectId/change-orders
+POST   /projects/:projectId/change-orders
+  Auto-generate number: CO-[projectCode]-[4 digit sequence]
+GET    /projects/:projectId/change-orders/:changeOrderId
+  Include linked RFI and submittal details
+PATCH  /projects/:projectId/change-orders/:changeOrderId
+POST   /projects/:projectId/change-orders/:changeOrderId/submit
+POST   /projects/:projectId/change-orders/:changeOrderId/approve
+POST   /projects/:projectId/change-orders/:changeOrderId/reject
+POST   /projects/:projectId/change-orders/:changeOrderId/ai-draft
+  Call Claude API — draft description from linked RFIs and submittals
+  Return: { description, suggested_cost_impact, suggested_schedule_impact }
+GET    /projects/:projectId/change-orders/:changeOrderId/export
+  PDF export using PDFKit
+
+─── 2E. meeting_minutes.ts ───────────────────────────────────────────
+
+GET    /projects/:projectId/meetings
+POST   /projects/:projectId/meetings
+  Body includes attendees array
+GET    /projects/:projectId/meetings/:meetingId
+PATCH  /projects/:projectId/meetings/:meetingId
+POST   /projects/:projectId/meetings/:meetingId/ai-summary
+  Call Claude API — summarize notes, extract action items
+  Return: { summary, action_items:[{description, assigned_to_name,
+  assigned_to_email, due_date}] }
+  Save ai_summary to meeting record
+POST   /projects/:projectId/meetings/:meetingId/action-items
+  Create action items, send notifications to assigned users
+GET    /projects/:projectId/action-items
+  All open action items, include overdue flag
+PATCH  /projects/:projectId/action-items/:itemId
+
+─── 2F. schedule.ts ──────────────────────────────────────────────────
+
+GET    /projects/:projectId/milestones
+POST   /projects/:projectId/milestones
+PATCH  /projects/:projectId/milestones/:milestoneId
+POST   /projects/:projectId/milestones/import
+  Accept Excel or CSV, parse title+due_date columns
+  Return: { imported_count, skipped_count, errors }
+
+─── 2G. search.ts ────────────────────────────────────────────────────
+
+GET    /search?q=[term]&projectId=[optional]
+  Search across: files, rfis, submittals, transmittals, change_orders,
+  meeting_minutes, action_items, users, companies
+  Filter to only items user has access to via project memberships
+  Return grouped: { files:[], rfis:[], submittals:[], people:[], ... }
+  Max 5 results per category
+
+─── 2H. reports.ts ───────────────────────────────────────────────────
+
+Build PDF versions first for ALL report types.
+Word and Excel exports come in a second pass after PDF is confirmed.
+
+GET /projects/:projectId/reports/project-health/pdf
+GET /projects/:projectId/reports/compliance/pdf
+  Query params: ?from=&to=&company=
+GET /projects/:projectId/reports/rfi-aging/pdf
+GET /projects/:projectId/reports/submittal-status/pdf
+GET /projects/:projectId/reports/performance/pdf
+GET /projects/:projectId/reports/dispute/:module/:itemId/pdf
+  module: rfi | submittal | file | transmittal
+  Full audit trail, SHA-256 hash, timestamps, ball in court history
+GET /projects/:projectId/reports/audit-certificate/pdf
+GET /projects/:projectId/reports/meeting-minutes/pdf
+GET /projects/:projectId/reports/change-order-log/pdf
+GET /projects/:projectId/reports/transmittal-log/pdf
+
+All use PDFKit. Professional formatting. Project name in header.
+BIMLog branding in footer.
+
+─── 2I. dashboard.ts ─────────────────────────────────────────────────
+
+GET /dashboard/briefing
+  Queries all open items, overdue items, compliance stats for logged-in user
+  Calls Claude API with this data
+  Prompt: You are BIMLog's intelligence engine. Given this user's project
+  data, write ONE sentence that tells them the most important thing they
+  need to know right now. Be specific with numbers. Be direct.
+  Data: [json of user's stats]
+  Cache result 1 hour per user
+  Return: { briefing: "..." }
+
+─── 2J. UPDATE EXISTING ROUTES ──────────────────────────────────────
+
+In files.ts — after upload completes:
+  Set is_compliant = true if naming validation passed AND
+  content_verification_result != 'mismatch'
+  Otherwise is_compliant = false
+
+Add to files.ts:
+PATCH /projects/:projectId/files/:fileId/supersede
+  Body: { superseded_by_file_id, reason }
+  Set is_superseded = true, superseded_by_file_id on old file
+  Find all RFIs/submittals/transmittals referencing old file
+  createNotification for each affected user
+  Log to activity_log
+
+In rfis.ts and submittals.ts:
+  Import createNotification
+  Call it when ball_in_court changes
+
+─── REGISTER ALL ROUTES IN routes/index.ts ───────────────────────────
+
+Register: project_directory, notifications, transmittals, change_orders,
+meeting_minutes, schedule, search, reports, dashboard routes
+
+═══════════════════════════════════════════════════════════════════════
+PART 3 — FRONTEND
+═══════════════════════════════════════════════════════════════════════
+
+─── 3A. NOTIFICATION BELL — MasterSidebar.tsx ────────────────────────
+
+Add notification bell icon in navbar.
+Query GET /api/notifications every 30 seconds with refetchInterval:30000
+Show unread count badge: red circle, 9+ if over 9
+On click: dropdown with last 20 notifications
+  Each: title, message preview, time ago, read/unread (blue left border)
+  Click notification → navigate to action_url → mark as read
+  "Mark all read" button
+  "View all" link
+
+─── 3B. ADD TABS TO ProjectDetail.tsx ────────────────────────────────
+
+Add after existing tabs:
+  Directory | Transmittals | Change Orders | Meetings | Schedule
+
+Each lazy-loads its component.
+
+─── 3C. DirectoryTab.tsx ─────────────────────────────────────────────
+
+Table: Name | Company | Role | Email | BIMLog Status | Actions
+Status badges: gray External | amber Invited | green Active on BIMLog
+Actions: Invite to BIMLog button (if none) | Edit | Remove
+Add Party modal: Full Name*, Email*, Company, Role, Notes
+Auto-detect if email already has BIMLog account → show "Already on BIMLog"
+EN/ES bilingual.
+
+─── 3D. TransmittalsTab.tsx ──────────────────────────────────────────
+
+Table: Number | Title | Sent To | Status | Date | Actions
+Status badges: gray draft | blue sent | green acknowledged
+New Transmittal form:
+  Section 1: Title*, Purpose (with AI Draft button), Logo upload
+  Section 2: Send To (multi-select from Project Directory + manual email)
+  Section 3: Items (files from project + revision + description)
+AI Draft button → POST .../ai-draft → fills Purpose field
+Actions: Save Draft | Send
+Detail view: all fields + status timeline + Export PDF + Acknowledge Receipt
+EN/ES bilingual.
+
+─── 3E. ChangeOrdersTab.tsx ──────────────────────────────────────────
+
+Table: Number | Title | Status | Value Impact | Schedule Impact | Date | Actions
+Status badges: gray draft | amber pending | green approved | red rejected
+New CO form:
+  Section 1: Title*, Description (with AI Draft button), Logo upload
+  Section 2: Contract Value Impact, Schedule Impact Days
+  Section 3: Link RFIs (multi-select), Link Submittals (multi-select)
+  Section 4: Supporting documents
+AI Draft button → fills description from linked items
+Actions: Save Draft | Submit for Approval
+Detail view: all fields + linked items as clickable chips + 
+  Approve/Reject buttons (admin only) + Export PDF
+EN/ES bilingual.
+
+─── 3F. MeetingMinutesTab.tsx ────────────────────────────────────────
+
+Two panels: Meetings list (left) | Open Action Items (right)
+Meetings: date, title, attendee count, action item count
+  Color: green=all closed | amber=some open | red=overdue
+Action Items panel: Description | Assigned To | Due Date | Status | Linked To
+  Overdue = red highlight
+  One-click status: Open → In Progress → Completed
+
+New Meeting form:
+  Title*, Date*, Location
+  Attendees: search project directory or add external
+  Notes textarea
+  AI Summarize button → POST .../ai-summary
+    Shows summary preview + extracted action items
+    User reviews/edits each item before saving
+  Save Meeting & Create Action Items button
+
+EN/ES bilingual.
+
+─── 3G. ScheduleTab.tsx ──────────────────────────────────────────────
+
+Toggle: List view | Gantt view
+List: Title | Due Date | Status | Linked To | Actions
+  Status badges + overdue red highlight
+Gantt: simple CSS horizontal bars, color by status, read only
+Import button: upload xlsx/csv, column mapping, preview, confirm
+Add Milestone form: Title*, Due Date*, Link to module
+EN/ES bilingual.
+
+─── 3H. FilesTab.tsx — SUPERSEDE FLOW ───────────────────────────────
+
+Add Supersede button on each file (admin/write only)
+Modal flow:
+  Step 1: Select replacement file (dropdown of project files)
+  Step 2: Enter reason (required)
+  Step 3: Confirmation with count of affected items
+  Confirm → PATCH .../supersede
+After supersede: old file shows red SUPERSEDED badge
+  New file shows "Supersedes: [old name]" link
+
+─── 3I. ReportsTab.tsx — FULL REBUILD ───────────────────────────────
+
+Two columns: report type selector (left) | options + export (right)
+Report types: Project Health | Compliance | RFI Aging | Submittal Status |
+  Performance | Dispute Report | Audit Certificate | Meeting Minutes |
+  Change Order Log | Transmittal Log
+Each type: description + filters + Export PDF button
+  (Word and Excel buttons disabled with "Coming soon" until PDF confirmed)
+Dispute Report: extra step — select module + specific item
+Loading spinner during export. Specific error messages on failure.
+EN/ES bilingual.
+
+─── 3J. GLOBAL SEARCH — MasterSidebar.tsx ───────────────────────────
+
+Search bar at top of sidebar
+Activate on click or Cmd+K / Ctrl+K
+Debounced 300ms → GET /api/search?q=[term]
+Results dropdown: grouped by type with icons
+  Each: icon + name + project name, max 5 per category
+Keyboard navigation: arrows + enter, Escape to close
+EN/ES bilingual.
+
+─── 3K. OnboardingFlow.tsx ───────────────────────────────────────────
+
+Show only on first login — track with localStorage 'bimlog_onboarding_[userId]'
+
+Flow A (invited to project):
+  Step 1: Welcome + project name + role + who invited them
+  Step 2: What your role means (3 role-specific bullets)
+  Step 3: Your 3 things to do right now (dynamic, clickable)
+  
+Flow B (new account, no project yet):
+  Step 1: Welcome
+  Step 2: Create first project (embedded form)
+  Step 3: Set up naming convention link
+  Step 4: Invite first team member
+
+Both: progress bar, Skip button, minimal clean design.
+
+─── 3L. Dashboard.tsx — SMART REBUILD ───────────────────────────────
+
+TOP: Brain Daily Briefing bar
+  GET /api/dashboard/briefing → AI generated sentence
+  Skeleton loader while generating, refresh icon
+
+STAT CARDS ROW (5 cards, all clickable):
+  Active Projects | Files Processed | Open RFIs | 
+  Pending Submittals | Compliance Rate
+
+NEEDS ATTENTION:
+  Top 5 items needing user's action across all projects
+  Icon + description + project + overdue duration
+  All clickable
+
+YOUR PROJECTS grid:
+  Card per project with role badge + health color
+  Stats depend on role (owner sees different stats than sub)
+  All stats clickable
+
+RECENT ACTIVITY: last 20 entries, role-filtered
+
+TOP NAMING VIOLATORS: only for admin/GC/coordinator roles
+  Only confirmed violations
+
+─── 3M. TotalControl.tsx — MASTER VIEW REBUILD ──────────────────────
+
+Only for is_super_admin = true users.
+
+Layer 1 — Platform Health bar (full width top):
+  Total users | projects | files | RFIs | submittals | system status
+  All clickable → admin panel
+
+Layer 2 — Company Performance panel:
+  Super admin's company aggregate stats
+
+Layer 3 — Active Projects grid:
+  All projects, health score, compliance, open items
+  Color coded, all clickable
+
+Layer 4 — Brain Daily Brief:
+  Same AI briefing with platform-level context
+
+═══════════════════════════════════════════════════════════════════════
+PART 4 — FINAL CHECKS AFTER BUILD
+═══════════════════════════════════════════════════════════════════════
+
+Check 1:
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public' ORDER BY table_name;
+Expected: 32 tables
+
+Check 2:
+grep -n "directory\|notifications\|transmittals\|change.orders\|meeting\|schedule\|reports\|search\|dashboard" \
+artifacts/api-server/src/routes/index.ts | head -30
+
+Check 3:
+find artifacts/bimlog/src/pages/project -name "*.tsx" | sort
+
+Check 4:
+grep -n "notification\|bell\|unread" \
+artifacts/bimlog/src/components/layout/MasterSidebar.tsx | head -10
+
+Check 5:
+grep -n "supersede" \
+artifacts/api-server/src/routes/files.ts | head -5
+
+Check 6:
+grep -n "is_compliant" \
+artifacts/api-server/src/routes/files.ts | head -10
+
+Check 7:
+grep -n "briefing" \
+artifacts/api-server/src/routes/index.ts | head -5
+
+Check 8:
+grep -n "createNotification" \
+artifacts/api-server/src/routes/rfis.ts | head -5
+
+Rebuild frontend and backend. Restart API server. Publish.
+Paste all 8 check results. Nothing else.
+
+═══════════════════════════════════════════════════════════════════════
+CRITICAL RULES
+═══════════════════════════════════════════════════════════════════════
+
+1. Do not break RFIs, Submittals, Files, Convention Builder,
+   Analytics, Activity Log, Team, Profile, Admin Panel.
+
+2. All new UI is bilingual EN/ES.
+
+3. Every number on every dashboard is clickable.
+
+4. PDF exports only in this pass. Word and Excel come next.
+
+5. Every new action logs to activity_log.
+
+6. Use createNotification helper for all notification events.
+
+7. Role filtering on every query via requireProjectMember()
+   and requirePermission() middleware.

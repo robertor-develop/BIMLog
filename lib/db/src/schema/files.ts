@@ -35,6 +35,10 @@ export const filesTable = pgTable("files", {
   cvrReminderSentAt: timestamp("cvr_reminder_sent_at"),
   isSuperseded: boolean("is_superseded").default(false).notNull(),
   userConfirmedNonCompliant: boolean("user_confirmed_non_compliant").default(false).notNull(),
+  isCompliant: boolean("is_compliant").default(false).notNull(),
+  supersededByFileId: integer("superseded_by_file_id").references((): AnyPgColumn => filesTable.id),
+  sourceLocation: text("source_location"),
+  isHistoricalRecord: boolean("is_historical_record").default(false).notNull(),
   conventionVersion: text("convention_version"),
   rejectionDetails: json("rejection_details").$type<Array<{ field: string; message: string; expected?: string[]; received: string }>>(),
 

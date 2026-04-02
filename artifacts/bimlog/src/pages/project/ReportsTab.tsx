@@ -63,8 +63,22 @@ function CvrBadge({ result }: { result: string }) {
   );
 }
 
+const PDF_REPORTS = [
+  { key: "project-health",    labelEn: "Project Health",       labelEs: "Salud del Proyecto",      icon: "💚" },
+  { key: "compliance",        labelEn: "Compliance Report",    labelEs: "Cumplimiento",             icon: "✅" },
+  { key: "rfi-aging",         labelEn: "RFI Aging",            labelEs: "Antigüedad de RFIs",       icon: "⏳" },
+  { key: "submittal-status",  labelEn: "Submittal Status",     labelEs: "Estado de Submittals",     icon: "📋" },
+  { key: "performance",       labelEn: "Team Performance",     labelEs: "Rendimiento del Equipo",   icon: "📊" },
+  { key: "audit-certificate", labelEn: "Audit Certificate",    labelEs: "Certificado de Auditoría", icon: "🏅" },
+  { key: "meeting-minutes",   labelEn: "Meeting Minutes Log",  labelEs: "Log de Actas",             icon: "📝" },
+  { key: "change-order-log",  labelEn: "Change Order Log",     labelEs: "Log de Órdenes de Cambio", icon: "🔄" },
+  { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",     icon: "📨" },
+  { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",     icon: "🔍" },
+];
+
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const tl = (en: string, es: string) => lang === "es" ? es : en;
   const [report, setReport] = useState<CvrReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,8 +138,45 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
     background: "hsl(var(--card))",
   };
 
+  const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+
   return (
     <div>
+      {/* PDF Reports section */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 700, fontSize: 16, color: "hsl(var(--foreground))" }}>
+            {tl("Project PDF Reports", "Reportes PDF del Proyecto")}
+          </div>
+          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
+            {tl("Download any report as a professionally formatted PDF", "Descarga cualquier reporte como PDF con formato profesional")}
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+          {PDF_REPORTS.map(r => (
+            <button
+              key={r.key}
+              onClick={() => window.open(`/api/v1/projects/${projectId}/reports/${r.key}/pdf?token=${token}`, "_blank")}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+                border: "1px solid hsl(var(--border))", borderRadius: 9,
+                background: "hsl(var(--card))", cursor: "pointer",
+                fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))",
+                textAlign: "left", transition: "border-color 0.15s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = "#2563EB")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "hsl(var(--border))")}
+            >
+              <span style={{ fontSize: 20 }}>{r.icon}</span>
+              <div>
+                <div>{tl(r.labelEn, r.labelEs)}</div>
+                <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>PDF</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="section-header" style={{ marginBottom: 20 }}>
         <div>
           <div className="section-title" style={{ fontSize: 16 }}>CVR Reports</div>

@@ -1,0 +1,215 @@
+import { Router } from "express";
+import { db } from "@workspace/db";
+import {
+  changeOrdersTable, changeOrderDocumentsTable, activityLogTable,
+  projectsTable, rfisTable, submittalsTable,
+} from "@workspace/db/schema";
+import { eq, and, desc, inArray } from "drizzle-orm";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { createNotification } from "./notifications";
+import Anthropic from "@anthropic-ai/sdk";
+import PDFDocument from "pdfkit";
+
+const router: Router = Router();
+const anthropic = new Anthropic();
+
+async function nextCONumber(projectId: number, projectCode: string): Promise<string> {
+  const existing = await db.select({ id: changeOrdersTable.id })
+    .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
+  const seq = String(existing.length + 1).padStart(4, "0");
+  return `CO-${projectCode}-${seq}`;
+}
+
+// ── GET /projects/:projectId/change-orders ────────────────────────────────────
+router.get("/projects/:projectId/change-orders", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const rows = await db.select().from(changeOrdersTable)
+      .where(eq(changeOrdersTable.projectId, projectId))
+      .orderBy(desc(changeOrdersTable.createdAt));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── POST /projects/:projectId/change-orders ───────────────────────────────────
+router.post("/projects/:projectId/change-orders", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const body = req.body as {
+    title: string; description?: string; contract_value_impact?: string;
+    schedule_impact_days?: number; linked_rfi_ids?: number[]; linked_submittal_ids?: number[];
+  };
+  if (!body.title) { res.status(400).json({ error: "title required" }); return; }
+  try {
+    const project = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const number = await nextCONumber(projectId, project[0]?.code ?? "PRJ");
+
+    const [co] = await db.insert(changeOrdersTable).values({
+      projectId, number, title: body.title,
+      description: body.description ?? null,
+      status: "draft",
+      initiatedById: req.user!.userId,
+      contractValueImpact: body.contract_value_impact ?? null,
+      scheduleImpactDays: body.schedule_impact_days ?? null,
+      linkedRfiIds: body.linked_rfi_ids ?? null,
+      linkedSubmittalIds: body.linked_submittal_ids ?? null,
+    }).returning();
+
+    await db.insert(activityLogTable).values({
+      projectId, userId: req.user!.userId,
+      userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+      actionType: "create", entityType: "change_order", entityId: co.id,
+      fileNameBefore: null, fileNameAfter: null,
+      details: `Created change order ${number}: ${body.title}`,
+    });
+    res.status(201).json(co);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── GET /projects/:projectId/change-orders/:changeOrderId ─────────────────────
+router.get("/projects/:projectId/change-orders/:changeOrderId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const coId = Number(req.params.changeOrderId);
+  try {
+    const [co] = await db.select().from(changeOrdersTable)
+      .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)));
+    if (!co) { res.status(404).json({ error: "Not found" }); return; }
+
+    const linkedRfiIds = (co.linkedRfiIds as number[] | null) ?? [];
+    const linkedSubIds = (co.linkedSubmittalIds as number[] | null) ?? [];
+    const rfis = linkedRfiIds.length ? await db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject }).from(rfisTable).where(inArray(rfisTable.id, linkedRfiIds)) : [];
+    const subs = linkedSubIds.length ? await db.select({ id: submittalsTable.id, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(inArray(submittalsTable.id, linkedSubIds)) : [];
+    const docs = await db.select().from(changeOrderDocumentsTable).where(eq(changeOrderDocumentsTable.changeOrderId, coId));
+
+    res.json({ ...co, linkedRfis: rfis, linkedSubmittals: subs, documents: docs });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── PATCH /projects/:projectId/change-orders/:changeOrderId ───────────────────
+router.patch("/projects/:projectId/change-orders/:changeOrderId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const coId = Number(req.params.changeOrderId);
+  const body = req.body as Partial<{
+    title: string; description: string; contract_value_impact: string;
+    schedule_impact_days: number; linked_rfi_ids: number[]; linked_submittal_ids: number[];
+  }>;
+  try {
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.title !== undefined)               updates.title              = body.title;
+    if (body.description !== undefined)         updates.description        = body.description;
+    if (body.contract_value_impact !== undefined) updates.contractValueImpact = body.contract_value_impact;
+    if (body.schedule_impact_days !== undefined)  updates.scheduleImpactDays = body.schedule_impact_days;
+    if (body.linked_rfi_ids !== undefined)        updates.linkedRfiIds       = body.linked_rfi_ids;
+    if (body.linked_submittal_ids !== undefined)  updates.linkedSubmittalIds = body.linked_submittal_ids;
+    const [updated] = await db.update(changeOrdersTable).set(updates as any)
+      .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId))).returning();
+    if (!updated) { res.status(404).json({ error: "Not found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── POST submit / approve / reject ────────────────────────────────────────────
+for (const action of ["submit", "approve", "reject"] as const) {
+  const statusMap = { submit: "pending_approval", approve: "approved", reject: "rejected" } as const;
+  router.post(`/projects/:projectId/change-orders/:changeOrderId/${action}`, authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const coId = Number(req.params.changeOrderId);
+    try {
+      const updates: Record<string, unknown> = { status: statusMap[action], updatedAt: new Date() };
+      if (action === "approve") { updates.approvedById = req.user!.userId; updates.approvedAt = new Date(); }
+      await db.update(changeOrdersTable).set(updates as any)
+        .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)));
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: action, entityType: "change_order", entityId: coId,
+        fileNameBefore: null, fileNameAfter: null,
+        details: `Change order ${action}ed`,
+      });
+      res.json({ ok: true, status: statusMap[action] });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+    }
+  });
+}
+
+// ── POST /projects/:projectId/change-orders/:changeOrderId/ai-draft ───────────
+router.post("/projects/:projectId/change-orders/:changeOrderId/ai-draft", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const coId = Number(req.params.changeOrderId);
+  try {
+    const [co] = await db.select().from(changeOrdersTable)
+      .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)));
+    if (!co) { res.status(404).json({ error: "Not found" }); return; }
+
+    const linkedRfiIds = (co.linkedRfiIds as number[] | null) ?? [];
+    const linkedSubIds = (co.linkedSubmittalIds as number[] | null) ?? [];
+    const rfis = linkedRfiIds.length ? await db.select({ number: rfisTable.number, subject: rfisTable.subject, question: rfisTable.question }).from(rfisTable).where(inArray(rfisTable.id, linkedRfiIds)) : [];
+    const subs = linkedSubIds.length ? await db.select({ number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(inArray(submittalsTable.id, linkedSubIds)) : [];
+
+    const prompt = `You are a construction change order specialist. Draft a professional description and cost/schedule impact for this change order.
+Title: ${co.title}
+Linked RFIs: ${rfis.map(r => `${r.number}: ${r.subject}`).join(", ") || "none"}
+Linked Submittals: ${subs.map(s => `${s.number}: ${s.title}`).join(", ") || "none"}
+Return JSON only: { "description": "...", "suggested_cost_impact": "...", "suggested_schedule_impact": "..." }`;
+
+    const msg = await anthropic.messages.create({
+      model: "claude-opus-4-5", max_tokens: 400,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+    const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+    await db.update(changeOrdersTable).set({ aiDraftUsed: true, updatedAt: new Date() }).where(eq(changeOrdersTable.id, coId));
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── GET /projects/:projectId/change-orders/:changeOrderId/export ──────────────
+router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const coId = Number(req.params.changeOrderId);
+  try {
+    const [co] = await db.select().from(changeOrdersTable)
+      .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)));
+    if (!co) { res.status(404).json({ error: "Not found" }); return; }
+    const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+
+    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="co-${co.number}.pdf"`);
+    doc.pipe(res);
+
+    doc.fontSize(18).font("Helvetica-Bold").text("CHANGE ORDER", { align: "center" });
+    doc.moveDown(0.5);
+    doc.fontSize(11).font("Helvetica").text(`Project: ${project[0]?.name ?? ""} (${project[0]?.code ?? ""})`, { align: "center" });
+    doc.moveDown();
+
+    const field = (label: string, value: string) => {
+      doc.fontSize(9).font("Helvetica-Bold").text(label + ": ", { continued: true });
+      doc.font("Helvetica").text(value);
+    };
+    field("Number", co.number);
+    field("Title", co.title);
+    field("Status", co.status.replace(/_/g, " ").toUpperCase());
+    if (co.contractValueImpact) field("Contract Value Impact", co.contractValueImpact);
+    if (co.scheduleImpactDays) field("Schedule Impact", `${co.scheduleImpactDays} days`);
+    if (co.description) { doc.moveDown(0.5); doc.fontSize(9).font("Helvetica-Bold").text("Description:"); doc.font("Helvetica").text(co.description); }
+
+    doc.moveDown(2);
+    doc.fontSize(8).font("Helvetica").fillColor("#666").text("Generated by BIMLog by IgniteSmart", { align: "center" });
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+export default router;

@@ -14,6 +14,15 @@ import documentsRouter from "./documents";
 import adminRouter from "./admin";
 import contactRouter from "./contact";
 import prodSeedRouter from "./prod-seed";
+import notificationsRouter from "./notifications";
+import directoryRouter from "./project_directory";
+import transmittalsRouter from "./transmittals";
+import changeOrdersRouter from "./change_orders";
+import meetingMinutesRouter from "./meeting_minutes";
+import scheduleRouter from "./schedule";
+import searchRouter from "./search";
+import reportsRouter from "./reports";
+import dashboardBriefingRouter from "./dashboard_briefing";
 
 const router: IRouter = Router();
 
@@ -32,5 +41,14 @@ router.use(membersRouter);
 router.use(adminRouter);
 router.use(contactRouter);
 router.use(prodSeedRouter);
+router.use(notificationsRouter);
+router.use(directoryRouter);
+router.use(transmittalsRouter);
+router.use(changeOrdersRouter);
+router.use(meetingMinutesRouter);
+router.use(scheduleRouter);
+router.use(searchRouter);
+router.use(reportsRouter);
+router.use(dashboardBriefingRouter);
 
 export default router;

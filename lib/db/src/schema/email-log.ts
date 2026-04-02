@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 export const emailLogTable = pgTable("email_log", {
   id: serial("id").primaryKey(),
@@ -8,6 +8,9 @@ export const emailLogTable = pgTable("email_log", {
   status: text("status").notNull().default("sent"),
   errorMessage: text("error_message"),
   sentAt: timestamp("sent_at").defaultNow().notNull(),
+  projectId: integer("project_id"),
+  userId: integer("user_id"),
+  roleContext: text("role_context"),
 });
 
 export type EmailLogEntry = typeof emailLogTable.$inferSelect;

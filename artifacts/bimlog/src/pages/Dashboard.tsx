@@ -87,6 +87,71 @@ function actionStyle(type: string) {
   return ACTION_COLORS[key];
 }
 
+// ── AI Briefing Card ──────────────────────────────────────────────────────────
+function AiBriefingCard({ token }: { token?: string }) {
+  const { lang } = useI18n();
+  const tl = (en: string, es: string) => lang === "es" ? es : en;
+  const [briefing, setBriefing] = useState<{ summary: string; criticalItems: string[]; todaysDate: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [shown, setShown] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const loadBriefing = async () => {
+    if (!token || shown) return;
+    setLoading(true); setShown(true);
+    try {
+      const r = await fetch("/api/v1/dashboard/briefing", { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) { setBriefing(await r.json()); setOpen(true); }
+    } finally { setLoading(false); }
+  };
+
+  if (!token) return null;
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      {!open && !loading && (
+        <button
+          onClick={loadBriefing}
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            width: "100%", padding: "10px 16px", borderRadius: 9,
+            background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)",
+            border: "1px solid #BFDBFE", cursor: "pointer", textAlign: "left",
+            fontSize: 12, color: "#1D4ED8", fontWeight: 600,
+          }}
+        >
+          <span style={{ fontSize: 18 }}>✨</span>
+          {tl("Get AI Morning Briefing — smart summary of what needs your attention today", "Obtener Briefing IA — resumen inteligente de lo que necesita atención hoy")}
+        </button>
+      )}
+      {loading && (
+        <div style={{ padding: "10px 16px", borderRadius: 9, background: "#EFF6FF", border: "1px solid #BFDBFE", fontSize: 12, color: "#2563EB" }}>
+          ✨ {tl("Generating AI briefing…", "Generando briefing IA…")}
+        </div>
+      )}
+      {open && briefing && (
+        <div style={{ padding: 16, borderRadius: 9, background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>✨ {tl("AI Briefing", "Briefing IA")}</span>
+              <span style={{ fontSize: 10, color: "#6B7280", marginLeft: 8 }}>{briefing.todaysDate}</span>
+            </div>
+            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0 }}>✕</button>
+          </div>
+          <p style={{ fontSize: 12, color: "#374151", margin: "0 0 10px", lineHeight: 1.6 }}>{briefing.summary}</p>
+          {briefing.criticalItems?.length > 0 && (
+            <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
+              {briefing.criticalItems.map((item, i) => (
+                <li key={i} style={{ fontSize: 12, color: "#374151", marginBottom: 3 }}>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export function Dashboard() {
   const { t } = useI18n();
@@ -260,6 +325,9 @@ export function Dashboard() {
               {projects?.length ?? 0} project{(projects?.length ?? 0) !== 1 ? "s" : ""} · {totalFiles} files processed
             </p>
           </div>
+
+          {/* AI Briefing banner */}
+          <AiBriefingCard token={token} />
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (projects?.length ?? 0) > 0 && (

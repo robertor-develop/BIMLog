@@ -833,6 +833,7 @@ router.post(
           version: 1,
           parentFileId: null,
           status: "rejected",
+          isCompliant: false,
           uploadedById: req.user!.userId,
           fileHash,
           fileSizeBytes: actualFileSize,
@@ -942,6 +943,7 @@ router.post(
         version: newVersion,
         parentFileId,
         status: defaultFileStatus,
+        isCompliant: defaultFileStatus !== "rejected",
         uploadedById: req.user!.userId,
         fileHash,
         fileSizeBytes: actualFileSize,
@@ -956,14 +958,14 @@ router.post(
       // ── Auto-supersede all previous versions in the same document family ────
       if (newVersion > 1) {
         await db.update(filesTable)
-          .set({ isSuperseded: true, updatedAt: new Date() })
+          .set({ isSuperseded: true, supersededByFileId: file.id, updatedAt: new Date() })
           .where(and(
             eq(filesTable.projectId, projectId),
             eq(filesTable.parentFileId, parentFileId!),
           ));
         if (parentFileId) {
           await db.update(filesTable)
-            .set({ isSuperseded: true, updatedAt: new Date() })
+            .set({ isSuperseded: true, supersededByFileId: file.id, updatedAt: new Date() })
             .where(and(
               eq(filesTable.projectId, projectId),
               eq(filesTable.id, parentFileId),
@@ -1323,6 +1325,33 @@ router.get("/cvr-health", authMiddleware, async (req, res) => {
     else if (totalFlagged > 0) healthStatus = "amber";
 
     res.json({ totalFilesProcessed, totalFlagged, totalPendingReview, totalAdminApproved, totalAdminRejected, healthStatus });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ─── POST /:projectId/files/:fileId/supersede ─────────────────────────────────
+router.post("/:projectId/files/:fileId/supersede", authMiddleware, async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const fileId    = Number(req.params.fileId);
+  const { new_file_id } = req.body as { new_file_id: number };
+  if (isNaN(projectId) || isNaN(fileId) || !new_file_id) {
+    res.status(400).json({ error: "projectId, fileId, and new_file_id required" }); return;
+  }
+  try {
+    const [updated] = await db.update(filesTable)
+      .set({ isSuperseded: true, supersededByFileId: new_file_id, updatedAt: new Date() })
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "File not found" }); return; }
+    await db.insert(activityLogTable).values({
+      projectId, userId: req.user!.userId,
+      userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+      actionType: "supersede", entityType: "file", entityId: fileId,
+      fileNameBefore: updated.fileName, fileNameAfter: null,
+      details: `File manually superseded by file ID ${new_file_id}`,
+    });
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }

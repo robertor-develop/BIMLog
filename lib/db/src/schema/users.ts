@@ -10,6 +10,11 @@ export const companiesTable = pgTable("companies", {
   address: text("address"),
   phone: text("phone"),
   companyLogoUrl: text("company_logo_url"),
+  industry: text("industry"),
+  companyType: text("company_type"),
+  isPublicProfile: boolean("is_public_profile").default(false).notNull(),
+  profileDescription: text("profile_description"),
+  verifiedProjectsCount: integer("verified_projects_count").default(0).notNull(),
 });
 
 export const usersTable = pgTable("users", {

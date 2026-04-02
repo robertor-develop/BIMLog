@@ -5,7 +5,8 @@ import { useAuthStore } from "@/store/auth";
 import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
-  Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2
+  Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
+  BookOpen, Send, RefreshCw, CalendarDays
 } from "lucide-react";
 
 interface SidebarProps {
@@ -19,16 +20,21 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: "analytics",    label: "Analytics",                  icon: BarChart2,     section: "Project" },
-  { id: "files",        label: "project.tabs.files",          icon: FolderOpen,    section: "Project" },
-  { id: "rfis",         label: "project.tabs.rfis",           icon: MessageSquare, section: "Project" },
-  { id: "submittals",   label: "project.tabs.submittals",     icon: FileCheck,     section: "Project" },
-  { id: "activity",     label: "project.tabs.activity",       icon: Activity,      section: "Project" },
-  { id: "team",         label: "project.tabs.team",           icon: Users,         section: "Project" },
-  { id: "generator",    label: "project.tabs.generator",      icon: Wand2,         section: "Tools" },
-  { id: "convention",   label: "project.tabs.convention",     icon: Settings2,     section: "Tools", adminOnly: true },
-  { id: "reports",      label: "CVR Reports",                 icon: FileBarChart2, section: "Tools", adminOnly: true },
-  { id: "integrations", label: "Integrations",                icon: Puzzle,        section: "Tools" },
+  { id: "analytics",     label: "Analytics",                  icon: BarChart2,     section: "Project" },
+  { id: "files",         label: "project.tabs.files",          icon: FolderOpen,    section: "Project" },
+  { id: "rfis",          label: "project.tabs.rfis",           icon: MessageSquare, section: "Project" },
+  { id: "submittals",    label: "project.tabs.submittals",     icon: FileCheck,     section: "Project" },
+  { id: "transmittals",  label: "Transmittals",                icon: Send,          section: "Project" },
+  { id: "change-orders", label: "Change Orders",               icon: RefreshCw,     section: "Project" },
+  { id: "meetings",      label: "Meetings",                    icon: BookOpen,      section: "Project" },
+  { id: "schedule",      label: "Schedule",                    icon: CalendarDays,  section: "Project" },
+  { id: "directory",     label: "Directory",                   icon: Users,         section: "Project" },
+  { id: "activity",      label: "project.tabs.activity",       icon: Activity,      section: "Project" },
+  { id: "team",          label: "project.tabs.team",           icon: Users,         section: "Admin" },
+  { id: "generator",     label: "project.tabs.generator",      icon: Wand2,         section: "Tools" },
+  { id: "convention",    label: "project.tabs.convention",     icon: Settings2,     section: "Tools", adminOnly: true },
+  { id: "reports",       label: "Reports & PDF",               icon: FileBarChart2, section: "Tools" },
+  { id: "integrations",  label: "Integrations",                icon: Puzzle,        section: "Tools" },
 ];
 
 const PLATFORM_ITEMS = [
@@ -92,7 +98,7 @@ export function ProjectSidebar({
     try { return t(label as Parameters<typeof t>[0]); } catch { return label; }
   };
 
-  const sections = ["Project", "Tools"];
+  const sections = ["Project", "Admin", "Tools"];
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
 
   const sidebarBtnStyle: React.CSSProperties = {
