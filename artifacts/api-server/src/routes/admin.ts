@@ -171,8 +171,10 @@ router.get("/admin/users", async (req, res) => {
 
     let scopedUserIds: number[] | null = null;
     if (scope === "mine") {
+      console.log("[admin/users scope=mine] userId:", req.user!.userId, "role check for project_admin");
       const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
         .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+      console.log("[admin/users scope=mine] myProjectIds:", myProjectIds);
       if (myProjectIds.length === 0) { res.json({ data: [], total: 0, page: 1, pages: 0 }); return; }
       scopedUserIds = (await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
         .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)
