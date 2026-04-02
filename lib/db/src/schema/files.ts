@@ -34,6 +34,7 @@ export const filesTable = pgTable("files", {
   cvrAdminActionBy: integer("cvr_admin_action_by"),
   cvrReminderSentAt: timestamp("cvr_reminder_sent_at"),
   isSuperseded: boolean("is_superseded").default(false).notNull(),
+  userConfirmedNonCompliant: boolean("user_confirmed_non_compliant").default(false).notNull(),
   conventionVersion: text("convention_version"),
   rejectionDetails: json("rejection_details").$type<Array<{ field: string; message: string; expected?: string[]; received: string }>>(),
 

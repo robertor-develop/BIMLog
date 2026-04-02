@@ -1277,6 +1277,23 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
   }
 });
 
+// ─── PATCH /:projectId/files/:fileId/confirm-violation ───────────────────────
+// Called when user clicks "Continue Anyway" on the naming warning modal.
+// Sets user_confirmed_non_compliant = true so the file counts as a real violation.
+router.patch("/:projectId/files/:fileId/confirm-violation", authMiddleware, async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const fileId    = Number(req.params.fileId);
+  if (isNaN(projectId) || isNaN(fileId)) { res.status(400).json({ error: "Invalid id" }); return; }
+  try {
+    await db.update(filesTable)
+      .set({ userConfirmedNonCompliant: true, updatedAt: new Date() })
+      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId)));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 // ─── GET /cvr-health ──────────────────────────────────────────────────────────
 router.get("/cvr-health", authMiddleware, async (req, res) => {
   try {
@@ -1303,6 +1320,7 @@ router.get("/cvr-health", authMiddleware, async (req, res) => {
     let healthStatus: "green" | "amber" | "red" = "green";
     if (hasOverdue) healthStatus = "red";
     else if (totalPendingReview > 0) healthStatus = "amber";
+    else if (totalFlagged > 0) healthStatus = "amber";
 
     res.json({ totalFilesProcessed, totalFlagged, totalPendingReview, totalAdminApproved, totalAdminRejected, healthStatus });
   } catch (err) {

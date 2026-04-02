@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { StatCard } from "@/components/dashboard/StatCard";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -164,11 +165,22 @@ export function Dashboard() {
   // ── Derived aggregate stats ────────────────────────────────────────────────
   const projectMap = new Map((projects ?? []).map(p => [p.id, p]));
 
-  const openRfis       = agg.rfis.filter(r => r.status !== "closed");
-  const pendingSubmits = agg.submittals.filter(s => s.status === "pending");
-  const validFiles     = agg.files.filter(f => f.status === "valid").length;
-  const totalFilesReal = agg.files.length;
-  const complianceRate = totalFilesReal > 0 ? Math.round((validFiles / totalFilesReal) * 100) : 0;
+  const openRfis        = agg.rfis.filter(r => r.status !== "closed");
+  const pendingSubmittals = agg.submittals.filter(s => ["pending", "under_review"].includes(s.status));
+  const pendingSubmits  = pendingSubmittals;
+  // FIX 4: compliance rate only counts completed uploads (valid + rejected), not in-progress
+  const completedFiles  = agg.files.filter(f => f.status === "valid" || f.status === "rejected");
+  const compliantFiles  = completedFiles.filter(f => f.status === "valid");
+  const totalFilesReal  = agg.files.length;
+  const complianceRate  = completedFiles.length > 0
+    ? Math.round((compliantFiles.length / completedFiles.length) * 100)
+    : null;
+  // FIX 1: count confirmed violations only (user clicked Continue Anyway past naming warning)
+  const confirmedViolations = agg.files.filter(f => (f as any).userConfirmedNonCompliant === true);
+  // FIX 6: files needing attention = non-compliant or CVR-flagged completed files
+  const filesNeedingAttention = agg.files.filter(f =>
+    (f.status === "rejected" || (f as any).cvrStatus === "flagged") && f.status !== "in_progress"
+  );
 
   // ── Needs Attention ────────────────────────────────────────────────────────
   const now = Date.now();
@@ -209,10 +221,10 @@ export function Dashboard() {
     .slice(0, 15);
 
   // ── Top Naming Violators ───────────────────────────────────────────────────
-  const rejected = agg.files.filter(f => f.status === "rejected");
+  // FIX 2: only count confirmed violations (user clicked Continue Anyway on naming warning)
   const violatorMap = new Map<string, { count: number; pids: Set<number> }>();
-  rejected.forEach(f => {
-    const co = f.uploadedByCompany || "Unknown";
+  confirmedViolations.forEach(f => {
+    const co = (f as any).uploadedByCompany || "Unknown";
     if (!violatorMap.has(co)) violatorMap.set(co, { count: 0, pids: new Set() });
     const v = violatorMap.get(co)!;
     v.count++;
@@ -252,31 +264,46 @@ export function Dashboard() {
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (projects?.length ?? 0) > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
-              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
-                <div className="kpi-label">Active Projects</div>
-                <div className="kpi-value">{activeProjects.length}</div>
-                <div className="kpi-sub">{projects?.length ?? 0} total</div>
-              </div>
-              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
-                <div className="kpi-label">Files Processed</div>
-                <div className="kpi-value">{agg.loading ? "…" : (totalFilesReal || totalFiles)}</div>
-                <div className="kpi-sub">Across all projects</div>
-              </div>
-              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation(projects && projects.length > 0 ? `/projects/${projects[0].id}/rfis` : "/dashboard")}>
-                <div className="kpi-label">Open RFIs</div>
-                <div className="kpi-value">{agg.loading ? "…" : openRfis.length}</div>
-                <div className="kpi-sub">Across all projects</div>
-              </div>
-              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
-                <div className="kpi-label">Pending Submittals</div>
-                <div className="kpi-value">{agg.loading ? "…" : pendingSubmits.length}</div>
-                <div className="kpi-sub">Awaiting review</div>
-              </div>
-              <div className="kpi-card" style={{ cursor: "pointer" }} onClick={() => setLocation("/dashboard")}>
-                <div className="kpi-label">Compliance Rate</div>
-                <div className="kpi-value">{agg.loading ? "…" : `${complianceRate}%`}</div>
-                <div className="kpi-sub">Valid / total files</div>
-              </div>
+              {/* FIX 3: each card navigates to the correct section */}
+              <StatCard
+                label="Active Projects"
+                value={activeProjects.length}
+                sub={`${projects?.length ?? 0} total`}
+                navigate={() => setLocation("/projects")}
+              />
+              <StatCard
+                label="Files Processed"
+                value={agg.loading ? "…" : (totalFilesReal || totalFiles)}
+                sub="Across all projects"
+                navigate={() => {
+                  const active = activeProjects[0] ?? projects?.[0];
+                  setLocation(active ? `/projects/${active.id}/files` : "/projects");
+                }}
+              />
+              <StatCard
+                label="Open RFIs"
+                value={agg.loading ? "…" : openRfis.length}
+                sub="Across all projects"
+                navigate={() => setLocation(projects && projects.length > 0 ? `/projects/${projects[0].id}/rfis` : "/projects")}
+              />
+              <StatCard
+                label="Pending Submittals"
+                value={agg.loading ? "…" : pendingSubmits.length}
+                sub="Awaiting review"
+                navigate={() => {
+                  const withPending = pendingSubmits[0] ? projects?.find(p => p.id === pendingSubmits[0].projectId) : null;
+                  setLocation(withPending ? `/projects/${withPending.id}/submittals` : "/projects");
+                }}
+              />
+              <StatCard
+                label="Compliance Rate"
+                value={agg.loading ? "…" : complianceRate === null ? "—" : `${complianceRate}%`}
+                sub="Completed uploads only"
+                navigate={() => {
+                  const latest = activeProjects[0] ?? projects?.[0];
+                  setLocation(latest ? `/projects/${latest.id}/analytics` : "/projects");
+                }}
+              />
             </div>
           )}
 
@@ -381,44 +408,54 @@ export function Dashboard() {
                 })}
               </div>
 
-              {/* Your Pending Items */}
+              {/* Pending Items — FIX 6: real aggregate counts */}
               <div style={panel}>
-                <div style={panelTitle}>Your Pending Items</div>
-                {agg.loading ? loadingText : (myRfis.length === 0 && mySubmittals.length === 0) ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
-                    <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
-                    <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>Nothing waiting on you</span>
-                  </div>
-                ) : (
-                  <>
-                    {myRfis.slice(0, 4).map(rfi => {
-                      const proj = projectMap.get(rfi.projectId);
-                      const days = rfi.dueDate ? Math.ceil((new Date(rfi.dueDate).getTime() - now) / 86400000) : null;
-                      return (
-                        <div key={rfi.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A", cursor: "pointer" }} onClick={() => setLocation(`/projects/${rfi.projectId}/rfis`)}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rfi.number} — {rfi.subject}</div>
-                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{proj?.name} · RFI{days !== null ? ` · ${days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}` : ""}</div>
-                          </div>
-                          <Link href={`/projects/${rfi.projectId}/rfis`} style={{ fontSize: 10, color: "#D97706", textDecoration: "none", flexShrink: 0 }}>Open →</Link>
+                <div style={panelTitle}>Pending Items</div>
+                {agg.loading ? loadingText : (() => {
+                  const openRfisCount      = openRfis.length;
+                  const pendingSubsCount   = pendingSubmittals.length;
+                  const filesAttnCount     = filesNeedingAttention.length;
+                  const allClear = openRfisCount === 0 && pendingSubsCount === 0 && filesAttnCount === 0;
+                  if (allClear) {
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+                        <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
+                        <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All items up to date ✓</span>
+                      </div>
+                    );
+                  }
+                  const rows: { label: string; count: number; color: string; bg: string; border: string; href: string }[] = [
+                    {
+                      label: "Open RFIs",
+                      count: openRfisCount,
+                      color: "#D97706", bg: "#FFFBEB", border: "#FDE68A",
+                      href: projects?.[0] ? `/projects/${projects[0].id}/rfis` : "/projects",
+                    },
+                    {
+                      label: "Pending Submittals",
+                      count: pendingSubsCount,
+                      color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE",
+                      href: projects?.[0] ? `/projects/${projects[0].id}/submittals` : "/projects",
+                    },
+                    {
+                      label: "Files Needing Attention",
+                      count: filesAttnCount,
+                      color: "#DC2626", bg: "#FEF2F2", border: "#FECACA",
+                      href: projects?.[0] ? `/projects/${projects[0].id}/files` : "/projects",
+                    },
+                  ];
+                  return (
+                    <>
+                      {rows.filter(r => r.count > 0).map(r => (
+                        <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", marginBottom: 6, borderRadius: 6, background: r.bg, border: `1px solid ${r.border}`, cursor: "pointer" }} onClick={() => setLocation(r.href)}>
+                          <div style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))" }}>{r.label}</div>
+                          <span style={{ fontWeight: 700, fontSize: 13, color: r.color, background: "white", border: `1px solid ${r.border}`, padding: "1px 8px", borderRadius: 4 }}>{r.count}</span>
+                          <span style={{ fontSize: 10, color: r.color, flexShrink: 0 }}>Go →</span>
                         </div>
-                      );
-                    })}
-                    {mySubmittals.slice(0, 4).map(sub => {
-                      const proj = projectMap.get(sub.projectId);
-                      const days = sub.dueDate ? Math.ceil((new Date(sub.dueDate).getTime() - now) / 86400000) : null;
-                      return (
-                        <div key={sub.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", marginBottom: 5, borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", cursor: "pointer" }} onClick={() => setLocation(`/projects/${sub.projectId}/submittals`)}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.number} — {sub.title}</div>
-                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{proj?.name} · {sub.status.replace(/_/g, " ")}{days !== null ? ` · ${days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}` : ""}</div>
-                          </div>
-                          <Link href={`/projects/${sub.projectId}/submittals`} style={{ fontSize: 10, color: "#2563EB", textDecoration: "none", flexShrink: 0 }}>Open →</Link>
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
+                      ))}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -587,15 +624,18 @@ export function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {topViolators.map(([co, data]) => (
-                        <tr key={co}>
-                          <td style={{ fontSize: 11, padding: "5px 8px", color: "hsl(var(--foreground))", fontWeight: 500, borderBottom: "1px solid hsl(var(--border)/0.5)" }}>{co}</td>
-                          <td style={{ fontSize: 11, padding: "5px 8px", borderBottom: "1px solid hsl(var(--border)/0.5)" }}>
-                            <span style={{ fontWeight: 700, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FECACA", padding: "1px 6px", borderRadius: 4 }}>{data.count}</span>
-                          </td>
-                          <td style={{ fontSize: 11, padding: "5px 8px", color: "hsl(var(--muted-foreground))", borderBottom: "1px solid hsl(var(--border)/0.5)" }}>{data.pids.size}</td>
-                        </tr>
-                      ))}
+                      {topViolators.map(([co, data]) => {
+                        const pid = [...data.pids][0];
+                        return (
+                          <tr key={co} style={{ cursor: "pointer" }} onClick={() => pid && setLocation(`/projects/${pid}/files`)}>
+                            <td style={{ fontSize: 11, padding: "5px 8px", color: "#1D4ED8", fontWeight: 600, borderBottom: "1px solid hsl(var(--border)/0.5)", textDecoration: "underline" }}>{co}</td>
+                            <td style={{ fontSize: 11, padding: "5px 8px", borderBottom: "1px solid hsl(var(--border)/0.5)" }}>
+                              <span style={{ fontWeight: 700, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FECACA", padding: "1px 6px", borderRadius: 4 }}>{data.count}</span>
+                            </td>
+                            <td style={{ fontSize: 11, padding: "5px 8px", color: "hsl(var(--muted-foreground))", borderBottom: "1px solid hsl(var(--border)/0.5)" }}>{data.pids.size}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 )}

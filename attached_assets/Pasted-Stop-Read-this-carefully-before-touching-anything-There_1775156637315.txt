@@ -1,0 +1,118 @@
+Stop. Read this carefully before touching anything.
+
+There are 6 fixes needed on the Dashboard. Fix all 6 in one pass.
+
+---
+
+FIX 1 — NAMING VIOLATIONS LOGIC (most important)
+
+A naming violation must ONLY be recorded when a user uploads a file with 
+a non-compliant name AND confirms/saves it anyway — either by clicking 
+"Continue Anyway" or by the upload completing despite a failed validation.
+
+A rejection is NOT a violation. If the system rejected a file and the 
+user did not force it through, that is NOT a violation. Remove it from 
+the violations log.
+
+In the backend violations logic:
+- Violation = file was saved to the database with is_compliant = false 
+  AND the user explicitly proceeded past the warning
+- NOT a violation = file was rejected and never saved, OR file is 
+  currently in the upload/correction flow
+
+Update the violations query to only count files where:
+  is_compliant = false AND upload_status = 'completed' AND 
+  user_confirmed_non_compliant = true
+
+If user_confirmed_non_compliant column does not exist, add it to the 
+files table with default false. Set it to true only when the user clicks 
+"Continue Anyway" on the naming warning modal.
+
+---
+
+FIX 2 — TOP NAMING VIOLATORS widget
+
+Same root fix as FIX 1. The violators list must only show companies 
+where confirmed violations exist (user saved a wrong-named file after 
+being warned). Remove any entry where the file was simply rejected.
+
+Also make the violator row clickable — clicking a company name should 
+navigate to /projects filtered to show that company's files with 
+violations.
+
+---
+
+FIX 3 — STAT CARDS navigation
+
+Active Projects card → clicking navigates to /projects
+Files Processed card → clicking navigates to the Files tab of the most 
+recent active project, OR to /projects if multiple
+Pending Submittals card → clicking navigates to /projects with the 
+submittals tab pre-selected on the first project that has pending items
+Compliance Rate card → clicking navigates to the Analytics tab of the 
+most recent project
+
+Wrap each stat card's outer div with a cursor-pointer and an onClick 
+handler using useNavigate.
+
+---
+
+FIX 4 — COMPLIANCE RATE calculation
+
+Compliance Rate must be calculated as:
+  (files with is_compliant = true AND upload_status = 'completed') 
+  divided by 
+  (ALL files with upload_status = 'completed')
+  × 100
+
+Do NOT count rejected files that were never saved. Do NOT count files 
+currently in upload flow. Only count completed uploads.
+
+If there are zero completed uploads, show "—" instead of 0%.
+
+---
+
+FIX 5 — CVR PLATFORM HEALTH contradition
+
+If there are any AI-flagged files, the status must NOT say "All Clear". 
+Fix the logic:
+- All Clear = zero flags of any kind
+- Needs Attention = 1 or more AI-flagged files
+- Critical = 1 or more files with content mismatch confirmed
+
+The count badge showing "1 AI flagged" and the label saying "All Clear" 
+at the same time must never happen.
+
+---
+
+FIX 6 — PENDING ITEMS section
+
+This section must pull real data. Query:
+- Open RFIs: SELECT count(*) FROM rfis WHERE status != 'closed' 
+  AND project_id IN (user's projects)
+- Pending Submittals: SELECT count(*) FROM submittals WHERE 
+  status IN ('pending', 'under_review') AND project_id IN (user's projects)
+- Files needing attention: SELECT count(*) FROM files WHERE 
+  (is_compliant = false OR cvr_status = 'flagged') AND 
+  upload_status = 'completed' AND project_id IN (user's projects)
+
+Show each with a real count and make each row clickable to navigate to 
+the relevant section.
+
+If all counts are zero, show "All items up to date ✓" — not an empty 
+section.
+
+---
+
+After all 6 fixes, run these checks and paste output:
+
+Check 1: grep -n "user_confirmed_non_compliant\|Continue Anyway" 
+artifacts/api-server/src/routes/files.ts | head -10
+
+Check 2: grep -n "useNavigate\|onClick.*navigate" 
+artifacts/bimlog/src/components/dashboard/StatCard.tsx | head -10
+
+Check 3: grep -n "Pending Items\|openRfis\|pendingSubmittals" 
+artifacts/bimlog/src/pages/Dashboard.tsx | head -15
+
+Rebuild and publish. Nothing else.
