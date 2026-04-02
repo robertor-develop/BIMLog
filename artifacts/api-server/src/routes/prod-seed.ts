@@ -496,6 +496,17 @@ router.post("/system/set-super-admin", async (req, res) => {
   }
 });
 
+router.post("/system/cleanup-orphan-companies", async (req, res) => {
+  const key = req.headers["x-seed-key"];
+  if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid seed key" }); return; }
+  try {
+    const result = await db.execute(sql`DELETE FROM companies WHERE id NOT IN (SELECT DISTINCT company_id FROM users WHERE company_id IS NOT NULL)`);
+    res.json({ success: true, deleted: (result as any).rowCount ?? 0 });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Failed" });
+  }
+});
+
 router.post("/system/rename-dds-mechanical", async (req, res) => {
   const key = req.headers["x-seed-key"];
   if (key !== SEED_KEY) { res.status(403).json({ error: "Invalid seed key" }); return; }
