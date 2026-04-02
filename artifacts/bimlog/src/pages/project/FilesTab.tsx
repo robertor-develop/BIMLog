@@ -821,6 +821,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     navigator.clipboard.writeText(name).then(() => {
       setCopiedSuggestion(true);
       setTimeout(() => setCopiedSuggestion(false), 2000);
+      toast({ title: "Copied to clipboard" });
     });
   };
 
