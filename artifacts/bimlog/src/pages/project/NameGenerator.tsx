@@ -291,22 +291,20 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
 
   return (
     <div>
-      {/* Back button — only shown when returnTo is provided */}
-      {returnTo && (
-        <button
-          onClick={() => setLocation(returnTo)}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            marginBottom: 16, padding: "6px 12px", borderRadius: 6,
-            border: "1px solid hsl(var(--border))",
-            background: "transparent", cursor: "pointer",
-            fontSize: 12, fontWeight: 500, color: "hsl(var(--muted-foreground))",
-          }}
-        >
-          <ArrowLeft style={{ width: 13, height: 13 }} />
-          {w("Back to Files", "Volver a Archivos", lang)}
-        </button>
-      )}
+      {/* Back to Files button — always visible */}
+      <button
+        onClick={() => setLocation(returnTo || `/projects/${projectId}/files`)}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: 6,
+          marginBottom: 16, padding: "6px 12px", borderRadius: 6,
+          border: "1px solid hsl(var(--border))",
+          background: "transparent", cursor: "pointer",
+          fontSize: 12, fontWeight: 500, color: "hsl(var(--muted-foreground))",
+        }}
+      >
+        <ArrowLeft style={{ width: 13, height: 13 }} />
+        {w("Back to Files", "Volver a Archivos", lang)}
+      </button>
 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
