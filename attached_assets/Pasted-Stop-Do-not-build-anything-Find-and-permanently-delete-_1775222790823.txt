@@ -1,0 +1,88 @@
+Stop. Do not build anything.
+
+Find and permanently delete every single seed file 
+and every single seed function anywhere in the entire 
+codebase. No exceptions.
+
+STEP 1 — Find everything seed related:
+grep -rn "seed\|Seed\|SEED" \
+artifacts/api-server/src/ --include="*.ts" -l
+
+STEP 2 — Delete every file found in Step 1 that 
+contains seed logic. Delete the entire file.
+
+STEP 3 — Find and remove every seed-related import, 
+call, or reference in ALL remaining files:
+grep -rn "seed\|Seed\|SEED" \
+artifacts/api-server/src/ --include="*.ts"
+
+Remove every single line that references seed 
+from every file found.
+
+STEP 4 — Search for hardcoded fake project data:
+grep -rn "270 Park\|IBQ-LIT\|Harbor View\|Callie\
+|NYC-270\|HV-2026\|DDS Mechanical\|Tom Davis\
+|Maria Sanchez\|Ana Reyes\|Sofia Vargas\
+|Carlos Mendoza" \
+artifacts/api-server/src/ --include="*.ts"
+
+Delete every file or remove every line found.
+
+STEP 5 — Clean database one final time:
+DELETE FROM submittal_view_events;
+DELETE FROM submittal_register;
+DELETE FROM rfi_view_events;
+DELETE FROM rfi_ball_in_court_history;
+DELETE FROM rfi_responses;
+DELETE FROM transmittal_items;
+DELETE FROM transmittals;
+DELETE FROM change_order_documents;
+DELETE FROM change_orders;
+DELETE FROM meeting_attendees;
+DELETE FROM action_items;
+DELETE FROM meeting_minutes;
+DELETE FROM project_milestones;
+DELETE FROM project_directory;
+DELETE FROM notifications;
+DELETE FROM submittals;
+DELETE FROM rfis;
+DELETE FROM files;
+DELETE FROM naming_fields;
+DELETE FROM naming_conventions;
+DELETE FROM activity_log;
+DELETE FROM email_log;
+DELETE FROM admin_actions_log;
+DELETE FROM project_invitations;
+DELETE FROM project_members;
+DELETE FROM projects;
+DELETE FROM users 
+  WHERE email != 'robertor@rryasociados.com';
+DELETE FROM companies 
+  WHERE id != (
+    SELECT company_id FROM users 
+    WHERE email = 'robertor@rryasociados.com'
+  );
+
+STEP 6 — Verify database is clean:
+SELECT 
+  (SELECT COUNT(*) FROM projects) as projects,
+  (SELECT COUNT(*) FROM users) as users,
+  (SELECT COUNT(*) FROM files) as files,
+  (SELECT COUNT(*) FROM rfis) as rfis,
+  (SELECT COUNT(*) FROM companies) as companies;
+
+Expected: projects=0, users=1, files=0, rfis=0, companies=1
+
+STEP 7 — Verify no seed files remain anywhere:
+grep -rn "seed\|Seed\|SEED" \
+artifacts/api-server/src/ --include="*.ts" | \
+grep -v "node_modules"
+
+Expected: empty or only irrelevant matches.
+No seed logic. No seed files. No seed calls. Nowhere.
+
+STEP 8 — Rebuild both frontend and backend.
+Restart API server.
+Publish.
+
+Paste output of Steps 6 and 7 only.
