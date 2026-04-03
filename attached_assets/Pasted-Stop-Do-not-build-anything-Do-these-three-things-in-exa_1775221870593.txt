@@ -1,0 +1,77 @@
+Stop. Do not build anything.
+
+Do these three things in exact order.
+
+STEP 1 — Delete the auto-seed file permanently:
+rm artifacts/api-server/src/lib/auto-seed.ts
+
+STEP 2 — Find and remove any import of auto-seed 
+from the main server file:
+grep -rn "auto-seed\|autoSeed" \
+artifacts/api-server/src/ --include="*.ts"
+
+Remove every import or call to auto-seed found.
+
+STEP 3 — Delete the prod-seed route file:
+rm artifacts/api-server/src/routes/prod-seed.ts
+
+STEP 4 — Remove prod-seed from routes/index.ts:
+grep -n "prod-seed\|prodSeed" \
+artifacts/api-server/src/routes/index.ts
+
+Remove whatever line imports or registers prod-seed.
+
+STEP 5 — Clean the database one final time:
+DELETE FROM submittal_view_events;
+DELETE FROM submittal_register;
+DELETE FROM rfi_view_events;
+DELETE FROM rfi_ball_in_court_history;
+DELETE FROM rfi_responses;
+DELETE FROM transmittal_items;
+DELETE FROM transmittals;
+DELETE FROM change_order_documents;
+DELETE FROM change_orders;
+DELETE FROM meeting_attendees;
+DELETE FROM action_items;
+DELETE FROM meeting_minutes;
+DELETE FROM project_milestones;
+DELETE FROM project_directory;
+DELETE FROM notifications;
+DELETE FROM submittals;
+DELETE FROM rfis;
+DELETE FROM files;
+DELETE FROM naming_fields;
+DELETE FROM naming_conventions;
+DELETE FROM activity_log;
+DELETE FROM email_log;
+DELETE FROM admin_actions_log;
+DELETE FROM project_invitations;
+DELETE FROM project_members;
+DELETE FROM projects;
+DELETE FROM users 
+  WHERE email != 'robertor@rryasociados.com';
+DELETE FROM companies 
+  WHERE id != (
+    SELECT company_id FROM users 
+    WHERE email = 'robertor@rryasociados.com'
+  );
+
+STEP 6 — Verify clean:
+SELECT 
+  (SELECT COUNT(*) FROM projects) as projects,
+  (SELECT COUNT(*) FROM users) as users,
+  (SELECT COUNT(*) FROM files) as files,
+  (SELECT COUNT(*) FROM rfis) as rfis,
+  (SELECT COUNT(*) FROM companies) as companies;
+
+Expected: projects=0, users=1, files=0, rfis=0, companies=1
+
+STEP 7 — Restart both workflows.
+
+STEP 8 — Verify auto-seed is gone:
+find artifacts/api-server/src -name "*seed*" | sort
+
+Expected: empty — no seed files found.
+
+Rebuild. Restart. Publish.
+Paste output of Steps 6 and 8 only.
