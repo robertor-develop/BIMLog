@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useListProjects, useCreateProject } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -167,6 +167,22 @@ export function Dashboard() {
   const { shouldShow: showOnboarding, markDone: doneOnboarding } = useOnboarding();
   const [onboardingVisible, setOnboardingVisible] = useState(false);
   useEffect(() => { if (showOnboarding) setOnboardingVisible(true); }, [showOnboarding]);
+
+  const { data: stats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const r = await fetch(`${API_BASE}/api/v1/dashboard/stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error("Failed");
+      return r.json() as Promise<{
+        activeProjects: number; filesProcessed: number; openRfis: number;
+        pendingSubmittals: number; complianceRate: number | null; filesNeedingAttention: number;
+      }>;
+    },
+    enabled: !!token,
+    refetchInterval: 60000,
+  });
 
   // ── CVR Platform Health ────────────────────────────────────────────────────
   const [cvrHealth, setCvrHealth] = useState<{ healthStatus: "green" | "amber" | "red"; totalPendingReview: number; totalFlagged: number } | null>(null);
@@ -342,42 +358,33 @@ export function Dashboard() {
               {/* FIX 3: each card navigates to the correct section */}
               <StatCard
                 label="Active Projects"
-                value={activeProjects.length}
+                value={stats?.activeProjects ?? 0}
                 sub={`${projects?.length ?? 0} total`}
                 navigate={() => setLocation("/projects")}
               />
               <StatCard
                 label="Files Processed"
-                value={agg.loading ? "…" : (totalFilesReal || totalFiles)}
+                value={stats?.filesProcessed ?? 0}
                 sub="Across all projects"
-                navigate={() => {
-                  const active = activeProjects[0] ?? projects?.[0];
-                  setLocation(active ? `/projects/${active.id}/files` : "/projects");
-                }}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/files` : "/projects")}
               />
               <StatCard
                 label="Open RFIs"
-                value={agg.loading ? "…" : openRfis.length}
+                value={stats?.openRfis ?? 0}
                 sub="Across all projects"
-                navigate={() => setLocation(projects && projects.length > 0 ? `/projects/${projects[0].id}/rfis` : "/projects")}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/rfis` : "/projects")}
               />
               <StatCard
                 label="Pending Submittals"
-                value={agg.loading ? "…" : pendingSubmits.length}
+                value={stats?.pendingSubmittals ?? 0}
                 sub="Awaiting review"
-                navigate={() => {
-                  const withPending = pendingSubmits[0] ? projects?.find(p => p.id === pendingSubmits[0].projectId) : null;
-                  setLocation(withPending ? `/projects/${withPending.id}/submittals` : "/projects");
-                }}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
               <StatCard
                 label="Compliance Rate"
-                value={agg.loading ? "…" : complianceRate === null ? "—" : `${complianceRate}%`}
+                value={stats?.complianceRate === null || stats?.complianceRate === undefined ? "—" : `${stats.complianceRate}%`}
                 sub="Completed uploads only"
-                navigate={() => {
-                  const latest = activeProjects[0] ?? projects?.[0];
-                  setLocation(latest ? `/projects/${latest.id}/analytics` : "/projects");
-                }}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/analytics` : "/projects")}
               />
             </div>
           )}
@@ -486,11 +493,11 @@ export function Dashboard() {
               {/* Pending Items — FIX 6: real aggregate counts */}
               <div style={panel}>
                 <div style={panelTitle}>Pending Items</div>
-                {agg.loading ? loadingText : (() => {
-                  const openRfisCount      = openRfis.length;
-                  const pendingSubsCount   = pendingSubmittals.length;
-                  const filesAttnCount     = filesNeedingAttention.length;
-                  const allClear = openRfisCount === 0 && pendingSubsCount === 0 && filesAttnCount === 0;
+                {(() => {
+                  const openRfisCount      = stats?.openRfis ?? 0;
+                  const pendingSubsCount   = stats?.pendingSubmittals ?? 0;
+                  const filesAttnCount     = stats?.filesNeedingAttention ?? 0;
+                  const allClear = stats !== undefined && openRfisCount === 0 && pendingSubsCount === 0 && filesAttnCount === 0;
                   if (allClear) {
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>

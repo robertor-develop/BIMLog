@@ -1,0 +1,249 @@
+Stop. Read every word.
+Fix the Command Center ONLY.
+Do not touch any other file.
+Do not publish until all checks pass.
+
+═══════════════════════════════════════════════════════════
+FIX 1 — ADD STATS ENDPOINT
+═══════════════════════════════════════════════════════════
+
+In dashboard_briefing.ts add this route:
+
+router.get("/dashboard/stats", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  const memberships = await db
+    .select({ projectId: projectMembers.projectId })
+    .from(projectMembers)
+    .where(eq(projectMembers.userId, userId));
+
+  const projectIds = memberships.map(m => m.projectId);
+
+  if (projectIds.length === 0) {
+    return res.json({
+      activeProjects: 0,
+      filesProcessed: 0,
+      openRfis: 0,
+      pendingSubmittals: 0,
+      complianceRate: null,
+      filesNeedingAttention: 0
+    });
+  }
+
+  const [
+    activeProjectsRes,
+    allFilesRes,
+    compliantFilesRes,
+    attentionFilesRes,
+    openRfisRes,
+    pendingSubmittalsRes
+  ] = await Promise.all([
+    db.select({ id: projects.id }).from(projects)
+      .where(and(
+        inArray(projects.id, projectIds),
+        ne(projects.status, 'archived')
+      )),
+    db.select({ id: files.id }).from(files)
+      .where(inArray(files.projectId, projectIds)),
+    db.select({ id: files.id }).from(files)
+      .where(and(
+        inArray(files.projectId, projectIds),
+        eq(files.isCompliant, true)
+      )),
+    db.select({ id: files.id }).from(files)
+      .where(and(
+        inArray(files.projectId, projectIds),
+        eq(files.isCompliant, false)
+      )),
+    db.select({ id: rfis.id }).from(rfis)
+      .where(and(
+        inArray(rfis.projectId, projectIds),
+        ne(rfis.status, 'closed')
+      )),
+    db.select({ id: submittals.id }).from(submittals)
+      .where(and(
+        inArray(submittals.projectId, projectIds),
+        inArray(submittals.status, ['pending', 'under_review'])
+      ))
+  ]);
+
+  const totalFiles = allFilesRes.length;
+  const complianceRate = totalFiles > 0
+    ? Math.round((compliantFilesRes.length / totalFiles) * 100)
+    : null;
+
+  res.json({
+    activeProjects: activeProjectsRes.length,
+    filesProcessed: totalFiles,
+    openRfis: openRfisRes.length,
+    pendingSubmittals: pendingSubmittalsRes.length,
+    complianceRate,
+    filesNeedingAttention: attentionFilesRes.length
+  });
+});
+
+═══════════════════════════════════════════════════════════
+FIX 2 — FIX BRIEFING RESPONSE FORMAT
+═══════════════════════════════════════════════════════════
+
+In dashboard_briefing.ts update the Claude API call:
+
+Change system prompt to:
+"You are BIMLog's intelligence engine. 
+Return ONLY valid JSON. No markdown. No explanation."
+
+Change user prompt to:
+"Project data for [user.fullName]: [stats JSON]
+Return exactly:
+{
+  summary: one sentence, most important thing today 
+           with specific numbers,
+  criticalItems: array of up to 3 short urgent strings,
+  todaysDate: today formatted as 'April 3, 2026'
+}"
+
+After Claude responds:
+- Strip markdown fences before parsing
+- Parse as JSON
+- On parse failure return:
+{
+  summary: "Your projects are active — review open items.",
+  criticalItems: [],
+  todaysDate: new Date().toLocaleDateString('en-US',
+    {year:'numeric',month:'long',day:'numeric'})
+}
+
+Return the parsed object directly.
+NOT wrapped in { briefing: ... }
+
+═══════════════════════════════════════════════════════════
+FIX 3 — UPDATE DASHBOARD.TSX STAT CARDS
+═══════════════════════════════════════════════════════════
+
+In Dashboard.tsx:
+
+Add this query at the top with other queries:
+
+const { data: stats } = useQuery({
+  queryKey: ["dashboard-stats"],
+  queryFn: async () => {
+    const r = await fetch("/api/v1/dashboard/stats", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!r.ok) throw new Error("Failed");
+    return r.json();
+  },
+  enabled: !!token,
+  refetchInterval: 60000
+});
+
+Replace stat card values:
+  Active Projects → stats?.activeProjects ?? 0
+  Files Processed → stats?.filesProcessed ?? 0
+  Open RFIs → stats?.openRfis ?? 0
+  Pending Submittals → stats?.pendingSubmittals ?? 0
+  Compliance Rate → stats?.complianceRate === null 
+    ? "—" : `${stats.complianceRate}%`
+
+Fix stat card navigation:
+  Active Projects → setLocation("/projects")
+  Files Processed → setLocation(projects?.[0]?.id 
+    ? `/projects/${projects[0].id}/files` : "/projects")
+  Open RFIs → setLocation(projects?.[0]?.id
+    ? `/projects/${projects[0].id}/rfis` : "/projects")
+  Pending Submittals → setLocation(projects?.[0]?.id
+    ? `/projects/${projects[0].id}/submittals` : "/projects")
+  Compliance Rate → setLocation(projects?.[0]?.id
+    ? `/projects/${projects[0].id}/analytics` : "/projects")
+
+Fix Pending Items section:
+  Open RFIs → stats?.openRfis ?? 0
+    onClick → projects?.[0]?.id rfis tab
+  Pending Submittals → stats?.pendingSubmittals ?? 0
+    onClick → projects?.[0]?.id submittals tab
+  Files Needing Attention → stats?.filesNeedingAttention ?? 0
+    onClick → projects?.[0]?.id files tab
+  If all zero AND stats loaded → 
+    show "All items up to date ✓" green text
+
+═══════════════════════════════════════════════════════════
+FIX 4 — TOTALCONTROL CRASH
+═══════════════════════════════════════════════════════════
+
+In TotalControl.tsx fix super admin check:
+
+Replace:
+  const d = data as typeof data & { isSuperAdmin?: boolean };
+  if (!d.isSuperAdmin) { setLocation("/dashboard"); return; }
+
+With:
+  const userData = data as any;
+  const isAdmin = userData?.is_super_admin === true || 
+                  userData?.isSuperAdmin === true;
+  if (!isAdmin) { setLocation("/dashboard"); return; }
+
+Wrap the entire component return in try/catch.
+If ANY data fetch fails show:
+  <div>Unable to load admin dashboard. 
+  Please refresh.</div>
+Never let the page crash the app or show blank screen.
+
+═══════════════════════════════════════════════════════════
+FIX 5 — REPORTS AUTHENTICATION
+═══════════════════════════════════════════════════════════
+
+In reports.ts add this helper at the top:
+
+async function verifyReportToken(req: any, res: any): 
+Promise<number | null> {
+  const token = 
+    req.headers.authorization?.split(' ')[1] || 
+    (req.query.token as string);
+  if (!token) {
+    res.status(401).json({ error: 'Authentication required' });
+    return null;
+  }
+  try {
+    const decoded = jwt.verify(
+      token, process.env.JWT_SECRET!) as any;
+    return decoded.userId || decoded.id;
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
+  }
+}
+
+Replace authMiddleware on ALL report route handlers with:
+  router.get("...route...", async (req, res) => {
+    const userId = await verifyReportToken(req, res);
+    if (!userId) return;
+    // rest unchanged
+
+Apply to all 10 report endpoints.
+
+═══════════════════════════════════════════════════════════
+CHECKS
+═══════════════════════════════════════════════════════════
+
+Check 1:
+grep -n "dashboard/stats" \
+artifacts/api-server/src/routes/dashboard_briefing.ts | head -5
+
+Check 2:
+grep -n "summary\|criticalItems\|todaysDate" \
+artifacts/api-server/src/routes/dashboard_briefing.ts | head -5
+
+Check 3:
+grep -n "dashboard-stats\|stats?.activeProjects" \
+artifacts/bimlog/src/pages/Dashboard.tsx | head -5
+
+Check 4:
+grep -n "isAdmin\|is_super_admin" \
+artifacts/bimlog/src/pages/TotalControl.tsx | head -5
+
+Check 5:
+grep -n "verifyReportToken\|req.query.token" \
+artifacts/api-server/src/routes/reports.ts | head -5
+
+Rebuild both. Restart API. Publish.
+Paste all 5 checks. Nothing else.

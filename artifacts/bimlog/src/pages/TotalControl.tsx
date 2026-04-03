@@ -465,6 +465,7 @@ export function TotalControl() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   // Modal state
   const [showUsers, setShowUsers] = useState(false);
@@ -477,8 +478,9 @@ export function TotalControl() {
     if (!token) { setLocation("/login"); return; }
     getMe()
       .then((data) => {
-        const d = data as typeof data & { isSuperAdmin?: boolean };
-        if (!d.isSuperAdmin) { setLocation("/dashboard"); return; }
+        const userData = data as any;
+        const isAdmin = userData?.is_super_admin === true || userData?.isSuperAdmin === true;
+        if (!isAdmin) { setLocation("/dashboard"); return; }
         setAuthorized(true);
         loadAll();
       })
@@ -503,6 +505,8 @@ export function TotalControl() {
         const d = await projectsRes.json();
         setProjects(Array.isArray(d) ? d : d.projects ?? []);
       }
+    } catch {
+      setLoadError(true);
     } finally { setLoading(false); }
   }, [token]);
 
@@ -518,6 +522,19 @@ export function TotalControl() {
         <div style={{ textAlign: "center", color: "#9CA3AF" }}>
           <div style={{ fontSize: 36, marginBottom: 12 }}>🔐</div>
           <div>Verifying access…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
+        <div style={{ textAlign: "center", color: "#6B7280" }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Unable to load admin dashboard.</div>
+          <div>Please refresh.</div>
+          <button onClick={() => { setLoadError(false); loadAll(); }} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 6, background: "#1D4ED8", color: "white", border: "none", cursor: "pointer", fontWeight: 600 }}>Retry</button>
         </div>
       </div>
     );
