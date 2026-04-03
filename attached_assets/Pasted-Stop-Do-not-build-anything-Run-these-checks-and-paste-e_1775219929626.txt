@@ -1,0 +1,48 @@
+Stop. Do not build anything. 
+Run these checks and paste exact output only.
+
+Check 1 — Dashboard briefing route exists:
+grep -n "briefing" artifacts/api-server/src/routes/dashboard_briefing.ts | head -20
+
+Check 2 — Dashboard stats endpoint exists:
+grep -n "stats\|active_projects\|files_processed\|open_rfis" artifacts/api-server/src/routes/dashboard_briefing.ts | head -20
+
+Check 3 — How stat cards get their data in Dashboard.tsx:
+grep -n "stats\|briefing\|activeProjects\|filesProcessed\|openRfis\|pendingSubmittals\|complianceRate" artifacts/bimlog/src/pages/Dashboard.tsx | head -30
+
+Check 4 — How stat card navigation works:
+grep -n "onClick\|navigate\|StatCard" artifacts/bimlog/src/pages/Dashboard.tsx | head -20
+
+Check 5 — TotalControl crash — what is it trying to render:
+grep -n "isSuperAdmin\|superAdmin\|redirect\|return\|fetch\|useQuery" artifacts/bimlog/src/pages/TotalControl.tsx | head -30
+
+Check 6 — Reports authentication error — how token is passed:
+grep -n "token\|auth\|header\|download\|window.open\|href" artifacts/bimlog/src/pages/project/ReportsTab.tsx | head -30
+
+Check 7 — Transmittal form current state:
+grep -n "ai\|logo\|directory\|autofill\|purpose\|AI" artifacts/bimlog/src/pages/project/TransmittalsTab.tsx | head -20
+
+Check 8 — Change order form current state:
+grep -n "ai\|logo\|directory\|autofill\|AI\|linked" artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx | head -20
+
+Check 9 — Meeting form current state:
+grep -n "ai\|AI\|summary\|extract\|action" artifacts/bimlog/src/pages/project/MeetingsTab.tsx | head -20
+
+Check 10 — Directory tab current state:
+grep -n "directory\|invite\|bimlog_status\|linked_user" artifacts/bimlog/src/pages/project/DirectoryTab.tsx | head -20
+
+Check 11 — Current DB stats query:
+SELECT 
+  (SELECT COUNT(*) FROM projects) as total_projects,
+  (SELECT COUNT(*) FROM files WHERE status IN ('valid','rejected','reviewed')) as files_processed,
+  (SELECT COUNT(*) FROM rfis WHERE status != 'closed') as open_rfis,
+  (SELECT COUNT(*) FROM submittals WHERE status IN ('pending','under_review')) as pending_submittals;
+
+Check 12 — Project members with roles:
+SELECT pm.user_id, pm.role, p.name, p.status 
+FROM project_members pm
+JOIN projects p ON p.id = pm.project_id
+WHERE pm.user_id = (SELECT id FROM users WHERE email = 'robertor@rryasociados.com')
+ORDER BY p.name;
+
+Paste exact output of all 12 checks. Nothing else.
