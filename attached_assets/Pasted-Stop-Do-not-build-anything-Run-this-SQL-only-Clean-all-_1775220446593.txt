@@ -1,0 +1,73 @@
+Stop. Do not build anything.
+Run this SQL only. Clean all fake demo data.
+Keep all table structures. Keep all code. 
+Delete data only.
+
+-- Clean all fake data in correct order 
+-- (respect foreign key constraints)
+
+DELETE FROM submittal_view_events;
+DELETE FROM submittal_register;
+DELETE FROM rfi_view_events;
+DELETE FROM rfi_ball_in_court_history;
+DELETE FROM rfi_responses;
+DELETE FROM transmittal_items;
+DELETE FROM transmittals;
+DELETE FROM change_order_documents;
+DELETE FROM change_orders;
+DELETE FROM meeting_attendees;
+DELETE FROM action_items;
+DELETE FROM meeting_minutes;
+DELETE FROM project_milestones;
+DELETE FROM project_directory;
+DELETE FROM notifications;
+DELETE FROM clashes;
+DELETE FROM clash_reports;
+DELETE FROM submittals;
+DELETE FROM rfis;
+DELETE FROM files;
+DELETE FROM naming_fields;
+DELETE FROM naming_conventions;
+DELETE FROM activity_log;
+DELETE FROM email_log;
+DELETE FROM admin_actions_log;
+DELETE FROM project_invitations;
+DELETE FROM project_members;
+DELETE FROM projects;
+DELETE FROM users WHERE email != 'robertor@rryasociados.com';
+DELETE FROM companies WHERE id != (
+  SELECT company_id FROM users 
+  WHERE email = 'robertor@rryasociados.com'
+);
+
+-- Reset all sequences so IDs start from 1
+ALTER SEQUENCE projects_id_seq RESTART WITH 1;
+ALTER SEQUENCE users_id_seq RESTART WITH 1;
+ALTER SEQUENCE files_id_seq RESTART WITH 1;
+ALTER SEQUENCE rfis_id_seq RESTART WITH 1;
+ALTER SEQUENCE submittals_id_seq RESTART WITH 1;
+ALTER SEQUENCE transmittals_id_seq RESTART WITH 1;
+ALTER SEQUENCE change_orders_id_seq RESTART WITH 1;
+ALTER SEQUENCE meeting_minutes_id_seq RESTART WITH 1;
+ALTER SEQUENCE action_items_id_seq RESTART WITH 1;
+ALTER SEQUENCE project_directory_id_seq RESTART WITH 1;
+ALTER SEQUENCE notifications_id_seq RESTART WITH 1;
+
+-- Verify clean:
+SELECT 
+  (SELECT COUNT(*) FROM projects) as projects,
+  (SELECT COUNT(*) FROM users) as users,
+  (SELECT COUNT(*) FROM files) as files,
+  (SELECT COUNT(*) FROM rfis) as rfis,
+  (SELECT COUNT(*) FROM submittals) as submittals,
+  (SELECT COUNT(*) FROM companies) as companies;
+
+-- Should show:
+-- projects: 0
+-- users: 1 (only Roberto)
+-- files: 0
+-- rfis: 0
+-- submittals: 0
+-- companies: 1 (only BIMCapital Partners)
+
+Paste the verify output. Nothing else.
