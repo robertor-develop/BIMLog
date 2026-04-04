@@ -1,0 +1,101 @@
+Stop. Do not build anything.
+Run all checks and report only. Do not fix anything.
+
+Check 1 — Unused imports in main pages:
+grep -rn "^import" \
+artifacts/bimlog/src/pages/ --include="*.tsx" | \
+grep -v "node_modules" | sort | uniq -d | head -30
+
+Check 2 — Console warnings and errors in frontend:
+grep -rn "console.warn\|console.error\|TODO\|FIXME\|HACK\|temp\|temporary" \
+artifacts/bimlog/src/ --include="*.tsx" --include="*.ts" | \
+grep -v "node_modules" | head -30
+
+Check 3 — Dead routes in backend:
+grep -rn "TODO\|FIXME\|HACK\|temp\|unused\|dead" \
+artifacts/api-server/src/routes/ --include="*.ts" | head -20
+
+Check 4 — Any remaining hardcoded fake data anywhere:
+grep -rn "270 Park\|IBQ-LIT\|Harbor View\|Callie\
+|NYC-270\|HV-2026\|Tom Davis\|Maria Sanchez\
+|DDS Mechanical\|Ana Reyes\|Sofia Vargas\
+|Carlos Mendoza\|Alejandro" \
+artifacts/ --include="*.tsx" --include="*.ts" | \
+grep -v "node_modules" | head -20
+
+Check 5 — Frontend TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | head -50
+
+Check 6 — Backend TypeScript errors:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | head -50
+
+Check 7 — Broken or missing API endpoints 
+referenced in frontend but not in backend:
+grep -rn "api/v1" \
+artifacts/bimlog/src/ --include="*.tsx" --include="*.ts" | \
+grep -v "node_modules" | \
+sed 's/.*api\/v1//' | \
+sed 's/[`"'"'"'].*//' | \
+sort | uniq | head -50
+
+Check 8 — Routes registered in index.ts:
+cat artifacts/api-server/src/routes/index.ts
+
+Check 9 — Any fetch calls with no error handling:
+grep -rn "\.fetch\|await fetch" \
+artifacts/bimlog/src/ --include="*.tsx" --include="*.ts" | \
+grep -v "node_modules" | \
+grep -v "catch\|try\|\.ok\|then" | head -20
+
+Check 10 — Missing env variables referenced in code:
+grep -rn "process.env\|import.meta.env" \
+artifacts/api-server/src/ --include="*.ts" | \
+grep -v "node_modules" | head -20
+
+Check 11 — Duplicate table definitions in schema:
+grep -rn "pgTable\|createTable" \
+artifacts/api-server/src/db/ --include="*.ts" | \
+sort | head -40
+
+Check 12 — Any components imported but never used:
+grep -rn "^import.*from" \
+artifacts/bimlog/src/pages/ --include="*.tsx" | \
+awk '{print $2}' | sort | uniq -d | head -20
+
+Check 13 — Sidebar items with no working route:
+grep -n "href\|setLocation\|navigate\|to=" \
+artifacts/bimlog/src/components/layout/MasterSidebar.tsx | \
+head -30
+
+Check 14 — Sidebar items with no working route 
+in ProjectSidebar:
+grep -n "href\|setLocation\|navigate\|to=" \
+artifacts/bimlog/src/components/layout/ProjectSidebar.tsx | \
+head -40
+
+Check 15 — Any route in App.tsx with no matching page:
+grep -n "Route path\|component=" \
+artifacts/bimlog/src/App.tsx | head -40
+
+Check 16 — Check all new tab components exist:
+find artifacts/bimlog/src/pages/project -name "*.tsx" | sort
+
+Check 17 — Check all new backend route files exist:
+find artifacts/api-server/src/routes -name "*.ts" | sort
+
+Check 18 — Check for any infinite loops or 
+missing dependency arrays in useEffect:
+grep -rn "useEffect.*\[\]" \
+artifacts/bimlog/src/pages/ --include="*.tsx" | head -20
+
+Check 19 — Check notification bell is wired correctly:
+grep -n "notifications\|unread\|bell" \
+artifacts/bimlog/src/components/layout/MasterSidebar.tsx | \
+head -15
+
+Check 20 — Check search is wired correctly:
+grep -n "search\|Search" \
+artifacts/bimlog/src/components/layout/MasterSidebar.tsx | \
+head -15
+
+Paste exact output of all 20 checks. Nothing else.
