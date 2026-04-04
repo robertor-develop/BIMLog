@@ -2334,7 +2334,6 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
 
   const hasExisting = convention && convention.fields && convention.fields.length > 0;
-  if (hasExisting && !forceWizard) return <EditMode convention={convention} onRunWizard={() => { setForceWizard(true); setWs(s => ({ ...s, flowPhase: "setup_context", setupCtx: defaultSetupCtx() })); }} lang={lang} projectId={projectId} />;
 
   // ── routing logic: determine the next phase after Step 0 ──────────────────
   function handleSetupContinue() {

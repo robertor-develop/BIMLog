@@ -844,14 +844,15 @@ function CreateProjectForm({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [form, setForm] = useState({ name: "", code: "", description: "" });
 
   const { mutate, isPending } = useCreateProject({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
-        toast({ title: t("common.success") });
         onClose();
+        setLocation(`/projects/${data.id}/convention`);
       },
       onError: () => toast({ title: t("common.error"), variant: "destructive" }),
     },
