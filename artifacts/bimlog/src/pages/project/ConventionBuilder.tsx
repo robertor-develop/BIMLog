@@ -283,6 +283,103 @@ interface WizardState {
   requireAcceptance: boolean;
   enableExtRestrictions: boolean;
   extRestrictions: Record<string, string[]>;
+  // ── front-door setup context ──────────────────────────────────────────────
+  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard";
+  setupCtx: SetupContext;
+  discoveryResult: DiscoveryResult | null;
+  industrialState: IndustrialState;
+  importState: ImportState;
+}
+
+// ─── setup context types ──────────────────────────────────────────────────────
+interface SetupContext {
+  setupContextChoice: string;
+  projectEnvironment: string;
+  builderIntent: string;
+  scopeType: string;
+  scopeDetails: { disciplines: string; systems: string; packages: string; notes: string };
+  levelsRelevant: string;
+  primaryStructure: string;
+  availableInputs: Record<string, boolean>;
+  analysisOnlyMode: boolean;
+}
+
+interface DiscoveryItem {
+  code?: string;
+  key?: string;
+  label: string;
+  reason: string;
+  confidence: "high" | "medium" | "low";
+  accepted?: boolean;
+  editing?: boolean;
+}
+
+interface DiscoveryResult {
+  projectTypeGuess: string;
+  scopeInterpretation: string;
+  usesLevels: boolean | null;
+  usesAreas: boolean | null;
+  usesPackages: boolean | null;
+  usesVolumes: boolean | null;
+  suggestedDisciplines: DiscoveryItem[];
+  suggestedSystems: DiscoveryItem[];
+  suggestedDocTypes: DiscoveryItem[];
+  suggestedExtraFields: DiscoveryItem[];
+  suggestedFieldOrder: string[];
+  ambiguities: string[];
+  recommendedMode: string;
+  analysisSummary: string;
+}
+
+interface IndustrialCodeEntry { id: string; code: string; label: string; }
+
+interface IndustrialState {
+  disciplineCodes: IndustrialCodeEntry[];
+  systemCodes: IndustrialCodeEntry[];
+  packageStructure: string;
+  areaZoneStructure: string;
+  volumeStructure: string;
+  sampleDocCodes: string;
+  levelsIfRelevant: string;
+}
+
+interface ImportState {
+  sampleNames: string;
+  rawFolderText: string;
+  rawIndexText: string;
+  rawNotes: string;
+  analyzing: boolean;
+  error: string;
+}
+
+function defaultSetupCtx(): SetupContext {
+  return {
+    setupContextChoice: "",
+    projectEnvironment: "",
+    builderIntent: "",
+    scopeType: "",
+    scopeDetails: { disciplines: "", systems: "", packages: "", notes: "" },
+    levelsRelevant: "",
+    primaryStructure: "",
+    availableInputs: {},
+    analysisOnlyMode: false,
+  };
+}
+
+function defaultIndustrialState(): IndustrialState {
+  return {
+    disciplineCodes: [{ id: uid(), code: "", label: "" }],
+    systemCodes: [],
+    packageStructure: "",
+    areaZoneStructure: "",
+    volumeStructure: "",
+    sampleDocCodes: "",
+    levelsIfRelevant: "",
+  };
+}
+
+function defaultImportState(): ImportState {
+  return { sampleNames: "", rawFolderText: "", rawIndexText: "", rawNotes: "", analyzing: false, error: "" };
 }
 
 // ─── level helpers ────────────────────────────────────────────────────────────
@@ -362,6 +459,605 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
       borderRadius: 8, padding: "16px 18px", ...style,
     }}>
       {children}
+    </div>
+  );
+}
+
+// ─── Step 0: Project Convention Setup (front door) ───────────────────────────
+const API_BASE_CB = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+
+function RadioGroup({ label, field, options, value, onChange }: {
+  label: string; field: string;
+  options: { value: string; label: string }[];
+  value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 8 }}>{label}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+        {options.map(opt => (
+          <label key={opt.value} htmlFor={`${field}-${opt.value}`} style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "9px 14px",
+            border: `1.5px solid ${value === opt.value ? "#2563EB" : "#E5E7EB"}`,
+            borderRadius: 8, cursor: "pointer",
+            background: value === opt.value ? "#EFF6FF" : "white",
+          }}>
+            <input id={`${field}-${opt.value}`} type="radio" name={field} value={opt.value}
+              checked={value === opt.value} onChange={() => onChange(opt.value)}
+              style={{ accentColor: "#2563EB", width: 15, height: 15 }} />
+            <span style={{ fontSize: 13, color: "#111827" }}>{opt.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ConfidenceBadge({ level }: { level: "high" | "medium" | "low" }) {
+  const map = {
+    high: { bg: "#DCFCE7", color: "#166534", label: "High" },
+    medium: { bg: "#FEF9C3", color: "#854D0E", label: "Medium" },
+    low: { bg: "#FEE2E2", color: "#991B1B", label: "Low" },
+  };
+  const s = map[level];
+  return (
+    <span style={{
+      fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+      background: s.bg, color: s.color, textTransform: "uppercase", letterSpacing: "0.04em",
+    }}>{s.label}</span>
+  );
+}
+
+function Step0_SetupContext({ state, setState, onContinue }: {
+  state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  onContinue: () => void;
+}) {
+  const ctx = state.setupCtx;
+  const setCtx = (partial: Partial<SetupContext>) =>
+    setState(s => ({ ...s, setupCtx: { ...s.setupCtx, ...partial } }));
+
+  const isPartialScope = ctx.scopeType !== "" && ctx.scopeType !== "entire" && ctx.scopeType !== "not_sure" && ctx.scopeType !== "review_only";
+
+  const evidenceOptions: { key: keyof typeof ctx.availableInputs; label: string }[] = [
+    { key: "sampleFileNames", label: "Sample file names" },
+    { key: "folderStructure", label: "Folder structure" },
+    { key: "documentIndex", label: "Document index / register" },
+    { key: "pdfDocuments", label: "PDF documents" },
+    { key: "spreadsheetRegisters", label: "Spreadsheet registers" },
+    { key: "mixedEvidence", label: "Mixed evidence" },
+    { key: "nothingYet", label: "Nothing yet" },
+  ];
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Project Convention Setup</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#111827", marginBottom: 6 }}>Before setting up any fields, tell BIMLog about your project</div>
+        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>
+          Answer these questions first. BIMLog will use your answers to guide the convention structure correctly for your environment — whether you are setting up from scratch, taking over an existing project, configuring a partial scope, or simply analyzing first.
+        </div>
+      </div>
+
+      <RadioGroup label="Setup context" field="setupContextChoice" value={ctx.setupContextChoice} onChange={v => setCtx({ setupContextChoice: v })} options={[
+        { value: "full", label: "Set up the full project convention from the start" },
+        { value: "takeover", label: "Take over an existing document environment" },
+        { value: "partial", label: "Configure BIMLog for only part of the project scope" },
+        { value: "analyze_first", label: "Analyze the project first before deciding" },
+      ]} />
+
+      <RadioGroup label="Project environment" field="projectEnvironment" value={ctx.projectEnvironment} onChange={v => setCtx({ projectEnvironment: v })} options={[
+        { value: "building", label: "Building" },
+        { value: "industrial_epc", label: "Industrial / plant / EPC" },
+        { value: "infrastructure_civil", label: "Infrastructure / civil" },
+        { value: "legal_regulatory", label: "Legal / regulatory / document-heavy" },
+        { value: "mixed_custom", label: "Mixed / custom" },
+        { value: "not_sure", label: "Not sure yet" },
+      ]} />
+
+      <RadioGroup label="What do you want BIMLog to do first" field="builderIntent" value={ctx.builderIntent} onChange={v => setCtx({ builderIntent: v })} options={[
+        { value: "create_scratch", label: "Create a new convention from scratch" },
+        { value: "mirror_existing", label: "Mirror an existing naming logic" },
+        { value: "analyze_existing", label: "Analyze existing evidence and propose a structure" },
+        { value: "not_sure", label: "I am not sure yet" },
+      ]} />
+
+      <RadioGroup label="Scope of responsibility" field="scopeType" value={ctx.scopeType} onChange={v => setCtx({ scopeType: v })} options={[
+        { value: "entire", label: "Entire project" },
+        { value: "disciplines", label: "Specific disciplines" },
+        { value: "systems", label: "Specific systems" },
+        { value: "packages", label: "Specific packages / areas / volumes" },
+        { value: "review_only", label: "Document review / audit only" },
+        { value: "not_sure", label: "Not sure yet" },
+      ]} />
+
+      {isPartialScope && (
+        <div style={{ marginBottom: 22, padding: "16px 18px", border: "1.5px solid #BFDBFE", borderRadius: 8, background: "#F0F9FF" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>Specify your scope below</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {ctx.scopeType === "disciplines" && (
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Disciplines</label>
+                <input value={ctx.scopeDetails.disciplines} onChange={e => setCtx({ scopeDetails: { ...ctx.scopeDetails, disciplines: e.target.value } })}
+                  placeholder="e.g. Structural, Mechanical, Piping"
+                  style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", boxSizing: "border-box" }} />
+              </div>
+            )}
+            {ctx.scopeType === "systems" && (
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Systems</label>
+                <input value={ctx.scopeDetails.systems} onChange={e => setCtx({ scopeDetails: { ...ctx.scopeDetails, systems: e.target.value } })}
+                  placeholder="e.g. HVAC, Sprinkler, Instrumentation"
+                  style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", boxSizing: "border-box" }} />
+              </div>
+            )}
+            {ctx.scopeType === "packages" && (
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Packages / areas / volumes</label>
+                <input value={ctx.scopeDetails.packages} onChange={e => setCtx({ scopeDetails: { ...ctx.scopeDetails, packages: e.target.value } })}
+                  placeholder="e.g. Package A, Zone 3, Volume 2"
+                  style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", boxSizing: "border-box" }} />
+              </div>
+            )}
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Additional notes</label>
+              <input value={ctx.scopeDetails.notes} onChange={e => setCtx({ scopeDetails: { ...ctx.scopeDetails, notes: e.target.value } })}
+                placeholder="Any additional context about your scope"
+                style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", boxSizing: "border-box" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <RadioGroup label="Are levels / floors relevant to this project?" field="levelsRelevant" value={ctx.levelsRelevant} onChange={v => setCtx({ levelsRelevant: v })} options={[
+        { value: "yes", label: "Yes" },
+        { value: "no", label: "No" },
+        { value: "not_sure", label: "Not sure yet" },
+      ]} />
+
+      <RadioGroup label="What usually matters more in this project's document structure?" field="primaryStructure" value={ctx.primaryStructure} onChange={v => setCtx({ primaryStructure: v })} options={[
+        { value: "levels", label: "Levels / floors" },
+        { value: "areas", label: "Areas / zones" },
+        { value: "packages", label: "Packages / volumes" },
+        { value: "disciplines", label: "Disciplines" },
+        { value: "mixed", label: "Mixed" },
+        { value: "not_sure", label: "Not sure yet" },
+      ]} />
+
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 8 }}>What evidence do you already have?</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {evidenceOptions.map(opt => (
+            <label key={opt.key} htmlFor={`evidence-${opt.key}`} style={{
+              display: "flex", alignItems: "center", gap: 10, padding: "9px 14px",
+              border: `1.5px solid ${ctx.availableInputs[opt.key] ? "#2563EB" : "#E5E7EB"}`,
+              borderRadius: 8, cursor: "pointer",
+              background: ctx.availableInputs[opt.key] ? "#EFF6FF" : "white",
+            }}>
+              <input id={`evidence-${opt.key}`} type="checkbox"
+                checked={!!ctx.availableInputs[opt.key]}
+                onChange={e => setCtx({ availableInputs: { ...ctx.availableInputs, [opt.key]: e.target.checked } })}
+                style={{ accentColor: "#2563EB", width: 15, height: 15 }} />
+              <span style={{ fontSize: 13, color: "#111827" }}>{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        marginBottom: 28, padding: "14px 18px",
+        border: `2px solid ${ctx.analysisOnlyMode ? "#2563EB" : "#E5E7EB"}`,
+        borderRadius: 8, cursor: "pointer",
+        background: ctx.analysisOnlyMode ? "#EFF6FF" : "white",
+      }} onClick={() => setCtx({ analysisOnlyMode: !ctx.analysisOnlyMode })}>
+        <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
+          <input type="checkbox" checked={ctx.analysisOnlyMode}
+            onChange={e => setCtx({ analysisOnlyMode: e.target.checked })}
+            style={{ accentColor: "#2563EB", width: 15, height: 15, marginTop: 2, flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>Analyze project without creating a convention yet</div>
+            <div style={{ fontSize: 12, color: "#6B7280", marginTop: 3, lineHeight: 1.5 }}>BIMLog will perform discovery only and will not force you into final convention setup. You can review the findings and decide what to do next.</div>
+          </div>
+        </label>
+      </div>
+
+      <Button onClick={onContinue} style={{ width: "100%", justifyContent: "center", fontSize: 13, padding: "11px 0", gap: 6 }}>
+        Continue <ChevronRight style={{ width: 15, height: 15 }} />
+      </Button>
+    </div>
+  );
+}
+
+// ─── Industrial Structure Discovery ──────────────────────────────────────────
+function IndustrialDiscovery({ state, setState, onBack, onContinue }: {
+  state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  onBack: () => void;
+  onContinue: () => void;
+}) {
+  const ind = state.industrialState;
+  const setInd = (partial: Partial<IndustrialState>) =>
+    setState(s => ({ ...s, industrialState: { ...s.industrialState, ...partial } }));
+  const levelsRelevant = state.setupCtx.levelsRelevant === "yes";
+
+  function addCode(field: "disciplineCodes" | "systemCodes") {
+    setInd({ [field]: [...ind[field], { id: uid(), code: "", label: "" }] });
+  }
+  function removeCode(field: "disciplineCodes" | "systemCodes", id: string) {
+    setInd({ [field]: ind[field].filter(e => e.id !== id) });
+  }
+  function updateCode(field: "disciplineCodes" | "systemCodes", id: string, patch: Partial<IndustrialCodeEntry>) {
+    setInd({ [field]: ind[field].map(e => e.id === id ? { ...e, ...patch } : e) });
+  }
+
+  const codeTable = (label: string, sub: string, field: "disciplineCodes" | "systemCodes") => (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 10 }}>{sub}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {ind[field].map(entry => (
+          <div key={entry.id} style={{ display: "grid", gridTemplateColumns: "100px 1fr 28px", gap: 8, alignItems: "center" }}>
+            <input value={entry.code} onChange={e => updateCode(field, entry.id, { code: e.target.value.toUpperCase().slice(0, 8) })}
+              placeholder="CODE" style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, padding: "7px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", textTransform: "uppercase" }} />
+            <input value={entry.label} onChange={e => updateCode(field, entry.id, { label: e.target.value })}
+              placeholder="Description / full name" style={{ fontSize: 13, padding: "7px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none" }} />
+            <button onClick={() => removeCode(field, entry.id)}
+              style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}>
+              <Trash2 style={{ width: 13, height: 13 }} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => addCode(field)} style={{ marginTop: 8, fontSize: 12, padding: "6px 12px", borderRadius: 6, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", color: "#374151", display: "flex", alignItems: "center", gap: 5 }}>
+        <Plus style={{ width: 12, height: 12 }} /> Add {label.replace(" codes", "")}
+      </button>
+    </div>
+  );
+
+  const textArea = (label: string, sub: string, key: keyof Pick<IndustrialState, "packageStructure"|"areaZoneStructure"|"volumeStructure"|"sampleDocCodes"|"levelsIfRelevant">) => (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>{sub}</div>
+      <textarea value={ind[key]} onChange={e => setInd({ [key]: e.target.value })} rows={3}
+        style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit", lineHeight: 1.5 }} />
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Industrial Structure Discovery</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginBottom: 6 }}>Describe your project's industrial structure</div>
+        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>
+          Enter codes relevant to your project environment. Do not assume standard building disciplines. Use the codes, labels, and structure from your actual project.
+        </div>
+      </div>
+
+      {codeTable("Discipline codes", "Codes representing engineering disciplines (e.g. PROC, MECH, INST, ELEC, PIPE, CIVL)", "disciplineCodes")}
+      {codeTable("System codes", "Codes for process systems, plant systems, or technical systems (e.g. SYS-01, U100, F-300)", "systemCodes")}
+      {textArea("Package structure", "Describe how work packages, areas, or volumes are organized (one per line or brief description)", "packageStructure")}
+      {textArea("Area / zone structure", "Describe how areas or zones are organized (e.g. Area A, Zone 1, Unit 200)", "areaZoneStructure")}
+      {textArea("Volume / tomo structure", "Describe volume or tomo structure if applicable (e.g. Vol-01, Tomo-A)", "volumeStructure")}
+      {textArea("Sample existing document codes", "Paste 3-10 real document codes from the project so BIMLog can learn the pattern", "sampleDocCodes")}
+      {levelsRelevant && textArea("Level codes (you said levels are relevant)", "List the level codes used in this project (one per line)", "levelsIfRelevant")}
+
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+        <Button variant="outline" onClick={onBack} style={{ gap: 6, fontSize: 13 }}>
+          <ChevronLeft style={{ width: 15, height: 15 }} /> Back
+        </Button>
+        <Button onClick={onContinue} style={{ gap: 6, fontSize: 13 }}>
+          Continue to wizard <ChevronRight style={{ width: 15, height: 15 }} />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Import Existing Structure ────────────────────────────────────────────────
+function ImportStructure({ state, setState, token, projectId, onBack, onResult }: {
+  state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  token: string;
+  projectId: number;
+  onBack: () => void;
+  onResult: (result: DiscoveryResult) => void;
+}) {
+  const imp = state.importState;
+  const setImp = (partial: Partial<ImportState>) =>
+    setState(s => ({ ...s, importState: { ...s.importState, ...partial } }));
+
+  async function runAnalysis() {
+    setImp({ analyzing: true, error: "" });
+    try {
+      const sampleNames = imp.sampleNames.split("\n").map(s => s.trim()).filter(Boolean);
+      const body = {
+        setupContext: state.setupCtx.setupContextChoice,
+        projectEnvironment: state.setupCtx.projectEnvironment,
+        builderIntent: state.setupCtx.builderIntent,
+        scopeType: state.setupCtx.scopeType,
+        scopeDetails: state.setupCtx.scopeDetails,
+        levelsRelevant: state.setupCtx.levelsRelevant,
+        primaryStructure: state.setupCtx.primaryStructure,
+        availableInputs: state.setupCtx.availableInputs,
+        sampleNames,
+        rawFolderTreeText: imp.rawFolderText,
+        rawIndexText: imp.rawIndexText,
+        rawNotes: imp.rawNotes,
+      };
+      const res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setImp({ analyzing: false, error: data.error || "Analysis failed" });
+        return;
+      }
+      setImp({ analyzing: false });
+      setState(s => ({ ...s, discoveryResult: data as DiscoveryResult }));
+      onResult(data as DiscoveryResult);
+    } catch (err) {
+      setImp({ analyzing: false, error: err instanceof Error ? err.message : "Analysis failed" });
+    }
+  }
+
+  const textAreaField = (label: string, sub: string, key: keyof Pick<ImportState, "sampleNames"|"rawFolderText"|"rawIndexText"|"rawNotes">, rows: number, placeholder: string) => (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>{sub}</div>
+      <textarea value={imp[key]} onChange={e => setImp({ [key]: e.target.value })} rows={rows} placeholder={placeholder}
+        style={{ width: "100%", fontSize: 12, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "var(--font-mono)", lineHeight: 1.6 }} />
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Import Existing Structure</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginBottom: 6 }}>Provide evidence before BIMLog proposes anything</div>
+        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>
+          Paste any available evidence below. BIMLog will analyze it and propose a probable structure. You will review and edit every suggestion before anything is applied. Partial evidence is fine — the analysis works even with only filenames or folder names.
+        </div>
+      </div>
+
+      {textAreaField("Sample file names", "Paste existing file names, one per line", "sampleNames", 6, "PRJ-ARC-G0-DR-0001-P01\nPRJ-STR-L3-CA-0003-C02\n...")}
+      {textAreaField("Folder structure", "Paste a folder tree or list of folder names", "rawFolderText", 5, "01-Architecture\n  01.01-Drawings\n  01.02-Models\n02-Structure\n...")}
+      {textAreaField("Document index / register", "Paste rows from a document register or index", "rawIndexText", 5, "Doc No | Discipline | Title | Status\nPRJ-ARC-0001 | ARC | Ground Floor Plan | IFR...")}
+      {textAreaField("Additional notes", "Any other context, conventions explained in words, or instructions to the analysis engine", "rawNotes", 4, "The project uses a zone-based structure. Area codes are A1–A6...")}
+
+      {imp.error && (
+        <div style={{ marginBottom: 16, padding: "10px 14px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, fontSize: 13, color: "#991B1B" }}>
+          {imp.error}
+        </div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+        <Button variant="outline" onClick={onBack} style={{ gap: 6, fontSize: 13 }} disabled={imp.analyzing}>
+          <ChevronLeft style={{ width: 15, height: 15 }} /> Back
+        </Button>
+        <Button onClick={runAnalysis} disabled={imp.analyzing} style={{ gap: 6, fontSize: 13 }}>
+          {imp.analyzing ? (
+            <><RefreshCw style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} /> Analyzing project structure…</>
+          ) : (
+            <>Analyze Project Structure <ChevronRight style={{ width: 15, height: 15 }} /></>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── AI Suggestions review ────────────────────────────────────────────────────
+function AISuggestions({ state, setState, onBack, onContinueToWizard, onStopHere }: {
+  state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  onBack: () => void;
+  onContinueToWizard: () => void;
+  onStopHere: () => void;
+}) {
+  const result = state.discoveryResult;
+  if (!result) return null;
+
+  function updateItem(
+    list: "suggestedDisciplines" | "suggestedSystems" | "suggestedDocTypes" | "suggestedExtraFields",
+    idx: number, patch: Partial<DiscoveryItem>
+  ) {
+    setState(s => {
+      const r = s.discoveryResult;
+      if (!r) return s;
+      const updated = (r[list] as DiscoveryItem[]).map((item, i) => i === idx ? { ...item, ...patch } : item);
+      return { ...s, discoveryResult: { ...r, [list]: updated } };
+    });
+  }
+
+  function removeItem(list: "suggestedDisciplines" | "suggestedSystems" | "suggestedDocTypes" | "suggestedExtraFields", idx: number) {
+    setState(s => {
+      const r = s.discoveryResult;
+      if (!r) return s;
+      return { ...s, discoveryResult: { ...r, [list]: (r[list] as DiscoveryItem[]).filter((_, i) => i !== idx) } };
+    });
+  }
+
+  function addItem(list: "suggestedDisciplines" | "suggestedSystems" | "suggestedDocTypes" | "suggestedExtraFields") {
+    const blank: DiscoveryItem = { code: "", label: "", reason: "Manually added", confidence: "high", accepted: true };
+    setState(s => {
+      const r = s.discoveryResult;
+      if (!r) return s;
+      return { ...s, discoveryResult: { ...r, [list]: [...(r[list] as DiscoveryItem[]), blank] } };
+    });
+  }
+
+  const boolFlag = (v: boolean | null) => v === true ? "Yes" : v === false ? "No" : "Not determined";
+
+  const itemList = (
+    title: string,
+    list: "suggestedDisciplines" | "suggestedSystems" | "suggestedDocTypes" | "suggestedExtraFields",
+    items: DiscoveryItem[],
+    useKey = false
+  ) => (
+    <div style={{ marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{title}</div>
+        <button onClick={() => addItem(list)} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 5, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", color: "#374151", display: "flex", alignItems: "center", gap: 4 }}>
+          <Plus style={{ width: 11, height: 11 }} /> Add
+        </button>
+      </div>
+      {items.length === 0 ? (
+        <div style={{ fontSize: 12, color: "#9CA3AF", fontStyle: "italic" }}>None suggested</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {items.map((item, idx) => (
+            <div key={idx} style={{
+              padding: "10px 14px", borderRadius: 8,
+              border: `1.5px solid ${item.accepted === false ? "#E5E7EB" : "#D1D5DB"}`,
+              background: item.accepted === false ? "#F9FAFB" : "white",
+              opacity: item.accepted === false ? 0.55 : 1,
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    {item.editing ? (
+                      <>
+                        <input
+                          value={useKey ? (item.key ?? "") : (item.code ?? "")}
+                          onChange={e => updateItem(list, idx, useKey ? { key: e.target.value.toUpperCase() } : { code: e.target.value.toUpperCase() })}
+                          style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, width: 80, padding: "3px 6px", borderRadius: 4, border: "1px solid #D1D5DB", outline: "none" }}
+                        />
+                        <input
+                          value={item.label}
+                          onChange={e => updateItem(list, idx, { label: e.target.value })}
+                          style={{ flex: 1, fontSize: 12, padding: "3px 6px", borderRadius: 4, border: "1px solid #D1D5DB", outline: "none" }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "2px 8px", borderRadius: 4 }}>
+                          {useKey ? item.key : item.code}
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{item.label}</span>
+                      </>
+                    )}
+                    <ConfidenceBadge level={item.confidence} />
+                  </div>
+                  <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4 }}>{item.reason}</div>
+                </div>
+                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                  <button onClick={() => updateItem(list, idx, { editing: !item.editing })}
+                    style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", borderRadius: 4 }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#2563EB")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}>
+                    <Edit2 style={{ width: 12, height: 12 }} />
+                  </button>
+                  <button onClick={() => updateItem(list, idx, { accepted: item.accepted === false ? true : false })}
+                    style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: item.accepted === false ? "#9CA3AF" : "#16A34A", borderRadius: 4 }}>
+                    <Check style={{ width: 12, height: 12 }} />
+                  </button>
+                  <button onClick={() => removeItem(list, idx)}
+                    style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", borderRadius: 4 }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9CA3AF")}>
+                    <Trash2 style={{ width: 12, height: 12 }} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Suggested Convention Structure</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginBottom: 6 }}>Review BIMLog's analysis of your project</div>
+        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>
+          These are AI-generated proposals only. Everything below is editable. Your edits are authoritative — accept, modify, remove, or add items before proceeding. Nothing is applied until you confirm.
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 18px", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, marginBottom: 24 }}>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Project type interpretation</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{result.projectTypeGuess || "Not determined"}</div>
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Scope interpretation</div>
+          <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>{result.scopeInterpretation || "Not specified"}</div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
+          {[
+            { label: "Levels", val: boolFlag(result.usesLevels) },
+            { label: "Areas", val: boolFlag(result.usesAreas) },
+            { label: "Packages", val: boolFlag(result.usesPackages) },
+            { label: "Volumes", val: boolFlag(result.usesVolumes) },
+          ].map(f => (
+            <div key={f.label} style={{ padding: "8px 10px", background: "white", border: "1px solid #E2E8F0", borderRadius: 6, textAlign: "center" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", textTransform: "uppercase", marginBottom: 2 }}>{f.label}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{f.val}</div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Analysis summary</div>
+          <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>{result.analysisSummary}</div>
+        </div>
+        {result.recommendedMode && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Recommended mode</div>
+            <div style={{ fontSize: 13, color: "#374151" }}>{result.recommendedMode}</div>
+          </div>
+        )}
+      </div>
+
+      {itemList("Suggested disciplines", "suggestedDisciplines", result.suggestedDisciplines)}
+      {itemList("Suggested systems", "suggestedSystems", result.suggestedSystems)}
+      {itemList("Suggested document types", "suggestedDocTypes", result.suggestedDocTypes)}
+      {itemList("Suggested extra fields", "suggestedExtraFields", result.suggestedExtraFields, true)}
+
+      {result.suggestedFieldOrder && result.suggestedFieldOrder.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 8 }}>Suggested field order</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {result.suggestedFieldOrder.map((f, i) => (
+              <span key={i} style={{ fontSize: 12, fontWeight: 600, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "4px 10px", borderRadius: 5 }}>
+                {i + 1}. {f}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {result.ambiguities && result.ambiguities.length > 0 && (
+        <div style={{ marginBottom: 24, padding: "12px 16px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Open questions / ambiguities</div>
+          <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
+            {result.ambiguities.map((a, i) => (
+              <li key={i} style={{ fontSize: 12, color: "#92400E" }}>{a}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: "1px solid hsl(var(--border))" }}>
+        <Button variant="outline" onClick={onBack} style={{ gap: 6, fontSize: 13 }}>
+          <ChevronLeft style={{ width: 15, height: 15 }} /> Back
+        </Button>
+        <div style={{ display: "flex", gap: 10 }}>
+          {state.setupCtx.analysisOnlyMode && (
+            <Button variant="outline" onClick={onStopHere} style={{ fontSize: 13 }}>
+              Save findings and stop here
+            </Button>
+          )}
+          <Button onClick={onContinueToWizard} style={{ gap: 6, fontSize: 13 }}>
+            Accept and continue to builder <ChevronRight style={{ width: 15, height: 15 }} />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1548,6 +2244,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const { data: convention, isLoading, isError, refetch } = useGetConvention(projectId);
   const [forceWizard, setForceWizard] = useState(false);
 
+  const { token } = useAuthStore();
   const initDisciplines = (): DisciplineEntry[] => DEFAULT_DISCIPLINES.map(d => ({ ...d, id: uid(), selected: true }));
   const initDocTypes    = (): DocTypeEntry[] => DOC_TYPE_CATEGORIES.flatMap(cat => cat.types.map(t => ({ ...t, id: uid(), category: cat.cat, selected: false })));
   const initStatusCodes = (): StatusEntry[] => DEFAULT_STATUS.map(sc => ({ ...sc, id: uid(), selected: true }));
@@ -1581,6 +2278,11 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     requireAcceptance: true,
     enableExtRestrictions: false,
     extRestrictions: {},
+    flowPhase: "setup_context",
+    setupCtx: defaultSetupCtx(),
+    discoveryResult: null,
+    industrialState: defaultIndustrialState(),
+    importState: defaultImportState(),
   }));
 
   const [isSaving, setIsSaving] = useState(false);
@@ -1632,8 +2334,63 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
 
   const hasExisting = convention && convention.fields && convention.fields.length > 0;
-  if (hasExisting && !forceWizard) return <EditMode convention={convention} onRunWizard={() => setForceWizard(true)} lang={lang} projectId={projectId} />;
+  if (hasExisting && !forceWizard) return <EditMode convention={convention} onRunWizard={() => { setForceWizard(true); setWs(s => ({ ...s, flowPhase: "setup_context", setupCtx: defaultSetupCtx() })); }} lang={lang} projectId={projectId} />;
 
+  // ── routing logic: determine the next phase after Step 0 ──────────────────
+  function handleSetupContinue() {
+    const ctx = ws.setupCtx;
+    const intent = ctx.builderIntent;
+    const env = ctx.projectEnvironment;
+    const isAnalyze = ctx.analysisOnlyMode || intent === "analyze_existing" || intent === "mirror_existing" || ctx.setupContextChoice === "takeover" || ctx.setupContextChoice === "analyze_first";
+    if (isAnalyze) { setWs(s => ({ ...s, flowPhase: "import_structure" })); return; }
+    if (env === "industrial_epc") { setWs(s => ({ ...s, flowPhase: "industrial_discovery" })); return; }
+    setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+  }
+
+  const { flowPhase } = ws;
+
+  // ── Setup Context (front door) ────────────────────────────────────────────
+  if (flowPhase === "setup_context") {
+    return <Step0_SetupContext state={ws} setState={setWs} onContinue={handleSetupContinue} />;
+  }
+
+  // ── Industrial Structure Discovery ────────────────────────────────────────
+  if (flowPhase === "industrial_discovery") {
+    return (
+      <IndustrialDiscovery
+        state={ws} setState={setWs}
+        onBack={() => setWs(s => ({ ...s, flowPhase: "setup_context" }))}
+        onContinue={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
+      />
+    );
+  }
+
+  // ── Import Existing Structure ─────────────────────────────────────────────
+  if (flowPhase === "import_structure") {
+    return (
+      <ImportStructure
+        state={ws} setState={setWs}
+        token={token ?? ""}
+        projectId={projectId}
+        onBack={() => setWs(s => ({ ...s, flowPhase: "setup_context" }))}
+        onResult={() => setWs(s => ({ ...s, flowPhase: "ai_suggestions" }))}
+      />
+    );
+  }
+
+  // ── AI Suggestions review ─────────────────────────────────────────────────
+  if (flowPhase === "ai_suggestions") {
+    return (
+      <AISuggestions
+        state={ws} setState={setWs}
+        onBack={() => setWs(s => ({ ...s, flowPhase: "import_structure" }))}
+        onContinueToWizard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
+        onStopHere={() => { /* analysis only: stay on review, user can restart later */ }}
+      />
+    );
+  }
+
+  // ── Main wizard (existing steps) ──────────────────────────────────────────
   const step = ws.step;
   return (
     <div>
@@ -1644,7 +2401,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       {step === 3 && <Step4 state={ws} setState={setWs} lang={lang} />}
       {step === 4 && <ReviewScreen state={ws} onEdit={s => setWs(prev => ({ ...prev, step: s }))} onSave={handleSave} isSaving={isSaving} saved={saved} savedMessage={savedMessage} lang={lang} projectId={projectId} />}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
-        <div>{step > 0 && <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>}</div>
+        <div>
+          {step === 0
+            ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back to Setup","Volver",lang)}</Button>
+            : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
+          }
+        </div>
         <div>{step < 4 && <Button onClick={() => setWs(s => ({ ...s, step: s.step + 1 }))} style={{ gap: 6, fontSize: 13 }}>{step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}<ChevronRight style={{ width: 15, height: 15 }} /></Button>}</div>
       </div>
     </div>

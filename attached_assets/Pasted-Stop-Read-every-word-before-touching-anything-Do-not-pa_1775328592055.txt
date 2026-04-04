@@ -1,0 +1,339 @@
+Stop. Read every word before touching anything.
+
+Do not patch the current Convention Builder screens. The problem is not the discipline list. The problem is the builder starts too late and assumes too much.
+
+We need to rebuild the FRONT DOOR of the Convention Builder so BIMLog helps the user understand the project structure before forcing any convention structure, disciplines, levels, packages, or document assumptions.
+
+This must work for all cases:
+full-project setup,
+partial-scope setup,
+trade-specific setup,
+fresh-start projects,
+takeover projects,
+users joining an already-running project,
+users who only understand part of the job,
+users who have inherited hundreds of documents and do not yet know the structure.
+
+Do not hardcode around IBQ. IBQ is only an example. Build this generically.
+
+Modify ONLY the Convention Builder flow and the minimum backend support required for it.
+
+Build this in exact order:
+
+STEP 1 — Add a new Step 0 before the current Convention Builder flow.
+
+Title:
+Project Convention Setup
+
+This step must appear before any discipline, level, document type, or revision setup.
+
+This step must ask these questions:
+
+Setup context
+Options:
+Set up the full project convention from the start
+Take over an existing document environment
+Configure BIMLog for only part of the project scope
+Analyze the project first before deciding
+Project environment
+Options:
+Building
+Industrial / plant / EPC
+Infrastructure / civil
+Legal / regulatory / document-heavy
+Mixed / custom
+Not sure yet
+What do you want BIMLog to do first
+Options:
+Create a new convention from scratch
+Mirror an existing naming logic
+Analyze existing evidence and propose a structure
+I am not sure yet
+Scope of responsibility
+Options:
+Entire project
+Specific disciplines
+Specific systems
+Specific packages / areas / volumes
+Document review / audit only
+Not sure yet
+
+If the user selects a partial scope option, show follow-up inputs:
+disciplines
+systems
+packages / areas / volumes
+free text notes
+
+Are levels / floors relevant to this project?
+Options:
+Yes
+No
+Not sure yet
+What usually matters more in this project’s document structure?
+Options:
+Levels / floors
+Areas / zones
+Packages / volumes
+Disciplines
+Mixed
+Not sure yet
+What evidence do you already have?
+Checkboxes:
+Sample file names
+Folder structure
+Document index / register
+PDF documents
+Spreadsheet registers
+Mixed evidence
+Nothing yet
+Add this option clearly:
+Analyze project without creating a convention yet
+
+This is critical. If selected, BIMLog performs discovery only and does not force the user into final convention setup.
+
+At the bottom show:
+Continue
+
+Do not show the current disciplines / levels builder until this step is completed.
+
+STEP 2 — Save this setup context.
+
+If needed, add fields to naming_conventions table or a linked config table:
+
+setup_context text nullable
+project_environment text nullable
+builder_intent text nullable
+scope_type text nullable
+scope_details jsonb nullable
+levels_relevant boolean nullable
+primary_structure text nullable
+available_inputs jsonb nullable
+analysis_only_mode boolean default false
+
+Push schema if needed.
+
+STEP 3 — Route the flow based on answers.
+
+If setup_context is full project + project_environment is Building + builder_intent is create from scratch:
+Use the current builder flow after Step 0.
+
+If project_environment is Industrial / plant / EPC:
+Do NOT go directly to generic disciplines and levels.
+Show a new guided step first:
+Industrial Structure Discovery
+
+If builder_intent is mirror existing naming logic or analyze existing evidence:
+Show a new guided step first:
+Import Existing Structure
+
+If analysis_only_mode is true:
+Do not push the user into final convention fields yet.
+Run analysis, show findings, let them stop there if needed.
+
+STEP 4 — Build Industrial Structure Discovery.
+
+This step should ask for and support:
+discipline codes
+system codes
+package structure
+area / zone structure
+volume / tomo structure
+sample existing document codes
+optional levels only if the user said levels are relevant
+
+Do not preload generic building disciplines here.
+Do not assume floors are central.
+Do not force architecture / plumbing / etc. unless they come from evidence or user choice.
+
+STEP 5 — Build Import Existing Structure.
+
+This step must allow the user to provide evidence before BIMLog proposes anything.
+
+Inputs:
+plain text paste area
+sample filenames pasted one per line
+folder tree / folder names pasted as text
+index / register text
+optional upload of PDFs and spreadsheets if already supported by current infrastructure
+
+Add:
+Analyze Project Structure button
+
+When clicked, call backend discovery endpoint.
+
+STEP 6 — Create backend convention discovery endpoint.
+
+Add:
+POST /api/v1/projects/:projectId/convention/discover
+
+Request body should include:
+Step 0 answers
+sampleNames array
+rawFolderTreeText
+rawIndexText
+rawNotes
+optional extracted text from uploaded docs if available
+
+Claude prompt must say exactly in substance:
+You are helping BIMLog understand a project document environment.
+Do not assume a standard building convention unless the evidence clearly shows one.
+The user may only be responsible for part of the project.
+The evidence may be incomplete.
+Infer probable structure, but do not force certainty where there is ambiguity.
+Return ONLY valid JSON.
+
+Return this structure:
+{
+"projectTypeGuess": "",
+"scopeInterpretation": "",
+"usesLevels": true/false/null,
+"usesAreas": true/false/null,
+"usesPackages": true/false/null,
+"usesVolumes": true/false/null,
+"suggestedDisciplines": [
+{ "code":"", "label":"", "reason":"", "confidence":"high|medium|low" }
+],
+"suggestedSystems": [
+{ "code":"", "label":"", "reason":"", "confidence":"high|medium|low" }
+],
+"suggestedDocTypes": [
+{ "code":"", "label":"", "reason":"", "confidence":"high|medium|low" }
+],
+"suggestedExtraFields": [
+{ "key":"", "label":"", "reason":"", "confidence":"high|medium|low" }
+],
+"suggestedFieldOrder": [""],
+"ambiguities": [""],
+"recommendedMode": "",
+"analysisSummary": ""
+}
+
+If parsing fails, return a clear structured error and do not crash the builder.
+
+STEP 7 — Build Suggested Convention Structure review screen.
+
+Title:
+Suggested Convention Structure
+
+Show:
+project type guess
+scope interpretation
+suggested disciplines
+suggested systems
+suggested document types
+suggested extra fields
+suggested field order
+analysis summary
+ambiguities / questions needing confirmation
+
+Every inferred item must show:
+code / label
+reason
+confidence
+
+Every inferred item must be editable.
+The user must be able to:
+accept
+edit
+remove
+add new items manually
+
+Do not auto-lock anything.
+AI suggestions are proposals only.
+User edits are authoritative.
+
+STEP 8 — Add continuous refinement rule.
+
+The Convention Builder must support refinement after initial setup.
+
+That means:
+new evidence can be analyzed later
+new disciplines / systems / packages can be added later
+the convention can evolve without breaking existing records
+AI may propose changes later, but never silently changes the locked structure
+
+Add this rule clearly:
+
+The Convention Builder must support post-setup refinement.
+
+Users must be able to return later and:
+add new disciplines
+add new systems
+add new packages / volumes / areas
+add new document types
+add new extra fields
+reorder fields
+disable fields no longer needed
+
+But this must NOT retroactively break or rewrite existing records.
+
+Implement convention versioning behavior:
+when the structure is changed after initial setup, BIMLog saves the updated convention as the new active convention state for future records
+existing files and existing validated records must preserve the convention context they were created under
+the UI should show that the convention was updated and when
+if useful, label existing records as validated under an earlier convention version or earlier convention state
+
+Do not force users to rebuild from scratch just because reality evolved.
+The builder must be structured but adaptable.
+
+STEP 9 — Scope awareness must filter downstream builder steps.
+
+If the user said they are only responsible for part of the project,
+the builder must propose and display only the relevant subset first.
+
+Examples:
+specific disciplines only
+specific systems only
+specific packages only
+document review only
+
+This scope awareness must affect:
+what BIMLog proposes
+what builder screens show first
+what AI treats as relevant
+
+STEP 10 — Reality rules.
+
+Do NOT build full parsing for RVT, DWG, NWD, IFC right now.
+Use filenames, pasted evidence, folder trees, registers, and extracted PDF text as primary signals.
+This discovery system must work even if the user only has filenames and folder names.
+
+Do NOT show disciplines, levels, or document types until after:
+the user chooses to build manually
+or analysis results are shown
+
+The flow must feel like:
+Understand context first
+Read evidence second
+Infer structure third
+Confirm and edit fourth
+Detailed builder last
+
+Keep the UI serious, clean, professional. No emojis. No playful language.
+
+STEP 11 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -n "Project Convention Setup|Set up the full project convention from the start|Take over an existing document environment|Configure BIMLog for only part of the project scope|Analyze the project first before deciding" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -20
+
+Check 2
+grep -n "Scope of responsibility|Entire project|Specific disciplines|Specific systems|Specific packages / areas / volumes|Document review / audit only" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -20
+
+Check 3
+grep -n "Analyze project without creating a convention yet|Industrial Structure Discovery|Import Existing Structure|Suggested Convention Structure" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -20
+
+Check 4
+grep -Rni "convention/discover" artifacts/api-server/src/routes | head -20
+
+Check 5
+grep -n "setup_context|project_environment|builder_intent|scope_type|scope_details|levels_relevant|primary_structure|available_inputs|analysis_only_mode" artifacts/workspace/db/schema.ts | head -20
+
+Check 6
+grep -Rni "Do not assume a standard building convention unless the evidence clearly shows one" artifacts/api-server/src/routes | head -20
+
+Check 7
+grep -Rni "confidence" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes | head -20
+
+Show exact output only. Nothing else.
