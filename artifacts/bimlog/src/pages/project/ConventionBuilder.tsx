@@ -776,6 +776,8 @@ function ImportStructure({ state, setState, token, projectId, onBack, onResult }
   const setImp = (partial: Partial<ImportState>) =>
     setState(s => ({ ...s, importState: { ...s.importState, ...partial } }));
 
+  const [dragOver, setDragOver] = useState<UploadedFile["category"] | null>(null);
+
   async function runAnalysis() {
     setImp({ analyzing: true, error: "", extractionWarning: "" });
     try {
@@ -854,47 +856,77 @@ function ImportStructure({ state, setState, token, projectId, onBack, onResult }
   ) {
     const slotId = `upload-${category}`;
     const catFiles = imp.uploadedFiles.filter(f => f.category === category);
+    const isOver = dragOver === category;
+
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+      e.preventDefault();
+      setDragOver(null);
+      const dropped = Array.from(e.dataTransfer.files);
+      const newFiles = dropped.map(file => ({ id: uid(), file, category } as UploadedFile));
+      if (newFiles.length > 0) setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
+    }
+
     return (
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 3 }}>{title}</div>
-        <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: catFiles.length > 0 ? 8 : 10 }}>
+        <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>
           {purposes.join(" · ")}
         </div>
-        {catFiles.length > 0 && (
-          <div style={{ marginBottom: 8 }}>
-            {catFiles.map(uf => (
-              <div key={uf.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 5, marginBottom: 4, fontSize: 12 }}>
-                <FileText style={{ width: 12, height: 12, color: "#6B7280", flexShrink: 0 }} />
-                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#374151" }}>{uf.file.name}</span>
-                <span style={{ color: "#9CA3AF", flexShrink: 0, fontSize: 11 }}>{uf.file.name.split(".").pop()?.toUpperCase()}</span>
-                <button
-                  type="button"
-                  onClick={() => setImp({ uploadedFiles: imp.uploadedFiles.filter(f => f.id !== uf.id) })}
-                  style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", display: "flex", alignItems: "center" }}
-                >
-                  <X style={{ width: 12, height: 12 }} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <label htmlFor={slotId} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", fontSize: 12, border: "1px dashed #D1D5DB", borderRadius: 6, cursor: "pointer", color: "#6B7280", background: "#FAFAFA" }}>
-          <Upload style={{ width: 12, height: 12 }} />
-          Add files
-          <input
-            id={slotId}
-            type="file"
-            multiple
-            accept={accept}
-            style={{ display: "none" }}
-            onChange={e => {
-              const newFiles = Array.from(e.target.files || []).map(file => ({ id: uid(), file, category } as UploadedFile));
-              setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
-              e.target.value = "";
-            }}
-          />
-        </label>
-        <span style={{ marginLeft: 8, fontSize: 11, color: "#D1D5DB" }}>{accept.replace(/\./g, "").split(",").join(", ").toUpperCase()}</span>
+        <div
+          onDragOver={e => { e.preventDefault(); setDragOver(category); }}
+          onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(null); }}
+          onDrop={handleDrop}
+          style={{
+            border: `1px dashed ${isOver ? "#2563EB" : "#D1D5DB"}`,
+            borderRadius: 8,
+            background: isOver ? "#EFF6FF" : "#FAFAFA",
+            padding: "14px 16px",
+            transition: "border-color 0.15s, background 0.15s",
+          }}
+        >
+          {catFiles.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              {catFiles.map(uf => (
+                <div key={uf.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 5, marginBottom: 4, fontSize: 12 }}>
+                  <FileText style={{ width: 12, height: 12, color: "#6B7280", flexShrink: 0 }} />
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#374151" }}>{uf.file.name}</span>
+                  <span style={{ color: "#9CA3AF", flexShrink: 0, fontSize: 11 }}>{uf.file.name.split(".").pop()?.toUpperCase()}</span>
+                  <button
+                    type="button"
+                    onClick={() => setImp({ uploadedFiles: imp.uploadedFiles.filter(f => f.id !== uf.id) })}
+                    style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", display: "flex", alignItems: "center" }}
+                  >
+                    <X style={{ width: 12, height: 12 }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label
+            htmlFor={slotId}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "10px 12px", cursor: "pointer" }}
+          >
+            <Upload style={{ width: 18, height: 18, color: isOver ? "#2563EB" : "#9CA3AF" }} />
+            <span style={{ fontSize: 12, fontWeight: 500, color: isOver ? "#1D4ED8" : "#6B7280" }}>
+              Drag and drop files here or click to browse
+            </span>
+            <span style={{ fontSize: 11, color: "#C4C9D4" }}>
+              {accept.replace(/\./g, "").split(",").join(", ").toUpperCase()}
+            </span>
+            <input
+              id={slotId}
+              type="file"
+              multiple
+              accept={accept}
+              style={{ display: "none" }}
+              onChange={e => {
+                const newFiles = Array.from(e.target.files || []).map(file => ({ id: uid(), file, category } as UploadedFile));
+                setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
       </div>
     );
   }
