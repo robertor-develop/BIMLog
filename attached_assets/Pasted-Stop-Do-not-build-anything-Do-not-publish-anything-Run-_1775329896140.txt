@@ -1,0 +1,76 @@
+Stop. Do not build anything. Do not publish anything. Run a full stability audit first so we know the current state before real-project testing.
+
+Show exact output only.
+
+=== CHECK 1 — Frontend TypeScript ===
+cd /home/runner/workspace/artifacts/bimlog && npx tsc --noEmit
+
+=== CHECK 2 — Backend TypeScript ===
+cd /home/runner/workspace/artifacts/api-server && npx tsc --noEmit
+
+=== CHECK 3 — Frontend build ===
+cd /home/runner/workspace/artifacts/bimlog && npm run build
+
+=== CHECK 4 — Backend build / compile check ===
+cd /home/runner/workspace/artifacts/api-server && npm run build
+
+=== CHECK 5 — Dead code / unused imports frontend ===
+cd /home/runner/workspace/artifacts/bimlog && npx eslint src --ext .ts,.tsx
+
+=== CHECK 6 — Dead code / unused imports backend ===
+cd /home/runner/workspace/artifacts/api-server && npx eslint src --ext .ts
+
+=== CHECK 7 — Mounted backend routes ===
+grep -Rni "router.use|app.use" artifacts/api-server/src | head -100
+
+=== CHECK 8 — Convention Builder wiring ===
+grep -n "Project Convention Setup|Industrial Structure Discovery|Import Existing Structure|Suggested Convention Structure|convention/discover" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -50
+
+=== CHECK 9 — Schema fields actually present in DB ===
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'naming_conventions'
+ORDER BY ordinal_position;
+
+=== CHECK 10 — DB tables count ===
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+=== CHECK 11 — Find obvious dead placeholder pages/tabs ===
+grep -Rni "Coming Soon|placeholder|TODO|FIXME" artifacts/bimlog/src artifacts/api-server/src | head -100
+
+=== CHECK 12 — Dashboard / TotalControl / Reports / new tabs existence ===
+find artifacts/bimlog/src/pages -name ".tsx" | sort
+find artifacts/bimlog/src/pages/project -name ".tsx" | sort
+
+=== CHECK 13 — Backend health endpoint ===
+curl -s http://127.0.0.1:8080/api/v1/healthz
+
+=== CHECK 14 — Auth-protected route smoke test with current session if available ===
+If a token is available in the dev environment, test:
+GET /api/v1/dashboard/briefing
+GET /api/v1/dashboard/stats
+GET /api/v1/notifications
+GET /api/v1/projects/:projectId/convention
+GET /api/v1/projects/:projectId/directory
+GET /api/v1/projects/:projectId/transmittals
+GET /api/v1/projects/:projectId/change-orders
+GET /api/v1/projects/:projectId/meetings
+GET /api/v1/projects/:projectId/milestones
+Show status code for each.
+
+=== CHECK 15 — Search for broken query-param auth patterns ===
+grep -Rni "token=.*window.open|window.open.*token|Authorization.*query" artifacts/bimlog/src artifacts/api-server/src | head -50
+
+=== CHECK 16 — Search for dangerous silent catches ===
+grep -Rni "catch (() =>|catch(
+ =>|catch { }|catch{}" artifacts/api-server/src artifacts/bimlog/src | head -100
+
+=== CHECK 17 — Search for hardcoded project references ===
+grep -Rni "IBQ|270 Park|NYC-270|robertor@rryasociados.com
+" artifacts/bimlog/src artifacts/api-server/src | head -100
+
+=== CHECK 18 — Search for navigation to missing routes ===
+grep -Rni "navigate(|setLocation(|href=" artifacts/bimlog/src | head -200
