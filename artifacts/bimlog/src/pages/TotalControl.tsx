@@ -492,27 +492,6 @@ export function TotalControl() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  useEffect(() => {
-    if (!token) { setLocation("/login"); return; }
-    getMe()
-      .then((data) => {
-        const userData = data as any;
-        const isAdmin = userData?.is_super_admin === true || userData?.isSuperAdmin === true;
-        if (!isAdmin) { setLocation("/dashboard"); return; }
-        setAuthorized(true);
-        loadAll();
-      })
-      .catch(() => { setLocation("/dashboard"); });
-  }, [token]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(false);
-      setLoadError(true);
-    }, 10000);
-    return () => clearTimeout(timeout);
-  }, []);
-
   const loadAll = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -567,6 +546,19 @@ export function TotalControl() {
       setLoading(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!token) { setLocation("/login"); return; }
+    getMe()
+      .then((data) => {
+        const userData = data as any;
+        const isAdmin = userData?.is_super_admin === true || userData?.isSuperAdmin === true;
+        if (!isAdmin) { setLocation("/dashboard"); return; }
+        setAuthorized(true);
+        loadAll();
+      })
+      .catch(() => { setLocation("/dashboard"); });
+  }, [token, loadAll]);
 
   const handleHealthBarExpand = (tab: string) => {
     try {
