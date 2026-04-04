@@ -46,7 +46,7 @@ async function logAdminAction(params: {
 }
 
 // ── Platform Stats (Super Admin only) ────────────────────────────────────────
-router.get("/admin/platform-stats", async (req, res) => {
+router.get("/admin/platform-stats", authMiddleware, async (req, res) => {
   try {
     if (!req.user?.isSuperAdmin) {
       return res.status(403).json({ error: "Forbidden" });
