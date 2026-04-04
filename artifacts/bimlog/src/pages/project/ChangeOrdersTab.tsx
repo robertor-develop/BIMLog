@@ -64,7 +64,8 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       reject: [t("Reject this change order?", "¿Rechazar esta orden?"), ""],
     };
     if (!confirm(msgs[act][0])) return;
-    await fetch(`${API}/projects/${projectId}/change-orders/${id}/${act}`, { method: "POST", headers });
+    const r = await fetch(`${API}/projects/${projectId}/change-orders/${id}/${act}`, { method: "POST", headers });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.error || "Request failed"); return; }
     await load();
   };
 

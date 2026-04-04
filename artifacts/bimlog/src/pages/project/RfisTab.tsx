@@ -1202,11 +1202,11 @@ ${hasResp ? `
     </td>
     <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
       <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SIGNATURE</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:4pt;font-size:8pt;">
+      <div style='display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:4pt;font-size:8pt;'>
         <div>Name: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
         <div>Title: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;font-size:8pt;">
+      <div style='display:grid;grid-template-columns:1fr 1fr;gap:8pt;font-size:8pt;'>
         <div>Company: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
         <div>Date: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
       </div>

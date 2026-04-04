@@ -77,24 +77,31 @@ export function MasterSidebar() {
     setLoadingNotifs(true);
     try {
       const r = await fetch(`${API_BASE}/api/v1/notifications`, { headers });
-      if (r.ok) setNotifications(await r.json());
+      if (!r.ok) { console.error("Notifications fetch failed", r.status); return; }
+      setNotifications(await r.json());
     } finally { setLoadingNotifs(false); }
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const markRead = async (id: number) => {
-    await fetch(`${API_BASE}/api/v1/notifications/${id}/read`, { method: "PATCH", headers });
+    try {
+      await fetch(`${API_BASE}/api/v1/notifications/${id}/read`, { method: "PATCH", headers });
+    } catch(e) { console.error("Notification action failed", e); }
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
   const markAllRead = async () => {
-    await fetch(`${API_BASE}/api/v1/notifications/read-all`, { method: "PATCH", headers });
+    try {
+      await fetch(`${API_BASE}/api/v1/notifications/read-all`, { method: "PATCH", headers });
+    } catch(e) { console.error("Notification action failed", e); }
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
   const deleteNotif = async (id: number) => {
-    await fetch(`${API_BASE}/api/v1/notifications/${id}`, { method: "DELETE", headers });
+    try {
+      await fetch(`${API_BASE}/api/v1/notifications/${id}`, { method: "DELETE", headers });
+    } catch(e) { console.error("Notification action failed", e); }
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -116,7 +123,8 @@ export function MasterSidebar() {
       setSearchLoading(true);
       try {
         const r = await fetch(`${API_BASE}/api/v1/search?q=${encodeURIComponent(searchQ)}`, { headers });
-        if (r.ok) setSearchResults(await r.json());
+        if (!r.ok) { setSearchResults(null); return; }
+        setSearchResults(await r.json());
       } finally { setSearchLoading(false); }
     }, 300);
   }, [searchQ]);

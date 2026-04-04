@@ -1,0 +1,125 @@
+Stop. Read every word. Fix these specific issues only.
+Do not touch anything else.
+Do not publish until all checks pass.
+
+═══════════════════════════════════════════════════════
+FIX 1 — ADD .ok CHECKS TO ALL UNGUARDED FETCH CALLS
+═══════════════════════════════════════════════════════
+
+In MasterSidebar.tsx fix these fetch calls:
+
+Line 79 — notifications fetch:
+Change:
+  const r = await fetch(`...notifications`, { headers });
+  if (r.ok) setNotifications(await r.json());
+Add after the fetch:
+  if (!r.ok) { console.error("Notifications fetch failed", r.status); return; }
+
+Lines 87, 92, 97 — notification actions:
+Wrap each in try/catch:
+  try {
+    await fetch(...);
+  } catch(e) { console.error("Notification action failed", e); }
+
+Line 118 — search fetch:
+Add after fetch:
+  if (!r.ok) { setSearchResults(null); return; }
+
+In TransmittalsTab.tsx fix lines 34, 44, 56, 61, 72:
+After every fetch add:
+  if (!r.ok) { 
+    const d = await r.json().catch(() => ({}));
+    setError(d.error || "Request failed"); 
+    return; 
+  }
+
+In ChangeOrdersTab.tsx fix lines 40, 52, 67, 74:
+Same pattern — add .ok check after every fetch.
+
+In MeetingsTab.tsx fix lines 55, 68, 73:
+Same pattern — add .ok check after every fetch.
+
+═══════════════════════════════════════════════════════
+FIX 2 — RFISTAB HTML STYLE STRINGS
+═══════════════════════════════════════════════════════
+
+In RfisTab.tsx lines 1205 and 1209:
+These use HTML string style attributes which don't 
+work in React JSX.
+
+Change:
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:4pt;font-size:8pt;">
+To:
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8pt",marginBottom:"4pt",fontSize:"8pt"}}>
+
+And:
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8pt;font-size:8pt;">
+To:
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8pt",fontSize:"8pt"}}>
+
+═══════════════════════════════════════════════════════
+FIX 3 — PROJECTSIDEBAR WRONG NAVIGATION
+═══════════════════════════════════════════════════════
+
+In ProjectSidebar.tsx line 242:
+  href={`/projects/${projectId}/${item.id}`}
+
+This navigates to a raw item ID which is wrong.
+Check what item.id represents here — if these are
+tab items then the href should use item.id as the
+tab name not a numeric ID.
+
+Show me the context around line 242:
+grep -n "item.id\|item\." \
+artifacts/bimlog/src/components/layout/ProjectSidebar.tsx | \
+head -20
+
+If item.id is a tab slug like "files", "rfis" etc then
+the href is correct. If it's a numeric database ID
+then change to use the tab slug instead.
+
+═══════════════════════════════════════════════════════
+FIX 4 — VERIFY SUBMITTAL RESPOND ENDPOINT
+═══════════════════════════════════════════════════════
+
+Verify this endpoint exists in submittals.ts:
+grep -n "respond\|/respond" \
+artifacts/api-server/src/routes/submittals.ts | head -5
+
+If it exists — no action needed.
+If it does not exist — add:
+POST /projects/:projectId/submittals/:submittalId/respond
+  Body: { decision, notes }
+  Update submittal status based on decision
+  Log to activity_log
+  Auth: requirePermission('admin', 'write')
+
+═══════════════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════════════
+
+Check 1 — Frontend TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+Expected: 0
+
+Check 2 — Backend TypeScript errors:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+Expected: 0
+
+Check 3 — .ok checks added to new tabs:
+grep -n "\.ok\|if (!r\." \
+artifacts/bimlog/src/pages/project/TransmittalsTab.tsx | head -5
+
+Check 4 — RfisTab style fixed:
+grep -n "style=\"display:grid" \
+artifacts/bimlog/src/pages/project/RfisTab.tsx | head -5
+Expected: no output
+
+Check 5 — Submittal respond endpoint:
+grep -n "respond" \
+artifacts/api-server/src/routes/submittals.ts | head -5
+
+Rebuild frontend and backend.
+Restart API server.
+Publish.
+Paste all 5 checks. Nothing else.

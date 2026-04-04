@@ -53,12 +53,14 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
 
   const send = async (id: number) => {
     if (!confirm(t("Send this transmittal?", "¿Enviar esta transmisión?"))) return;
-    await fetch(`${API}/projects/${projectId}/transmittals/${id}/send`, { method: "POST", headers });
+    const r = await fetch(`${API}/projects/${projectId}/transmittals/${id}/send`, { method: "POST", headers });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.error || "Request failed"); return; }
     await load();
   };
 
   const acknowledge = async (id: number) => {
-    await fetch(`${API}/projects/${projectId}/transmittals/${id}/acknowledge`, { method: "POST", headers });
+    const r = await fetch(`${API}/projects/${projectId}/transmittals/${id}/acknowledge`, { method: "POST", headers });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.error || "Request failed"); return; }
     await load();
   };
 

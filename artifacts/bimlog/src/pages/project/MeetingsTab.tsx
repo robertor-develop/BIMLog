@@ -70,7 +70,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         const d = await r.json();
         setMeetings(prev => prev.map(m => m.id === id ? { ...m, aiSummary: d.summary } : m));
         if (d.action_items?.length) {
-          await fetch(`${API}/projects/${projectId}/meetings/${id}/action-items`, {
+          const ar = await fetch(`${API}/projects/${projectId}/meetings/${id}/action-items`, {
             method: "POST", headers,
             body: JSON.stringify({ items: d.action_items.map((ai: { description: string; assigned_to_name?: string; assigned_to_email?: string; due_date?: string }) => ({
               description: ai.description,
@@ -79,6 +79,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
               due_date: ai.due_date ?? null,
             })) }),
           });
+          if (!ar.ok) { const dd = await ar.json().catch(() => ({})); setError(dd.error || "Request failed"); return; }
           await load();
         }
       }
