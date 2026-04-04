@@ -327,7 +327,7 @@ function UsersModal({ token, onClose }: { token: string; onClose: () => void }) 
 
   useEffect(() => {
     setLoading(true);
-    apiFetch("/admin/users", token).then(r => r.json()).then(setUsers).catch(() => {}).finally(() => setLoading(false));
+    apiFetch("/admin/users", token).then(r => r.json()).then(d => setUsers(Array.isArray(d) ? d : [])).catch(() => {}).finally(() => setLoading(false));
   }, [token]);
 
   const filtered = users.filter(u =>
@@ -517,7 +517,14 @@ export function TotalControl() {
         const r = await apiFetch("/admin/companies", token);
         if (r?.ok) {
           const d = await r.json();
-          setCompanies(Array.isArray(d) ? d : []);
+          const raw: any[] = Array.isArray(d) ? d : [];
+          setCompanies(raw.map(c => ({
+            ...c,
+            projectCount: Number(c.projectCount ?? 0),
+            userCount:    Number(c.userCount    ?? 0),
+            fileCount:    Number(c.fileCount    ?? 0),
+            createdAt:    c.createdAt ?? new Date().toISOString(),
+          })));
         }
       } catch(e) { console.warn("companies failed", e); }
 
@@ -525,7 +532,15 @@ export function TotalControl() {
         const r = await apiFetch("/admin/projects", token);
         if (r?.ok) {
           const d = await r.json();
-          setProjects(Array.isArray(d) ? d : Array.isArray(d?.projects) ? d.projects : []);
+          const raw: any[] = Array.isArray(d) ? d : Array.isArray(d?.projects) ? d.projects : [];
+          setProjects(raw.map(p => ({
+            ...p,
+            memberCount:    Number(p.memberCount    ?? 0),
+            fileCount:      Number(p.fileCount      ?? 0),
+            rfiCount:       Number(p.rfiCount       ?? 0),
+            submittalCount: Number(p.submittalCount ?? 0),
+            createdAt:      p.createdAt ?? new Date().toISOString(),
+          })));
         }
       } catch(e) { console.warn("projects failed", e); }
 
