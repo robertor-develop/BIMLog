@@ -1,0 +1,77 @@
+Stop. Do not invent fixes. Do not say "it should now work." It is still broken in production.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary databases.
+All checks and fixes must run against the live production app behavior only.
+
+The actual issue:
+After clicking Create Project, the app is still leaving the user on the dashboard create form instead of taking them to the Convention Builder front door.
+So we need to inspect the exact create-project response and the exact redirect path in production.
+
+Do not change multiple files blindly.
+First run these checks and show exact output only.
+
+Check 1
+Show the exact code for the create project submit handler in Dashboard.tsx
+sed -n '1,260p' artifacts/bimlog/src/pages/Dashboard.tsx
+
+Check 2
+Show the exact code for the CreateProjectForm component if it is separate
+grep -Rni "function CreateProjectForm|const CreateProjectForm" artifacts/bimlog/src | head -20
+
+Check 3
+Show the exact generated createProject hook / mutation return type
+grep -Rni "useCreateProject|createProject" lib/api-client-react/src | head -50
+
+Check 4
+Show the exact POST /projects response shape from backend
+sed -n '1,260p' artifacts/api-server/src/routes/projects.ts
+
+Check 5
+In production, after clicking Create Project, log the exact mutation success payload to browser console before any redirect:
+console.log("CREATE PROJECT SUCCESS PAYLOAD", data)
+
+Show the exact console output.
+
+Check 6
+In production, log the exact redirect target before calling setLocation:
+console.log("REDIRECT TARGET", /projects/${data?.id}/convention)
+
+Show the exact console output.
+
+Check 7
+Confirm the exact browser URL after clicking Create Project in production.
+
+Check 8
+Show the exact route definitions for /projects and /projects/:id/:tab?
+sed -n '1,260p' artifacts/bimlog/src/App.tsx
+
+Check 9
+Show the exact convention tab render block in ProjectDetail.tsx
+grep -n "tab === "convention"|ConventionBuilder" artifacts/bimlog/src/pages/ProjectDetail.tsx | head -40
+
+Check 10
+If CREATE PROJECT SUCCESS PAYLOAD does not contain a direct id field, then do not guess.
+Find the actual field path that contains the new project id and fix the redirect using that exact path only.
+
+After the checks, apply one fix only:
+Use the real returned project id from the actual success payload and redirect to:
+/projects/${REAL_ID}/convention
+
+Then show exact output of these final checks only:
+
+Final Check 1
+console output of CREATE PROJECT SUCCESS PAYLOAD
+
+Final Check 2
+console output of REDIRECT TARGET
+
+Final Check 3
+exact browser URL immediately after project creation
+
+Final Check 4
+exact first visible title after project creation
+It must say:
+Project Convention Setup

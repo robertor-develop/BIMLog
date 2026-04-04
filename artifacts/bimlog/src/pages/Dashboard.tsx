@@ -163,8 +163,10 @@ export function Dashboard() {
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
   function handleProjectCreated(newId: number) {
+    console.log("REDIRECT TARGET", `/projects/${newId}/convention`);
     setShowCreate(false);
-    setLocation(`/projects/${newId}/convention`);
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+    window.location.href = `${base}/projects/${newId}/convention`;
   }
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -853,6 +855,7 @@ function CreateProjectForm({ onClose, onCreated }: { onClose: () => void; onCrea
   const { mutate, isPending } = useCreateProject({
     mutation: {
       onSuccess: (data) => {
+        console.log("CREATE PROJECT SUCCESS PAYLOAD", data);
         queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
         onCreated(data.id);
       },
