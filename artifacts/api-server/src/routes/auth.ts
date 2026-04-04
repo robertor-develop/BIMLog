@@ -351,7 +351,7 @@ router.post("/auth/forgot-password", async (req, res) => {
     await sendEmail({
       to: user.email,
       subject: "Reset your BIMLog password",
-      html: makePasswordResetEmail({ lang: "en", recipientName: user.fullName, resetLink }),
+      html: makePasswordResetEmail({ lang: "en", recipientName: user.fullName, token }),
     });
     res.json({ message: "If an account with that email exists, a reset link has been sent." });
   } catch (error) {
@@ -374,7 +374,7 @@ router.post("/auth/reset-password", async (req, res) => {
     }
     const hashed = await bcrypt.hash(password, 10);
     await db.update(usersTable).set({
-      password: hashed,
+      passwordHash: hashed,
       passwordResetToken: null,
       passwordResetExpires: null,
     }).where(eq(usersTable.id, user.id));

@@ -68,7 +68,7 @@ router.get("/admin/platform-stats", authMiddleware, async (req, res) => {
       db.select({ c: count() }).from(companiesTable),
       db.select({ c: count() }).from(projectsTable).where(eq(projectsTable.status, "active")),
     ]);
-    res.json({
+    return res.json({
       totalUsers: Number(totalUsers ?? 0),
       totalProjects: Number(totalProjects ?? 0),
       totalFiles: Number(totalFiles ?? 0),
@@ -81,7 +81,7 @@ router.get("/admin/platform-stats", authMiddleware, async (req, res) => {
       systemStatus: "healthy",
     });
   } catch(e) {
-    res.status(500).json({ error: "Failed to load stats" });
+    return res.status(500).json({ error: "Failed to load stats" });
   }
 });
 
@@ -482,8 +482,8 @@ router.get("/admin/feature-flags", async (req, res) => {
       const seeded = await db.select().from(featureFlagsTable);
       return res.json(seeded.map(f => ({ ...f, updatedAt: f.updatedAt.toISOString() })));
     }
-    res.json(existing.map(f => ({ ...f, updatedAt: f.updatedAt.toISOString() })));
-  } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
+    return res.json(existing.map(f => ({ ...f, updatedAt: f.updatedAt.toISOString() })));
+  } catch (err) { return res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
 });
 
 router.patch("/admin/feature-flags/:id", async (req, res) => {

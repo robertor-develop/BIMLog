@@ -62,7 +62,11 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout
+      title={t("auth.resetPassword")}
+      subtitle={stage === "request" ? t("auth.resetPasswordSubtitle") : "Enter your new password below."}
+      footer={<a href="/login" className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline">{t("auth.hasAccount")}</a>}
+    >
       <h1 className="text-2xl font-bold text-foreground mb-1">{t("auth.resetPassword")}</h1>
       {stage === "request" && (
         <>

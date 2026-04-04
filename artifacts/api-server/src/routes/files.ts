@@ -636,9 +636,7 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
     } else if (fileContent && fileName.toLowerCase().endsWith(".pdf")) {
       try {
         const buf = Buffer.from(fileContent, "base64");
-        const parser = new PDFParse({ data: buf, verbosity: 0 });
-        const result = await parser.getText();
-        await parser.destroy();
+        const result = await pdfParse(buf);
         extractedText = (result.text || "").trim().slice(0, 2000);
       } catch {
         extractedText = "";
@@ -1111,8 +1109,8 @@ router.delete("/projects/:projectId/files/:fileId", authMiddleware, requirePermi
 // ─── POST /projects/:projectId/files/:fileId/cvr-proceed ──────────────────────
 router.post("/projects/:projectId/files/:fileId/cvr-proceed", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId);
-    const fileId = parseInt(req.params.fileId);
+    const projectId = parseInt(req.params.projectId as string);
+    const fileId = parseInt(req.params.fileId as string);
     const { reason } = req.body as { reason?: string };
 
     const [file] = await db.select().from(filesTable)
@@ -1149,8 +1147,8 @@ router.post("/projects/:projectId/files/:fileId/cvr-proceed", authMiddleware, re
 // ─── POST /projects/:projectId/files/:fileId/cvr-approve ──────────────────────
 router.post("/projects/:projectId/files/:fileId/cvr-approve", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId);
-    const fileId = parseInt(req.params.fileId);
+    const projectId = parseInt(req.params.projectId as string);
+    const fileId = parseInt(req.params.fileId as string);
     const { reason } = req.body as { reason?: string };
 
     const member = await db.select().from(projectMembersTable)
@@ -1193,8 +1191,8 @@ router.post("/projects/:projectId/files/:fileId/cvr-approve", authMiddleware, re
 // ─── POST /projects/:projectId/files/:fileId/cvr-reject ───────────────────────
 router.post("/projects/:projectId/files/:fileId/cvr-reject", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId);
-    const fileId = parseInt(req.params.fileId);
+    const projectId = parseInt(req.params.projectId as string);
+    const fileId = parseInt(req.params.fileId as string);
     const { reason } = req.body as { reason?: string };
 
     const member = await db.select().from(projectMembersTable)
@@ -1238,7 +1236,7 @@ router.post("/projects/:projectId/files/:fileId/cvr-reject", authMiddleware, req
 // ─── GET /projects/:projectId/cvr-report ──────────────────────────────────────
 router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(req.params.projectId as string);
     const { from, to } = req.query as { from?: string; to?: string };
 
     const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));

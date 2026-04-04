@@ -54,14 +54,16 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const invite = async (id: number) => {
     setInviting(id);
     try {
-      await fetch(`${API}/projects/${projectId}/directory/${id}/invite`, { method: "POST", headers });
+      const rInvite = await fetch(`${API}/projects/${projectId}/directory/${id}/invite`, { method: "POST", headers });
+      if (!rInvite.ok) { console.error("Request failed", rInvite.status); return; }
       await load();
     } finally { setInviting(null); }
   };
 
   const remove = async (id: number) => {
     if (!confirm(t("Remove this entry?", "¿Eliminar este contacto?"))) return;
-    await fetch(`${API}/projects/${projectId}/directory/${id}`, { method: "DELETE", headers });
+    const rDel = await fetch(`${API}/projects/${projectId}/directory/${id}`, { method: "DELETE", headers });
+    if (!rDel.ok) { console.error("Request failed", rDel.status); return; }
     await load();
   };
 

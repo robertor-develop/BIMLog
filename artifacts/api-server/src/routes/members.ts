@@ -119,7 +119,7 @@ router.post("/projects/:projectId/members", authMiddleware, requirePermission("a
             : `You've been added to project: ${project[0]?.name || "Unknown Project"}`,
           html: makeTeamMemberAddedEmail({
             lang,
-            recipientName: user.fullName,
+            memberName: user.fullName,
             projectName: project[0]?.name || "Unknown Project",
             role: member.role,
             addedByName: req.user!.fullName,
@@ -246,11 +246,11 @@ router.post("/projects/:projectId/invitations", authMiddleware, requirePermissio
           subject: `You've been invited to join ${projectName} on BIMLog`,
           html: makeInvitationEmail({
             lang: "en",
-            recipientName: fullName || email,
-            inviterName,
+            invitedByName: inviterName,
+            invitedEmail: email,
             projectName,
             role: roleValue,
-            inviteLink,
+            projectId,
           }),
         });
       } catch (_) {}

@@ -112,6 +112,16 @@ export interface ProjectFile {
   source?: string | null;
   linkedRfiId?: number | null;
   contentVerificationResult?: string | null;
+  cvrWorkflowStatus?: string | null;
+  cvrUserReason?: string | null;
+  cvrAdminAction?: string | null;
+  cvrAdminActionAt?: string | null;
+  cvrAdminActionBy?: number | null;
+  rejectionDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null;
+  rootFileId?: number | null;
+  isCompliant?: boolean;
+  isSuperseded?: boolean;
+  supersededByFileId?: number | null;
   createdAt: string;
   updatedAt: string;
 }

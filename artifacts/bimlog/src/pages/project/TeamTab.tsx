@@ -372,10 +372,11 @@ function PendingInvitations({ projectId }: { projectId: number }) {
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-      await fetch(`${BASE}/api/v1/projects/${projectId}/invitations/${id}`, {
+      const r = await fetch(`${BASE}/api/v1/projects/${projectId}/invitations/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!r.ok) { console.error("Request failed", r.status); return; }
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/invitations`] });
       setInvitations(prev => prev.filter(i => i.id !== id));
       toast({ title: "Invitation cancelled" });

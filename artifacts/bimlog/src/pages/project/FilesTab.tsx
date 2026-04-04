@@ -62,6 +62,7 @@ interface FileRow {
   cvrAdminActionAt?: string | null;
   cvrAdminActionBy?: number | null;
   rejectionDetails?: Array<{ field: string; message: string; expected?: string[]; received: string }> | null;
+  rootFileId?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -155,6 +156,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
           ...(manualExplanation ? { manualExplanation } : {}),
         }),
       });
+      if (!resp.ok) { console.error("Request failed", resp.status); return; }
       const data = await resp.json() as { suggestedName: string | null; reason: string; isRelevant?: boolean };
       if (data.isRelevant === false) {
         setRejAiResults(prev => {
@@ -849,6 +851,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ fileName, ...(fileContent ? { fileContent } : {}) }),
       });
+      if (!resp.ok) { console.error("Request failed", resp.status); return; }
       const data = await resp.json() as { suggestedName: string; reason: string };
       if (data.suggestedName) {
         setAiSuggestedName(data.suggestedName);
@@ -916,11 +919,12 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setCvrModalOpen(false);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      await fetch(`/api/v1/projects/${projectId}/files/${cvrModalFile.id}/cvr-proceed`, {
+      const cvrResp = await fetch(`/api/v1/projects/${projectId}/files/${cvrModalFile.id}/cvr-proceed`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reason }),
       });
+      if (!cvrResp.ok) { console.error("Request failed", cvrResp.status); return; }
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/files`] });
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/activity`] });
       toast({ title: "File submitted for review", description: "The project administrator will be notified." });
