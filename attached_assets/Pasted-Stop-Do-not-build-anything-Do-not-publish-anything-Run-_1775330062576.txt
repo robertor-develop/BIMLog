@@ -1,0 +1,190 @@
+Stop. Do not build anything. Do not publish anything. Run a full schema and integrity audit first because many tables were changed and we need to verify the database, relations, routes, and app behavior are still correct.
+
+Show exact output only.
+
+=== CHECK 1 — Full tables list ===
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+=== CHECK 2 — naming_conventions full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'naming_conventions'
+ORDER BY ordinal_position;
+
+=== CHECK 3 — projects full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'projects'
+ORDER BY ordinal_position;
+
+=== CHECK 4 — project_members full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'project_members'
+ORDER BY ordinal_position;
+
+=== CHECK 5 — companies full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'companies'
+ORDER BY ordinal_position;
+
+=== CHECK 6 — files full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'files'
+ORDER BY ordinal_position;
+
+=== CHECK 7 — email_log full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'email_log'
+ORDER BY ordinal_position;
+
+=== CHECK 8 — new tables full columns ===
+SELECT table_name, column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name IN (
+'project_directory',
+'notifications',
+'transmittals',
+'transmittal_items',
+'change_orders',
+'change_order_documents',
+'meeting_minutes',
+'meeting_attendees',
+'action_items',
+'project_milestones'
+)
+ORDER BY table_name, ordinal_position;
+
+=== CHECK 9 — foreign key integrity ===
+SELECT
+tc.table_name,
+kcu.column_name,
+ccu.table_name AS foreign_table_name,
+ccu.column_name AS foreign_column_name
+FROM information_schema.table_constraints AS tc
+JOIN information_schema.key_column_usage AS kcu
+ON tc.constraint_name = kcu.constraint_name
+JOIN information_schema.constraint_column_usage AS ccu
+ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY'
+ORDER BY tc.table_name, kcu.column_name;
+
+=== CHECK 10 — indexes and primary keys ===
+SELECT
+t.relname AS table_name,
+i.relname AS index_name,
+a.attname AS column_name
+FROM
+pg_class t,
+pg_class i,
+pg_index ix,
+pg_attribute a
+WHERE
+t.oid = ix.indrelid
+AND i.oid = ix.indexrelid
+AND a.attrelid = t.oid
+AND a.attnum = ANY(ix.indkey)
+AND t.relkind = 'r'
+ORDER BY t.relname, i.relname;
+
+=== CHECK 11 — orphan check: project_directory ===
+SELECT COUNT(*) AS orphans
+FROM project_directory pd
+LEFT JOIN projects p ON p.id = pd.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 12 — orphan check: notifications ===
+SELECT COUNT(*) AS orphans
+FROM notifications n
+LEFT JOIN users u ON u.id = n.user_id
+WHERE u.id IS NULL;
+
+=== CHECK 13 — orphan check: transmittals ===
+SELECT COUNT(*) AS orphans
+FROM transmittals t
+LEFT JOIN projects p ON p.id = t.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 14 — orphan check: change_orders ===
+SELECT COUNT(*) AS orphans
+FROM change_orders c
+LEFT JOIN projects p ON p.id = c.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 15 — orphan check: meeting_minutes ===
+SELECT COUNT(*) AS orphans
+FROM meeting_minutes m
+LEFT JOIN projects p ON p.id = m.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 16 — orphan check: action_items ===
+SELECT COUNT(*) AS orphans
+FROM action_items a
+LEFT JOIN projects p ON p.id = a.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 17 — orphan check: project_milestones ===
+SELECT COUNT(*) AS orphans
+FROM project_milestones pm
+LEFT JOIN projects p ON p.id = pm.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 18 — row counts for all major tables ===
+SELECT schemaname, tablename, n_live_tup
+FROM pg_stat_user_tables
+ORDER BY tablename;
+
+=== CHECK 19 — backend TypeScript ===
+cd /home/runner/workspace/artifacts/api-server && npx tsc --noEmit
+
+=== CHECK 20 — frontend TypeScript ===
+cd /home/runner/workspace/artifacts/bimlog && npx tsc --noEmit
+
+=== CHECK 21 — backend build ===
+cd /home/runner/workspace/artifacts/api-server && npm run build
+
+=== CHECK 22 — frontend build ===
+cd /home/runner/workspace/artifacts/bimlog && npm run build
+
+=== CHECK 23 — mounted routes ===
+grep -Rni "router.use|app.use" artifacts/api-server/src | head -200
+
+=== CHECK 24 — search for TODO / placeholder / coming soon in new modules ===
+grep -Rni "TODO|FIXME|Coming Soon|placeholder" artifacts/bimlog/src/pages/project artifacts/api-server/src/routes | head -200
+
+=== CHECK 25 — search for hardcoded project/user references ===
+grep -Rni "IBQ|NYC-270|270 Park|robertor@rryasociados.com
+" artifacts/bimlog/src artifacts/api-server/src | head -200
+
+=== CHECK 26 — route existence for all new modules ===
+find artifacts/api-server/src/routes -name "*.ts" | sort
+
+=== CHECK 27 — frontend page existence for all new modules ===
+find artifacts/bimlog/src/pages -name ".tsx" | sort
+find artifacts/bimlog/src/pages/project -name ".tsx" | sort
+
+=== CHECK 28 — auth smoke test if token available ===
+If a token is available in local dev, test status code only for:
+GET /api/v1/healthz
+GET /api/v1/dashboard/briefing
+GET /api/v1/dashboard/stats
+GET /api/v1/notifications
+GET /api/v1/projects/:projectId/convention
+GET /api/v1/projects/:projectId/directory
+GET /api/v1/projects/:projectId/transmittals
+GET /api/v1/projects/:projectId/change-orders
+GET /api/v1/projects/:projectId/meetings
+GET /api/v1/projects/:projectId/milestones
+
+=== CHECK 29 — search for silent catches ===
+grep -Rni "catch (() =>|catch(
+ =>|catch { }|catch{}" artifacts/api-server/src artifacts/bimlog/src | head -200
+
+=== CHECK 30 — convention builder wiring after schema change ===
+grep -n "setup_context|project_environment|builder_intent|scope_type|scope_details|levels_relevant|primary_structure|available_inputs|analysis_only_mode|convention_version" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx lib/db/src/schema/conventions.ts artifacts/api-server/src/routes/conventions.ts | head -200
