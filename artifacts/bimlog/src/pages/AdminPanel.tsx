@@ -147,10 +147,7 @@ function UsersTab({ token }: { token: string }) {
     await apiFetch(`/admin/users/${id}`, token, { method: "DELETE" });
     setMsg("User deleted."); load();
   };
-  const toggleSuperAdmin = async (id: number, cur: boolean) => {
-    await apiFetch(`/admin/users/${id}`, token, { method: "PATCH", body: JSON.stringify({ isSuperAdmin: !cur }) });
-    load();
-  };
+
   const doResetPw = async () => {
     if (!resetModal) return;
     const r = await apiFetch(`/admin/users/${resetModal}/reset-password`, token, { method: "POST", body: JSON.stringify({ password: newPw }) });
@@ -184,10 +181,7 @@ function UsersTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 12 }}>{String(u.companyName || "")}</Td>
                 <Td>{String(u.projectCount || 0)}</Td>
                 <Td>
-                  <button onClick={() => toggleSuperAdmin(u.id as number, u.isSuperAdmin as boolean)}
-                    style={{ background: u.isSuperAdmin ? "#f59e0b22" : "hsl(var(--secondary))", border: `1px solid ${u.isSuperAdmin ? "#f59e0b44" : "hsl(var(--border))"}`, borderRadius: 9999, padding: "2px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: u.isSuperAdmin ? "#b45309" : "hsl(var(--muted-foreground))", letterSpacing: "0.04em" }}>
-                    {u.isSuperAdmin ? "SUPER ADMIN" : "USER"}
-                  </button>
+                  <Badge label={String(u.role || "user")} />
                 </Td>
                 <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</Td>
                 <Td>

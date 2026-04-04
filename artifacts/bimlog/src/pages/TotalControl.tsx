@@ -488,27 +488,64 @@ export function TotalControl() {
       .catch(() => { setLocation("/dashboard"); });
   }, [token]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      setLoadError(true);
+    }, 10000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const loadAll = useCallback(async () => {
     if (!token) return;
     setLoading(true);
+    setLoadError(false);
     try {
-      const [overviewRes, companiesRes, projectsRes] = await Promise.all([
-        apiFetch("/admin/overview", token),
-        apiFetch("/admin/companies", token),
-        apiFetch("/admin/projects", token),
-      ]);
-      if (overviewRes.ok) {
-        const d = await overviewRes.json();
-        setStats(d.stats ?? d);
-      }
-      if (companiesRes.ok) setCompanies(await companiesRes.json());
-      if (projectsRes.ok) {
-        const d = await projectsRes.json();
-        setProjects(Array.isArray(d) ? d : d.projects ?? []);
-      }
-    } catch {
+      try {
+        const r = await apiFetch("/admin/platform-stats", token);
+        if (r.ok) {
+          const d = await r.json();
+          setStats(prev => ({ ...prev, ...d } as PlatformStats));
+        }
+      } catch(e) { console.warn("platform-stats failed", e); }
+
+      try {
+        const r = await apiFetch("/admin/overview", token);
+        if (r.ok) {
+          const d = await r.json();
+          setStats(d.stats ?? d);
+        }
+      } catch(e) { console.warn("overview failed", e); }
+
+      try {
+        const r = await apiFetch("/admin/companies", token);
+        if (r.ok) setCompanies(await r.json());
+      } catch(e) { console.warn("companies failed", e); }
+
+      try {
+        const r = await apiFetch("/admin/projects", token);
+        if (r.ok) {
+          const d = await r.json();
+          setProjects(Array.isArray(d) ? d : d.projects ?? []);
+        }
+      } catch(e) { console.warn("projects failed", e); }
+
+      try {
+        const r = await apiFetch("/dashboard/stats", token);
+        if (r.ok) await r.json();
+      } catch(e) { console.warn("dash-stats failed", e); }
+
+      try {
+        const r = await apiFetch("/dashboard/briefing", token);
+        if (r.ok) await r.json();
+      } catch(e) { console.warn("briefing failed", e); }
+
+    } catch(e) {
+      console.warn("loadAll failed", e);
       setLoadError(true);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
   const handleHealthBarExpand = (tab: string) => {
@@ -533,9 +570,12 @@ export function TotalControl() {
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
         <div style={{ textAlign: "center", color: "#6B7280" }}>
           <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><AlertTriangle size={32} color="#9CA3AF" /></div>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Unable to load admin dashboard.</div>
-          <div>Please refresh.</div>
-          <button onClick={() => { setLoadError(false); loadAll(); }} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 6, background: "#1D4ED8", color: "white", border: "none", cursor: "pointer", fontWeight: 600 }}>Retry</button>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Unable to load Total Control dashboard.</div>
+          <p style={{ marginBottom: 16, fontSize: 13 }}>One or more data endpoints could not be reached.</p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <button onClick={() => { setLoadError(false); loadAll(); }} style={{ padding: "8px 20px", borderRadius: 6, background: "#1D4ED8", color: "white", border: "none", cursor: "pointer", fontWeight: 600 }}>Retry</button>
+            <button onClick={() => setLocation("/dashboard")} style={{ padding: "8px 20px", borderRadius: 6, background: "#F3F4F6", color: "#374151", border: "1px solid #E5E7EB", cursor: "pointer", fontWeight: 600 }}>Back to Dashboard</button>
+          </div>
         </div>
       </div>
     );

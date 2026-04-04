@@ -45,6 +45,46 @@ async function logAdminAction(params: {
   });
 }
 
+// ── Platform Stats (Super Admin only) ────────────────────────────────────────
+router.get("/admin/platform-stats", async (req, res) => {
+  try {
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const [
+      [{ c: totalUsers }],
+      [{ c: totalProjects }],
+      [{ c: totalFiles }],
+      [{ c: totalRfis }],
+      [{ c: totalSubmittals }],
+      [{ c: totalCompanies }],
+      [{ c: activeProjects }],
+    ] = await Promise.all([
+      db.select({ c: count() }).from(usersTable),
+      db.select({ c: count() }).from(projectsTable),
+      db.select({ c: count() }).from(filesTable),
+      db.select({ c: count() }).from(rfisTable),
+      db.select({ c: count() }).from(submittalsTable),
+      db.select({ c: count() }).from(companiesTable),
+      db.select({ c: count() }).from(projectsTable).where(eq(projectsTable.status, "active")),
+    ]);
+    res.json({
+      totalUsers: Number(totalUsers ?? 0),
+      totalProjects: Number(totalProjects ?? 0),
+      totalFiles: Number(totalFiles ?? 0),
+      totalRfis: Number(totalRfis ?? 0),
+      totalSubmittals: Number(totalSubmittals ?? 0),
+      totalCompanies: Number(totalCompanies ?? 0),
+      activeProjects: Number(activeProjects ?? 0),
+      filesLast24h: 0,
+      rfisLast7d: 0,
+      systemStatus: "healthy",
+    });
+  } catch(e) {
+    res.status(500).json({ error: "Failed to load stats" });
+  }
+});
+
 // ── Tab 1: Platform Overview ──────────────────────────────────────────────────
 router.get("/admin/overview", async (req, res) => {
   try {

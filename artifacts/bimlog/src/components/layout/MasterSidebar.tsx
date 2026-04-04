@@ -160,7 +160,7 @@ export function MasterSidebar() {
           style={{
             display: "flex", alignItems: "center", gap: 6, width: "100%",
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.5)",
+            borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)",
             cursor: "pointer", fontSize: 11,
           }}
         >
@@ -241,7 +241,7 @@ export function MasterSidebar() {
               style={{
                 display: "flex", alignItems: "center", gap: 8, width: "100%",
                 background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.6)",
+                borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)",
                 fontSize: 12,
               }}
             >
@@ -355,11 +355,11 @@ export function MasterSidebar() {
               <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {user.fullName}
               </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.35)" }}>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)" }}>
                 {companyName || user.companyName || ""}
               </div>
             </div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>Profile →</div>
+            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>Profile →</div>
           </a>
 
           {/* Sign out */}
@@ -369,7 +369,7 @@ export function MasterSidebar() {
               display: "block", width: "calc(100% - 28px)", margin: "6px 14px 0",
               padding: "5px 0", borderRadius: 5, cursor: "pointer",
               background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
-              color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 500,
+              color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500,
             }}
           >
             Sign Out
@@ -379,7 +379,7 @@ export function MasterSidebar() {
             style={{
               display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0",
               padding: "3px 0", background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.18)", fontSize: 10, textAlign: "center",
+              color: "rgba(255,255,255,0.7)", fontSize: 10, textAlign: "center",
               textDecoration: "underline", textUnderlineOffset: 2,
             }}
           >

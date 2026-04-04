@@ -1,0 +1,197 @@
+Stop. Three fixes only. Nothing else.
+Do not touch any other file.
+Do not publish until all checks pass.
+
+═══════════════════════════════════════════════════════════
+FIX 1 — TOTALCONTROL CRASH
+═══════════════════════════════════════════════════════════
+
+PROBLEM: TotalControl hangs the app when loadAll() fails
+silently or hits an endpoint that doesn't exist.
+
+In TotalControl.tsx:
+
+Step 1 — Wrap loadAll in proper error handling:
+The loadAll function must have a try/catch around 
+EVERY individual fetch call. If any single fetch fails
+it must catch silently and continue — never crash.
+
+Change loadAll to:
+const loadAll = useCallback(async () => {
+  setLoadError(false);
+  try {
+    // Each fetch in its own try/catch
+    try {
+      const r = await apiFetch("/admin/platform-stats", token);
+      if (r.ok) setPlatformStats(await r.json());
+    } catch(e) { console.warn("platform-stats failed", e); }
+
+    try {
+      const r = await apiFetch("/admin/overview", token);
+      if (r.ok) setOverview(await r.json());
+    } catch(e) { console.warn("overview failed", e); }
+
+    try {
+      const r = await apiFetch("/dashboard/stats", token);
+      if (r.ok) setDashStats(await r.json());
+    } catch(e) { console.warn("dash-stats failed", e); }
+
+    try {
+      const r = await apiFetch("/dashboard/briefing", token);
+      if (r.ok) setBriefing(await r.json());
+    } catch(e) { console.warn("briefing failed", e); }
+
+  } catch(e) {
+    console.warn("loadAll failed", e);
+    setLoadError(true);
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
+
+Step 2 — Add GET /admin/platform-stats endpoint 
+to admin.ts:
+
+router.get("/admin/platform-stats", authMiddleware, 
+async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await db.select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (!user[0]?.is_super_admin) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const [
+      totalUsers,
+      totalProjects,
+      totalFiles,
+      totalRfis,
+      totalSubmittals,
+      totalCompanies
+    ] = await Promise.all([
+      db.select({ count: sql`count(*)` }).from(users),
+      db.select({ count: sql`count(*)` }).from(projects),
+      db.select({ count: sql`count(*)` }).from(files),
+      db.select({ count: sql`count(*)` }).from(rfis),
+      db.select({ count: sql`count(*)` }).from(submittals),
+      db.select({ count: sql`count(*)` }).from(companies)
+    ]);
+
+    res.json({
+      totalUsers: Number(totalUsers[0]?.count ?? 0),
+      totalProjects: Number(totalProjects[0]?.count ?? 0),
+      totalFiles: Number(totalFiles[0]?.count ?? 0),
+      totalRfis: Number(totalRfis[0]?.count ?? 0),
+      totalSubmittals: Number(totalSubmittals[0]?.count ?? 0),
+      totalCompanies: Number(totalCompanies[0]?.count ?? 0),
+      systemStatus: "healthy"
+    });
+  } catch(e) {
+    res.status(500).json({ error: "Failed to load stats" });
+  }
+});
+
+Step 3 — Make sure TotalControl never hangs the app.
+If loading takes more than 10 seconds set a timeout:
+
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    setLoading(false);
+    setLoadError(true);
+  }, 10000);
+  return () => clearTimeout(timeout);
+}, []);
+
+Step 4 — If loadError is true show:
+<div style={{ padding: 40, textAlign: "center" }}>
+  <p>Unable to load Total Control dashboard.</p>
+  <button onClick={() => loadAll()}>Retry</button>
+  <button onClick={() => setLocation("/dashboard")}>
+    Back to Dashboard
+  </button>
+</div>
+
+Never show a blank screen. Never hang.
+
+═══════════════════════════════════════════════════════════
+FIX 2 — ADMIN PANEL SEPARATION
+═══════════════════════════════════════════════════════════
+
+PROBLEM: AdminPanel must be completely separate from 
+TotalControl. AdminPanel is for project-level admin.
+TotalControl is the super admin platform view.
+
+In AdminPanel.tsx:
+- Remove ANY reference to is_super_admin or isSuperAdmin
+- AdminPanel shows only:
+  Overview, Users, Companies, Projects, Email Log,
+  Activity Feed, Feature Flags, Admin Actions Log
+- These are ALL scoped to the logged-in user's data
+- NOT platform-wide data
+- Add scope=mine to all API calls that don't have it:
+  /admin/overview?scope=mine
+  /admin/users?scope=mine
+  /admin/projects?scope=mine
+
+In AdminPanel.tsx overview section:
+Show only the logged-in user's stats:
+  Their projects count
+  Their files count  
+  Their team members count
+  Their RFIs count
+  Their submittals count
+
+NOT platform totals. Those belong in TotalControl only.
+
+═══════════════════════════════════════════════════════════
+FIX 3 — SIDEBAR TEXT COLOR
+═══════════════════════════════════════════════════════════
+
+PROBLEM: Sidebar text is too dark — hard to read.
+
+In MasterSidebar.tsx update text colors:
+
+Navigation items (inactive):
+  Change color: "rgba(255,255,255,0.5)" 
+  To: "rgba(255,255,255,0.75)"
+
+Navigation items (active):
+  Change color: "rgba(255,255,255,0.6)"
+  To: "rgba(255,255,255,0.95)"
+
+Section headers (PROJECT, ADMIN, TOOLS etc):
+  Change color: "#fff" with low opacity
+  To: "rgba(255,255,255,0.5)"
+  These should be slightly dimmer than nav items
+
+All other text in sidebar:
+  Minimum opacity 0.7 — nothing below that.
+
+═══════════════════════════════════════════════════════════
+CHECKS
+═══════════════════════════════════════════════════════════
+
+Check 1:
+grep -n "platform-stats\|loadAll\|setTimeout.*10000" \
+artifacts/bimlog/src/pages/TotalControl.tsx | head -10
+
+Check 2:
+grep -n "platform-stats" \
+artifacts/api-server/src/routes/admin.ts | head -5
+
+Check 3:
+grep -n "scope=mine" \
+artifacts/bimlog/src/pages/AdminPanel.tsx | head -5
+
+Check 4:
+grep -n "rgba(255,255,255,0.75)\|rgba(255,255,255,0.95)" \
+artifacts/bimlog/src/components/layout/MasterSidebar.tsx | head -5
+
+Rebuild frontend and backend.
+Restart API server.
+Publish.
+Paste all 4 checks. Nothing else.
