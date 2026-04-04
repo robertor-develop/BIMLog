@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { PartyPopper, Folder, CheckCircle2, Lock, Rocket, Hand, HardHat, Ruler, Users, Package, Sparkles, Zap } from "lucide-react";
 
 const STORAGE_KEY = "bimlog-onboarding-done";
 const API = "/api/v1";
@@ -9,7 +10,7 @@ type FlowType = "invited" | "new" | null;
 
 interface Step {
   id: string;
-  icon: string;
+  icon: React.ReactNode;
   titleEn: string;
   titleEs: string;
   bodyEn: string;
@@ -19,7 +20,7 @@ interface Step {
 const STEPS_INVITED: Step[] = [
   {
     id: "welcome",
-    icon: "🎉",
+    icon: <PartyPopper size={48} color="#2563EB" />,
     titleEn: "Welcome to BIMLog",
     titleEs: "Bienvenido a BIMLog",
     bodyEn: "You've been invited to collaborate on a BIM project. BIMLog keeps every file, RFI, submittal, and coordination issue in one immutable audit trail.",
@@ -27,7 +28,7 @@ const STEPS_INVITED: Step[] = [
   },
   {
     id: "project",
-    icon: "📁",
+    icon: <Folder size={48} color="#2563EB" />,
     titleEn: "Your Project is Ready",
     titleEs: "Tu Proyecto Está Listo",
     bodyEn: "Head to your Dashboard to see the project you've been added to. Click into it to explore files, RFIs, submittals, transmittals, and more.",
@@ -35,7 +36,7 @@ const STEPS_INVITED: Step[] = [
   },
   {
     id: "naming",
-    icon: "✅",
+    icon: <CheckCircle2 size={48} color="#2563EB" />,
     titleEn: "ISO 19650 Naming Convention",
     titleEs: "Convención de Nombres ISO 19650",
     bodyEn: "Every file you upload is validated against the project's naming convention. Use the Name Generator tool to create compliant file names instantly.",
@@ -43,7 +44,7 @@ const STEPS_INVITED: Step[] = [
   },
   {
     id: "audit",
-    icon: "🔒",
+    icon: <Lock size={48} color="#2563EB" />,
     titleEn: "Immutable Audit Trail",
     titleEs: "Historial de Auditoría Inmutable",
     bodyEn: "Every action — uploads, approvals, comments, supersessions — is permanently logged. Nothing can be deleted. This protects you legally.",
@@ -51,7 +52,7 @@ const STEPS_INVITED: Step[] = [
   },
   {
     id: "done",
-    icon: "🚀",
+    icon: <Rocket size={48} color="#2563EB" />,
     titleEn: "You're All Set!",
     titleEs: "¡Todo Listo!",
     bodyEn: "You're ready to use BIMLog. If you need help, click the Help button in any project view. Welcome to the team!",
@@ -62,7 +63,7 @@ const STEPS_INVITED: Step[] = [
 const STEPS_NEW: Step[] = [
   {
     id: "welcome",
-    icon: "👋",
+    icon: <Hand size={48} color="#2563EB" />,
     titleEn: "Welcome to BIMLog by IgniteSmart",
     titleEs: "Bienvenido a BIMLog by IgniteSmart",
     bodyEn: "BIMLog is the intelligence layer for AEC project coordination — ISO 19650 compliant naming, immutable audit trails, RFIs, submittals, transmittals, and AI-powered insights.",
@@ -70,7 +71,7 @@ const STEPS_NEW: Step[] = [
   },
   {
     id: "create",
-    icon: "🏗️",
+    icon: <HardHat size={48} color="#2563EB" />,
     titleEn: "Create Your First Project",
     titleEs: "Crea Tu Primer Proyecto",
     bodyEn: "From your Dashboard, click \"New Project\" and enter a project code and name. The project code should follow your organisation's prefix convention (e.g. NYC-270).",
@@ -78,7 +79,7 @@ const STEPS_NEW: Step[] = [
   },
   {
     id: "convention",
-    icon: "📐",
+    icon: <Ruler size={48} color="#2563EB" />,
     titleEn: "Configure Naming Convention",
     titleEs: "Configura la Convención de Nombres",
     bodyEn: "Go to your project → Tools → Naming Convention to set up ISO 19650-compliant naming rules. This governs every file uploaded to the project.",
@@ -86,7 +87,7 @@ const STEPS_NEW: Step[] = [
   },
   {
     id: "team",
-    icon: "👥",
+    icon: <Users size={48} color="#2563EB" />,
     titleEn: "Invite Your Team",
     titleEs: "Invita a Tu Equipo",
     bodyEn: "In your project, go to the Team tab to add members. You can assign roles: Project Admin, BIM Manager, Document Controller, Engineer, Architect, or Viewer.",
@@ -94,7 +95,7 @@ const STEPS_NEW: Step[] = [
   },
   {
     id: "modules",
-    icon: "📦",
+    icon: <Package size={48} color="#2563EB" />,
     titleEn: "Explore the Modules",
     titleEs: "Explora los Módulos",
     bodyEn: "BIMLog includes Files, RFIs, Submittals, Transmittals, Change Orders, Meeting Minutes, Schedule, Directory, and AI Reports — everything you need for project coordination.",
@@ -102,7 +103,7 @@ const STEPS_NEW: Step[] = [
   },
   {
     id: "done",
-    icon: "✨",
+    icon: <Sparkles size={48} color="#2563EB" />,
     titleEn: "You're Ready to Build!",
     titleEs: "¡Listo para Construir!",
     bodyEn: "Your workspace is set up. Head to the Dashboard to create your first project. Remember: every action is logged permanently — so work with confidence.",
@@ -135,7 +136,7 @@ export function OnboardingFlow({ onDone }: { onDone: () => void }) {
     return (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 }}>
         <div style={{ background: "white", borderRadius: 16, padding: 40, width: 360, textAlign: "center" }}>
-          <div style={{ fontSize: 28, marginBottom: 12 }}>⚡</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Zap size={28} color="#2563EB" /></div>
           <div style={{ color: "#6B7280", fontSize: 13 }}>{tl("Loading…", "Cargando…")}</div>
         </div>
       </div>
@@ -186,7 +187,7 @@ export function OnboardingFlow({ onDone }: { onDone: () => void }) {
 
         {/* Content */}
         <div style={{ padding: "28px 32px 24px", textAlign: "center" }}>
-          <div style={{ fontSize: 52, marginBottom: 16, lineHeight: 1 }}>{current.icon}</div>
+          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>{current.icon}</div>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: "#111827", marginBottom: 12, lineHeight: 1.3 }}>
             {tl(current.titleEn, current.titleEs)}
           </h2>

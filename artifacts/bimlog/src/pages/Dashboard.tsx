@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield, Sparkles } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -121,20 +121,20 @@ function AiBriefingCard({ token }: { token?: string }) {
             fontSize: 12, color: "#1D4ED8", fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 18 }}>✨</span>
+          <Sparkles style={{ width: 18, height: 18 }} />
           {tl("Get AI Morning Briefing — smart summary of what needs your attention today", "Obtener Briefing IA — resumen inteligente de lo que necesita atención hoy")}
         </button>
       )}
       {loading && (
         <div style={{ padding: "10px 16px", borderRadius: 9, background: "#EFF6FF", border: "1px solid #BFDBFE", fontSize: 12, color: "#2563EB" }}>
-          ✨ {tl("Generating AI briefing…", "Generando briefing IA…")}
+          <Sparkles style={{ width: 12, height: 12, marginRight: 4 }} />{tl("Generating AI briefing…", "Generando briefing IA…")}
         </div>
       )}
       {open && briefing && (
         <div style={{ padding: 16, borderRadius: 9, background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
             <div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>✨ {tl("AI Briefing", "Briefing IA")}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 4 }}><Sparkles style={{ width: 13, height: 13 }} />{tl("AI Briefing", "Briefing IA")}</span>
               <span style={{ fontSize: 10, color: "#6B7280", marginLeft: 8 }}>{briefing.todaysDate}</span>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0 }}>✕</button>

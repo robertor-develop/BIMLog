@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { getMe } from "@workspace/api-client-react";
+import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Calendar } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -60,15 +61,15 @@ interface BriefData { summary: string; criticalItems: string[]; todaysDate: stri
 
 function HealthBar({ stats, onExpand }: { stats: PlatformStats; onExpand: (tab: string) => void }) {
   const items = [
-    { key: "totalUsers",     label: "Users",          value: stats.totalUsers,     tab: "users",    color: "#2563EB", icon: "👤" },
-    { key: "totalCompanies", label: "Companies",      value: stats.totalCompanies, tab: "companies",color: "#7C3AED", icon: "🏢" },
-    { key: "totalProjects",  label: "Projects",       value: stats.totalProjects,  tab: "projects", color: "#0891B2", icon: "📁" },
-    { key: "activeProjects", label: "Active",         value: stats.activeProjects, tab: "projects", color: "#16A34A", icon: "🟢" },
-    { key: "totalFiles",     label: "Files",          value: stats.totalFiles,     tab: "projects", color: "#D97706", icon: "📄" },
-    { key: "filesLast24h",   label: "Files 24h",      value: stats.filesLast24h,   tab: "projects", color: "#EA580C", icon: "⚡" },
-    { key: "totalRfis",      label: "RFIs",           value: stats.totalRfis,      tab: "projects", color: "#DC2626", icon: "💬" },
-    { key: "totalSubmittals",label: "Submittals",     value: stats.totalSubmittals,tab: "projects", color: "#9333EA", icon: "📋" },
-    { key: "rfisLast7d",     label: "RFIs (7d)",      value: stats.rfisLast7d,     tab: "projects", color: "#DB2777", icon: "📈" },
+    { key: "totalUsers",     label: "Users",          value: stats.totalUsers,     tab: "users",    color: "#2563EB", icon: <User size={16} /> },
+    { key: "totalCompanies", label: "Companies",      value: stats.totalCompanies, tab: "companies",color: "#7C3AED", icon: <Building2 size={16} /> },
+    { key: "totalProjects",  label: "Projects",       value: stats.totalProjects,  tab: "projects", color: "#0891B2", icon: <Folder size={16} /> },
+    { key: "activeProjects", label: "Active",         value: stats.activeProjects, tab: "projects", color: "#16A34A", icon: <Circle size={16} fill="#16A34A" /> },
+    { key: "totalFiles",     label: "Files",          value: stats.totalFiles,     tab: "projects", color: "#D97706", icon: <FileText size={16} /> },
+    { key: "filesLast24h",   label: "Files 24h",      value: stats.filesLast24h,   tab: "projects", color: "#EA580C", icon: <Zap size={16} /> },
+    { key: "totalRfis",      label: "RFIs",           value: stats.totalRfis,      tab: "projects", color: "#DC2626", icon: <MessageSquare size={16} /> },
+    { key: "totalSubmittals",label: "Submittals",     value: stats.totalSubmittals,tab: "projects", color: "#9333EA", icon: <ClipboardList size={16} /> },
+    { key: "rfisLast7d",     label: "RFIs (7d)",      value: stats.rfisLast7d,     tab: "projects", color: "#DB2777", icon: <TrendingUp size={16} /> },
   ];
 
   return (
@@ -110,7 +111,7 @@ function CompanyPanel({ companies, onSelect }: { companies: Company[]; onSelect:
     <div style={{ marginBottom: 28 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>🏢 Company Performance</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#111", display: "flex", alignItems: "center", gap: 6 }}><Building2 size={15} /> Company Performance</div>
           <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{companies.length} companies on platform · click any row to drill in</div>
         </div>
         <select
@@ -179,7 +180,7 @@ function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (
     <div style={{ marginBottom: 28 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>📁 Active Projects Grid</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#111", display: "flex", alignItems: "center", gap: 6 }}><Folder size={15} /> Active Projects Grid</div>
           <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{projects.length} total projects · color-coded by health · click to inspect</div>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
@@ -220,11 +221,11 @@ function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (
                 <Pill label={health.label} color={health.color} />
               </div>
               <div style={{ fontWeight: 700, fontSize: 13, color: "#111", marginBottom: 6, lineHeight: 1.3 }}>{p.name}</div>
-              {p.companyName && <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 6 }}>🏢 {p.companyName}</div>}
+              {p.companyName && <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}><Building2 size={11} /> {p.companyName}</div>}
               <div style={{ display: "flex", gap: 10, fontSize: 11, color: "#6B7280" }}>
-                <span>👥 {p.memberCount}</span>
-                <span>📄 {p.fileCount.toLocaleString()}</span>
-                {p.rfiCount !== undefined && <span>💬 {p.rfiCount}</span>}
+                <span style={{ display: "flex", alignItems: "center", gap: 3 }}><Users size={11} /> {p.memberCount}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 3 }}><FileText size={11} /> {p.fileCount.toLocaleString()}</span>
+                {p.rfiCount !== undefined && <span style={{ display: "flex", alignItems: "center", gap: 3 }}><MessageSquare size={11} /> {p.rfiCount}</span>}
               </div>
             </button>
           );
@@ -261,7 +262,7 @@ function BrainBrief({ token }: { token: string }) {
     }}>
       <div style={{ padding: "16px 20px", borderBottom: "1px solid #DBEAFE", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#1D4ED8" }}>🧠 Brain Daily Brief</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 6 }}><Brain size={15} /> Brain Daily Brief</div>
           <div style={{ fontSize: 12, color: "#3B82F6", marginTop: 2 }}>AI-powered platform intelligence snapshot</div>
         </div>
         {!shown && (
@@ -276,7 +277,7 @@ function BrainBrief({ token }: { token: string }) {
       <div style={{ padding: "16px 20px" }}>
         {loading && (
           <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#2563EB", fontSize: 13 }}>
-            <span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⚙️</span>
+            <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
             Generating AI brief…
           </div>
         )}
@@ -520,7 +521,7 @@ export function TotalControl() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
         <div style={{ textAlign: "center", color: "#9CA3AF" }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>🔐</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Lock size={36} color="#9CA3AF" /></div>
           <div>Verifying access…</div>
         </div>
       </div>
@@ -531,7 +532,7 @@ export function TotalControl() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
         <div style={{ textAlign: "center", color: "#6B7280" }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><AlertTriangle size={32} color="#9CA3AF" /></div>
           <div style={{ fontWeight: 700, marginBottom: 8 }}>Unable to load admin dashboard.</div>
           <div>Please refresh.</div>
           <button onClick={() => { setLoadError(false); loadAll(); }} style={{ marginTop: 16, padding: "8px 20px", borderRadius: 6, background: "#1D4ED8", color: "white", border: "none", cursor: "pointer", fontWeight: 600 }}>Retry</button>

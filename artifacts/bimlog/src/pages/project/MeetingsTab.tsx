@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { ClipboardList, CheckCircle2, BookOpen, Calendar, MapPin, Users, Sparkles, AlertTriangle } from "lucide-react";
 
 interface Meeting {
   id: number; title: string; meetingDate: string; location?: string;
@@ -133,10 +134,10 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       {/* View toggle */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <button className={`btn btn-sm ${view === "meetings" ? "btn-primary" : "btn-outline"}`} onClick={() => setView("meetings")}>
-          📋 {t("Meetings", "Reuniones")}
+          <ClipboardList size={14} style={{ marginRight: 4 }} />{t("Meetings", "Reuniones")}
         </button>
         <button className={`btn btn-sm ${view === "actions" ? "btn-primary" : "btn-outline"}`} onClick={() => setView("actions")}>
-          ✅ {t("Action Items", "Ítems de Acción")} {openActions.length > 0 && `(${openActions.length})`}
+          <CheckCircle2 size={14} style={{ marginRight: 4 }} />{t("Action Items", "Ítems de Acción")} {openActions.length > 0 && `(${openActions.length})`}
         </button>
       </div>
 
@@ -176,7 +177,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         <>
           {meetings.length === 0 ? (
             <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📓</div>
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><BookOpen size={40} color="#D1D5DB" /></div>
               <div style={{ fontWeight: 600 }}>{t("No meetings recorded yet", "Sin reuniones registradas aún")}</div>
             </div>
           ) : (
@@ -187,23 +188,23 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>{m.title}</div>
                       <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
-                        📅 {new Date(m.meetingDate).toLocaleDateString()} {new Date(m.meetingDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        {m.location && <span> · 📍 {m.location}</span>}
+                        <Calendar size={11} style={{ marginRight: 3 }} />{new Date(m.meetingDate).toLocaleDateString()} {new Date(m.meetingDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {m.location && <span style={{ display: "inline-flex", alignItems: "center" }}> · <MapPin size={11} style={{ margin: "0 3px" }} />{m.location}</span>}
                       </div>
                       <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#6B7280" }}>
-                        <span>👥 {m.attendeeCount} {t("attendees", "asistentes")}</span>
-                        <span>✅ {m.openActionItems}/{m.actionItemCount} {t("open actions", "acciones abiertas")}</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Users size={11} /> {m.attendeeCount} {t("attendees", "asistentes")}</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><CheckCircle2 size={11} /> {m.openActionItems}/{m.actionItemCount} {t("open actions", "acciones abiertas")}</span>
                       </div>
                       {m.aiSummary && (
                         <div style={{ marginTop: 10, padding: 10, background: "#EFF6FF", borderRadius: 8, borderLeft: "3px solid #2563EB" }}>
-                          <div style={{ fontSize: 11, color: "#1D4ED8", fontWeight: 600, marginBottom: 2 }}>✨ AI Summary</div>
+                          <div style={{ fontSize: 11, color: "#1D4ED8", fontWeight: 600, marginBottom: 2, display: "flex", alignItems: "center", gap: 4 }}><Sparkles size={11} /> AI Summary</div>
                           <div style={{ fontSize: 12, color: "#374151" }}>{m.aiSummary}</div>
                         </div>
                       )}
                     </div>
                     {canWrite && !m.aiSummary && (
                       <button className="btn btn-sm btn-outline" onClick={() => aiSummary(m.id)} disabled={aiLoading && activeMeeting === m.id} style={{ marginLeft: 12 }}>
-                        {aiLoading && activeMeeting === m.id ? "…" : "✨ " + t("AI Summary", "Resumen IA")}
+                        {aiLoading && activeMeeting === m.id ? "…" : <><Sparkles size={12} style={{ marginRight: 4 }} />{t("AI Summary", "Resumen IA")}</>}
                       </button>
                     )}
                   </div>
@@ -219,7 +220,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         <>
           {actionItems.length === 0 ? (
             <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><CheckCircle2 size={40} color="#D1D5DB" /></div>
               <div style={{ fontWeight: 600 }}>{t("No action items yet", "Sin ítems de acción aún")}</div>
             </div>
           ) : (
@@ -239,7 +240,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                     <tr key={ai.id} style={{ background: ai.isOverdue ? "#FEF2F2" : undefined }}>
                       <td>
                         <div style={{ fontWeight: 500 }}>{ai.description}</div>
-                        {ai.isOverdue && <div style={{ fontSize: 11, color: "#DC2626" }}>⚠ {t("Overdue", "Vencido")}</div>}
+                        {ai.isOverdue && <div style={{ fontSize: 11, color: "#DC2626", display: "flex", alignItems: "center", gap: 4 }}><AlertTriangle size={11} /> {t("Overdue", "Vencido")}</div>}
                       </td>
                       <td>{ai.assignedToName || "—"}</td>
                       <td style={{ fontSize: 12 }}>{ai.dueDate ? new Date(ai.dueDate).toLocaleDateString() : "—"}</td>

@@ -16,7 +16,7 @@ import {
   MessageSquare, Plus, X, FileText, Download,
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
-  Search, UserPlus, Shield, Eye,
+  Search, UserPlus, Shield, Eye, DollarSign, Calendar,
 } from "lucide-react";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
@@ -358,7 +358,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                     <td>
                       <span style={{ fontSize: 11, fontWeight: 700, color: daysColor(days, isOverdue) }}>{days}d</span>
                       {rfi.scheduleImpact && rfi.scheduleImpact !== "No Schedule Impact" && (
-                        <span style={{ display: "block", fontSize: 9, color: "#D97706" }}>⚠ {w("Sched.", "Prog.", lang)}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 9, color: "#D97706" }}><AlertTriangle size={8} /> {w("Sched.", "Prog.", lang)}</span>
                       )}
                     </td>
                     <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
@@ -1558,14 +1558,14 @@ ${hasResp ? `
                     </div>
                     {resp.isConflictOfInterest && (
                       <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 8px", background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 5, marginBottom: 6, fontSize: 11, color: "#92400E", fontWeight: 600 }}>
-                        ⚠ {w("Conflict of interest — logged in audit trail", "Conflicto de interés — registrado en auditoría", lang)}
+                        <AlertTriangle size={12} style={{ flexShrink: 0 }} /> {w("Conflict of interest — logged in audit trail", "Conflicto de interés — registrado en auditoría", lang)}
                       </div>
                     )}
                     <p style={{ fontSize: 12, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "#1E293B" }}>{resp.responseText}</p>
                     {(resp.costImpact || resp.scheduleImpact) && (
                       <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11, color: "#64748B" }}>
-                        {resp.costImpact && <span>💰 {resp.costImpact}</span>}
-                        {resp.scheduleImpact && <span>📅 {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}</span>}
+                        {resp.costImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {resp.costImpact}</span>}
+                        {resp.scheduleImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}</span>}
                       </div>
                     )}
                   </div>
@@ -1606,7 +1606,7 @@ ${hasResp ? `
               <div style={{ borderTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? 12 : 0 }}>
                 {isCoi && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FFFBEB", border: "1.5px solid #F59E0B", borderRadius: 7, marginBottom: 12 }}>
-                    <span style={{ fontSize: 16 }}>⚠</span>
+                    <AlertTriangle size={16} style={{ color: "#92400E", flexShrink: 0 }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E" }}>
                         {w("Warning: You are responding to your own RFI.", "Advertencia: Está respondiendo a su propio RFI.", lang)}

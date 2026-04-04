@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { Send, Sparkles } from "lucide-react";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -136,7 +137,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
 
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📨</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Send size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600 }}>{t("No transmittals yet", "Sin transmisiones aún")}</div>
         </div>
       )}
@@ -160,14 +161,14 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   {canWrite && tx.status === "draft" && (
                     <>
-                      <button className="btn btn-sm btn-outline" onClick={() => aiDraft(tx.id)} disabled={aiLoading} title={t("AI Draft Purpose", "Borrador IA")}>✨ AI</button>
+                      <button className="btn btn-sm btn-outline" onClick={() => aiDraft(tx.id)} disabled={aiLoading} title={t("AI Draft Purpose", "Borrador IA")} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Sparkles size={12} /> AI</button>
                       <button className="btn btn-sm btn-primary" onClick={() => send(tx.id)}>{t("Send", "Enviar")}</button>
                     </>
                   )}
                   {tx.status === "sent" && canWrite && (
                     <button className="btn btn-sm btn-outline" onClick={() => acknowledge(tx.id)}>{t("Acknowledge", "Acusar")}</button>
                   )}
-                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(tx.id)}>📄 PDF</button>
+                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(tx.id)}>PDF</button>
                 </div>
               </div>
             </div>

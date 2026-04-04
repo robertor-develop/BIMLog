@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
-import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 
 interface CvrIssue {
@@ -63,17 +63,17 @@ function CvrBadge({ result }: { result: string }) {
   );
 }
 
-const PDF_REPORTS = [
-  { key: "project-health",    labelEn: "Project Health",       labelEs: "Salud del Proyecto",      icon: "💚" },
-  { key: "compliance",        labelEn: "Compliance Report",    labelEs: "Cumplimiento",             icon: "✅" },
-  { key: "rfi-aging",         labelEn: "RFI Aging",            labelEs: "Antigüedad de RFIs",       icon: "⏳" },
-  { key: "submittal-status",  labelEn: "Submittal Status",     labelEs: "Estado de Submittals",     icon: "📋" },
-  { key: "performance",       labelEn: "Team Performance",     labelEs: "Rendimiento del Equipo",   icon: "📊" },
-  { key: "audit-certificate", labelEn: "Audit Certificate",    labelEs: "Certificado de Auditoría", icon: "🏅" },
-  { key: "meeting-minutes",   labelEn: "Meeting Minutes Log",  labelEs: "Log de Actas",             icon: "📝" },
-  { key: "change-order-log",  labelEn: "Change Order Log",     labelEs: "Log de Órdenes de Cambio", icon: "🔄" },
-  { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",     icon: "📨" },
-  { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",     icon: "🔍" },
+const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; icon: React.ReactNode }[] = [
+  { key: "project-health",    labelEn: "Project Health",       labelEs: "Salud del Proyecto",      icon: <Activity size={20} /> },
+  { key: "compliance",        labelEn: "Compliance Report",    labelEs: "Cumplimiento",             icon: <CheckCircle2 size={20} /> },
+  { key: "rfi-aging",         labelEn: "RFI Aging",            labelEs: "Antigüedad de RFIs",       icon: <Clock size={20} /> },
+  { key: "submittal-status",  labelEn: "Submittal Status",     labelEs: "Estado de Submittals",     icon: <ClipboardList size={20} /> },
+  { key: "performance",       labelEn: "Team Performance",     labelEs: "Rendimiento del Equipo",   icon: <BarChart2 size={20} /> },
+  { key: "audit-certificate", labelEn: "Audit Certificate",    labelEs: "Certificado de Auditoría", icon: <Award size={20} /> },
+  { key: "meeting-minutes",   labelEn: "Meeting Minutes Log",  labelEs: "Log de Actas",             icon: <FileText size={20} /> },
+  { key: "change-order-log",  labelEn: "Change Order Log",     labelEs: "Log de Órdenes de Cambio", icon: <RefreshCw size={20} /> },
+  { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",     icon: <Send size={20} /> },
+  { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",     icon: <Search size={20} /> },
 ];
 
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
@@ -167,7 +167,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               onMouseEnter={e => (e.currentTarget.style.borderColor = "#2563EB")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "hsl(var(--border))")}
             >
-              <span style={{ fontSize: 20 }}>{r.icon}</span>
+              <span style={{ display: "flex", alignItems: "center" }}>{r.icon}</span>
               <div>
                 <div>{tl(r.labelEn, r.labelEs)}</div>
                 <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>PDF</div>

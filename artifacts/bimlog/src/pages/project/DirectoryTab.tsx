@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { Users } from "lucide-react";
 
 interface DirectoryEntry {
   id: number; fullName: string; email: string; companyName?: string;
@@ -136,7 +137,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Users size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("No contacts yet", "Sin contactos aún")}</div>
           <div style={{ fontSize: 13 }}>{t("Add stakeholders to your project directory", "Agrega interesados al directorio del proyecto")}</div>
         </div>

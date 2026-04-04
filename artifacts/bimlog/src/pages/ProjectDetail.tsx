@@ -19,7 +19,7 @@ import { TransmittalsTab } from "./project/TransmittalsTab";
 import { ChangeOrdersTab } from "./project/ChangeOrdersTab";
 import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
-import { ChevronLeft, HelpCircle } from "lucide-react";
+import { ChevronLeft, HelpCircle, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ProjectDetail() {
@@ -138,7 +138,7 @@ export function ProjectDetail() {
           {tab === "schedule"       && <ScheduleTab       projectId={projectId} canWrite={canWrite} />}
           {tab === "clash-reports"  && (
             <div style={{ textAlign: "center", padding: "80px 40px" }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>🔗</div>
+              <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Link2 style={{ width: 52, height: 52, color: "#D1D5DB" }} /></div>
               <h2 style={{ fontWeight: 800, fontSize: 20, color: "#111827", marginBottom: 8 }}>Clash Reports</h2>
               <div style={{
                 display: "inline-block", padding: "4px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,

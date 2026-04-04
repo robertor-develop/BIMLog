@@ -204,7 +204,7 @@ function StatusBadge({ status, lang }: { status: string; lang: string }) {
 
 // ─── AI result badge ──────────────────────────────────────────────────────────
 function AiBadge({ result }: { result: "pass" | "possible_issue" | "fail" }) {
-  const labels: Record<string, string> = { pass: "AI ✓", possible_issue: "AI ⚠", fail: "AI ✗" };
+  const labels: Record<string, string> = { pass: "AI Pass", possible_issue: "AI Issue", fail: "AI Fail" };
   return (
     <span style={{
       display: "inline-block", padding: "2px 7px", borderRadius: 10,

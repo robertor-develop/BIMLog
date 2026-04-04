@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronLeft, Check } from "lucide-react";
+import { ChevronLeft, Check, Star } from "lucide-react";
 
 const FREE_FEATURES = [
   "1 active project",
@@ -316,7 +316,7 @@ export function Pricing() {
         }}>
           <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: "#f59e0b11", borderRadius: "0 0 0 120px" }} />
           <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 28 }}>⭐</div>
+            <div style={{ display: "flex", alignItems: "center" }}><Star size={28} color="#92400e" fill="#f59e0b" /></div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#92400e", marginBottom: 6 }}>Limited Availability</div>
               <h2 style={{ fontSize: 20, fontWeight: 800, color: "#78350f", marginBottom: 10, fontFamily: "var(--font-display)" }}>

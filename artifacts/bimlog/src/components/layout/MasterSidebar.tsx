@@ -275,7 +275,7 @@ export function MasterSidebar() {
                 )}
                 {!loadingNotifs && notifications.length === 0 && (
                   <div style={{ padding: 24, textAlign: "center", fontSize: 12, color: "#9CA3AF" }}>
-                    <div style={{ fontSize: 28, marginBottom: 6 }}>🔔</div>
+                    <div style={{ marginBottom: 6, display: "flex", justifyContent: "center" }}><Bell style={{ width: 28, height: 28, color: "#9CA3AF" }} /></div>
                     {t("No notifications", "Sin notificaciones")}
                   </div>
                 )}

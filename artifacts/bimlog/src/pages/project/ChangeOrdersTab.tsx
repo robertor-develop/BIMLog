@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
 
 interface ChangeOrder {
   id: number; number: string; title: string; description?: string;
@@ -146,7 +147,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
 
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><ClipboardList size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600 }}>{t("No change orders yet", "Sin órdenes de cambio aún")}</div>
         </div>
       )}
@@ -164,15 +165,15 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>{co.title}</div>
                   {co.description && <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 6 }}>{co.description}</div>}
                   <div style={{ display: "flex", gap: 16, fontSize: 12, color: "#6B7280" }}>
-                    {co.contractValueImpact && <span>💰 {co.contractValueImpact}</span>}
-                    {co.scheduleImpactDays && <span>📅 {co.scheduleImpactDays} {t("days", "días")}</span>}
+                    {co.contractValueImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {co.contractValueImpact}</span>}
+                    {co.scheduleImpactDays && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {co.scheduleImpactDays} {t("days", "días")}</span>}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end", marginLeft: 12 }}>
                   {canWrite && co.status === "draft" && (
                     <>
                       <button className="btn btn-sm btn-outline" onClick={() => aiDraft(co.id)} disabled={aiLoading && activeAi === co.id}>
-                        {aiLoading && activeAi === co.id ? "…" : "✨ AI"}
+                        {aiLoading && activeAi === co.id ? "…" : <><Sparkles size={12} style={{ marginRight: 4 }} />AI</>}
                       </button>
                       <button className="btn btn-sm btn-primary" onClick={() => action(co.id, "submit")}>{t("Submit", "Enviar")}</button>
                     </>
@@ -183,7 +184,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                       <button className="btn btn-sm btn-danger-outline" onClick={() => action(co.id, "reject")}>{t("Reject", "Rechazar")}</button>
                     </>
                   )}
-                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(co.id)}>📄 PDF</button>
+                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(co.id)}>PDF</button>
                 </div>
               </div>
             </div>

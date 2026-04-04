@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { AlertTriangle, Calendar } from "lucide-react";
 
 interface Milestone {
   id: number; title: string; dueDate: string; status: string;
@@ -99,7 +100,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </div>
           <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 12, color: "#6B7280" }}>
             <span>{t("Completed", "Completados")}: {completed}/{total}</span>
-            {overdue > 0 && <span style={{ color: "#DC2626" }}>⚠ {overdue} {t("overdue", "vencidos")}</span>}
+            {overdue > 0 && <span style={{ color: "#DC2626", display: "inline-flex", alignItems: "center", gap: 4 }}><AlertTriangle size={13} /> {overdue} {t("overdue", "vencidos")}</span>}
           </div>
         </div>
       )}
@@ -148,7 +149,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📅</div>
+          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Calendar size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600 }}>{t("No milestones yet", "Sin hitos aún")}</div>
           <div style={{ fontSize: 13 }}>{t("Add key dates and deliverables to track project progress", "Agrega fechas clave para rastrear el avance del proyecto")}</div>
         </div>
@@ -162,7 +163,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 <div>
                   <div style={{ fontWeight: 600 }}>{ms.title}</div>
                   <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-                    📅 {new Date(ms.dueDate).toLocaleDateString()}
+                    <Calendar size={11} style={{ marginRight: 3 }} />{new Date(ms.dueDate).toLocaleDateString()}
                     {ms.linkedModule && <span> · {ms.linkedModule}</span>}
                   </div>
                 </div>
