@@ -1,0 +1,249 @@
+Stop. Read every word. This is a complete codebase 
+repair. Fix every TypeScript error and every crash.
+Do in exact order. Do not skip any step.
+
+═══════════════════════════════════════════════════════
+STEP 1 — FIX SCHEMA EXPORTS
+═══════════════════════════════════════════════════════
+
+Find the Drizzle schema file:
+find artifacts/api-server/src -name "schema.ts" -o \
+-name "*.schema.ts" | grep -v node_modules
+
+Open it and verify these tables are defined AND exported:
+- filesTable with ALL these columns:
+  isCompliant, supersededByFileId, sourceLocation,
+  isHistoricalRecord, cvrWorkflowStatus, 
+  userConfirmedNonCompliant, cvrAdminAction,
+  cvrAdminActionAt, cvrAdminActionBy, cvrReminderSentAt,
+  cvrUserReason, fileTypeTier, conventionVersion,
+  rejectionDetails, linkedRfiId, versionDiffStatus,
+  hashComparisonNote, contentVerificationResult,
+  documentRelationship, documentRelationshipDeclaredAt,
+  isSuperseded, parentFileId
+
+- changeOrdersTable with ALL columns from schema
+- changeOrderDocumentsTable with ALL columns from schema
+
+If any table is missing columns — add them.
+If any table is not exported — add export keyword.
+
+After fixing schema run:
+drizzle-kit push
+
+Check:
+grep -n "changeOrdersTable\|changeOrderDocumentsTable\
+\|isCompliant\|cvrWorkflowStatus\|userConfirmedNonCompliant" \
+artifacts/api-server/src/db/schema.ts | head -20
+
+═══════════════════════════════════════════════════════
+STEP 2 — FIX USER TYPE
+═══════════════════════════════════════════════════════
+
+Find the User type definition:
+grep -rn "interface User\|type User\|export.*User" \
+artifacts/bimlog/src/ --include="*.ts" | head -10
+
+Add missing fields to User type:
+  avatarUrl?: string;
+  isSuperAdmin?: boolean;
+  is_super_admin?: boolean;
+  jobTitle?: string;
+  phone?: string;
+  signatureUrl?: string;
+  apiToken?: string;
+  notificationPreferences?: any;
+
+Check:
+grep -n "avatarUrl\|isSuperAdmin\|is_super_admin" \
+artifacts/bimlog/src/store/auth.ts | head -10
+
+═══════════════════════════════════════════════════════
+STEP 3 — FIX ADMINPANEL STYLE ERRORS
+═══════════════════════════════════════════════════════
+
+In AdminPanel.tsx the style prop errors are because
+a wrapper component doesn't accept style prop.
+
+Find every instance of this pattern:
+  <SomeComponent style={{...}}>
+
+If SomeComponent is a custom component that doesn't 
+accept style — wrap the content in a plain div instead:
+  <div style={{...}}><SomeComponent>
+
+Fix all 20+ instances of this error in AdminPanel.tsx.
+
+Check:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | \
+grep "AdminPanel" | wc -l
+Should return 0.
+
+═══════════════════════════════════════════════════════
+STEP 4 — FIX AUTH ERRORS
+═══════════════════════════════════════════════════════
+
+In auth.ts fix these two errors:
+
+Error 1 — resetLink doesn't exist in email template:
+Find the sendPasswordResetEmail call at line ~354
+Change resetLink to the correct field name that the
+email template expects. Check lib/email.ts for the
+correct field name.
+
+Error 2 — password field doesn't exist in users update:
+At line ~377 the update is trying to set 'password'
+but the column is named 'passwordHash'.
+Change: { password: hashedPassword }
+To: { passwordHash: hashedPassword }
+
+Check:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | \
+grep "auth.ts" | head -5
+Should return 0.
+
+═══════════════════════════════════════════════════════
+STEP 5 — FIX OVERDUE NOTIFIER
+═══════════════════════════════════════════════════════
+
+In lib/overdue-notifier.ts:
+cvrWorkflowStatus and cvrReminderSentAt don't exist
+on the filesTable type.
+
+These columns DO exist in the database — they just
+aren't in the TypeScript schema yet.
+
+After Step 1 fixes the schema these errors will
+resolve automatically. If they don't:
+
+Find the overdue-notifier.ts references and update
+to use the correct column names from the fixed schema.
+
+Check:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | \
+grep "overdue-notifier" | head -5
+Should return 0.
+
+═══════════════════════════════════════════════════════
+STEP 6 — FIX TOTALCONTROL RENDER CRASH
+═══════════════════════════════════════════════════════
+
+The blank screen crash is caused by rendering 
+undefined values. 
+
+In TotalControl.tsx apply these fixes:
+
+1. Find every .map() call and add ?? [] before it:
+   Change: items.map(...)
+   To: (items ?? []).map(...)
+
+2. Find every object property access on state variables
+   and add optional chaining:
+   Change: platformStats.totalUsers
+   To: platformStats?.totalUsers ?? 0
+
+3. Find every number display and wrap with fallback:
+   Change: {count}
+   To: {count ?? 0}
+
+4. Find the briefing render and add null check:
+   Change: {brief.summary}
+   To: {brief?.summary ?? "Loading briefing..."}
+
+5. Add error boundary at top of component return:
+   Wrap entire return JSX in:
+   <React.Fragment>
+     {/* content */}
+   </React.Fragment>
+   
+   And add at very top of component function:
+   if (!token) return null;
+
+6. Remove the 10 second timeout that sets loadError —
+   this is causing the page to show error state even 
+   when data is still loading on slow connections.
+   Replace with 30 second timeout instead.
+
+Check:
+grep -n "??\|?\\." \
+artifacts/bimlog/src/pages/TotalControl.tsx | wc -l
+Should be more than 30.
+
+═══════════════════════════════════════════════════════
+STEP 7 — FIX FILES ROUTE ERRORS
+═══════════════════════════════════════════════════════
+
+In files.ts fix these errors:
+
+1. PDFParse vs pdfParse — line 639:
+   Change: PDFParse
+   To: pdfParse
+
+2. string | string[] type errors at lines 1196, 1197,
+   1241:
+   Add Array.isArray check:
+   Change: req.body.fieldName
+   To: Array.isArray(req.body.fieldName) 
+       ? req.body.fieldName[0] 
+       : req.body.fieldName
+
+3. cvrWorkflowStatus errors — after Step 1 fixes 
+   schema these will resolve. If not — comment out
+   only the cvrWorkflowStatus update lines temporarily
+   until schema is confirmed fixed.
+
+Check:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | \
+grep "files.ts" | wc -l
+Should return 0.
+
+═══════════════════════════════════════════════════════
+STEP 8 — ADD MISSING .ok CHECKS
+═══════════════════════════════════════════════════════
+
+In these files add .ok checks to all fetch calls
+that are missing them:
+
+TeamTab.tsx lines 254, 359, 375
+FilesTab.tsx lines 147, 847, 880, 919
+DirectoryTab.tsx lines 33, 44, 57, 64
+TransmittalsTab.tsx line 34
+
+Pattern to add:
+const r = await fetch(...);
+if (!r.ok) { 
+  console.error("Request failed", r.status); 
+  return; 
+}
+
+═══════════════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════════════
+
+Check 1 — Frontend TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+Should return 0 or 1 (just the summary line)
+
+Check 2 — Backend TypeScript errors:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+Should return 0 or 1
+
+Check 3 — Schema has all required columns:
+grep -n "isCompliant\|cvrWorkflowStatus\
+\|userConfirmedNonCompliant\|changeOrdersTable" \
+artifacts/api-server/src/db/schema.ts | head -10
+
+Check 4 — TotalControl defensive coding:
+grep -n "??" \
+artifacts/bimlog/src/pages/TotalControl.tsx | wc -l
+Should be more than 30
+
+Check 5 — DB schema pushed:
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'files'
+ORDER BY ordinal_position;
+
+Rebuild frontend and backend.
+Restart API server.
+Publish.
+Paste all 5 checks. Nothing else.

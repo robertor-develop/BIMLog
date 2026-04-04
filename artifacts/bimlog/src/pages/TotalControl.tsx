@@ -455,6 +455,22 @@ function ProjectDetailModal({ project, token, onClose }: { project: Project; tok
   );
 }
 
+/* ── Fallback error screen ─────────────────────────────────────────────────── */
+
+function TCErrorFallback({ onBack }: { onBack: () => void }) {
+  return (
+    <div style={{ padding: 40, textAlign: "center", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9FAFB" }}>
+      <div>
+        <h2 style={{ fontWeight: 800, fontSize: 18, marginBottom: 12, color: "#111" }}>Total Control — Loading Error</h2>
+        <p style={{ color: "#6B7280", marginBottom: 20, fontSize: 14 }}>Something went wrong rendering this page.</p>
+        <button onClick={onBack} style={{ padding: "10px 24px", background: "#1D4ED8", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 14 }}>
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main TotalControl Component ──────────────────────────────────────────── */
 
 export function TotalControl() {
@@ -467,6 +483,7 @@ export function TotalControl() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [renderError, setRenderError] = useState(false);
 
   // Modal state
   const [showUsers, setShowUsers] = useState(false);
@@ -503,41 +520,44 @@ export function TotalControl() {
     try {
       try {
         const r = await apiFetch("/admin/platform-stats", token);
-        if (r.ok) {
+        if (r?.ok) {
           const d = await r.json();
-          setStats(prev => ({ ...prev, ...d } as PlatformStats));
+          setStats(prev => ({ ...(prev ?? {}), ...(d ?? {}) } as PlatformStats));
         }
       } catch(e) { console.warn("platform-stats failed", e); }
 
       try {
         const r = await apiFetch("/admin/overview", token);
-        if (r.ok) {
+        if (r?.ok) {
           const d = await r.json();
-          setStats(d.stats ?? d);
+          setStats((d?.stats ?? d) || null);
         }
       } catch(e) { console.warn("overview failed", e); }
 
       try {
         const r = await apiFetch("/admin/companies", token);
-        if (r.ok) setCompanies(await r.json());
+        if (r?.ok) {
+          const d = await r.json();
+          setCompanies(Array.isArray(d) ? d : []);
+        }
       } catch(e) { console.warn("companies failed", e); }
 
       try {
         const r = await apiFetch("/admin/projects", token);
-        if (r.ok) {
+        if (r?.ok) {
           const d = await r.json();
-          setProjects(Array.isArray(d) ? d : d.projects ?? []);
+          setProjects(Array.isArray(d) ? d : Array.isArray(d?.projects) ? d.projects : []);
         }
       } catch(e) { console.warn("projects failed", e); }
 
       try {
         const r = await apiFetch("/dashboard/stats", token);
-        if (r.ok) await r.json();
+        if (r?.ok) await r.json();
       } catch(e) { console.warn("dash-stats failed", e); }
 
       try {
         const r = await apiFetch("/dashboard/briefing", token);
-        if (r.ok) await r.json();
+        if (r?.ok) await r.json();
       } catch(e) { console.warn("briefing failed", e); }
 
     } catch(e) {
@@ -549,10 +569,30 @@ export function TotalControl() {
   }, [token]);
 
   const handleHealthBarExpand = (tab: string) => {
-    if (tab === "users") setShowUsers(true);
-    else if (tab === "companies") { /* already visible in Layer 2 */ }
-    else if (tab === "projects") { /* already visible in Layer 3 */ }
+    try {
+      if (tab === "users") setShowUsers(true);
+    } catch(e) { console.warn("handleHealthBarExpand failed", e); }
   };
+
+  // Safe stat accessor with 0 fallback
+  const safeStats: PlatformStats = {
+    totalUsers:      Number(stats?.totalUsers      ?? 0),
+    totalCompanies:  Number(stats?.totalCompanies  ?? 0),
+    totalProjects:   Number(stats?.totalProjects   ?? 0),
+    totalFiles:      Number(stats?.totalFiles      ?? 0),
+    totalRfis:       Number(stats?.totalRfis       ?? 0),
+    totalSubmittals: Number(stats?.totalSubmittals ?? 0),
+    activeProjects:  Number(stats?.activeProjects  ?? 0),
+    filesLast24h:    Number(stats?.filesLast24h    ?? 0),
+    rfisLast7d:      Number(stats?.rfisLast7d      ?? 0),
+  };
+
+  const safeCompanies: Company[] = Array.isArray(companies) ? companies : [];
+  const safeProjects: Project[]  = Array.isArray(projects)  ? projects  : [];
+
+  if (renderError) {
+    return <TCErrorFallback onBack={() => setLocation("/dashboard")} />;
+  }
 
   if (authorized === null) {
     return (
@@ -581,7 +621,7 @@ export function TotalControl() {
     );
   }
 
-  return (
+  try { return (
     <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
       {/* Modals */}
       {showUsers && token && <UsersModal token={token} onClose={() => setShowUsers(false)} />}
@@ -589,12 +629,19 @@ export function TotalControl() {
       {showActivity && token && <ActivityModal token={token} onClose={() => setShowActivity(false)} />}
       {selectedProject && token && <ProjectDetailModal project={selectedProject} token={token} onClose={() => setSelectedProject(null)} />}
       {selectedCompany && (
-        <Modal title={`${selectedCompany.name} — Details`} onClose={() => setSelectedCompany(null)}>
+        <Modal title={`${selectedCompany?.name ?? "Company"} — Details`} onClose={() => setSelectedCompany(null)}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {[["Plan", selectedCompany.plan ?? "free"], ["Status", selectedCompany.status], ["Projects", String(selectedCompany.projectCount)], ["Users", String(selectedCompany.userCount)], ["Files", selectedCompany.fileCount.toLocaleString()], ["Joined", new Date(selectedCompany.createdAt).toLocaleDateString()]].map(([k, v]) => (
+            {[
+              ["Plan",     selectedCompany?.plan ?? "free"],
+              ["Status",   selectedCompany?.status ?? "—"],
+              ["Projects", String(Number(selectedCompany?.projectCount ?? 0))],
+              ["Users",    String(Number(selectedCompany?.userCount    ?? 0))],
+              ["Files",    Number(selectedCompany?.fileCount ?? 0).toLocaleString()],
+              ["Joined",   selectedCompany?.createdAt ? new Date(selectedCompany.createdAt).toLocaleDateString() : "—"],
+            ].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k ?? ""}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v ?? "—"}</div>
               </div>
             ))}
           </div>
@@ -631,7 +678,7 @@ export function TotalControl() {
               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
                 LAYER 1 · PLATFORM HEALTH · click any metric to drill in
               </div>
-              {stats && <HealthBar stats={stats} onExpand={handleHealthBarExpand} />}
+              <HealthBar stats={safeStats} onExpand={handleHealthBarExpand} />
             </div>
 
             {/* ── Layer 2: Company Performance ─── */}
@@ -639,7 +686,7 @@ export function TotalControl() {
               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
                 LAYER 2 · COMPANY PERFORMANCE
               </div>
-              <CompanyPanel companies={companies} onSelect={setSelectedCompany} />
+              <CompanyPanel companies={safeCompanies} onSelect={setSelectedCompany} />
             </div>
 
             {/* ── Layer 3: Active Projects Grid ─── */}
@@ -647,7 +694,7 @@ export function TotalControl() {
               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3AF", marginBottom: 10 }}>
                 LAYER 3 · ACTIVE PROJECTS GRID
               </div>
-              <ProjectsGrid projects={projects} onSelect={setSelectedProject} />
+              <ProjectsGrid projects={safeProjects} onSelect={setSelectedProject} />
             </div>
 
             {/* ── Layer 4: Brain Daily Brief ─── */}
@@ -662,4 +709,8 @@ export function TotalControl() {
       </div>
     </div>
   );
+  } catch(e) {
+    console.warn("TotalControl render error", e);
+    return <TCErrorFallback onBack={() => setLocation("/dashboard")} />;
+  }
 }
