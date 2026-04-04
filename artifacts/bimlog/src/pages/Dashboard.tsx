@@ -162,6 +162,10 @@ export function Dashboard() {
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
+  function handleProjectCreated(newId: number) {
+    setShowCreate(false);
+    setLocation(`/projects/${newId}/convention`);
+  }
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { shouldShow: showOnboarding, markDone: doneOnboarding } = useOnboarding();
@@ -562,7 +566,7 @@ export function Dashboard() {
 
             {/* Create project form */}
             {showCreate && (
-              <CreateProjectForm onClose={() => setShowCreate(false)} />
+              <CreateProjectForm onClose={() => setShowCreate(false)} onCreated={handleProjectCreated} />
             )}
 
             {/* Error state */}
@@ -840,19 +844,17 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
 }
 
 // ── CreateProjectForm (unchanged) ──────────────────────────────────────────────
-function CreateProjectForm({ onClose }: { onClose: () => void }) {
+function CreateProjectForm({ onClose, onCreated }: { onClose: () => void; onCreated: (id: number) => void }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
   const [form, setForm] = useState({ name: "", code: "", description: "" });
 
   const { mutate, isPending } = useCreateProject({
     mutation: {
       onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
-        onClose();
-        setLocation(`/projects/${data.id}/convention`);
+        onCreated(data.id);
       },
       onError: () => toast({ title: t("common.error"), variant: "destructive" }),
     },
