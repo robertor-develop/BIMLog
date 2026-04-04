@@ -374,6 +374,17 @@ export function MasterSidebar() {
           >
             Sign Out
           </button>
+          <button
+            onClick={() => { localStorage.removeItem("bimlog-auth"); logout(); window.location.href = "/"; }}
+            style={{
+              display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0",
+              padding: "3px 0", background: "none", border: "none", cursor: "pointer",
+              color: "rgba(255,255,255,0.18)", fontSize: 10, textAlign: "center",
+              textDecoration: "underline", textUnderlineOffset: 2,
+            }}
+          >
+            Clear session &amp; sign in again
+          </button>
         </div>
       )}
     </div>

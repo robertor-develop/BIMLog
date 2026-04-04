@@ -353,7 +353,7 @@ export function Dashboard() {
           <AiBriefingCard token={token ?? undefined} />
 
           {/* SECTION 2 — Platform stats (5 cards) */}
-          {!isLoading && (projects?.length ?? 0) > 0 && (
+          {!isLoading && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
               {/* FIX 3: each card navigates to the correct section */}
               <StatCard
@@ -622,26 +622,7 @@ export function Dashboard() {
                       <FolderOpen style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} />
                     </div>
                     <div className="empty-title">{t("dashboard.empty")}</div>
-                    <div className="empty-desc" style={{ marginBottom: 16 }}>{t("dashboard.emptyDesc")}</div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                      <Button onClick={() => setShowCreate(true)} variant="outline" style={{ gap: 6, fontSize: 12 }}>
-                        <Plus style={{ width: 13, height: 13 }} />
-                        {t("dashboard.createProject")}
-                      </Button>
-                      <button
-                        onClick={clearSessionAndRetry}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 5,
-                          fontSize: 11, color: "hsl(var(--muted-foreground))",
-                          background: "none", border: "none", cursor: "pointer",
-                          padding: "4px 8px", borderRadius: 4,
-                          textDecoration: "underline", textUnderlineOffset: 3,
-                        }}
-                      >
-                        <LogOut style={{ width: 11, height: 11 }} />
-                        Clear session &amp; sign in again
-                      </button>
-                    </div>
+                    <div className="empty-desc">{t("dashboard.emptyDesc")}</div>
                   </div>
                 )}
               </>
