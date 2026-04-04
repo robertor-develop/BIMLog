@@ -10,7 +10,7 @@ import {
   ChevronRight, ChevronLeft, Check, Plus, Trash2,
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
   Download, RotateCcw, AlertTriangle, CheckCircle2, X,
-  ArrowUp, ArrowDown, RefreshCw,
+  ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -343,6 +343,12 @@ interface IndustrialState {
   levelsIfRelevant: string;
 }
 
+interface UploadedFile {
+  id: string;
+  file: File;
+  category: "pdf" | "spreadsheet" | "screenshot" | "sample";
+}
+
 interface ImportState {
   sampleNames: string;
   rawFolderText: string;
@@ -350,6 +356,8 @@ interface ImportState {
   rawNotes: string;
   analyzing: boolean;
   error: string;
+  extractionWarning: string;
+  uploadedFiles: UploadedFile[];
 }
 
 function defaultSetupCtx(): SetupContext {
@@ -379,7 +387,7 @@ function defaultIndustrialState(): IndustrialState {
 }
 
 function defaultImportState(): ImportState {
-  return { sampleNames: "", rawFolderText: "", rawIndexText: "", rawNotes: "", analyzing: false, error: "" };
+  return { sampleNames: "", rawFolderText: "", rawIndexText: "", rawNotes: "", analyzing: false, error: "", extractionWarning: "", uploadedFiles: [] };
 }
 
 // ─── level helpers ────────────────────────────────────────────────────────────
@@ -769,36 +777,61 @@ function ImportStructure({ state, setState, token, projectId, onBack, onResult }
     setState(s => ({ ...s, importState: { ...s.importState, ...partial } }));
 
   async function runAnalysis() {
-    setImp({ analyzing: true, error: "" });
+    setImp({ analyzing: true, error: "", extractionWarning: "" });
     try {
       const sampleNames = imp.sampleNames.split("\n").map(s => s.trim()).filter(Boolean);
-      const body = {
-        setupContext: state.setupCtx.setupContextChoice,
-        projectEnvironment: state.setupCtx.projectEnvironment,
-        builderIntent: state.setupCtx.builderIntent,
-        scopeType: state.setupCtx.scopeType,
-        scopeDetails: state.setupCtx.scopeDetails,
-        levelsRelevant: state.setupCtx.levelsRelevant,
-        primaryStructure: state.setupCtx.primaryStructure,
-        availableInputs: state.setupCtx.availableInputs,
-        sampleNames,
-        rawFolderTreeText: imp.rawFolderText,
-        rawIndexText: imp.rawIndexText,
-        rawNotes: imp.rawNotes,
-      };
-      const res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-      });
+      let res: Response;
+      if (imp.uploadedFiles.length > 0) {
+        const fd = new FormData();
+        fd.append("setupContext", state.setupCtx.setupContextChoice);
+        fd.append("projectEnvironment", state.setupCtx.projectEnvironment);
+        fd.append("builderIntent", state.setupCtx.builderIntent);
+        fd.append("scopeType", state.setupCtx.scopeType);
+        fd.append("scopeDetails", JSON.stringify(state.setupCtx.scopeDetails));
+        fd.append("levelsRelevant", state.setupCtx.levelsRelevant);
+        fd.append("primaryStructure", state.setupCtx.primaryStructure);
+        fd.append("availableInputs", JSON.stringify(state.setupCtx.availableInputs));
+        fd.append("sampleNames", sampleNames.join("\n"));
+        fd.append("rawFolderTreeText", imp.rawFolderText);
+        fd.append("rawIndexText", imp.rawIndexText);
+        fd.append("rawNotes", imp.rawNotes);
+        for (const uf of imp.uploadedFiles) {
+          fd.append(uf.category, uf.file, uf.file.name);
+        }
+        res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover-upload`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+      } else {
+        res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            setupContext: state.setupCtx.setupContextChoice,
+            projectEnvironment: state.setupCtx.projectEnvironment,
+            builderIntent: state.setupCtx.builderIntent,
+            scopeType: state.setupCtx.scopeType,
+            scopeDetails: state.setupCtx.scopeDetails,
+            levelsRelevant: state.setupCtx.levelsRelevant,
+            primaryStructure: state.setupCtx.primaryStructure,
+            availableInputs: state.setupCtx.availableInputs,
+            sampleNames,
+            rawFolderTreeText: imp.rawFolderText,
+            rawIndexText: imp.rawIndexText,
+            rawNotes: imp.rawNotes,
+          }),
+        });
+      }
       const data = await res.json();
       if (!res.ok) {
         setImp({ analyzing: false, error: data.error || "Analysis failed" });
         return;
       }
-      setImp({ analyzing: false });
-      setState(s => ({ ...s, discoveryResult: data as DiscoveryResult }));
-      onResult(data as DiscoveryResult);
+      const { _extractionWarning, ...cleanData } = data as Record<string, unknown>;
+      setImp({ analyzing: false, extractionWarning: typeof _extractionWarning === "string" ? _extractionWarning : "" });
+      setState(s => ({ ...s, discoveryResult: cleanData as unknown as DiscoveryResult }));
+      onResult(cleanData as unknown as DiscoveryResult);
     } catch (err) {
       setImp({ analyzing: false, error: err instanceof Error ? err.message : "Analysis failed" });
     }
@@ -813,13 +846,66 @@ function ImportStructure({ state, setState, token, projectId, onBack, onResult }
     </div>
   );
 
+  function renderUploadSlot(
+    title: string,
+    category: UploadedFile["category"],
+    accept: string,
+    purposes: string[],
+  ) {
+    const slotId = `upload-${category}`;
+    const catFiles = imp.uploadedFiles.filter(f => f.category === category);
+    return (
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 3 }}>{title}</div>
+        <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: catFiles.length > 0 ? 8 : 10 }}>
+          {purposes.join(" · ")}
+        </div>
+        {catFiles.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            {catFiles.map(uf => (
+              <div key={uf.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 5, marginBottom: 4, fontSize: 12 }}>
+                <FileText style={{ width: 12, height: 12, color: "#6B7280", flexShrink: 0 }} />
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#374151" }}>{uf.file.name}</span>
+                <span style={{ color: "#9CA3AF", flexShrink: 0, fontSize: 11 }}>{uf.file.name.split(".").pop()?.toUpperCase()}</span>
+                <button
+                  type="button"
+                  onClick={() => setImp({ uploadedFiles: imp.uploadedFiles.filter(f => f.id !== uf.id) })}
+                  style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", display: "flex", alignItems: "center" }}
+                >
+                  <X style={{ width: 12, height: 12 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <label htmlFor={slotId} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", fontSize: 12, border: "1px dashed #D1D5DB", borderRadius: 6, cursor: "pointer", color: "#6B7280", background: "#FAFAFA" }}>
+          <Upload style={{ width: 12, height: 12 }} />
+          Add files
+          <input
+            id={slotId}
+            type="file"
+            multiple
+            accept={accept}
+            style={{ display: "none" }}
+            onChange={e => {
+              const newFiles = Array.from(e.target.files || []).map(file => ({ id: uid(), file, category } as UploadedFile));
+              setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
+              e.target.value = "";
+            }}
+          />
+        </label>
+        <span style={{ marginLeft: 8, fontSize: 11, color: "#D1D5DB" }}>{accept.replace(/\./g, "").split(",").join(", ").toUpperCase()}</span>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Import Existing Structure</div>
         <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginBottom: 6 }}>Provide evidence before BIMLog proposes anything</div>
         <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>
-          Paste any available evidence below. BIMLog will analyze it and propose a probable structure. You will review and edit every suggestion before anything is applied. Partial evidence is fine — the analysis works even with only filenames or folder names.
+          You can paste text, upload evidence, or do both. BIMLog will use whatever you provide and propose a probable structure for your review. You will review and edit every suggestion before anything is applied.
         </div>
       </div>
 
@@ -827,6 +913,32 @@ function ImportStructure({ state, setState, token, projectId, onBack, onResult }
       {textAreaField("Folder structure", "Paste a folder tree or list of folder names", "rawFolderText", 5, "01-Architecture\n  01.01-Drawings\n  01.02-Models\n02-Structure\n...")}
       {textAreaField("Document index / register", "Paste rows from a document register or index", "rawIndexText", 5, "Doc No | Discipline | Title | Status\nPRJ-ARC-0001 | ARC | Ground Floor Plan | IFR...")}
       {textAreaField("Additional notes", "Any other context, conventions explained in words, or instructions to the analysis engine", "rawNotes", 4, "The project uses a zone-based structure. Area codes are A1–A6...")}
+
+      <div style={{ marginTop: 8, marginBottom: 24, borderTop: "1px solid #E5E7EB", paddingTop: 24 }}>
+        <div style={{ fontWeight: 700, fontSize: 14, color: "#111827", marginBottom: 4 }}>Upload Existing Evidence</div>
+        <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 20, lineHeight: 1.5 }}>
+          You can upload supporting files instead of typing everything manually. BIMLog will extract what it can and combine it with your pasted inputs.
+        </div>
+        {renderUploadSlot("PDF references", "pdf", ".pdf", [
+          "Document indexes", "Naming guides", "Contract appendices", "Document lists", "Sample coded documents",
+        ])}
+        {renderUploadSlot("Spreadsheet registers", "spreadsheet", ".xlsx,.xls,.csv", [
+          "Document indexes", "Registers", "Drawing lists", "Transmittal logs", "Submittal logs", "Coding tables",
+        ])}
+        {renderUploadSlot("Screenshot evidence", "screenshot", ".png,.jpg,.jpeg,.webp", [
+          "Folder trees", "Naming examples", "Document headers", "Register screenshots", "Existing coding systems",
+        ])}
+        {renderUploadSlot("Optional sample files", "sample", ".pdf,.dwg,.ifc,.nwd,.rvt,.docx,.xlsx,.xls,.csv", [
+          "Filename evidence only", "BIMLog extracts filenames and visible naming patterns only",
+        ])}
+      </div>
+
+      {imp.extractionWarning && (
+        <div style={{ marginBottom: 16, padding: "10px 14px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 6, fontSize: 13, color: "#92400E", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <Info style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1 }} />
+          {imp.extractionWarning}
+        </div>
+      )}
 
       {imp.error && (
         <div style={{ marginBottom: 16, padding: "10px 14px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, fontSize: 13, color: "#991B1B" }}>

@@ -1,0 +1,195 @@
+Stop. Do not change the logic of Step 0. Do not remove the current text fields. Extend the evidence intake in the “Import Existing Structure” step so users can provide real project evidence, not just pasted text.
+
+This is the problem:
+The current screen only allows pasted text for sample file names, folder structure, document index/register, and notes.
+That is too limited for real takeover projects.
+Users may already have:
+PDF indexes
+Excel registers
+screenshots of folder trees
+screenshots of coding examples
+real files with naming patterns
+mixed evidence from inherited projects
+
+We need to keep the current paste fields, but add real evidence upload inputs.
+
+Modify ONLY the “Import Existing Structure” step and the minimum backend support needed for it.
+
+Build this in exact order:
+
+STEP 1 — Keep the current text inputs exactly as they are.
+Do not remove:
+Sample file names
+Folder structure
+Document index / register
+Additional notes
+
+These are still useful.
+
+STEP 2 — Add a new section below the existing paste areas.
+
+Title:
+Upload Existing Evidence
+
+Subtitle:
+You can upload supporting files instead of typing everything manually. BIMLog will extract what it can and combine it with your pasted inputs.
+
+Add upload slots for:
+
+PDF references
+Accept:
+.pdf
+Purpose:
+document indexes
+naming guides
+contract appendices
+document lists
+sample coded documents
+Spreadsheet registers
+Accept:
+.xlsx
+.xls
+.csv
+Purpose:
+document indexes
+registers
+drawing lists
+transmittal logs
+submittal logs
+coding tables
+Screenshot evidence
+Accept:
+.png
+.jpg
+.jpeg
+.webp
+Purpose:
+folder trees
+naming examples
+document headers
+register screenshots
+existing coding systems
+Optional sample files
+Accept for this step only as filename evidence, not deep parsing:
+.pdf
+.dwg
+.ifc
+.nwd
+.rvt
+.docx
+.xlsx
+.xls
+.csv
+Purpose:
+extract filenames and visible naming patterns only
+
+STEP 3 — Important behavior.
+Do NOT force the user to upload anything.
+The user may use:
+only pasted text,
+only uploaded evidence,
+or both together.
+
+The analysis must combine all available evidence.
+
+STEP 4 — Backend endpoint update.
+Update:
+POST /api/v1/projects/:projectId/convention/discover
+
+So it can accept multipart/form-data as well as structured text inputs.
+
+Support these fields:
+sampleNames
+rawFolderTreeText
+rawIndexText
+rawNotes
+uploaded evidence files
+
+If multipart is too disruptive to existing route structure, create:
+POST /api/v1/projects/:projectId/convention/discover-upload
+and keep discover for text-only mode.
+But the final frontend must hide that complexity and just let the user click Analyze Project Structure once.
+
+STEP 5 — Extraction rules.
+Do not overbuild.
+Do not try to deeply parse every engineering file format.
+
+For this pass, use these rules:
+
+PDF:
+extract text if possible
+if text extraction fails, still record file name and basic metadata
+
+Spreadsheet:
+read visible rows and columns where possible
+extract candidate codes, titles, discipline labels, numbering patterns
+
+Screenshots:
+send through image-capable analysis only if already supported by existing infrastructure
+otherwise at minimum record filename and let user know screenshot OCR/image interpretation is limited
+but do not reject the file
+
+Sample files:
+do NOT deeply parse RVT, DWG, NWD, IFC in this step
+use only filename and extension as evidence signals for now
+
+STEP 6 — Analysis input composition.
+When the user clicks Analyze Project Structure, BIMLog must combine:
+all pasted text
+all extracted text from uploaded PDFs/spreadsheets if available
+all uploaded filenames/extensions
+all screenshot filenames and any extracted text if available
+
+Then send that combined evidence to the convention discovery endpoint.
+
+STEP 7 — UI feedback.
+For each uploaded file show:
+file name
+file type
+remove button
+
+During analysis show:
+Analyzing project structure...
+
+If extraction fails for one file, do not fail the whole analysis.
+Show a non-blocking note like:
+Some files could not be fully read, but BIMLog still used the available evidence.
+
+STEP 8 — Keep the system realistic.
+Do NOT build full parsing for:
+RVT
+DWG
+NWD
+IFC
+
+Do NOT require OCR perfection for screenshots.
+
+The goal here is:
+let users load real evidence they already have,
+extract what is reasonable,
+and give BIMLog more context before proposing structure.
+
+STEP 9 — Update the helper text in this step.
+Current text should make clear:
+You can paste text, upload evidence, or do both.
+BIMLog will use whatever you provide and propose a probable structure for your review.
+
+STEP 10 — Checks.
+After building, run these checks and show exact output only:
+
+Check 1
+grep -n "Upload Existing Evidence|PDF references|Spreadsheet registers|Screenshot evidence|Optional sample files" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -30
+
+Check 2
+grep -n "Analyzing project structure|Some files could not be fully read" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -30
+
+Check 3
+grep -Rni "convention/discover-upload|multipart/form-data" artifacts/api-server/src/routes | head -30
+
+Check 4
+grep -Rni "pdf|xlsx|xls|csv|png|jpg|jpeg|webp|dwg|ifc|nwd|rvt|docx" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -50
+
+Check 5
+grep -Rni "Do NOT build full parsing for" artifacts/api-server/src/routes artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -30
+
+Show exact output only. Nothing else.

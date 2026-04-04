@@ -224,6 +224,9 @@ importers:
       pdfkit:
         specifier: ^0.18.0
         version: 0.18.0
+      xlsx:
+        specifier: ^0.18.5
+        version: 0.18.5
     devDependencies:
       '@types/bcryptjs':
         specifier: ^3.0.0
