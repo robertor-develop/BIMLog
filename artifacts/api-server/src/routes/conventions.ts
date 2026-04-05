@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable } from "@workspace/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
@@ -471,6 +471,273 @@ Return ONLY this JSON structure (no markdown, no explanation):
       res.json(parsed);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Discovery failed";
+      res.status(500).json({ error: message });
+    }
+  }
+);
+
+// ── Convention Versions — list ────────────────────────────────────────────────
+router.get("/projects/:projectId/convention/versions", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId), 10);
+    if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
+
+    const versions = await db
+      .select()
+      .from(namingConventionVersionsTable)
+      .where(eq(namingConventionVersionsTable.projectId, projectId))
+      .orderBy(desc(namingConventionVersionsTable.conventionVersion));
+
+    res.json(versions.map(v => ({
+      id: v.id,
+      conventionVersion: v.conventionVersion,
+      analysisSummary: v.analysisSummary,
+      changeSummary: v.changeSummary,
+      acceptedDisciplines: v.acceptedDisciplines,
+      acceptedSystems: v.acceptedSystems,
+      acceptedDocTypes: v.acceptedDocTypes,
+      acceptedExtraFields: v.acceptedExtraFields,
+      acceptedFieldOrder: v.acceptedFieldOrder,
+      ambiguities: v.ambiguities,
+      userNotes: v.userNotes,
+      createdAt: v.createdAt.toISOString(),
+      createdById: v.createdById,
+    })));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+// ── Convention Versions — save snapshot ──────────────────────────────────────
+router.post("/projects/:projectId/convention/versions", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId), 10);
+    if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
+    const userId = req.user!.userId;
+
+    const {
+      acceptedDisciplines = [],
+      acceptedSystems = [],
+      acceptedDocTypes = [],
+      acceptedExtraFields = [],
+      acceptedFieldOrder = [],
+      analysisSummary,
+      ambiguities = [],
+      userNotes,
+      changeSummary,
+    } = req.body as Record<string, unknown>;
+
+    const existing = await db
+      .select({ conventionVersion: namingConventionVersionsTable.conventionVersion })
+      .from(namingConventionVersionsTable)
+      .where(eq(namingConventionVersionsTable.projectId, projectId))
+      .orderBy(desc(namingConventionVersionsTable.conventionVersion))
+      .limit(1);
+
+    const nextVersion = existing.length > 0 ? existing[0].conventionVersion + 1 : 1;
+
+    const [inserted] = await db
+      .insert(namingConventionVersionsTable)
+      .values({
+        projectId,
+        conventionVersion: nextVersion,
+        acceptedDisciplines: acceptedDisciplines as Array<{ code: string; label: string }>,
+        acceptedSystems: acceptedSystems as Array<{ code: string; label: string }>,
+        acceptedDocTypes: acceptedDocTypes as Array<{ code: string; label: string }>,
+        acceptedExtraFields: acceptedExtraFields as Array<{ key: string; label: string }>,
+        acceptedFieldOrder: acceptedFieldOrder as string[],
+        analysisSummary: typeof analysisSummary === "string" ? analysisSummary : null,
+        ambiguities: ambiguities as string[],
+        userNotes: typeof userNotes === "string" ? userNotes : null,
+        changeSummary: typeof changeSummary === "string" ? changeSummary : null,
+        createdById: userId,
+      })
+      .returning();
+
+    res.json({ id: inserted.id, conventionVersion: inserted.conventionVersion });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+// ── Convention Re-analysis (comparison against baseline) ──────────────────────
+router.post(
+  "/projects/:projectId/convention/reanalyze",
+  authMiddleware,
+  requireProjectMember(),
+  (req, res, next) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err) { res.status(400).json({ error: `File upload error: ${err instanceof Error ? err.message : String(err)}` }); return; }
+      next();
+    });
+  },
+  async (req, res) => {
+    try {
+      const projectId = parseInt(String(req.params.projectId), 10);
+      if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
+
+      const b = req.body as Record<string, string>;
+      const files = (req.files as Record<string, Express.Multer.File[]>) || {};
+
+      const rawFolderTreeText = b.rawFolderTreeText || "";
+      const rawIndexText = b.rawIndexText || "";
+      const rawNotes = b.rawNotes || "";
+      const sampleNames: string[] = (b.sampleNames || "").split("\n").map((s: string) => s.trim()).filter(Boolean);
+
+      const failedFiles: string[] = [];
+
+      const pdfTexts: string[] = [];
+      for (const f of files.pdf || []) {
+        try {
+          const parser = new PDFParse({ data: new Uint8Array(f.buffer) });
+          const result = await parser.getText();
+          const txt = ((result as { text?: string }).text ?? "").trim();
+          pdfTexts.push(txt
+            ? `[From PDF: ${f.originalname}]\n${txt.slice(0, 8000)}`
+            : `[PDF: ${f.originalname} — no extractable text]`);
+        } catch {
+          failedFiles.push(f.originalname);
+          pdfTexts.push(`[PDF: ${f.originalname} — could not read]`);
+        }
+      }
+
+      const sheetTexts: string[] = [];
+      for (const f of files.spreadsheet || []) {
+        try {
+          const workbook = XLSX.read(f.buffer, { type: "buffer" });
+          const rows: string[] = [];
+          for (const sheetName of workbook.SheetNames.slice(0, 3)) {
+            const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName], { blankrows: false });
+            const nonEmpty = csv.split("\n").filter((r: string) => r.replace(/,/g, "").trim()).slice(0, 200).join("\n");
+            if (nonEmpty) rows.push(`[Sheet: ${sheetName}]\n${nonEmpty}`);
+          }
+          sheetTexts.push(rows.length > 0
+            ? `[From spreadsheet: ${f.originalname}]\n${rows.join("\n").slice(0, 8000)}`
+            : `[Spreadsheet: ${f.originalname} — no readable data]`);
+        } catch {
+          failedFiles.push(f.originalname);
+          sheetTexts.push(`[Spreadsheet: ${f.originalname} — could not read]`);
+        }
+      }
+
+      const screenshotNotes: string[] = (files.screenshot || []).map(f =>
+        `[Screenshot: ${f.originalname} — image evidence (filename recorded, OCR not performed)]`
+      );
+      const sampleFileNotes: string[] = (files.sample || []).map(f => {
+        const ext = f.originalname.split(".").pop()?.toLowerCase() || "";
+        return `[Sample file: ${f.originalname} (type: .${ext}) — filename used as naming pattern evidence only]`;
+      });
+
+      const latestVersions = await db
+        .select()
+        .from(namingConventionVersionsTable)
+        .where(eq(namingConventionVersionsTable.projectId, projectId))
+        .orderBy(desc(namingConventionVersionsTable.conventionVersion))
+        .limit(1);
+
+      const baseline = latestVersions[0] ?? null;
+
+      const baselineSummary = baseline
+        ? `Current accepted convention (Version ${baseline.conventionVersion}):
+- Disciplines: ${(baseline.acceptedDisciplines as Array<{ code: string; label: string }>).map(d => `${d.code} (${d.label})`).join(", ") || "none"}
+- Systems: ${(baseline.acceptedSystems as Array<{ code: string; label: string }>).map(s => `${s.code} (${s.label})`).join(", ") || "none"}
+- Document types: ${(baseline.acceptedDocTypes as Array<{ code: string; label: string }>).map(d => `${d.code} (${d.label})`).join(", ") || "none"}
+- Extra fields: ${(baseline.acceptedExtraFields as Array<{ key: string; label: string }>).map(f => f.label).join(", ") || "none"}
+- Field order: ${(baseline.acceptedFieldOrder as string[]).join(" → ") || "default"}
+- Original summary: ${baseline.analysisSummary || "not recorded"}`
+        : "No previously accepted convention baseline found for this project.";
+
+      const evidenceParts = [
+        sampleNames.length > 0 ? `Sample file names:\n${sampleNames.join("\n")}` : null,
+        rawFolderTreeText ? `Folder structure:\n${rawFolderTreeText}` : null,
+        rawIndexText ? `Document index / register:\n${rawIndexText}` : null,
+        rawNotes ? `Additional notes:\n${rawNotes}` : null,
+        pdfTexts.length > 0 ? `PDF evidence:\n${pdfTexts.join("\n\n")}` : null,
+        sheetTexts.length > 0 ? `Spreadsheet evidence:\n${sheetTexts.join("\n\n")}` : null,
+        screenshotNotes.length > 0 ? `Screenshot evidence (filenames):\n${screenshotNotes.join("\n")}` : null,
+        sampleFileNotes.length > 0 ? `Sample file evidence (filenames):\n${sampleFileNotes.join("\n")}` : null,
+      ].filter(Boolean).join("\n\n");
+
+      const systemPrompt = `You are re-evaluating an existing project naming convention using newly provided evidence.
+Do not discard the current convention blindly.
+Identify what is confirmed, what is newly discovered, what conflicts with the current convention, and what remains unresolved.
+If no baseline exists, treat this as an initial discovery and return empty confirmedItems.
+Return ONLY valid JSON with no markdown, no explanation, no code block wrapping.`;
+
+      const userPrompt = `BASELINE CONVENTION:
+${baselineSummary}
+
+NEW EVIDENCE:
+${evidenceParts || "No new evidence provided — returning baseline as confirmed."}
+
+Return ONLY this JSON structure (no markdown, no explanation):
+{
+  "baselineVersion": ${baseline?.conventionVersion ?? 0},
+  "analysisSummary": "2-4 sentence summary of what the new evidence shows",
+  "confirmedItems": {
+    "disciplines": ["array of discipline codes confirmed by new evidence"],
+    "systems": ["array of system codes confirmed by new evidence"],
+    "documentTypes": ["array of doc type codes confirmed by new evidence"],
+    "extraFields": ["array of extra field keys confirmed"],
+    "fieldOrder": ["array of field names confirmed in order"]
+  },
+  "newlySuggestedItems": {
+    "disciplines": [{ "code": "string", "label": "string", "reason": "string", "confidence": "high|medium|low" }],
+    "systems": [{ "code": "string", "label": "string", "reason": "string", "confidence": "high|medium|low" }],
+    "documentTypes": [{ "code": "string", "label": "string", "reason": "string", "confidence": "high|medium|low" }],
+    "extraFields": [{ "key": "string", "label": "string", "reason": "string", "confidence": "high|medium|low" }],
+    "fieldOrder": []
+  },
+  "conflicts": [
+    { "category": "string", "existingValue": "string", "newValue": "string", "reason": "string", "confidence": "high|medium|low" }
+  ],
+  "stillUnresolved": ["array of open questions or ambiguous areas"],
+  "recommendedActions": ["array of recommended next actions"],
+  "proposedNextVersionSummary": "one paragraph describing what the next version snapshot should include"
+}`;
+
+      const anthropic = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      });
+
+      const message = await anthropic.messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 8192,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+
+      const block = message.content[0];
+      if (block.type !== "text") { res.status(500).json({ error: "No text response from AI" }); return; }
+
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(block.text.trim()) as Record<string, unknown>;
+      } catch {
+        res.status(422).json({
+          error: "AI returned non-JSON response",
+          baselineVersion: baseline?.conventionVersion ?? 0,
+          analysisSummary: "The re-analysis could not be completed. Please add more evidence and try again.",
+          confirmedItems: { disciplines: [], systems: [], documentTypes: [], extraFields: [], fieldOrder: [] },
+          newlySuggestedItems: { disciplines: [], systems: [], documentTypes: [], extraFields: [], fieldOrder: [] },
+          conflicts: [],
+          stillUnresolved: ["AI parse error — try with more specific evidence"],
+          recommendedActions: [],
+          proposedNextVersionSummary: "",
+        });
+        return;
+      }
+
+      if (failedFiles.length > 0) {
+        parsed._extractionWarning = `Some files could not be fully read: ${failedFiles.join(", ")}`;
+      }
+
+      res.json(parsed);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Re-analysis failed";
       res.status(500).json({ error: message });
     }
   }

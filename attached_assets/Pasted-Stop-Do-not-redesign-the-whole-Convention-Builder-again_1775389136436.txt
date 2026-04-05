@@ -1,0 +1,236 @@
+Stop. Do not redesign the whole Convention Builder again. We are now building the next layer of the same system: re-run discovery with new evidence on the same project, compare it against the current convention understanding, and show the delta before accepting changes.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a temporary or local database.
+All work must run against the live production database only.
+
+Do not touch Files, RFIs, Submittals, Dashboard, or unrelated modules.
+Modify only the Convention Builder flow and the minimum backend/database support required.
+
+This is the goal:
+A project convention is not one-time setup. It must be revisitable, expandable, and evidence-driven over time.
+Users must be able to come back later, add more real project evidence, re-run discovery, and see what changed before accepting anything.
+
+Build this in exact order:
+
+STEP 1 — Persist accepted convention findings as a baseline snapshot.
+
+Right now the system analyzes and proposes. We now need to preserve the accepted state.
+
+Add support for saving an accepted convention snapshot that includes at minimum:
+project_id
+convention_version
+accepted disciplines
+accepted systems
+accepted document types
+accepted extra fields
+accepted field order
+analysis summary
+ambiguities
+user-confirmed notes if any already exist
+created_at
+created_by_id if available
+
+If the current naming_conventions table is not the right place to store a full accepted snapshot history, add a new table for convention versions/history. Name it something clear, for example:
+naming_convention_versions
+
+It must support multiple versions per project.
+Do not overwrite prior accepted versions.
+
+STEP 2 — Add a clear way to re-run discovery later on the same project.
+
+In the Convention Builder for an existing project with an already accepted convention, add a visible action:
+
+Add More Evidence and Re-run Discovery
+
+This must not reset the project.
+This must not wipe the current convention.
+This must reopen the evidence intake flow using the same project.
+
+The user must be able to:
+paste more text
+upload more PDFs / spreadsheets / screenshots / sample files
+re-run analysis against the same project
+
+STEP 3 — Re-run discovery must use both:
+the current accepted convention baseline
+and the new evidence
+
+When the user re-runs discovery, the backend must receive:
+the current accepted convention snapshot
+the previously known structure if available
+the new uploaded/pasted evidence
+the original setup context if available
+
+Claude must not analyze the new evidence in a vacuum.
+It must compare the new evidence against the existing accepted convention.
+
+STEP 4 — Add a new backend endpoint for re-run discovery comparison.
+
+Add a dedicated endpoint, for example:
+POST /api/v1/projects/:projectId/convention/reanalyze
+
+This endpoint must:
+load the current accepted convention baseline
+combine it with the new evidence
+ask Claude to compare the baseline against the new evidence
+return structured JSON describing what changed
+
+Prompt intent in substance:
+You are re-evaluating an existing project naming convention using newly provided evidence.
+Do not discard the current convention blindly.
+Identify what is confirmed, what is newly discovered, what conflicts with the current convention, and what remains unresolved.
+Return ONLY valid JSON.
+
+Return structure:
+{
+"baselineVersion": 1,
+"analysisSummary": "",
+"confirmedItems": {
+"disciplines": [],
+"systems": [],
+"documentTypes": [],
+"extraFields": [],
+"fieldOrder": []
+},
+"newlySuggestedItems": {
+"disciplines": [],
+"systems": [],
+"documentTypes": [],
+"extraFields": [],
+"fieldOrder": []
+},
+"conflicts": [
+{
+"category": "",
+"existingValue": "",
+"newValue": "",
+"reason": "",
+"confidence": "high|medium|low"
+}
+],
+"stillUnresolved": [],
+"recommendedActions": [],
+"proposedNextVersionSummary": ""
+}
+
+If parsing fails, return a clean structured error and do not crash the builder.
+
+STEP 5 — Build a new review screen after re-analysis.
+
+Add a new step/screen called:
+
+Convention Changes Review
+
+This screen must clearly show:
+
+Current accepted version
+What was confirmed by the new evidence
+What is newly suggested
+What conflicts with the current convention
+What remains unresolved
+Recommended actions
+Proposed next-version summary
+
+This must not feel like a fresh setup.
+It must feel like:
+existing convention + new evidence + change review
+
+STEP 6 — Every change must be selectable, not forced.
+
+The user must be able to:
+accept a newly suggested item
+ignore a newly suggested item
+keep the current version’s item
+replace an existing item with a new one only if they explicitly choose to
+
+Do not auto-merge everything.
+Do not silently change the convention.
+
+STEP 7 — Add true convention versioning behavior.
+
+When the user accepts changes from the re-analysis flow:
+create a new convention version snapshot
+increment convention_version
+preserve the previous version intact
+
+The project should then have:
+Version 1
+Version 2
+Version 3
+etc.
+
+Each version must remain historically traceable.
+
+STEP 8 — Add a convention history view.
+
+In the Convention Builder for a project with accepted versions, add a section or panel showing:
+Convention History
+
+At minimum show:
+version number
+created date
+created by
+short summary of what changed
+
+The user must be able to inspect previous versions.
+Do not allow editing old versions directly.
+Only the newest active version should be editable going forward.
+
+STEP 9 — Add delta visibility.
+
+The system must clearly tell the user things like:
+Confirmed by new evidence
+New discipline found
+Conflict with current package structure
+Still unresolved
+Recommended for next version
+
+This is not cosmetic.
+This is the core intelligence layer.
+
+STEP 10 — Keep this realistic.
+
+Do NOT build deep parsing for RVT, DWG, NWD, IFC.
+Use the same evidence rules already established:
+PDF text if extractable
+spreadsheet content if extractable
+screenshots as limited evidence
+sample files by filename/extension only
+pasted text
+folder structures
+register text
+
+STEP 11 — Do not break the current first-pass discovery flow.
+
+Fresh projects must still work:
+Create project
+Project Convention Setup
+Discovery
+Suggested Convention Structure
+Accept and continue to builder
+
+This new work is for returning later and expanding the convention intelligently.
+
+STEP 12 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "naming_convention_versions|Convention History|Add More Evidence and Re-run Discovery|Convention Changes Review" artifacts/bimlog/src artifacts/api-server/src lib/db/src/schema artifacts/workspace/db/schema.ts | head -100
+
+Check 2
+grep -Rni "convention/reanalyze" artifacts/api-server/src/routes artifacts/bimlog/src | head -50
+
+Check 3
+grep -Rni "confirmedItems|newlySuggestedItems|conflicts|stillUnresolved|proposedNextVersionSummary" artifacts/api-server/src/routes artifacts/bimlog/src | head -100
+
+Check 4
+grep -Rni "convention_version|Convention History|Version 1|Version 2" artifacts/bimlog/src artifacts/api-server/src lib/db/src/schema artifacts/workspace/db/schema.ts | head -100
+
+Check 5
+grep -Rni "Do not discard the current convention blindly" artifacts/api-server/src/routes | head -20
+
+Show exact output only. Nothing else.

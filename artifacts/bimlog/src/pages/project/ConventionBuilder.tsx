@@ -11,6 +11,7 @@ import {
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
   Download, RotateCcw, AlertTriangle, CheckCircle2, X,
   ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
+  Clock, GitMerge,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -284,9 +285,10 @@ interface WizardState {
   enableExtRestrictions: boolean;
   extRestrictions: Record<string, string[]>;
   // ── front-door setup context ──────────────────────────────────────────────
-  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard";
+  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review";
   setupCtx: SetupContext;
   discoveryResult: DiscoveryResult | null;
+  reanalysisResult: ReanalysisResult | null;
   industrialState: IndustrialState;
   importState: ImportState;
 }
@@ -358,6 +360,48 @@ interface ImportState {
   error: string;
   extractionWarning: string;
   uploadedFiles: UploadedFile[];
+}
+
+interface ReanalysisItem { code: string; label: string; reason: string; confidence: string; }
+interface ReanalysisExtraField { key: string; label: string; reason: string; confidence: string; }
+interface ReanalysisConflict { category: string; existingValue: string; newValue: string; reason: string; confidence: string; }
+
+interface ReanalysisResult {
+  baselineVersion: number;
+  analysisSummary: string;
+  confirmedItems: {
+    disciplines: string[];
+    systems: string[];
+    documentTypes: string[];
+    extraFields: string[];
+    fieldOrder: string[];
+  };
+  newlySuggestedItems: {
+    disciplines: ReanalysisItem[];
+    systems: ReanalysisItem[];
+    documentTypes: ReanalysisItem[];
+    extraFields: ReanalysisExtraField[];
+    fieldOrder: string[];
+  };
+  conflicts: ReanalysisConflict[];
+  stillUnresolved: string[];
+  recommendedActions: string[];
+  proposedNextVersionSummary: string;
+  _extractionWarning?: string;
+}
+
+interface ConventionVersionSnapshot {
+  id: number;
+  conventionVersion: number;
+  analysisSummary: string | null;
+  changeSummary: string | null;
+  acceptedDisciplines: Array<{ code: string; label: string }>;
+  acceptedSystems: Array<{ code: string; label: string }>;
+  acceptedDocTypes: Array<{ code: string; label: string }>;
+  acceptedExtraFields: Array<{ key: string; label: string }>;
+  acceptedFieldOrder: string[];
+  createdAt: string;
+  createdById: number | null;
 }
 
 function defaultSetupCtx(): SetupContext {
@@ -1249,6 +1293,349 @@ function ProgressBar({ step }: { step: number }) {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Re-Evidence Intake ───────────────────────────────────────────────────────
+function ReEvidenceIntake({ state, setState, token, projectId, onBack, onResult }: {
+  state: WizardState;
+  setState: React.Dispatch<React.SetStateAction<WizardState>>;
+  token: string;
+  projectId: number;
+  onBack: () => void;
+  onResult: (result: ReanalysisResult) => void;
+}) {
+  const imp = state.importState;
+  const setImp = (partial: Partial<ImportState>) =>
+    setState(s => ({ ...s, importState: { ...s.importState, ...partial } }));
+  const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
+  const [dragOver, setDragOver] = useState<UploadedFile["category"] | null>(null);
+
+  async function runReanalysis() {
+    setAnalyzing(true); setError(""); setWarning("");
+    try {
+      const fd = new FormData();
+      fd.append("sampleNames", imp.sampleNames.split("\n").map((s: string) => s.trim()).filter(Boolean).join("\n"));
+      fd.append("rawFolderTreeText", imp.rawFolderText);
+      fd.append("rawIndexText", imp.rawIndexText);
+      fd.append("rawNotes", imp.rawNotes);
+      for (const uf of imp.uploadedFiles) { fd.append(uf.category, uf.file, uf.file.name); }
+      const res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/reanalyze`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) { setAnalyzing(false); setError(data.error || "Re-analysis failed"); return; }
+      const { _extractionWarning, ...cleanData } = data as Record<string, unknown>;
+      if (typeof _extractionWarning === "string") setWarning(_extractionWarning);
+      setAnalyzing(false);
+      onResult(cleanData as unknown as ReanalysisResult);
+    } catch (err) {
+      setAnalyzing(false);
+      setError(err instanceof Error ? err.message : "Re-analysis failed");
+    }
+  }
+
+  function renderSlot(title: string, category: UploadedFile["category"], accept: string, purposes: string[]) {
+    const slotId = `reev-${category}`;
+    const catFiles = imp.uploadedFiles.filter(f => f.category === category);
+    const isOver = dragOver === category;
+    function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+      e.preventDefault(); setDragOver(null);
+      const newFiles = Array.from(e.dataTransfer.files).map(file => ({ id: uid(), file, category } as UploadedFile));
+      if (newFiles.length > 0) setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
+    }
+    return (
+      <div key={category} style={{ marginBottom: 16 }}>
+        <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>{purposes.join(" · ")}</div>
+        <div onDragOver={e => { e.preventDefault(); setDragOver(category); }} onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(null); }} onDrop={handleDrop}
+          style={{ border: `1px dashed ${isOver ? "#2563EB" : "#D1D5DB"}`, borderRadius: 8, background: isOver ? "#EFF6FF" : "#FAFAFA", padding: "12px 14px", transition: "border-color 0.15s, background 0.15s" }}>
+          {catFiles.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              {catFiles.map(uf => (
+                <div key={uf.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 5, marginBottom: 4, fontSize: 12 }}>
+                  <FileText style={{ width: 12, height: 12, color: "#6B7280", flexShrink: 0 }} />
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#374151" }}>{uf.file.name}</span>
+                  <span style={{ color: "#9CA3AF", flexShrink: 0, fontSize: 11 }}>{uf.file.name.split(".").pop()?.toUpperCase()}</span>
+                  <button type="button" onClick={() => setImp({ uploadedFiles: imp.uploadedFiles.filter(f => f.id !== uf.id) })} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "#9CA3AF", display: "flex", alignItems: "center" }}>
+                    <X style={{ width: 12, height: 12 }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label htmlFor={slotId} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "8px 12px", cursor: "pointer" }}>
+            <Upload style={{ width: 16, height: 16, color: isOver ? "#2563EB" : "#9CA3AF" }} />
+            <span style={{ fontSize: 12, fontWeight: 500, color: isOver ? "#1D4ED8" : "#6B7280" }}>Drag and drop files here or click to browse</span>
+            <span style={{ fontSize: 11, color: "#C4C9D4" }}>{accept.replace(/\./g, "").split(",").join(", ").toUpperCase()}</span>
+            <input id={slotId} type="file" multiple accept={accept} style={{ display: "none" }} onChange={e => {
+              const newFiles = Array.from(e.target.files || []).map(file => ({ id: uid(), file, category } as UploadedFile));
+              setImp({ uploadedFiles: [...imp.uploadedFiles, ...newFiles] });
+              e.target.value = "";
+            }} />
+          </label>
+        </div>
+      </div>
+    );
+  }
+
+  const ta = (label: string, sub: string, val: string, onChange: (v: string) => void, rows: number, placeholder: string) => (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 6 }}>{sub}</div>
+      <textarea value={val} onChange={e => onChange(e.target.value)} rows={rows} placeholder={placeholder}
+        style={{ width: "100%", fontSize: 12, padding: "8px 10px", borderRadius: 6, border: "1px solid #D1D5DB", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "var(--font-mono)", lineHeight: 1.6 }} />
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <RefreshCw style={{ width: 18, height: 18, color: "#2563EB" }} />
+          <span style={{ fontWeight: 700, fontSize: 17, color: "#111827" }}>Add More Evidence and Re-run Discovery</span>
+        </div>
+        <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6 }}>
+          Upload new evidence or paste additional context. The system will compare it against your existing accepted convention and show only what changed.
+        </div>
+      </div>
+
+      <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "20px 22px", marginBottom: 18 }}>
+        <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", marginBottom: 14 }}>Paste new text evidence</div>
+        {ta("Sample file names", "Real file names from the project, one per line", imp.sampleNames, v => setImp({ sampleNames: v }), 4, "PRJ-ARC-G0-DR-001-A1.pdf\nPRJ-STR-01-GA-002-P1.dwg")}
+        {ta("Folder structure", "Paste a new folder tree or directory listing", imp.rawFolderText, v => setImp({ rawFolderText: v }), 4, "Project Root\n  └─ Architecture\n  └─ Structure")}
+        {ta("Document register / index", "Paste rows from a spreadsheet or document register", imp.rawIndexText, v => setImp({ rawIndexText: v }), 3, "Doc No\tTitle\tDiscipline\nPRJ-ARC-001\tGA Floor Plans\tARC")}
+        {ta("Additional notes", "Anything else relevant — new scope, new subcontractors, etc.", imp.rawNotes, v => setImp({ rawNotes: v }), 3, "New MEP subcontractor added...")}
+      </div>
+
+      <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "20px 22px", marginBottom: 18 }}>
+        <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", marginBottom: 14 }}>Upload new files</div>
+        {renderSlot("PDF references", "pdf", ".pdf", ["Updated BEP sections", "New naming standard PDFs", "Revised specification sections"])}
+        {renderSlot("Spreadsheet registers", "spreadsheet", ".xlsx,.xls,.csv", ["Updated drawing registers", "New document transmittals", "Revised schedule of sheets"])}
+        {renderSlot("Screenshot evidence", "screenshot", ".png,.jpg,.jpeg,.webp", ["New CDE folder screenshots", "Updated file manager views"])}
+        {renderSlot("Optional sample files", "sample", ".pdf,.dwg,.ifc,.nwd,.rvt,.docx,.xlsx,.xls,.csv", ["New real project files — filename used as naming pattern evidence only"])}
+      </div>
+
+      {warning && (
+        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#92400E", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <AlertTriangle style={{ width: 14, height: 14, marginTop: 1, flexShrink: 0 }} />
+          <span>{warning}</span>
+        </div>
+      )}
+      {error && (
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{error}</div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
+        <Button variant="outline" onClick={onBack} disabled={analyzing} style={{ gap: 6, fontSize: 13 }}>
+          <ChevronLeft style={{ width: 15, height: 15 }} /> Back
+        </Button>
+        <Button onClick={runReanalysis} disabled={analyzing} style={{ gap: 6, fontSize: 13 }}>
+          {analyzing
+            ? <><RefreshCw style={{ width: 14, height: 14 }} /> Running re-analysis...</>
+            : <><RefreshCw style={{ width: 14, height: 14 }} /> Run Re-analysis</>}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Changes Review ───────────────────────────────────────────────────────────
+function ChangesReview({ state, token, projectId, onAccept, onDiscard }: {
+  state: WizardState;
+  token: string;
+  projectId: number;
+  onAccept: () => void;
+  onDiscard: () => void;
+}) {
+  const result = state.reanalysisResult!;
+  const [decisions, setDecisions] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  const toggle = (key: string) => setDecisions(d => ({ ...d, [key]: !d[key] }));
+  const isOn = (key: string) => decisions[key] === true;
+
+  const cColor = (c: string) => c === "high" ? "#059669" : c === "medium" ? "#D97706" : "#9CA3AF";
+  const cBg = (c: string) => c === "high" ? "#ECFDF5" : c === "medium" ? "#FFFBEB" : "#F3F4F6";
+
+  async function handleAcceptChanges() {
+    setSaving(true); setSaveError("");
+    try {
+      const { confirmedItems: ci, newlySuggestedItems: ni, stillUnresolved, proposedNextVersionSummary, analysisSummary } = result;
+      const acceptedDisciplines = [
+        ...ci.disciplines.map(code => ({ code, label: code })),
+        ...ni.disciplines.filter((_, i) => isOn(`nd_${i}`)).map(d => ({ code: d.code, label: d.label })),
+      ];
+      const acceptedSystems = [
+        ...ci.systems.map(code => ({ code, label: code })),
+        ...ni.systems.filter((_, i) => isOn(`ns_${i}`)).map(s => ({ code: s.code, label: s.label })),
+      ];
+      const acceptedDocTypes = [
+        ...ci.documentTypes.map(code => ({ code, label: code })),
+        ...ni.documentTypes.filter((_, i) => isOn(`ndt_${i}`)).map(d => ({ code: d.code, label: d.label })),
+      ];
+      const acceptedExtraFields = [
+        ...ci.extraFields.map(key => ({ key, label: key })),
+        ...ni.extraFields.filter((_, i) => isOn(`nef_${i}`)).map(f => ({ key: f.key, label: f.label })),
+      ];
+      const res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          acceptedDisciplines, acceptedSystems, acceptedDocTypes, acceptedExtraFields,
+          acceptedFieldOrder: ci.fieldOrder,
+          analysisSummary,
+          ambiguities: stillUnresolved,
+          changeSummary: proposedNextVersionSummary,
+        }),
+      });
+      if (!res.ok) { const d = await res.json(); setSaveError(d.error || "Failed to save version"); setSaving(false); return; }
+      setSaving(false);
+      onAccept();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save version");
+      setSaving(false);
+    }
+  }
+
+  function itemRow(item: ReanalysisItem | ReanalysisExtraField, key: string) {
+    const code = "code" in item ? item.code : item.key;
+    const label = item.label;
+    const on = isOn(key);
+    return (
+      <div key={key} onClick={() => toggle(key)} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 10px", marginBottom: 4, border: `1px solid ${on ? "#BFDBFE" : "#E5E7EB"}`, borderRadius: 7, background: on ? "#EFF6FF" : "#FAFAFA", cursor: "pointer", userSelect: "none" }}>
+        <div style={{ width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${on ? "#2563EB" : "#D1D5DB"}`, background: on ? "#2563EB" : "#fff", flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {on && <Check style={{ width: 10, height: 10, color: "#fff" }} />}
+        </div>
+        <div style={{ flex: 1 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>{code}</span>
+          {label !== code && <span style={{ fontSize: 12, color: "#374151" }}> — {label}</span>}
+          <span style={{ fontSize: 11, color: cColor(item.confidence), background: cBg(item.confidence), padding: "1px 5px", borderRadius: 4, marginLeft: 6 }}>{item.confidence}</span>
+          <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>{item.reason}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const ni = result.newlySuggestedItems;
+  const hasNew = ni.disciplines.length + ni.systems.length + ni.documentTypes.length + ni.extraFields.length > 0;
+  const ci = result.confirmedItems;
+  const hasConfirmed = ci.disciplines.length + ci.systems.length + ci.documentTypes.length > 0;
+
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <GitMerge style={{ width: 18, height: 18, color: "#2563EB" }} />
+          <span style={{ fontWeight: 700, fontSize: 17, color: "#111827" }}>Convention Changes Review</span>
+        </div>
+        <div style={{ fontSize: 13, color: "#6B7280" }}>
+          Based on Version {result.baselineVersion}. Review each finding before saving a new version. Changes are not forced — you decide what to accept.
+        </div>
+      </div>
+
+      <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+        <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 8 }}>Analysis Summary</div>
+        <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}>{result.analysisSummary || "No summary provided."}</div>
+      </div>
+
+      {hasConfirmed && (
+        <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <CheckCircle2 style={{ width: 14, height: 14, color: "#059669" }} />
+            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#059669" }}>Confirmed by New Evidence</span>
+          </div>
+          {ci.disciplines.length > 0 && <div style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}><strong>Disciplines:</strong> {ci.disciplines.join(", ")}</div>}
+          {ci.systems.length > 0 && <div style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}><strong>Systems:</strong> {ci.systems.join(", ")}</div>}
+          {ci.documentTypes.length > 0 && <div style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}><strong>Document types:</strong> {ci.documentTypes.join(", ")}</div>}
+          {ci.extraFields.length > 0 && <div style={{ fontSize: 12, color: "#374151" }}><strong>Extra fields:</strong> {ci.extraFields.join(", ")}</div>}
+        </div>
+      )}
+
+      {hasNew && (
+        <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+            <Plus style={{ width: 14, height: 14, color: "#2563EB" }} />
+            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#2563EB" }}>Newly Suggested Items</span>
+            <span style={{ fontSize: 11, color: "#9CA3AF", marginLeft: 4 }}>— click to accept</span>
+          </div>
+          {ni.disciplines.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Disciplines</div>{ni.disciplines.map((d, i) => itemRow(d, `nd_${i}`))}</div>)}
+          {ni.systems.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Systems</div>{ni.systems.map((s, i) => itemRow(s, `ns_${i}`))}</div>)}
+          {ni.documentTypes.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Document types</div>{ni.documentTypes.map((d, i) => itemRow(d, `ndt_${i}`))}</div>)}
+          {ni.extraFields.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Extra fields</div>{ni.extraFields.map((f, i) => itemRow(f, `nef_${i}`))}</div>)}
+        </div>
+      )}
+
+      {result.conflicts.length > 0 && (
+        <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+            <AlertTriangle style={{ width: 14, height: 14, color: "#D97706" }} />
+            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#D97706" }}>Conflict with Current Convention</span>
+          </div>
+          {result.conflicts.map((conflict, i) => {
+            const key = `conflict_${i}`;
+            const replace = isOn(key);
+            return (
+              <div key={i} style={{ background: "#fff", border: "1px solid #FED7AA", borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 3 }}>{conflict.category}</div>
+                <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>{conflict.reason}</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button type="button" onClick={() => setDecisions(d => ({ ...d, [key]: false }))} style={{ flex: 1, padding: "6px 10px", border: `1.5px solid ${!replace ? "#9CA3AF" : "#E5E7EB"}`, borderRadius: 6, background: !replace ? "#F3F4F6" : "#fff", fontSize: 12, cursor: "pointer", fontWeight: !replace ? 600 : 400, color: !replace ? "#374151" : "#9CA3AF" }}>
+                    Keep current: {conflict.existingValue}
+                  </button>
+                  <button type="button" onClick={() => setDecisions(d => ({ ...d, [key]: true }))} style={{ flex: 1, padding: "6px 10px", border: `1.5px solid ${replace ? "#D97706" : "#E5E7EB"}`, borderRadius: 6, background: replace ? "#FFFBEB" : "#fff", fontSize: 12, cursor: "pointer", fontWeight: replace ? 600 : 400, color: replace ? "#92400E" : "#9CA3AF" }}>
+                    Replace with: {conflict.newValue}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {result.stillUnresolved.length > 0 && (
+        <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 10 }}>Still Unresolved</div>
+          {result.stillUnresolved.map((item, i) => (
+            <div key={i} style={{ fontSize: 12, color: "#374151", marginBottom: 5, display: "flex", gap: 8 }}><span style={{ color: "#9CA3AF" }}>—</span><span>{item}</span></div>
+          ))}
+        </div>
+      )}
+
+      {result.recommendedActions.length > 0 && (
+        <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 10 }}>Recommended Actions</div>
+          {result.recommendedActions.map((action, i) => (
+            <div key={i} style={{ fontSize: 12, color: "#374151", marginBottom: 5, display: "flex", gap: 8 }}><span style={{ color: "#2563EB", fontWeight: 700 }}>{i + 1}.</span><span>{action}</span></div>
+          ))}
+        </div>
+      )}
+
+      {result.proposedNextVersionSummary && (
+        <div style={{ background: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: 10, padding: "16px 20px", marginBottom: 22 }}>
+          <div style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#0369A1", marginBottom: 8 }}>Proposed Next Version Summary</div>
+          <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}>{result.proposedNextVersionSummary}</div>
+        </div>
+      )}
+
+      {saveError && (
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{saveError}</div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
+        <Button variant="outline" onClick={onDiscard} disabled={saving} style={{ gap: 6, fontSize: 13 }}>
+          <X style={{ width: 14, height: 14 }} /> Discard Changes
+        </Button>
+        <Button onClick={handleAcceptChanges} disabled={saving} style={{ gap: 6, fontSize: 13 }}>
+          {saving ? "Saving..." : <><Check style={{ width: 14, height: 14 }} /> Accept Selected Changes + Save New Version</>}
+        </Button>
       </div>
     </div>
   );
@@ -2425,6 +2812,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     flowPhase: "setup_context",
     setupCtx: defaultSetupCtx(),
     discoveryResult: null,
+    reanalysisResult: null,
     industrialState: defaultIndustrialState(),
     importState: defaultImportState(),
   }));
@@ -2490,6 +2878,42 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
   }
 
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  async function loadHistory() {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+        headers: { Authorization: `Bearer ${token ?? ""}` },
+      });
+      if (res.ok) setHistoryVersions((await res.json()) as ConventionVersionSnapshot[]);
+    } catch { /* silent */ }
+    setHistoryLoading(false);
+  }
+
+  async function saveVersionSnapshot(summary: string) {
+    const dr = ws.discoveryResult;
+    if (!dr) return;
+    try {
+      await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token ?? ""}` },
+        body: JSON.stringify({
+          acceptedDisciplines: (dr.suggestedDisciplines || []).filter(d => d.confidence !== "low").map(d => ({ code: d.code || d.key || "", label: d.label })),
+          acceptedSystems: (dr.suggestedSystems || []).filter(d => d.confidence !== "low").map(d => ({ code: d.code || d.key || "", label: d.label })),
+          acceptedDocTypes: (dr.suggestedDocTypes || []).filter(d => d.confidence !== "low").map(d => ({ code: d.code || d.key || "", label: d.label })),
+          acceptedExtraFields: (dr.suggestedExtraFields || []).filter(d => d.confidence !== "low").map(d => ({ key: d.key || d.code || "", label: d.label })),
+          acceptedFieldOrder: dr.suggestedFieldOrder || [],
+          analysisSummary: dr.analysisSummary,
+          ambiguities: dr.ambiguities || [],
+          changeSummary: summary,
+        }),
+      });
+    } catch { /* non-critical */ }
+  }
+
   const { flowPhase } = ws;
 
   // ── Setup Context (front door) ────────────────────────────────────────────
@@ -2527,8 +2951,39 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       <AISuggestions
         state={ws} setState={setWs}
         onBack={() => setWs(s => ({ ...s, flowPhase: "import_structure" }))}
-        onContinueToWizard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
-        onStopHere={() => { /* analysis only: stay on review, user can restart later */ }}
+        onContinueToWizard={() => {
+          saveVersionSnapshot("Initial convention setup — accepted from AI discovery");
+          setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+        }}
+        onStopHere={() => {
+          saveVersionSnapshot("Initial convention setup — accepted in analysis-only mode");
+        }}
+      />
+    );
+  }
+
+  // ── Add More Evidence and Re-run Discovery ────────────────────────────────
+  if (flowPhase === "re_evidence") {
+    return (
+      <ReEvidenceIntake
+        state={ws} setState={setWs}
+        token={token ?? ""}
+        projectId={projectId}
+        onBack={() => setWs(s => ({ ...s, flowPhase: "main_wizard" }))}
+        onResult={result => setWs(s => ({ ...s, reanalysisResult: result, flowPhase: "changes_review" }))}
+      />
+    );
+  }
+
+  // ── Convention Changes Review ─────────────────────────────────────────────
+  if (flowPhase === "changes_review") {
+    return (
+      <ChangesReview
+        state={ws}
+        token={token ?? ""}
+        projectId={projectId}
+        onAccept={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
+        onDiscard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
       />
     );
   }
@@ -2550,7 +3005,53 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
             : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
           }
         </div>
-        <div>{step < 4 && <Button onClick={() => setWs(s => ({ ...s, step: s.step + 1 }))} style={{ gap: 6, fontSize: 13 }}>{step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}<ChevronRight style={{ width: 15, height: 15 }} /></Button>}</div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Button variant="outline" onClick={() => setWs(s => ({ ...s, importState: { sampleNames: "", rawFolderText: "", rawIndexText: "", rawNotes: "", analyzing: false, error: "", extractionWarning: "", uploadedFiles: [] }, flowPhase: "re_evidence" }))} style={{ gap: 6, fontSize: 13 }}>
+            <RefreshCw style={{ width: 14, height: 14 }} /> Add More Evidence and Re-run Discovery
+          </Button>
+          {step < 4 && <Button onClick={() => setWs(s => ({ ...s, step: s.step + 1 }))} style={{ gap: 6, fontSize: 13 }}>{step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}<ChevronRight style={{ width: 15, height: 15 }} /></Button>}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 28, borderTop: "1px solid #F3F4F6", paddingTop: 20 }}>
+        <button
+          type="button"
+          onClick={() => { if (!showHistory) loadHistory(); setShowHistory(h => !h); }}
+          style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, color: "#6B7280", fontSize: 13 }}
+        >
+          <Clock style={{ width: 14, height: 14 }} />
+          <span style={{ fontWeight: 600 }}>Convention History</span>
+          {showHistory ? <ChevronUp style={{ width: 13, height: 13 }} /> : <ChevronDown style={{ width: 13, height: 13 }} />}
+        </button>
+
+        {showHistory && (
+          <div style={{ marginTop: 14 }}>
+            {historyLoading && <div style={{ fontSize: 12, color: "#9CA3AF" }}>Loading history...</div>}
+            {!historyLoading && historyVersions.length === 0 && (
+              <div style={{ fontSize: 12, color: "#9CA3AF" }}>No saved versions yet. Versions are created when you accept a discovery or re-analysis result.</div>
+            )}
+            {!historyLoading && historyVersions.map(v => (
+              <div key={v.id} style={{ background: "#FAFAFA", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px", marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                  <span style={{ background: "#EFF6FF", color: "#2563EB", fontWeight: 700, fontSize: 11, padding: "2px 8px", borderRadius: 4 }}>Version {v.conventionVersion}</span>
+                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(v.createdAt).toLocaleDateString()} {new Date(v.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                {v.changeSummary && <div style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}>{v.changeSummary}</div>}
+                {v.analysisSummary && <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>{v.analysisSummary}</div>}
+                {v.acceptedDisciplines.length > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "#6B7280" }}>
+                    <strong>Disciplines:</strong> {v.acceptedDisciplines.map(d => d.code).join(", ")}
+                  </div>
+                )}
+                {v.acceptedDocTypes.length > 0 && (
+                  <div style={{ fontSize: 11, color: "#6B7280" }}>
+                    <strong>Document types:</strong> {v.acceptedDocTypes.map(d => d.code).join(", ")}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
