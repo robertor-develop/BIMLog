@@ -1,0 +1,197 @@
+Stop. Read carefully before changing anything.
+
+We are not redesigning the system. We are finishing the next missing piece of the same architecture properly.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database only.
+
+Current state is correct:
+initial discovery exists,
+accepted convention versions exist,
+re-analysis with new evidence exists,
+delta review exists,
+history exists.
+
+What is still missing is the human control layer inside that same loop.
+
+Right now BIMLog can:
+discover,
+version,
+reanalyze,
+compare.
+
+But it still cannot persist and carry forward project-specific human directives that AI should obey going forward.
+
+This is the missing layer.
+
+We are adding only this:
+persistent project convention guidance that survives across versions and is used during re-analysis and future convention refinement.
+
+Do not redesign the whole flow.
+Do not remove anything that already works.
+Do not touch Files, RFIs, Submittals, Dashboard, or unrelated modules.
+Modify only the Convention Builder flow, convention version persistence, and the minimum backend/database support required.
+
+Build this in exact order:
+
+STEP 1 — Add persistent convention guidance storage.
+
+We need a place to store project-specific human directives that govern the convention going forward.
+
+Add a new nullable field to naming_conventions or to naming_convention_versions if that is cleaner for the architecture.
+Use a clear name such as:
+user_guidance text nullable
+
+If both are useful, do this cleanly:
+naming_conventions.user_guidance = current active guidance
+naming_convention_versions.user_notes or user_guidance = version-specific captured guidance
+
+Do not overwrite historical version notes when new versions are created.
+Push schema if needed.
+
+STEP 2 — Add the guidance input to Suggested Convention Structure.
+
+In the Suggested Convention Structure screen, before the final action buttons, add a new section:
+
+Title:
+Project Convention Guidance
+
+Helper text:
+Add any project-specific rules, corrections, exclusions, or naming decisions BIMLog should carry forward into the active convention. This is for human context that AI should not guess.
+
+Add a large textarea.
+
+Use this exact placeholder text:
+Example:
+Going forward, remove Chinese company references from the active naming convention.
+Keep them only as historical evidence where already present.
+Use local operational terminology for all new convention fields and future records.
+
+Add a small button:
+Save guidance
+
+This button only saves to builder state for now.
+Do not trigger a new AI analysis from this button.
+
+STEP 3 — Guidance must persist while navigating.
+
+The user guidance text must not disappear when the user:
+goes back,
+returns to Import Existing Structure,
+accepts and continues,
+saves findings and stops,
+comes back later to the same convention.
+
+At minimum:
+keep it in ConventionBuilder state
+and persist it to the backend once the user accepts or saves a version
+
+STEP 4 — Save guidance into Version 1.
+
+When the user accepts the first Suggested Convention Structure and creates the first accepted convention version, store the guidance text with that version snapshot and update the active convention guidance field if one exists.
+
+That means Version 1 must preserve:
+the convention structure
+the ambiguities
+the analysis summary
+the human guidance entered by the user
+
+STEP 5 — Use the saved guidance during re-analysis.
+
+When the user clicks:
+Add More Evidence and Re-run Discovery
+
+the re-analysis endpoint must include:
+the current accepted convention baseline
+the saved active user guidance
+the new evidence
+
+Claude must receive this guidance as a governing instruction, not as a loose note.
+
+Prompt intent in substance:
+You are re-evaluating an existing project naming convention using newly provided evidence.
+Do not discard the current convention blindly.
+The saved user guidance expresses project-specific human decisions and must be respected unless the user explicitly changes it.
+Return ONLY valid JSON.
+
+Do not over-automate.
+Do not silently rewrite the convention.
+Guidance informs the analysis and comparison, but changes still go through user review.
+
+STEP 6 — Show guidance in Convention Changes Review.
+
+In Convention Changes Review, show a clearly labeled block near the top:
+
+Active Project Convention Guidance
+
+This should display the saved guidance currently governing the convention.
+Allow the user to edit it before accepting the next version.
+
+Add a button:
+Update guidance
+
+This saves the edited text into state for the re-analysis acceptance flow.
+Do not trigger a new re-analysis automatically from this button.
+
+STEP 7 — Save guidance into every future version.
+
+When a user accepts changes from re-analysis and creates Version 2, Version 3, etc.:
+store the current guidance text in that version snapshot
+and update the active convention guidance field if one exists
+
+This is important:
+guidance may evolve over time
+historical versions must preserve the guidance that applied when that version was accepted
+
+STEP 8 — Keep the human control layer realistic.
+
+Do NOT use this guidance field to auto-rewrite all suggested items.
+Do NOT run a second hidden AI pass automatically after every keystroke.
+Do NOT force acceptance.
+
+For this pass:
+capture guidance
+preserve it
+show it
+carry it into re-analysis
+store it in version history
+
+That is the goal.
+
+STEP 9 — Keep the current actions exactly as they are.
+
+Do not remove:
+Back
+Save findings and stop here
+Accept and continue to builder
+
+Do not remove:
+Add More Evidence and Re-run Discovery
+Convention History
+Convention Changes Review
+
+We are extending the loop, not replacing it.
+
+STEP 10 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "Project Convention Guidance|Save guidance|Active Project Convention Guidance|Update guidance" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -100
+
+Check 2
+grep -Rni "user_guidance|userGuidance|user_notes|userNotes" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts lib/db/src/schema artifacts/workspace/db/schema.ts | head -200
+
+Check 3
+grep -Rni "Going forward, remove Chinese company references from the active naming convention" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -20
+
+Check 4
+grep -Rni "Do not discard the current convention blindly|must be respected unless the user explicitly changes it" artifacts/api-server/src/routes/conventions.ts | head -50
+
+Check 5
+grep -Rni "Add More Evidence and Re-run Discovery|Convention Changes Review|Convention History" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -100
+
+Show exact output only. Nothing else.

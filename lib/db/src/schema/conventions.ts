@@ -17,6 +17,7 @@ export const namingConventionsTable = pgTable("naming_conventions", {
   availableInputs: json("available_inputs").$type<Record<string, boolean>>(),
   analysisOnlyMode: boolean("analysis_only_mode").default(false),
   conventionVersion: integer("convention_version").default(1),
+  userGuidance: text("user_guidance"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -42,6 +43,7 @@ export const namingConventionVersionsTable = pgTable("naming_convention_versions
   ambiguities: json("ambiguities").$type<string[]>().notNull().default([]),
   userNotes: text("user_notes"),
   changeSummary: text("change_summary"),
+  userGuidance: text("user_guidance"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   createdById: integer("created_by_id").references(() => usersTable.id),
 });

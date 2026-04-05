@@ -493,6 +493,7 @@ router.get("/projects/:projectId/convention/versions", authMiddleware, requirePr
       conventionVersion: v.conventionVersion,
       analysisSummary: v.analysisSummary,
       changeSummary: v.changeSummary,
+      userGuidance: v.userGuidance,
       acceptedDisciplines: v.acceptedDisciplines,
       acceptedSystems: v.acceptedSystems,
       acceptedDocTypes: v.acceptedDocTypes,
@@ -526,6 +527,7 @@ router.post("/projects/:projectId/convention/versions", authMiddleware, requireP
       ambiguities = [],
       userNotes,
       changeSummary,
+      userGuidance,
     } = req.body as Record<string, unknown>;
 
     const existing = await db
@@ -551,9 +553,18 @@ router.post("/projects/:projectId/convention/versions", authMiddleware, requireP
         ambiguities: ambiguities as string[],
         userNotes: typeof userNotes === "string" ? userNotes : null,
         changeSummary: typeof changeSummary === "string" ? changeSummary : null,
+        userGuidance: typeof userGuidance === "string" ? userGuidance : null,
         createdById: userId,
       })
       .returning();
+
+    // Propagate guidance to the active convention row as well
+    if (typeof userGuidance === "string") {
+      await db
+        .update(namingConventionsTable)
+        .set({ userGuidance })
+        .where(eq(namingConventionsTable.projectId, projectId));
+    }
 
     res.json({ id: inserted.id, conventionVersion: inserted.conventionVersion });
   } catch (error) {
@@ -660,15 +671,22 @@ router.post(
         sampleFileNotes.length > 0 ? `Sample file evidence (filenames):\n${sampleFileNotes.join("\n")}` : null,
       ].filter(Boolean).join("\n\n");
 
+      const guidanceText = (baseline?.userGuidance as string | null) ?? null;
+
       const systemPrompt = `You are re-evaluating an existing project naming convention using newly provided evidence.
 Do not discard the current convention blindly.
 Identify what is confirmed, what is newly discovered, what conflicts with the current convention, and what remains unresolved.
-If no baseline exists, treat this as an initial discovery and return empty confirmedItems.
+If no baseline exists, treat this as an initial discovery and return empty confirmedItems.${guidanceText ? `
+
+MANDATORY PROJECT GUIDANCE (set by the project team — you must respect this):
+${guidanceText}
+
+Apply this guidance strictly when determining what to include, exclude, or change in the next convention version. Do not override or ignore it.` : ""}
 Return ONLY valid JSON with no markdown, no explanation, no code block wrapping.`;
 
       const userPrompt = `BASELINE CONVENTION:
 ${baselineSummary}
-
+${guidanceText ? `\nPROJECT CONVENTION GUIDANCE (carry this forward — human-governed):\n${guidanceText}\n` : ""}
 NEW EVIDENCE:
 ${evidenceParts || "No new evidence provided — returning baseline as confirmed."}
 

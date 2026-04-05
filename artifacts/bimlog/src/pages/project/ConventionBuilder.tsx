@@ -291,6 +291,7 @@ interface WizardState {
   reanalysisResult: ReanalysisResult | null;
   industrialState: IndustrialState;
   importState: ImportState;
+  userGuidance: string;
 }
 
 // ─── setup context types ──────────────────────────────────────────────────────
@@ -395,6 +396,7 @@ interface ConventionVersionSnapshot {
   conventionVersion: number;
   analysisSummary: string | null;
   changeSummary: string | null;
+  userGuidance: string | null;
   acceptedDisciplines: Array<{ code: string; label: string }>;
   acceptedSystems: Array<{ code: string; label: string }>;
   acceptedDocTypes: Array<{ code: string; label: string }>;
@@ -1231,6 +1233,32 @@ function AISuggestions({ state, setState, onBack, onContinueToWizard, onStopHere
         </div>
       )}
 
+      <div style={{ background: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: 10, padding: "18px 20px", marginBottom: 24 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#0369A1", marginBottom: 4 }}>Project Convention Guidance</div>
+        <div style={{ fontSize: 12, color: "#0369A1", marginBottom: 10 }}>
+          Add any project-specific rules, corrections, exclusions, or naming decisions BIMLog should carry forward into the active convention. This is for human context that AI should not guess.
+        </div>
+        <textarea
+          value={state.userGuidance}
+          onChange={e => setState(s => ({ ...s, userGuidance: e.target.value }))}
+          rows={5}
+          placeholder={"Example:\nGoing forward, remove Chinese company references from the active naming convention.\nKeep them only as historical evidence where already present.\nUse local operational terminology for all new convention fields and future records."}
+          style={{ width: "100%", fontSize: 12, padding: "8px 10px", borderRadius: 6, border: "1px solid #BAE6FD", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "var(--font-mono)", lineHeight: 1.6, background: "#fff" }}
+        />
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => {}}
+            style={{ fontSize: 12, fontWeight: 600, padding: "5px 14px", borderRadius: 6, border: "1px solid #BAE6FD", background: "#E0F2FE", color: "#0369A1", cursor: "default" }}
+          >
+            Save guidance
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: "#64748B", marginTop: 6 }}>
+          Guidance is saved automatically when you accept this convention. It will be carried forward into all future re-analyses.
+        </div>
+      </div>
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: "1px solid hsl(var(--border))" }}>
         <Button variant="outline" onClick={onBack} style={{ gap: 6, fontSize: 13 }}>
           <ChevronLeft style={{ width: 15, height: 15 }} /> Back
@@ -1447,10 +1475,12 @@ function ReEvidenceIntake({ state, setState, token, projectId, onBack, onResult 
 }
 
 // ─── Changes Review ───────────────────────────────────────────────────────────
-function ChangesReview({ state, token, projectId, onAccept, onDiscard }: {
+function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange, onAccept, onDiscard }: {
   state: WizardState;
   token: string;
   projectId: number;
+  userGuidance: string;
+  onGuidanceChange: (v: string) => void;
   onAccept: () => void;
   onDiscard: () => void;
 }) {
@@ -1458,6 +1488,8 @@ function ChangesReview({ state, token, projectId, onAccept, onDiscard }: {
   const [decisions, setDecisions] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [localGuidance, setLocalGuidance] = useState(userGuidance);
+  const [guidanceSaved, setGuidanceSaved] = useState(false);
 
   const toggle = (key: string) => setDecisions(d => ({ ...d, [key]: !d[key] }));
   const isOn = (key: string) => decisions[key] === true;
@@ -1494,10 +1526,12 @@ function ChangesReview({ state, token, projectId, onAccept, onDiscard }: {
           analysisSummary,
           ambiguities: stillUnresolved,
           changeSummary: proposedNextVersionSummary,
+          userGuidance: localGuidance || null,
         }),
       });
       if (!res.ok) { const d = await res.json(); setSaveError(d.error || "Failed to save version"); setSaving(false); return; }
       setSaving(false);
+      onGuidanceChange(localGuidance);
       onAccept();
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save version");
@@ -1538,6 +1572,29 @@ function ChangesReview({ state, token, projectId, onAccept, onDiscard }: {
         </div>
         <div style={{ fontSize: 13, color: "#6B7280" }}>
           Based on Version {result.baselineVersion}. Review each finding before saving a new version. Changes are not forced — you decide what to accept.
+        </div>
+      </div>
+
+      <div style={{ background: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#0369A1", marginBottom: 8 }}>Active Project Convention Guidance</div>
+        <div style={{ fontSize: 12, color: "#0369A1", marginBottom: 8 }}>
+          This guidance governs the active convention. Edit it here before accepting a new version. Guidance is carried forward into all future re-analyses.
+        </div>
+        <textarea
+          value={localGuidance}
+          onChange={e => { setLocalGuidance(e.target.value); setGuidanceSaved(false); }}
+          rows={4}
+          placeholder={"No guidance set. Add project-specific rules, corrections, or naming decisions BIMLog should respect going forward."}
+          style={{ width: "100%", fontSize: 12, padding: "8px 10px", borderRadius: 6, border: "1px solid #BAE6FD", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "var(--font-mono)", lineHeight: 1.6, background: "#fff" }}
+        />
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => { onGuidanceChange(localGuidance); setGuidanceSaved(true); }}
+            style={{ fontSize: 12, fontWeight: 600, padding: "5px 14px", borderRadius: 6, border: "1px solid #BAE6FD", background: guidanceSaved ? "#DCFCE7" : "#E0F2FE", color: guidanceSaved ? "#15803D" : "#0369A1", cursor: "pointer" }}
+          >
+            {guidanceSaved ? "Guidance updated" : "Update guidance"}
+          </button>
         </div>
       </div>
 
@@ -2815,6 +2872,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     reanalysisResult: null,
     industrialState: defaultIndustrialState(),
     importState: defaultImportState(),
+    userGuidance: "",
   }));
 
   const [isSaving, setIsSaving] = useState(false);
@@ -2909,6 +2967,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           analysisSummary: dr.analysisSummary,
           ambiguities: dr.ambiguities || [],
           changeSummary: summary,
+          userGuidance: ws.userGuidance || null,
         }),
       });
     } catch { /* non-critical */ }
@@ -2982,6 +3041,8 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         state={ws}
         token={token ?? ""}
         projectId={projectId}
+        userGuidance={ws.userGuidance}
+        onGuidanceChange={g => setWs(s => ({ ...s, userGuidance: g }))}
         onAccept={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
         onDiscard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
       />
