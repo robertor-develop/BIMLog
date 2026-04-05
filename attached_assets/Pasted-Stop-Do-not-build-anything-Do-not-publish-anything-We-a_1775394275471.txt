@@ -1,0 +1,270 @@
+Stop. Do not build anything. Do not publish anything. We are now in system validation mode.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All checks and tests must run against the live production database and live production app behavior only.
+
+Run this in two parts:
+Part A = full system audit
+Part B = one real production flow test
+
+Show exact outputs only. Do not summarize.
+
+PART A — FULL SYSTEM AUDIT
+
+=== CHECK 1 — Frontend TypeScript ===
+cd /home/runner/workspace/artifacts/bimlog && npx tsc --noEmit
+
+=== CHECK 2 — Backend TypeScript ===
+cd /home/runner/workspace/artifacts/api-server && npx tsc --noEmit
+
+=== CHECK 3 — Frontend build ===
+cd /home/runner/workspace/artifacts/bimlog && npm run build
+
+=== CHECK 4 — Backend build ===
+cd /home/runner/workspace/artifacts/api-server && npm run build
+
+=== CHECK 5 — Full tables list ===
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+=== CHECK 6 — naming_conventions full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'naming_conventions'
+ORDER BY ordinal_position;
+
+=== CHECK 7 — naming_convention_versions full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'naming_convention_versions'
+ORDER BY ordinal_position;
+
+=== CHECK 8 — files full columns ===
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'files'
+ORDER BY ordinal_position;
+
+=== CHECK 9 — foreign key integrity ===
+SELECT
+tc.table_name,
+kcu.column_name,
+ccu.table_name AS foreign_table_name,
+ccu.column_name AS foreign_column_name
+FROM information_schema.table_constraints AS tc
+JOIN information_schema.key_column_usage AS kcu
+ON tc.constraint_name = kcu.constraint_name
+JOIN information_schema.constraint_column_usage AS ccu
+ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_type = 'FOREIGN KEY'
+ORDER BY tc.table_name, kcu.column_name;
+
+=== CHECK 10 — indexes and primary keys ===
+SELECT
+t.relname AS table_name,
+i.relname AS index_name,
+a.attname AS column_name
+FROM
+pg_class t,
+pg_class i,
+pg_index ix,
+pg_attribute a
+WHERE
+t.oid = ix.indrelid
+AND i.oid = ix.indexrelid
+AND a.attrelid = t.oid
+AND a.attnum = ANY(ix.indkey)
+AND t.relkind = 'r'
+ORDER BY t.relname, i.relname;
+
+=== CHECK 11 — orphan check: naming_convention_versions ===
+SELECT COUNT(*) AS orphans
+FROM naming_convention_versions ncv
+LEFT JOIN projects p ON p.id = ncv.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 12 — orphan check: project_directory ===
+SELECT COUNT(*) AS orphans
+FROM project_directory pd
+LEFT JOIN projects p ON p.id = pd.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 13 — orphan check: notifications ===
+SELECT COUNT(*) AS orphans
+FROM notifications n
+LEFT JOIN users u ON u.id = n.user_id
+WHERE u.id IS NULL;
+
+=== CHECK 14 — orphan check: transmittals ===
+SELECT COUNT(*) AS orphans
+FROM transmittals t
+LEFT JOIN projects p ON p.id = t.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 15 — orphan check: change_orders ===
+SELECT COUNT(*) AS orphans
+FROM change_orders c
+LEFT JOIN projects p ON p.id = c.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 16 — orphan check: meeting_minutes ===
+SELECT COUNT(*) AS orphans
+FROM meeting_minutes m
+LEFT JOIN projects p ON p.id = m.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 17 — orphan check: action_items ===
+SELECT COUNT(*) AS orphans
+FROM action_items a
+LEFT JOIN projects p ON p.id = a.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 18 — orphan check: project_milestones ===
+SELECT COUNT(*) AS orphans
+FROM project_milestones pm
+LEFT JOIN projects p ON p.id = pm.project_id
+WHERE p.id IS NULL;
+
+=== CHECK 19 — row counts for all major tables ===
+SELECT schemaname, tablename, COUNT(*)::int AS row_count
+FROM pg_tables pt
+JOIN pg_class pc ON pc.relname = pt.tablename
+JOIN pg_namespace pn ON pn.oid = pc.relnamespace AND pn.nspname = pt.schemaname
+LEFT JOIN LATERAL (
+SELECT 1
+) dummy ON true
+WHERE schemaname = 'public'
+GROUP BY schemaname, tablename
+ORDER BY tablename;
+
+=== CHECK 20 — mounted backend routes ===
+grep -Rni "router.use|app.use" artifacts/api-server/src | head -200
+
+=== CHECK 21 — Convention Builder wiring ===
+grep -Rni "Project Convention Setup|Industrial Structure Discovery|Import Existing Structure|Suggested Convention Structure|Add More Evidence and Re-run Discovery|Convention Changes Review|Convention History|Project Convention Guidance|Active Project Convention Guidance" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -300
+
+=== CHECK 22 — reanalyze + guidance endpoint wiring ===
+grep -Rni "convention/reanalyze|naming_convention_versions|confirmedItems|newlySuggestedItems|conflicts|stillUnresolved|proposedNextVersionSummary|user_guidance|userGuidance|must be respected unless the user explicitly changes it" artifacts/api-server/src/routes artifacts/bimlog/src lib/db/src/schema | head -300
+
+=== CHECK 23 — evidence upload wiring ===
+grep -Rni "Upload Existing Evidence|PDF references|Spreadsheet registers|Screenshot evidence|Optional sample files|discover-upload|multipart/form-data" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -300
+
+=== CHECK 24 — drag and drop wiring ===
+grep -n "Drag and drop files here or click to browse|onDragOver|onDragLeave|onDrop" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -150
+
+=== CHECK 25 — TODO / FIXME / Coming Soon / placeholder in active modules ===
+grep -Rni "TODO|FIXME|Coming Soon|placeholder" artifacts/bimlog/src/pages/project artifacts/api-server/src/routes | head -300
+
+=== CHECK 26 — hardcoded project or client references ===
+grep -Rni "IBQ|NYC-270|270 Park|robertor@rryasociados.com
+" artifacts/bimlog/src artifacts/api-server/src | head -300
+
+=== CHECK 27 — silent catches ===
+grep -Rni "catch (() =>|catch(
+ =>|catch { }|catch{}" artifacts/api-server/src artifacts/bimlog/src | head -300
+
+=== CHECK 28 — query-param auth patterns ===
+grep -Rni "token=.*window.open|window.open.*token|Authorization.*query" artifacts/bimlog/src artifacts/api-server/src | head -150
+
+=== CHECK 29 — navigation to routes ===
+grep -Rni "navigate(|setLocation(|href=" artifacts/bimlog/src | head -400
+
+=== CHECK 30 — App route definitions ===
+sed -n '1,260p' artifacts/bimlog/src/App.tsx
+
+=== CHECK 31 — ProjectDetail convention render block ===
+grep -n "tab === "convention"|ConventionBuilder|isAdmin" artifacts/bimlog/src/pages/ProjectDetail.tsx | head -100
+
+=== CHECK 32 — Dashboard project creation redirect ===
+grep -n "CREATE PROJECT SUCCESS PAYLOAD|REDIRECT TARGET|/projects/${.*}/convention|window.location.href" artifacts/bimlog/src/pages/Dashboard.tsx | head -120
+
+=== CHECK 33 — health endpoint ===
+curl -s http://127.0.0.1:8080/api/v1/healthz
+
+=== CHECK 34 — route files ===
+find artifacts/api-server/src/routes -name "*.ts" | sort
+
+=== CHECK 35 — frontend page files ===
+find artifacts/bimlog/src/pages -name ".tsx" | sort
+find artifacts/bimlog/src/pages/project -name ".tsx" | sort
+
+=== CHECK 36 — convention builder schema wiring after latest changes ===
+grep -Rni "setup_context|project_environment|builder_intent|scope_type|scope_details|levels_relevant|primary_structure|available_inputs|analysis_only_mode|convention_version|user_guidance|userGuidance|user_notes|userNotes|change_summary" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts lib/db/src/schema artifacts/workspace/db/schema.ts | head -400
+
+=== CHECK 37 — auth smoke test if token available ===
+If a token is available in local dev, test status code only for:
+GET /api/v1/healthz
+GET /api/v1/dashboard/briefing
+GET /api/v1/dashboard/stats
+GET /api/v1/notifications
+GET /api/v1/projects/:projectId/conventions
+GET /api/v1/projects/:projectId/convention/versions
+GET /api/v1/projects/:projectId/directory
+GET /api/v1/projects/:projectId/transmittals
+GET /api/v1/projects/:projectId/change-orders
+GET /api/v1/projects/:projectId/meetings
+GET /api/v1/projects/:projectId/milestones
+
+PART B — ONE REAL PRODUCTION FLOW TEST
+
+Use the live authenticated production app. No preview.
+
+Run exactly this flow and show exact outputs only.
+
+=== TEST 38 — create project to convention flow ===
+Create a brand new project in production and show:
+browser console output of CREATE PROJECT SUCCESS PAYLOAD
+browser console output of REDIRECT TARGET
+exact browser URL immediately after creation
+exact first visible title after creation
+
+=== TEST 39 — initial discovery to Version 1 flow ===
+On that new real project:
+complete Project Convention Setup
+provide real evidence
+run initial discovery
+enter Project Convention Guidance
+accept the first convention
+
+Show:
+exact browser URL after acceptance
+whether a Version 1 snapshot row was created in naming_convention_versions: yes/no
+if yes, show the latest row for that project with:
+project_id, convention_version, user_guidance, change_summary
+
+=== TEST 40 — re-run discovery to Version 2 flow ===
+On the same real project:
+click Add More Evidence and Re-run Discovery
+provide additional real evidence
+run re-analysis
+check whether Active Project Convention Guidance is visible: yes/no
+accept the next version
+
+Show:
+exact browser URL during re-analysis review
+exact first visible title during re-analysis review
+whether a Version 2 snapshot row was created in naming_convention_versions: yes/no
+if yes, show the latest two rows for that project with:
+project_id, convention_version, user_guidance, change_summary
+
+=== TEST 41 — convention history visibility ===
+On the same project after Version 2 exists:
+is Convention History visible: yes/no
+show the version numbers listed in the UI
+show whether Version 1 and Version 2 both appear: yes/no
+
+=== TEST 42 — guidance persistence check ===
+Confirm whether the guidance entered before Version 1 is still present during re-analysis:
+yes/no
+
+=== TEST 43 — reanalysis route hit ===
+Show the exact network request path used when clicking Analyze in the re-run evidence screen.
+It must hit:
+/api/v1/projects/:projectId/convention/reanalyze
+
+Show exact outputs only. Do not summarize.

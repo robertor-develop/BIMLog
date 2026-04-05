@@ -48,6 +48,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       projectId: convention.projectId,
       separator: convention.separator,
       isActive: convention.isActive,
+      userGuidance: convention.userGuidance ?? null,
       fields: fields.map((f) => ({
         id: f.id,
         label: f.label,
@@ -77,13 +78,17 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
     let conventionId: number;
 
     if (existing.length > 0) {
+      const updateSet: Record<string, unknown> = {
+        separator: body.separator,
+        isActive: body.isActive,
+        updatedAt: new Date(),
+      };
+      if (typeof body.userGuidance === "string") {
+        updateSet.userGuidance = body.userGuidance;
+      }
       const [updated] = await db
         .update(namingConventionsTable)
-        .set({
-          separator: body.separator,
-          isActive: body.isActive,
-          updatedAt: new Date(),
-        })
+        .set(updateSet)
         .where(eq(namingConventionsTable.id, existing[0].id))
         .returning();
 
@@ -97,6 +102,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
           projectId,
           separator: body.separator,
           isActive: body.isActive,
+          ...(typeof body.userGuidance === "string" ? { userGuidance: body.userGuidance } : {}),
         })
         .returning();
 
@@ -136,6 +142,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       projectId: convention[0].projectId,
       separator: convention[0].separator,
       isActive: convention[0].isActive,
+      userGuidance: convention[0].userGuidance ?? null,
       fields: fields.map((f) => ({
         id: f.id,
         label: f.label,

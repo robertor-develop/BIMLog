@@ -2885,6 +2885,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (convention && (convention as any).userGuidance && !ws.userGuidance) {
+      setWs(s => ({ ...s, userGuidance: (convention as any).userGuidance }));
+    }
+  }, [convention]);
+
   const { mutate } = useUpsertConvention({
     mutation: {
       onSuccess: () => {
@@ -2917,8 +2923,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       { label: "Revision",     fieldOrder: 7, allowedValues: revCodes },
     ];
     setIsSaving(true);
-    mutate({ projectId, data: { separator: ws.separator, isActive: true, fields } });
+    mutate({ projectId, data: { separator: ws.separator, isActive: true, fields, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } });
   };
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   if (isLoading) return <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}</div>;
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
@@ -2935,10 +2945,6 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     if (env === "industrial_epc") { setWs(s => ({ ...s, flowPhase: "industrial_discovery" })); return; }
     setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
   }
-
-  const [showHistory, setShowHistory] = useState(false);
-  const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
 
   async function loadHistory() {
     setHistoryLoading(true);
