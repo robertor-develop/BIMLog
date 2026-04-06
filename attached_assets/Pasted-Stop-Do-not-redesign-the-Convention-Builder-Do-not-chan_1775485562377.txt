@@ -1,0 +1,200 @@
+Stop. Do not redesign the Convention Builder. Do not change prompts. Do not add unrelated features. We are adding one missing layer only: a clear checkpoint/status layer so the user always knows where the convention stands before testing live again.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+This is the problem:
+The convention system is now powerful, but the user still cannot easily tell:
+which version is active,
+whether they are looking at the baseline or a re-analysis path,
+what evidence has been used so far,
+what changed in the last accepted version,
+what remains unresolved,
+and whether they are on the correct path.
+
+We are not building a report generator. We are building a checkpoint/status layer inside the Convention Builder so the user can orient themselves at any time.
+
+Modify only the Convention Builder flow and the minimum backend support required.
+
+Build this in exact order:
+
+STEP 1 — Add a new persistent status panel in the Convention Builder.
+
+Add a clear panel near the top of the builder when a project already has discovery/version data.
+
+Title:
+Convention Status
+
+This panel must show at minimum:
+
+Active convention version
+Baseline version used for the current view
+Current mode:
+Initial discovery
+Builder from accepted AI proposal
+Re-analysis in progress
+Changes review
+Current active project guidance
+Last accepted change summary
+Count of unresolved ambiguities still open
+Whether the current state came from:
+initial discovery
+accepted version
+or re-analysis
+
+Keep it clean and serious. Do not overdesign it.
+
+STEP 2 — Add an evidence summary block inside the same panel.
+
+Show:
+Evidence used so far
+
+At minimum include:
+number of uploaded evidence files used in the latest accepted version if available
+whether pasted text was used
+whether spreadsheets were used
+whether PDFs were used
+whether screenshots were used
+whether sample filenames were used
+
+If exact counts are not yet available for all historical versions, show the best available structured summary without inventing anything.
+Do not hallucinate counts.
+Use real stored data only.
+
+STEP 3 — Add a “What changed in the latest version” block.
+
+If the project has Version 2 or higher, show a compact change summary block inside Convention Status:
+
+Title:
+Latest accepted changes
+
+Show:
+newly accepted disciplines if any
+newly accepted systems if any
+newly accepted document types if any
+accepted conflict resolutions if any
+the saved change_summary from the latest version if available
+
+If only Version 1 exists, show:
+Initial convention baseline established
+
+STEP 4 — Add an “Open issues still unresolved” block.
+
+Use the latest accepted ambiguities / unresolved items if available.
+
+Title:
+Still unresolved
+
+Show the unresolved items clearly as a short list.
+
+If none exist, show:
+No unresolved convention issues currently recorded
+
+This is critical because the user needs to know whether the convention is stable or still incomplete.
+
+STEP 5 — Add a “Path status” indicator.
+
+The user should never feel lost again.
+
+Show a small current-state label such as:
+Working from accepted baseline
+Working from AI proposal
+Working from re-analysis results awaiting acceptance
+
+This must reflect the real current state, not a guess.
+
+STEP 6 — Backend support.
+
+Add or update the minimum endpoint support needed so ConventionBuilder can load a compact convention status object for the current project.
+
+If the existing GET convention and GET version endpoints are enough, reuse them.
+If not, add one lightweight endpoint such as:
+GET /api/v1/projects/:projectId/convention/status
+
+Return only real stored data. No invented summaries.
+
+Suggested structure:
+{
+"activeVersion": 2,
+"baselineVersion": 2,
+"currentMode": "accepted_baseline|ai_proposal|reanalysis_pending",
+"currentGuidance": "",
+"lastChangeSummary": "",
+"unresolvedCount": 3,
+"unresolvedItems": [],
+"latestEvidenceSummary": {
+"usedPastedText": true,
+"usedPdf": true,
+"usedSpreadsheet": false,
+"usedScreenshot": true,
+"usedSampleFilenames": true,
+"fileCount": 5
+},
+"latestAcceptedChanges": {
+"disciplines": [],
+"systems": [],
+"documentTypes": [],
+"conflictsResolved": []
+}
+}
+
+If exact evidence summary is not yet fully stored, return only the fields that can be truthfully derived.
+Do not fake completeness.
+
+STEP 7 — Convention History must remain as-is.
+
+Do not remove Convention History.
+The new Convention Status panel is a current-state checkpoint, not a replacement for history.
+
+Convention History remains the audit trail.
+Convention Status is the live orientation layer.
+
+STEP 8 — Place it where it helps.
+
+The Convention Status panel should appear:
+in the main builder
+and in Convention Changes Review if practical
+
+At minimum it must be visible before the user accepts new changes, so they can understand:
+where they are,
+what they are changing,
+and what remains unresolved.
+
+STEP 9 — Do not overbuild.
+
+Do not add charts.
+Do not add exports.
+Do not add PDFs.
+Do not build a separate reporting module.
+This is only a checkpoint/status layer to keep the user oriented and confident.
+
+STEP 10 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "Convention Status|Evidence used so far|Latest accepted changes|Still unresolved|Working from accepted baseline|Working from AI proposal|Working from re-analysis results awaiting acceptance" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -200
+
+Check 2
+grep -Rni "convention/status|activeVersion|baselineVersion|currentMode|currentGuidance|lastChangeSummary|unresolvedCount|latestEvidenceSummary|latestAcceptedChanges" artifacts/api-server/src/routes artifacts/bimlog/src lib/db/src/schema | head -200
+
+Check 3
+grep -Rni "Initial convention baseline established|No unresolved convention issues currently recorded" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -50
+
+Check 4
+Using the live production app on a real project, show:
+the exact visible contents of the Convention Status panel
+the active version shown
+the unresolved count shown
+whether the current guidance is visible: yes/no
+
+Check 5
+Using the same project during re-analysis review, show:
+whether Convention Status is visible: yes/no
+what current mode it shows
+what baseline version it shows
+
+Show exact output only. Do not summarize.

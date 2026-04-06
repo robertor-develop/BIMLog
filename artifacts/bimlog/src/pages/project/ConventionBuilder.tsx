@@ -2871,6 +2871,164 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
   );
 }
 
+// ─── Convention Status Panel ──────────────────────────────────────────────────
+interface ConventionStatus {
+  activeVersion: number;
+  baselineVersion: number;
+  currentMode: string;
+  currentGuidance: string;
+  lastChangeSummary: string;
+  unresolvedCount: number;
+  unresolvedItems: string[];
+  latestEvidenceSummary: {
+    hasAnalysis: boolean;
+    fileCount: number | null;
+    usedPastedText: boolean | null;
+    usedPdf: boolean | null;
+    usedSpreadsheet: boolean | null;
+    usedScreenshot: boolean | null;
+    usedSampleFilenames: boolean | null;
+  };
+  latestAcceptedChanges: {
+    disciplines: Array<{ code: string; label: string }>;
+    systems: Array<{ code: string; label: string }>;
+    documentTypes: Array<{ code: string; label: string }>;
+    conflictsResolved: string[];
+  };
+}
+
+function ConventionStatusPanel({ projectId, token, flowPhase, enteredFromDiscovery, lang }: {
+  projectId: number;
+  token: string;
+  flowPhase: WizardState["flowPhase"];
+  enteredFromDiscovery: boolean;
+  lang: string;
+}) {
+  const [status, setStatus] = useState<ConventionStatus | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/status`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.activeVersion > 0) setStatus(d as ConventionStatus); })
+      .catch(() => {});
+  }, [projectId, token]);
+
+  if (!status) return null;
+
+  const isChangesReview = flowPhase === "changes_review";
+  let modeLabel: string;
+  let modeBg: string;
+  let modeColor: string;
+  if (isChangesReview) {
+    modeLabel = w("Re-analysis in progress — changes awaiting acceptance", "Reanálisis en curso — cambios pendientes de aceptación", lang);
+    modeBg = "#FFFBEB"; modeColor = "#92400E";
+  } else if (enteredFromDiscovery) {
+    modeLabel = w("Working from accepted AI proposal", "Trabajando desde la propuesta de IA aceptada", lang);
+    modeBg = "#EFF6FF"; modeColor = "#1E40AF";
+  } else {
+    modeLabel = w("Working from accepted baseline", "Trabajando desde la línea base aceptada", lang);
+    modeBg = "#F0FDF4"; modeColor = "#166534";
+  }
+
+  const { activeVersion, currentGuidance, lastChangeSummary, unresolvedCount, unresolvedItems, latestAcceptedChanges, latestEvidenceSummary } = status;
+  const hasNewDiscs = latestAcceptedChanges.disciplines.length > 0;
+  const hasNewSys   = latestAcceptedChanges.systems.length > 0;
+  const hasNewDocs  = latestAcceptedChanges.documentTypes.length > 0;
+  const hasAnyChange = hasNewDiscs || hasNewSys || hasNewDocs;
+
+  return (
+    <div style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", marginBottom: 20, fontSize: 12, background: "#fff" }}>
+      {/* Header */}
+      <div style={{ padding: "7px 14px", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", gap: 8 }}>
+        <GitMerge style={{ width: 13, height: 13, color: "#6B7280" }} />
+        <span style={{ fontWeight: 600, fontSize: 11, color: "#374151", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          {w("Convention Status", "Estado de la Convención", lang)}
+        </span>
+        <span style={{ marginLeft: "auto", fontWeight: 600, color: "#374151", fontSize: 12 }}>
+          {w("Version", "Versión", lang)} {activeVersion}
+        </span>
+      </div>
+
+      {/* Path status */}
+      <div style={{ padding: "6px 14px", background: modeBg, borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", gap: 7 }}>
+        <CheckCircle2 style={{ width: 12, height: 12, color: modeColor, flexShrink: 0 }} />
+        <span style={{ color: modeColor, fontWeight: 500 }}>{modeLabel}</span>
+      </div>
+
+      {/* Two-column grid: guidance + latest changes */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #E5E7EB" }}>
+        <div style={{ padding: "10px 14px", borderRight: "1px solid #E5E7EB" }}>
+          <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+            {w("Active Project Guidance", "Guía de proyecto activa", lang)}
+          </div>
+          {currentGuidance
+            ? <span style={{ color: "#111827", lineHeight: 1.6 }}>{currentGuidance}</span>
+            : <span style={{ color: "#9CA3AF", fontStyle: "italic" }}>{w("No guidance set", "Sin guía configurada", lang)}</span>
+          }
+        </div>
+        <div style={{ padding: "10px 14px" }}>
+          <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+            {w("Latest Accepted Changes", "Últimos cambios aceptados", lang)}
+          </div>
+          {activeVersion === 1 && !hasAnyChange
+            ? <span style={{ color: "#374151" }}>{w("Initial convention baseline established", "Línea base de convención inicial establecida", lang)}</span>
+            : hasAnyChange
+              ? <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {hasNewDiscs && <span style={{ color: "#374151" }}>+{latestAcceptedChanges.disciplines.length} {w("discipline(s)", "disciplina(s)", lang)}: {latestAcceptedChanges.disciplines.map(d => d.code).join(", ")}</span>}
+                  {hasNewSys   && <span style={{ color: "#374151" }}>+{latestAcceptedChanges.systems.length} {w("system(s)", "sistema(s)", lang)}: {latestAcceptedChanges.systems.map(s => s.code).join(", ")}</span>}
+                  {hasNewDocs  && <span style={{ color: "#374151" }}>+{latestAcceptedChanges.documentTypes.length} {w("doc type(s)", "tipo(s) de doc", lang)}: {latestAcceptedChanges.documentTypes.map(d => d.code).join(", ")}</span>}
+                  {lastChangeSummary && <span style={{ color: "#6B7280", marginTop: 3, lineHeight: 1.5 }}>{lastChangeSummary}</span>}
+                </div>
+              : lastChangeSummary
+                  ? <span style={{ color: "#374151", lineHeight: 1.5 }}>{lastChangeSummary}</span>
+                  : <span style={{ color: "#9CA3AF", fontStyle: "italic" }}>{w("No changes recorded for this version", "Sin cambios registrados para esta versión", lang)}</span>
+          }
+        </div>
+      </div>
+
+      {/* Still unresolved */}
+      <div style={{ padding: "10px 14px", borderBottom: "1px solid #E5E7EB" }}>
+        <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: unresolvedCount > 0 ? 6 : 0, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: 6 }}>
+          <AlertTriangle style={{ width: 11, height: 11, color: unresolvedCount > 0 ? "#D97706" : "#9CA3AF" }} />
+          {w("Still Unresolved", "Aún sin resolver", lang)}
+          <span style={{ fontWeight: 500, textTransform: "none", fontSize: 11, color: unresolvedCount > 0 ? "#B45309" : "#9CA3AF", letterSpacing: 0 }}>
+            ({unresolvedCount})
+          </span>
+        </div>
+        {unresolvedCount === 0
+          ? <span style={{ color: "#6B7280", fontStyle: "italic" }}>{w("No unresolved convention issues currently recorded", "No hay problemas de convención sin resolver actualmente", lang)}</span>
+          : <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 3 }}>
+              {unresolvedItems.slice(0, 8).map((item, i) => (
+                <li key={i} style={{ color: "#374151", lineHeight: 1.5 }}>{item}</li>
+              ))}
+              {unresolvedItems.length > 8 && (
+                <li style={{ color: "#9CA3AF" }}>{w(`…and ${unresolvedItems.length - 8} more`, `…y ${unresolvedItems.length - 8} más`, lang)}</li>
+              )}
+            </ul>
+        }
+      </div>
+
+      {/* Evidence used so far */}
+      <div style={{ padding: "10px 14px" }}>
+        <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+          {w("Evidence Used So Far", "Evidencia usada hasta ahora", lang)}
+        </div>
+        <div style={{ color: "#374151", lineHeight: 1.6 }}>
+          {latestEvidenceSummary.hasAnalysis
+            ? <span>{w("AI analysis was performed for this version.", "Se realizó análisis de IA para esta versión.", lang)}</span>
+            : <span style={{ color: "#9CA3AF", fontStyle: "italic" }}>{w("No AI analysis recorded for this version.", "Sin análisis de IA registrado para esta versión.", lang)}</span>
+          }
+          <span style={{ color: "#9CA3AF", marginLeft: 6, fontSize: 11 }}>
+            {w("Detailed file evidence counts are not retained per version.", "Los conteos detallados de archivos de evidencia no se conservan por versión.", lang)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── main export ──────────────────────────────────────────────────────────────
 export function ConventionBuilder({ projectId }: { projectId: number }) {
   const { lang } = useI18n();
@@ -3143,15 +3301,24 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   // ── Convention Changes Review ─────────────────────────────────────────────
   if (flowPhase === "changes_review") {
     return (
-      <ChangesReview
-        state={ws}
-        token={token ?? ""}
-        projectId={projectId}
-        userGuidance={ws.userGuidance}
-        onGuidanceChange={g => setWs(s => ({ ...s, userGuidance: g }))}
-        onAccept={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
-        onDiscard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
-      />
+      <div>
+        <ConventionStatusPanel
+          projectId={projectId}
+          token={token ?? ""}
+          flowPhase={flowPhase}
+          enteredFromDiscovery={ws.enteredFromDiscovery}
+          lang={lang}
+        />
+        <ChangesReview
+          state={ws}
+          token={token ?? ""}
+          projectId={projectId}
+          userGuidance={ws.userGuidance}
+          onGuidanceChange={g => setWs(s => ({ ...s, userGuidance: g }))}
+          onAccept={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
+          onDiscard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
+        />
+      </div>
     );
   }
 
@@ -3166,6 +3333,13 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           <span>{w("Convention preloaded from accepted AI proposal. Review and adjust each step, then save.", "Convención precargada desde la propuesta de IA aceptada. Revisa y ajusta cada paso, luego guarda.", lang)}</span>
         </div>
       )}
+      <ConventionStatusPanel
+        projectId={projectId}
+        token={token ?? ""}
+        flowPhase={flowPhase}
+        enteredFromDiscovery={ws.enteredFromDiscovery}
+        lang={lang}
+      />
       {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} />}
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}

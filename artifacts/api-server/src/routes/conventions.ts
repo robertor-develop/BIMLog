@@ -517,6 +517,78 @@ router.get("/projects/:projectId/convention/versions", authMiddleware, requirePr
   }
 });
 
+// ── Convention Status — compact orientation object ────────────────────────────
+router.get("/projects/:projectId/convention/status", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId), 10);
+    if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
+
+    const versions = await db
+      .select()
+      .from(namingConventionVersionsTable)
+      .where(eq(namingConventionVersionsTable.projectId, projectId))
+      .orderBy(desc(namingConventionVersionsTable.conventionVersion))
+      .limit(2);
+
+    if (versions.length === 0) {
+      res.json({
+        activeVersion: 0,
+        baselineVersion: 0,
+        currentMode: "no_version",
+        currentGuidance: "",
+        lastChangeSummary: "",
+        unresolvedCount: 0,
+        unresolvedItems: [],
+        latestEvidenceSummary: { hasAnalysis: false, fileCount: null, usedPastedText: null, usedPdf: null, usedSpreadsheet: null, usedScreenshot: null, usedSampleFilenames: null },
+        latestAcceptedChanges: { disciplines: [], systems: [], documentTypes: [], conflictsResolved: [] },
+      });
+      return;
+    }
+
+    const latest = versions[0];
+    const prev = versions[1] ?? null;
+
+    const latestAcceptedChanges: {
+      disciplines: Array<{ code: string; label: string }>;
+      systems: Array<{ code: string; label: string }>;
+      documentTypes: Array<{ code: string; label: string }>;
+      conflictsResolved: string[];
+    } = { disciplines: [], systems: [], documentTypes: [], conflictsResolved: [] };
+
+    if (prev) {
+      const prevDiscCodes = new Set(prev.acceptedDisciplines.map(d => d.code));
+      latestAcceptedChanges.disciplines = latest.acceptedDisciplines.filter(d => !prevDiscCodes.has(d.code));
+      const prevSysCodes = new Set(prev.acceptedSystems.map(s => s.code));
+      latestAcceptedChanges.systems = latest.acceptedSystems.filter(s => !prevSysCodes.has(s.code));
+      const prevDocCodes = new Set(prev.acceptedDocTypes.map(d => d.code));
+      latestAcceptedChanges.documentTypes = latest.acceptedDocTypes.filter(d => !prevDocCodes.has(d.code));
+    }
+
+    res.json({
+      activeVersion: latest.conventionVersion,
+      baselineVersion: latest.conventionVersion,
+      currentMode: "accepted_baseline",
+      currentGuidance: latest.userGuidance ?? "",
+      lastChangeSummary: latest.changeSummary ?? "",
+      unresolvedCount: latest.ambiguities.length,
+      unresolvedItems: latest.ambiguities,
+      latestEvidenceSummary: {
+        hasAnalysis: !!latest.analysisSummary,
+        fileCount: null,
+        usedPastedText: null,
+        usedPdf: null,
+        usedSpreadsheet: null,
+        usedScreenshot: null,
+        usedSampleFilenames: null,
+      },
+      latestAcceptedChanges,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 // ── Convention Versions — save snapshot ──────────────────────────────────────
 router.post("/projects/:projectId/convention/versions", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
