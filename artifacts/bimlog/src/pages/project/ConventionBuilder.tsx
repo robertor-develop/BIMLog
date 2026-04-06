@@ -285,7 +285,7 @@ interface WizardState {
   enableExtRestrictions: boolean;
   extRestrictions: Record<string, string[]>;
   // ── front-door setup context ──────────────────────────────────────────────
-  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review";
+  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review" | "checkpoint";
   setupCtx: SetupContext;
   discoveryResult: DiscoveryResult | null;
   reanalysisResult: ReanalysisResult | null;
@@ -403,6 +403,8 @@ interface ConventionVersionSnapshot {
   acceptedDocTypes: Array<{ code: string; label: string }>;
   acceptedExtraFields: Array<{ key: string; label: string }>;
   acceptedFieldOrder: string[];
+  ambiguities: string[];
+  userNotes: string | null;
   createdAt: string;
   createdById: number | null;
 }
@@ -2871,6 +2873,248 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
   );
 }
 
+// ─── Checkpoint Screen ────────────────────────────────────────────────────────
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory }: {
+  ws: WizardState;
+  projectId: number;
+  token: string;
+  lang: string;
+  onContinueEditing: () => void;
+  onReEvidence: () => void;
+  onOpenHistory: () => void;
+}) {
+  const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then((versions: ConventionVersionSnapshot[]) => {
+        if (Array.isArray(versions) && versions.length > 0) setLatestVersion(versions[0]);
+      })
+      .catch(() => {});
+  }, [projectId, token]);
+
+  const sep = ws.separator || "-";
+
+  function buildSampleName(version: ConventionVersionSnapshot): string {
+    const fieldMap: Record<string, string> = {
+      "Project Code": ws.companies[0]?.code || "PROJ",
+      "Originator":   ws.companies[0]?.code || "ORG",
+      "Discipline":   version.acceptedDisciplines[0]?.code || "DIS",
+      "Level":        ws.levelList?.[0]?.code || "L01",
+      "Type":         version.acceptedDocTypes[0]?.code || "TYPE",
+      "Sequence":     "0001",
+      "Status":       ws.statusCodes?.find(s => s.selected)?.code || "S0",
+      "Revision":     ws.revisionFormat === "numerical" ? "01" : "P01",
+    };
+    const order = version.acceptedFieldOrder.length > 0
+      ? version.acceptedFieldOrder
+      : Object.keys(fieldMap);
+    return order.map(f => fieldMap[f] || f.slice(0, 4).toUpperCase()).join(sep);
+  }
+
+  const snap = latestVersion;
+
+  return (
+    <div>
+      <ConventionStatusPanel
+        projectId={projectId}
+        token={token}
+        flowPhase="checkpoint"
+        enteredFromDiscovery={ws.enteredFromDiscovery}
+        lang={lang}
+      />
+
+      {/* Action buttons */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+        <Button onClick={onContinueEditing} style={{ gap: 7, fontSize: 13, height: 40 }}>
+          <Edit2 style={{ width: 14, height: 14 }} />
+          {w("Continue Editing Convention", "Continuar editando convención", lang)}
+        </Button>
+        <Button variant="outline" onClick={onReEvidence} style={{ gap: 7, fontSize: 13, height: 40 }}>
+          <RefreshCw style={{ width: 14, height: 14 }} />
+          {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
+        </Button>
+        <Button
+          variant="outline"
+          style={{ gap: 7, fontSize: 13, height: 40 }}
+          onClick={() => { const el = document.getElementById("convention-snapshot-section"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
+        >
+          <FileText style={{ width: 14, height: 14 }} />
+          {w("View Latest Accepted Convention Snapshot", "Ver snapshot de convención aceptada", lang)}
+        </Button>
+        <Button variant="outline" onClick={onOpenHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
+          <Clock style={{ width: 14, height: 14 }} />
+          {w("Open Convention History", "Abrir historial de convención", lang)}
+        </Button>
+      </div>
+
+      {/* Latest Accepted Convention Snapshot */}
+      <div id="convention-snapshot-section" style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", fontSize: 12, background: "#fff" }}>
+        <div style={{ padding: "8px 14px", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", gap: 8 }}>
+          <FileText style={{ width: 13, height: 13, color: "#6B7280" }} />
+          <span style={{ fontWeight: 600, fontSize: 11, color: "#374151", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            {w("Latest Accepted Convention Snapshot", "Snapshot de convención aceptada", lang)}
+          </span>
+          {snap && (
+            <span style={{ marginLeft: "auto", color: "#6B7280", fontSize: 11 }}>
+              {w("Version", "Versión", lang)} {snap.conventionVersion}
+            </span>
+          )}
+        </div>
+
+        {!snap ? (
+          <div style={{ padding: "16px 14px", color: "#9CA3AF", fontStyle: "italic" }}>
+            {w("Loading snapshot…", "Cargando snapshot…", lang)}
+          </div>
+        ) : (
+          <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 14 }}>
+
+            {/* Sample naming string */}
+            <div>
+              <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                {w("Sample Convention String", "Ejemplo de nombre de archivo", lang)}
+              </div>
+              <code style={{ display: "block", padding: "8px 12px", background: "#F3F4F6", borderRadius: 6, fontFamily: "monospace", fontSize: 13, color: "#111827", letterSpacing: "0.03em" }}>
+                {buildSampleName(snap)}
+              </code>
+              {snap.acceptedFieldOrder.length > 0 && (
+                <div style={{ color: "#9CA3AF", marginTop: 5, fontSize: 11 }}>
+                  {w("Field order:", "Orden de campos:", lang)} {snap.acceptedFieldOrder.join(` ${sep} `)}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              {/* Disciplines */}
+              <div>
+                <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                  {w("Disciplines", "Disciplinas", lang)} ({snap.acceptedDisciplines.length})
+                </div>
+                {snap.acceptedDisciplines.length === 0
+                  ? <span style={{ color: "#9CA3AF", fontStyle: "italic" }}>{w("None recorded", "Ninguna registrada", lang)}</span>
+                  : <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {snap.acceptedDisciplines.map(d => (
+                        <span key={d.code} style={{ padding: "2px 7px", background: "#EFF6FF", color: "#1E40AF", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                          {d.code}
+                          {d.label && d.label !== d.code && <span style={{ fontWeight: 400, color: "#3B82F6" }}> — {d.label}</span>}
+                        </span>
+                      ))}
+                    </div>
+                }
+              </div>
+
+              {/* Document types */}
+              <div>
+                <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                  {w("Document Types", "Tipos de documento", lang)} ({snap.acceptedDocTypes.length})
+                </div>
+                {snap.acceptedDocTypes.length === 0
+                  ? <span style={{ color: "#9CA3AF", fontStyle: "italic" }}>{w("None recorded", "Ninguno registrado", lang)}</span>
+                  : <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {snap.acceptedDocTypes.map(d => (
+                        <span key={d.code} style={{ padding: "2px 7px", background: "#F0FDF4", color: "#166534", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                          {d.code}
+                          {d.label && d.label !== d.code && <span style={{ fontWeight: 400, color: "#16A34A" }}> — {d.label}</span>}
+                        </span>
+                      ))}
+                    </div>
+                }
+              </div>
+
+              {/* Systems */}
+              {snap.acceptedSystems.length > 0 && (
+                <div>
+                  <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                    {w("Systems", "Sistemas", lang)} ({snap.acceptedSystems.length})
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {snap.acceptedSystems.map(s => (
+                      <span key={s.code} style={{ padding: "2px 7px", background: "#FFF7ED", color: "#9A3412", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                        {s.code}{s.label && s.label !== s.code && <span style={{ fontWeight: 400, color: "#EA580C" }}> — {s.label}</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Extra fields */}
+              {snap.acceptedExtraFields?.length > 0 && (
+                <div>
+                  <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                    {w("Extra Fields", "Campos adicionales", lang)}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {snap.acceptedExtraFields.map(f => (
+                      <span key={f.key} style={{ padding: "2px 7px", background: "#F5F3FF", color: "#5B21B6", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                        {f.key}{f.label && f.label !== f.key && <span style={{ fontWeight: 400 }}> — {f.label}</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Guidance */}
+            {snap.userGuidance && (
+              <div>
+                <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                  {w("Active Guidance", "Guía activa", lang)}
+                </div>
+                <div style={{ color: "#111827", lineHeight: 1.6, padding: "8px 12px", background: "#F9FAFB", borderRadius: 6 }}>
+                  {snap.userGuidance}
+                </div>
+              </div>
+            )}
+
+            {/* Last change summary */}
+            {snap.changeSummary && (
+              <div>
+                <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                  {w("Last Accepted Changes", "Últimos cambios aceptados", lang)}
+                </div>
+                <div style={{ color: "#374151", lineHeight: 1.6 }}>{snap.changeSummary}</div>
+              </div>
+            )}
+
+            {/* Analysis summary */}
+            {snap.analysisSummary && (
+              <div>
+                <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
+                  {w("Analysis Summary", "Resumen del análisis", lang)}
+                </div>
+                <div style={{ color: "#374151", lineHeight: 1.6 }}>{snap.analysisSummary}</div>
+              </div>
+            )}
+
+            {/* Still unresolved */}
+            <div>
+              <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: snap.ambiguities.length > 0 ? 6 : 0, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: 6 }}>
+                <AlertTriangle style={{ width: 11, height: 11, color: snap.ambiguities.length > 0 ? "#D97706" : "#9CA3AF" }} />
+                {w("Still Unresolved", "Aún sin resolver", lang)}
+                <span style={{ fontWeight: 500, textTransform: "none", fontSize: 11, color: snap.ambiguities.length > 0 ? "#B45309" : "#9CA3AF", letterSpacing: 0 }}>
+                  ({snap.ambiguities.length})
+                </span>
+              </div>
+              {snap.ambiguities.length === 0
+                ? <span style={{ color: "#6B7280", fontStyle: "italic" }}>{w("No unresolved convention issues currently recorded", "No hay problemas de convención sin resolver actualmente", lang)}</span>
+                : <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 3 }}>
+                    {snap.ambiguities.map((item, i) => (
+                      <li key={i} style={{ color: "#374151", lineHeight: 1.5 }}>{item}</li>
+                    ))}
+                  </ul>
+              }
+            </div>
+
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Convention Status Panel ──────────────────────────────────────────────────
 interface ConventionStatus {
   activeVersion: number;
@@ -3137,7 +3381,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           if (s.flowPhase !== "setup_context") return s;
           return {
             ...hydrateFromDiscovery(s, syntheticDr),
-            flowPhase: "main_wizard",
+            flowPhase: "checkpoint",
             step: 0,
             userGuidance: latest.userGuidance || s.userGuidance,
           };
@@ -3235,6 +3479,25 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   }
 
   const { flowPhase } = ws;
+
+  // ── Checkpoint — re-entry for projects with an accepted convention ─────────
+  if (flowPhase === "checkpoint") {
+    return (
+      <CheckpointScreen
+        ws={ws}
+        projectId={projectId}
+        token={token ?? ""}
+        lang={lang}
+        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
+        onReEvidence={() => setWs(s => ({ ...s, importState: defaultImportState(), flowPhase: "re_evidence" }))}
+        onOpenHistory={() => {
+          loadHistory();
+          setShowHistory(true);
+          setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+        }}
+      />
+    );
+  }
 
   // ── Setup Context (front door) ────────────────────────────────────────────
   if (flowPhase === "setup_context") {

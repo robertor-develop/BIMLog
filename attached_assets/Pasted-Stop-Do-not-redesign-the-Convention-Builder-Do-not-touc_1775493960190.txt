@@ -1,0 +1,184 @@
+Stop. Do not redesign the Convention Builder. Do not touch prompts. Do not add unrelated features. We are fixing the next two coherence issues first, in order, without breaking anything.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+The two issues to fix first are these:
+
+Issue 1:
+When a project already has an accepted convention version, returning to /projects/:projectId/convention should not drop the user into Step 1 of the builder by default. The system already knows the active version, latest change summary, guidance, and unresolved items, but the user is still being thrown into the first builder step, which feels like a reset and causes confusion.
+
+Issue 2:
+The Convention Builder has no durable user-facing convention snapshot/report surface. The latest analysis and accepted state are still too ephemeral. The platform already has a Reports & PDF area, but the convention engine is not yet connected to a simple readable convention report/snapshot.
+
+We are fixing these two things first. Nothing else.
+
+Build this in exact order:
+
+STEP 1 — Fix convention re-entry target.
+
+When the user opens:
+/projects/:projectId/convention
+
+and the project already has at least one accepted convention version, do not default to the first builder step.
+
+Instead, the default landing state must be a current convention checkpoint view.
+
+This checkpoint view must clearly show:
+the Convention Status panel,
+the latest accepted version,
+the current guidance,
+the latest accepted change summary,
+the unresolved items,
+and clear actions for what the user can do next.
+
+Acceptable actions from that checkpoint are:
+Continue editing current convention
+View latest accepted convention snapshot
+Add More Evidence and Re-run Discovery
+Open Convention History
+
+Do not force the user into Step 1 unless they explicitly choose to continue editing the builder.
+
+If no accepted convention version exists yet, keep the current first-time flow as it is.
+
+STEP 2 — Add a clear internal re-entry mode.
+
+Add a real internal re-entry mode such as:
+checkpoint
+or equivalent
+
+Use it so the Convention Builder can distinguish between:
+first-time setup,
+main builder editing,
+changes review,
+and returning to an already accepted convention.
+
+The default logic should become:
+
+If no accepted version exists:
+start normal builder/discovery flow
+
+If accepted version exists:
+start at checkpoint mode
+
+If re-analysis is pending and that state is already persisted:
+resume the review state only if that pending review state is truly stored and recoverable
+otherwise go to checkpoint mode
+
+Do not guess state from in-memory values only.
+Use persisted project/version state.
+
+STEP 3 — Add a latest accepted convention snapshot view inside Convention Builder.
+
+In the checkpoint view, add a readable section:
+
+Latest Accepted Convention Snapshot
+
+This should show the latest accepted convention in a compact human-readable way, at minimum:
+prefix / sample convention string
+companies / originators
+disciplines
+levels
+document types
+status codes
+revision codes
+field summary
+active guidance
+last accepted changes
+still unresolved items
+
+Do not make this an edit screen.
+This is a snapshot/read view for orientation and trust.
+
+This is not a replacement for the builder.
+It is the default re-entry checkpoint.
+
+STEP 4 — Add a durable latest analysis / latest accepted report surface.
+
+Add a simple convention report/snapshot output accessible from the Convention Builder checkpoint first.
+If practical and low-risk, also expose it through Reports & PDF as a new card later in this same task only if it does not break anything.
+But the primary requirement is inside Convention Builder.
+
+Name this section clearly:
+Convention Snapshot
+or
+Latest Accepted Convention Snapshot
+
+The user must be able to come back later and still see the result of the accepted convention work in a stable readable form, not only through ephemeral review screens.
+
+Do not build a PDF generator yet unless there is already an easy existing export path.
+Priority is readable durable in-app access.
+
+STEP 5 — Keep the builder accessible but not forced.
+
+From the checkpoint screen, provide a clear button:
+Continue Editing Convention
+
+That action opens the builder steps using the currently accepted convention as the starting state.
+
+This is important:
+re-entry should not feel like reset.
+It should feel like:
+current accepted baseline → optionally continue editing
+
+STEP 6 — Keep Convention History exactly as it is.
+
+Do not remove Convention History.
+Do not remove Convention Status.
+Do not remove Changes Review.
+
+The new checkpoint is the user’s re-entry anchor.
+Convention History remains the audit trail.
+The builder remains the edit flow.
+Changes Review remains the accept/reject delta flow.
+
+STEP 7 — Do not touch AI behavior yet.
+
+Do not yet fix:
+AI updating old discipline descriptions
+AI guidance inside levels/document types/status steps
+replace/remove wording
+ghost projects in Total Control
+feature flags/settings architecture
+
+Those are real issues, but not in this task.
+We are doing this step by step so nothing breaks.
+
+STEP 8 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "checkpoint|Continue Editing Convention|Latest Accepted Convention Snapshot|Add More Evidence and Re-run Discovery|Open Convention History" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -200
+
+Check 2
+grep -Rni "accepted version exists|current accepted baseline|latest accepted version|Convention Status" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -200
+
+Check 3
+Using the live production app on a real project with Version 2 already saved, open:
+/projects/:projectId/convention
+
+Show:
+the exact first visible title/section
+whether Step 1 builder fields are shown immediately: yes/no
+whether the Convention Status panel is visible: yes/no
+whether the Latest Accepted Convention Snapshot is visible: yes/no
+
+Check 4
+From that same checkpoint screen, click:
+Continue Editing Convention
+
+Show:
+the exact next visible title/section
+whether the builder opens prefilled from the accepted convention: yes/no
+
+Check 5
+If you also exposed the snapshot in Reports & PDF, show exactly what card or entry was added.
+If not, say:
+Not added in this task.
+
+Show exact output only. Do not summarize.
