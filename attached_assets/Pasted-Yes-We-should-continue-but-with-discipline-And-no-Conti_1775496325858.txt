@@ -1,0 +1,149 @@
+Yes. We should continue, but with discipline.
+
+And no, “Continue Editing Convention” taking you back to Step 1 is not fully solved in the user sense, even if technically the builder is now prefilled. What was fixed was:
+
+it no longer resets to empty defaults
+it re-enters from accepted baseline
+it shows the checkpoint first
+
+But from your point of view, landing on Step 1 still feels like a reset. So that is still a real product problem.
+
+And yes, the Total Control 3-project issue is clearly a separate bug because:
+
+normal platform shows 1
+normal admin panel shows 1
+Total Control shows 3
+
+So that almost certainly means Total Control is reading a different query scope, likely including:
+
+soft-deleted projects
+incomplete test projects
+draft/unaccepted projects
+or unfiltered historical rows
+
+So we have two separate next issues:
+
+1. Total Control project count mismatch
+
+This is a data/query integrity issue.
+
+2. Continue Editing Convention still lands on Step 1
+
+This is now a re-entry target UX/state issue, not a data loss issue.
+
+The correct next move is to fix these two before moving on to AI guidance for levels, document types, and status codes.
+
+Tell Replit this exactly, nothing else:
+
+Stop. Do not add new features yet. We are fixing two coherence issues first.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+There are two separate issues:
+
+ISSUE 1 — Total Control shows 3 projects while the normal platform and normal admin views show only 1.
+This means Total Control is using the wrong project query scope or filter.
+
+ISSUE 2 — “Continue Editing Convention” still takes the user into Step 1 of the builder.
+Even though the builder is prefilled, this still feels like reset.
+The user should land in a better edit re-entry point, not generic Step 1.
+
+Fix these in this exact order.
+
+STEP 1 — Audit the Total Control project query.
+
+Find the exact backend route and frontend query used by Total Control to load the active projects grid and top metrics.
+
+Compare it against:
+normal dashboard project count
+normal admin panel project count
+
+We need exact truth:
+Which projects are being counted in Total Control that are not appearing in the normal platform?
+
+Check for inclusion of:
+soft-deleted projects
+draft projects
+projects without accepted convention
+projects without active status
+historical test records
+archived projects
+duplicate rows from joins
+
+Do not guess.
+Show the exact query path and the exact extra project ids being included.
+
+Then fix only the real filter issue so Total Control counts the same real active projects the platform should consider active.
+
+If Total Control is intentionally broader, then label it clearly in UI.
+But if not intentional, fix the query to match real active visible projects.
+
+STEP 2 — Fix “Continue Editing Convention” re-entry target.
+
+Right now the checkpoint exists, which is correct.
+But clicking “Continue Editing Convention” still takes the user into Step 1.
+
+That is technically acceptable for the system but still wrong for the user experience.
+
+We need a smarter re-entry target.
+
+New rule:
+If an accepted convention already exists, “Continue Editing Convention” should not land on generic Step 1 by default.
+
+Instead it should land on the most relevant edit re-entry screen for an accepted convention, which is:
+the Review / Summary step of the current accepted convention
+or a dedicated editable convention summary screen if that already exists cleanly
+
+The user should see the accepted convention in editable form first, not be forced to walk from Step 1 forward again.
+
+Builder step editing should still remain accessible from there through Edit buttons by section.
+
+So:
+checkpoint → continue editing → editable summary/review state
+not
+checkpoint → step 1 companies
+
+Do not redesign the builder.
+Do not remove step navigation.
+Just change the default re-entry target for accepted conventions.
+
+STEP 3 — Keep first-time flow unchanged.
+
+For projects with no accepted convention:
+keep the current first-time builder/discovery flow exactly as it is.
+
+This change applies only to projects that already have an accepted version.
+
+STEP 4 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "Total Control|active projects grid|projects count|sort projects" artifacts/bimlog/src artifacts/api-server/src | head -200
+
+Check 2
+Using the live production database, show:
+project ids and names returned by Total Control
+project ids and names returned by normal dashboard
+project ids and names returned by normal admin panel
+
+Check 3
+Explain with exact output which extra project ids are appearing only in Total Control and why.
+
+Check 4
+grep -Rni "Continue Editing Convention|flowPhase|checkpoint|review|summary" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -200
+
+Check 5
+Using a real project with Version 2 already saved, click:
+Continue Editing Convention
+
+Show:
+the exact first visible title/section after click
+whether it lands on Step 1 companies: yes/no
+whether it lands on editable accepted summary/review state: yes/no
+
+Show exact output only. Do not summarize.

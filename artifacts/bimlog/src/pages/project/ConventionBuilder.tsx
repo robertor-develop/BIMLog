@@ -3488,7 +3488,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         projectId={projectId}
         token={token ?? ""}
         lang={lang}
-        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
+        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 4 }))}
         onReEvidence={() => setWs(s => ({ ...s, importState: defaultImportState(), flowPhase: "re_evidence" }))}
         onOpenHistory={() => {
           loadHistory();

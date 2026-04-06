@@ -63,8 +63,8 @@ function HealthBar({ stats, onExpand }: { stats: PlatformStats; onExpand: (tab: 
   const items = [
     { key: "totalUsers",     label: "Users",          value: stats.totalUsers,     tab: "users",    color: "#2563EB", icon: <User size={16} /> },
     { key: "totalCompanies", label: "Companies",      value: stats.totalCompanies, tab: "companies",color: "#7C3AED", icon: <Building2 size={16} /> },
-    { key: "totalProjects",  label: "Projects",       value: stats.totalProjects,  tab: "projects", color: "#0891B2", icon: <Folder size={16} /> },
-    { key: "activeProjects", label: "Active",         value: stats.activeProjects, tab: "projects", color: "#16A34A", icon: <Circle size={16} fill="#16A34A" /> },
+    { key: "totalProjects",  label: "All Projects",   value: stats.totalProjects,  tab: "projects", color: "#0891B2", icon: <Folder size={16} /> },
+    { key: "activeProjects", label: "Active Projects",value: stats.activeProjects, tab: "projects", color: "#16A34A", icon: <Circle size={16} fill="#16A34A" /> },
     { key: "totalFiles",     label: "Files",          value: stats.totalFiles,     tab: "projects", color: "#D97706", icon: <FileText size={16} /> },
     { key: "filesLast24h",   label: "Files 24h",      value: stats.filesLast24h,   tab: "projects", color: "#EA580C", icon: <Zap size={16} /> },
     { key: "totalRfis",      label: "RFIs",           value: stats.totalRfis,      tab: "projects", color: "#DC2626", icon: <MessageSquare size={16} /> },
@@ -73,26 +73,38 @@ function HealthBar({ stats, onExpand }: { stats: PlatformStats; onExpand: (tab: 
   ];
 
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 28 }}>
-      {items.map(i => (
-        <button
-          key={i.key}
-          onClick={() => onExpand(i.tab)}
-          style={{
-            flex: "1 0 120px", minWidth: 110, padding: "14px 16px",
-            border: "1.5px solid #E5E7EB", borderRadius: 12,
-            background: "white", cursor: "pointer", textAlign: "left",
-            transition: "border-color 0.15s, box-shadow 0.15s",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = i.color; e.currentTarget.style.boxShadow = `0 0 0 3px ${i.color}18`; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"; }}
-        >
-          <div style={{ fontSize: 18, marginBottom: 6 }}>{i.icon}</div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: i.color, lineHeight: 1 }}>{i.value.toLocaleString()}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF", marginTop: 4 }}>{i.label}</div>
-        </button>
-      ))}
+    <div style={{ marginBottom: 28 }}>
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        marginBottom: 10, padding: "3px 10px",
+        background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6,
+      }}>
+        <MapPin size={11} color="#2563EB" />
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Platform-wide totals — all projects across all users
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {items.map(i => (
+          <button
+            key={i.key}
+            onClick={() => onExpand(i.tab)}
+            style={{
+              flex: "1 0 120px", minWidth: 110, padding: "14px 16px",
+              border: "1.5px solid #E5E7EB", borderRadius: 12,
+              background: "white", cursor: "pointer", textAlign: "left",
+              transition: "border-color 0.15s, box-shadow 0.15s",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = i.color; e.currentTarget.style.boxShadow = `0 0 0 3px ${i.color}18`; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)"; }}
+          >
+            <div style={{ fontSize: 18, marginBottom: 6 }}>{i.icon}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: i.color, lineHeight: 1 }}>{i.value.toLocaleString()}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF", marginTop: 4 }}>{i.label}</div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
