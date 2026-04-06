@@ -11,7 +11,7 @@ import {
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
   Download, RotateCcw, AlertTriangle, CheckCircle2, X,
   ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
-  Clock, GitMerge,
+  Clock, GitMerge, Brain,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -1852,6 +1852,302 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
   );
 }
 
+// ─── Builder Guidance Panel ───────────────────────────────────────────────────
+interface GuidanceItem { code: string; label: string; reason?: string; }
+
+function BuilderGuidancePanel({
+  confidence, summary, reasoning, recommended, possible, extraNotes, onApply, lang,
+}: {
+  confidence: "high" | "medium" | "low";
+  summary: string;
+  reasoning: string;
+  recommended: GuidanceItem[];
+  possible?: GuidanceItem[];
+  extraNotes?: string[];
+  onApply?: () => void;
+  lang: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const CONF_STYLE: Record<string, { bg: string; color: string; border: string; label: string }> = {
+    high:   { bg: "#F0FDF4", color: "#166534", border: "#BBF7D0", label: w("High confidence",   "Alta confianza",   lang) },
+    medium: { bg: "#FFFBEB", color: "#92400E", border: "#FDE68A", label: w("Medium confidence", "Confianza media",  lang) },
+    low:    { bg: "#FEF2F2", color: "#991B1B", border: "#FECACA", label: w("Low confidence",    "Baja confianza",   lang) },
+  };
+  const cs = CONF_STYLE[confidence];
+
+  return (
+    <div style={{
+      marginBottom: 16, padding: "14px 16px", borderRadius: 9,
+      background: "#F8FAFC", border: "1.5px solid #E2E8F0",
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Brain style={{ width: 14, height: 14, color: "#475569", flexShrink: 0 }} />
+          <span style={{ fontSize: 12, fontWeight: 800, color: "#0F172A", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            {w("BIMLog Guidance", "Guía BIMLog", lang)}
+          </span>
+        </div>
+        <span style={{
+          fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
+          background: cs.bg, color: cs.color, border: `1px solid ${cs.border}`,
+        }}>{cs.label}</span>
+      </div>
+
+      {/* Summary line */}
+      {summary && (
+        <div style={{ fontSize: 12, color: "#334155", marginBottom: 10, lineHeight: 1.55 }}>{summary}</div>
+      )}
+
+      {/* Recommended items */}
+      {recommended.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#475569", marginBottom: 5 }}>
+            {w("Recommended now", "Recomendados ahora", lang)}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {recommended.map(r => (
+              <span key={r.code} style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 5,
+                background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE",
+              }}>
+                <span style={{ fontFamily: "var(--font-mono)" }}>{r.code}</span>
+                {r.label !== r.code && <span style={{ fontWeight: 400, color: "#3B82F6" }}>— {r.label}</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Possible / uncertain items */}
+      {(possible ?? []).length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#94A3B8", marginBottom: 5 }}>
+            {w("Uncertain / possible", "Incierto / posible", lang)}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {(possible ?? []).map(p => (
+              <span key={p.code} style={{
+                fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 5,
+                background: "#F8FAFC", color: "#64748B", border: "1px solid #E2E8F0",
+              }}>
+                <span style={{ fontFamily: "var(--font-mono)" }}>{p.code}</span>
+                {p.label !== p.code && <> — {p.label}</>}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Extra notes */}
+      {(extraNotes ?? []).length > 0 && (
+        <div style={{ marginBottom: 8, display: "flex", flexDirection: "column", gap: 3 }}>
+          {(extraNotes ?? []).map((note, i) => (
+            <div key={i} style={{ fontSize: 11, color: "#475569", lineHeight: 1.4, display: "flex", gap: 6, alignItems: "flex-start" }}>
+              <span style={{ marginTop: 1, flexShrink: 0, color: "#94A3B8" }}>—</span>
+              <span>{note}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Actions row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+        {onApply && recommended.length > 0 && (
+          <button
+            onClick={onApply}
+            style={{
+              fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 5, cursor: "pointer",
+              background: "#1D4ED8", color: "white", border: "none",
+              display: "flex", alignItems: "center", gap: 5,
+            }}
+          >
+            <Check style={{ width: 11, height: 11 }} />
+            {w("Apply recommended selections", "Aplicar selecciones recomendadas", lang)}
+          </button>
+        )}
+        {reasoning && (
+          <button
+            onClick={() => setExpanded(e => !e)}
+            style={{
+              fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 5, cursor: "pointer",
+              background: "transparent", color: "#475569", border: "1px solid #E2E8F0",
+              display: "flex", alignItems: "center", gap: 5,
+            }}
+          >
+            <Info style={{ width: 11, height: 11 }} />
+            {expanded ? w("Hide reasoning", "Ocultar razonamiento", lang) : w("Why BIMLog recommends this", "Por qué BIMLog recomienda esto", lang)}
+          </button>
+        )}
+      </div>
+
+      {/* Expandable reasoning */}
+      {expanded && reasoning && (
+        <div style={{
+          marginTop: 10, padding: "10px 12px",
+          background: "#F1F5F9", border: "1px solid #E2E8F0", borderRadius: 6,
+          fontSize: 11, color: "#334155", lineHeight: 1.6,
+        }}>
+          {reasoning}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── guidance derivation ──────────────────────────────────────────────────────
+function deriveDisciplinesGuidance(state: WizardState, lang: string): {
+  recommended: GuidanceItem[]; possible: GuidanceItem[];
+  confidence: "high" | "medium" | "low";
+  summary: string; reasoning: string; extraNotes: string[];
+  onApply: ((setState: React.Dispatch<React.SetStateAction<WizardState>>) => void) | null;
+} | null {
+  const dr = state.discoveryResult;
+  const rr = state.reanalysisResult;
+  if (!dr && !rr) return null;
+
+  let recommended: GuidanceItem[] = [];
+  let possible: GuidanceItem[] = [];
+  let confidence: "high" | "medium" | "low" = "medium";
+  let summary = "";
+  let reasoning = "";
+  const extraNotes: string[] = [];
+
+  if (rr) {
+    recommended = rr.confirmedItems.disciplines.map(code => {
+      const disc = dr?.suggestedDisciplines.find(d => (d.code || d.key) === code);
+      return { code, label: disc?.label || code };
+    });
+    rr.newlySuggestedItems.disciplines.forEach(d => {
+      if (!recommended.some(r => r.code === d.code))
+        possible.push({ code: d.code, label: d.label, reason: d.reason });
+    });
+    confidence = recommended.length > 0 ? "high" : "medium";
+    summary = rr.analysisSummary || "";
+    reasoning = w(
+      `Derived from Version ${rr.baselineVersion} accepted convention cross-referenced with latest evidence analysis.`,
+      `Derivado de la convención aceptada Versión ${rr.baselineVersion} cruzada con el último análisis de evidencia.`,
+      lang
+    );
+    if (rr.stillUnresolved.length > 0)
+      extraNotes.push(w("Still unresolved:", "Aún sin resolver:", lang) + " " + rr.stillUnresolved.slice(0, 2).join("; "));
+  } else if (dr) {
+    const high = dr.suggestedDisciplines.filter(d => d.confidence === "high");
+    const med  = dr.suggestedDisciplines.filter(d => d.confidence === "medium");
+    const low  = dr.suggestedDisciplines.filter(d => d.confidence === "low");
+    recommended = [...high, ...med].map(d => ({ code: d.code || d.key || "", label: d.label }));
+    possible    = low.map(d => ({ code: d.code || d.key || "", label: d.label, reason: d.reason }));
+    confidence  = high.length > 0 ? "high" : med.length > 0 ? "medium" : "low";
+    summary     = dr.analysisSummary || "";
+    reasoning   = dr.scopeInterpretation || dr.analysisSummary || "";
+    if (dr.ambiguities.length > 0)
+      extraNotes.push(w("Ambiguities noted:", "Ambigüedades detectadas:", lang) + " " + dr.ambiguities.slice(0, 2).join("; "));
+  }
+
+  if (dr?.usesLevels === true)
+    extraNotes.push(w("Levels appear relevant — evidence supports floor / storey-based structure.", "Los niveles parecen relevantes — la evidencia apunta a una estructura por pisos.", lang));
+  else if (dr?.usesLevels === false)
+    extraNotes.push(w("Levels likely not central — evidence points more to area or package-based structure.", "Los niveles probablemente no son centrales — la evidencia apunta más a zonas o paquetes.", lang));
+  else if (dr)
+    extraNotes.push(w("Level relevance is uncertain — review the level list manually.", "La relevancia de niveles es incierta — revisa la lista de niveles manualmente.", lang));
+
+  if (recommended.length === 0 && possible.length === 0) return null;
+
+  return {
+    recommended, possible, confidence, summary, reasoning, extraNotes,
+    onApply: recommended.length > 0 ? (setState) => {
+      setState(s => ({
+        ...s,
+        disciplines: s.disciplines.map(d =>
+          recommended.some(r => r.code === d.code) ? { ...d, selected: true } : d
+        ),
+      }));
+    } : null,
+  };
+}
+
+function deriveDocTypesGuidance(state: WizardState, lang: string): {
+  recommended: GuidanceItem[]; possible: GuidanceItem[];
+  confidence: "high" | "medium" | "low";
+  summary: string; reasoning: string; extraNotes: string[];
+  onApply: ((setState: React.Dispatch<React.SetStateAction<WizardState>>) => void) | null;
+} | null {
+  const dr = state.discoveryResult;
+  const rr = state.reanalysisResult;
+  if (!dr && !rr) return null;
+
+  let recommended: GuidanceItem[] = [];
+  let possible: GuidanceItem[] = [];
+  let confidence: "high" | "medium" | "low" = "medium";
+  let summary = "";
+  let reasoning = "";
+  const extraNotes: string[] = [];
+
+  if (rr) {
+    recommended = rr.confirmedItems.documentTypes.map(code => {
+      const dt = dr?.suggestedDocTypes.find(d => (d.code || d.key) === code);
+      return { code, label: dt?.label || code };
+    });
+    rr.newlySuggestedItems.documentTypes.forEach(d => {
+      if (!recommended.some(r => r.code === d.code))
+        possible.push({ code: d.code, label: d.label, reason: d.reason });
+    });
+    confidence = recommended.length > 0 ? "high" : "medium";
+    summary    = rr.analysisSummary || "";
+    reasoning  = w(
+      `Derived from Version ${rr.baselineVersion} accepted convention cross-referenced with latest evidence analysis.`,
+      `Derivado de la convención aceptada Versión ${rr.baselineVersion} cruzada con el último análisis de evidencia.`,
+      lang
+    );
+    if (rr.stillUnresolved.length > 0)
+      extraNotes.push(w("Still unresolved:", "Aún sin resolver:", lang) + " " + rr.stillUnresolved.slice(0, 2).join("; "));
+  } else if (dr) {
+    const high = dr.suggestedDocTypes.filter(d => d.confidence === "high");
+    const med  = dr.suggestedDocTypes.filter(d => d.confidence === "medium");
+    const low  = dr.suggestedDocTypes.filter(d => d.confidence === "low");
+    recommended = [...high, ...med].map(d => ({ code: d.code || d.key || "", label: d.label }));
+    possible    = low.map(d => ({ code: d.code || d.key || "", label: d.label, reason: d.reason }));
+    confidence  = high.length > 0 ? "high" : med.length > 0 ? "medium" : "low";
+    summary     = dr.analysisSummary || "";
+    reasoning   = dr.scopeInterpretation || dr.analysisSummary || "";
+    if (dr.ambiguities.length > 0)
+      extraNotes.push(w("Ambiguities noted:", "Ambigüedades detectadas:", lang) + " " + dr.ambiguities.slice(0, 2).join("; "));
+  }
+
+  extraNotes.push(
+    w(`Sequence: ${state.seqDigits}-digit fixed-width numeric format currently configured.`,
+      `Secuencia: formato numérico de ${state.seqDigits} dígitos configurado actualmente.`, lang)
+  );
+
+  const selectedStatusCount = state.statusCodes.filter(sc => sc.selected).length;
+  if (selectedStatusCount > 0) {
+    extraNotes.push(rr
+      ? w(`Status codes: ${selectedStatusCount} currently selected — confirmed against convention history.`,
+          `Códigos de estado: ${selectedStatusCount} seleccionados — confirmados en el historial de convención.`, lang)
+      : w(`Status codes: ${selectedStatusCount} currently selected — confirm these match your project workflow.`,
+          `Códigos de estado: ${selectedStatusCount} seleccionados — confirma que corresponden a tu flujo de trabajo.`, lang)
+    );
+  } else {
+    extraNotes.push(w("Status codes: none selected — review and select the codes your project uses.", "Códigos de estado: ninguno seleccionado — revisa y selecciona los códigos de tu proyecto.", lang));
+  }
+
+  if (recommended.length === 0 && possible.length === 0) return null;
+
+  return {
+    recommended, possible, confidence, summary, reasoning, extraNotes,
+    onApply: recommended.length > 0 ? (setState) => {
+      setState(s => ({
+        ...s,
+        docTypes: s.docTypes.map(d =>
+          recommended.some(r => r.code === d.code) ? { ...d, selected: true } : d
+        ),
+      }));
+    } : null,
+  };
+}
+
 // ─── step 2 ───────────────────────────────────────────────────────────────────
 function Step2({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
   const [customDName, setCustomDName] = useState("");
@@ -1919,9 +2215,24 @@ function Step2({ state, setState, lang }: { state: WizardState; setState: React.
     setState(s => ({ ...s, levelList: s.levelList.map(l => l.id === id ? { ...l, code: code.toUpperCase().slice(0, 10) } : l) }));
   };
 
+  const discGuidance = deriveDisciplinesGuidance(state, lang);
+
   return (
     <div>
       <SectionTitle title={w("What disciplines and floors does this project have?", "¿Qué disciplinas y pisos tiene este proyecto?", lang)} />
+
+      {discGuidance && (
+        <BuilderGuidancePanel
+          confidence={discGuidance.confidence}
+          summary={discGuidance.summary}
+          reasoning={discGuidance.reasoning}
+          recommended={discGuidance.recommended}
+          possible={discGuidance.possible}
+          extraNotes={discGuidance.extraNotes}
+          onApply={discGuidance.onApply ? () => discGuidance.onApply!(setState) : undefined}
+          lang={lang}
+        />
+      )}
 
       {/* Disciplines */}
       <Card style={{ marginBottom: 16 }}>
@@ -2183,9 +2494,24 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
     </div>
   );
 
+  const docGuidance = deriveDocTypesGuidance(state, lang);
+
   return (
     <div>
       <SectionTitle title={w("What types of documents will be submitted?", "¿Qué tipos de documentos se enviarán?", lang)} sub={w("How will files be numbered and what status codes will be used?", "¿Cómo se numerarán y qué códigos de estado se usarán?", lang)} />
+
+      {docGuidance && (
+        <BuilderGuidancePanel
+          confidence={docGuidance.confidence}
+          summary={docGuidance.summary}
+          reasoning={docGuidance.reasoning}
+          recommended={docGuidance.recommended}
+          possible={docGuidance.possible}
+          extraNotes={docGuidance.extraNotes}
+          onApply={docGuidance.onApply ? () => docGuidance.onApply!(setState) : undefined}
+          lang={lang}
+        />
+      )}
 
       {/* Doc Types */}
       <Card style={{ marginBottom: 16 }}>

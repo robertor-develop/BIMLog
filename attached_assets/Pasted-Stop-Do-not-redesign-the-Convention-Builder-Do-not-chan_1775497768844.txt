@@ -1,0 +1,255 @@
+Stop. Do not redesign the Convention Builder. Do not change prompts outside this task. Do not add popups everywhere. Do not add unrelated features. We are adding the next missing layer only: structured AI guidance in the decision-heavy builder steps.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+What is already working must remain untouched:
+checkpoint re-entry
+Convention Status
+latest accepted snapshot
+versioning
+re-analysis
+changes review
+continue editing to Review screen
+guidance persistence
+
+The problem now is this:
+in decision-heavy builder steps, the user is still being asked to choose from many options without enough intelligent guidance.
+This is most obvious in:
+levels
+document types
+status codes
+and similar structured selection steps
+
+We are not adding fluff.
+We are adding a real co-pilot layer inside the builder:
+what BIMLog recommends,
+why,
+and with what confidence.
+
+Build this in exact order:
+
+STEP 1 — Add a builder guidance panel component.
+
+Create a reusable panel inside ConventionBuilder for step-level AI guidance.
+
+Title:
+BIMLog Guidance
+
+This panel must support:
+Recommended items
+Why they are recommended
+Confidence
+A short note when the recommendation is weak or uncertain
+
+Keep it compact and serious.
+No chat UI.
+No long essays.
+No decorative elements.
+
+STEP 2 — Start with these builder steps only.
+
+Add the guidance panel only to:
+Disciplines & Levels step
+Doc Types / Sequence / Status step
+
+Do not add it yet to:
+company / separator
+advanced settings
+review
+checkpoint
+changes review
+
+We are doing this in a controlled way.
+
+STEP 3 — Guidance source must be real, not invented.
+
+Use already available real sources only:
+latest accepted convention snapshot if one exists
+latest discoveryResult if in memory
+latest reanalysis result if in memory and relevant
+current project guidance
+latest accepted change summary
+latest ambiguities / unresolved items
+
+Do not fabricate recommendations from empty state.
+If evidence is weak, say so clearly.
+
+STEP 4 — Disciplines & Levels guidance behavior.
+
+In the Disciplines & Levels step, the guidance panel should show things like:
+
+Recommended disciplines to include now
+Possible disciplines that remain uncertain
+Level structure recommendation
+Whether levels appear relevant or not
+Why BIMLog thinks so based on current evidence
+
+Examples of acceptable guidance language:
+Recommended now: ARC, STR, MEP
+Confidence: high
+Why: repeatedly present in accepted file naming and latest evidence
+
+Levels likely not central to this convention
+Confidence: medium
+Why: current evidence points more strongly to area / package / plant-unit structure than building floors
+
+Or if evidence supports levels:
+Levels appear relevant
+Confidence: high
+Why: repeated L01 / L02 / Roof / Basement style references found in accepted convention and evidence
+
+The important part:
+the user should not be blind anymore when deciding whether “10 levels” makes sense or not.
+
+STEP 5 — Doc Types / Sequence / Status guidance behavior.
+
+In the Doc Types / Sequence / Status step, the guidance panel should show things like:
+
+Recommended document types to keep
+Document types newly supported by evidence
+Possible duplicates or overlaps
+Whether sequence appears to be fixed-width numeric
+Whether status codes appear standard or project-specific
+Why BIMLog thinks so
+
+Examples:
+Recommended document types now: DRW, SCH, REP
+Confidence: medium
+Why: confirmed in accepted convention plus recent evidence
+
+Sequence likely fixed-width numeric
+Confidence: high
+Why: accepted naming pattern repeatedly uses 4-digit sequence structure
+
+Status codes appear project-specific rather than generic
+Confidence: low
+Why: evidence is limited and current accepted status set may still need manual confirmation
+
+STEP 6 — Show confidence explicitly.
+
+Each recommendation block must show one of:
+High confidence
+Medium confidence
+Low confidence
+
+Do not invent numeric scoring.
+Use only these three levels.
+
+STEP 7 — Add one “Apply recommended set” action per guided step.
+
+In each of the two guided steps, add one button:
+
+Apply recommended selections
+
+Rules:
+This applies only the currently recommended items for that step.
+It must not silently remove everything else.
+It should merge sensible recommended selections into the current step state.
+For uncertain items, do not auto-apply them unless they are explicitly in the recommended set.
+
+This is assistance, not forced override.
+
+STEP 8 — Add one “Why BIMLog recommends this” expandable text area.
+
+Inside each guidance panel, include a compact expandable section:
+Why BIMLog recommends this
+
+Collapsed by default.
+When opened, it shows the evidence-based explanation text for that step.
+
+This avoids clutter while still giving the user real reasoning.
+
+STEP 9 — Do not call the AI live on every click.
+
+Do not trigger a fresh model call every time the user enters a step.
+That would be unstable and expensive.
+
+Instead:
+derive the step guidance from the latest already-available convention intelligence:
+accepted version
+discovery result
+reanalysis result
+guidance
+ambiguities
+
+Only add a new backend call if absolutely necessary and only if current data cannot support the panel.
+Prefer local derivation first.
+
+STEP 10 — If a lightweight backend helper is needed, keep it narrow.
+
+Only if truly needed, add a small endpoint like:
+GET /api/v1/projects/:projectId/convention/builder-guidance
+
+It must return step-scoped recommendations derived from existing stored data.
+Do not trigger a new Claude analysis from this endpoint.
+This is a summarization/selection layer, not a new intelligence pass.
+
+Suggested shape only if needed:
+{
+"disciplinesLevels": {
+"recommended": [],
+"possible": [],
+"confidence": "high|medium|low",
+"summary": "",
+"reasoning": ""
+},
+"docTypesSequenceStatus": {
+"recommendedDocTypes": [],
+"recommendedStatusCodes": [],
+"sequenceRecommendation": "",
+"confidence": "high|medium|low",
+"summary": "",
+"reasoning": ""
+}
+}
+
+Again: only if needed.
+Prefer using current loaded data already in ConventionBuilder.
+
+STEP 11 — Do not yet solve other known issues in this task.
+
+Do not touch:
+AI enriching old discipline descriptions
+replace/remove wording in changes review
+ghost/test projects
+soft delete
+feature flags vs settings architecture
+reports integration
+PDF export
+RFI/Submittal modules
+
+Those are separate tasks.
+
+STEP 12 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "BIMLog Guidance|Apply recommended selections|Why BIMLog recommends this|High confidence|Medium confidence|Low confidence" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -200
+
+Check 2
+grep -Rni "disciplinesLevels|docTypesSequenceStatus|builder-guidance|recommendedDocTypes|recommendedStatusCodes|sequenceRecommendation" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -200
+
+Check 3
+Using the live production app on a real project with accepted convention data, open the Disciplines & Levels step and show:
+whether BIMLog Guidance is visible: yes/no
+the confidence shown
+the recommended items shown
+whether “Apply recommended selections” is visible: yes/no
+
+Check 4
+Using the same project, open the Doc Types / Sequence / Status step and show:
+whether BIMLog Guidance is visible: yes/no
+the confidence shown
+the recommendation summary shown
+whether “Apply recommended selections” is visible: yes/no
+
+Check 5
+Confirm whether entering and leaving those steps causes any unwanted reset of builder state:
+yes/no
+
+Show exact output only. Do not summarize.
