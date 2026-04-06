@@ -740,7 +740,16 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
       let parsed: Record<string, unknown>;
       try {
-        parsed = JSON.parse(block.text.trim()) as Record<string, unknown>;
+        let raw = block.text.trim();
+        if (raw.startsWith("```")) {
+          raw = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
+        }
+        const firstBrace = raw.indexOf("{");
+        const lastBrace = raw.lastIndexOf("}");
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          raw = raw.slice(firstBrace, lastBrace + 1);
+        }
+        parsed = JSON.parse(raw) as Record<string, unknown>;
       } catch {
         res.status(422).json({
           error: "AI returned non-JSON response",

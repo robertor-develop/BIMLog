@@ -2975,12 +2975,15 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           recommendedMode: "",
           analysisSummary: latest.analysisSummary || "",
         };
-        setWs(s => ({
-          ...hydrateFromDiscovery(s, syntheticDr),
-          flowPhase: "main_wizard",
-          step: 0,
-          userGuidance: latest.userGuidance || s.userGuidance,
-        }));
+        setWs(s => {
+          if (s.flowPhase !== "setup_context") return s;
+          return {
+            ...hydrateFromDiscovery(s, syntheticDr),
+            flowPhase: "main_wizard",
+            step: 0,
+            userGuidance: latest.userGuidance || s.userGuidance,
+          };
+        });
       })
       .catch(() => {});
   }, []);

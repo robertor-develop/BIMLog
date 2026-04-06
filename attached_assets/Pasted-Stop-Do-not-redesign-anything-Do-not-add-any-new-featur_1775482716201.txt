@@ -1,0 +1,134 @@
+Stop. Do not redesign anything. Do not add any new features. Fix only the two confirmed defects in the convention re-analysis loop.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+There are two confirmed defects:
+
+Defect A — Intermittent reanalysis failure
+The backend reanalyze route sometimes receives valid JSON wrapped in markdown fences from Claude, causing JSON.parse to fail and the frontend to show:
+AI returned non-JSON response
+
+Defect B — Silent flow corruption
+The frontend auto-load hydration effect can asynchronously override the user’s active flow and force main_wizard even when the user is already in import_structure, ai_suggestions, or re_evidence.
+
+Fix only these two things.
+
+STEP 1 — Fix backend JSON parsing in:
+artifacts/api-server/src/routes/conventions.ts
+
+In the reanalyze route, before JSON.parse, sanitize the AI response.
+
+Current behavior is effectively:
+JSON.parse(block.text.trim())
+
+Replace it with safe parsing logic like this:
+
+let raw = block.text.trim();
+
+if (raw.startsWith("")) { raw = raw.replace(/^json\s*/i, "").replace(/^\s*/i, "").replace(/$/i, "").trim();
+}
+
+const firstBrace = raw.indexOf("{");
+const lastBrace = raw.lastIndexOf("}");
+if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+raw = raw.slice(firstBrace, lastBrace + 1);
+}
+
+const parsed = JSON.parse(raw);
+
+Do not change the fallback 422 behavior if parsing still truly fails.
+Do not change prompts.
+Do not change response shape.
+
+STEP 2 — Fix the frontend hydration race condition in:
+artifacts/bimlog/src/pages/project/ConventionBuilder.tsx
+
+There is an async auto-load effect that currently does this without guarding the current phase:
+
+setWs(s => ({
+...hydrateFromDiscovery(s, syntheticDr),
+flowPhase: "main_wizard",
+step: 0,
+}));
+
+That is wrong.
+
+Replace it with a guarded update:
+
+setWs(s => {
+if (s.flowPhase !== "setup_context") return s;
+
+return {
+...hydrateFromDiscovery(s, syntheticDr),
+flowPhase: "main_wizard",
+step: 0,
+};
+});
+
+The rule is:
+auto-hydration may only take control when the user is still in setup_context.
+It must never override:
+import_structure
+ai_suggestions
+re_evidence
+changes_review
+main_wizard
+or any other active user path
+
+STEP 3 — Do not change anything else.
+
+Do not modify:
+builder layout
+guidance system
+versioning
+history
+delta review
+prompts
+AI logic
+routing
+UI wording
+
+This is a defect fix only.
+
+STEP 4 — Run these checks and show exact output only:
+
+Check 1
+grep -n "JSON.parse(block.text.trim())|firstBrace|lastBrace|startsWith("```")" artifacts/api-server/src/routes/conventions.ts | head -50
+
+Check 2
+grep -n "flowPhase !== "setup_context"|hydrateFromDiscovery
+𝑠
+,
+𝑠
+𝑦
+𝑛
+𝑡
+ℎ
+𝑒
+𝑡
+𝑖
+𝑐
+𝐷
+𝑟
+s,syntheticDr|flowPhase: "main_wizard"" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -80
+
+Check 3
+Using the live production app, run the exact second-pass flow again and show:
+exact network request URL for reanalysis
+exact response status code
+exact response body text
+exact first visible next-screen title
+
+Check 4
+Confirm whether the second-pass error is gone:
+yes/no
+
+Check 5
+Confirm whether the user flow is still being silently reset after the fix:
+yes/no
+
+Show exact output only. Do not summarize.
