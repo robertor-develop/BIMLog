@@ -1,0 +1,170 @@
+Stop. Do not redesign the Convention Builder. Do not change prompts. Do not add features. Fix only the broken state connections and flow coherence.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+This is the actual problem:
+The AI discovery flow works.
+The builder exists.
+Versioning exists.
+But after “Accept and continue to builder”, the system does not behave like one connected flow.
+
+Current symptoms:
+
+it appears to jump back into earlier builder steps in a confusing way
+it does not clearly carry the AI-proposed structure into the builder
+the user loses confidence because it looks like the AI work was ignored
+the final convention can duplicate the same prefix twice, for example BIMCP-BIMCP
+
+We are fixing only these three things:
+
+Hydrate the builder from the accepted AI discovery result
+Lock the routing/step transition so discovery does not feel like it resets the process
+Prevent duplicate prefix generation when the same code appears twice
+
+Build this in exact order:
+
+STEP 1 — Hydrate builder state from AI discovery result.
+
+When the user clicks:
+Accept and continue to builder
+
+the Convention Builder must not open with default generic/manual state.
+It must open preloaded from the accepted AI discovery result.
+
+That means the accepted discovery result must map into the builder state before the main wizard steps render.
+
+At minimum, hydrate these builder areas from the accepted discovery result if data exists:
+companies / abbreviations if derived or already set
+disciplines
+systems
+document types
+extra fields
+field order
+convention guidance
+ambiguities / notes if relevant
+any other builder state already supported that should obviously come from the accepted AI result
+
+Important:
+Do not leave the builder looking generic or reset after AI acceptance.
+The user must feel that the AI proposal became the starting point of the manual builder.
+
+STEP 2 — Persist the accepted discovery result as the active draft state before entering the main wizard.
+
+Do not rely only on transient React state if that is causing the confusion.
+If needed, persist an accepted discovery draft to the backend for that project before routing into the builder.
+
+If you need a field or a draft object, do it cleanly.
+But do not build a new subsystem.
+Use the minimum persistence needed so that:
+refreshing the page
+navigating back
+or reopening the builder
+still shows the AI-derived starting point instead of a generic reset
+
+If the existing naming_conventions row is the right place to store this pre-builder working state, use it.
+If not, add the minimum clean support needed.
+
+STEP 3 — Lock the flow transition.
+
+After the user completes:
+Project Convention Setup
+then Import Existing Structure / discovery
+then Suggested Convention Structure
+then clicks Accept and continue to builder
+
+the next screen must be the builder already hydrated from that accepted discovery result.
+
+It must not feel like:
+the system restarted
+the user went backward
+the user is seeing unrelated defaults
+the AI work was discarded
+
+Do not send the user back through setup_context or generic company/disciplines defaults in a confusing way.
+
+The flow must feel continuous:
+Setup
+Discovery
+Review AI result
+Builder preloaded from accepted result
+Review / save
+
+If the builder still needs to show step 1 company/separator first, that is acceptable only if the values are already intelligently prefilled from the accepted result and clearly part of the same flow.
+It must not look blank or generic.
+
+STEP 4 — Add a source-of-truth flag for this transition.
+
+Add a small explicit internal state flag for example:
+enteredFromDiscovery = true
+or equivalent
+
+Use it so the builder knows:
+this project is entering the main wizard from an accepted AI convention proposal
+
+This flag must prevent the builder from initializing from generic defaults when it should initialize from accepted discovery output.
+
+STEP 5 — Make the AI-to-builder handoff visible.
+
+At the top of the first builder step after AI acceptance, show a small, clear info banner:
+
+Convention preloaded from accepted AI proposal.
+You can now refine the structure before saving.
+
+Do not overdesign it.
+Do not add a big new screen.
+Just make it clear to the user that the builder is continuing from the AI result, not starting over.
+
+STEP 6 — Fix duplicate prefix generation.
+
+The final convention preview must not repeat the same acronym twice when the same code appears in multiple places.
+Example:
+BIMCP-BIMCP-...
+
+Add normalization logic so duplicate adjacent or duplicate repeated prefix tokens are not rendered twice.
+
+At minimum:
+if two consecutive convention tokens resolve to the same exact string, render it once
+
+If better, use a clean unique-token normalization only for the company/project prefix region where duplication is clearly unintended.
+Do not break legitimate repeated codes in other parts of the naming structure.
+
+STEP 7 — Keep versioning and guidance intact.
+
+Do not break:
+Version 1 / Version 2 snapshots
+Convention History
+Project Convention Guidance
+re-analysis
+guidance persistence
+delta review
+
+This is a flow-connection fix only.
+
+STEP 8 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+grep -Rni "Accept and continue to builder|enteredFromDiscovery|preloaded from accepted AI proposal|Convention preloaded from accepted AI proposal" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx | head -100
+
+Check 2
+grep -Rni "discoveryResult|hydrat|prefill|initialState|userGuidance" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/api-server/src/routes/conventions.ts | head -200
+
+Check 3
+grep -Rni "BIMCP-BIMCP|duplicate|unique.*token|consecutive.*same" artifacts/bimlog/src/pages/project/ConventionBuilder.tsx artifacts/bimlog/src/pages/project/NameGenerator.tsx artifacts/api-server/src/routes/conventions.ts | head -100
+
+Check 4
+Using the live production app, run one real flow and show:
+exact browser URL immediately after clicking Accept and continue to builder
+exact first visible title on the next screen
+whether the first builder screen is prefilled from the accepted AI proposal: yes/no
+whether the info banner appears: yes/no
+
+Check 5
+Using the same real flow, show the exact final preview string and confirm whether duplicate prefix repetition is gone: yes/no
+
+Show exact output only. Do not summarize.

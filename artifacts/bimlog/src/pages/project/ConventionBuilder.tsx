@@ -292,6 +292,7 @@ interface WizardState {
   industrialState: IndustrialState;
   importState: ImportState;
   userGuidance: string;
+  enteredFromDiscovery: boolean;
 }
 
 // ─── setup context types ──────────────────────────────────────────────────────
@@ -455,6 +456,53 @@ function buildRevisionCodes(format: "alpha" | "numerical" | "custom", custom: st
   if (format === "alpha") return ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"];
   if (format === "numerical") return ["P01","P02","P03","P04","C01","C02","C03","C04","S0","S1","S2"];
   return custom;
+}
+
+// ─── hydrate wizard state from an accepted AI discovery result ────────────────
+function hydrateFromDiscovery(prev: WizardState, dr: DiscoveryResult): WizardState {
+  const acceptedDiscCodes = new Set(
+    (dr.suggestedDisciplines || [])
+      .filter(d => d.confidence !== "low")
+      .map(d => (d.code || d.key || "").toUpperCase().trim())
+  );
+  const knownDiscCodes = new Set(DEFAULT_DISCIPLINES.map(d => d.code.toUpperCase()));
+  const hydratedDiscs: DisciplineEntry[] = [
+    ...DEFAULT_DISCIPLINES.map(d => ({ ...d, id: uid(), selected: acceptedDiscCodes.has(d.code.toUpperCase()) })),
+    ...(dr.suggestedDisciplines || [])
+      .filter(d => d.confidence !== "low")
+      .filter(d => !knownDiscCodes.has((d.code || d.key || "").toUpperCase().trim()))
+      .map(d => ({
+        id: uid(),
+        code: (d.code || d.key || "").toUpperCase().trim(),
+        name: d.label || d.code || d.key || "",
+        desc: d.reason || "From AI discovery",
+        selected: true,
+        custom: true as const,
+      })),
+  ];
+  const allKnownDocTypes = DOC_TYPE_CATEGORIES.flatMap(cat => cat.types.map(t => ({ ...t, category: cat.cat })));
+  const acceptedDocCodes = new Set(
+    (dr.suggestedDocTypes || [])
+      .filter(d => d.confidence !== "low")
+      .map(d => (d.code || "").toUpperCase().trim())
+  );
+  const knownDocCodes = new Set(allKnownDocTypes.map(t => t.code.toUpperCase()));
+  const hydratedDocTypes: DocTypeEntry[] = [
+    ...allKnownDocTypes.map(t => ({ ...t, id: uid(), selected: acceptedDocCodes.has(t.code.toUpperCase()) })),
+    ...(dr.suggestedDocTypes || [])
+      .filter(d => d.confidence !== "low")
+      .filter(d => !knownDocCodes.has((d.code || "").toUpperCase().trim()))
+      .map(d => ({
+        id: uid(),
+        code: (d.code || "").toUpperCase().trim(),
+        name: d.label || d.code || "",
+        desc: d.reason || "From AI discovery",
+        category: "Custom",
+        selected: true,
+        custom: true as const,
+      })),
+  ];
+  return { ...prev, disciplines: hydratedDiscs, docTypes: hydratedDocTypes, enteredFromDiscovery: true };
 }
 
 // ─── small UI helpers ─────────────────────────────────────────────────────────
@@ -2409,9 +2457,9 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
   const sep = state.separator;
   const seqSample = "0".repeat(state.seqDigits - 1) + "1";
 
-  const sampleParts = [
+  const rawSampleParts = [
     state.companies[0]?.code || "PRJ",
-    state.companies[0]?.code || "BTC",
+    state.companies[1]?.code || state.companies[0]?.code || "BTC",
     selectedDiscs[0]?.code || "ARC",
     levels[0] || "L1",
     selectedDocs[0]?.code || "DR",
@@ -2419,6 +2467,7 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
     selectedStatus[0]?.code || "S2",
     revCodes[0] || "P01",
   ];
+  const sampleParts = rawSampleParts.filter((p, i) => i === 0 || p !== rawSampleParts[i - 1]);
   const sampleName = sampleParts.join(sep);
 
   const handleExportPDF = () => {
@@ -2873,6 +2922,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     industrialState: defaultIndustrialState(),
     importState: defaultImportState(),
     userGuidance: "",
+    enteredFromDiscovery: false,
   }));
 
   const [isSaving, setIsSaving] = useState(false);
@@ -2890,6 +2940,50 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       setWs(s => ({ ...s, userGuidance: (convention as any).userGuidance }));
     }
   }, [convention]);
+
+  const hasAutoLoaded = useRef(false);
+  useEffect(() => {
+    if (hasAutoLoaded.current || !token) return;
+    hasAutoLoaded.current = true;
+    fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then((versions: ConventionVersionSnapshot[]) => {
+        if (!Array.isArray(versions) || versions.length === 0) return;
+        const latest = versions[0];
+        if (!latest.acceptedDisciplines?.length && !latest.acceptedDocTypes?.length) return;
+        const syntheticDr: DiscoveryResult = {
+          projectTypeGuess: "",
+          scopeInterpretation: "",
+          usesLevels: null,
+          usesAreas: null,
+          usesPackages: null,
+          usesVolumes: null,
+          suggestedDisciplines: (latest.acceptedDisciplines || []).map(d => ({
+            code: d.code, label: d.label, reason: "From saved version", confidence: "high" as const,
+          })),
+          suggestedSystems: (latest.acceptedSystems || []).map(d => ({
+            code: d.code, label: d.label, reason: "From saved version", confidence: "high" as const,
+          })),
+          suggestedDocTypes: (latest.acceptedDocTypes || []).map(d => ({
+            code: d.code, label: d.label, reason: "From saved version", confidence: "high" as const,
+          })),
+          suggestedExtraFields: [],
+          suggestedFieldOrder: latest.acceptedFieldOrder || [],
+          ambiguities: [],
+          recommendedMode: "",
+          analysisSummary: latest.analysisSummary || "",
+        };
+        setWs(s => ({
+          ...hydrateFromDiscovery(s, syntheticDr),
+          flowPhase: "main_wizard",
+          step: 0,
+          userGuidance: latest.userGuidance || s.userGuidance,
+        }));
+      })
+      .catch(() => {});
+  }, []);
 
   const { mutate } = useUpsertConvention({
     mutation: {
@@ -3018,7 +3112,10 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         onBack={() => setWs(s => ({ ...s, flowPhase: "import_structure" }))}
         onContinueToWizard={() => {
           saveVersionSnapshot("Initial convention setup — accepted from AI discovery");
-          setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+          setWs(s => s.discoveryResult
+            ? { ...hydrateFromDiscovery(s, s.discoveryResult), flowPhase: "main_wizard", step: 0 }
+            : { ...s, flowPhase: "main_wizard", step: 0 }
+          );
         }}
         onStopHere={() => {
           saveVersionSnapshot("Initial convention setup — accepted in analysis-only mode");
@@ -3060,6 +3157,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   return (
     <div>
       <ProgressBar step={step} />
+      {ws.enteredFromDiscovery && (
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px", marginBottom: 16, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, fontSize: 12, color: "#1E40AF" }}>
+          <Info style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1 }} />
+          <span>{w("Convention preloaded from accepted AI proposal. Review and adjust each step, then save.", "Convención precargada desde la propuesta de IA aceptada. Revisa y ajusta cada paso, luego guarda.", lang)}</span>
+        </div>
+      )}
       {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} />}
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
@@ -3068,7 +3171,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
         <div>
           {step === 0
-            ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back to Setup","Volver",lang)}</Button>
+            ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
             : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
           }
         </div>
