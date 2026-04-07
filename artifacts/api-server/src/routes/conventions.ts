@@ -873,6 +873,26 @@ Return ONLY this JSON structure (no markdown, no explanation):
       if (skippedDuplicates.length > 0) warningParts.push(`Duplicate files ignored (already included): ${skippedDuplicates.join(", ")}`);
       if (warningParts.length > 0) parsed._extractionWarning = warningParts.join(" | ");
 
+      const ciRisk = (parsed.confirmedItems || {}) as Record<string, unknown[]>;
+      const baseDiscCount = baseline ? (baseline.acceptedDisciplines as unknown[]).length : 0;
+      const baseDocCount = baseline ? (baseline.acceptedDocTypes as unknown[]).length : 0;
+      const confirmedDiscCount = (ciRisk.disciplines || []).length;
+      const confirmedDocCount = (ciRisk.documentTypes || []).length;
+      const conflictCount = ((parsed.conflicts || []) as unknown[]).length;
+      const totalBaseline = baseDiscCount + baseDocCount;
+      const totalConfirmed = confirmedDiscCount + confirmedDocCount;
+      let riskLevel = "low";
+      if (baseline && totalBaseline > 0) {
+        if (totalConfirmed === 0) {
+          riskLevel = "high";
+        } else if (conflictCount >= 2 || totalConfirmed < totalBaseline / 2) {
+          riskLevel = "high";
+        } else if (conflictCount > 0) {
+          riskLevel = "medium";
+        }
+      }
+      parsed.riskLevel = riskLevel;
+
       res.json(parsed);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Re-analysis failed";

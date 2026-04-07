@@ -11,7 +11,7 @@ import {
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
   Download, RotateCcw, AlertTriangle, CheckCircle2, X,
   ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
-  Clock, GitMerge, Brain, Lock,
+  Clock, GitMerge, Brain, Lock, ShieldAlert,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -390,6 +390,7 @@ interface ReanalysisResult {
   recommendedActions: string[];
   proposedNextVersionSummary: string;
   _extractionWarning?: string;
+  riskLevel?: string;
 }
 
 interface ConventionVersionSnapshot {
@@ -1540,6 +1541,15 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
   const [saveError, setSaveError] = useState("");
   const [localGuidance, setLocalGuidance] = useState(userGuidance);
   const [guidanceSaved, setGuidanceSaved] = useState(false);
+  const [highRiskAck, setHighRiskAck] = useState(false);
+  const [highRiskTyped, setHighRiskTyped] = useState("");
+
+  const isHighRisk = result.riskLevel === "high" || (() => {
+    const ci = result.confirmedItems;
+    const totalConfirmed = ci.disciplines.length + ci.documentTypes.length;
+    return totalConfirmed === 0 && result.conflicts.length > 0;
+  })();
+  const highRiskConfirmed = highRiskAck && highRiskTyped.trim() === "ACCEPT HIGH RISK CHANGE";
 
   const toggle = (key: string) => setDecisions(d => ({ ...d, [key]: !d[key] }));
   const isOn = (key: string) => decisions[key] === true;
@@ -1624,6 +1634,23 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
           Based on Version {result.baselineVersion}. Review each finding before saving a new version. Changes are not forced — you decide what to accept.
         </div>
       </div>
+
+      {isHighRisk && (
+        <div style={{ background: "#FEF2F2", border: "2px solid #F87171", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <ShieldAlert style={{ width: 20, height: 20, color: "#DC2626", flexShrink: 0 }} />
+            <span style={{ fontWeight: 800, fontSize: 15, color: "#991B1B" }}>High Risk — External or Inconsistent Evidence Detected</span>
+          </div>
+          <div style={{ fontSize: 13, color: "#991B1B", lineHeight: 1.7, marginBottom: 12 }}>
+            The submitted evidence does not confirm any items from the current accepted convention.
+            This strongly suggests the files belong to a different project or job.
+            Accepting these changes could corrupt your naming convention and break file validation.
+          </div>
+          <div style={{ fontSize: 12, color: "#B91C1C", fontWeight: 600, marginBottom: 6 }}>
+            Confirmed from baseline: 0 disciplines, 0 document types | Conflicts: {result.conflicts.length} | Unresolved: {result.stillUnresolved.length}
+          </div>
+        </div>
+      )}
 
       <div style={{ background: "#F0F9FF", border: "1px solid #BAE6FD", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
         <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#0369A1", marginBottom: 8 }}>Active Project Convention Guidance</div>
@@ -1732,6 +1759,38 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
         </div>
       )}
 
+      {isHighRisk && (
+        <div style={{ background: "#FEF2F2", border: "2px solid #FCA5A5", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+            <ShieldAlert style={{ width: 16, height: 16, color: "#DC2626", flexShrink: 0 }} />
+            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#991B1B" }}>Double Confirmation Required</span>
+          </div>
+          <label
+            onClick={() => setHighRiskAck(v => !v)}
+            style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px", background: "#fff", border: `1.5px solid ${highRiskAck ? "#DC2626" : "#E5E7EB"}`, borderRadius: 7, cursor: "pointer", userSelect: "none", marginBottom: 12 }}
+          >
+            <div style={{ width: 18, height: 18, borderRadius: 3, border: `1.5px solid ${highRiskAck ? "#DC2626" : "#D1D5DB"}`, background: highRiskAck ? "#DC2626" : "#fff", flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {highRiskAck && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
+            </div>
+            <span style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>
+              I acknowledge this evidence may be from a different project or job and understand that accepting these changes could corrupt the naming convention.
+            </span>
+          </label>
+          <div style={{ marginBottom: 6 }}>
+            <div style={{ fontSize: 12, color: "#991B1B", fontWeight: 600, marginBottom: 6 }}>
+              Type <span style={{ fontFamily: "var(--font-mono)", background: "#FEE2E2", padding: "1px 6px", borderRadius: 4 }}>ACCEPT HIGH RISK CHANGE</span> to proceed:
+            </div>
+            <input
+              type="text"
+              value={highRiskTyped}
+              onChange={e => setHighRiskTyped(e.target.value)}
+              placeholder="ACCEPT HIGH RISK CHANGE"
+              style={{ width: "100%", fontSize: 13, padding: "8px 10px", borderRadius: 6, border: `1.5px solid ${highRiskTyped.trim() === "ACCEPT HIGH RISK CHANGE" ? "#DC2626" : "#D1D5DB"}`, outline: "none", boxSizing: "border-box", fontFamily: "var(--font-mono)", background: highRiskTyped.trim() === "ACCEPT HIGH RISK CHANGE" ? "#FEF2F2" : "#fff" }}
+            />
+          </div>
+        </div>
+      )}
+
       {saveError && (
         <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#DC2626" }}>{saveError}</div>
       )}
@@ -1740,7 +1799,7 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
         <Button variant="outline" onClick={onDiscard} disabled={saving} style={{ gap: 6, fontSize: 13 }}>
           <X style={{ width: 14, height: 14 }} /> Discard Changes
         </Button>
-        <Button onClick={handleAcceptChanges} disabled={saving} style={{ gap: 6, fontSize: 13 }}>
+        <Button onClick={handleAcceptChanges} disabled={saving || (isHighRisk && !highRiskConfirmed)} style={{ gap: 6, fontSize: 13, opacity: (isHighRisk && !highRiskConfirmed) ? 0.4 : 1 }}>
           {saving ? "Saving..." : <><Check style={{ width: 14, height: 14 }} /> Accept Selected Changes + Save New Version</>}
         </Button>
       </div>

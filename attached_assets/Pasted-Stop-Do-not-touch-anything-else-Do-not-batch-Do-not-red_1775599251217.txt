@@ -1,0 +1,154 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. Do not assume ISSUE 4 is already understood. We stay in strict diagnostic and targeted fix mode.
+
+We are now doing:
+
+ISSUE 4 — Re-analysis is unsafe when wrong-job files are uploaded.
+
+Live behavior reported:
+
+obviously wrong files from another job were analyzed
+the result did not stand out strongly enough
+user could too easily accept and damage the convention
+this is a safety failure in a core BIMLog enforcement path
+
+This is not fixed until all three are proven:
+
+live classification logic correctly identifies high-risk wrong-job evidence
+live UI makes the risk unmistakable
+live acceptance path is blocked behind explicit double confirmation for high-risk cases
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+All checks, fixes, and validations must run against live production app behavior and live production database only.
+
+Step 1:
+Show the exact backend code for re-analysis classification.
+
+Show exact code for:
+
+route receiving re-analysis input
+evidence parsing
+classification logic for conflicts
+mismatch detection
+unresolved detection
+confidence scoring
+warning generation
+any logic that determines whether evidence appears consistent with the current accepted convention
+exact response body shape returned to frontend
+
+Step 2:
+Show the exact frontend code for the re-analysis results path.
+
+Show exact code for:
+
+component rendering results
+logic that determines warning severity
+any styling for conflict / mismatch / unresolved / high risk
+accept button render block
+accept handler
+any existing confirmation modal / dialog / checkbox / guard
+any logic that allows convention update after re-analysis
+
+Step 3:
+Using the live production app, reproduce the issue with one clearly wrong-job file set.
+
+Use real uploaded evidence already available in production if possible.
+If not, use one minimal live test file set that is clearly inconsistent with project 5’s accepted convention and clearly belongs to a different job context.
+
+Show exact live request:
+
+exact request URL
+exact method
+exact payload or form data summary
+
+Show exact live response:
+
+exact status
+exact raw response body
+
+Step 4:
+Show the exact live UI result for that wrong-job re-analysis.
+
+Show exact visible:
+
+title
+risk label
+warning text
+confidence text
+mismatch/conflict counts
+whether accept button is enabled immediately yes/no
+whether any confirmation is currently required yes/no
+
+Step 5:
+Identify the real safety failure with exact evidence only.
+
+Choose only what is proven:
+
+backend is not classifying wrong-job evidence strongly enough
+frontend is downplaying a high-risk backend result
+accept path lacks confirmation guard
+response shape contains risk but UI ignores it
+wrong-job evidence is not distinguished from ordinary mismatch
+current threshold for high-risk classification is too weak
+multiple failures at once, but name each only if proven
+
+Step 6:
+Implement this exact rule and nothing broader:
+
+If re-analysis evidence is clearly inconsistent with the current accepted convention baseline or appears to belong to a different job, then:
+
+show a red high-risk state in the UI
+show this exact title:
+High Risk — External or Inconsistent Evidence Detected
+disable one-click acceptance
+require double confirmation before acceptance
+confirmation must require:
+one explicit acknowledgment checkbox
+one typed confirmation input with exact text:
+ACCEPT HIGH RISK CHANGE
+only after both are satisfied may the final acceptance action proceed
+
+Do not redesign the rest of the screen.
+Do not change normal low-risk or medium-risk flows unless required by the exact fix.
+
+Step 7:
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+Step 8:
+Run the same live wrong-job re-analysis again after the fix and show exact outputs:
+
+A. exact request URL
+B. exact response status
+C. exact raw response body
+D. exact visible risk title in UI
+E. exact warning text in UI
+F. is accept button immediately available yes/no
+G. is acknowledgment checkbox required yes/no
+H. is typed confirmation required yes/no
+I. exact final accept path request after both confirmations are satisfied
+
+Step 9:
+Show final proof in this exact format:
+
+ISSUE 4 — EXACT OUTPUTS
+
+Live request URL:
+Live response status:
+High-risk classification returned by backend: yes/no
+High-risk warning shown in UI: yes/no
+Exact UI title:
+One-click acceptance blocked: yes/no
+Acknowledgment checkbox required: yes/no
+Typed confirmation required: yes/no
+Root cause:
+Exact fix applied:
