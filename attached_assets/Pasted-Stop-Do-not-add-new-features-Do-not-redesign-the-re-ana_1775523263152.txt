@@ -1,0 +1,136 @@
+Stop. Do not add new features. Do not redesign the re-analysis flow. We are debugging one real failure only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+Problem:
+When using “Add More Evidence and Re-run Discovery”, the user selected a mix of previously used files and new files. The flow failed and got stuck on the re-evidence screen with an error.
+This is a valid user action. The system must not crash when old and new evidence are mixed.
+
+We need exact runtime truth first, then fix only the actual cause.
+
+Run these checks and show exact outputs only.
+
+STEP 1 — Capture the real frontend failure.
+
+Using the live production app, reproduce the same action:
+open Add More Evidence and Re-run Discovery
+add a mix of previously used files and new files
+click Re-run Discovery
+
+Show:
+exact browser console error text
+exact visible on-screen error text
+exact Network request URL
+exact request method
+exact response status code
+exact response body text
+exact response content-type
+
+STEP 2 — Confirm request payload contents.
+
+Show exactly what the frontend is sending for this failing request.
+
+We need:
+form field keys
+uploaded filenames
+whether duplicate filenames are present
+whether any file ids or previous evidence references are included
+whether pasted text / folder structure / notes fields are included
+
+Do not summarize.
+Show the actual payload keys and filenames.
+
+STEP 3 — Capture backend runtime logs.
+
+At the exact time the failing request is made, show:
+full backend log lines
+full stack trace if any
+any multipart parsing errors
+any duplicate key / duplicate file / validation errors
+any AI response parsing errors
+
+STEP 4 — Read the exact re-evidence upload and reanalyze path.
+
+Show the relevant code for:
+the frontend handler for Add More Evidence and Re-run Discovery
+the backend route for POST /api/v1/projects/:projectId/convention/reanalyze
+any helper that processes uploaded evidence files for reanalysis
+
+Use exact code excerpts, not summaries.
+
+STEP 5 — Determine whether duplicates are currently unsupported.
+
+We need the exact truth:
+Does the backend currently:
+A. reject duplicate filenames
+B. reject duplicate file hashes
+C. assume every reanalysis upload is new
+D. try to insert duplicate evidence rows and fail
+E. fail during multipart parsing
+F. fail during AI prompt assembly
+
+Do not guess. Show which one is actually happening.
+
+STEP 6 — Fix only the real cause.
+
+Expected correct behavior:
+If the user uploads some files that were already used before, the system must not crash.
+
+Acceptable behaviors:
+ignore exact duplicates silently
+or mark them as already included
+or include them again if harmless
+or warn the user and continue
+
+Not acceptable:
+hard failure
+stuck screen
+generic crash
+
+Implement the minimum safe fix only after the real cause is confirmed.
+
+STEP 7 — Add explicit duplicate handling for reanalysis evidence.
+
+Whatever the bug is, add safe duplicate handling in this reanalysis flow.
+
+At minimum:
+if the same filename or same file hash appears in the new reanalysis evidence set, do not crash
+if a file was previously used in earlier convention evidence, do not crash
+prefer logging or skipping duplicate evidence over failing
+
+Do not redesign storage.
+Do not build a new evidence registry.
+Just make this flow safe.
+
+STEP 8 — After the fix, rerun the exact same live test.
+
+Use:
+some previously used files
+plus some new files
+
+Show exact outputs only:
+
+Check 1
+browser console error after retry
+
+Check 2
+network request URL, status code, response body
+
+Check 3
+whether the reanalysis completes: yes/no
+
+Check 4
+whether duplicate files are now handled without crash: yes/no
+
+Check 5
+what the system did with duplicates:
+ignored
+warned
+merged
+or other exact behavior
+
+Show exact output only. Do not summarize.

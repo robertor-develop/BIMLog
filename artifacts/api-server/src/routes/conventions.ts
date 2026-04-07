@@ -287,10 +287,10 @@ const uploadMiddleware = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
 }).fields([
-  { name: "pdf", maxCount: 10 },
-  { name: "spreadsheet", maxCount: 10 },
-  { name: "screenshot", maxCount: 10 },
-  { name: "sample", maxCount: 10 },
+  { name: "pdf", maxCount: 30 },
+  { name: "spreadsheet", maxCount: 30 },
+  { name: "screenshot", maxCount: 30 },
+  { name: "sample", maxCount: 30 },
 ]);
 
 router.post(
@@ -669,7 +669,25 @@ router.post(
       if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
 
       const b = req.body as Record<string, string>;
-      const files = (req.files as Record<string, Express.Multer.File[]>) || {};
+      const rawFiles = (req.files as Record<string, Express.Multer.File[]>) || {};
+
+      // Deduplicate files per category by originalname — silently skip exact-name duplicates.
+      // This prevents crashes when the user re-uploads previously used files alongside new ones.
+      const skippedDuplicates: string[] = [];
+      const files: Record<string, Express.Multer.File[]> = {};
+      for (const [cat, catFiles] of Object.entries(rawFiles)) {
+        const seen = new Set<string>();
+        const deduped: Express.Multer.File[] = [];
+        for (const f of catFiles) {
+          if (seen.has(f.originalname)) {
+            skippedDuplicates.push(f.originalname);
+          } else {
+            seen.add(f.originalname);
+            deduped.push(f);
+          }
+        }
+        files[cat] = deduped;
+      }
 
       const rawFolderTreeText = b.rawFolderTreeText || "";
       const rawIndexText = b.rawIndexText || "";
@@ -837,9 +855,10 @@ Return ONLY this JSON structure (no markdown, no explanation):
         return;
       }
 
-      if (failedFiles.length > 0) {
-        parsed._extractionWarning = `Some files could not be fully read: ${failedFiles.join(", ")}`;
-      }
+      const warningParts: string[] = [];
+      if (failedFiles.length > 0) warningParts.push(`Some files could not be fully read: ${failedFiles.join(", ")}`);
+      if (skippedDuplicates.length > 0) warningParts.push(`Duplicate files ignored (already included): ${skippedDuplicates.join(", ")}`);
+      if (warningParts.length > 0) parsed._extractionWarning = warningParts.join(" | ");
 
       res.json(parsed);
     } catch (error) {
