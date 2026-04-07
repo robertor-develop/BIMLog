@@ -3814,6 +3814,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   };
 
   const [foundationalUnlocked, setFoundationalUnlocked] = useState(false);
+  const [foundationalEditMode, setFoundationalEditMode] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -3885,6 +3886,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         }}
         onEditFoundational={() => {
           setFoundationalUnlocked(true);
+          setFoundationalEditMode(true);
           setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
         }}
       />
@@ -3995,7 +3997,27 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         enteredFromDiscovery={ws.enteredFromDiscovery}
         lang={lang}
       />
-      {step === 0 && hasExisting && (
+      {step === 0 && hasExisting && foundationalEditMode && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "14px 16px", marginBottom: 16, background: "#FEF2F2", border: "2px solid #FCA5A5", borderRadius: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <AlertTriangle style={{ width: 16, height: 16, color: "#DC2626", flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#991B1B" }}>{w("You are editing foundational settings of an accepted convention", "Está editando los ajustes fundacionales de una convención aceptada", lang)}</span>
+          </div>
+          <span style={{ fontSize: 12, color: "#7F1D1D" }}>{w("Changes here affect company codes, separator character, uppercase enforcement, and character limits. These settings govern all future file naming, validation rules, and project structure. This cannot be undone automatically — proceed only if you have confirmed with your team.", "Los cambios aquí afectan los códigos de empresa, el separador, las mayúsculas y los límites de caracteres. Estos ajustes rigen todos los nombres de archivos futuros, las reglas de validación y la estructura del proyecto. Esto no se puede deshacer automáticamente — proceda solo si ha confirmado con su equipo.", lang)}</span>
+          <div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { setFoundationalEditMode(false); setFoundationalUnlocked(false); setWs(s => ({ ...s, flowPhase: "checkpoint" })); }}
+              style={{ fontSize: 12, gap: 6, borderColor: "#FCA5A5", color: "#991B1B" }}
+            >
+              <ChevronLeft style={{ width: 13, height: 13 }} />
+              {w("Cancel — Return to Checkpoint", "Cancelar — Volver al checkpoint", lang)}
+            </Button>
+          </div>
+        </div>
+      )}
+      {step === 0 && hasExisting && !foundationalEditMode && (
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px", marginBottom: 16, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
           <AlertTriangle style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1 }} />
           <span>{w("Changing foundational convention settings may affect all future file naming and project structure. Use the steps above to revise specific sections instead.", "Cambiar los ajustes fundacionales puede afectar todos los nombres de archivo futuros y la estructura del proyecto. Use los pasos anteriores para revisar secciones específicas.", lang)}</span>
@@ -4009,7 +4031,9 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
         <div>
           {step === 0
-            ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
+            ? foundationalEditMode
+              ? null
+              : <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
             : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
           }
         </div>

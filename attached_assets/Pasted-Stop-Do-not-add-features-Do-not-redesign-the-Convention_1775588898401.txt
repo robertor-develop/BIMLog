@@ -1,0 +1,163 @@
+Stop. Do not add features. Do not redesign the Convention Builder. Do not change prompts. We are fixing three remaining gaps only, using live production app behavior and live production database truth.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All checks and fixes must run against the live production app and live production database only.
+
+There are three remaining gaps:
+
+GAP 1 — Total Control still needs live UI verification.
+The backend responses now look correct, but we still need to confirm the live Total Control UI is actually rendering the same correct counts and project list.
+
+GAP 2 — Foundational edit flow is still too easy to confuse with normal Step 1.
+Right now Edit Foundational Settings routes into Step 1. That is acceptable only if the system clearly marks that the user is editing foundational settings of an already accepted convention.
+
+GAP 3 — CVR Reports are only showing an empty-state because there are zero processed files.
+That is not enough. We need a real live validation with actual project files so CVR is proven on real data, not only on an empty response.
+
+Fix and validate these in exact order.
+
+STEP 1 — Verify Total Control live UI against live backend.
+
+Using the live production app as super admin, open Total Control and inspect the actual live requests used by the page.
+
+We need exact truth for the rendered UI, not only DB queries.
+
+Show:
+the exact request URL(s) feeding the top metrics
+the exact request URL(s) feeding the active projects grid
+the exact response payload parts related to projects/counts
+the exact numbers shown in the UI for:
+All Projects
+Active Projects
+the exact project ids and names visible in the Active Projects Grid
+
+Then confirm:
+UI All Projects = 1 yes/no
+UI Active Projects = 1 yes/no
+UI grid shows only the real active project yes/no
+
+If the UI still mismatches the backend, fix the UI binding only.
+Do not change the backend again unless the live request proves the backend response is wrong.
+
+STEP 2 — Add explicit foundational edit mode clarity.
+
+Do not redesign the builder.
+Do not move the foundational controls.
+Do not add a new settings module.
+
+Current behavior:
+Edit Foundational Settings routes to main_wizard step 0.
+
+That can remain, but it must be unmistakably clear that the user is editing foundational settings of an already accepted convention.
+
+Add one explicit state flag, for example:
+foundationalEditMode = true
+
+When entering from the checkpoint via Edit Foundational Settings:
+set that flag
+route to step 0
+
+Then in Step 0:
+show a prominent top banner, not subtle helper text.
+
+Required meaning:
+You are editing foundational settings of an accepted convention.
+Changes here may affect all future file naming, validation, and project structure.
+
+This banner must only show in foundationalEditMode for an existing accepted convention.
+It must not show during first-time setup.
+
+Also enforce:
+if the user exits this mode without saving, return them to checkpoint
+do not silently keep them wandering in generic setup flow
+
+Do not change the first-time setup flow.
+
+STEP 3 — Validate CVR with real project files.
+
+We need to prove CVR with real data, not only empty state.
+
+Using the live app on the real project:
+upload at least two files through the real file flow:
+one intentionally valid
+one intentionally invalid
+
+Then wait for the normal CVR processing path.
+
+After that, open Reports & PDF → CVR Reports and show:
+the exact frontend request URL
+the exact backend response status
+the exact backend response body
+the exact visible UI state
+
+We need to see:
+totalFilesProcessed greater than 0
+and if possible one flagged file for the invalid upload
+
+If CVR still shows zero after real file uploads, do not guess.
+Trace the real pipeline and fix the actual break:
+upload path
+CVR processing
+DB write
+project scoping
+or report query
+
+Fix only the real cause.
+
+STEP 4 — Keep current good behavior intact.
+
+Do not break:
+checkpoint mode
+Continue Editing Convention to Review screen
+Convention History staying in checkpoint/history context
+latest accepted snapshot
+re-analysis flow
+foundational settings persistence
+version creation on save
+
+This task is only:
+live UI truth for Total Control
+clear foundational edit mode
+real CVR validation with actual files
+
+STEP 5 — Checks.
+
+After fixing and validating, show exact output only:
+
+Check 1
+Using the live production app in Total Control, show:
+the exact visible counts for All Projects and Active Projects
+the exact project ids and names visible in the Active Projects Grid
+
+Check 2
+Show the exact live request URL(s) and response snippets feeding:
+Total Control top metrics
+Total Control project grid
+
+Check 3
+Using the live production app, click Edit Foundational Settings and show:
+the exact first visible section after click
+the exact banner text shown
+whether foundationalEditMode is active yes/no
+
+Check 4
+Exit foundational edit mode without saving and show:
+the exact screen it returns to
+whether it returns to checkpoint yes/no
+
+Check 5
+Using the live project, after uploading real files, open CVR Reports and show:
+the exact request URL
+the exact backend response status
+the exact response body
+the exact visible UI state
+whether totalFilesProcessed is now greater than 0 yes/no
+
+Check 6
+If one invalid file was uploaded intentionally, show:
+whether totalFlagged is greater than 0 yes/no
+
+Show exact outputs only. Do not summarize.

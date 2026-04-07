@@ -1,0 +1,21 @@
+STRUCTURAL ENGINEERING SPECIFICATION
+Project: Audit Final Project
+Document Type: Technical Specification
+Discipline: Structural Engineering
+
+1. SCOPE
+This document covers the structural steel framework design for the main building.
+
+2. MATERIALS
+- Structural steel grade A36
+- Reinforced concrete columns per AISC standards
+- Steel beam connections with ASTM A325 bolts
+
+3. LOAD CALCULATIONS
+Dead load: 120 psf
+Live load: 50 psf
+Seismic zone: D
+
+4. STRUCTURAL SYSTEM
+The primary lateral force resisting system consists of moment frames at grid lines A through F.
+Perimeter steel bracing supports gravity loads per structural drawings STR-001 through STR-045.
