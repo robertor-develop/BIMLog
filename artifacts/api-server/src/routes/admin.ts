@@ -329,9 +329,15 @@ router.get("/admin/companies", async (req, res) => {
     const result = await Promise.all(companies.map(async (c) => {
       const [{ userCount }] = await db.select({ userCount: count() }).from(usersTable).where(eq(usersTable.companyId, c.id));
       const [{ projectCount }] = await db.select({ projectCount: count() }).from(projectsTable).where(
-        sql`${projectsTable.id} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
+        and(
+          ne(projectsTable.status, "archived"),
+          sql`${projectsTable.id} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
+        )
       );
-      return { ...c, createdAt: c.createdAt.toISOString(), userCount: Number(userCount), projectCount: Number(projectCount) };
+      const [{ fileCount }] = await db.select({ fileCount: count() }).from(filesTable).where(
+        sql`${filesTable.projectId} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
+      );
+      return { ...c, createdAt: c.createdAt.toISOString(), userCount: Number(userCount), projectCount: Number(projectCount), fileCount: Number(fileCount) };
     }));
     res.json(result);
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }

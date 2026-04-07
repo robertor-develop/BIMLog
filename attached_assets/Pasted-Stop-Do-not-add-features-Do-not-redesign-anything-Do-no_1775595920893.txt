@@ -1,0 +1,263 @@
+Stop. Do not add features. Do not redesign anything. Do not assume anything is fixed. We are now in strict diagnostic and targeted fix mode only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All checks, fixes, and validations must run against the live production app behavior and live production database only.
+
+There are five confirmed live issues. We will handle them one by one in this exact order. Do not batch them. Do not summarize. After each issue, show exact code changed, exact endpoint response, and exact UI result.
+
+ISSUE 1 — Total Control still shows 3 active projects in the live super admin view.
+
+This is not fixed.
+
+Step 1:
+Show the exact backend code for:
+
+GET /admin/projects
+GET /admin/platform-stats
+GET /admin/overview
+
+Step 2:
+Show the exact queries used for:
+
+totalProjects
+activeProjects
+project grid rows
+
+Step 3:
+Run these exact live DB queries and show raw output:
+
+SELECT id, name, status, created_at FROM projects ORDER BY id;
+SELECT COUNT() AS total_non_archived FROM projects WHERE status != 'archived';
+SELECT COUNT() AS total_active FROM projects WHERE status = 'active';
+
+Step 4:
+Using the live production browser, inspect the actual requests used by Total Control for:
+
+top metrics
+project grid
+
+Show:
+
+exact request URLs
+exact response bodies related to project counts and project rows
+exact numbers visible in UI for All Projects and Active Projects
+exact project ids and names visible in the grid
+
+Step 5:
+Identify the real mismatch. Do not guess. Possible causes include:
+
+frontend binding using wrong field
+different endpoint for cards vs grid
+stale cached response
+backend count query still wrong
+archived projects still included somewhere
+
+Step 6:
+Fix only the real cause.
+
+Step 7:
+After the fix, show exact outputs:
+
+UI All Projects
+UI Active Projects
+visible project ids and names in the grid
+
+ISSUE 2 — Edit Foundational Settings is broken.
+
+Live behavior reported:
+
+it jumps into the wrong step
+disciplines look incomplete or wrong
+user cannot clearly edit what they intended
+
+Step 1:
+Show the exact code for:
+
+onEditFoundational handler
+wizard state declaration
+step routing logic
+foundationalEditMode flag logic
+step 0 render path
+step 1 render path if relevant
+
+Step 2:
+Using the live app, click Edit Foundational Settings and log the exact state immediately after click:
+
+flowPhase
+step
+foundationalEditMode
+hasExisting
+any other state that determines routing
+
+Step 3:
+Show the exact first visible section after click in the live UI.
+
+Step 4:
+Identify why it is not behaving like a clean foundational edit mode.
+
+Correct behavior:
+Edit Foundational Settings must open the foundational settings area only, clearly marked as editing foundational settings of an already accepted convention.
+It must not feel like generic setup or a broken jump into unrelated builder state.
+
+Step 5:
+Fix only the real cause.
+
+Step 6:
+After the fix, show exact outputs:
+
+exact first visible section after click
+exact banner text shown
+whether foundationalEditMode is active yes/no
+exact visible editable foundational controls
+
+ISSUE 3 — Save after foundational edits appears to do nothing.
+
+Live behavior reported:
+
+user edits foundational settings
+clicks save
+no confirmation
+no new version
+no visible indication anything happened
+
+Step 1:
+Show the exact function handling the save action from that state.
+
+Step 2:
+Using the live app, perform the save and show:
+
+exact request URL
+exact request payload
+exact response status
+exact response body
+
+Step 3:
+Run the exact live DB query after save and show raw output:
+
+SELECT id, project_id, convention_version, created_at, created_by_id
+FROM naming_convention_versions
+WHERE project_id = 5
+ORDER BY convention_version DESC, created_at DESC;
+
+Step 4:
+Confirm with exact evidence:
+
+was a new version created yes/no
+if no, where did it fail
+if yes, why did the UI fail to confirm it
+
+Step 5:
+Fix only the real cause.
+
+Step 6:
+After the fix, show exact outputs:
+
+exact visible confirmation in UI after save
+whether a new version row exists yes/no
+exact newest version row
+
+ISSUE 4 — Re-analysis is unsafe when wrong-job files are uploaded.
+
+Live behavior reported:
+
+obviously wrong files from another job were analyzed
+the result did not stand out strongly enough
+user could easily click accept and damage the convention
+
+This is a serious safety issue.
+
+Step 1:
+Show how re-analysis currently classifies results in backend and frontend.
+We need the exact logic for:
+
+conflicts
+mismatches
+unresolved
+confidence
+warnings
+
+Step 2:
+Show exactly how the UI currently styles or highlights a high-risk re-analysis result.
+
+Step 3:
+Implement this exact rule:
+
+If the re-analysis evidence is clearly inconsistent with the current accepted convention baseline or appears to belong to a different job, then:
+
+highlight the warning state in red
+show a clear title such as:
+High Risk — External or Inconsistent Evidence Detected
+require double confirmation before acceptance
+
+The two confirmations must be:
+
+Accept changes
+Confirm override of existing accepted convention with inconsistent evidence
+
+Do not redesign the whole review screen.
+Do not change AI prompts unnecessarily.
+Add the minimum correct safety behavior only.
+
+Step 4:
+Using the live app, reproduce with wrong-job files and show:
+
+exact warning text
+exact color/severity state
+whether double confirmation appears yes/no
+
+ISSUE 5 — CVR Reports still do not work properly.
+
+Live behavior reported:
+
+user still cannot get a meaningful report
+empty state or broken state is still not trustworthy
+
+Step 1:
+Show the exact frontend request used by CVR Reports:
+
+URL
+method
+
+Step 2:
+Show the exact backend route handling that request.
+
+Step 3:
+Using the live project, run and show:
+
+exact response status
+exact response body
+
+Step 4:
+Run the exact live DB checks needed to prove whether CVR data exists for this project.
+Show raw outputs for the real underlying source rows used by the report.
+
+Step 5:
+Determine exact truth:
+
+no data exists
+data exists but query is wrong
+data exists but project scoping is wrong
+UI mapping is wrong
+processing path never wrote the CVR data
+
+Do not guess.
+
+Step 6:
+Fix only the real cause.
+
+Step 7:
+After the fix, show exact outputs:
+
+exact CVR request URL
+exact response status
+exact response body
+exact visible UI state
+whether the report is now truly working yes/no
+
+Final rule:
+Do not move to the next issue until the current one is fully proven with exact outputs.
+
+Start with ISSUE 1 only. Show exact outputs only. No summaries.

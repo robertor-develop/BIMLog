@@ -1,0 +1,19 @@
+We do not use the preview platform. We work on the live BIMLog build and we verify everything against the real live app and real live API behavior.
+
+Read the current code first and then fix the exact live issues I am reporting. Do not redesign the product. Do not give explanations. Do not give a plan. Do not stop after one partial fix. Fix the actual broken behavior in the current build, test it live, and then report exactly what changed and exactly what was verified.
+
+TotalControl Super Admin is still wrong and still showing the wrong active jobs count. Fix the live query and the live UI so the top cards and the active projects grid match exactly in the live build.
+
+Edit Foundational Settings is still broken. It is loading the wrong state, jumping into the wrong part of the flow, and the disciplines and foundational items are incomplete or not properly editable. Fix that flow so it loads the current saved foundational convention correctly from the live project and lets me actually edit the foundational convention data properly.
+
+When I save foundational changes, the system is still not giving proper confirmation and the changes are not visibly reflected in the project. Fix save and publish behavior so the live build clearly confirms what happened and the updated convention version and changes are visibly reflected immediately.
+
+The job dashboard is still not reflecting the real current project state. It must show the real companies involved in the job, the current convention status, the current convention version, the reports available, and the files that have been loaded. Fix the live dashboard so it reflects the actual saved and published project state instead of acting like the work does not exist.
+
+Re-analyze More Files is too dangerous in its current state. When foreign-job or high-risk mismatch files are loaded, the warning must stand out clearly and must not look like a normal result that someone could casually accept. Fix that live behavior so dangerous mismatches are visually severe and require a stronger confirmation flow before anything can be applied.
+
+The CVR report action is broken in the live build. Fix the actual backend route or the frontend call so the report works correctly. There must not be a dead report button in the live app.
+
+Work only on these exact live issues. Do not make unrelated changes. Do not use preview. Do not claim something is fixed unless you actually tested it in the live build.
+
+When done, report back with the exact files changed, the exact routes changed, the exact bugs fixed, and the exact live verification results for each issue.

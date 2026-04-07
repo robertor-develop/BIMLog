@@ -3250,7 +3250,10 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
     })
       .then(r => r.ok ? r.json() : [])
       .then((versions: ConventionVersionSnapshot[]) => {
-        if (Array.isArray(versions) && versions.length > 0) setLatestVersion(versions[0]);
+        if (Array.isArray(versions) && versions.length > 0) {
+          const usable = versions.find(v => (v.acceptedDisciplines?.length ?? 0) > 0 || (v.acceptedDocTypes?.length ?? 0) > 0) ?? versions[0];
+          setLatestVersion(usable);
+        }
       })
       .catch(() => {});
   }, [projectId, token]);
@@ -3739,9 +3742,17 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     })
       .then(r => r.ok ? r.json() : [])
       .then((versions: ConventionVersionSnapshot[]) => {
-        if (!Array.isArray(versions) || versions.length === 0) return;
-        const latest = versions[0];
-        if (!latest.acceptedDisciplines?.length && !latest.acceptedDocTypes?.length) return;
+        if (!Array.isArray(versions)) return;
+        // Find the most recent version that has actual discipline/docType content.
+        // If all versions are empty (e.g. a re-analysis snapshot with no results was saved),
+        // fall back to routing the wizard to checkpoint without discipline hydration, so the
+        // user sees the checkpoint screen rather than the setup-context front door.
+        const latest = versions.find(v => (v.acceptedDisciplines?.length ?? 0) > 0 || (v.acceptedDocTypes?.length ?? 0) > 0);
+        if (!latest) {
+          // All versions empty: if this project already has a saved convention, skip setup_context.
+          setWs(s => s.flowPhase === "setup_context" ? { ...s, flowPhase: "checkpoint", step: 0 } : s);
+          return;
+        }
         const syntheticDr: DiscoveryResult = {
           projectTypeGuess: "",
           scopeInterpretation: "",
