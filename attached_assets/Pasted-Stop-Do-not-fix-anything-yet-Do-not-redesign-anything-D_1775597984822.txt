@@ -1,0 +1,189 @@
+Stop. Do not fix anything yet. Do not redesign anything. Do not batch issue fixes. We need a FULL LIVE BUILD STATE SNAPSHOT for BIMLog so the entire current production system can be understood before continuing targeted debugging.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from LIVE production app behavior, LIVE production code, and LIVE production database only.
+
+We need a full system state capture of the current build as it exists right now.
+
+OUTPUT FORMAT:
+Do not summarize vaguely.
+Do not say “looks correct.”
+Do not say “should be.”
+Show exact code, exact routes, exact queries, exact DB schema, exact endpoint responses, and exact UI entry points.
+
+SECTION 1 — FRONTEND APP STRUCTURE
+
+Show exact frontend file paths and exact code entry points for:
+
+app shell / router
+super admin / TotalControl
+convention builder
+foundational settings edit flow
+re-analysis flow
+reports module
+CVR report UI
+project dashboard / project detail shell
+any global query client / cache invalidation setup
+any shared API client used by admin and project modules
+
+SECTION 2 — BACKEND ROUTE MAP
+
+Show exact backend route file paths and exact registered routes for:
+
+admin
+projects
+conventions
+re-analysis
+reports
+CVR
+files / uploads
+activity log
+auth / current user / role resolution
+
+For each, show exact route definitions and the exact handler file if split.
+
+SECTION 3 — DATABASE STRUCTURE
+
+Show exact live production schema for the core BIMLog tables involved in the current build.
+
+At minimum include exact columns for:
+
+projects
+users
+companies
+project_members
+naming_convention_versions
+naming conventions current/live table if separate
+files / documents table
+file_versions if separate
+rfis
+rfi_responses
+submittals
+activity_logs
+reports / report_runs if any
+cvr-related tables if any
+reanalysis-related tables if any
+
+Run exact schema inspection queries and show raw output.
+
+SECTION 4 — LIVE SYSTEM COUNTS
+
+Run exact live DB queries and show raw output for:
+
+total projects
+active projects
+archived projects
+total companies
+total users
+total files
+total naming convention versions by project
+total RFIs
+total RFI responses
+total submittals
+total report records
+any CVR-related records
+
+SECTION 5 — CURRENT LIVE API STATE
+
+Hit the live production endpoints currently used by the app and show exact raw JSON responses for the major areas:
+
+admin platform stats
+admin overview
+admin projects
+admin companies
+current project detail endpoint for project 5
+convention versions endpoint for project 5
+reports endpoint for project 5
+CVR endpoint for project 5 if separate
+re-analysis related endpoints for project 5
+any endpoint used to save foundational settings
+
+Use real authenticated production requests only. Redact secrets only.
+
+SECTION 6 — CURRENT LIVE UI ENTRY POINTS
+
+Using the live production browser, show exact entry path and exact visible first-screen state for:
+
+TotalControl
+company table
+project grid
+project 5
+convention builder landing state
+Edit Foundational Settings click result
+current save button path for foundational changes
+re-analysis result screen
+reports screen
+CVR screen
+
+Show exact visible text and exact visible data where relevant.
+
+SECTION 7 — QUERY / STATE MANAGEMENT
+
+Show exact code for:
+
+query keys
+mutation hooks
+invalidation logic
+refetch logic
+local component state that controls:
+flowPhase
+step
+foundationalEditMode
+selectedVersion
+hasExisting
+checkpoint routing
+report loading state
+re-analysis acceptance state
+
+SECTION 8 — LIVE KNOWN BROKEN PATHS
+
+For each confirmed issue, show the exact live code path currently involved, even if already partially fixed:
+
+TotalControl incorrect counts
+Edit Foundational Settings broken flow
+Save after foundational edits appears to do nothing
+Re-analysis unsafe acceptance of wrong-job files
+CVR reports not functional
+
+For each one show:
+
+frontend file path
+backend route
+DB table(s)
+live endpoint used
+current known mismatch if already proven
+
+SECTION 9 — BUILD CHANGE TRACE
+
+Show exact files changed in the recent debugging work.
+Show the exact before/after code blocks for the changes already applied this session or the last session, including:
+
+admin companies route fix
+convention version hydration fix
+checkpoint version selection fix
+anything else already modified during this debugging cycle
+
+SECTION 10 — FINAL SYSTEM MAP
+
+At the end, provide a strict build map only in this format:
+
+FRONTEND MODULES:
+...
+BACKEND MODULES:
+...
+LIVE DB TABLES:
+...
+LIVE ISSUE PATHS:
+...
+RECENTLY CHANGED FILES:
+...
+HIGH-RISK AREAS:
+...
+
+Do not fix anything yet.
+Do not propose redesign.
+Do not jump ahead to ISSUE 4 or ISSUE 5.
+This is a full live build state capture only.

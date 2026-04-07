@@ -3232,7 +3232,7 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
 }
 
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
-function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory, onEditFoundational }: {
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory, onEditFoundational, savedFlash, refetchKey }: {
   ws: WizardState;
   projectId: number;
   token: string;
@@ -3241,6 +3241,8 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
   onReEvidence: () => void;
   onOpenHistory: () => void;
   onEditFoundational: () => void;
+  savedFlash?: string;
+  refetchKey?: number;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
 
@@ -3256,7 +3258,7 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
         }
       })
       .catch(() => {});
-  }, [projectId, token]);
+  }, [projectId, token, refetchKey]);
 
   const sep = ws.separator || "-";
 
@@ -3281,6 +3283,12 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
 
   return (
     <div>
+      {savedFlash && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", marginBottom: 16, background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#166534" }}>
+          <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />
+          {savedFlash}
+        </div>
+      )}
       <ConventionStatusPanel
         projectId={projectId}
         token={token}
@@ -3697,6 +3705,8 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
+  const [savedFlash, setSavedFlash] = useState("");
+  const [checkpointRefetchKey, setCheckpointRefetchKey] = useState(0);
 
   useEffect(() => {
     if (user && ws.companies.length === 0) {
@@ -3797,6 +3807,34 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           ? w(`Convention saved. Grace period active until ${graceTo}. Violations will be flagged but not rejected until then.`, `Convención guardada. Período de gracia activo hasta ${graceTo}.`, lang)
           : w("Convention saved. Enforcing all uploads immediately.", "Convención guardada. Aplicada a todas las cargas de inmediato.", lang);
         setSavedMessage(msg); setSaved(true); setIsSaving(false);
+        // Create a version snapshot from the current wizard state so save history is preserved.
+        // This writes to naming_convention_versions, which is the "visible new version" after save.
+        const selectedDiscs = ws.disciplines.filter(d => d.selected);
+        const selectedDocs  = ws.docTypes.filter(d => d.selected);
+        if (selectedDiscs.length > 0 || selectedDocs.length > 0) {
+          fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token ?? ""}` },
+            body: JSON.stringify({
+              acceptedDisciplines: selectedDiscs.map(d => ({ code: d.code, label: d.label })),
+              acceptedSystems: [],
+              acceptedDocTypes: selectedDocs.map(d => ({ code: d.code, label: d.label })),
+              acceptedExtraFields: [],
+              acceptedFieldOrder: [],
+              analysisSummary: "",
+              ambiguities: [],
+              changeSummary: "Convention saved from wizard",
+              userGuidance: ws.userGuidance || null,
+            }),
+          }).catch(() => {});
+        }
+        // Use savedFlash so the confirmation appears on the CheckpointScreen (which replaces
+        // ReviewScreen in the same React batch). Increment refetchKey so CheckpointScreen
+        // reloads convention versions and reflects the new snapshot.
+        setSavedFlash(msg);
+        setCheckpointRefetchKey(k => k + 1);
+        setFoundationalEditMode(false);
+        setFoundationalUnlocked(false);
         setWs(s => ({ ...s, flowPhase: "checkpoint", step: 0 }));
       },
       onError: () => { toast({ title: "Error saving convention", variant: "destructive" }); setIsSaving(false); },
@@ -3898,8 +3936,11 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         onEditFoundational={() => {
           setFoundationalUnlocked(true);
           setFoundationalEditMode(true);
+          setSavedFlash("");
           setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
         }}
+        savedFlash={savedFlash}
+        refetchKey={checkpointRefetchKey}
       />
     );
   }

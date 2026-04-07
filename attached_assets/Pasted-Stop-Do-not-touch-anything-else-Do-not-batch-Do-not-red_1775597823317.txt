@@ -1,0 +1,142 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. Do not assume ISSUE 3 is already fixed because ISSUE 2 was fixed. We stay in strict diagnostic and targeted fix mode.
+
+We are now doing:
+
+ISSUE 3 — Save after foundational edits appears to do nothing.
+
+Live behavior reported:
+
+user edits foundational settings
+clicks save
+no confirmation
+no visible new version
+no visible indication that anything persisted
+
+This is not fixed until all three are proven:
+
+live DB write is correct
+live API response is correct
+live UI confirms and reflects it correctly
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+All checks, fixes, and validations must run against live production app behavior and live production database only.
+
+Step 1:
+Show the exact frontend code for the save flow triggered from foundational edit mode only.
+
+Show exact code for:
+
+save button render block
+onClick handler
+save function called
+any mutation hook used
+any success toast / banner / modal logic
+any refresh / invalidate / reload logic after save
+any code that switches flowPhase, step, foundationalEditMode, selectedVersion, or checkpoint state after save
+
+Step 2:
+Show the exact backend code for the endpoint that receives that save.
+
+Show exact code for:
+
+route
+request validation
+version creation logic
+transaction if any
+query that inserts into naming_convention_versions
+any logic that updates current convention / accepted convention / latest version pointers
+exact response body returned on success
+
+Step 3:
+Using the live production browser, perform one real foundational edit on project 5 and click save.
+
+Use a tiny controlled change that is easy to verify, for example:
+
+add one discipline if currently missing
+or
+add one doc type if currently missing
+or
+change one foundational field that must appear in the saved version
+
+Show exact live request:
+
+exact request URL
+exact method
+exact request payload
+
+Show exact live response:
+
+exact response status
+exact raw response body
+
+Step 4:
+Immediately run this exact live DB query and show raw output:
+
+SELECT id, project_id, convention_version, accepted_disciplines, accepted_doc_types, created_at, created_by_id
+FROM naming_convention_versions
+WHERE project_id = 5
+ORDER BY convention_version DESC, created_at DESC;
+
+If the table or columns differ, inspect schema first and then run the corrected exact query. Do not guess.
+
+Step 5:
+Identify the truth with exact evidence only.
+
+Choose one only after proof:
+
+no request fired
+request fired but backend failed
+backend succeeded but no new version row created
+new version row created but frontend did not refresh
+new version row created and frontend refreshed but no confirmation UI exists
+version created against wrong project
+response shape mismatch
+stale cache / invalidation failure
+save path is hitting the wrong endpoint for foundational edit mode
+
+Step 6:
+Fix only the real cause.
+
+Do not touch ISSUE 4 or ISSUE 5.
+Do not redesign the wizard.
+Do not add unrelated UX improvements.
+Only fix the exact cause that makes save appear to do nothing.
+
+Step 7:
+After the fix, perform the same live test again and show exact outputs:
+
+A. exact request URL
+B. exact request payload
+C. exact response status
+D. exact raw response body
+E. exact newest DB row for project 5
+F. exact visible confirmation in UI after save
+G. exact visible evidence in UI that a new version exists or that the current convention state updated
+
+Step 8:
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+Step 9:
+Show final proof in this exact format:
+
+ISSUE 3 — EXACT OUTPUTS
+
+Live request URL:
+Live response status:
+Was new version row created: yes/no
+Newest convention_version after save:
+Visible confirmation shown in UI: yes/no
+Visible new version or updated state shown in UI: yes/no
+Root cause:
+Exact fix applied:
