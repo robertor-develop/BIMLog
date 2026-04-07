@@ -1,0 +1,190 @@
+Stop. Do not add new features. Do not redesign the Convention Builder. Do not change prompts. We are fixing five confirmed regressions/coherence bugs only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+There are five confirmed issues still happening in the live app:
+
+ISSUE 1 — Total Control still shows 3 projects in the live super admin view.
+This is still wrong in the live app and is not resolved.
+
+ISSUE 2 — Opening Convention History still brings the user back into Step 1 / foundational setup state.
+That is wrong.
+History should not route into Step 1.
+
+ISSUE 3 — The foundational controls are now too hidden.
+The user can no longer easily find where to:
+add a new company
+edit company code / acronym
+edit separator
+edit uppercase
+edit character limits
+
+We do want foundational controls protected, but not lost.
+
+ISSUE 4 — “View Latest Accepted Convention Snapshot” is redundant/useless if the snapshot is already directly below the button.
+That button should not exist in its current form.
+
+ISSUE 5 — CVR Reports still do not work in the live app.
+That needs exact debugging, not guessing.
+
+Fix these in exact order.
+
+STEP 1 — Audit the live Total Control data path again.
+
+Do not rely on previous assumptions.
+Use the live production app and live production database only.
+
+Find the exact route and exact frontend request currently feeding the Total Control project cards and counts in the live app.
+Show the exact project ids and names being returned right now in the live super admin view.
+If archived/test projects are still being returned, identify why the live app is still showing them.
+
+Possible causes to check:
+frontend still calling an unfiltered endpoint
+backend route not actually deployed/restarted
+different route for cards vs counts
+different query for HealthBar vs cards
+cached/stale API response
+wrong status filter
+multiple admin endpoints with different behavior
+
+Do not guess.
+Show exact live route, exact query, exact returned project ids.
+
+Then fix only the real cause.
+
+Correct behavior:
+Total Control live super admin view should show only real visible active projects intended for platform-wide operations, not stale archived audit/test projects.
+
+STEP 2 — Fix Convention History routing.
+
+Opening Convention History must not push the user into Step 1 or foundational setup.
+
+Correct behavior:
+Convention History should remain a history/audit view.
+If the user opens a specific version from history, they should land on:
+a read-only accepted snapshot / version detail view
+or checkpoint with that version context
+but not Step 1 setup controls.
+
+Do not redesign history.
+Do not route history into generic builder steps.
+
+STEP 3 — Restore safe access to foundational controls.
+
+Right now they are over-hidden.
+We need a safe but usable path.
+
+Correct behavior:
+From checkpoint / accepted convention state, there must be one clear explicit action:
+Edit foundational settings
+
+That action should take the user to the foundational settings area with a strong warning.
+
+Required editable controls there:
+company name / company list if supported
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+Rules:
+not shown as default post-save landing state
+not mixed into normal revision flow by accident
+but easy to find intentionally
+
+If there is already an unlock button in Step 1 only, that is not enough.
+The user must be able to intentionally reach it from the checkpoint/accepted convention area.
+
+STEP 4 — Remove or repurpose the redundant snapshot button.
+
+If the Latest Accepted Convention Snapshot is already visible directly below, then:
+remove the “View Latest Accepted Convention Snapshot” button
+or repurpose it to collapse/expand that section if that is low risk
+
+But do not leave a useless button that points to content already on screen.
+
+STEP 5 — Debug CVR Reports in the live app.
+
+Do not guess.
+Use the live app.
+
+Open Reports & PDF → CVR Reports and determine exactly why it “still doesn’t work”.
+
+We need exact truth:
+is the route failing
+is the date filter returning no data incorrectly
+is the project scoping wrong
+is it only empty because there is truly no CVR data
+is the widget not connected to the backend
+is the backend query wrong
+is auth failing
+is it using wrong project id
+is it querying global data or none at all
+
+Show:
+exact frontend request URL
+exact backend route hit
+exact response body
+exact SQL/query source if applicable
+exact visible reason the UI is empty or broken
+
+Then fix only the real cause.
+
+If there is truly no CVR data for this project in the selected date range, the UI must say that clearly and truthfully.
+If the route is broken, fix the route.
+If project scoping is wrong, fix scoping.
+
+STEP 6 — Ensure post-save and history flows remain coherent.
+
+After these fixes:
+saving Version 4 / Version 5 etc. must still land on checkpoint
+opening history must not land on Step 1
+continue editing must still land on the editable accepted summary/review state
+foundational settings must be intentionally reachable, not defaulted and not lost
+
+Do not break the current checkpoint routing.
+
+STEP 7 — Checks.
+
+After fixing, run these checks and show exact output only:
+
+Check 1
+Using the live production app, show the exact project ids and names currently visible in Total Control after the fix.
+
+Check 2
+Show the exact live route and response feeding Total Control.
+Include whether archived/test projects are still present: yes/no
+
+Check 3
+Open Convention History on the real project and show:
+the exact first visible screen/section after click
+whether it lands on Step 1 setup inputs: yes/no
+
+Check 4
+From the checkpoint/accepted convention state, show:
+whether there is now an explicit “Edit foundational settings” path: yes/no
+the exact warning text shown
+the exact visible editable controls available there
+
+Check 5
+Show whether the redundant snapshot button still exists: yes/no
+If no, say whether it was removed or repurposed.
+
+Check 6
+For CVR Reports, show:
+exact frontend request URL
+exact backend response status
+exact response body
+exact visible UI state after fix
+
+Check 7
+After saving a new convention version, show:
+exact first visible screen
+whether checkpoint still works: yes/no
+whether Continue Editing Convention still lands on editable accepted summary/review state: yes/no
+
+Show exact output only. Do not summarize.

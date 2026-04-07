@@ -11,7 +11,7 @@ import {
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
   Download, RotateCcw, AlertTriangle, CheckCircle2, X,
   ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
-  Clock, GitMerge, Brain,
+  Clock, GitMerge, Brain, Lock,
 } from "lucide-react";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -3232,7 +3232,7 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
 }
 
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
-function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory }: {
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory, onEditFoundational }: {
   ws: WizardState;
   projectId: number;
   token: string;
@@ -3240,6 +3240,7 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
   onContinueEditing: () => void;
   onReEvidence: () => void;
   onOpenHistory: () => void;
+  onEditFoundational: () => void;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
 
@@ -3295,18 +3296,23 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           <RefreshCw style={{ width: 14, height: 14 }} />
           {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
         </Button>
-        <Button
-          variant="outline"
-          style={{ gap: 7, fontSize: 13, height: 40 }}
-          onClick={() => { const el = document.getElementById("convention-snapshot-section"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
-        >
-          <FileText style={{ width: 14, height: 14 }} />
-          {w("View Latest Accepted Convention Snapshot", "Ver snapshot de convención aceptada", lang)}
-        </Button>
         <Button variant="outline" onClick={onOpenHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <Clock style={{ width: 14, height: 14 }} />
           {w("Open Convention History", "Abrir historial de convención", lang)}
         </Button>
+        <Button
+          variant="outline"
+          onClick={onEditFoundational}
+          style={{ gap: 7, fontSize: 13, height: 40, borderColor: "#D97706", color: "#92400E" }}
+        >
+          <Lock style={{ width: 14, height: 14 }} />
+          {w("Edit Foundational Settings", "Editar ajustes fundacionales", lang)}
+        </Button>
+      </div>
+      {/* Foundational settings warning note */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", marginBottom: 16, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 6, fontSize: 11, color: "#92400E" }}>
+        <AlertTriangle style={{ width: 13, height: 13, flexShrink: 0, marginTop: 1 }} />
+        <span>{w("Edit Foundational Settings controls company codes, separator, uppercase enforcement, and character limits. Changes affect all future file naming across this project.", "Editar ajustes fundacionales controla códigos de empresa, separador, mayúsculas y límites de caracteres. Los cambios afectan todos los futuros nombres de archivo en este proyecto.", lang)}</span>
       </div>
 
       {/* Latest Accepted Convention Snapshot */}
@@ -3876,6 +3882,9 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         onOpenHistory={() => {
           loadHistory();
           setShowHistory(true);
+        }}
+        onEditFoundational={() => {
+          setFoundationalUnlocked(true);
           setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
         }}
       />

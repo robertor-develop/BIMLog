@@ -61,7 +61,7 @@ router.get("/admin/platform-stats", authMiddleware, async (req, res) => {
       [{ c: activeProjects }],
     ] = await Promise.all([
       db.select({ c: count() }).from(usersTable),
-      db.select({ c: count() }).from(projectsTable),
+      db.select({ c: count() }).from(projectsTable).where(ne(projectsTable.status, "archived")),
       db.select({ c: count() }).from(filesTable),
       db.select({ c: count() }).from(rfisTable),
       db.select({ c: count() }).from(submittalsTable),
@@ -117,7 +117,7 @@ router.get("/admin/overview", async (req, res) => {
       ] = await Promise.all([
         db.select({ c: count() }).from(usersTable).where(uFilter),
         db.select({ c: count() }).from(companiesTable).where(cFilter),
-        db.select({ c: count() }).from(projectsTable).where(pFilter),
+        db.select({ c: count() }).from(projectsTable).where(and(pFilter, ne(projectsTable.status, "archived"))),
         db.select({ c: count() }).from(filesTable).where(fFilter),
         db.select({ c: count() }).from(rfisTable).where(rFilter),
         db.select({ c: count() }).from(submittalsTable).where(sFilter),
@@ -144,7 +144,7 @@ router.get("/admin/overview", async (req, res) => {
     ] = await Promise.all([
       db.select({ c: count() }).from(usersTable),
       db.select({ c: count() }).from(companiesTable),
-      db.select({ c: count() }).from(projectsTable),
+      db.select({ c: count() }).from(projectsTable).where(ne(projectsTable.status, "archived")),
       db.select({ c: count() }).from(filesTable),
       db.select({ c: count() }).from(rfisTable),
       db.select({ c: count() }).from(submittalsTable),

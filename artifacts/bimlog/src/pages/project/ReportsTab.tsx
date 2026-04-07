@@ -276,12 +276,26 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           {report.issues.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">
-                <CheckCircle2 style={{ width: 22, height: 22, color: "#16A34A" }} />
+                <CheckCircle2 style={{ width: 22, height: 22, color: report.totalFilesProcessed === 0 ? "#9CA3AF" : "#16A34A" }} />
               </div>
-              <div className="empty-title" style={{ color: "#16A34A" }}>
-                {from || to ? "No issues in selected date range" : "No pending issues"}
+              <div className="empty-title" style={{ color: report.totalFilesProcessed === 0 ? "#6B7280" : "#16A34A" }}>
+                {report.totalFilesProcessed === 0
+                  ? "No files uploaded yet"
+                  : (from || to)
+                    ? "No CVR flags in selected date range"
+                    : report.totalFlagged === 0
+                      ? "No CVR flags found"
+                      : "No pending issues"}
               </div>
-              <div className="empty-desc">All flagged files have been resolved or there are no CVR flags.</div>
+              <div className="empty-desc">
+                {report.totalFilesProcessed === 0
+                  ? "No files have been uploaded to this project. CVR analysis runs automatically when files are submitted."
+                  : (from || to)
+                    ? "No content verification flags were raised in the selected date range."
+                    : report.totalFlagged === 0
+                      ? "All uploaded files passed content verification. No mismatches were detected."
+                      : "All flagged files have been resolved — no items pending admin review."}
+              </div>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
