@@ -1,0 +1,77 @@
+Stop. Do not build anything else. Do not summarize. We are verifying the five fixes with exact live outputs only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All checks must run against the live production app behavior and live production database only.
+
+Run these checks and show exact outputs only.
+
+Check 1 — Total Control live project list
+Using the live production app, open Total Control and show:
+the exact project ids and names currently visible in the Active Projects Grid
+the exact counts shown in the top metrics for:
+All Projects
+Active Projects
+
+Check 2 — Total Control backend responses
+Show the exact live responses for:
+GET /admin/projects
+GET /admin/platform-stats
+GET /admin/overview
+Include only the project-count-related parts if the payload is large.
+We need to confirm archived/test projects are no longer counted in the metrics.
+
+Check 3 — Convention History routing
+Using the live real project, open /projects/19/convention
+Then click:
+Open Convention History
+
+Show:
+the exact first visible section after click
+whether it lands on Step 1 setup inputs: yes/no
+whether it stays on checkpoint/history context: yes/no
+
+Check 4 — Edit foundational settings path
+From the checkpoint screen, click:
+Edit Foundational Settings
+
+Show:
+the exact first visible section after click
+the exact warning text shown
+the exact visible editable controls now available there
+
+Check 5 — Redundant snapshot button
+On the live checkpoint screen, show whether the old
+“View Latest Accepted Convention Snapshot”
+button still exists: yes/no
+
+If no, show what replaced it.
+
+Check 6 — CVR reports live behavior
+Using the live app on this same project, open Reports & PDF → CVR Reports and show:
+the exact frontend request URL
+the exact backend response status
+the exact response body
+the exact visible empty-state message now shown in the UI
+
+Check 7 — Post-save convention flow
+On the same live project, save one new convention version again.
+
+Show:
+the exact first visible screen after save
+whether it lands on checkpoint: yes/no
+whether it lands on Step 1 setup inputs: yes/no
+whether Continue Editing Convention still lands on editable accepted summary/review state: yes/no
+
+Check 8 — Foundational values after re-entry
+After that save and re-entry, show the visible foundational values:
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+These must match the saved accepted baseline.
+
+Show exact outputs only. Do not summarize
