@@ -1,0 +1,173 @@
+Stop. Do not add new features. Do not redesign the whole Convention Builder. We are fixing three confirmed coherence bugs only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+There are three confirmed issues:
+
+ISSUE 1 — Total Control still shows old audit/test projects.
+The earlier badge clarified that Total Control is platform-wide, but the real problem remains: stale audit/test projects are still appearing there and polluting the platform view.
+
+ISSUE 2 — The project dashboard is showing fake or wrong schedule delay attribution data for this project.
+Names like ABC Mech and PACE are appearing even though they are not part of this real project.
+That means the delay attribution widget is pulling wrong-scope data, demo data, or stale fallback data.
+
+ISSUE 3 — After saving a new convention version, the Convention Builder still returns to a Step 1-style setup state with stale/original foundational values.
+Example:
+company acronym reappears as BIM instead of BIMCP,
+separator and foundational controls are shown as if setup restarted,
+even though Version 3 saved successfully.
+This is misleading and wrong.
+
+Fix these in exact order.
+
+STEP 1 — Audit and clean Total Control project source.
+
+Find the exact source of the project list shown in Total Control.
+We already know /admin/projects is platform-wide.
+Now determine exactly why old audit/test projects are still present.
+
+Check whether these old projects:
+still exist as active rows in projects table
+still have memberships
+still have no soft delete / archive status
+were created by earlier test flows and never cleaned
+are being included because there is no exclusion for test/audit artifacts
+
+Do not guess.
+Show the exact ids, names, created_at, status, and any available ownership/membership info for the stale projects currently appearing in Total Control.
+
+Then implement the minimum correct fix.
+
+If these are true active rows created during testing, do NOT silently hard-delete them in code.
+Instead:
+either archive them cleanly if an archive path exists,
+or exclude clearly identified audit/test artifacts from Total Control only if that is the agreed behavior,
+or provide a cleanup action if the platform already supports it.
+
+But do not invent a fake filter that hides real client projects.
+Show exact truth first, then fix only the real cause.
+
+STEP 2 — Fix wrong schedule delay attribution data scope.
+
+Audit the exact query and data source used by the project dashboard widget that shows schedule delay attribution.
+
+We need exact truth:
+Why is this project showing companies/trades that do not belong to it?
+
+Check whether the widget is using:
+seed/demo fallback data
+global sample data
+hardcoded placeholder values
+cross-project records
+unscoped schedule/activity rows
+or stale cached mock values
+
+Show the exact query path and the exact source rows feeding that widget for this project.
+
+Then fix only the real cause.
+
+Correct behavior:
+If there is no real delay attribution data for the project yet, the widget must say so clearly.
+It must not show fake companies, fake bars, or placeholder project trades.
+
+Acceptable fallback:
+“No real delay attribution data yet for this project.”
+
+Not acceptable:
+ABC Mech, PACE, or any invented trade/company names on a real project that does not use them.
+
+STEP 3 — Fix post-save convention landing state.
+
+After the user accepts a re-analysis result and saves a new convention version, the Convention Builder must not drop the user into Step 1-style setup controls with stale/original values.
+
+Correct post-save behavior:
+after saving Version 2, Version 3, etc.,
+the user should land on the checkpoint / accepted convention summary state
+not on setup_context
+not on generic Step 1 company/separator inputs
+not on stale foundational values
+
+That means:
+saving a new accepted version must route back to checkpoint mode by default
+
+Use the accepted saved version as the source of truth for what is shown next.
+
+STEP 4 — Ensure foundational fields hydrate from latest accepted version.
+
+Audit how these fields are populated after save / re-entry:
+company name
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+They must reflect the latest accepted convention baseline, not stale original defaults.
+
+If the latest accepted version stores or can derive these values, use that.
+If the current accepted naming_conventions row is the source of truth, ensure it is updated correctly on save and reanalysis acceptance.
+
+Do not leave BIM visible if the accepted current convention baseline is BIMCP.
+Do not show stale separator/uppercase/character-limit values as if setup restarted.
+
+STEP 5 — Separate foundational controls from normal revision flow.
+
+Do not redesign the whole builder.
+Just change the re-entry and review logic so foundational controls are not shown as the default surface after every revision.
+
+Rule:
+normal convention revisions should reopen through checkpoint / accepted summary
+foundational controls remain accessible only when explicitly editing those sections
+
+If possible with minimal risk:
+add a warning label when editing foundational controls such as:
+Changing foundational convention settings may affect all future file naming and project structure.
+
+But do not add new UI systems.
+The core fix is:
+do not land there by default.
+
+STEP 6 — Checks.
+
+After fixing, run these checks and show exact output only:
+
+Check 1
+Using the live production database, show the exact project rows currently feeding Total Control:
+id, name, status, created_at
+
+Check 2
+Show exactly what was done about the stale Total Control projects:
+archived
+excluded
+cleaned up
+or other exact action
+
+Check 3
+Audit the schedule delay attribution widget for this real project and show:
+the exact query/data source
+the exact rows used before the fix
+the exact rows used after the fix
+
+Check 4
+Using the live production app on this same real project, show:
+whether fake companies like ABC Mech / PACE still appear in schedule delay attribution: yes/no
+
+Check 5
+Save a new convention version on the same project and show:
+exact first visible screen after save
+whether it lands on checkpoint/accepted summary: yes/no
+whether it lands on Step 1 company/separator inputs: yes/no
+
+Check 6
+On that post-save screen, show the visible foundational values:
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+They must reflect the latest accepted baseline, not stale original defaults.
+
+Show exact output only. Do not summarize.

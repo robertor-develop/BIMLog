@@ -356,47 +356,12 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           </div>
         </div>
 
-        <div style={{ padding: "20px 0" }}>
-          {[
-            { label: "MEP Rough-in L3",     baseline: 55, delay: 15, company: "ABC Mech." },
-            { label: "Structural steel L4",  baseline: 70, delay: 5,  company: "Pace GC" },
-            { label: "Arch. drawings",       baseline: 80, delay: 0,  company: "ACM Arch." },
-            { label: "MEP Coordination",     baseline: 40, delay: 20, company: "ABC Mech." },
-          ].map(row => (
-            <div key={row.label} className="gantt-row">
-              <div className="gantt-label">{row.label}</div>
-              <div className="gantt-track">
-                <div
-                  className="gantt-bar"
-                  style={{
-                    left: 0,
-                    width: `${row.baseline}%`,
-                    background: row.delay === 0 ? "#16A34A" : "#2563EB"
-                  }}
-                >
-                  {row.delay === 0 ? "On track" : "Baseline"}
-                </div>
-                {row.delay > 0 && (
-                  <div className="gantt-delay-bar" style={{ left: `${row.baseline}%`, width: `${row.delay}%` }}>
-                    +{Math.round(row.delay / 5)}d · {row.company}
-                  </div>
-                )}
-              </div>
-              <div
-                className="gantt-val"
-                style={{ color: row.delay === 0 ? "#16A34A" : "#DC2626" }}
-              >
-                {row.delay === 0 ? "0d" : `+${Math.round(row.delay / 5)}d`}
-              </div>
-            </div>
-          ))}
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-              Sample data shown — connect MS Project to see live schedule
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#DC2626" }}>
-              Total estimated delay: 5 days attributed to ABC Mechanical
-            </span>
+        <div style={{ padding: "32px 0", textAlign: "center" }}>
+          <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
+            No real delay attribution data yet for this project.
+          </div>
+          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.7 }}>
+            Connect an MS Project file to begin tracking schedule delay by trade and company.
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import {
   filesTable, rfisTable, submittalsTable, activityLogTable,
   emailLogTable, featureFlagsTable, adminActionsLogTable,
 } from "@workspace/db/schema";
-import { eq, desc, count, gte, and, or, ilike, sql, lt } from "drizzle-orm";
+import { eq, desc, count, gte, and, or, ilike, sql, lt, ne } from "drizzle-orm";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 
 const router = Router();
@@ -376,7 +376,9 @@ router.get("/admin/projects", async (req, res) => {
         .where(sql`${projectsTable.id} = ANY(ARRAY[${sql.raw(myIds.join(","))}]::int[])`)
         .orderBy(desc(projectsTable.createdAt));
     } else {
-      projects = await db.select().from(projectsTable).orderBy(desc(projectsTable.createdAt));
+      projects = await db.select().from(projectsTable)
+        .where(ne(projectsTable.status, "archived"))
+        .orderBy(desc(projectsTable.createdAt));
     }
     const result = await Promise.all(projects.map(async (p) => {
       const [[{ memberCount }], [{ fileCount }], [{ rfiCount }], [{ submittalCount }]] = await Promise.all([

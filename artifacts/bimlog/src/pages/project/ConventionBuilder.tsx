@@ -3669,6 +3669,27 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     }
   }, [convention]);
 
+  // Hydrate foundational fields from the saved convention baseline (separator, company codes).
+  // This prevents stale default values (e.g. "BIM" from user.companyName) from appearing
+  // in Companies & Separator step after returning from checkpoint or after save.
+  const hasHydratedFoundational = useRef(false);
+  useEffect(() => {
+    if (hasHydratedFoundational.current || !convention) return;
+    const conv = convention as any;
+    const savedSep: "-" | "_" = conv.separator === "_" ? "_" : "-";
+    const projCodeField = (conv.fields || []).find((f: any) => f.label === "Project Code");
+    const codes: string[] = Array.isArray(projCodeField?.allowedValues) ? projCodeField.allowedValues as string[] : [];
+    if (!conv.separator && codes.length === 0) return; // no useful data yet
+    hasHydratedFoundational.current = true;
+    setWs(s => ({
+      ...s,
+      separator: savedSep,
+      ...(codes.length > 0
+        ? { companies: codes.map(code => ({ id: uid(), name: code, code })) }
+        : {}),
+    }));
+  }, [convention]);
+
   const hasAutoLoaded = useRef(false);
   useEffect(() => {
     if (hasAutoLoaded.current || !token) return;
@@ -3725,6 +3746,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           ? w(`Convention saved. Grace period active until ${graceTo}. Violations will be flagged but not rejected until then.`, `Convención guardada. Período de gracia activo hasta ${graceTo}.`, lang)
           : w("Convention saved. Enforcing all uploads immediately.", "Convención guardada. Aplicada a todas las cargas de inmediato.", lang);
         setSavedMessage(msg); setSaved(true); setIsSaving(false);
+        setWs(s => ({ ...s, flowPhase: "checkpoint", step: 0 }));
       },
       onError: () => { toast({ title: "Error saving convention", variant: "destructive" }); setIsSaving(false); },
     },
@@ -3904,7 +3926,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           projectId={projectId}
           userGuidance={ws.userGuidance}
           onGuidanceChange={g => setWs(s => ({ ...s, userGuidance: g }))}
-          onAccept={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
+          onAccept={() => setWs(s => ({ ...s, flowPhase: "checkpoint", step: 0, reanalysisResult: null }))}
           onDiscard={() => setWs(s => ({ ...s, flowPhase: "main_wizard", reanalysisResult: null }))}
         />
       </div>
@@ -3929,6 +3951,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         enteredFromDiscovery={ws.enteredFromDiscovery}
         lang={lang}
       />
+      {step === 0 && hasExisting && (
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px", marginBottom: 16, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
+          <AlertTriangle style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1 }} />
+          <span>{w("Changing foundational convention settings may affect all future file naming and project structure. Use the steps above to revise specific sections instead.", "Cambiar los ajustes fundacionales puede afectar todos los nombres de archivo futuros y la estructura del proyecto. Use los pasos anteriores para revisar secciones específicas.", lang)}</span>
+        </div>
+      )}
       {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} />}
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
