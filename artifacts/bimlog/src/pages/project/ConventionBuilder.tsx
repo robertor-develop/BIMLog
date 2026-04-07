@@ -285,7 +285,7 @@ interface WizardState {
   enableExtRestrictions: boolean;
   extRestrictions: Record<string, string[]>;
   // ── front-door setup context ──────────────────────────────────────────────
-  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review" | "checkpoint";
+  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review" | "checkpoint" | "edit_foundation";
   setupCtx: SetupContext;
   discoveryResult: DiscoveryResult | null;
   reanalysisResult: ReanalysisResult | null;
@@ -3290,6 +3290,312 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
   );
 }
 
+// ─── Edit Foundation Screen ───────────────────────────────────────────────────
+function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onSaved }: {
+  ws: WizardState;
+  setWs: React.Dispatch<React.SetStateAction<WizardState>>;
+  projectId: number;
+  token: string;
+  lang: string;
+  onCancel: () => void;
+  onSaved: (msg: string) => void;
+}) {
+  const [newName, setNewName] = useState("");
+  const [newCode, setNewCode] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCode, setEditCode] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [contextLoaded, setContextLoaded] = useState(false);
+  const [contextError, setContextError] = useState(false);
+  const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
+
+  useEffect(() => {
+    setContextLoaded(false);
+    setContextError(false);
+    fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => { if (!r.ok) throw new Error("Failed to load versions"); return r.json(); })
+      .then((versions: ConventionVersionSnapshot[]) => {
+        if (Array.isArray(versions) && versions.length > 0) {
+          const usable = versions.find(v => (v.acceptedDisciplines?.length ?? 0) > 0 || (v.acceptedDocTypes?.length ?? 0) > 0) ?? versions[0];
+          setLatestVersion(usable);
+        }
+        setContextLoaded(true);
+      })
+      .catch(() => { setContextError(true); setContextLoaded(true); });
+  }, [projectId, token]);
+
+  const handleAddCompany = () => {
+    if (!newName.trim()) return;
+    const code = newCode.trim().toUpperCase() || newName.trim().slice(0, 3).toUpperCase();
+    setWs(s => ({ ...s, companies: [...s.companies, { id: uid(), name: newName.trim(), code }] }));
+    setNewName(""); setNewCode("");
+  };
+
+  const startEdit = (c: Company) => { setEditId(c.id); setEditName(c.name); setEditCode(c.code); };
+  const saveEdit = () => {
+    if (!editId) return;
+    setWs(s => ({ ...s, companies: s.companies.map(c => c.id === editId ? { ...c, name: editName.trim() || c.name, code: editCode.toUpperCase().slice(0, 8) || c.code } : c) }));
+    setEditId(null);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const discs = latestVersion?.acceptedDisciplines || [];
+      const docs = latestVersion?.acceptedDocTypes || [];
+      const fieldOrder = latestVersion?.acceptedFieldOrder?.length
+        ? latestVersion.acceptedFieldOrder
+        : ["Project Code", "Originator", "Discipline", "Level", "Type", "Sequence", "Status", "Revision"];
+      const buildAllowedValues = (label: string): string[] => {
+        if (label === "Project Code" || label === "Originator") return ws.companies.map(c => c.code);
+        if (label === "Discipline") return discs.map(d => d.code);
+        if (label === "Type") return docs.map(d => d.code);
+        return [];
+      };
+      const convRes = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/conventions`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          separator: ws.separator,
+          isActive: true,
+          enforceUppercase: ws.enforceUppercase,
+          applyCharLimits: ws.applyCharLimits,
+          companyCode: ws.companies.map(c => c.code).join(","),
+          userGuidance: ws.userGuidance || "",
+          fields: fieldOrder.map((label, i) => ({
+            label,
+            fieldOrder: i,
+            allowedValues: buildAllowedValues(label),
+          })),
+        }),
+      });
+      if (!convRes.ok) throw new Error("Failed to update convention");
+      const verRes = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          acceptedDisciplines: discs,
+          acceptedSystems: latestVersion?.acceptedSystems || [],
+          acceptedDocTypes: docs,
+          acceptedExtraFields: latestVersion?.acceptedExtraFields || [],
+          acceptedFieldOrder: latestVersion?.acceptedFieldOrder || [],
+          analysisSummary: latestVersion?.analysisSummary || "",
+          ambiguities: latestVersion?.ambiguities || [],
+          changeSummary: `Foundational settings updated: ${ws.companies.map(c => c.code).join(", ")} | sep=${ws.separator}`,
+          userGuidance: ws.userGuidance || null,
+        }),
+      });
+      if (!verRes.ok) throw new Error("Failed to create version snapshot");
+      onSaved(w("Foundational settings saved. A new convention version has been recorded.", "Ajustes fundacionales guardados. Se registró una nueva versión de convención.", lang));
+    } catch {
+      onSaved(w("Error saving foundational settings.", "Error al guardar los ajustes fundacionales.", lang));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const sep = ws.separator;
+  const sampleParts = [
+    ws.companies[0]?.code || "PROJ",
+    latestVersion?.acceptedDisciplines?.[0]?.code || "STR",
+    latestVersion?.acceptedDocTypes?.[0]?.code || "DRW",
+    "0001",
+  ];
+  const sampleName = sampleParts.join(sep);
+
+  if (!contextLoaded) {
+    return (
+      <div style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center", color: "#6B7280" }}>
+          <RefreshCw style={{ width: 20, height: 20, margin: "0 auto 8px", animation: "spin 1s linear infinite" }} />
+          <div style={{ fontSize: 13 }}>{w("Loading project context...", "Cargando contexto del proyecto...", lang)}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (contextError) {
+    return (
+      <div style={{ padding: 20, textAlign: "center" }}>
+        <AlertTriangle style={{ width: 24, height: 24, margin: "0 auto 8px", color: "#DC2626" }} />
+        <div style={{ fontSize: 13, color: "#DC2626", marginBottom: 12 }}>{w("Failed to load convention context.", "Error al cargar el contexto de convención.", lang)}</div>
+        <Button variant="outline" onClick={onCancel} style={{ fontSize: 13 }}>{w("Return to Checkpoint", "Volver al checkpoint", lang)}</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", marginBottom: 16, background: "#FFFBEB", border: "2px solid #FDE68A", borderRadius: 8 }}>
+        <AlertTriangle style={{ width: 18, height: 18, color: "#D97706", flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#92400E" }}>
+            {w("Editing Foundational Settings", "Editando ajustes fundacionales", lang)}
+          </div>
+          <div style={{ fontSize: 12, color: "#92400E", marginTop: 2 }}>
+            {w("Changes here affect company codes, separator, and formatting rules. Your disciplines, document types, and convention structure remain unchanged.", "Los cambios aquí afectan códigos de empresa, separador y reglas de formato. Las disciplinas, tipos de documento y estructura de convención no se modifican.", lang)}
+          </div>
+        </div>
+      </div>
+
+      {latestVersion && (
+        <div style={{ padding: "10px 14px", marginBottom: 16, background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, fontSize: 12, color: "#1E40AF" }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            {w("Current Convention Context", "Contexto de convención actual", lang)} — {w("Version", "Versión", lang)} {latestVersion.conventionVersion}
+          </div>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <span>{w("Disciplines", "Disciplinas", lang)}: <strong>{latestVersion.acceptedDisciplines.map(d => d.code).join(", ") || "—"}</strong></span>
+            <span>{w("Doc Types", "Tipos Doc", lang)}: <strong>{latestVersion.acceptedDocTypes.map(d => d.code).join(", ") || "—"}</strong></span>
+          </div>
+          {latestVersion.analysisSummary && (
+            <div style={{ marginTop: 4, fontSize: 11, color: "#3B82F6" }}>{latestVersion.analysisSummary}</div>
+          )}
+          {ws.userGuidance && (
+            <div style={{ marginTop: 4, fontSize: 11, color: "#7C3AED", fontStyle: "italic" }}>
+              {w("Guidance", "Guía", lang)}: {ws.userGuidance}
+            </div>
+          )}
+        </div>
+      )}
+
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{w("Companies", "Empresas", lang)}</div>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
+          {w("Add, remove, or edit company codes. Each company code appears in every file name.", "Agregar, eliminar o editar códigos de empresa. Cada código aparece en los nombres de archivo.", lang)}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          <Input value={newName} onChange={e => { setNewName(e.target.value); if (!newCode) setNewCode(e.target.value.slice(0, 3).toUpperCase()); }} onKeyDown={e => e.key === "Enter" && handleAddCompany()} placeholder={w("Company Name", "Nombre de Empresa", lang)} style={{ flex: 2, fontSize: 13 }} />
+          <Input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase().slice(0, 8))} onKeyDown={e => e.key === "Enter" && handleAddCompany()} placeholder={w("Code (auto)", "Código (auto)", lang)} style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }} />
+          <Button onClick={handleAddCompany} size="sm" style={{ gap: 5, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 13, height: 13 }} />{w("Add", "Agregar", lang)}</Button>
+        </div>
+
+        {editId && (
+          <div style={{ marginBottom: 12, padding: "14px 16px", background: "#EFF6FF", border: "2px solid #2563EB", borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>{w("Edit Company", "Editar Empresa", lang)}</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder={w("Company Name", "Nombre", lang)} style={{ flex: 2, fontSize: 13 }} autoFocus />
+              <Input value={editCode} onChange={e => setEditCode(e.target.value.toUpperCase().slice(0, 8))} placeholder="Code" style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button size="sm" onClick={saveEdit} style={{ fontSize: 12, gap: 5 }}><Check style={{ width: 12, height: 12 }} />{w("Save", "Guardar", lang)}</Button>
+              <Button size="sm" variant="outline" onClick={() => setEditId(null)} style={{ fontSize: 12 }}>{w("Cancel", "Cancelar", lang)}</Button>
+            </div>
+          </div>
+        )}
+
+        {ws.companies.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {ws.companies.map(c => (
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 7, background: editId === c.id ? "#EFF6FF" : "hsl(var(--secondary))", border: `1px solid ${editId === c.id ? "#2563EB" : "hsl(var(--border))"}` }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "3px 10px", borderRadius: 4, flexShrink: 0, minWidth: 60, textAlign: "center" }}>
+                  {c.code}
+                </span>
+                <span style={{ flex: 1, fontSize: 13 }}>{c.name}</span>
+                <button onClick={() => startEdit(c)} title={w("Edit", "Editar", lang)} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}>
+                  <Edit2 style={{ width: 13, height: 13 }} />
+                </button>
+                <button onClick={() => setWs(s => ({ ...s, companies: s.companies.filter(x => x.id !== c.id) }))} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
+                  <Trash2 style={{ width: 13, height: 13 }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {ws.companies.length === 0 && (
+          <div style={{ padding: 16, textAlign: "center", color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
+            {w("No companies added yet.", "Sin empresas agregadas.", lang)}
+          </div>
+        )}
+      </Card>
+
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{w("Separator Character", "Carácter Separador", lang)}</div>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
+          {w("The character that separates every field in file names.", "El carácter que separa cada campo en los nombres de archivo.", lang)}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {(["-", "_"] as const).map(s => (
+            <button key={s} onClick={() => setWs(prev => ({ ...prev, separator: s }))} style={{ padding: "14px", borderRadius: 8, cursor: "pointer", textAlign: "left", border: `2px solid ${ws.separator === s ? "#2563EB" : "hsl(var(--border))"}`, background: ws.separator === s ? "#EFF6FF" : "hsl(var(--card))" }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 900, color: ws.separator === s ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 2 }}>{s}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: ws.separator === s ? "#1D4ED8" : "hsl(var(--foreground))" }}>
+                {s === "-" ? w("Hyphen", "Guión", lang) : w("Underscore", "Guión bajo", lang)}
+              </div>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{w("Formatting Rules", "Reglas de formato", lang)}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13 }}>
+            <input type="checkbox" checked={ws.enforceUppercase} onChange={e => setWs(s => ({ ...s, enforceUppercase: e.target.checked }))} style={{ width: 16, height: 16 }} />
+            {w("Enforce uppercase for all file name fields", "Forzar mayúsculas en todos los campos del nombre de archivo", lang)}
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13 }}>
+            <input type="checkbox" checked={ws.applyCharLimits} onChange={e => setWs(s => ({ ...s, applyCharLimits: e.target.checked }))} style={{ width: 16, height: 16 }} />
+            {w("Apply character limits per field", "Aplicar límites de caracteres por campo", lang)}
+          </label>
+        </div>
+      </Card>
+
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{w("Project Guidance", "Guía del proyecto", lang)}</div>
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>
+          {w("Human-governed rules the AI must respect during analysis and re-analysis.", "Reglas definidas por el usuario que la IA debe respetar durante el análisis.", lang)}
+        </div>
+        <textarea
+          value={ws.userGuidance}
+          onChange={e => setWs(s => ({ ...s, userGuidance: e.target.value }))}
+          placeholder={w("e.g. Always include STR discipline. Exclude placeholder codes.", "ej. Siempre incluir disciplina STR. Excluir códigos temporales.", lang)}
+          style={{ width: "100%", minHeight: 60, padding: "8px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", resize: "vertical", fontFamily: "inherit" }}
+        />
+      </Card>
+
+      <div style={{ padding: "12px 16px", marginBottom: 20, background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          {w("Live Preview", "Vista previa", lang)}
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "#1D4ED8", letterSpacing: "0.04em" }}>
+          {sampleName}
+        </div>
+        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+          {w("Sample name using current companies and separator with existing convention fields.", "Nombre ejemplo usando las empresas y separador actuales con los campos de convención existentes.", lang)}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: "2px solid hsl(var(--border))" }}>
+        <Button variant="outline" onClick={onCancel} style={{ gap: 6, fontSize: 13 }}>
+          <ChevronLeft style={{ width: 15, height: 15 }} />
+          {w("Cancel — Return to Checkpoint", "Cancelar — Volver al checkpoint", lang)}
+        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button
+            variant="outline"
+            onClick={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }))}
+            style={{ gap: 6, fontSize: 13, borderColor: "#D97706", color: "#92400E" }}
+          >
+            <RefreshCw style={{ width: 14, height: 14 }} />
+            {w("Rebuild Convention from Changes", "Reconstruir convención desde cambios", lang)}
+          </Button>
+          <Button onClick={handleSave} disabled={saving || ws.companies.length === 0} style={{ gap: 6, fontSize: 13 }}>
+            {saving ? (
+              <><RefreshCw style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />{w("Saving...", "Guardando...", lang)}</>
+            ) : (
+              <><Check style={{ width: 14, height: 14 }} />{w("Save Foundational Changes", "Guardar cambios fundacionales", lang)}</>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
 function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory, onEditFoundational, savedFlash, refetchKey }: {
   ws: WizardState;
@@ -3993,13 +4299,30 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           setShowHistory(true);
         }}
         onEditFoundational={() => {
-          setFoundationalUnlocked(true);
-          setFoundationalEditMode(true);
           setSavedFlash("");
-          setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+          setWs(s => ({ ...s, flowPhase: "edit_foundation" }));
         }}
         savedFlash={savedFlash}
         refetchKey={checkpointRefetchKey}
+      />
+    );
+  }
+
+  // ── Edit Foundation — contextual edit, NOT wizard replay ─────────────────
+  if (flowPhase === "edit_foundation") {
+    return (
+      <EditFoundationScreen
+        ws={ws}
+        setWs={setWs}
+        projectId={projectId}
+        token={token ?? ""}
+        lang={lang}
+        onCancel={() => setWs(s => ({ ...s, flowPhase: "checkpoint" }))}
+        onSaved={(msg) => {
+          setSavedFlash(msg);
+          setCheckpointRefetchKey(k => k + 1);
+          setWs(s => ({ ...s, flowPhase: "checkpoint" }));
+        }}
       />
     );
   }

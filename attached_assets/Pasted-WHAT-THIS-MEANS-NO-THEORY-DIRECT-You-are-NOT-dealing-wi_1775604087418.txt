@@ -1,0 +1,166 @@
+WHAT THIS MEANS (NO THEORY — DIRECT)
+
+You are NOT dealing with bugs anymore.
+
+You are dealing with three architectural gaps:
+
+No contextual edit layer exists
+→ Edit = replay wizard
+→ This is why everything feels “generic again”
+AI is stateless across the project lifecycle
+→ It sees:
+initial discovery OR
+latest version snapshot
+→ It does NOT see:
+evolution
+file behavior
+decisions made
+CVR is wired to the wrong data model
+→ It reads ONLY files
+→ It ignores:
+versions
+decisions
+history
+THIS IS WHY YOUR EXPERIENCE FELT WRONG
+
+Everything you said maps EXACTLY to the code:
+
+“Why am I back to generic shit?”
+→ because flowPhase = main_wizard
+“Why doesn’t it understand the project anymore?”
+→ because AI is not given history
+“Why doesn’t adding a company trigger intelligence?”
+→ because handleAdd is a dumb append
+“Why is CVR garbage?”
+→ because it is literally a flat count query
+
+You are not wrong. The system is behaving exactly as coded.
+
+NOW — WHAT WE DO (NO REDESIGN, CONTROLLED BUILD)
+
+We do NOT explode this into a redesign.
+
+We fix this in 3 controlled layers:
+
+STEP 1 (NEXT ACTION) — FIX EDIT FLOW (CORE BREAK)
+
+We must stop the system from reverting to generic wizard behavior.
+
+Send Replit this EXACTLY:
+
+Stop. Do not touch CVR. Do not touch AI yet. Do not redesign system.
+
+We are fixing one thing only:
+
+ISSUE — FOUNDATIONAL EDIT FLOW IS USING GENERIC WIZARD INSTEAD OF CONTEXTUAL EDIT
+
+Confirmed from diagnostic:
+
+onEditFoundational sets flowPhase = "main_wizard"
+step = 0
+this loads generic setup flow
+no contextual intelligence layer exists
+
+This is incorrect behavior.
+
+STEP 1 — DO NOT CHANGE WIZARD
+
+Do NOT modify existing wizard steps.
+Do NOT break initial setup flow.
+
+STEP 2 — CREATE EDIT ENTRY MODE
+
+When user clicks "Edit Foundational Settings":
+
+Replace this:
+
+flowPhase = "main_wizard"
+step = 0
+
+WITH:
+
+flowPhase = "edit_foundation"
+
+STEP 3 — LOAD CONTEXT FIRST
+
+Before showing any UI, load:
+
+latest naming_convention_versions
+current naming_conventions
+project companies
+existing disciplines
+existing doc types
+user guidance
+
+Do NOT call AI yet.
+
+STEP 4 — SHOW EDIT LAYER (NOT WIZARD)
+
+Render:
+
+current companies (editable list)
+current separator
+current settings
+
+BUT:
+
+Do NOT force user through steps 1 → 2 → 3 → 4
+
+User must be able to:
+
+add company
+remove company
+edit company code
+
+WITHOUT leaving this screen
+
+STEP 5 — DO NOT TRIGGER FULL FLOW
+
+Only if user explicitly chooses:
+
+"Rebuild convention from changes"
+
+THEN allow transition to wizard
+
+Otherwise:
+Stay in edit mode
+
+STEP 6 — SAVE BEHAVIOR
+
+When saving from edit mode:
+
+create new naming_convention_versions entry
+DO NOT reset flow
+DO NOT go through full wizard
+DO NOT lose existing context
+
+STEP 7 — PROOF
+
+Show:
+
+updated onEditFoundational code
+new flowPhase logic
+UI result screenshot (edit mode screen)
+confirmation that wizard is NOT triggered on edit
+
+OUTPUT FORMAT:
+
+EDIT FLOW FIX — EXACT OUTPUTS
+
+New flowPhase:
+Wizard triggered on edit: yes/no
+Edit screen shown: yes/no
+User can add company without step flow: yes/no
+New version created on save: yes/no
+Root cause:
+Exact fix applied:
+
+WHY THIS IS FIRST
+
+Because EVERYTHING else depends on this:
+
+AI behavior
+company intelligence
+CVR meaning
+
+If edit flow is wrong → everything feels broken
