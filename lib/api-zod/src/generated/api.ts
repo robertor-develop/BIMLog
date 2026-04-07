@@ -463,6 +463,9 @@ export const UpsertConventionParams = zod.object({
 export const UpsertConventionBody = zod.object({
   separator: zod.string(),
   isActive: zod.boolean(),
+  enforceUppercase: zod.boolean().optional(),
+  applyCharLimits: zod.boolean().optional(),
+  companyCode: zod.string().optional(),
   userGuidance: zod.string().optional(),
   fields: zod.array(
     zod.object({

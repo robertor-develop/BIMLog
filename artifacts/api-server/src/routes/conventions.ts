@@ -28,6 +28,9 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
         id: 0,
         projectId,
         separator: defaultSeparator,
+        enforceUppercase: true,
+        applyCharLimits: false,
+        companyCode: "",
         isActive: false,
         fields: [],
         createdAt: new Date().toISOString(),
@@ -47,6 +50,9 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       id: convention.id,
       projectId: convention.projectId,
       separator: convention.separator,
+      enforceUppercase: convention.enforceUppercase,
+      applyCharLimits: convention.applyCharLimits,
+      companyCode: convention.companyCode ?? "",
       isActive: convention.isActive,
       userGuidance: convention.userGuidance ?? null,
       fields: fields.map((f) => ({
@@ -83,9 +89,10 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
         isActive: body.isActive,
         updatedAt: new Date(),
       };
-      if (typeof body.userGuidance === "string") {
-        updateSet.userGuidance = body.userGuidance;
-      }
+      if (typeof body.enforceUppercase === "boolean") updateSet.enforceUppercase = body.enforceUppercase;
+      if (typeof body.applyCharLimits === "boolean") updateSet.applyCharLimits = body.applyCharLimits;
+      if (typeof body.companyCode === "string") updateSet.companyCode = body.companyCode;
+      if (typeof body.userGuidance === "string") updateSet.userGuidance = body.userGuidance;
       const [updated] = await db
         .update(namingConventionsTable)
         .set(updateSet)
@@ -102,6 +109,9 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
           projectId,
           separator: body.separator,
           isActive: body.isActive,
+          ...(typeof body.enforceUppercase === "boolean" ? { enforceUppercase: body.enforceUppercase } : {}),
+          ...(typeof body.applyCharLimits === "boolean" ? { applyCharLimits: body.applyCharLimits } : {}),
+          ...(typeof body.companyCode === "string" ? { companyCode: body.companyCode } : {}),
           ...(typeof body.userGuidance === "string" ? { userGuidance: body.userGuidance } : {}),
         })
         .returning();
@@ -141,6 +151,9 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       id: convention[0].id,
       projectId: convention[0].projectId,
       separator: convention[0].separator,
+      enforceUppercase: convention[0].enforceUppercase,
+      applyCharLimits: convention[0].applyCharLimits,
+      companyCode: convention[0].companyCode ?? "",
       isActive: convention[0].isActive,
       userGuidance: convention[0].userGuidance ?? null,
       fields: fields.map((f) => ({

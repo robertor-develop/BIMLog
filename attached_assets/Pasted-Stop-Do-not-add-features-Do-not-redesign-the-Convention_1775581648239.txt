@@ -1,0 +1,144 @@
+Stop. Do not add features. Do not redesign the Convention Builder. Do not change prompts. We are stabilizing foundational convention correctness only.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use a local or temporary database.
+All work must run against the live production database and live production app behavior only.
+
+Current problem:
+The post-save routing is now correct, and the checkpoint works, but foundational convention settings are still not trustworthy enough.
+
+Right now:
+company code / acronym is being derived indirectly from field definitions,
+separator appears to be hydrated,
+but force uppercase and character limits are still coming from wizard defaults instead of saved convention state.
+
+That is not acceptable.
+
+We need explicit, durable, reload-safe foundational convention storage and hydration.
+
+Fix only these things.
+
+STEP 1 — Identify the explicit source of truth for foundational convention settings.
+
+We need a real persisted source for these values:
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+Do not derive company code from naming field allowedValues anymore if that is what is happening now.
+Do not rely on wizard defaults after a convention has been accepted.
+
+Determine the correct storage location in the current architecture.
+If naming_conventions is the right place, use it.
+If the version snapshot must also preserve them, keep that too.
+But the active convention needs one explicit source of truth.
+
+STEP 2 — Persist foundational settings on save.
+
+When the user saves the convention baseline or accepts a new re-analysis version, ensure these foundational settings are explicitly written to the active convention record:
+
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+If they are already partially stored, fix the write path so all four are saved reliably.
+Do not leave any of them implied, derived, or default-only.
+
+STEP 3 — Hydrate foundational settings only from the saved convention.
+
+On re-entry, checkpoint, continue editing, and post-save reload:
+load those foundational settings from the saved active convention source of truth only.
+
+Rules:
+company code / acronym must reflect the latest accepted baseline
+separator must reflect the latest accepted baseline
+force uppercase must reflect the latest accepted baseline
+apply character limits must reflect the latest accepted baseline
+
+Do not derive acronym from Project Code allowedValues.
+Do not use wizard defaults if a saved convention exists.
+
+STEP 4 — Lock foundational controls in normal revision flow.
+
+Do not redesign the whole UI.
+Do not remove the foundational section entirely.
+But if an accepted convention already exists, these foundational controls must not behave like normal freely editable revision fields.
+
+Minimal correct behavior:
+they must be read-only by default after a convention exists
+or behind one explicit action such as:
+Edit foundational settings
+
+This action must include a serious warning.
+
+Suggested warning text:
+Changing foundational convention settings may affect all future file naming, validation, and project structure. Proceed only if this change is intentional and approved.
+
+The important part:
+normal revision flow must not casually expose foundational settings as if they are regular step-by-step edits.
+
+STEP 5 — Keep first-time setup flow unchanged.
+
+For a project with no accepted convention yet:
+keep the current setup flow exactly as it is
+
+This lock/read-only behavior applies only after at least one accepted convention version exists.
+
+STEP 6 — Keep versioning and checkpoint intact.
+
+Do not break:
+checkpoint mode
+Continue Editing Convention
+Convention Status
+Latest Accepted Convention Snapshot
+Version history
+Re-analysis acceptance
+
+This task is only about making foundational settings explicit, durable, and safe.
+
+STEP 7 — Checks.
+
+After building, run these checks and show exact output only:
+
+Check 1
+Show the exact storage location for foundational settings:
+table name
+column names
+and whether each of these is explicitly stored:
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+Check 2
+Using the live production database for the real project, show the actual saved values for:
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+Check 3
+Show the exact read path used on reload/re-entry.
+It must load from the saved convention source of truth, not wizard defaults and not naming field allowedValues.
+
+Check 4
+Using the live production app on the same project after save/re-entry, show:
+the visible foundational values
+company code / acronym
+separator
+force uppercase
+apply character limits
+
+These must exactly match the saved values from Check 2.
+
+Check 5
+After an accepted convention already exists, show:
+whether foundational inputs are editable by default: yes/no
+whether they are behind an explicit action or read-only state: yes/no
+the exact warning text shown when editing them
+
+Show exact output only. Do not summarize.

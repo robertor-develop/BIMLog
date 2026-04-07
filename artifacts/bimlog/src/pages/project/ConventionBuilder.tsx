@@ -1749,7 +1749,7 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
 }
 
 // ─── step 1 ───────────────────────────────────────────────────────────────────
-function Step1({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
+function Step1({ state, setState, lang, readOnly, onUnlock }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string; readOnly?: boolean; onUnlock?: () => void }) {
   const [newName, setNewName] = useState("");
   const [newCode, setNewCode] = useState("");
   // per-company edit state
@@ -1770,6 +1770,38 @@ function Step1({ state, setState, lang }: { state: WizardState; setState: React.
     setState(s => ({ ...s, companies: s.companies.map(c => c.id === editId ? { ...c, name: editName.trim() || c.name, code: editCode.toUpperCase().slice(0, 8) || c.code } : c) }));
     setEditId(null);
   };
+
+  if (readOnly) {
+    return (
+      <div>
+        <Card style={{ marginBottom: 16, background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>{w("Foundational Settings", "Configuración Fundacional", lang)}</div>
+              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("These settings were locked when the convention was first saved.", "Estos ajustes se bloquearon al guardar la convención por primera vez.", lang)}</div>
+            </div>
+            <Button size="sm" variant="outline" onClick={onUnlock} style={{ fontSize: 11, gap: 5, flexShrink: 0 }}>
+              <Edit2 style={{ width: 12, height: 12 }} />
+              {w("Edit foundational settings", "Editar ajustes fundacionales", lang)}
+            </Button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {state.companies.map(c => (
+                <span key={c.id} style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, background: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE", padding: "3px 10px", borderRadius: 4 }}>{c.code}</span>
+              ))}
+              {state.companies.length === 0 && <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No companies configured", "Sin empresas configuradas", lang)}</span>}
+            </div>
+            <div style={{ display: "flex", gap: 16, fontSize: 12, color: "hsl(var(--muted-foreground))", flexWrap: "wrap" }}>
+              <span>{w("Separator", "Separador", lang)}: <strong style={{ fontFamily: "var(--font-mono)", color: "hsl(var(--foreground))" }}>{state.separator}</strong></span>
+              <span>{w("Uppercase", "Mayúsculas", lang)}: <strong>{state.enforceUppercase ? w("Yes", "Sí", lang) : "No"}</strong></span>
+              <span>{w("Char limits", "Límites de caracteres", lang)}: <strong>{state.applyCharLimits ? w("Yes", "Sí", lang) : "No"}</strong></span>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -3684,6 +3716,8 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     setWs(s => ({
       ...s,
       separator: savedSep,
+      enforceUppercase: typeof conv.enforceUppercase === "boolean" ? conv.enforceUppercase : s.enforceUppercase,
+      applyCharLimits: typeof conv.applyCharLimits === "boolean" ? conv.applyCharLimits : s.applyCharLimits,
       ...(codes.length > 0
         ? { companies: codes.map(code => ({ id: uid(), name: code, code })) }
         : {}),
@@ -3770,9 +3804,10 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       { label: "Revision",     fieldOrder: 7, allowedValues: revCodes },
     ];
     setIsSaving(true);
-    mutate({ projectId, data: { separator: ws.separator, isActive: true, fields, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } });
+    mutate({ projectId, data: { separator: ws.separator, isActive: true, enforceUppercase: ws.enforceUppercase, applyCharLimits: ws.applyCharLimits, fields, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } });
   };
 
+  const [foundationalUnlocked, setFoundationalUnlocked] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -3957,7 +3992,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           <span>{w("Changing foundational convention settings may affect all future file naming and project structure. Use the steps above to revise specific sections instead.", "Cambiar los ajustes fundacionales puede afectar todos los nombres de archivo futuros y la estructura del proyecto. Use los pasos anteriores para revisar secciones específicas.", lang)}</span>
         </div>
       )}
-      {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} />}
+      {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} readOnly={!!hasExisting && !foundationalUnlocked} onUnlock={() => setFoundationalUnlocked(true)} />}
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
       {step === 3 && <Step4 state={ws} setState={setWs} lang={lang} />}
