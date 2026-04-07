@@ -1,0 +1,150 @@
+Starting all three investigations in parallel — database queries, widget code, and convention post-save flow:
+
+
+4 actions
+Now I have the project list. All 5 are audit/test projects. I need membership/convention data plus the delay widget source and the exact post-save handler:
+
+
+4 actions
+Issue 2 found: hardcoded demo data in AnalyticsTab.tsx lines 361-398. Now read the exact section and the post-save/onAccept handlers:
+
+
+4 actions
+Read the post-save onSuccess and ChangesReview onAccept handlers, and query project memberships via the direct admin endpoint:
+
+
+4 actions
+Now read how foundational wizard state is initialized from the convention data and the admin routes for project management:
+
+
+3 actions
+Now read the admin project PATCH endpoint and the exact wizard state initialization at component mount:
+
+
+3 actions
+Read the full auto-load effect to understand exactly what data is available for hydration:
+
+
+3 actions
+I have everything I need. Now implementing all three fixes simultaneously:
+
+Fix 1 — Archive projects 1–4 via the existing admin PATCH endpoint:
+
+
+2 actions
+The admin list still shows all 5 rows — the admin list endpoint doesn't filter by status. Now check if the Total Control health bar counts filter by status=active:
+
+
+2 actions
+Read the admin/projects endpoint to see exactly what it selects and how to add status filtering:
+
+
+2 actions
+Now implementing all three fixes simultaneously — admin.ts, AnalyticsTab.tsx, and ConventionBuilder.tsx:
+
+Fix 1b — Filter archived projects from admin/projects listing:
+
+
+2 actions
+ne not imported — add it and fix the query. Also implement AnalyticsTab and ConventionBuilder fixes simultaneously:
+
+
+3 actions
+Now apply all remaining fixes at once:
+
+Fix 1b — Filter archived projects from admin listing query:
+
+
+2 actions
+Fix 2 — Remove hardcoded ABC Mech/PACE data, replace with honest no-data state:
+
+
+2 actions
+Fix 3a — onAccept routes to checkpoint instead of main_wizard (line 3907):
+
+
+2 actions
+Fix 3b — mutate.onSuccess navigates to checkpoint after successful save:
+
+
+2 actions
+Fix 3c — Hydrate foundational fields (separator, company codes) from convention on first load:
+
+Now add the foundational hydration effect. It runs once when convention first loads with real data, and does not re-run on subsequent convention refreshes:
+
+
+2 actions
+Fix 3d — Add warning label on foundational controls (Step 0 of main_wizard). Find the step 0 render:
+
+
+2 actions
+Read the main wizard rendering to find where Step 0 (Companies & Separator) is rendered:
+
+
+2 actions
+Now add the Step 5 warning label at step === 0 in the main wizard when an accepted convention already exists:
+
+
+2 actions
+Restart the API server so the admin.ts changes are picked up, then run Step 6 checks:
+
+
+2 actions
+Now run all Step 6 checks simultaneously:
+
+
+4 actions
+All checks confirmed clean. Write commit message:
+
+
+3 actions
+All three issues are fixed. Here are the exact Step 6 outputs:
+
+Check 1 — Project rows currently feeding Total Control:
+
+id:5  name:Audit Final Project    status:active  created_at:2026-04-05T13:28:59.844Z
+TOTAL visible in Total Control:  1
+
+Check 2 — What was done about stale projects:
+
+Action taken:  ARCHIVED (status=archived, data preserved)
+Projects 1, 2, 3, 4: status set to "archived" via PATCH /admin/projects/:id
+Data rows remain in DB — not hard-deleted.
+admin/projects query now includes WHERE status != 'archived'.
+
+Check 3 — Schedule delay attribution (before vs after):
+
+Before fix:
+  Source:  hardcoded static array (no DB query, no API call)
+  Rows:    { company: "ABC Mech." }, { company: "Pace GC" },
+           { company: "ACM Arch." }, { company: "ABC Mech." }
+  Footer:  "Total estimated delay: 5 days attributed to ABC Mechanical"
+After fix:
+  Source:  none — no array rendered
+  Shown:   "No real delay attribution data yet for this project."
+  Sub:     "Connect an MS Project file to begin tracking schedule delay by trade and company."
+
+Check 4 — Fake companies still visible:
+
+ABC Mech / PACE / Pace GC / ACM Arch references in AnalyticsTab.tsx:  0
+
+Check 5 — First visible screen after save:
+
+Lands on checkpoint / accepted convention summary:  YES
+Lands on Step 1 company/separator inputs:           NO
+Routing:
+  mutate.onSuccess → setWs({ flowPhase: "checkpoint", step: 0 })
+  onAccept         → setWs({ flowPhase: "checkpoint", step: 0, reanalysisResult: null })
+
+Check 6 — Foundational values on post-save screen:
+
+Hydrated from live convention (project 5):
+  company code:      AFP1  (not stale "BIM")
+  separator:         -     (from convention.separator)
+  force uppercase:   true  (ws default, unchanged)
+  apply char limits: false (ws default, unchanged)
+Hydration source: convention.fields[label="Project Code"].allowedValues
+Guard: hasHydratedFoundational ref — runs once, never overwrites user edits
+Warning shown: "Changing foundational convention settings may affect all future
+               file naming and project structure." (amber banner, step 0 only,
+               when hasExisting is true)
