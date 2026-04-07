@@ -385,4 +385,69 @@ router.get("/projects/:projectId/reports/transmittal-log/pdf", async (req, res) 
   }
 });
 
+// ── CVR FULL REPORT ──────────────────────────────────────────────────────────
+router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
+  const userId = await verifyReportToken(req, res);
+  if (!userId) return;
+  const projectId = Number(req.params.projectId);
+  try {
+    const project = await getProject(projectId);
+    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const totalFiles = allFiles.length;
+    const matched = allFiles.filter(f => f.contentVerificationResult === "match").length;
+    const flagged = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch");
+    const pendingReview = allFiles.filter(f => f.cvrWorkflowStatus === "pending_admin_review").length;
+    const adminApproved = allFiles.filter(f => f.cvrWorkflowStatus === "admin_approved").length;
+    const adminRejected = allFiles.filter(f => f.cvrWorkflowStatus === "admin_rejected").length;
+    const notApplicable = allFiles.filter(f => f.contentVerificationResult === "not_applicable").length;
+
+    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="cvr-report-${project.code}.pdf"`);
+    doc.pipe(res);
+    pdfHeader(doc, project, "Content Verification Report (CVR)");
+
+    row(doc, "Total Files Processed", String(totalFiles));
+    row(doc, "Matched", String(matched));
+    row(doc, "Flagged (Possible + Clear Mismatch)", String(flagged.length));
+    row(doc, "Not Applicable", String(notApplicable));
+    row(doc, "Pending Admin Review", String(pendingReview));
+    row(doc, "Admin Approved", String(adminApproved));
+    row(doc, "Admin Rejected", String(adminRejected));
+    doc.moveDown();
+
+    if (flagged.length > 0) {
+      doc.fontSize(12).font("Helvetica-Bold").fillColor("#DC2626").text("Flagged Files");
+      doc.moveDown(0.5);
+      for (const f of flagged) {
+        doc.fontSize(9).font("Helvetica-Bold").fillColor("#111")
+          .text(f.fileName, { continued: true });
+        doc.font("Helvetica").fillColor("#666")
+          .text(`  |  CVR: ${f.contentVerificationResult}  |  Workflow: ${f.cvrWorkflowStatus}  |  Uploaded: ${new Date(f.createdAt).toLocaleDateString()}`);
+        if (f.hashComparisonNote) {
+          doc.fontSize(8).font("Helvetica").fillColor("#92400E")
+            .text(`  Assessment: ${f.hashComparisonNote}`, { indent: 10 });
+        }
+        if (f.cvrUserReason) {
+          doc.fontSize(8).font("Helvetica").fillColor("#555")
+            .text(`  User reason: ${f.cvrUserReason}`, { indent: 10 });
+        }
+        if (f.cvrAdminAction) {
+          doc.fontSize(8).font("Helvetica").fillColor("#555")
+            .text(`  Admin decision: ${f.cvrAdminAction}`, { indent: 10 });
+        }
+        doc.moveDown(0.3);
+      }
+    } else {
+      doc.fontSize(10).fillColor("#16A34A").text("No CVR flags found. All files passed content verification.", { align: "center" });
+    }
+
+    pdfFooter(doc);
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 export default router;

@@ -1,0 +1,124 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. We stay in strict diagnostic and targeted fix mode.
+
+We are now doing:
+
+ISSUE 5 — CVR reports not working correctly
+
+Live behavior reported:
+
+CVR reports not generating correctly
+incorrect data and/or incomplete rendering may exist
+broken flow is possible
+
+This is not fixed until all three are proven:
+
+backend CVR data generation is correct
+API response is correct
+UI renders correct CVR output
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+All checks, fixes, and validations must run against live production app behavior and live production database only.
+
+Step 1:
+Show the exact backend code for:
+
+CVR route(s)
+CVR report generation logic
+exact queries used
+exact aggregation/calculation logic
+exact project scoping logic
+exact response body shape
+
+Step 2:
+Show the exact frontend code for:
+
+CVR screen/component
+fetch logic
+render logic
+any frontend transformations
+loading state
+error state
+empty state
+
+Step 3:
+Using the live production app, trigger CVR for project 5.
+
+Show exact live request:
+
+exact request URL
+exact method
+exact payload if any
+
+Show exact live response:
+
+exact status
+exact raw response body
+
+Step 4:
+Show the exact live UI result for CVR.
+
+Show exact visible:
+
+title
+sections rendered
+missing values if any
+incorrect values if any
+empty sections if any
+visible error text if any
+
+Step 5:
+Identify the real failure with exact evidence only.
+
+Choose only what is proven:
+
+backend query incorrect
+aggregation logic incorrect
+wrong project scope
+response shape mismatch
+frontend mapping error
+UI not rendering returned data
+empty DB/no source data for CVR
+multiple failures at once, but name each only if proven
+
+Step 6:
+Fix only the real cause.
+
+Do not touch ISSUE 6 or anything else.
+Do not redesign the reports module.
+Do not add unrelated features.
+
+Step 7:
+After the fix, run the same live CVR test again and show exact outputs:
+
+A. exact request URL
+B. exact response status
+C. exact raw response body
+D. exact key CVR values returned
+E. exact visible UI result
+
+Step 8:
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+Step 9:
+Show final proof in this exact format:
+
+ISSUE 5 — EXACT OUTPUTS
+
+Live request URL:
+Live response status:
+CVR data returned correctly: yes/no
+UI rendering correct: yes/no
+Key CVR values:
+Root cause:
+Exact fix applied:

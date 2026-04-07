@@ -1262,6 +1262,13 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
       issues = issues.filter(f => f.cvrWorkflowStatus === "pending_admin_review");
     }
 
+    const issuesWithUploader = await Promise.all(
+      issues.map(async (f) => {
+        const users = await db.select().from(usersTable).where(eq(usersTable.id, f.uploadedById)).limit(1);
+        return { ...f, uploadedByName: users[0]?.fullName || null };
+      })
+    );
+
     res.json({
       projectId,
       generatedAt: new Date().toISOString(),
@@ -1270,7 +1277,7 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
       totalPendingReview,
       totalAdminApproved,
       totalAdminRejected,
-      issues,
+      issues: issuesWithUploader,
     });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
