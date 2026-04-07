@@ -1,0 +1,154 @@
+The platform is still behaving like a generic step-by-step builder instead of an intelligent project-aware operating system.
+
+That is the real issue underneath what you just showed:
+
+TotalControl is still counting dead history wrong.
+“Edit Foundational Settings” is not acting like an edit layer over an already-understood project. It is throwing you back into generic setup behavior.
+Adding a company is not triggering contextual intelligence about role, scope, disciplines, document types, or impact on the accepted convention.
+The AI is not carrying forward project memory strongly enough.
+The CVR report is technically generating, but conceptually useless because it is not reflecting the actual accumulated project history, convention evolution, evidence history, and file-driven learning across versions.
+
+So yes, you are correct: the bigger issue is not just “button broken” or “count wrong.”
+It is that the system is still not behaving like BIMLog is supposed to behave. BIMLog is supposed to understand context, preserve continuity, and act intelligently across project history. That is the core product promise in the brief.
+
+At this point, I do not think the right move is to keep piecemealing tiny fixes first.
+
+The right move now is to send Replit a broader instruction that addresses the real product failure while still forcing exact proof.
+
+Send Replit this exactly:
+
+Stop. Do not treat this as isolated UI bug fixing anymore. Do not redesign the whole platform blindly. We are now addressing a higher-level confirmed failure in BIMLog behavior.
+
+The live user test shows the real problem is this:
+
+The system is still reverting to generic wizard behavior instead of behaving like an intelligent project-aware convention system.
+
+This is now the active issue:
+
+ISSUE 6 — BIMLog is not behaving like a smart, context-aware convention system
+
+Confirmed live evidence:
+
+TotalControl still reflects stale/soft-deleted project history in a way that breaks trust
+“Edit Foundational Settings” does not behave like an edit layer over an already-known project state
+adding one company forces the user back through generic foundational setup flow
+the system is not using existing project knowledge to infer role, likely disciplines, likely document types, likely separators, or likely naming impact
+AI/context continuity is weak or absent during edit flow
+CVR output is technically generated but conceptually poor because it does not reflect accumulated project history and version evolution
+
+This is not one small bug.
+This is a failure of context continuity and intelligence behavior.
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not fixing yet.
+We are first doing a precise diagnostic of why BIMLog is reverting to generic behavior instead of remaining context-aware.
+
+SECTION 1 — EXISTING PROJECT CONTEXT AVAILABLE TO THE SYSTEM
+
+Show exact live sources of project context currently available for project 5:
+
+current accepted convention
+naming_convention_versions history
+uploaded file history
+re-analysis history
+company list in project
+disciplines already accepted
+document types already accepted
+extra fields already accepted
+user guidance / project guidance text
+any AI summary fields already stored
+any project metadata the AI can read
+
+Show exact DB rows and exact code paths that load this context.
+
+SECTION 2 — EDIT FOUNDATIONAL SETTINGS FLOW
+
+Show exact code path when user clicks “Edit Foundational Settings”.
+
+Show:
+
+where the click starts
+what state changes occur
+why the system routes back into generic wizard steps
+what context is preserved
+what context is lost
+whether the AI/context loader runs again
+whether the system knows the user is editing one company only vs rebuilding all foundational logic
+
+SECTION 3 — COMPANY ADDITION INTELLIGENCE FAILURE
+
+Show exact code path for adding a company during foundational edit.
+
+We need to know:
+
+does system ask what role the new company plays
+does system infer likely disciplines from existing project state
+does system infer likely document types from existing project state
+does system evaluate whether the new company should affect all project settings or only company-specific mappings
+does the AI receive current project context and latest accepted convention before suggesting anything
+if not, show exactly where that context is missing
+
+SECTION 4 — AI CONTEXT CONTINUITY
+
+Show exact prompt/context building code used during:
+
+foundational edit flow
+re-analysis flow
+company/disciplines/doc types suggestion flow
+any “Add More Evidence and Re-run Discovery” path
+
+Show exactly what context is passed to AI and what is not.
+We need to see whether the system is effectively forgetting the existing project and falling back to generic defaults.
+
+SECTION 5 — CVR INTELLIGENCE FAILURE
+
+Show exact code and exact query path for CVR report generation.
+
+We need to know why the generated CVR report only reflects immediate file counts and not the broader project evidence/history.
+
+Show whether CVR currently includes or excludes:
+
+convention version history
+accepted changes over time
+upload history across versions
+rejected/reanalyzed evidence history
+project-level convention evolution
+any historical explanation of why the current convention became what it is
+
+SECTION 6 — LIVE TRUTH TABLE
+
+For each of these behaviors, answer with exact code and evidence only:
+
+Does BIMLog currently preserve full project context during foundational edit: yes/no
+Does BIMLog currently distinguish “edit one company” from “rebuild convention”: yes/no
+Does BIMLog currently infer likely company role from existing project context: yes/no
+Does BIMLog currently infer likely disciplines/doc types contextually: yes/no
+Does BIMLog currently keep AI aware of current accepted convention during edit flow: yes/no
+Does CVR currently reflect project history/version evolution: yes/no
+
+SECTION 7 — ROOT CAUSE MAP
+
+After proving everything above, provide only this exact map:
+
+ROOT CAUSE MAP
+
+A. Trust failure in platform metrics:
+...
+B. Edit flow reverting to generic wizard behavior:
+...
+C. New company addition lacking contextual intelligence:
+...
+D. AI not staying aware of full project context:
+...
+E. CVR report too shallow / not reflecting project history:
+...
+
+Do not fix yet.
+Do not redesign yet.
+Do not propose UX ideas yet.
+This step is a live architectural diagnostic of why BIMLog is not behaving like an intelligent project-aware system.

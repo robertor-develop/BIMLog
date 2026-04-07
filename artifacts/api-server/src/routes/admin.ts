@@ -94,7 +94,8 @@ router.get("/admin/overview", async (req, res) => {
 
     if (scope === "mine") {
       const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
-        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myProjectIds.length === 0) {
         res.json({ stats: { totalUsers: 0, totalCompanies: 0, totalProjects: 0, totalFiles: 0, totalRfis: 0, totalSubmittals: 0, activeProjects: 0, filesLast24h: 0, rfisLast7d: 0 }, activity: [] });
         return;
@@ -181,7 +182,8 @@ router.get("/admin/activity", async (req, res) => {
     let activity, total;
     if (scope === "mine") {
       const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
-        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myProjectIds.length === 0) { res.json({ data: [], total: 0, page, pages: 0 }); return; }
       const where = sql`${activityLogTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`;
       activity = await db.select().from(activityLogTable).where(where).orderBy(desc(activityLogTable.createdAt)).limit(limit).offset(offset);
@@ -211,10 +213,9 @@ router.get("/admin/users", async (req, res) => {
 
     let scopedUserIds: number[] | null = null;
     if (scope === "mine") {
-      console.log("[admin/users scope=mine] userId:", req.user!.userId, "role check for project_admin");
       const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
-        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
-      console.log("[admin/users scope=mine] myProjectIds:", myProjectIds);
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myProjectIds.length === 0) { res.json({ data: [], total: 0, page: 1, pages: 0 }); return; }
       scopedUserIds = (await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
         .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)
@@ -312,7 +313,8 @@ router.get("/admin/companies", async (req, res) => {
     let companies;
     if (scope === "mine") {
       const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
-        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myProjectIds.length === 0) { res.json([]); return; }
       const scopedUserIds = [...new Set((await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
         .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)).map(r => r.uid))];
@@ -376,7 +378,8 @@ router.get("/admin/projects", async (req, res) => {
     let projects;
     if (scope === "mine") {
       const myIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
-        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin")))).map(r => r.pid);
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myIds.length === 0) { res.json([]); return; }
       projects = await db.select().from(projectsTable)
         .where(sql`${projectsTable.id} = ANY(ARRAY[${sql.raw(myIds.join(","))}]::int[])`)
