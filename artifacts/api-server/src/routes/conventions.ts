@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
@@ -46,6 +46,27 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       .where(eq(namingFieldsTable.conventionId, convention.id))
       .orderBy(namingFieldsTable.fieldOrder);
 
+    const conventionCodes = (convention.companyCode ?? "").split(",").map(c => c.trim()).filter(Boolean);
+    let companyAssignmentStatus: Array<{ code: string; hasUsers: boolean; companyName?: string }> = [];
+    if (conventionCodes.length > 0) {
+      const memberCompanies = await db
+        .select({ companyName: companiesTable.name })
+        .from(projectMembersTable)
+        .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
+        .innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(eq(projectMembersTable.projectId, projectId));
+      const memberCompanyNames = [...new Set(memberCompanies.map(r => r.companyName))];
+      companyAssignmentStatus = conventionCodes.map(code => ({
+        code,
+        hasUsers: memberCompanyNames.some(name =>
+          name.toUpperCase().includes(code.toUpperCase()) || code.toUpperCase().includes(name.toUpperCase())
+        ),
+        companyName: memberCompanyNames.find(name =>
+          name.toUpperCase().includes(code.toUpperCase()) || code.toUpperCase().includes(name.toUpperCase())
+        ),
+      }));
+    }
+
     res.json({
       id: convention.id,
       projectId: convention.projectId,
@@ -55,6 +76,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       companyCode: convention.companyCode ?? "",
       isActive: convention.isActive,
       userGuidance: convention.userGuidance ?? null,
+      companyAssignmentStatus,
       fields: fields.map((f) => ({
         id: f.id,
         label: f.label,

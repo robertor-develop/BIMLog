@@ -5,6 +5,7 @@ import {
   usersTable, companiesTable, projectsTable, projectMembersTable,
   filesTable, rfisTable, submittalsTable, activityLogTable,
   emailLogTable, featureFlagsTable, adminActionsLogTable,
+  namingConventionsTable,
 } from "@workspace/db/schema";
 import { eq, desc, count, gte, and, or, ilike, sql, lt, ne } from "drizzle-orm";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
@@ -413,7 +414,32 @@ router.get("/admin/projects", async (req, res) => {
           if (co) companyName = co.name;
         }
       }
-      return { ...p, createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(), memberCount: Number(memberCount), fileCount: Number(fileCount), rfiCount: Number(rfiCount), submittalCount: Number(submittalCount), companyName };
+      const convention = (await db.select({ companyCode: namingConventionsTable.companyCode }).from(namingConventionsTable).where(eq(namingConventionsTable.projectId, p.id)).limit(1))[0];
+      const conventionCompanyCodes = convention?.companyCode ? convention.companyCode.split(",").map(c => c.trim()).filter(Boolean) : [];
+
+      const memberCompanyIds = [...new Set((await db.select({ cid: usersTable.companyId }).from(usersTable)
+        .innerJoin(projectMembersTable, eq(projectMembersTable.userId, usersTable.id))
+        .where(eq(projectMembersTable.projectId, p.id))).map(r => r.cid))];
+      const participatingCompanies = memberCompanyIds.length > 0
+        ? (await db.select({ name: companiesTable.name }).from(companiesTable)
+            .where(sql`${companiesTable.id} = ANY(ARRAY[${sql.raw(memberCompanyIds.join(","))}]::int[])`)).map(r => r.name)
+        : [];
+
+      return {
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+        memberCount: Number(memberCount),
+        fileCount: Number(fileCount),
+        rfiCount: Number(rfiCount),
+        submittalCount: Number(submittalCount),
+        companyName,
+        conventionCompanyCodes,
+        participatingCompanies,
+        unassignedConventionCompanies: conventionCompanyCodes.filter(
+          code => !participatingCompanies.some(name => name.toUpperCase().includes(code.toUpperCase()) || code.toUpperCase().includes(name.toUpperCase()))
+        ),
+      };
     }));
     res.json(result);
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }

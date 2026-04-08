@@ -1,0 +1,172 @@
+This is not a reporting problem first.
+This is a core data-model / workflow problem.
+
+Right now the system is treating:
+company codes in the convention
+and
+actual project companies with actual users
+as if they were the same thing.
+
+They are not.
+
+That is why you are seeing nonsense like:
+the convention knows multiple companies,
+but Total Control / admin says the project has one company,
+and nobody ever asked who the users are for the new companies.
+
+So the next step is not guided intelligence.
+The next step is to fix the company-to-user-to-project structure properly.
+
+Send Replit this exactly:
+
+Stop. Do not continue guided intelligence yet. Do not touch Reports for now. Do not redesign blindly. We are now fixing a core system integrity issue.
+
+This is now the active build task:
+
+ISSUE — PROJECT COMPANIES, CONVENTION COMPANIES, AND PROJECT USERS ARE NOT PROPERLY CONNECTED
+
+Confirmed live problem:
+
+the convention now contains multiple companies/codes
+but Total Control / admin still says the project has only one company
+the system lets the user add companies in convention logic without asking who the users are
+this breaks project reality and makes company-level intelligence/reporting unreliable
+the system currently treats “company code in convention” and “actual project company with users/members” as if they were the same thing
+this is incorrect
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not fixing UI cosmetics in this step.
+We are not expanding reports in this step.
+We are fixing the company/user/project model and the workflow around it.
+
+STEP 1:
+Show the exact live data model and code paths for all three layers:
+
+A. convention companies
+Where company codes/names are stored in naming_conventions and/or naming_fields and/or naming_convention_versions
+
+B. actual project companies
+Where project companies are derived in admin / Total Control / project views
+
+C. actual project users/members
+Where users are attached to projects and companies
+
+Show exact backend routes, exact schema/table relationships, and exact frontend code paths that render company counts.
+
+STEP 2:
+Run exact live DB queries and show raw output for the active project.
+
+We need exact output for:
+
+project row
+project_members rows
+users rows for those members
+company / organization rows related to those users
+naming_conventions row
+latest naming_convention_versions row
+
+If schema names differ, inspect schema first and then run corrected exact queries. Do not guess.
+
+STEP 3:
+Identify the real mismatch with exact evidence only.
+
+We need exact proof of:
+
+where convention companies are stored
+where admin/company counts are sourced from
+why Total Control says 1 company while convention has several
+whether the system currently has any mechanism at all to connect a newly added convention company to real users/project membership
+
+STEP 4:
+Define the correct system rule before implementation.
+
+The rule must be:
+
+Adding a company to the convention does NOT automatically mean the project has real users from that company.
+But the system must recognize it as a project company slot that needs membership assignment.
+
+So after this step, BIMLog must distinguish clearly between:
+
+Convention Company
+A company/originator code recognized in the naming convention
+Project Company
+A company actually participating in the project
+Project Members
+Real users assigned to that company within the project
+
+Do not implement yet.
+First prove the current model is missing this distinction.
+
+STEP 5:
+Implement the minimum correct structural fix only.
+
+Requirements:
+
+A. project/company counts shown in admin and Total Control must no longer rely only on current project_members if convention companies exist
+B. the system must expose both:
+
+convention companies count
+actual participating companies count
+C. if a convention company exists with no assigned users/members, it must be visible as unassigned / no users yet
+D. do not invent fake users
+E. do not silently auto-create memberships
+
+STEP 6:
+Add the missing workflow hook.
+
+When a company is added in foundational edit mode, the system must not stop at just name/code.
+It must immediately create a visible follow-up requirement in the UI, not a dead hidden assumption.
+
+For this step, the minimum requirement is:
+after save, the system must visibly indicate for each convention company whether:
+
+users assigned
+no users assigned yet
+
+Do not build a giant invitation system yet.
+Do not redesign the whole membership flow yet.
+Just surface the truth correctly.
+
+STEP 7:
+Show exact live validation after the fix.
+
+Required output:
+
+exact admin / Total Control company values
+exact convention companies count
+exact participating companies count
+exact companies with no users assigned
+exact UI result where this is shown
+
+STEP 8:
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9:
+Show final proof in this exact format:
+
+COMPANY / USER MODEL FIX — EXACT OUTPUTS
+
+Convention companies count:
+Participating companies count:
+Companies with assigned users:
+Companies with no users yet:
+Total Control now reflects distinction: yes/no
+Project admin view reflects distinction: yes/no
+Root cause:
+Exact fix applied:
+
+Build only this.
+Nothing more.

@@ -3511,6 +3511,32 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
             {w("No companies added yet.", "Sin empresas agregadas.", lang)}
           </div>
         )}
+        {ws.companies.length > 0 && (convention as any)?.companyAssignmentStatus?.length > 0 && (
+          <div style={{ marginTop: 12, padding: 10, borderRadius: 6, background: "#F9FAFB", border: "1px solid hsl(var(--border))" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", marginBottom: 8 }}>
+              {w("User Assignment Status", "Estado de Asignacion de Usuarios", lang)}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {((convention as any).companyAssignmentStatus as Array<{ code: string; hasUsers: boolean; companyName?: string }>).map(item => (
+                <span key={item.code} style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "3px 8px", borderRadius: 16, fontSize: 11, fontWeight: 700,
+                  background: item.hasUsers ? "#F0FDF4" : "#FEF2F2",
+                  color: item.hasUsers ? "#15803D" : "#DC2626",
+                  border: `1px solid ${item.hasUsers ? "#BBF7D0" : "#FECACA"}`,
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: item.hasUsers ? "#16A34A" : "#DC2626" }} />
+                  {item.code}
+                  <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>
+                    {item.hasUsers
+                      ? w("users assigned", "usuarios asignados", lang)
+                      : w("no users yet", "sin usuarios", lang)}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card style={{ marginBottom: 16 }}>

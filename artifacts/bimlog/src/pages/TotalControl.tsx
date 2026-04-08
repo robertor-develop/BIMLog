@@ -51,7 +51,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 interface PlatformStats { totalUsers: number; totalCompanies: number; totalProjects: number; totalFiles: number; totalRfis: number; totalSubmittals: number; activeProjects: number; filesLast24h: number; rfisLast7d: number; }
 interface Company { id: number; name: string; status: string; plan?: string; projectCount: number; userCount: number; fileCount: number; createdAt: string; }
-interface Project { id: number; code: string; name: string; status: string; companyName?: string; memberCount: number; fileCount: number; rfiCount?: number; submittalCount?: number; createdAt: string; }
+interface Project { id: number; code: string; name: string; status: string; companyName?: string; memberCount: number; fileCount: number; rfiCount?: number; submittalCount?: number; createdAt: string; conventionCompanyCodes?: string[]; participatingCompanies?: string[]; unassignedConventionCompanies?: string[]; }
 interface UserRow { id: number; fullName: string; email: string; role: string; status: string; companyName?: string; lastLoginAt?: string; createdAt: string; }
 interface EmailLogRow { id: number; to: string; subject: string; status: string; createdAt: string; errorMessage?: string; }
 interface ActivityRow { id: number; userId?: number; userName?: string; projectId?: number; projectCode?: string; action: string; entity?: string; entityId?: number; createdAt: string; }
@@ -239,6 +239,11 @@ function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (
                 <span style={{ display: "flex", alignItems: "center", gap: 3 }}><FileText size={11} /> {p.fileCount.toLocaleString()}</span>
                 {p.rfiCount !== undefined && <span style={{ display: "flex", alignItems: "center", gap: 3 }}><MessageSquare size={11} /> {p.rfiCount}</span>}
               </div>
+              {(p.unassignedConventionCompanies?.length ?? 0) > 0 && (
+                <div style={{ marginTop: 6, fontSize: 10, fontWeight: 700, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 4, padding: "2px 6px", display: "inline-block" }}>
+                  {p.unassignedConventionCompanies!.length} convention {p.unassignedConventionCompanies!.length === 1 ? "company" : "companies"} — no users assigned
+                </div>
+              )}
             </button>
           );
         })}
@@ -478,6 +483,40 @@ function ProjectDetailModal({ project, token, onClose, onRefresh }: { project: P
           </div>
         ))}
       </div>
+
+      {(project.conventionCompanyCodes?.length ?? 0) > 0 && (
+        <div style={{ marginBottom: 20, padding: 14, border: "1px solid #E5E7EB", borderRadius: 8, background: "#F9FAFB" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", marginBottom: 10 }}>Company / User Assignment</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+            <div style={{ padding: "8px 12px", background: "#EFF6FF", borderRadius: 6, border: "1px solid #BFDBFE" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#3B82F6" }}>Convention Companies</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "#1D4ED8" }}>{project.conventionCompanyCodes!.length}</div>
+            </div>
+            <div style={{ padding: "8px 12px", background: "#F0FDF4", borderRadius: 6, border: "1px solid #BBF7D0" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#16A34A" }}>Participating (with users)</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "#15803D" }}>{project.participatingCompanies?.length ?? 0}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {project.conventionCompanyCodes!.map(code => {
+              const isUnassigned = project.unassignedConventionCompanies?.includes(code);
+              return (
+                <span key={code} style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                  background: isUnassigned ? "#FEF2F2" : "#F0FDF4",
+                  color: isUnassigned ? "#DC2626" : "#15803D",
+                  border: `1px solid ${isUnassigned ? "#FECACA" : "#BBF7D0"}`,
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isUnassigned ? "#DC2626" : "#16A34A" }} />
+                  {code}
+                  <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>{isUnassigned ? "no users" : "assigned"}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div style={{ display: "flex", gap: 10 }}>
         <button
           onClick={() => { onClose(); setLocation(`/projects/${project.id}/analytics`); }}
