@@ -135,7 +135,8 @@ function UsersTab({ token }: { token: string }) {
   const [showCreate, setShowCreate] = useState(false);
   const [resetModal, setResetModal] = useState<number | null>(null);
   const [newPw, setNewPw] = useState("");
-  const [createForm, setCreateForm] = useState({ fullName: "", email: "", password: "", companyName: "" });
+  const [createForm, setCreateForm] = useState({ fullName: "", email: "", password: "", companyName: "", projectId: "" });
+  const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
 
   const load = useCallback(() => {
@@ -144,6 +145,9 @@ function UsersTab({ token }: { token: string }) {
       .then(r => r.json()).then(d => setUsers(d.data || [])).finally(() => setLoading(false));
   }, [search, token]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    apiFetch("/admin/projects-list?scope=mine", token).then(r => r.json()).then(setProjectsList).catch(() => {});
+  }, [token]);
 
   const deleteUser = async (id: number, name: string) => {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
@@ -159,9 +163,12 @@ function UsersTab({ token }: { token: string }) {
     else setMsg(d.error || "Failed");
   };
   const doCreate = async () => {
-    const r = await apiFetch("/admin/users", token, { method: "POST", body: JSON.stringify(createForm) });
+    const body: Record<string, unknown> = { ...createForm };
+    if (createForm.projectId) body.projectId = parseInt(createForm.projectId);
+    else delete body.projectId;
+    const r = await apiFetch("/admin/users", token, { method: "POST", body: JSON.stringify(body) });
     const d = await r.json();
-    if (d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "" }); setMsg("User created."); load(); }
+    if (d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "", projectId: "" }); setMsg("User created."); load(); }
     else setMsg(d.error || "Failed");
   };
 
@@ -216,6 +223,14 @@ function UsersTab({ token }: { token: string }) {
               <Input type={field === "password" ? "password" : "text"} value={(createForm as Record<string, string>)[field]} onChange={e => setCreateForm(f => ({ ...f, [field]: e.target.value }))} />
             </div>
           ))}
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Assign to Project</label>
+            <select value={createForm.projectId} onChange={e => setCreateForm(f => ({ ...f, projectId: e.target.value }))} style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }}>
+              <option value="">Select project...</option>
+              {projectsList.map(p => <option key={p.id} value={String(p.id)}>{p.code} — {p.name}</option>)}
+            </select>
+            <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 4 }}>Required for project-scoped admin. Links user as project member.</div>
+          </div>
           <Button onClick={doCreate}>Create</Button>
         </Modal>
       )}

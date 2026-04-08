@@ -278,7 +278,8 @@ router.post("/admin/users", async (req, res) => {
 
     if ((req as any).isProjectAdminOnly) {
       const myPids: number[] = (req as any).projectAdminProjectIds || [];
-      if (projectId && !myPids.includes(projectId)) { res.status(403).json({ error: "You are not admin of the specified project" }); return; }
+      if (!projectId) { res.status(400).json({ error: "Project selection is required for project-scoped admin" }); return; }
+      if (!myPids.includes(projectId)) { res.status(403).json({ error: "You are not admin of the specified project" }); return; }
     }
 
     let company = (await db.select().from(companiesTable).where(ilike(companiesTable.name, companyName)).limit(1))[0];
@@ -288,14 +289,14 @@ router.post("/admin/users", async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const [user] = await db.insert(usersTable).values({ fullName, email: email.toLowerCase(), passwordHash: hash, companyId: company.id }).returning();
 
-    if ((req as any).isProjectAdminOnly && projectId) {
+    if (projectId) {
       const existing = await db.select().from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, user.id))).limit(1);
       if (existing.length === 0) {
         await db.insert(projectMembersTable).values({ projectId, userId: user.id, role: role || "viewer", status: "active" });
       }
     }
 
-    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "create_user", targetType: "user", targetId: String(user.id), details: { email, fullName, companyName } });
+    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "create_user", targetType: "user", targetId: String(user.id), details: { email, fullName, companyName, projectId: projectId || null } });
     res.status(201).json({ ...user, createdAt: user.createdAt.toISOString() });
   } catch (err) { res.status(400).json({ error: err instanceof Error ? err.message : "Failed to create user" }); }
 });
@@ -638,6 +639,47 @@ router.get("/admin/actions-log", async (req, res) => {
       ? await db.select({ total: count() }).from(adminActionsLogTable).where(where)
       : await db.select({ total: count() }).from(adminActionsLogTable);
     res.json({ data: logs.map(l => ({ ...l, createdAt: l.createdAt.toISOString() })), total: Number(total), page, pages: Math.ceil(Number(total) / limit) });
+  } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
+});
+
+router.post("/admin/fix-ghost-members", async (req, res) => {
+  try {
+    if (!req.user?.isSuperAdmin) { res.status(403).json({ error: "Super admin only" }); return; }
+    const allUsers = await db.select({ id: usersTable.id, fullName: usersTable.fullName, email: usersTable.email }).from(usersTable);
+    const fixed: { userId: number; email: string; projectId: number }[] = [];
+    for (const u of allUsers) {
+      const memberships = await db.select().from(projectMembersTable).where(eq(projectMembersTable.userId, u.id));
+      if (memberships.length === 0) {
+        const activeProjects = await db.select({ id: projectsTable.id }).from(projectsTable).where(eq(projectsTable.status, "active")).limit(1);
+        if (activeProjects.length > 0) {
+          await db.insert(projectMembersTable).values({ projectId: activeProjects[0].id, userId: u.id, role: "viewer", status: "active" });
+          fixed.push({ userId: u.id, email: u.email, projectId: activeProjects[0].id });
+        }
+      }
+    }
+    await logAdminAction({ adminUserId: req.user.userId, adminEmail: req.user.email, action: "fix_ghost_members", details: { fixed } });
+    res.json({ fixed, count: fixed.length });
+  } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Failed" }); }
+});
+
+router.get("/admin/projects-list", async (req, res) => {
+  try {
+    const scope = String(req.query.scope || "");
+    let projects;
+    if (scope === "mine") {
+      const myIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+        .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+        .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
+      if (myIds.length === 0) { res.json([]); return; }
+      projects = await db.select({ id: projectsTable.id, code: projectsTable.code, name: projectsTable.name }).from(projectsTable)
+        .where(sql`${projectsTable.id} = ANY(ARRAY[${sql.raw(myIds.join(","))}]::int[])`)
+        .orderBy(projectsTable.name);
+    } else {
+      projects = await db.select({ id: projectsTable.id, code: projectsTable.code, name: projectsTable.name }).from(projectsTable)
+        .where(ne(projectsTable.status, "archived"))
+        .orderBy(projectsTable.name);
+    }
+    res.json(projects);
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
 });
 

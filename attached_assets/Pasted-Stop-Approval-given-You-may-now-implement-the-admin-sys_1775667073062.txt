@@ -1,0 +1,167 @@
+Stop. Approval given. You may now implement the admin system unification plan exactly as approved. Do not remove any actions. Do not restrict anything without asking. Do not redesign beyond what is explicitly approved here.
+
+This is now the active build task:
+
+ISSUE — IMPLEMENT ONE ADMIN SYSTEM WITH TWO SCOPES
+
+Approved decisions:
+
+Create user in both admin scopes should support a project selector
+Existing ghost user/company must be linked to project 19
+TotalControl should move toward a tabbed layout like regular admin for consistency, but keep a visibly different style/color treatment so Super Admin is clearly distinguishable
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are now implementing the approved plan.
+
+STEP 1 — FIX THE GHOST USER / COMPANY DATA
+
+Use the live production data and fix the existing ghost linkage case.
+
+Link the existing ghost user/company to project 19 correctly by creating the missing project_members row.
+
+Show exact live DB before and after for:
+
+user row
+company row
+project_members row
+
+We need proof that the existing half-complete record is repaired.
+
+STEP 2 — FIX ADMINPANEL CREATE USER FLOW
+
+Implement the missing project linkage in regular AdminPanel create-user flow.
+
+Requirements:
+
+Create User modal must include a project selector
+for project-scoped admin, project selector should default to their project(s)
+projectId must be sent in request body
+backend must require projectId when request comes from project-admin scoped flow
+if projectId missing in project-admin scope, return clear validation error
+on success, always create:
+company if needed
+user
+project_members row
+
+No silent partial creation allowed.
+
+STEP 3 — SUPER ADMIN CREATE USER FLOW
+
+In Super Admin / TotalControl, create-user flow must also support project selector.
+
+Requirements:
+
+Super Admin can create a user platform-wide and optionally assign to a project
+project selector must be present
+if a project is selected, create project_members row
+if no project is selected, platform-wide user/company creation is valid
+no half-complete ambiguous flow
+
+STEP 4 — TOTALCONTROL ADMIN UNIFICATION
+
+Implement capability parity in TotalControl.
+
+TotalControl must gain the same core admin actions as AdminPanel, using the same endpoints, with platform-wide scope.
+
+At minimum add:
+
+create user
+reset password
+delete user
+edit company
+delete company
+transfer project
+delete project
+
+Do not remove Archive.
+Do not remove existing dashboard.
+But add the real admin controls.
+
+STEP 5 — TABBED SUPER ADMIN LAYOUT
+
+Move TotalControl toward a tabbed admin layout consistent with AdminPanel.
+
+Approved rule:
+
+keep Super Admin visually distinct
+same core admin capabilities
+scope difference only
+color/style can differ so user knows they are in platform-wide control mode
+
+Minimum required tabs:
+
+Overview
+Users
+Companies
+Projects
+Email Log
+Activity Feed
+
+You may keep the existing dashboard overview as the Overview tab.
+Do not redesign everything beyond this.
+Do not invent new modules.
+
+STEP 6 — COMPANY / USER LINKAGE CONSISTENCY
+
+When creating a user/company through any valid admin flow:
+
+if company exists, reuse it
+if company does not exist, create it
+if project selected, always create project_members row
+if project not selected in super-admin flow, allow platform-only user/company
+no ghost company
+no ghost user
+no half-complete project assignment
+
+STEP 7 — LIVE VALIDATION
+
+After implementation, show exact live outputs for:
+
+A. repaired ghost user/company now linked to project 19
+B. regular AdminPanel create-user request
+C. regular AdminPanel create-user success response
+D. project_members row created from regular admin flow
+E. TotalControl create-user request
+F. TotalControl create-user success response
+G. project_members row created when project selected from super-admin flow
+H. TotalControl tabs visible
+I. Users tab actions visible in TotalControl
+J. Companies tab actions visible in TotalControl
+K. Projects tab actions visible in TotalControl
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL PROOF
+
+At the end provide only this exact block:
+
+ADMIN SYSTEM UNIFICATION — EXACT OUTPUTS
+
+Ghost user/company linked to project 19: yes/no
+Regular admin create-user with project selector works: yes/no
+Super admin create-user with project selector works: yes/no
+Project_members linkage enforced correctly: yes/no
+Existing company reuse works: yes/no
+TotalControl now has tabbed admin layout: yes/no
+TotalControl now has same core admin capabilities as AdminPanel: yes/no
+Super Admin remains platform-wide: yes/no
+Project Admin remains project-scoped: yes/no
+Exact files changed:
+
+Build only this.
+Nothing more

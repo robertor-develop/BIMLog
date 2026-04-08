@@ -79,6 +79,22 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 - **AI Question Generator**: Claude (claude-haiku-4-5) generates formal RFI questions from plain-language descriptions via `/api/v1/rfis/generate-question`
 - **Submittal Register**: Full lifecycle tracking with type classification
 
+## Admin System (Unified Two-Scope Model)
+
+Two admin panels share the same `/admin/*` endpoints with different scopes:
+
+- **AdminPanel** (`/admin`): Project-scoped admin. Uses `?scope=mine` on all GETs. Restricted to projects where user is `project_admin`. Create-user requires `projectId` (enforced by backend).
+- **TotalControl** (`/total-control`): Super admin only. Platform-wide scope (no `?scope` param). Tabbed layout with dark header. Same 6 tabs: Overview, Users, Companies, Projects, Email Log, Activity Feed.
+
+Both panels have identical CRUD capabilities:
+- Users: Create (with project selector), Reset Password, Delete
+- Companies: Edit, Delete
+- Projects: Archive/Restore, Transfer Ownership, Delete
+
+**Linkage rule**: When a project admin creates a user, `projectId` is required and a `project_members` row is always created. Super admin can optionally select a project. Ghost data fix endpoint: `POST /admin/fix-ghost-members`.
+
+**Projects list endpoint**: `GET /admin/projects-list` (lightweight id/code/name for dropdowns, supports `?scope=mine`).
+
 ## Database Schema
 
 Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
