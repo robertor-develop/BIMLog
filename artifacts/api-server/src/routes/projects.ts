@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectsTable, projectMembersTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
-import { eq, ne, count, inArray, and } from "drizzle-orm";
+import { projectsTable, projectMembersTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { eq, ne, count, inArray, and, sql, ilike } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
+import bcrypt from "bcryptjs";
 
 const router: IRouter = Router();
 
@@ -198,6 +199,89 @@ router.delete("/projects/:projectId", authMiddleware, requireProjectMember(), as
     await db.delete(projectsTable).where(eq(projectsTable.id, projectId));
 
     res.json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+router.post("/projects/:projectId/assign-company-user", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+    const { companyCode, userId, newUserData } = req.body as {
+      companyCode: string;
+      userId?: number;
+      newUserData?: { fullName: string; email: string; companyName: string };
+    };
+
+    if (!companyCode) {
+      res.status(400).json({ error: "companyCode is required" });
+      return;
+    }
+
+    const project = (await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1))[0];
+    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+
+    let assignUserId: number;
+
+    if (userId) {
+      const existingUser = (await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1))[0];
+      if (!existingUser) { res.status(404).json({ error: "User not found" }); return; }
+      assignUserId = existingUser.id;
+    } else if (newUserData) {
+      if (!newUserData.fullName || !newUserData.email || !newUserData.companyName) {
+        res.status(400).json({ error: "newUserData requires fullName, email, companyName" });
+        return;
+      }
+
+      const existingByEmail = (await db.select().from(usersTable).where(eq(usersTable.email, newUserData.email.toLowerCase())).limit(1))[0];
+      if (existingByEmail) {
+        assignUserId = existingByEmail.id;
+      } else {
+        let company = (await db.select().from(companiesTable).where(ilike(companiesTable.name, newUserData.companyName)).limit(1))[0];
+        if (!company) {
+          [company] = await db.insert(companiesTable).values({ name: newUserData.companyName }).returning();
+        }
+
+        const tempPassword = await bcrypt.hash(`temp-${Date.now()}`, 10);
+        const [newUser] = await db.insert(usersTable).values({
+          email: newUserData.email.toLowerCase(),
+          fullName: newUserData.fullName,
+          companyId: company.id,
+          passwordHash: tempPassword,
+        }).returning();
+        assignUserId = newUser.id;
+      }
+    } else {
+      res.status(400).json({ error: "Either userId or newUserData is required" });
+      return;
+    }
+
+    const existingMember = (await db.select().from(projectMembersTable)
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, assignUserId))).limit(1))[0];
+
+    if (existingMember) {
+      res.json({ ok: true, message: "User already a project member", memberId: existingMember.id, userId: assignUserId });
+      return;
+    }
+
+    const [member] = await db.insert(projectMembersTable).values({
+      projectId,
+      userId: assignUserId,
+      role: "viewer",
+      status: "active",
+    }).returning();
+
+    const user = (await db.select({ fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, assignUserId)).limit(1))[0];
+
+    res.json({
+      ok: true,
+      memberId: member.id,
+      userId: assignUserId,
+      userName: user?.fullName,
+      userEmail: user?.email,
+      companyCode,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

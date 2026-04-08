@@ -1,0 +1,106 @@
+Upgrading company assignment from passive visibility to actionable workflow. We are not touching Reports or Intelligence further. We are enabling resolution of unassigned companies.
+
+Let me start by inspecting current companyAssignmentStatus usage and project members endpoints:
+
+2 actions
+
+Now extend the system to allow assigning users to convention companies.
+
+We are building minimal assignment flow only.
+
+STEP 1 — BACKEND SUPPORT
+
+Add ability to assign a user to a convention company context within a project.
+
+Rules:
+
+do not create fake companies automatically
+use existing companies table if match exists
+if no match exists, allow mapping convention code to a new company record
+ensure project_members supports multiple companies per project
+
+Add endpoint:
+
+POST /projects/:projectId/assign-company-user
+
+Payload:
+
+companyCode
+userId OR newUserData (name, email, companyName)
+
+Behavior:
+
+if userId provided → assign existing user to project under that company
+if newUserData → create user + company if needed → assign to project
+update project_members accordingly
+
+STEP 2 — FRONTEND ACTION (Total Control + ConventionBuilder)
+
+For every convention company with:
+hasUsers = false
+
+Add visible action:
+
+“Assign User”
+
+On click:
+
+show simple modal:
+select existing user OR
+create new user (name + email + company name)
+
+On confirm:
+
+call backend endpoint
+refresh companyAssignmentStatus
+
+STEP 3 — VISUAL UPDATE
+
+After assignment:
+
+company pill turns green (assigned)
+participatingCompanies updates
+Total Control company counts update
+
+STEP 4 — DO NOT BUILD FULL USER MANAGEMENT
+
+Do not:
+
+build invitations system
+build permissions matrix
+build roles UI
+
+Only:
+
+assign user to company for project context
+
+STEP 5 — LIVE VALIDATION
+
+Show:
+
+A. endpoint request
+B. DB change (project_members row added)
+C. updated companyAssignmentStatus
+D. updated Total Control display
+E. updated ConventionBuilder display
+
+STEP 6 — CODE OUTPUT
+
+// exact file path
+// BEFORE
+// AFTER
+
+STEP 7 — FINAL PROOF
+
+COMPANY ASSIGNMENT FLOW — EXACT OUTPUTS
+
+Unassigned companies before:
+Assigned users added:
+Unassigned companies after:
+Total Control updated: yes/no
+ConventionBuilder updated: yes/no
+Uses live DB only: yes/no
+Exact files changed:
+
+Build only this.
+Nothing more.

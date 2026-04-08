@@ -442,9 +442,57 @@ function ActivityModal({ token, onClose }: { token: string; onClose: () => void 
   );
 }
 
+function AssignUserModal({ projectId, companyCode, token, onClose, onDone }: { projectId: number; companyCode: string; token: string; onClose: () => void; onDone: () => void }) {
+  const [mode, setMode] = useState<"new">("new");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [companyName, setCompanyName] = useState(companyCode);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    if (!fullName.trim() || !email.trim() || !companyName.trim()) { setError("All fields are required"); return; }
+    setSubmitting(true);
+    setError("");
+    try {
+      const r = await apiFetch(`/projects/${projectId}/assign-company-user`, token, {
+        method: "POST",
+        body: JSON.stringify({ companyCode, newUserData: { fullName: fullName.trim(), email: email.trim().toLowerCase(), companyName: companyName.trim() } }),
+      });
+      if (r?.ok) { onDone(); }
+      else {
+        const data = await r?.json().catch(() => null);
+        setError(data?.error || "Failed to assign user");
+      }
+    } catch { setError("Network error"); }
+    setSubmitting(false);
+  };
+
+  return (
+    <Modal title={`Assign User — ${companyCode}`} onClose={onClose}>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>
+        Create a new user for convention company <strong>{companyCode}</strong> in this project.
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Full Name" style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13 }} />
+        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" type="email" style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13 }} />
+        <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Company Name" style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13 }} />
+      </div>
+      {error && <div style={{ color: "#DC2626", fontSize: 12, marginTop: 8 }}>{error}</div>}
+      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+        <button onClick={onClose} style={{ flex: 1, padding: "8px 0", border: "1px solid #D1D5DB", borderRadius: 6, background: "white", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+        <button onClick={handleSubmit} disabled={submitting} style={{ flex: 1, padding: "8px 0", border: "none", borderRadius: 6, background: "#1D4ED8", color: "white", fontSize: 13, fontWeight: 700, cursor: submitting ? "wait" : "pointer" }}>
+          {submitting ? "Assigning..." : "Assign User"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 function ProjectDetailModal({ project, token, onClose, onRefresh }: { project: Project; token: string; onClose: () => void; onRefresh?: () => void }) {
   const [, setLocation] = useLocation();
   const [archiving, setArchiving] = useState(false);
+  const [assignCode, setAssignCode] = useState<string | null>(null);
 
   const handleArchive = async () => {
     if (!confirm(`Archive project "${project.name}" (${project.code})? This will hide it from the active projects grid.`)) return;
@@ -507,10 +555,15 @@ function ProjectDetailModal({ project, token, onClose, onRefresh }: { project: P
                   background: isUnassigned ? "#FEF2F2" : "#F0FDF4",
                   color: isUnassigned ? "#DC2626" : "#15803D",
                   border: `1px solid ${isUnassigned ? "#FECACA" : "#BBF7D0"}`,
-                }}>
+                  cursor: isUnassigned ? "pointer" : "default",
+                }}
+                  onClick={() => { if (isUnassigned) setAssignCode(code); }}
+                >
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: isUnassigned ? "#DC2626" : "#16A34A" }} />
                   {code}
-                  <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>{isUnassigned ? "no users" : "assigned"}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>
+                    {isUnassigned ? "Assign User" : "assigned"}
+                  </span>
                 </span>
               );
             })}
@@ -534,6 +587,15 @@ function ProjectDetailModal({ project, token, onClose, onRefresh }: { project: P
           </button>
         )}
       </div>
+      {assignCode && (
+        <AssignUserModal
+          projectId={project.id}
+          companyCode={assignCode}
+          token={token}
+          onClose={() => setAssignCode(null)}
+          onDone={() => { setAssignCode(null); onRefresh?.(); }}
+        />
+      )}
     </Modal>
   );
 }
