@@ -1,0 +1,139 @@
+Stop. Do not continue building. Do not add features. Do not redesign. We are now doing a strict correction pass because your last implementation contains unresolved production/data inconsistencies.
+
+This is now the active task:
+
+ISSUE — CORRECT PRODUCTION FIX METHOD, REMOVE UNAPPROVED AUTO-LINKING, AND CLARIFY ENVIRONMENT TRUTH
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database as a substitute for production truth.
+Everything must be grounded in live production code, live production DB reality, and live production app behavior only.
+
+You are not implementing new functionality in this step.
+You are correcting and clarifying what you already did.
+
+STEP 1 — PRODUCTION FIX METHOD ONLY
+
+You said production DB is read-only from your tool and you created a fix endpoint instead.
+
+That is not enough.
+
+For the exact known production case, show the exact deterministic production fix method for:
+
+user 17
+company 28
+project 19
+missing project_members linkage
+
+Return only:
+
+A. exact SQL that would fix this specific case
+B. exact API call or migration path that will execute this in production
+C. whether this requires manual trigger, deploy hook, or one-time admin action
+D. exact proof that this is specific to the known case and not a broad auto-fix
+
+Do not assume deploy will magically fix production.
+Do not leave this abstract.
+
+STEP 2 — REMOVE UNAPPROVED AUTO-LINKING LOGIC
+
+You introduced a generic ghost-member auto-fix endpoint.
+
+That is not approved.
+
+We do not want automatic inferred linking of orphan users to whatever active project exists.
+
+For this step:
+
+identify the exact file and code you added for automatic ghost-member fixing
+show it
+explain why it is unsafe
+propose the exact removal or replacement
+
+Replacement rule:
+Only explicit linkage for the known approved case.
+No broad auto-linking logic.
+
+Do not implement yet until shown.
+
+STEP 3 — CLARIFY ENVIRONMENT TRUTH
+
+Show clearly and exactly:
+
+A. which database the production app is using
+B. which database the running API server in your environment is using
+C. whether the frontend changes you built are pointing to dev or production-backed API behavior
+D. exact evidence that dev DB and production DB are different, including project ID ranges already observed
+
+We need one unambiguous environment map.
+No vague language.
+
+STEP 4 — TOTALCONTROL REWRITE SAFETY CHECK
+
+You rewrote TotalControl into tabs.
+
+Before we proceed, verify exactly:
+
+A. original dashboard components still exist
+
+Health Bar
+Company Performance
+Projects Grid
+Brain Brief
+
+B. they are still reachable and rendered in the new Overview tab
+C. no original functionality was silently removed
+D. navigation to project/open project still works
+
+Show exact code paths and exact visible behavior expected.
+
+Do not redesign further in this step.
+
+STEP 5 — APPROVED CHANGES VS UNAPPROVED CHANGES
+
+Separate your last work into two groups only:
+
+APPROVED AND KEEP:
+
+project selector in create user
+scoped create-user enforcement
+optional project assignment for super admin
+admin action parity direction
+TotalControl tabbed consistency direction
+
+UNAPPROVED / MUST BE CORRECTED:
+
+any generic ghost-member auto-linking
+any production-fix assumptions without deterministic execution
+any environment confusion that makes validation unreliable
+
+Show exact file paths for both groups.
+
+STEP 6 — NO NEW IMPLEMENTATION YET
+
+Do not implement anything new in this step.
+Do not modify code further in this step.
+This is diagnosis, correction plan, and approval checkpoint only.
+
+STEP 7 — OUTPUT FORMAT
+
+At the end provide only this exact block:
+
+PRODUCTION / ENVIRONMENT CORRECTION PLAN
+
+Exact production case to fix:
+Exact SQL for the known linkage fix:
+Exact execution method in production:
+Automatic ghost-linking code present: yes/no
+Automatic ghost-linking must be removed/replaced: yes/no
+Production DB used by live app:
+DB used by current API server:
+Frontend currently validated against:
+Original TotalControl dashboard preserved: yes/no
+Approved changes to keep:
+Changes requiring correction before proceeding:
+Exact files involved:
+
+Do only this.
+Nothing more.
