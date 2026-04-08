@@ -1,0 +1,201 @@
+Stop. Do not add new reports. Do not redesign the UI. Do not add AI calls. Do not change the database. We are now upgrading the project intelligence layer from descriptive output to analytical interpretation.
+
+This is now the active build task:
+
+ISSUE — PROJECT INTELLIGENCE SUMMARY IS DESCRIPTIVE, NOT ANALYTICAL
+
+Confirmed current state:
+
+the new project intelligence layer is working
+it returns live data correctly
+it shows summary, timeline, and convention evolution
+but it still behaves like a data formatter instead of an intelligence system
+it describes counts, but does not detect and explain meaningful structural events
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not adding features.
+We are not expanding reports.
+We are upgrading interpretation only.
+
+STEP 1 — ADD DETERMINISTIC EVENT CLASSIFICATION
+
+Inside the shared intelligence query layer, extend the logic to classify meaningful convention events using only live DB data.
+
+Add these exact deterministic rules:
+
+STRUCTURAL_RESET
+If a convention version has:
+disciplines count = 0
+doc types count = 0
+systems count = 0
+
+Then classify that version event as:
+eventType = "STRUCTURAL_RESET"
+severity = "high"
+
+MAJOR_EXPANSION
+If delta from previous version adds:
+2 or more disciplines
+OR
+2 or more systems
+OR
+2 or more document types
+
+Then classify that version event as:
+eventType = "MAJOR_EXPANSION"
+severity = "medium"
+
+AMBIGUITY_INCREASE
+If ambiguity count increases compared to previous version
+
+Then classify that version event as:
+eventType = "AMBIGUITY_INCREASE"
+severity = "medium"
+
+STABILIZATION
+If compared to previous version:
+no new ambiguities
+and only minimal structural changes
+
+Then classify that version event as:
+eventType = "STABILIZATION"
+severity = "low"
+
+Do not use AI for this.
+Do not guess.
+Do not invent events not supported by live data.
+
+STEP 2 — ENHANCE intelligenceSummary LOGIC
+
+Rewrite the deterministic intelligenceSummary generation logic.
+
+It must no longer only describe counts.
+It must now interpret the project history and current condition.
+
+The summary must include exactly these interpretation layers:
+
+A. Evolution narrative
+Explain how the convention evolved from earliest meaningful version to current version.
+
+B. Most significant event
+Identify the single most important event in project history using this priority:
+STRUCTURAL_RESET > MAJOR_EXPANSION > AMBIGUITY_INCREASE > STABILIZATION
+
+C. Current state interpretation
+Determine one current state label using deterministic logic only:
+
+stable
+unstable
+incomplete
+untested
+
+Suggested deterministic logic:
+
+untested = no files processed
+incomplete = latest version still has ambiguities
+unstable = latest two versions show major change or ambiguity increase
+stable = no active ambiguities and no major structural change in latest version
+
+D. Validation status
+State clearly whether the current convention has been tested against real file data or not.
+
+Do not add fluff.
+Do not make it poetic.
+It must read like a smart operational system.
+
+STEP 3 — TAG TIMELINE EVENTS
+
+Each timeline event in the intelligence payload must now include:
+
+eventType
+severity
+
+At minimum for convention-version events.
+
+If an event is just a file upload or ordinary save and does not match the special rules, keep a normal event type.
+
+STEP 4 — EXPOSE MOST SIGNIFICANT EVENT IN RESPONSE
+
+Add one new top-level field to the route response:
+
+mostSignificantEvent
+
+It must include:
+
+eventType
+severity
+version if applicable
+title
+summary
+
+This must be derived from the live data and the event priority rules above.
+
+STEP 5 — FRONTEND MINIMAL UPGRADE ONLY
+
+Do not redesign the Reports page.
+Only make these minimal frontend upgrades in the existing intelligence area:
+
+show mostSignificantEvent as a highlighted block near the top
+color code timeline items by severity:
+high = red
+medium = yellow/orange
+low = green
+display eventType label on timeline items
+
+Do not move major layout pieces.
+Do not add new sections.
+Do not touch PDF buttons.
+
+STEP 6 — LIVE VALIDATION
+
+Use the active live project that currently has convention history and show exact outputs.
+
+Required proof:
+
+exact route request
+exact raw JSON response
+exact updated intelligenceSummary text
+exact mostSignificantEvent object
+exact timeline entries showing eventType and severity
+exact proof that:
+Version 3 is classified as STRUCTURAL_RESET
+Version 4 is classified as MAJOR_EXPANSION
+exact current state label returned
+
+STEP 7 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 8 — FINAL PROOF
+
+At the end provide only this exact block:
+
+INTELLIGENCE INTERPRETATION UPGRADE — EXACT OUTPUTS
+
+Live request:
+Live response status:
+Most significant event detected:
+Version 3 classified as STRUCTURAL_RESET: yes/no
+Version 4 classified as MAJOR_EXPANSION: yes/no
+Current state label:
+Updated intelligence summary visible: yes/no
+Timeline severity labels visible: yes/no
+Uses deterministic live DB logic only: yes/no
+Root data sources:
+Exact files changed:
+
+Build only this.
+Nothing more.

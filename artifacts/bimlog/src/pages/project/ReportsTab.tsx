@@ -77,10 +77,19 @@ interface VersionSnapshot {
 interface TimelineEvent {
   timestamp: string;
   eventType: string;
+  severity: "high" | "medium" | "low";
   actor: string | null;
   title: string;
   summary: string;
   version: number | null;
+}
+
+interface SignificantEvent {
+  eventType: string;
+  severity: "high" | "medium" | "low";
+  version: number | null;
+  title: string;
+  summary: string;
 }
 
 interface IntelligencePayload {
@@ -100,9 +109,10 @@ interface IntelligencePayload {
     userGuidance: string | null;
     lastChangeDate: string | null;
   };
-  intelligenceSummary: { narrative: string; conventionConfigured: boolean; hasFiles: boolean; hasAmbiguities: boolean };
+  intelligenceSummary: { narrative: string; stateLabel: string; conventionConfigured: boolean; hasFiles: boolean; hasAmbiguities: boolean; validationStatus: string };
+  mostSignificantEvent: SignificantEvent | null;
   timeline: TimelineEvent[];
-  conventionEvolution: VersionSnapshot[];
+  conventionEvolution: (VersionSnapshot & { classifiedEventType: string; severity: "high" | "medium" | "low" })[];
 }
 
 function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang: string }) {
@@ -152,6 +162,16 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
 
   const sectionHead = (icon: React.ReactNode, title: string): React.CSSProperties => ({ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 14, color: "#1D4ED8", marginBottom: 12 });
 
+  const severityColor = (s: string) => s === "high" ? "#DC2626" : s === "medium" ? "#D97706" : "#16A34A";
+  const severityBg = (s: string) => s === "high" ? "#FEF2F2" : s === "medium" ? "#FFFBEB" : "#F0FDF4";
+  const severityBorder = (s: string) => s === "high" ? "#FECACA" : s === "medium" ? "#FDE68A" : "#BBF7D0";
+  const stateLabelColor: Record<string, { color: string; bg: string }> = {
+    stable: { color: "#166534", bg: "#F0FDF4" },
+    unstable: { color: "#DC2626", bg: "#FEF2F2" },
+    incomplete: { color: "#D97706", bg: "#FFFBEB" },
+    untested: { color: "#6B7280", bg: "#F3F4F6" },
+  };
+
   return (
     <div style={{ marginBottom: 32 }}>
       {/* Filters */}
@@ -178,6 +198,18 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
         )}
       </div>
 
+      {/* MOST SIGNIFICANT EVENT */}
+      {data.mostSignificantEvent && (
+        <div style={{ padding: "12px 16px", borderRadius: 8, border: `1px solid ${severityBorder(data.mostSignificantEvent.severity)}`, background: severityBg(data.mostSignificantEvent.severity), marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <AlertTriangle style={{ width: 14, height: 14, color: severityColor(data.mostSignificantEvent.severity) }} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: severityColor(data.mostSignificantEvent.severity) }}>{data.mostSignificantEvent.title}</span>
+            <span style={{ fontSize: 9, padding: "1px 6px", borderRadius: 3, background: severityColor(data.mostSignificantEvent.severity) + "18", color: severityColor(data.mostSignificantEvent.severity), fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{data.mostSignificantEvent.eventType.replace(/_/g, " ")}</span>
+          </div>
+          <div style={{ fontSize: 11, color: "#374151", lineHeight: 1.5 }}>{data.mostSignificantEvent.summary}</div>
+        </div>
+      )}
+
       {/* A. PROJECT INTELLIGENCE SUMMARY */}
       <div style={{ padding: "16px 20px", borderRadius: 10, border: "1px solid #BFDBFE", background: "#EFF6FF", marginBottom: 20 }}>
         <div style={sectionHead(null, "")}>
@@ -186,6 +218,10 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
         </div>
         <div style={{ fontSize: 13, lineHeight: 1.7, color: "#1E3A5F" }}>{data.intelligenceSummary.narrative}</div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+          {data.intelligenceSummary.stateLabel && (() => {
+            const sc = stateLabelColor[data.intelligenceSummary.stateLabel] || stateLabelColor.untested;
+            return <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: sc.bg, color: sc.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{data.intelligenceSummary.stateLabel}</span>;
+          })()}
           <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#DBEAFE", color: "#1E40AF", fontWeight: 600 }}>v{cs.conventionVersion} ({cs.totalVersions} {tl("versions", "versiones")})</span>
           {cs.disciplines.length > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{cs.disciplines.length} {tl("disciplines", "disciplinas")}</span>}
           {cs.docTypes.length > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{cs.docTypes.length} {tl("doc types", "tipos doc")}</span>}
@@ -217,17 +253,24 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
         ) : (
           <div style={{ position: "relative", paddingLeft: 20 }}>
             <div style={{ position: "absolute", left: 7, top: 0, bottom: 0, width: 2, background: "#D1D5DB" }} />
-            {data.timeline.map((ev, i) => (
+            {data.timeline.map((ev, i) => {
+              const dotColor = severityColor(ev.severity);
+              const isClassified = ev.eventType === "STRUCTURAL_RESET" || ev.eventType === "MAJOR_EXPANSION" || ev.eventType === "AMBIGUITY_INCREASE" || ev.eventType === "STABILIZATION";
+              return (
               <div key={i} style={{ position: "relative", paddingBottom: 14, paddingLeft: 16 }}>
-                <div style={{ position: "absolute", left: -2, top: 4, width: 10, height: 10, borderRadius: "50%", background: ev.eventType === "convention_version" ? "#1D4ED8" : "#6B7280", border: "2px solid #fff", zIndex: 1 }} />
+                <div style={{ position: "absolute", left: -2, top: 4, width: 10, height: 10, borderRadius: "50%", background: dotColor, border: "2px solid #fff", zIndex: 1 }} />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{ev.title}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{ev.title}</span>
+                    {isClassified && <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 3, background: severityBg(ev.severity), color: severityColor(ev.severity), fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.3, border: `1px solid ${severityBorder(ev.severity)}` }}>{ev.eventType.replace(/_/g, " ")}</span>}
+                  </div>
                   <div style={{ fontSize: 10, color: "#6B7280", flexShrink: 0 }}>{format(new Date(ev.timestamp), "MMM d, yyyy HH:mm")}</div>
                 </div>
                 <div style={{ fontSize: 11, color: "#374151", marginTop: 2, lineHeight: 1.5 }}>{ev.summary.length > 200 ? ev.summary.slice(0, 200) + "..." : ev.summary}</div>
                 {ev.actor && <div style={{ fontSize: 10, color: "#6B7280", marginTop: 2 }}>{ev.actor}</div>}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -257,7 +300,8 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
                       </div>
                       {v.changeSummary && <div style={{ fontSize: 11, color: "#374151", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.changeSummary}</div>}
                     </div>
-                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                    <div style={{ display: "flex", gap: 4, flexShrink: 0, alignItems: "center" }}>
+                      {v.classifiedEventType && v.classifiedEventType !== "convention_version" && <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 3, background: severityBg(v.severity), color: severityColor(v.severity), fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.3, border: `1px solid ${severityBorder(v.severity)}` }}>{v.classifiedEventType.replace(/_/g, " ")}</span>}
                       <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{v.counts.disciplines}D</span>
                       <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{v.counts.docTypes}T</span>
                       <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{v.counts.systems}S</span>
