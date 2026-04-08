@@ -1,0 +1,135 @@
+Stop. Do not build any new features. Do not redesign UI yet. Do not remove, hide, or restrict anything without asking first.
+
+We are now fixing the core admin architecture.
+
+This is now the active build task:
+
+ISSUE — THERE MUST BE ONE ADMIN SYSTEM WITH TWO SCOPES, NOT TWO DIFFERENT SYSTEMS
+
+Confirmed live state:
+
+AdminPanel currently has the real CRUD/admin functionality
+TotalControl is incomplete and missing critical actions
+Super Admin and Project Admin are not using the same admin system behavior
+company/user/project linkage is inconsistent
+a company/user can be created platform-wide without being properly linked to project scope
+this is incorrect
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not implementing blindly.
+First we define the exact unification plan and prove the linkage issue.
+Do not make changes yet until the plan is shown.
+
+STEP 1 — SHOW THE UNIFICATION PLAN ONLY
+
+Show exactly how you will make AdminPanel and TotalControl behave as one admin system with two scopes:
+
+Super Admin / Total Control
+platform-wide scope
+sees all projects, all users, all companies
+can do everything
+Project Admin / AdminPanel
+project-scoped view
+sees only their own project(s), users, companies
+can do the same actions within scope
+
+Show exactly:
+
+which existing AdminPanel components/actions can be reused in TotalControl
+which endpoints will be shared
+how scope will be passed
+what minimal UI changes are needed
+what parts of TotalControl remain dashboard-only vs what parts gain admin actions
+
+Do not implement yet.
+Do not change code yet.
+Wait for approval after showing the plan.
+
+STEP 2 — TRACE THE LINKAGE BUG EXACTLY
+
+Show the exact end-to-end flow for:
+
+create/find company
+create user
+create project_members row
+
+We need exact proof of where the current flow breaks.
+
+For the exact live case that happened, show:
+
+whether company row was created
+whether user row was created
+whether project_members row was created
+if not, where the flow stopped
+
+This must be shown with exact route code and exact DB behavior.
+
+STEP 3 — DEFINE THE NON-NEGOTIABLE SYSTEM RULE
+
+The system rule must be:
+
+If a user/company is created through a project-scoped workflow, then:
+
+company may exist platform-wide
+user may exist platform-wide
+but project_members linkage must also be created when the workflow is intended to assign that user to that project
+
+No ghost company
+No ghost user
+No half-complete flow
+
+Show exactly how you will enforce this rule.
+
+STEP 4 — SHOW THE ACTION PARITY MAP
+
+List each action and exactly how it will work in both scopes:
+
+create user
+edit user
+reset password
+delete user
+create company
+edit company
+delete company
+transfer project
+delete project
+
+For each one, show:
+
+available in Project Admin scope: yes/no
+available in Super Admin scope: yes/no
+endpoint used
+scope rule used
+
+Do not remove any action unless explicitly approved.
+
+STEP 5 — WAIT
+
+Do not implement yet.
+Do not “helpfully” change anything yet.
+Do not simplify permissions on your own.
+Do not remove buttons.
+Do not redesign either panel.
+Show the plan first and wait for approval.
+
+STEP 6 — OUTPUT FORMAT
+
+At the end provide only this exact block:
+
+ADMIN SYSTEM UNIFICATION PLAN
+
+Shared admin actions:
+Scope handling model:
+How TotalControl will match AdminPanel:
+How project/user/company linkage will be enforced:
+Exact root cause of the current ghost company/user problem:
+Files that would be changed:
+Risks / questions that need approval first:
+
+Do only this.
+Nothing more.
