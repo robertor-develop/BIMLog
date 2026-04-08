@@ -89,6 +89,16 @@ Tables: companies, users, projects, project_members, files, rfis, submittals, ac
 
 The `config_options` table stores all configurable domain values (roles, statuses, separators, priorities, submittal types) with an optional `meta` JSON column for permission metadata. It serves as the single source of truth. Values are exposed via `GET /api/v1/config` and used by both frontend and backend validation. Backend RBAC uses `requirePermission("admin", "write")` which resolves allowed roles from DB at runtime (cached 60s).
 
+## Project Intelligence Layer
+
+- **Shared query module**: `artifacts/api-server/src/lib/project-intelligence.ts` — exported `getProjectIntelligence(projectId, filters)` assembles structured intelligence payload from live DB
+- **Route**: `GET /api/v1/projects/:projectId/intelligence-summary` — returns JSON with `project`, `currentState`, `intelligenceSummary`, `timeline`, `conventionEvolution`
+- **Filters**: `from`, `to` (date range, inclusive day boundaries), `versionFrom`, `versionTo` (convention version range) — applied to both timeline and evolution
+- **Frontend**: `ProjectIntelligenceView` component rendered at top of ReportsTab with three blocks: Project Intelligence Summary, Project Timeline, Convention Evolution
+- **Data sources**: projects, naming_conventions, naming_convention_versions, naming_fields, files (count), activity_log, users
+- **Convention evolution**: per-version deltas (disciplines/docTypes/systems/extraFields/ambiguities added/removed between adjacent versions)
+- **Auth**: requireProjectMember middleware allows superadmin bypass (verified via DB isSuperAdmin flag)
+
 ## API Endpoints (v1)
 
 All endpoints are versioned under `/api/v1/`.

@@ -73,6 +73,13 @@ export function requireProjectMember(...allowedRoles: string[]) {
       return;
     }
 
+    const [userCheck] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (userCheck?.isSuperAdmin) {
+      req.memberRole = "project_admin";
+      next();
+      return;
+    }
+
     const members = await db
       .select()
       .from(projectMembersTable)

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useI18n } from "@/lib/i18n";
-import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History } from "lucide-react";
 import { format } from "date-fns";
 
 interface CvrIssue {
@@ -41,6 +41,292 @@ interface CvrReport {
   totalAdminRejected: number;
   issues: CvrIssue[];
   conventionIntelligence?: ConventionIntelligence | null;
+}
+
+interface IntelCodeLabel { code: string; label: string }
+interface IntelKeyLabel { key: string; label: string }
+
+interface VersionDelta {
+  disciplinesAdded: string[];
+  disciplinesRemoved: string[];
+  docTypesAdded: string[];
+  docTypesRemoved: string[];
+  systemsAdded: string[];
+  systemsRemoved: string[];
+  extraFieldsAdded: string[];
+  extraFieldsRemoved: string[];
+  ambiguitiesAdded: string[];
+  ambiguitiesResolved: string[];
+}
+
+interface VersionSnapshot {
+  version: number;
+  createdAt: string;
+  actorName: string | null;
+  changeSummary: string | null;
+  analysisSummary: string | null;
+  disciplines: IntelCodeLabel[];
+  docTypes: IntelCodeLabel[];
+  systems: IntelCodeLabel[];
+  extraFields: IntelKeyLabel[];
+  ambiguities: string[];
+  counts: { disciplines: number; docTypes: number; systems: number; extraFields: number; ambiguities: number };
+  delta: VersionDelta | null;
+}
+
+interface TimelineEvent {
+  timestamp: string;
+  eventType: string;
+  actor: string | null;
+  title: string;
+  summary: string;
+  version: number | null;
+}
+
+interface IntelligencePayload {
+  project: { id: number; name: string; code: string; status: string; createdAt: string };
+  currentState: {
+    conventionVersion: number;
+    separator: string | null;
+    companyCodes: string;
+    disciplines: IntelCodeLabel[];
+    docTypes: IntelCodeLabel[];
+    systems: IntelCodeLabel[];
+    unresolvedAmbiguityCount: number;
+    unresolvedAmbiguities: string[];
+    fileCount: number;
+    totalVersions: number;
+    fieldOrder: string[];
+    userGuidance: string | null;
+    lastChangeDate: string | null;
+  };
+  intelligenceSummary: { narrative: string; conventionConfigured: boolean; hasFiles: boolean; hasAmbiguities: boolean };
+  timeline: TimelineEvent[];
+  conventionEvolution: VersionSnapshot[];
+}
+
+function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang: string }) {
+  const tl = (en: string, es: string) => lang === "es" ? es : en;
+  const [data, setData] = useState<IntelligencePayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [verFrom, setVerFrom] = useState("");
+  const [verTo, setVerTo] = useState("");
+  const [expandedVersion, setExpandedVersion] = useState<number | null>(null);
+
+  const fetchIntel = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const params = new URLSearchParams();
+      if (dateFrom) params.set("from", dateFrom);
+      if (dateTo) params.set("to", dateTo);
+      if (verFrom) params.set("versionFrom", verFrom);
+      if (verTo) params.set("versionTo", verTo);
+      const resp = await fetch(`/api/v1/projects/${projectId}/intelligence-summary?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Failed to load intelligence");
+      setData(await resp.json());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, dateFrom, dateTo, verFrom, verTo]);
+
+  useEffect(() => { fetchIntel(); }, [fetchIntel]);
+
+  if (loading) return <div style={{ textAlign: "center", padding: "30px 0", color: "#6B7280", fontSize: 13 }}>{tl("Loading project intelligence...", "Cargando inteligencia del proyecto...")}</div>;
+  if (error) return <div style={{ padding: "12px 16px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13 }}>{error}</div>;
+  if (!data) return null;
+
+  const cs = data.currentState;
+  const hasDelta = (d: VersionDelta | null) => {
+    if (!d) return false;
+    return d.disciplinesAdded.length > 0 || d.disciplinesRemoved.length > 0 || d.docTypesAdded.length > 0 || d.docTypesRemoved.length > 0 || d.systemsAdded.length > 0 || d.systemsRemoved.length > 0 || d.extraFieldsAdded.length > 0 || d.extraFieldsRemoved.length > 0 || d.ambiguitiesAdded.length > 0 || d.ambiguitiesResolved.length > 0;
+  };
+
+  const sectionHead = (icon: React.ReactNode, title: string): React.CSSProperties => ({ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 14, color: "#1D4ED8", marginBottom: 12 });
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 16, flexWrap: "wrap" }}>
+        <div>
+          <label style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 3 }}>{tl("From", "Desde")}</label>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: "5px 8px", borderRadius: 5, border: "1px solid #D1D5DB", fontSize: 11, background: "#fff", color: "#111" }} />
+        </div>
+        <div>
+          <label style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 3 }}>{tl("To", "Hasta")}</label>
+          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: "5px 8px", borderRadius: 5, border: "1px solid #D1D5DB", fontSize: 11, background: "#fff", color: "#111" }} />
+        </div>
+        <div>
+          <label style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 3 }}>{tl("Version From", "Versión desde")}</label>
+          <input type="number" min={1} value={verFrom} onChange={e => setVerFrom(e.target.value)} placeholder="1" style={{ padding: "5px 8px", borderRadius: 5, border: "1px solid #D1D5DB", fontSize: 11, width: 60, background: "#fff", color: "#111" }} />
+        </div>
+        <div>
+          <label style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 3 }}>{tl("Version To", "Versión hasta")}</label>
+          <input type="number" min={1} value={verTo} onChange={e => setVerTo(e.target.value)} placeholder={String(cs.totalVersions)} style={{ padding: "5px 8px", borderRadius: 5, border: "1px solid #D1D5DB", fontSize: 11, width: 60, background: "#fff", color: "#111" }} />
+        </div>
+        <button onClick={fetchIntel} style={{ padding: "6px 14px", borderRadius: 5, background: "#1D4ED8", color: "#fff", border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tl("Apply", "Aplicar")}</button>
+        {(dateFrom || dateTo || verFrom || verTo) && (
+          <button onClick={() => { setDateFrom(""); setDateTo(""); setVerFrom(""); setVerTo(""); }} style={{ padding: "6px 12px", borderRadius: 5, background: "transparent", color: "#6B7280", border: "1px solid #D1D5DB", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tl("Clear", "Limpiar")}</button>
+        )}
+      </div>
+
+      {/* A. PROJECT INTELLIGENCE SUMMARY */}
+      <div style={{ padding: "16px 20px", borderRadius: 10, border: "1px solid #BFDBFE", background: "#EFF6FF", marginBottom: 20 }}>
+        <div style={sectionHead(null, "")}>
+          <Layers style={{ width: 16, height: 16 }} />
+          {tl("Project Intelligence Summary", "Resumen de Inteligencia del Proyecto")}
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.7, color: "#1E3A5F" }}>{data.intelligenceSummary.narrative}</div>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+          <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#DBEAFE", color: "#1E40AF", fontWeight: 600 }}>v{cs.conventionVersion} ({cs.totalVersions} {tl("versions", "versiones")})</span>
+          {cs.disciplines.length > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{cs.disciplines.length} {tl("disciplines", "disciplinas")}</span>}
+          {cs.docTypes.length > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{cs.docTypes.length} {tl("doc types", "tipos doc")}</span>}
+          {cs.systems.length > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{cs.systems.length} {tl("systems", "sistemas")}</span>}
+          <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: cs.fileCount > 0 ? "#F0FDF4" : "#F3F4F6", color: cs.fileCount > 0 ? "#166534" : "#6B7280", fontWeight: 600 }}>{cs.fileCount} {tl("files", "archivos")}</span>
+          {cs.unresolvedAmbiguityCount > 0 && <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 5, background: "#FEF2F2", color: "#DC2626", fontWeight: 600 }}>{cs.unresolvedAmbiguityCount} {tl("unresolved", "sin resolver")}</span>}
+        </div>
+        {cs.unresolvedAmbiguityCount > 0 && (
+          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 6, background: "#FEF2F2", border: "1px solid #FECACA" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#991B1B", marginBottom: 6 }}>
+              <AlertTriangle style={{ width: 12, height: 12, display: "inline", verticalAlign: "middle", marginRight: 4 }} />
+              {tl("Unresolved Ambiguities", "Ambiguedades sin resolver")}
+            </div>
+            {cs.unresolvedAmbiguities.map((a, i) => (
+              <div key={i} style={{ fontSize: 11, color: "#7F1D1D", padding: "2px 0", borderBottom: i < cs.unresolvedAmbiguities.length - 1 ? "1px solid #FECACA" : "none" }}>{a}</div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* B. PROJECT TIMELINE */}
+      <div style={{ padding: "16px 20px", borderRadius: 10, border: "1px solid #D1D5DB", background: "#fff", marginBottom: 20 }}>
+        <div style={sectionHead(null, "")}>
+          <History style={{ width: 16, height: 16 }} />
+          {tl("Project Timeline", "Cronología del Proyecto")}
+        </div>
+        {data.timeline.length === 0 ? (
+          <div style={{ fontSize: 12, color: "#6B7280", textAlign: "center", padding: 16 }}>{tl("No events in selected range.", "Sin eventos en el rango seleccionado.")}</div>
+        ) : (
+          <div style={{ position: "relative", paddingLeft: 20 }}>
+            <div style={{ position: "absolute", left: 7, top: 0, bottom: 0, width: 2, background: "#D1D5DB" }} />
+            {data.timeline.map((ev, i) => (
+              <div key={i} style={{ position: "relative", paddingBottom: 14, paddingLeft: 16 }}>
+                <div style={{ position: "absolute", left: -2, top: 4, width: 10, height: 10, borderRadius: "50%", background: ev.eventType === "convention_version" ? "#1D4ED8" : "#6B7280", border: "2px solid #fff", zIndex: 1 }} />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{ev.title}</div>
+                  <div style={{ fontSize: 10, color: "#6B7280", flexShrink: 0 }}>{format(new Date(ev.timestamp), "MMM d, yyyy HH:mm")}</div>
+                </div>
+                <div style={{ fontSize: 11, color: "#374151", marginTop: 2, lineHeight: 1.5 }}>{ev.summary.length > 200 ? ev.summary.slice(0, 200) + "..." : ev.summary}</div>
+                {ev.actor && <div style={{ fontSize: 10, color: "#6B7280", marginTop: 2 }}>{ev.actor}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* C. CONVENTION EVOLUTION */}
+      <div style={{ padding: "16px 20px", borderRadius: 10, border: "1px solid #D1D5DB", background: "#fff", marginBottom: 20 }}>
+        <div style={sectionHead(null, "")}>
+          <GitBranch style={{ width: 16, height: 16 }} />
+          {tl("Convention Evolution", "Evolución de la Convención")}
+        </div>
+        {data.conventionEvolution.length === 0 ? (
+          <div style={{ fontSize: 12, color: "#6B7280", textAlign: "center", padding: 16 }}>{tl("No versions in selected range.", "Sin versiones en el rango seleccionado.")}</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {data.conventionEvolution.map(v => {
+              const isExpanded = expandedVersion === v.version;
+              const hasDeltas = hasDelta(v.delta);
+              return (
+                <div key={v.version} style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                  <button onClick={() => setExpandedVersion(isExpanded ? null : v.version)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: isExpanded ? "#F9FAFB" : "#fff", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    {isExpanded ? <ChevronDown style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} /> : <ChevronRight style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} />}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#111" }}>v{v.version}</span>
+                        <span style={{ fontSize: 10, color: "#6B7280" }}>{format(new Date(v.createdAt), "MMM d, yyyy HH:mm")}</span>
+                        {v.actorName && <span style={{ fontSize: 10, color: "#6B7280" }}>{v.actorName}</span>}
+                      </div>
+                      {v.changeSummary && <div style={{ fontSize: 11, color: "#374151", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.changeSummary}</div>}
+                    </div>
+                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                      <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{v.counts.disciplines}D</span>
+                      <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{v.counts.docTypes}T</span>
+                      <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{v.counts.systems}S</span>
+                      {v.counts.ambiguities > 0 && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "#FEF2F2", color: "#DC2626", fontWeight: 600 }}>{v.counts.ambiguities}?</span>}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div style={{ padding: "12px 14px", borderTop: "1px solid #E5E7EB", background: "#FAFAFA" }}>
+                      {hasDeltas && v.delta && (
+                        <div style={{ marginBottom: 10, padding: "8px 12px", borderRadius: 6, background: "#F0F9FF", border: "1px solid #BAE6FD" }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "#0369A1", marginBottom: 4 }}>{tl("Changes from previous version", "Cambios respecto a la versión anterior")}</div>
+                          {v.delta.disciplinesAdded.length > 0 && <div style={{ fontSize: 11, color: "#166534" }}><Plus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Disciplines added", "Disciplinas agregadas")}: {v.delta.disciplinesAdded.join(", ")}</div>}
+                          {v.delta.disciplinesRemoved.length > 0 && <div style={{ fontSize: 11, color: "#DC2626" }}><Minus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Disciplines removed", "Disciplinas eliminadas")}: {v.delta.disciplinesRemoved.join(", ")}</div>}
+                          {v.delta.docTypesAdded.length > 0 && <div style={{ fontSize: 11, color: "#166534" }}><Plus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Doc types added", "Tipos doc agregados")}: {v.delta.docTypesAdded.join(", ")}</div>}
+                          {v.delta.docTypesRemoved.length > 0 && <div style={{ fontSize: 11, color: "#DC2626" }}><Minus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Doc types removed", "Tipos doc eliminados")}: {v.delta.docTypesRemoved.join(", ")}</div>}
+                          {v.delta.systemsAdded.length > 0 && <div style={{ fontSize: 11, color: "#166534" }}><Plus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Systems added", "Sistemas agregados")}: {v.delta.systemsAdded.join(", ")}</div>}
+                          {v.delta.systemsRemoved.length > 0 && <div style={{ fontSize: 11, color: "#DC2626" }}><Minus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Systems removed", "Sistemas eliminados")}: {v.delta.systemsRemoved.join(", ")}</div>}
+                          {v.delta.extraFieldsAdded.length > 0 && <div style={{ fontSize: 11, color: "#166534" }}><Plus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Fields added", "Campos agregados")}: {v.delta.extraFieldsAdded.join(", ")}</div>}
+                          {v.delta.extraFieldsRemoved.length > 0 && <div style={{ fontSize: 11, color: "#DC2626" }}><Minus style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Fields removed", "Campos eliminados")}: {v.delta.extraFieldsRemoved.join(", ")}</div>}
+                          {v.delta.ambiguitiesAdded.length > 0 && <div style={{ fontSize: 11, color: "#D97706" }}><AlertTriangle style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("New ambiguities", "Nuevas ambiguedades")}: {v.delta.ambiguitiesAdded.length}</div>}
+                          {v.delta.ambiguitiesResolved.length > 0 && <div style={{ fontSize: 11, color: "#16A34A" }}><CheckCircle2 style={{ width: 10, height: 10, display: "inline", verticalAlign: "middle" }} /> {tl("Ambiguities resolved", "Ambiguedades resueltas")}: {v.delta.ambiguitiesResolved.length}</div>}
+                        </div>
+                      )}
+                      {v.disciplines.length > 0 && (
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", marginBottom: 3 }}>{tl("Disciplines", "Disciplinas")}</div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                            {v.disciplines.map(d => <span key={d.code} style={{ fontSize: 10, padding: "1px 6px", borderRadius: 3, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{d.code}{d.label !== d.code ? ` - ${d.label}` : ""}</span>)}
+                          </div>
+                        </div>
+                      )}
+                      {v.docTypes.length > 0 && (
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", marginBottom: 3 }}>{tl("Document Types", "Tipos de Documento")}</div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                            {v.docTypes.map(d => <span key={d.code} style={{ fontSize: 10, padding: "1px 6px", borderRadius: 3, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{d.code}{d.label !== d.code ? ` - ${d.label}` : ""}</span>)}
+                          </div>
+                        </div>
+                      )}
+                      {v.systems.length > 0 && (
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", marginBottom: 3 }}>{tl("Systems", "Sistemas")}</div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                            {v.systems.map(s => <span key={s.code} style={{ fontSize: 10, padding: "1px 6px", borderRadius: 3, background: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{s.code} - {s.label}</span>)}
+                          </div>
+                        </div>
+                      )}
+                      {v.analysisSummary && (
+                        <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", marginBottom: 3 }}>{tl("Analysis Summary", "Resumen de Análisis")}</div>
+                          <div style={{ fontSize: 11, color: "#374151", lineHeight: 1.5 }}>{v.analysisSummary}</div>
+                        </div>
+                      )}
+                      {v.ambiguities.length > 0 && (
+                        <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, background: "#FEF2F2", border: "1px solid #FECACA" }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: "#991B1B", marginBottom: 3 }}>{tl("Ambiguities", "Ambiguedades")} ({v.ambiguities.length})</div>
+                          {v.ambiguities.map((a, i) => <div key={i} style={{ fontSize: 11, color: "#7F1D1D", padding: "2px 0" }}>{a}</div>)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -158,6 +444,9 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
 
   return (
     <div>
+      {/* Project Intelligence Layer */}
+      <ProjectIntelligenceView projectId={projectId} lang={lang} />
+
       {/* PDF Reports section */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ marginBottom: 14 }}>

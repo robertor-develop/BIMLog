@@ -1,0 +1,228 @@
+Stop. Do not patch isolated report widgets. Do not add more static PDFs. Do not redesign blindly. We are now building the first true intelligence layer of BIMLog.
+
+This is now the active build task:
+
+ISSUE — REPORTS MUST BECOME THE PROJECT INTELLIGENCE SURFACE
+
+Confirmed from live use and diagnostic:
+
+BIMLog already stores rich project intelligence
+convention versions, summaries, ambiguities, changes, actors, and context already exist
+but the Reports area still behaves like scattered static outputs
+this is incorrect for BIMLog
+the Reports area must become the place where the user immediately understands what has happened, what changed, what remains unresolved, and what the current state means
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not building the whole future reporting system in one step.
+We are building the correct foundation first.
+
+This step builds exactly three things only:
+
+Project Intelligence Summary
+Project Timeline
+Convention Evolution
+
+Do not build anything else yet.
+
+STEP 1 — CREATE A SHARED QUERY LAYER
+
+Create one shared backend intelligence query layer for a project.
+
+It must return one structured JSON payload for a single project containing:
+
+current project identity
+current convention state
+convention version history
+version summaries
+change summaries
+analysis summaries
+ambiguities
+actor/user info where available
+high-level current-state interpretation
+chronological event list derived from existing live data
+
+Do not hardcode static text in frontend.
+The backend must assemble the live project intelligence payload from real DB data.
+
+Required output:
+Show exact new file path and exact exported function(s).
+
+STEP 2 — BACKEND DATA SOURCES
+
+The shared intelligence query layer must read from the live DB sources that already hold the richest project context, at minimum:
+
+projects
+naming_conventions
+naming_convention_versions
+naming_fields
+users
+files if present
+activity_log if present
+
+Use exact live data only.
+Do not invent tables.
+Do not fabricate chronology that does not exist.
+If some tables are empty, the intelligence response must say so honestly.
+
+STEP 3 — BUILD EXACT BACKEND ROUTE
+
+Add one new backend route only for this step:
+
+GET /api/v1/projects/:projectId/intelligence-summary
+
+This route must return structured JSON with exactly these top-level sections:
+
+project
+currentState
+intelligenceSummary
+timeline
+conventionEvolution
+
+Definitions:
+
+project:
+basic project identity
+
+currentState:
+current version number, separator, companies, disciplines, doc types, systems, unresolved ambiguity count, file count, last change date
+
+intelligenceSummary:
+a structured narrative summary generated from live data, not fluff, including:
+
+what the project convention has evolved from/to
+how many versions exist
+whether files have been validated yet
+how many unresolved ambiguities remain
+what the latest meaningful change was
+
+timeline:
+chronological events from live project intelligence, newest first or oldest first, but be consistent
+Each event must include:
+
+timestamp
+eventType
+actor if known
+title
+summary
+version number if applicable
+
+conventionEvolution:
+ordered version list with per-version structured data:
+
+version
+createdAt
+actor
+changeSummary
+analysisSummary
+counts of disciplines/doc types/systems/extra fields/ambiguities
+delta from previous version where possible:
+added
+removed
+changed
+
+STEP 4 — DO NOT USE AI YET FOR THIS STEP
+
+Do not call Claude for this step.
+The summary must be derived deterministically from existing DB data.
+This first layer must prove the reporting architecture, not depend on AI wording.
+
+STEP 5 — FRONTEND: ADD NEW REPORTS LANDING VIEW
+
+Do not remove existing PDF buttons yet.
+Do not redesign the full Reports area.
+Add a new top section to ReportsTab that becomes the primary live intelligence surface.
+
+At the top of ReportsTab, before static PDF cards, render exactly three blocks:
+
+A. PROJECT INTELLIGENCE SUMMARY
+This must read like the system understands the project.
+Not raw cards only.
+A concise structured narrative from the new backend route.
+
+B. PROJECT TIMELINE
+Readable chronological list of major project intelligence events.
+
+C. CONVENTION EVOLUTION
+Version-by-version structured comparison area showing how convention evolved.
+
+Do not make this beautiful yet.
+Make it clean, clear, information-dense, and trustworthy.
+
+STEP 6 — FILTERS FOR THIS FIRST STEP
+
+Add only these filters for now to the new intelligence view:
+
+date range
+version range
+
+Do not add company, status, actor, or file filters yet.
+Those come later.
+
+The backend route may accept:
+
+from
+to
+versionFrom
+versionTo
+
+Apply them to timeline and conventionEvolution.
+If omitted, return the full project history.
+
+STEP 7 — LIVE VALIDATION
+
+After implementation, use the active live project being tested and show exact outputs:
+
+A. exact route request
+B. exact raw JSON response
+C. exact visible Project Intelligence Summary text
+D. exact visible Timeline entries
+E. exact visible Convention Evolution rows/cards
+F. exact proof that this data comes from live convention versions already in DB
+
+STEP 8 — DO NOT TOUCH THESE YET
+
+Do not rebuild CVR again
+Do not modify re-analysis
+Do not modify foundational edit flow
+Do not add new PDFs
+Do not change report button layout
+Do not add AI-generated summaries yet
+
+This step is only the foundation of the project intelligence layer.
+
+STEP 9 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 10 — FINAL PROOF
+
+At the end provide only this exact block:
+
+PROJECT INTELLIGENCE LAYER — EXACT OUTPUTS
+
+New route:
+Live request:
+Live response status:
+Project Intelligence Summary visible: yes/no
+Timeline visible: yes/no
+Convention Evolution visible: yes/no
+Uses live convention version data: yes/no
+Uses deterministic live DB logic only: yes/no
+Root data sources:
+Exact files changed:
+
+Build only this.
+Nothing more.
