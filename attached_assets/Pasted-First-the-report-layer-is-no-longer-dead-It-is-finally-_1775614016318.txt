@@ -1,0 +1,184 @@
+First, the report layer is no longer dead. It is finally reading meaningful convention state and showing project intelligence instead of a blank zero shell.
+
+Second, it also proves your larger point: this area is still far below what BIMLog is supposed to be.
+
+The Reports area cannot be treated like a download tab with a few PDFs. It has to become the intelligence surface of the whole platform. This is where BIMLog must demonstrate memory, reasoning, chronology, traceability, comparison, accountability, and structured visibility across the entire life of the project. This is where the system proves that it is alive.
+
+So yes, from this point forward, the Reports area should be treated as the core brain layer.
+
+The correct next move is not another small patch. The correct next move is to make Replit build the reporting architecture intentionally.
+
+Send Replit this exactly:
+
+Stop. Do not patch isolated report widgets anymore. Do not redesign blindly. We are now treating the Reports area as a core system layer.
+
+Confirmed live result:
+
+CVR report is now better and no longer empty
+but the Reports area is still far below the required BIMLog standard
+reports must become the intelligence surface of the platform
+user must be able to understand everything that has happened on the project, to date, in structured and dynamic ways
+
+This is now the active issue:
+
+ISSUE — REPORTS AREA MUST EVOLVE FROM STATIC OUTPUTS INTO BIMLOG’S PROJECT INTELLIGENCE LAYER
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+This step is diagnostic and architecture-definition only.
+Do not fix yet.
+Do not redesign the UI yet.
+Do not jump into implementation yet.
+
+SECTION 1 — CURRENT REPORTING SURFACE
+
+Show exact frontend and backend code paths for all current report outputs:
+
+Project Health PDF
+Compliance Report PDF
+RFI Aging PDF
+Submittal Status PDF
+Team Performance PDF
+Audit Certificate PDF
+Meeting Minutes PDF
+Change Order Log PDF
+Transmittal Log PDF
+CVR Full Report PDF
+any on-screen reports blocks or data tables in ReportsTab
+
+For each one show:
+
+exact frontend trigger
+exact backend route
+exact DB tables queried
+exact output type
+exact scope of data included
+
+SECTION 2 — CURRENT REPORTING DATA MODEL
+
+Show all live data sources currently feeding reports.
+
+At minimum include exact code/query paths for:
+
+files
+naming_conventions
+naming_convention_versions
+activity_logs
+audit_trails
+rfis
+rfi_responses
+submittals
+meetings
+transmittals
+change orders
+any generated_reports table
+any content_verification_reports table
+
+We need to know exactly which report reads which table and what is currently missing.
+
+SECTION 3 — LIVE PROJECT HISTORY THAT EXISTS BUT IS NOT YET SURFACED
+
+For project 5 or the active live project being tested, show exact existing live data that BIMLog already knows but is not being surfaced properly in reports.
+
+Examples to inspect:
+
+convention version history
+change summaries
+analysis summaries
+guidance history
+accepted disciplines/doc types/systems per version
+file status history
+rejected uploads
+re-analysis outputs
+high-risk acceptance events
+company additions/removals
+activity log chronology
+any unresolved ambiguities
+actor/user chronology
+
+Show exact DB rows and exact code paths where these exist today.
+
+SECTION 4 — REPORTING GAP MAP
+
+Using exact evidence only, show the difference between:
+
+A. what BIMLog already knows
+B. what the Reports area currently exposes
+
+We need a strict gap map for:
+
+chronology
+version evolution
+evidence lineage
+actor accountability
+unresolved issues
+file intelligence
+company participation
+convention evolution
+dynamic filtering
+date ranges
+version ranges
+structured tables vs static PDFs
+
+SECTION 5 — REQUIRED REPORTING CAPABILITIES
+
+Do not design visuals yet.
+Define the architecture-level reporting capability set BIMLog now requires based on the live system and existing data.
+
+At minimum define the exact data/logic requirements for:
+
+Project Timeline Report
+Everything that happened in chronological order across versions, files, changes, uploads, re-analysis, approvals, and actions.
+Convention Evolution Report
+How the convention changed over time, version by version, with deltas, reasons, evidence, and actors.
+File Intelligence Report
+All files, statuses, match/mismatch, duplicates, rejected items, version linkage, uploader, date range, convention version.
+Evidence and Discovery Report
+What evidence was used, what it suggested, what was accepted, what remained unresolved, and what changed after new evidence.
+Company Participation Report
+Which companies were added, when, what codes they used, what roles or impacts they had, and what convention changes followed.
+Accountability Report
+Who changed what, who accepted what, who triggered high-risk actions, who uploaded what, and when.
+Dynamic Query Layer
+How date range, version range, company filter, file type filter, issue type filter, and status filter should work across reports.
+
+SECTION 6 — REPORT ARCHITECTURE DECISION
+
+Based on the live code and DB, answer with exact evidence only:
+
+Should BIMLog reporting be built as:
+
+separate hardcoded PDF routes only
+separate on-screen cards only
+or one shared project intelligence query layer feeding both tables and PDFs
+
+Choose one only after evidence and explain why using the current live system.
+
+SECTION 7 — FINAL OUTPUT
+
+At the end provide only this exact structure:
+
+REPORTING ARCHITECTURE MAP
+
+Current report routes:
+...
+Current report data sources:
+...
+Live project intelligence not yet surfaced:
+...
+Core reporting gaps:
+...
+Required report families:
+...
+Recommended reporting architecture base:
+...
+High-risk weaknesses if left as-is:
+...
+
+Do not fix anything yet.
+Do not redesign the screen yet.
+This step is to define the real reporting architecture BIMLog now needs, based on the live product and live data.
