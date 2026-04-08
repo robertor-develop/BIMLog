@@ -1,0 +1,149 @@
+Stop. Do not touch the existing intelligence classification logic. Do not add more PDFs. Do not redesign the whole Reports area. We are now fixing the interaction layer and the broken history behavior.
+
+This is now the active build task:
+
+ISSUE — REPORTS STILL FEEL STATIC AND “OPEN CONVENTION HISTORY” IS BROKEN
+
+Confirmed live behavior:
+
+Project Intelligence Summary is somewhat smarter now
+but Reports still feel static and weak
+the system does not yet let the user move through project intelligence naturally
+“Open Convention History” currently does nothing
+this breaks trust and makes the system feel dumb again
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not expanding data architecture in this step.
+We are fixing interaction and making existing intelligence usable.
+
+STEP 1 — TRACE THE BROKEN HISTORY CLICK
+
+Show exact frontend code for:
+
+the “Open Convention History” button
+its click handler
+any state it should change
+any route/navigation it should trigger
+any component that is supposed to render convention history
+
+Show exact backend/data source used by that history path, if any.
+
+We need exact proof of why the click currently does nothing.
+
+STEP 2 — FIX ONLY THE BROKEN HISTORY PATH
+
+Implement a working on-screen Convention History interaction.
+
+Requirements:
+
+clicking “Open Convention History” must visibly do something immediately
+it must show full convention version history on-screen
+it must use existing live version data already in DB
+it must not depend on PDF download
+it must not navigate to a dead path
+it can be an expand/collapse section, drawer, or modal, but keep it simple and clean
+
+The visible Convention History view must show for each version:
+
+version number
+created date
+actor if known
+change summary
+analysis summary
+disciplines/doc types/systems counts
+ambiguities count
+event type / severity if already available
+
+STEP 3 — MAKE THE NEW INTELLIGENCE SECTION INTERACTIVE
+
+Do not redesign the whole page.
+Add only these interactions to the existing intelligence view:
+
+A. Project Timeline
+
+each timeline item must be clickable
+if it is tied to a convention version, clicking it must highlight or expand that version in Convention Evolution
+
+B. Convention Evolution
+
+each version card/row must be expandable
+expanded state must show full details, not truncated blurbs
+user must be able to clearly compare versions without leaving the page
+
+C. Most Significant Event
+
+clicking it must jump to or expand the related version/event
+
+STEP 4 — ADD MINIMAL FILTER UX IMPROVEMENT
+
+Keep current filters but make them usable.
+
+Requirements:
+
+visible Apply button
+visible Reset/Clear button
+filters must affect the on-screen intelligence blocks
+show current active filter state clearly
+
+Do not add more filter types yet.
+Only support:
+
+date range
+version range
+
+STEP 5 — DO NOT TOUCH THESE YET
+
+Do not rebuild CVR again
+Do not add new PDFs
+Do not change re-analysis
+Do not change foundational edit flow
+Do not add AI summaries
+Do not redesign the entire Reports page
+
+This step is only about making the current intelligence layer usable and fixing the broken history path.
+
+STEP 6 — LIVE VALIDATION
+
+After implementation, test with the active live project and show exact outputs:
+
+A. click “Open Convention History” → exact visible result
+B. click one timeline event tied to a version → exact visible result
+C. click most significant event → exact visible result
+D. expand one convention version → exact visible result
+E. apply a version range filter → exact visible result
+F. clear filters → exact visible result
+
+STEP 7 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 8 — FINAL PROOF
+
+At the end provide only this exact block:
+
+REPORTS INTERACTION LAYER — EXACT OUTPUTS
+
+Open Convention History works: yes/no
+Timeline items clickable: yes/no
+Convention versions expandable: yes/no
+Most significant event clickable: yes/no
+Date/version filters usable on-screen: yes/no
+Uses live version data: yes/no
+Root cause of broken history click:
+Exact files changed:
+
+Build only this.
+Nothing more.

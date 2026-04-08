@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History } from "lucide-react";
 import { format } from "date-fns";
@@ -126,16 +126,16 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
   const [verTo, setVerTo] = useState("");
   const [expandedVersion, setExpandedVersion] = useState<number | null>(null);
 
-  const fetchIntel = useCallback(async () => {
+  async function fetchIntelWithParams(df: string, dt: string, vf: string, vt: string) {
     setLoading(true);
     setError(null);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const params = new URLSearchParams();
-      if (dateFrom) params.set("from", dateFrom);
-      if (dateTo) params.set("to", dateTo);
-      if (verFrom) params.set("versionFrom", verFrom);
-      if (verTo) params.set("versionTo", verTo);
+      if (df) params.set("from", df);
+      if (dt) params.set("to", dt);
+      if (vf) params.set("versionFrom", vf);
+      if (vt) params.set("versionTo", vt);
       const resp = await fetch(`/api/v1/projects/${projectId}/intelligence-summary?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -146,9 +146,11 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
     } finally {
       setLoading(false);
     }
-  }, [projectId, dateFrom, dateTo, verFrom, verTo]);
+  }
 
-  useEffect(() => { fetchIntel(); }, [fetchIntel]);
+  const fetchIntel = () => fetchIntelWithParams(dateFrom, dateTo, verFrom, verTo);
+
+  useEffect(() => { fetchIntelWithParams("", "", "", ""); }, [projectId]);
 
   if (loading) return <div style={{ textAlign: "center", padding: "30px 0", color: "#6B7280", fontSize: 13 }}>{tl("Loading project intelligence...", "Cargando inteligencia del proyecto...")}</div>;
   if (error) return <div style={{ padding: "12px 16px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13 }}>{error}</div>;
@@ -192,22 +194,45 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
           <label style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 3 }}>{tl("Version To", "Versión hasta")}</label>
           <input type="number" min={1} value={verTo} onChange={e => setVerTo(e.target.value)} placeholder={String(cs.totalVersions)} style={{ padding: "5px 8px", borderRadius: 5, border: "1px solid #D1D5DB", fontSize: 11, width: 60, background: "#fff", color: "#111" }} />
         </div>
-        <button onClick={fetchIntel} style={{ padding: "6px 14px", borderRadius: 5, background: "#1D4ED8", color: "#fff", border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tl("Apply", "Aplicar")}</button>
-        {(dateFrom || dateTo || verFrom || verTo) && (
-          <button onClick={() => { setDateFrom(""); setDateTo(""); setVerFrom(""); setVerTo(""); }} style={{ padding: "6px 12px", borderRadius: 5, background: "transparent", color: "#6B7280", border: "1px solid #D1D5DB", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tl("Clear", "Limpiar")}</button>
-        )}
+        <button onClick={() => fetchIntel()} style={{ padding: "6px 14px", borderRadius: 5, background: "#1D4ED8", color: "#fff", border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tl("Apply Filters", "Aplicar filtros")}</button>
+        <button
+          onClick={() => { setDateFrom(""); setDateTo(""); setVerFrom(""); setVerTo(""); fetchIntelWithParams("", "", "", ""); }}
+          disabled={!dateFrom && !dateTo && !verFrom && !verTo}
+          style={{ padding: "6px 12px", borderRadius: 5, background: "transparent", color: (dateFrom || dateTo || verFrom || verTo) ? "#DC2626" : "#9CA3AF", border: `1px solid ${(dateFrom || dateTo || verFrom || verTo) ? "#FECACA" : "#E5E7EB"}`, fontSize: 11, fontWeight: 600, cursor: (dateFrom || dateTo || verFrom || verTo) ? "pointer" : "default", opacity: (dateFrom || dateTo || verFrom || verTo) ? 1 : 0.5 }}
+        >{tl("Clear Filters", "Limpiar filtros")}</button>
       </div>
+      {(dateFrom || dateTo || verFrom || verTo) && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", alignSelf: "center" }}>{tl("Active filters:", "Filtros activos:")}</span>
+          {dateFrom && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#DBEAFE", color: "#1E40AF", fontWeight: 600 }}>{tl("From", "Desde")}: {dateFrom}</span>}
+          {dateTo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#DBEAFE", color: "#1E40AF", fontWeight: 600 }}>{tl("To", "Hasta")}: {dateTo}</span>}
+          {verFrom && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{tl("Version", "Version")} {">="} {verFrom}</span>}
+          {verTo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{tl("Version", "Version")} {"<="} {verTo}</span>}
+        </div>
+      )}
 
       {/* MOST SIGNIFICANT EVENT */}
       {data.mostSignificantEvent && (
-        <div style={{ padding: "12px 16px", borderRadius: 8, border: `1px solid ${severityBorder(data.mostSignificantEvent.severity)}`, background: severityBg(data.mostSignificantEvent.severity), marginBottom: 16 }}>
+        <button
+          type="button"
+          onClick={() => {
+            if (data.mostSignificantEvent?.version != null) {
+              setExpandedVersion(data.mostSignificantEvent.version);
+              setTimeout(() => {
+                document.getElementById(`evo-version-${data.mostSignificantEvent!.version}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 60);
+            }
+          }}
+          style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", borderRadius: 8, border: `1px solid ${severityBorder(data.mostSignificantEvent.severity)}`, background: severityBg(data.mostSignificantEvent.severity), marginBottom: 16, cursor: data.mostSignificantEvent.version != null ? "pointer" : "default" }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <AlertTriangle style={{ width: 14, height: 14, color: severityColor(data.mostSignificantEvent.severity) }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: severityColor(data.mostSignificantEvent.severity) }}>{data.mostSignificantEvent.title}</span>
             <span style={{ fontSize: 9, padding: "1px 6px", borderRadius: 3, background: severityColor(data.mostSignificantEvent.severity) + "18", color: severityColor(data.mostSignificantEvent.severity), fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{data.mostSignificantEvent.eventType.replace(/_/g, " ")}</span>
+            {data.mostSignificantEvent.version != null && <span style={{ fontSize: 9, color: "#6B7280", marginLeft: "auto" }}>{tl("Click to view version", "Clic para ver version")} v{data.mostSignificantEvent.version}</span>}
           </div>
           <div style={{ fontSize: 11, color: "#374151", lineHeight: 1.5 }}>{data.mostSignificantEvent.summary}</div>
-        </div>
+        </button>
       )}
 
       {/* A. PROJECT INTELLIGENCE SUMMARY */}
@@ -256,13 +281,32 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
             {data.timeline.map((ev, i) => {
               const dotColor = severityColor(ev.severity);
               const isClassified = ev.eventType === "STRUCTURAL_RESET" || ev.eventType === "MAJOR_EXPANSION" || ev.eventType === "AMBIGUITY_INCREASE" || ev.eventType === "STABILIZATION";
+              const isClickable = ev.version != null;
+              const handleTimelineClick = () => {
+                if (ev.version != null) {
+                  setExpandedVersion(ev.version);
+                  setTimeout(() => {
+                    document.getElementById(`evo-version-${ev.version}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 60);
+                }
+              };
               return (
-              <div key={i} style={{ position: "relative", paddingBottom: 14, paddingLeft: 16 }}>
+              <div
+                key={i}
+                onClick={handleTimelineClick}
+                role={isClickable ? "button" : undefined}
+                tabIndex={isClickable ? 0 : undefined}
+                onKeyDown={isClickable ? (e) => { if (e.key === "Enter") handleTimelineClick(); } : undefined}
+                style={{ position: "relative", paddingBottom: 14, paddingLeft: 16, cursor: isClickable ? "pointer" : "default", borderRadius: 6, transition: "background 0.15s" }}
+                onMouseEnter={isClickable ? (e) => { (e.currentTarget as HTMLDivElement).style.background = "#F9FAFB"; } : undefined}
+                onMouseLeave={isClickable ? (e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; } : undefined}
+              >
                 <div style={{ position: "absolute", left: -2, top: 4, width: 10, height: 10, borderRadius: "50%", background: dotColor, border: "2px solid #fff", zIndex: 1 }} />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{ev.title}</span>
                     {isClassified && <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 3, background: severityBg(ev.severity), color: severityColor(ev.severity), fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.3, border: `1px solid ${severityBorder(ev.severity)}` }}>{ev.eventType.replace(/_/g, " ")}</span>}
+                    {isClickable && <span style={{ fontSize: 8, color: "#9CA3AF" }}>v{ev.version}</span>}
                   </div>
                   <div style={{ fontSize: 10, color: "#6B7280", flexShrink: 0 }}>{format(new Date(ev.timestamp), "MMM d, yyyy HH:mm")}</div>
                 </div>
@@ -289,7 +333,7 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
               const isExpanded = expandedVersion === v.version;
               const hasDeltas = hasDelta(v.delta);
               return (
-                <div key={v.version} style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                <div key={v.version} id={`evo-version-${v.version}`} style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", transition: "box-shadow 0.3s", boxShadow: expandedVersion === v.version ? "0 0 0 2px #3B82F6" : "none" }}>
                   <button onClick={() => setExpandedVersion(isExpanded ? null : v.version)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: isExpanded ? "#F9FAFB" : "#fff", border: "none", cursor: "pointer", textAlign: "left" }}>
                     {isExpanded ? <ChevronDown style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} /> : <ChevronRight style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>

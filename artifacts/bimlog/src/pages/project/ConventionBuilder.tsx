@@ -3597,17 +3597,20 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
 }
 
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
-function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onOpenHistory, onEditFoundational, savedFlash, refetchKey }: {
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onEditFoundational, savedFlash, refetchKey, showHistory, historyVersions, historyLoading, onToggleHistory }: {
   ws: WizardState;
   projectId: number;
   token: string;
   lang: string;
   onContinueEditing: () => void;
   onReEvidence: () => void;
-  onOpenHistory: () => void;
   onEditFoundational: () => void;
   savedFlash?: string;
   refetchKey?: number;
+  showHistory: boolean;
+  historyVersions: ConventionVersionSnapshot[];
+  historyLoading: boolean;
+  onToggleHistory: () => void;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
 
@@ -3672,9 +3675,9 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           <RefreshCw style={{ width: 14, height: 14 }} />
           {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
         </Button>
-        <Button variant="outline" onClick={onOpenHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
+        <Button variant="outline" onClick={onToggleHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <Clock style={{ width: 14, height: 14 }} />
-          {w("Open Convention History", "Abrir historial de convención", lang)}
+          {w(showHistory ? "Close Convention History" : "Open Convention History", showHistory ? "Cerrar historial de convención" : "Abrir historial de convención", lang)}
         </Button>
         <Button
           variant="outline"
@@ -3851,6 +3854,103 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           </div>
         )}
       </div>
+
+      {showHistory && (
+        <div style={{ marginTop: 20, border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", background: "#fff" }}>
+          <div style={{ padding: "10px 14px", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", gap: 8 }}>
+            <Clock style={{ width: 13, height: 13, color: "#6B7280" }} />
+            <span style={{ fontWeight: 600, fontSize: 11, color: "#374151", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              {w("Convention Version History", "Historial de versiones de convención", lang)}
+            </span>
+            <span style={{ marginLeft: "auto", fontSize: 11, color: "#9CA3AF" }}>
+              {historyVersions.length} {w("versions", "versiones", lang)}
+            </span>
+          </div>
+          <div style={{ padding: 14 }}>
+            {historyLoading && <div style={{ fontSize: 12, color: "#9CA3AF" }}>{w("Loading history...", "Cargando historial...", lang)}</div>}
+            {!historyLoading && historyVersions.length === 0 && (
+              <div style={{ fontSize: 12, color: "#9CA3AF" }}>{w("No saved versions yet.", "Aún no hay versiones guardadas.", lang)}</div>
+            )}
+            {!historyLoading && historyVersions.map(v => (
+              <HistoryVersionCard key={v.id} v={v} lang={lang} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HistoryVersionCard({ v, lang }: { v: ConventionVersionSnapshot; lang: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const dCount = v.acceptedDisciplines?.length ?? 0;
+  const tCount = v.acceptedDocTypes?.length ?? 0;
+  const sCount = v.acceptedSystems?.length ?? 0;
+  const aCount = v.ambiguities?.length ?? 0;
+
+  return (
+    <div style={{ background: "#FAFAFA", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px", marginBottom: 10 }}>
+      <button
+        type="button"
+        onClick={() => setExpanded(e => !e)}
+        style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+      >
+        <span style={{ background: "#EFF6FF", color: "#2563EB", fontWeight: 700, fontSize: 11, padding: "2px 8px", borderRadius: 4 }}>
+          v{v.conventionVersion}
+        </span>
+        <span style={{ fontSize: 11, color: "#9CA3AF" }}>
+          {new Date(v.createdAt).toLocaleDateString()} {new Date(v.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
+        <span style={{ fontSize: 11, color: "#6B7280" }}>
+          {dCount}D / {tCount}T / {sCount}S
+          {aCount > 0 && <span style={{ color: "#D97706", marginLeft: 6 }}>{aCount} {w("ambiguities", "ambigüedades", lang)}</span>}
+        </span>
+        <span style={{ marginLeft: "auto" }}>
+          {expanded
+            ? <ChevronUp style={{ width: 13, height: 13, color: "#9CA3AF" }} />
+            : <ChevronDown style={{ width: 13, height: 13, color: "#9CA3AF" }} />}
+        </span>
+      </button>
+
+      {expanded && (
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
+          {v.changeSummary && (
+            <div><span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Changes:", "Cambios:", lang)}</span> <span style={{ color: "#374151" }}>{v.changeSummary}</span></div>
+          )}
+          {v.analysisSummary && (
+            <div><span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Analysis:", "Análisis:", lang)}</span> <span style={{ color: "#374151" }}>{v.analysisSummary}</span></div>
+          )}
+          {dCount > 0 && (
+            <div>
+              <span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Disciplines:", "Disciplinas:", lang)}</span>{" "}
+              <span style={{ color: "#374151" }}>{v.acceptedDisciplines.map(d => `${d.code}${d.label && d.label !== d.code ? ` (${d.label})` : ""}`).join(", ")}</span>
+            </div>
+          )}
+          {tCount > 0 && (
+            <div>
+              <span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Doc Types:", "Tipos doc:", lang)}</span>{" "}
+              <span style={{ color: "#374151" }}>{v.acceptedDocTypes.map(d => `${d.code}${d.label && d.label !== d.code ? ` (${d.label})` : ""}`).join(", ")}</span>
+            </div>
+          )}
+          {sCount > 0 && (
+            <div>
+              <span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Systems:", "Sistemas:", lang)}</span>{" "}
+              <span style={{ color: "#374151" }}>{v.acceptedSystems.map(s => `${s.code}${s.label && s.label !== s.code ? ` (${s.label})` : ""}`).join(", ")}</span>
+            </div>
+          )}
+          {aCount > 0 && (
+            <div>
+              <span style={{ fontWeight: 600, color: "#D97706" }}>{w("Ambiguities:", "Ambigüedades:", lang)}</span>
+              <ul style={{ margin: "4px 0 0 16px", padding: 0 }}>
+                {v.ambiguities.map((a, i) => <li key={i} style={{ color: "#374151", lineHeight: 1.5 }}>{a}</li>)}
+              </ul>
+            </div>
+          )}
+          {v.userGuidance && (
+            <div><span style={{ fontWeight: 600, color: "#6B7280" }}>{w("Guidance:", "Guía:", lang)}</span> <span style={{ color: "#374151" }}>{v.userGuidance}</span></div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -4294,9 +4394,12 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         lang={lang}
         onContinueEditing={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 4 }))}
         onReEvidence={() => setWs(s => ({ ...s, importState: defaultImportState(), flowPhase: "re_evidence" }))}
-        onOpenHistory={() => {
-          loadHistory();
-          setShowHistory(true);
+        showHistory={showHistory}
+        historyVersions={historyVersions}
+        historyLoading={historyLoading}
+        onToggleHistory={() => {
+          if (!showHistory) loadHistory();
+          setShowHistory(h => !h);
         }}
         onEditFoundational={() => {
           setSavedFlash("");
@@ -4497,24 +4600,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
               <div style={{ fontSize: 12, color: "#9CA3AF" }}>No saved versions yet. Versions are created when you accept a discovery or re-analysis result.</div>
             )}
             {!historyLoading && historyVersions.map(v => (
-              <div key={v.id} style={{ background: "#FAFAFA", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px", marginBottom: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <span style={{ background: "#EFF6FF", color: "#2563EB", fontWeight: 700, fontSize: 11, padding: "2px 8px", borderRadius: 4 }}>Version {v.conventionVersion}</span>
-                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(v.createdAt).toLocaleDateString()} {new Date(v.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                </div>
-                {v.changeSummary && <div style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}>{v.changeSummary}</div>}
-                {v.analysisSummary && <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>{v.analysisSummary}</div>}
-                {v.acceptedDisciplines.length > 0 && (
-                  <div style={{ marginTop: 8, fontSize: 11, color: "#6B7280" }}>
-                    <strong>Disciplines:</strong> {v.acceptedDisciplines.map(d => d.code).join(", ")}
-                  </div>
-                )}
-                {v.acceptedDocTypes.length > 0 && (
-                  <div style={{ fontSize: 11, color: "#6B7280" }}>
-                    <strong>Document types:</strong> {v.acceptedDocTypes.map(d => d.code).join(", ")}
-                  </div>
-                )}
-              </div>
+              <HistoryVersionCard key={v.id} v={v} lang={lang} />
             ))}
           </div>
         )}
