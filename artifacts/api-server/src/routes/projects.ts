@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { projectsTable, projectMembersTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable } from "@workspace/db/schema";
-import { eq, count, inArray, and } from "drizzle-orm";
+import { eq, ne, count, inArray, and } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
@@ -65,6 +65,15 @@ router.post("/projects", authMiddleware, async (req, res) => {
   try {
     const body = CreateProjectBody.parse(req.body);
     const userId = req.user!.userId;
+
+    const existing = await db.select({ id: projectsTable.id, name: projectsTable.name })
+      .from(projectsTable)
+      .where(and(eq(projectsTable.code, body.code), ne(projectsTable.status, "archived")))
+      .limit(1);
+    if (existing.length > 0) {
+      res.status(409).json({ error: `An active project with code "${body.code}" already exists (ID ${existing[0].id}: "${existing[0].name}"). Archive it first or use a different code.` });
+      return;
+    }
 
     const defaultStatus = await getDefaultValue("project_status");
     const [project] = await db

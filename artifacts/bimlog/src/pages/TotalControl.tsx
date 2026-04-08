@@ -437,8 +437,29 @@ function ActivityModal({ token, onClose }: { token: string; onClose: () => void 
   );
 }
 
-function ProjectDetailModal({ project, token, onClose }: { project: Project; token: string; onClose: () => void }) {
+function ProjectDetailModal({ project, token, onClose, onRefresh }: { project: Project; token: string; onClose: () => void; onRefresh?: () => void }) {
   const [, setLocation] = useLocation();
+  const [archiving, setArchiving] = useState(false);
+
+  const handleArchive = async () => {
+    if (!confirm(`Archive project "${project.name}" (${project.code})? This will hide it from the active projects grid.`)) return;
+    setArchiving(true);
+    try {
+      const r = await apiFetch(`/admin/projects/${project.id}`, token, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "archived" }),
+      });
+      if (r?.ok) {
+        onClose();
+        onRefresh?.();
+      } else {
+        alert("Failed to archive project");
+      }
+    } catch { alert("Failed to archive project"); }
+    setArchiving(false);
+  };
+
   return (
     <Modal title={`${project.code} — ${project.name}`} onClose={onClose}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
@@ -457,12 +478,23 @@ function ProjectDetailModal({ project, token, onClose }: { project: Project; tok
           </div>
         ))}
       </div>
-      <button
-        onClick={() => { onClose(); setLocation(`/projects/${project.id}/analytics`); }}
-        style={{ width: "100%", padding: "10px 0", background: "#1D4ED8", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700 }}
-      >
-        Open Project →
-      </button>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button
+          onClick={() => { onClose(); setLocation(`/projects/${project.id}/analytics`); }}
+          style={{ flex: 1, padding: "10px 0", background: "#1D4ED8", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700 }}
+        >
+          Open Project
+        </button>
+        {project.status !== "archived" && (
+          <button
+            onClick={handleArchive}
+            disabled={archiving}
+            style={{ padding: "10px 16px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 8, cursor: archiving ? "wait" : "pointer", fontSize: 13, fontWeight: 700 }}
+          >
+            {archiving ? "..." : "Archive"}
+          </button>
+        )}
+      </div>
     </Modal>
   );
 }
@@ -646,7 +678,7 @@ export function TotalControl() {
       {showUsers && token && <UsersModal token={token} onClose={() => setShowUsers(false)} />}
       {showEmail && token && <EmailLogModal token={token} onClose={() => setShowEmail(false)} />}
       {showActivity && token && <ActivityModal token={token} onClose={() => setShowActivity(false)} />}
-      {selectedProject && token && <ProjectDetailModal project={selectedProject} token={token} onClose={() => setSelectedProject(null)} />}
+      {selectedProject && token && <ProjectDetailModal project={selectedProject} token={token} onClose={() => setSelectedProject(null)} onRefresh={loadAll} />}
       {selectedCompany && (
         <Modal title={`${selectedCompany?.name ?? "Company"} — Details`} onClose={() => setSelectedCompany(null)}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
