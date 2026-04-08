@@ -4,6 +4,7 @@ import {
   projectsTable, rfisTable, submittalsTable, filesTable,
   activityLogTable, transmittalsTable, changeOrdersTable,
   meetingMinutesTable, actionItemsTable, projectMembersTable, usersTable,
+  namingConventionsTable, namingFieldsTable, namingConventionVersionsTable,
 } from "@workspace/db/schema";
 import { eq, and, inArray, desc, ne } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
@@ -393,7 +394,24 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
   try {
     const project = await getProject(projectId);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
-    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+
+    const [allFiles, conventions, versions] = await Promise.all([
+      db.select().from(filesTable).where(eq(filesTable.projectId, projectId)),
+      db.select().from(namingConventionsTable).where(eq(namingConventionsTable.projectId, projectId)).limit(1),
+      db.select().from(namingConventionVersionsTable)
+        .where(eq(namingConventionVersionsTable.projectId, projectId))
+        .orderBy(desc(namingConventionVersionsTable.conventionVersion)),
+    ]);
+
+    const convention = conventions[0] || null;
+    let fields: Array<{ label: string; fieldOrder: number; allowedValues: string[] }> = [];
+    if (convention) {
+      fields = (await db.select().from(namingFieldsTable)
+        .where(eq(namingFieldsTable.conventionId, convention.id))
+        .orderBy(namingFieldsTable.fieldOrder)) as typeof fields;
+    }
+    const latestVersion = versions[0] || null;
+
     const totalFiles = allFiles.length;
     const matched = allFiles.filter(f => f.contentVerificationResult === "match").length;
     const flagged = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch");
@@ -407,6 +425,85 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename="cvr-report-${project.code}.pdf"`);
     doc.pipe(res);
     pdfHeader(doc, project, "Content Verification Report (CVR)");
+
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("#1D4ED8").text("Convention Intelligence");
+    doc.moveDown(0.3);
+    if (convention) {
+      row(doc, "Convention Status", convention.isActive ? "Active" : "Inactive");
+      row(doc, "Separator", convention.separator === "-" ? "Dash (-)" : convention.separator === "_" ? "Underscore (_)" : convention.separator);
+      row(doc, "Company Codes", convention.companyCode || "Not set");
+      row(doc, "Enforce Uppercase", convention.enforceUppercase ? "Yes" : "No");
+      row(doc, "Convention Version", String(latestVersion?.conventionVersion ?? convention.conventionVersion ?? 1));
+      row(doc, "Total Versions", String(versions.length));
+      if (convention.userGuidance) {
+        row(doc, "User Guidance", convention.userGuidance);
+      }
+    } else {
+      doc.fontSize(9).font("Helvetica").fillColor("#6B7280").text("No naming convention configured for this project.");
+    }
+    doc.moveDown(0.5);
+
+    if (latestVersion) {
+      const discs = latestVersion.acceptedDisciplines as Array<{ code: string; label: string }>;
+      const docTypes = latestVersion.acceptedDocTypes as Array<{ code: string; label: string }>;
+      const systems = latestVersion.acceptedSystems as Array<{ code: string; label: string }>;
+
+      if (discs.length > 0) {
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Accepted Disciplines");
+        doc.moveDown(0.2);
+        discs.forEach(d => {
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`${d.code} — ${d.label}`, { indent: 10 });
+        });
+        doc.moveDown(0.4);
+      }
+      if (docTypes.length > 0) {
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Accepted Document Types");
+        doc.moveDown(0.2);
+        docTypes.forEach(d => {
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`${d.code} — ${d.label}`, { indent: 10 });
+        });
+        doc.moveDown(0.4);
+      }
+      if (systems.length > 0) {
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Accepted Systems");
+        doc.moveDown(0.2);
+        systems.forEach(s => {
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`${s.code} — ${s.label}`, { indent: 10 });
+        });
+        doc.moveDown(0.4);
+      }
+      if (fields.length > 0) {
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Field Order");
+        doc.moveDown(0.2);
+        fields.forEach((f, i) => {
+          const vals = f.allowedValues?.length ? ` (${f.allowedValues.slice(0, 6).join(", ")}${f.allowedValues.length > 6 ? "..." : ""})` : "";
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`${i + 1}. ${f.label}${vals}`, { indent: 10 });
+        });
+        doc.moveDown(0.4);
+      }
+      if (latestVersion.analysisSummary) {
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Latest Analysis Summary");
+        doc.moveDown(0.2);
+        doc.fontSize(8).font("Helvetica").fillColor("#374151").text(latestVersion.analysisSummary, { indent: 10 });
+        doc.moveDown(0.4);
+      }
+    }
+
+    if (versions.length > 1) {
+      doc.fontSize(11).font("Helvetica-Bold").fillColor("#111").text("Version History");
+      doc.moveDown(0.2);
+      versions.forEach(v => {
+        const dateStr = new Date(v.createdAt).toLocaleDateString();
+        const summary = v.changeSummary ? ` — ${v.changeSummary.slice(0, 120)}${v.changeSummary.length > 120 ? "..." : ""}` : "";
+        doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`v${v.conventionVersion} (${dateStr})${summary}`, { indent: 10 });
+      });
+      doc.moveDown(0.5);
+    }
+
+    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor("#D1D5DB").stroke();
+    doc.moveDown(0.5);
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("#1D4ED8").text("File Verification Results");
+    doc.moveDown(0.3);
 
     row(doc, "Total Files Processed", String(totalFiles));
     row(doc, "Matched", String(matched));
@@ -439,8 +536,10 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
         }
         doc.moveDown(0.3);
       }
-    } else {
+    } else if (totalFiles > 0) {
       doc.fontSize(10).fillColor("#16A34A").text("No CVR flags found. All files passed content verification.", { align: "center" });
+    } else {
+      doc.fontSize(10).fillColor("#6B7280").text("No files have been uploaded to this project yet. CVR file analysis will populate this section when files are submitted.", { align: "center" });
     }
 
     pdfFooter(doc);

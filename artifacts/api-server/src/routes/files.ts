@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 import { db } from "@workspace/db";
-import { filesTable, namingConventionsTable, namingFieldsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
+import { filesTable, namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
 import { sendEmail, makeNamingViolationEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and, or, gte, lte, isNull, count, inArray } from "drizzle-orm";
 import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
@@ -1239,7 +1239,16 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
     const projectId = parseInt(req.params.projectId as string);
     const { from, to } = req.query as { from?: string; to?: string };
 
-    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const [allFiles, conventions, versions] = await Promise.all([
+      db.select().from(filesTable).where(eq(filesTable.projectId, projectId)),
+      db.select().from(namingConventionsTable).where(eq(namingConventionsTable.projectId, projectId)).limit(1),
+      db.select().from(namingConventionVersionsTable)
+        .where(eq(namingConventionVersionsTable.projectId, projectId))
+        .orderBy(namingConventionVersionsTable.conventionVersion),
+    ]);
+
+    const convention = conventions[0] || null;
+    const latestVersion = versions.length > 0 ? versions[versions.length - 1] : null;
 
     const totalFilesProcessed = allFiles.length;
     const totalFlagged = allFiles.filter(f => f.contentVerificationResult === "possible_mismatch" || f.contentVerificationResult === "clear_mismatch").length;
@@ -1278,6 +1287,20 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
       totalAdminApproved,
       totalAdminRejected,
       issues: issuesWithUploader,
+      conventionIntelligence: convention ? {
+        separator: convention.separator,
+        companyCodes: convention.companyCode || "",
+        enforceUppercase: convention.enforceUppercase,
+        isActive: convention.isActive,
+        conventionVersion: latestVersion?.conventionVersion ?? convention.conventionVersion ?? 1,
+        totalVersions: versions.length,
+        userGuidance: convention.userGuidance || null,
+        acceptedDisciplines: latestVersion?.acceptedDisciplines ?? [],
+        acceptedDocTypes: latestVersion?.acceptedDocTypes ?? [],
+        acceptedSystems: latestVersion?.acceptedSystems ?? [],
+        latestChangeSummary: latestVersion?.changeSummary ?? null,
+        latestAnalysisSummary: latestVersion?.analysisSummary ?? null,
+      } : null,
     });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });

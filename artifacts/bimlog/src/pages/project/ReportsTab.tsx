@@ -16,6 +16,21 @@ interface CvrIssue {
   uploadedByName?: string | null;
 }
 
+interface ConventionIntelligence {
+  separator: string;
+  companyCodes: string;
+  enforceUppercase: boolean;
+  isActive: boolean;
+  conventionVersion: number;
+  totalVersions: number;
+  userGuidance: string | null;
+  acceptedDisciplines: Array<{ code: string; label: string }>;
+  acceptedDocTypes: Array<{ code: string; label: string }>;
+  acceptedSystems: Array<{ code: string; label: string }>;
+  latestChangeSummary: string | null;
+  latestAnalysisSummary: string | null;
+}
+
 interface CvrReport {
   projectId: number;
   generatedAt: string;
@@ -25,6 +40,7 @@ interface CvrReport {
   totalAdminApproved: number;
   totalAdminRejected: number;
   issues: CvrIssue[];
+  conventionIntelligence?: ConventionIntelligence | null;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -271,6 +287,74 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               <div style={{ fontSize: 11, color: "#991B1B", marginTop: 2 }}>Admin Rejected</div>
             </div>
           </div>
+
+          {/* Convention Intelligence */}
+          {report.conventionIntelligence && (
+            <div style={{ marginBottom: 24, padding: "16px 20px", borderRadius: 10, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))", marginBottom: 12 }}>
+                {tl("Convention Intelligence", "Inteligencia de Convención")}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8, marginBottom: 12 }}>
+                <div style={{ fontSize: 11 }}>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{tl("Version", "Versión")}: </span>
+                  <span style={{ fontWeight: 600 }}>v{report.conventionIntelligence.conventionVersion}</span>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}> ({report.conventionIntelligence.totalVersions} {tl("total", "total")})</span>
+                </div>
+                <div style={{ fontSize: 11 }}>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{tl("Separator", "Separador")}: </span>
+                  <span style={{ fontWeight: 600 }}>{report.conventionIntelligence.separator === "-" ? "Dash (-)" : report.conventionIntelligence.separator === "_" ? "Underscore (_)" : report.conventionIntelligence.separator}</span>
+                </div>
+                <div style={{ fontSize: 11 }}>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{tl("Companies", "Empresas")}: </span>
+                  <span style={{ fontWeight: 600 }}>{report.conventionIntelligence.companyCodes || "—"}</span>
+                </div>
+                <div style={{ fontSize: 11 }}>
+                  <span style={{ color: "hsl(var(--muted-foreground))" }}>{tl("Status", "Estado")}: </span>
+                  <span style={{ fontWeight: 600, color: report.conventionIntelligence.isActive ? "#16A34A" : "#DC2626" }}>
+                    {report.conventionIntelligence.isActive ? tl("Active", "Activa") : tl("Inactive", "Inactiva")}
+                  </span>
+                </div>
+              </div>
+              {report.conventionIntelligence.acceptedDisciplines.length > 0 && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{tl("Disciplines", "Disciplinas")}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {report.conventionIntelligence.acceptedDisciplines.map(d => (
+                      <span key={d.code} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#EEF2FF", color: "#3730A3", fontWeight: 600 }}>{d.code}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {report.conventionIntelligence.acceptedDocTypes.length > 0 && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{tl("Document Types", "Tipos de Documento")}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {report.conventionIntelligence.acceptedDocTypes.map(d => (
+                      <span key={d.code} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#F0FDF4", color: "#166534", fontWeight: 600 }}>{d.code}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {report.conventionIntelligence.acceptedSystems.length > 0 && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{tl("Systems", "Sistemas")}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                    {report.conventionIntelligence.acceptedSystems.slice(0, 20).map(s => (
+                      <span key={s.code} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: "#FEF3C7", color: "#92400E", fontWeight: 600 }}>{s.code}</span>
+                    ))}
+                    {report.conventionIntelligence.acceptedSystems.length > 20 && (
+                      <span style={{ fontSize: 10, padding: "2px 8px", color: "hsl(var(--muted-foreground))" }}>+{report.conventionIntelligence.acceptedSystems.length - 20} more</span>
+                    )}
+                  </div>
+                </div>
+              )}
+              {report.conventionIntelligence.userGuidance && (
+                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", padding: "6px 10px", background: "hsl(var(--muted) / 0.3)", borderRadius: 6, marginTop: 4 }}>
+                  <span style={{ fontWeight: 600 }}>{tl("Guidance", "Guía")}: </span>{report.conventionIntelligence.userGuidance}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Issues list */}
           {report.issues.length === 0 ? (

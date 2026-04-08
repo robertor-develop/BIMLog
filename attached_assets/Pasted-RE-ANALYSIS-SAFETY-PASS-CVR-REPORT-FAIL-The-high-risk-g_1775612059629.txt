@@ -1,0 +1,167 @@
+RE-ANALYSIS SAFETY: PASS
+CVR REPORT: FAIL
+
+The high-risk guard is working.
+The CVR report is still dead.
+
+And now we know something important:
+
+The report is not failing because of the UI PDF shell.
+It is failing because the PDF is still being generated from the wrong data source or from an empty query path.
+
+You just proved:
+the system can detect a high-risk convention change,
+but the report still shows:
+
+Total Files Processed 0
+Matched 0
+Flagged 0
+everything 0
+
+So the CVR/report pipeline is still not connected to the actual project intelligence state.
+
+Send Replit this exactly:
+
+Stop. Do not touch re-analysis safety. Do not touch edit flow. Do not batch. Do not redesign.
+
+We are now re-opening:
+
+ISSUE — CVR REPORT STILL RETURNS EMPTY / ZEROED REPORT AFTER LIVE HIGH-RISK RE-ANALYSIS
+
+Confirmed live behavior:
+
+high-risk re-analysis screen works
+user typed confirmation correctly
+acceptance path works
+but CVR Full Report PDF is still empty / zeroed
+report shows no project intelligence, no processed files, no useful output
+
+This is NOT fixed.
+
+Step 1:
+Show the exact backend code for the CVR PDF route currently used by the button.
+
+Show:
+
+exact route
+exact query or queries
+exact project filter
+exact aggregation logic
+exact data source tables used
+exact response/PDF build logic
+
+Step 2:
+Show the exact backend code for the non-PDF CVR data endpoint used by the screen, if separate.
+
+Show:
+
+exact route
+exact query or queries
+exact response body shape
+
+Step 3:
+Show the exact code path where accepted re-analysis results are persisted.
+
+We need exact proof of what gets stored after:
+
+high-risk acceptance
+foundational save
+convention version save
+
+Show exact code for:
+
+POST /convention/versions or equivalent
+any table writes
+whether anything CVR-related is written
+whether files table is updated
+whether generated_reports or content_verification_reports is updated
+whether naming_convention_versions is the only thing being updated
+
+Step 4:
+Run exact live DB queries and show raw output:
+
+SELECT id, project_id, filename, status, content_verification_result, convention_version, created_at
+FROM files
+WHERE project_id = 5
+ORDER BY created_at DESC;
+
+SELECT id, project_id, convention_version, change_summary, analysis_summary, created_at
+FROM naming_convention_versions
+WHERE project_id = 5
+ORDER BY convention_version DESC, created_at DESC;
+
+If a report table exists:
+SELECT *
+FROM generated_reports
+WHERE project_id = 5
+ORDER BY created_at DESC
+LIMIT 20;
+
+If a CVR/content verification table exists:
+SELECT *
+FROM content_verification_reports
+WHERE project_id = 5
+ORDER BY created_at DESC
+LIMIT 20;
+
+If table/column names differ, inspect schema first and then run the corrected exact queries. Do not guess.
+
+Step 5:
+Identify the real failure with exact evidence only.
+
+Choose only what is proven:
+
+CVR PDF route is querying files only and ignoring convention history
+files table has no usable rows for CVR aggregation
+accepted re-analysis does not write any CVR/reportable data
+report route is using wrong project scope
+report route is using stale or empty fields
+PDF route and screen route are inconsistent
+multiple failures at once, but name each only if proven
+
+Step 6:
+Fix only the real cause.
+
+Rules:
+
+Do not redesign the whole reporting system
+Do not invent a future architecture
+Do not touch unrelated screens
+Fix the exact path that causes the report to stay empty after live accepted changes
+
+Step 7:
+After the fix, run the same live test again and show exact outputs:
+
+A. exact CVR Full Report request URL
+B. exact response status
+C. exact key raw data used to build the report
+D. exact visible PDF values
+E. exact proof that the report is now reading real project state instead of zeros
+
+Step 8:
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+Step 9:
+Show final proof in this exact format:
+
+CVR REPORT — EXACT OUTPUTS
+
+Live request URL:
+Live response status:
+Report still zeroed: yes/no
+Data source used by report:
+Files counted:
+Convention versions considered:
+Root cause:
+Exact fix applied:
+
+This is now the only issue being worked.
+Do not touch anything else.
