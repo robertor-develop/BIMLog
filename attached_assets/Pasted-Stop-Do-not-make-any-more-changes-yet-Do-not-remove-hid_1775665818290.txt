@@ -1,0 +1,107 @@
+Stop. Do not make any more changes yet. Do not remove, hide, restrict, or redesign anything unless explicitly asked. Do not assume the admin-scope issue is fixed just because labels and middleware were changed.
+
+We are now doing:
+
+ISSUE — VERIFY SUPER ADMIN vs REGULAR ADMIN SCOPE MODEL IN LIVE APP
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must be verified against live production app behavior and live production database only.
+
+This step is verification only.
+Do not implement new changes unless a failure is proven.
+
+STEP 1:
+Show exact current frontend code and backend route/middleware paths for:
+
+A. Total Control / Super Admin
+
+exact page/component
+exact API calls
+exact backend endpoints used
+exact permission checks used
+
+B. Regular Admin / Project Admin
+
+exact page/component
+exact API calls
+exact backend endpoints used
+exact permission checks used
+
+C. destructive/admin actions in both surfaces
+
+create user
+edit user
+reset password
+delete user
+create company
+edit company
+delete company
+transfer project
+delete project
+
+We need exact proof that both surfaces still expose the same capabilities, with scope as the only difference.
+
+STEP 2:
+Run live validation for the active production setup and show exact results for:
+
+A. Super Admin view
+
+total projects visible
+total users visible
+total companies visible
+ability to access project-scoped admin features
+
+B. Regular Admin / Project Admin view
+
+only project-scoped projects visible
+only project-scoped users visible
+only project-scoped companies visible
+same action buttons visible as appropriate
+
+STEP 3:
+Validate one action from each category in live app without destructive side effects where possible.
+
+At minimum prove:
+
+create user button visible in both correct scopes
+reset password action visible in both correct scopes
+delete user action visible in both correct scopes
+delete company action visible in both correct scopes
+transfer project action visible in both correct scopes
+delete project action visible in both correct scopes
+
+If you do not execute a destructive action, still show exact visible UI proof that the action is present and correctly scoped.
+
+STEP 4:
+Validate the exact issue that triggered this correction:
+
+company created/visible platform-wide
+company visibility in regular admin panel
+company visibility in project-scoped context
+proof that the same company is reflected correctly in both surfaces according to scope
+
+STEP 5:
+Show exact live screenshots or exact visible UI results for:
+
+A. Total Control
+B. Regular Admin / Project Admin
+C. Users tab
+D. Companies tab
+E. Projects tab
+
+STEP 6:
+Only after verification, provide this exact final block:
+
+ADMIN SCOPE MODEL — LIVE VERIFICATION
+
+Super Admin sees platform-wide data correctly: yes/no
+Regular Admin sees project-scoped data correctly: yes/no
+Both surfaces keep same capabilities with scope as the only difference: yes/no
+Company created through project workflow reflected correctly in both surfaces: yes/no
+Any remaining mismatch:
+Root cause if still failing:
+
+Do not change anything in this step unless a failure is proven.
