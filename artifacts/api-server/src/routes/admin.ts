@@ -24,28 +24,13 @@ async function isUserInProjects(userId: number, projectIds: number[]): Promise<b
     .where(and(eq(projectMembersTable.userId, userId), sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(projectIds.join(","))}]::int[])`))).length > 0;
 }
 
-const PROJECT_ADMIN_WRITE_ROUTES: Array<{ method: string; pattern: RegExp }> = [
-  { method: "POST", pattern: /^\/admin\/users$/ },
-  { method: "PATCH", pattern: /^\/admin\/users\/\d+$/ },
-  { method: "DELETE", pattern: /^\/admin\/users\/\d+$/ },
-  { method: "POST", pattern: /^\/admin\/users\/\d+\/reset-password$/ },
-  { method: "PATCH", pattern: /^\/admin\/companies\/\d+$/ },
-  { method: "PATCH", pattern: /^\/admin\/projects\/\d+$/ },
-];
-
 router.use("/admin", authMiddleware, async (req, res, next) => {
   if (req.user?.isSuperAdmin) return next();
   if (req.method === "GET" && req.query.scope === "mine") return next();
   if (req.method === "GET" && req.path.includes("feature-flags")) return next();
 
-  const isWrite = req.method !== "GET";
-  if (!isWrite) return res.status(403).json({ error: "Super admin access required" });
-
-  const allowed = PROJECT_ADMIN_WRITE_ROUTES.some(r => r.method === req.method && r.pattern.test(req.path));
-  if (!allowed) return res.status(403).json({ error: "Super admin access required" });
-
   const myPids = await getProjectAdminProjectIds(req.user!.userId);
-  if (myPids.length === 0) return res.status(403).json({ error: "Super admin access required" });
+  if (myPids.length === 0) return res.status(403).json({ error: "Admin access required" });
 
   (req as any).isProjectAdminOnly = true;
   (req as any).projectAdminProjectIds = myPids;
@@ -321,17 +306,14 @@ router.patch("/admin/users/:id", async (req, res) => {
     const { fullName, email, role, isSuperAdmin, deactivated } = req.body as { fullName?: string; email?: string; role?: string; isSuperAdmin?: boolean; deactivated?: boolean };
 
     if ((req as any).isProjectAdminOnly) {
-      if (isSuperAdmin !== undefined) { res.status(403).json({ error: "Only super admins can change super admin status" }); return; }
       const myPids: number[] = (req as any).projectAdminProjectIds || [];
       if (!(await isUserInProjects(id, myPids))) { res.status(403).json({ error: "User is not in any of your projects" }); return; }
-      const targetUser = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
-      if (targetUser[0]?.isSuperAdmin) { res.status(403).json({ error: "Cannot modify a super admin account" }); return; }
     }
 
     const updates: Record<string, unknown> = {};
     if (fullName !== undefined) updates.fullName = fullName;
     if (email !== undefined) updates.email = email.toLowerCase();
-    if (isSuperAdmin !== undefined) updates.isSuperAdmin = isSuperAdmin;
+    if (isSuperAdmin !== undefined && req.user?.isSuperAdmin) updates.isSuperAdmin = isSuperAdmin;
     const [updated] = await db.update(usersTable).set(updates).where(eq(usersTable.id, id)).returning();
     await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "update_user", targetType: "user", targetId: String(id), details: req.body });
     res.json({ ...updated, createdAt: updated.createdAt.toISOString() });
@@ -348,10 +330,6 @@ router.delete("/admin/users/:id", async (req, res) => {
     if ((req as any).isProjectAdminOnly) {
       const myPids: number[] = (req as any).projectAdminProjectIds || [];
       if (!(await isUserInProjects(id, myPids))) { res.status(403).json({ error: "User is not in any of your projects" }); return; }
-      if (user.isSuperAdmin) { res.status(403).json({ error: "Cannot delete a super admin account" }); return; }
-      const allMemberships = await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable).where(eq(projectMembersTable.userId, id));
-      const outsideScope = allMemberships.some(m => !myPids.includes(m.pid));
-      if (outsideScope) { res.status(403).json({ error: "User belongs to projects outside your scope. Remove them from your project instead." }); return; }
     }
 
     await db.delete(projectMembersTable).where(eq(projectMembersTable.userId, id));
@@ -368,8 +346,6 @@ router.post("/admin/users/:id/reset-password", async (req, res) => {
     if ((req as any).isProjectAdminOnly) {
       const myPids: number[] = (req as any).projectAdminProjectIds || [];
       if (!(await isUserInProjects(id, myPids))) { res.status(403).json({ error: "User is not in any of your projects" }); return; }
-      const targetUser = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
-      if (targetUser[0]?.isSuperAdmin) { res.status(403).json({ error: "Cannot reset password for a super admin account" }); return; }
     }
 
     const { password } = req.body as { password?: string };
@@ -563,6 +539,12 @@ router.patch("/admin/projects/:id", async (req, res) => {
 router.delete("/admin/projects/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+
+    if ((req as any).isProjectAdminOnly) {
+      const myPids: number[] = (req as any).projectAdminProjectIds || [];
+      if (!myPids.includes(id)) { res.status(403).json({ error: "You are not admin of this project" }); return; }
+    }
+
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, id)).limit(1);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "delete_project", targetType: "project", targetId: String(id), details: { name: project.name, code: project.code } });
@@ -575,6 +557,12 @@ router.delete("/admin/projects/:id", async (req, res) => {
 router.post("/admin/projects/:id/transfer", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+
+    if ((req as any).isProjectAdminOnly) {
+      const myPids: number[] = (req as any).projectAdminProjectIds || [];
+      if (!myPids.includes(id)) { res.status(403).json({ error: "You are not admin of this project" }); return; }
+    }
+
     const { newOwnerId } = req.body as { newOwnerId: number };
     const [newOwner] = await db.select().from(usersTable).where(eq(usersTable.id, newOwnerId)).limit(1);
     if (!newOwner) { res.status(404).json({ error: "New owner not found" }); return; }

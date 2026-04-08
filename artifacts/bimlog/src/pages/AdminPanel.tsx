@@ -307,6 +307,7 @@ function CompaniesTab({ token }: { token: string }) {
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
                     <Button size="sm" variant="outline" onClick={() => setEditModal({ ...c })}>Edit</Button>
+                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(c.id as number, String(c.name), c.userCount as number)}>Delete</Button>
                   </div>
                 </Td>
               </tr>
@@ -393,6 +394,8 @@ function ProjectsTab({ token }: { token: string }) {
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                     <a href={`/projects/${p.id}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline">View</Button></a>
                     <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
+                    <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
+                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(p.id as number, String(p.name))}>Delete</Button>
                   </div>
                 </Td>
               </tr>
