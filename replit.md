@@ -91,7 +91,11 @@ Both panels have identical CRUD capabilities:
 - Companies: Edit, Delete
 - Projects: Archive/Restore, Transfer Ownership, Delete
 
-**Linkage rule**: When a project admin creates a user, `projectId` is required and a `project_members` row is always created. Super admin can optionally select a project. Ghost data fix endpoint: `POST /admin/fix-ghost-members`.
+**Linkage rule**: When a project admin creates a user, `projectId` is required and a `project_members` row is always created. Super admin can optionally select a project.
+
+**Surgical fix endpoint**: `POST /admin/fix-specific-link` (super admin only, body: `{userId, projectId}`) — creates a single explicit project_members row. No auto-detection, no loops, no inference.
+
+**Convention assignment**: TotalControl Overview tab project detail modal includes convention company pills with assign-user flow via `POST /projects/:projectId/assign-company-user`.
 
 **Projects list endpoint**: `GET /admin/projects-list` (lightweight id/code/name for dropdowns, supports `?scope=mine`).
 

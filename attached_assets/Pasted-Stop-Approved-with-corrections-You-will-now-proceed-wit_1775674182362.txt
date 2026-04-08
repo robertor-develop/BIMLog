@@ -1,0 +1,164 @@
+Stop. Approved with corrections. You will now proceed with a controlled fix pass. Do not add anything beyond what is specified here.
+
+ISSUE — FINAL CORRECTION + STABILIZATION BEFORE CONTINUING
+
+You correctly identified:
+
+the ghost linkage problem
+the environment split (dev vs production)
+the unsafe auto-linking endpoint
+the missing convention assignment UI
+
+Now we fix only what is necessary.
+
+STEP 1 — REMOVE UNSAFE AUTO-LINKING COMPLETELY
+
+Remove entirely:
+
+POST /admin/fix-ghost-members
+
+From:
+artifacts/api-server/src/routes/admin.ts
+
+This endpoint must not exist.
+
+No replacements.
+No automatic linking.
+No inference logic.
+
+Confirm removal.
+
+STEP 2 — FIX THE KNOWN PRODUCTION CASE ONLY
+
+We are NOT building a system.
+We are fixing ONE known record.
+
+Target:
+
+user_id = 17
+project_id = 19
+
+Correct action:
+
+INSERT INTO project_members (project_id, user_id, role, status)
+VALUES (19, 17, 'viewer', 'active');
+
+Implementation rule:
+
+You will NOT simulate this in dev.
+You will NOT assume deploy fixes it.
+
+Instead:
+
+Provide a safe way to execute this in production:
+
+Option A (preferred):
+
+create a one-time protected admin endpoint:
+POST /admin/fix-specific-link
+body: { userId: 17, projectId: 19 }
+
+Option B:
+
+provide exact SQL execution instructions for operator
+
+Do NOT generalize.
+Do NOT loop.
+Do NOT auto-detect anything.
+
+This is a surgical fix.
+
+STEP 3 — RESTORE CONVENTION ASSIGNMENT (CRITICAL)
+
+You removed functionality that must exist.
+
+Restore in TotalControl:
+
+AssignUserModal
+clickable unassigned convention company codes
+ability to assign a user to a company within a project
+
+This must work exactly as before.
+
+No redesign.
+No simplification.
+
+It must:
+
+create company if needed
+create user
+create project_members row
+
+This is a core workflow.
+
+STEP 4 — CONFIRM DASHBOARD PRESERVATION
+
+Before moving forward confirm:
+
+Overview tab contains:
+
+Health Bar
+Company Performance
+Projects Grid
+Brain Brief
+
+All must render and function exactly as before.
+
+No silent removal allowed.
+
+STEP 5 — ENVIRONMENT CONSISTENCY RULE
+
+You confirmed:
+
+dev DB ≠ production DB
+
+From now on:
+
+You must clearly separate:
+
+development validation (dev DB)
+production reality (production DB)
+
+For anything production-related:
+
+You must explicitly say:
+“this is production data”
+or
+“this is dev validation”
+
+No mixing.
+
+STEP 6 — DO NOT TOUCH WORKING LOGIC
+
+Do NOT modify:
+
+create-user project selector
+scope enforcement
+CRUD endpoints
+tab structure
+
+Those are approved and working.
+
+STEP 7 — VALIDATION AFTER FIX
+
+After implementing the corrections, show:
+
+A. auto-link endpoint removed (code proof)
+B. specific fix endpoint or SQL ready for production
+C. convention assignment UI restored (code + explanation)
+D. confirmation that Overview tab still contains all original components
+
+STEP 8 — OUTPUT FORMAT
+
+Return ONLY this:
+
+FINAL CORRECTION STATUS
+
+Auto-linking endpoint removed: yes/no
+Specific production fix method ready: yes/no
+Convention assignment restored in TotalControl: yes/no
+Original dashboard fully preserved: yes/no
+Any remaining inconsistencies:
+Files changed:
+
+Do only this. Nothing more.

@@ -221,9 +221,56 @@ function BrainBrief({ token }: { token: string }) {
   );
 }
 
-function TCOverviewTab({ token, stats, companies, projects }: { token: string; stats: PlatformStats; companies: Company[]; projects: Project[] }) {
+function AssignUserModal({ projectId, companyCode, token, onClose, onDone }: { projectId: number; companyCode: string; token: string; onClose: () => void; onDone: () => void }) {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [companyName, setCompanyName] = useState(companyCode);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    if (!fullName.trim() || !email.trim() || !companyName.trim()) { setError("All fields are required"); return; }
+    setSubmitting(true);
+    setError("");
+    try {
+      const r = await apiFetch(`/projects/${projectId}/assign-company-user`, token, {
+        method: "POST",
+        body: JSON.stringify({ companyCode, newUserData: { fullName: fullName.trim(), email: email.trim().toLowerCase(), companyName: companyName.trim() } }),
+      });
+      if (r?.ok) { onDone(); }
+      else {
+        const data = await r?.json().catch(() => null);
+        setError(data?.error || "Failed to assign user");
+      }
+    } catch { setError("Network error"); }
+    setSubmitting(false);
+  };
+
+  return (
+    <TCModal title={`Assign User — ${companyCode}`} onClose={onClose}>
+      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>
+        Create a new user for convention company <strong>{companyCode}</strong> in this project.
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <TCInput value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Full Name" />
+        <TCInput value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" type="email" />
+        <TCInput value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Company Name" />
+      </div>
+      {error && <div style={{ color: "#DC2626", fontSize: 12, marginTop: 8 }}>{error}</div>}
+      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+        <TCButton onClick={onClose}>Cancel</TCButton>
+        <TCButton variant="primary" onClick={handleSubmit} disabled={submitting}>
+          {submitting ? "Assigning..." : "Assign User"}
+        </TCButton>
+      </div>
+    </TCModal>
+  );
+}
+
+function TCOverviewTab({ token, stats, companies, projects, onRefresh }: { token: string; stats: PlatformStats; companies: Company[]; projects: Project[]; onRefresh: () => void }) {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [assignCode, setAssignCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   return (
     <div>
@@ -254,16 +301,65 @@ function TCOverviewTab({ token, stats, companies, projects }: { token: string; s
         </TCModal>
       )}
       {selectedProject && (
-        <TCModal title={`${selectedProject.code} — ${selectedProject.name}`} onClose={() => setSelectedProject(null)}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-            {[["Company", selectedProject.companyName || "-"], ["Status", selectedProject.status], ["Members", String(selectedProject.memberCount)], ["Files", selectedProject.fileCount.toLocaleString()], ["RFIs", String(selectedProject.rfiCount ?? "-")], ["Created", new Date(selectedProject.createdAt).toLocaleDateString()]].map(([k, v]) => (
+        <TCModal title={`${selectedProject.code} — ${selectedProject.name}`} onClose={() => setSelectedProject(null)} wide>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+            {[["Company", selectedProject.companyName || "-"], ["Status", selectedProject.status], ["Members", String(selectedProject.memberCount)], ["Files", selectedProject.fileCount.toLocaleString()], ["RFIs", String(selectedProject.rfiCount ?? "-")], ["Submittals", String(selectedProject.submittalCount ?? "-")], ["Created", new Date(selectedProject.createdAt).toLocaleDateString()]].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
               </div>
             ))}
           </div>
-          <TCButton variant="primary" onClick={() => setLocation(`/projects/${selectedProject.id}/analytics`)}>Open Project</TCButton>
+          {(selectedProject.conventionCompanyCodes?.length ?? 0) > 0 && (
+            <div style={{ marginBottom: 20, padding: 14, border: "1px solid #E5E7EB", borderRadius: 8, background: "#F9FAFB" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", marginBottom: 10 }}>Company / User Assignment</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                <div style={{ padding: "8px 12px", background: "#EFF6FF", borderRadius: 6, border: "1px solid #BFDBFE" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#3B82F6" }}>Convention Companies</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "#1D4ED8" }}>{selectedProject.conventionCompanyCodes!.length}</div>
+                </div>
+                <div style={{ padding: "8px 12px", background: "#F0FDF4", borderRadius: 6, border: "1px solid #BBF7D0" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#16A34A" }}>Participating (with users)</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "#15803D" }}>{selectedProject.participatingCompanies?.length ?? 0}</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {selectedProject.conventionCompanyCodes!.map(code => {
+                  const isUnassigned = selectedProject.unassignedConventionCompanies?.includes(code);
+                  return (
+                    <span key={code} style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                      background: isUnassigned ? "#FEF2F2" : "#F0FDF4",
+                      color: isUnassigned ? "#DC2626" : "#15803D",
+                      border: `1px solid ${isUnassigned ? "#FECACA" : "#BBF7D0"}`,
+                      cursor: isUnassigned ? "pointer" : "default",
+                    }}
+                      onClick={() => { if (isUnassigned) setAssignCode(code); }}
+                    >
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: isUnassigned ? "#DC2626" : "#16A34A" }} />
+                      {code}
+                      <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>
+                        {isUnassigned ? "Assign User" : "assigned"}
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 10 }}>
+            <TCButton variant="primary" onClick={() => { setSelectedProject(null); setLocation(`/projects/${selectedProject.id}/analytics`); }}>Open Project</TCButton>
+          </div>
+          {assignCode && (
+            <AssignUserModal
+              projectId={selectedProject.id}
+              companyCode={assignCode}
+              token={token}
+              onClose={() => setAssignCode(null)}
+              onDone={() => { setAssignCode(null); onRefresh(); setSelectedProject(null); }}
+            />
+          )}
         </TCModal>
       )}
     </div>
@@ -725,7 +821,7 @@ export function TotalControl() {
           </div>
         ) : (
           <>
-            {activeTab === 0 && token && <TCOverviewTab token={token} stats={safeStats} companies={companies} projects={projects} />}
+            {activeTab === 0 && token && <TCOverviewTab token={token} stats={safeStats} companies={companies} projects={projects} onRefresh={loadAll} />}
             {activeTab === 1 && token && <TCUsersTab token={token} />}
             {activeTab === 2 && token && <TCCompaniesTab token={token} />}
             {activeTab === 3 && token && <TCProjectsTab token={token} />}

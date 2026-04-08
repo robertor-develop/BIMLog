@@ -642,23 +642,20 @@ router.get("/admin/actions-log", async (req, res) => {
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
 });
 
-router.post("/admin/fix-ghost-members", async (req, res) => {
+router.post("/admin/fix-specific-link", async (req, res) => {
   try {
     if (!req.user?.isSuperAdmin) { res.status(403).json({ error: "Super admin only" }); return; }
-    const allUsers = await db.select({ id: usersTable.id, fullName: usersTable.fullName, email: usersTable.email }).from(usersTable);
-    const fixed: { userId: number; email: string; projectId: number }[] = [];
-    for (const u of allUsers) {
-      const memberships = await db.select().from(projectMembersTable).where(eq(projectMembersTable.userId, u.id));
-      if (memberships.length === 0) {
-        const activeProjects = await db.select({ id: projectsTable.id }).from(projectsTable).where(eq(projectsTable.status, "active")).limit(1);
-        if (activeProjects.length > 0) {
-          await db.insert(projectMembersTable).values({ projectId: activeProjects[0].id, userId: u.id, role: "viewer", status: "active" });
-          fixed.push({ userId: u.id, email: u.email, projectId: activeProjects[0].id });
-        }
-      }
-    }
-    await logAdminAction({ adminUserId: req.user.userId, adminEmail: req.user.email, action: "fix_ghost_members", details: { fixed } });
-    res.json({ fixed, count: fixed.length });
+    const { userId, projectId } = req.body as { userId: number; projectId: number };
+    if (!userId || !projectId) { res.status(400).json({ error: "userId and projectId are required" }); return; }
+    const user = (await db.select({ id: usersTable.id, fullName: usersTable.fullName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId)).limit(1))[0];
+    if (!user) { res.status(404).json({ error: `User ${userId} not found` }); return; }
+    const project = (await db.select({ id: projectsTable.id, code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1))[0];
+    if (!project) { res.status(404).json({ error: `Project ${projectId} not found` }); return; }
+    const existing = (await db.select().from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId))).limit(1))[0];
+    if (existing) { res.json({ ok: true, message: "Link already exists", memberId: existing.id }); return; }
+    const [member] = await db.insert(projectMembersTable).values({ projectId, userId, role: "viewer", status: "active" }).returning();
+    await logAdminAction({ adminUserId: req.user.userId, adminEmail: req.user.email, action: "fix_specific_link", details: { userId, projectId, memberId: member.id, userName: user.fullName, projectCode: project.code } });
+    res.json({ ok: true, memberId: member.id, userId, projectId, userName: user.fullName, projectCode: project.code });
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Failed" }); }
 });
 
