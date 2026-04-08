@@ -1,0 +1,181 @@
+Replit is not maintaining a clean distinction between:
+
+SUPER ADMIN / TOTAL CONTROL
+and
+REGULAR ADMIN / PROJECT ADMIN
+
+And because of that, the system is drifting into inconsistent behavior:
+one panel updates,
+the other does not,
+a company appears platform-wide but not project-wide,
+or appears in one admin surface but not the other.
+
+That must be fixed now before we continue.
+
+Send Replit this exactly:
+
+Stop. Do not continue reports. Do not continue guided intelligence. Do not continue user assignment flow expansion yet. We are fixing role scope and admin surface consistency first.
+
+This is now the active build task:
+
+ISSUE — SUPER ADMIN / TOTAL CONTROL AND REGULAR ADMIN / PROJECT ADMIN ARE NOT CLEANLY DISTINGUISHED OR KEPT IN SYNC
+
+Confirmed live behavior:
+
+a company created through project-facing workflow appeared in Total Control
+but did not appear correctly in the regular admin panel
+and did not appear correctly as participating in the project
+this proves the system is confusing platform-wide administration with project-scoped administration
+updates are landing in one admin surface but not the other
+this is structurally incorrect
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must come from live production code, live production DB, and live production app behavior only.
+
+We are not redesigning UI yet.
+We are fixing scope, permissions, and data consistency.
+
+STEP 1 — DEFINE THE SYSTEM RULES IN CODE TERMS
+
+Before changing anything, show the exact current code paths and permission logic for:
+
+A. Super Admin / Total Control
+
+what routes it can access
+what data it reads
+what actions it can perform
+whether it is truly platform-wide
+
+B. Regular Admin / Project Admin
+
+what routes it can access
+what data it reads
+what actions it can perform
+whether it is correctly project-scoped
+
+C. Shared admin components
+
+any places where the same component or route is being reused without clean scope distinction
+
+Show exact frontend files, backend routes, and middleware/permission checks.
+
+STEP 2 — TRACE THE COMPANY CREATION / ASSIGNMENT PATH END TO END
+
+Using the exact live workflow that just happened, show:
+
+where the company record was created
+whether it was created platform-wide only
+whether it was attached to the project
+whether it created a user
+whether it created a project_members row
+whether regular admin panel reads the same source
+whether Total Control reads a different source
+
+We need exact proof of why the company appears in Total Control but not correctly in regular admin/project scope.
+
+STEP 3 — DEFINE THE CORRECT PLATFORM RULES
+
+Implement these rules exactly:
+
+Super Admin / Total Control
+can see all projects across the platform
+can see all users across the platform
+can see all companies across the platform
+can access both platform-wide and project-scoped admin functions
+can act across all projects
+Regular Admin / Project Admin
+only sees their own project(s)
+only sees users relevant to their project(s)
+only sees companies relevant to their project(s)
+cannot act platform-wide
+Data consistency rule
+if a company/user/project assignment is created through a valid project-scoped workflow, both admin surfaces must reflect it correctly according to scope
+no admin surface may rely on a different inconsistent source of truth
+
+STEP 4 — FIX SOURCE-OF-TRUTH CONSISTENCY
+
+We need one clear source of truth for:
+
+platform companies
+project companies
+project members
+project-scoped admin views
+platform-wide admin views
+
+Requirements:
+
+Total Control must read platform-wide truth
+regular admin panel must read project-scoped truth
+both must derive from the same underlying records, not separate assumptions
+if a company exists platform-wide but has no project membership, that must be clearly distinguished
+if a company participates in a project, both panels must reflect that correctly according to scope
+
+STEP 5 — FIX REGULAR ADMIN PANEL VAGUENESS
+
+The regular admin panel must no longer feel vague or disconnected.
+
+Minimum required improvements in this step:
+
+show only project-relevant companies
+show only project-relevant users
+make clear what project is being administered
+make clear what is platform-wide vs project-scoped
+
+Do not redesign everything yet.
+Just make the scope obvious and correct.
+
+STEP 6 — FIX SUPER ADMIN ACCESS MODEL
+
+Super Admin must be able to do everything regular admin can do, plus platform-wide actions.
+
+Requirements:
+
+super admin can enter project-scoped admin surfaces and act there
+super admin can also stay in Total Control and act platform-wide
+permissions must not block super admin from project admin actions
+do not duplicate logic unnecessarily; super admin should inherit project-admin capabilities where appropriate
+
+STEP 7 — LIVE VALIDATION
+
+After implementation, show exact outputs for:
+
+A. platform-wide companies visible to super admin
+B. project-scoped companies visible to regular admin/project admin
+C. platform-wide users visible to super admin
+D. project-scoped users visible to regular admin/project admin
+E. exact project participation view for the active project
+F. exact proof that a company created/assigned through project workflow appears correctly in both surfaces according to scope
+G. exact proof that super admin can do what regular admin can do plus more
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL PROOF
+
+At the end provide only this exact block:
+
+ADMIN SCOPE / ROLE MODEL FIX — EXACT OUTPUTS
+
+Super Admin platform-wide visibility correct: yes/no
+Regular Admin project-scoped visibility correct: yes/no
+Platform companies and project companies clearly distinguished: yes/no
+Platform users and project users clearly distinguished: yes/no
+Company created through project workflow reflected correctly in both surfaces: yes/no
+Super Admin can do everything Regular Admin can do: yes/no
+Root cause:
+Exact files changed:
+
+Build only this.
+Nothing more.

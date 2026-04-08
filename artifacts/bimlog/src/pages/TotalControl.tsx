@@ -806,7 +806,7 @@ export function TotalControl() {
           <div style={{ width: 32, height: 32, background: "#2563EB", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white" }}>TC</div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 15, color: "white", lineHeight: 1 }}>Total Control</div>
-            <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>Super Admin · IgniteSmart Platform</div>
+            <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>Super Admin · Platform-wide scope · All projects & companies</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>

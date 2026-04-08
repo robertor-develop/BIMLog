@@ -92,12 +92,15 @@ function OverviewTab({ token }: { token: string }) {
   if (!data) return <div style={{ padding: 32, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
   return (
     <div>
+      <div style={{ marginBottom: 16, padding: "8px 14px", borderRadius: 8, background: "#eff6ff", border: "1px solid #bfdbfe", fontSize: 12, color: "#1d4ed8", fontWeight: 600 }}>
+        Showing data scoped to projects you administer. Platform-wide data is available in Total Control (super admin only).
+      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
         {Object.entries(data.stats).map(([k, v]) => (
           <StatCard key={k} label={STAT_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
         ))}
       </div>
-      <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Live Activity Feed (last 50)</h3>
+      <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Project Activity Feed (last 50)</h3>
       {data.activity.length === 0
         ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No activity yet. Actions taken in projects will appear here.</div>
         : (
@@ -223,10 +226,24 @@ function UsersTab({ token }: { token: string }) {
 // ── Companies Tab ─────────────────────────────────────────────────────────────
 function CompaniesTab({ token }: { token: string }) {
   const [companies, setCompanies] = useState<Record<string, unknown>[]>([]);
+  const [conventionSummary, setConventionSummary] = useState<Array<{ projectId: number; projectName: string; codes: string[]; assignedCodes: string[]; unassignedCodes: string[] }>>([]);
   const [editModal, setEditModal] = useState<Record<string, unknown> | null>(null);
   const [msg, setMsg] = useState("");
 
-  const load = () => apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch(() => {});
+  const load = () => {
+    apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch(() => {});
+    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then((projects: any[]) => {
+      setConventionSummary(projects
+        .filter(p => p.conventionCompanyCodes?.length > 0)
+        .map(p => ({
+          projectId: p.id,
+          projectName: `${p.code} — ${p.name}`,
+          codes: p.conventionCompanyCodes || [],
+          assignedCodes: (p.conventionCompanyCodes || []).filter((c: string) => !(p.unassignedConventionCompanies || []).includes(c)),
+          unassignedCodes: p.unassignedConventionCompanies || [],
+        })));
+    }).catch(() => {});
+  };
   useEffect(() => { load(); }, [token]);
 
   const doDelete = async (id: number, name: string, userCount: number) => {
@@ -243,6 +260,40 @@ function CompaniesTab({ token }: { token: string }) {
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+
+      {conventionSummary.length > 0 && (
+        <div style={{ marginBottom: 20, padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 10, color: "hsl(var(--foreground))" }}>Convention Companies vs Participating Companies</div>
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
+            Convention companies are originator codes in the naming convention. Participating companies have users assigned as project members.
+          </div>
+          {conventionSummary.map(ps => (
+            <div key={ps.projectId} style={{ marginBottom: 10, padding: "8px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>{ps.projectName}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {ps.codes.map(code => {
+                  const assigned = ps.assignedCodes.includes(code);
+                  return (
+                    <span key={code} style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "2px 8px", borderRadius: 16, fontSize: 11, fontWeight: 700,
+                      background: assigned ? "#f0fdf4" : "#fef2f2",
+                      color: assigned ? "#15803d" : "#dc2626",
+                      border: `1px solid ${assigned ? "#bbf7d0" : "#fecaca"}`,
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: assigned ? "#16a34a" : "#dc2626" }} />
+                      {code}
+                      <span style={{ fontSize: 9, opacity: 0.8 }}>{assigned ? "assigned" : "no users"}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 10, color: "hsl(var(--foreground))" }}>Registered Companies (project-scoped)</div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Company</Th><Th>Users</Th><Th>Projects</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
@@ -256,7 +307,6 @@ function CompaniesTab({ token }: { token: string }) {
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
                     <Button size="sm" variant="outline" onClick={() => setEditModal({ ...c })}>Edit</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(c.id as number, String(c.name), c.userCount as number)}>Delete</Button>
                   </div>
                 </Td>
               </tr>
@@ -316,29 +366,38 @@ function ProjectsTab({ token }: { token: string }) {
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><Th>Project</Th><Th>Code</Th><Th>Company</Th><Th>Status</Th><Th>Members</Th><Th>Files</Th><Th>RFIs</Th><Th>Submittals</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
+          <thead><tr><Th>Project</Th><Th>Code</Th><Th>Company</Th><Th>Convention Cos.</Th><Th>Status</Th><Th>Members</Th><Th>Files</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
           <tbody>
-            {projects.map((p: Record<string, unknown>) => (
+            {projects.map((p: Record<string, unknown>) => {
+              const convCodes = (p.conventionCompanyCodes || []) as string[];
+              const unassigned = (p.unassignedConventionCompanies || []) as string[];
+              return (
               <tr key={String(p.id)}>
                 <Td><span style={{ fontWeight: 600 }}>{String(p.name || "")}</span></Td>
                 <Td style={{ fontSize: 12, fontFamily: "monospace" }}>{String(p.code || "")}</Td>
                 <Td style={{ fontSize: 12 }}>{String(p.companyName || "")}</Td>
+                <Td>
+                  {convCodes.length > 0 ? (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                      {convCodes.map(c => (
+                        <span key={c} style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 8, background: unassigned.includes(c) ? "#fef2f2" : "#f0fdf4", color: unassigned.includes(c) ? "#dc2626" : "#15803d", border: `1px solid ${unassigned.includes(c) ? "#fecaca" : "#bbf7d0"}` }}>{c}</span>
+                      ))}
+                    </div>
+                  ) : <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>--</span>}
+                </Td>
                 <Td><Badge label={String(p.status || "")} color={statusColor[String(p.status)] || undefined} /></Td>
                 <Td>{String(p.memberCount || 0)}</Td>
                 <Td>{String(p.fileCount || 0)}</Td>
-                <Td>{String(p.rfiCount || 0)}</Td>
-                <Td>{String(p.submittalCount || 0)}</Td>
                 <Td style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                     <a href={`/projects/${p.id}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline">View</Button></a>
                     <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(p.id as number, String(p.name))}>Delete</Button>
                   </div>
                 </Td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -557,10 +616,12 @@ export function AdminPanel() {
       <div style={{ borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--card))", padding: "0 32px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16, paddingTop: 20, paddingBottom: 0 }}>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>BIMLog Admin Panel</h1>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Platform Administration</p>
+            <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Project Administration</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+              Scoped to your projects — companies, users, and data visible here belong to projects you administer.
+            </p>
           </div>
-          <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>← Back to Dashboard</Button>
+          <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>Back to Dashboard</Button>
         </div>
         <div style={{ display: "flex", gap: 0, marginTop: 16, overflowX: "auto" }}>
           {TABS.map((tab, i) => (
