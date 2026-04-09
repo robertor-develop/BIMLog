@@ -500,6 +500,8 @@ function TCCompaniesTab({ token }: { token: string }) {
   return (
     <div>
       {msg && <div style={{ background: "#16A34A22", border: "1px solid #16A34A44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16A34A" }}>{msg}</div>}
+      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: "#111" }}>All Platform Companies</div>
+      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 10 }}>Every registered company across the platform. Users, projects, and files are platform-wide totals.</div>
       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><TCTh>Company</TCTh><TCTh>Users</TCTh><TCTh>Projects</TCTh><TCTh>Files</TCTh><TCTh>Created</TCTh><TCTh>Actions</TCTh></tr></thead>
@@ -574,13 +576,25 @@ function TCProjectsTab({ token }: { token: string }) {
       {msg && <div style={{ background: "#16A34A22", border: "1px solid #16A34A44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16A34A" }}>{msg}</div>}
       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Project</TCTh><TCTh>Code</TCTh><TCTh>Company</TCTh><TCTh>Status</TCTh><TCTh>Members</TCTh><TCTh>Files</TCTh><TCTh>Created</TCTh><TCTh>Actions</TCTh></tr></thead>
+          <thead><tr><TCTh>Project</TCTh><TCTh>Code</TCTh><TCTh>Company</TCTh><TCTh>Convention Cos.</TCTh><TCTh>Status</TCTh><TCTh>Members</TCTh><TCTh>Files</TCTh><TCTh>Created</TCTh><TCTh>Actions</TCTh></tr></thead>
           <tbody>
-            {projects.map((p: Record<string, unknown>) => (
+            {projects.map((p: Record<string, unknown>) => {
+              const convCodes = (p.conventionCompanyCodes || []) as string[];
+              const unassigned = (p.unassignedConventionCompanies || []) as string[];
+              return (
               <tr key={String(p.id)}>
                 <TCTd style={{ fontWeight: 600 }}>{String(p.name || "")}</TCTd>
                 <TCTd style={{ fontSize: 12, fontFamily: "monospace" }}>{String(p.code || "")}</TCTd>
                 <TCTd style={{ fontSize: 12 }}>{String(p.companyName || "")}</TCTd>
+                <TCTd>
+                  {convCodes.length > 0 ? (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                      {convCodes.map(c => (
+                        <span key={c} style={{ fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 8, background: unassigned.includes(c) ? "#fef2f2" : "#f0fdf4", color: unassigned.includes(c) ? "#dc2626" : "#15803d", border: `1px solid ${unassigned.includes(c) ? "#fecaca" : "#bbf7d0"}` }}>{c}</span>
+                      ))}
+                    </div>
+                  ) : <span style={{ fontSize: 11, color: "#9CA3AF" }}>--</span>}
+                </TCTd>
                 <TCTd><Pill label={String(p.status || "")} color={STATUS_COLOR[String(p.status)] || undefined} /></TCTd>
                 <TCTd>{String(p.memberCount || 0)}</TCTd>
                 <TCTd>{String(p.fileCount || 0)}</TCTd>
@@ -594,7 +608,8 @@ function TCProjectsTab({ token }: { token: string }) {
                   </div>
                 </TCTd>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -308,7 +308,8 @@ function CompaniesTab({ token }: { token: string }) {
         </div>
       )}
 
-      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 10, color: "hsl(var(--foreground))" }}>Registered Companies (project-scoped)</div>
+      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: "hsl(var(--foreground))" }}>Participating Companies</div>
+      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>Companies with users assigned as members on your projects. Counts reflect only users and files within your project scope.</div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Company</Th><Th>Users</Th><Th>Projects</Th><Th>Created</Th><Th>Actions</Th></tr></thead>

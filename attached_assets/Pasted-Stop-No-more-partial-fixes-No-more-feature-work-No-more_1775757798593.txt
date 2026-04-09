@@ -1,0 +1,206 @@
+Stop. No more partial fixes. No more feature work. No more redesign. We are doing one final stabilization pass on the live system and we are not moving on until the current live project is internally consistent.
+
+This is now the active build task:
+
+ISSUE — FINAL LIVE STABILIZATION OF PROJECT DATA, ADMIN SURFACES, ROUTING, AND PROJECT WORKFLOW
+
+Confirmed live problems:
+
+project/user/company counts are still inconsistent across Regular Admin, Total Control, project cards, and project tabs
+user 17 / company 28 are still not properly linked to project 19
+Regular Admin and Total Control still mix platform-wide truth, project-scoped truth, and convention-code truth
+Companies tab still confuses convention companies with real participating companies
+Users tab does not reflect the real project participation state
+Project Administration “View” routing was broken and must be fully verified
+Convention Builder still has broken/unclear history and return-path behavior in live use
+branch workflow return paths are still unreliable
+the system still feels like different screens are reading different truths
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database as a substitute for production truth.
+Everything must be grounded in live production code, live production DB reality, and live production app behavior only.
+
+This is not plan-only.
+This is implementation plus proof.
+Do not stop at diagnosis.
+
+STEP 1 — FIX THE KNOWN LIVE LINKAGE CASE FIRST
+
+The known live case must be fixed first before anything else.
+
+Target:
+
+user_id = 17
+company_id = 28
+project_id = 19
+
+Use the approved specific fix path only.
+No generic auto-linking.
+No loops.
+No inference.
+
+Required result:
+
+user 17 must have a valid project_members row for project 19
+after that, all project-scoped user/company counts must refresh from the corrected truth
+
+Show exact production-safe execution method and exact before/after proof for this specific case.
+
+STEP 2 — ENFORCE ONE SOURCE OF TRUTH FOR PROJECT PARTICIPATION
+
+From this point forward, all project-scoped counts and displays must derive from the same rule:
+
+Project users = users linked through project_members
+Participating companies = companies of those project_members users
+Convention companies = naming convention company codes only, not real participating companies
+
+Fix every relevant surface so it follows this rule consistently.
+
+At minimum stabilize:
+
+Regular Admin Overview
+Regular Admin Users tab
+Regular Admin Companies tab
+Regular Admin Projects tab
+Total Control Overview
+Total Control Users tab
+Total Control Companies tab
+Total Control Projects tab
+project cards in both admin surfaces
+
+STEP 3 — MAKE THE DISTINCTIONS EXPLICIT
+
+The system must explicitly distinguish these three things everywhere they matter:
+
+Convention Companies
+company/originator codes from the naming convention
+Participating Companies
+real companies with at least one project member on the project
+Platform Companies
+all companies existing in the platform database
+
+Do not mix them visually or numerically.
+Do not show a project as having 3 real companies if it only has 1 participating company and 3 convention codes.
+
+STEP 4 — FIX REGULAR ADMIN COMPLETELY
+
+Requirements:
+
+Users tab must show all and only users actually linked to the admin’s project(s)
+Companies tab must show all and only participating companies for the admin’s project(s)
+if convention company codes are shown, they must be shown in a clearly separate convention-company section, not mixed into participating companies
+Projects tab counts must match the same truth as Users and Companies tabs
+“View” must open the correct live project every time
+no “Project not found” for valid live project rows
+
+STEP 5 — FIX TOTAL CONTROL COMPLETELY
+
+Requirements:
+
+Total Control remains platform-wide
+Users tab shows all platform users
+Companies tab shows all platform companies
+project cards and project detail views must use correct project-scoped participation truth for each project
+if a company exists platform-wide but has no members on a given project, do not imply it is participating in that project
+keep convention-company assignment visible where relevant, but clearly labeled as convention-company assignment, not participating company count
+improve dark-header/tab contrast if still weak in live use
+cards and labels must be readable and meaningful
+
+STEP 6 — FIX CONVENTION BUILDER WORKFLOW COMPLETELY
+
+Requirements:
+
+“Open Convention History” must visibly open history every time in live use
+if there is no saved history, show a clear empty-state message, not a dead-feeling no-op
+“Add More Evidence” branch flow must have a visible in-app return action
+any other branch flow entered from the project workflow must also have a visible return action
+browser back and in-app back behavior must not throw the user to dashboard while they are still inside the same project workflow
+keep the user inside the project workflow unless they explicitly leave it
+
+STEP 7 — NO MORE MIXED TRUTH
+
+Audit every place currently showing:
+
+user count
+company count
+convention company codes
+project participation
+project card mini-metrics
+
+For each one, align it to the correct truth or relabel it clearly.
+Do not leave any ambiguous metric like “0” with unclear meaning.
+If a metric is unclear, label it clearly or remove it.
+
+STEP 8 — DO NOT TOUCH THESE YET
+
+Do not expand reports
+Do not expand AI
+Do not add new features
+Do not create new test projects
+Do not wipe current data
+Do not redesign broadly beyond what is needed for correctness and clarity
+
+This pass is stabilization only.
+
+STEP 9 — LIVE VALIDATION
+
+After implementation, show exact outputs for all of the following against the live active project:
+
+A. exact before/after proof for user 17 linked to project 19
+B. exact live truth for project 19:
+
+convention companies count
+participating companies count
+project users count
+C. Regular Admin:
+Users tab result
+Companies tab result
+Projects tab result
+View route result
+D. Total Control:
+Overview result
+Users tab result
+Companies tab result
+Projects tab result
+project card/detail result
+E. Convention Builder:
+Open Convention History result
+Add More Evidence return-path result
+back-navigation result
+
+STEP 10 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 11 — FINAL PROOF
+
+At the end provide only this exact block:
+
+FINAL LIVE STABILIZATION STATUS
+
+Known user 17 linked to project 19: yes/no
+Regular Admin users count correct: yes/no
+Regular Admin companies count correct: yes/no
+Regular Admin projects tab consistent: yes/no
+Project Administration View route fixed: yes/no
+Total Control users/platform data correct: yes/no
+Total Control project participation data correct: yes/no
+Convention companies clearly separated from participating companies: yes/no
+Open Convention History works clearly: yes/no
+Branch flow return paths work: yes/no
+Back navigation stays inside project workflow: yes/no
+Any remaining inconsistency:
+Exact files changed:
+
+Do only this.
+Nothing more.

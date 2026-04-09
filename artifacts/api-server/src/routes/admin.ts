@@ -363,12 +363,14 @@ router.get("/admin/companies", async (req, res) => {
   try {
     const scope = String(req.query.scope || "");
     let companies;
+    let scopedUserIds: number[] | null = null;
+    let myProjectIds: number[] | null = null;
     if (scope === "mine") {
-      const myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+      myProjectIds = (await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
         .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
         .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.role, "project_admin"), ne(projectsTable.status, "archived")))).map(r => r.pid);
       if (myProjectIds.length === 0) { res.json([]); return; }
-      const scopedUserIds = [...new Set((await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
+      scopedUserIds = [...new Set((await db.select({ uid: projectMembersTable.userId }).from(projectMembersTable)
         .where(sql`${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)).map(r => r.uid))];
       if (scopedUserIds.length === 0) { res.json([]); return; }
       const scopedCompanyIds = [...new Set((await db.select({ cid: usersTable.companyId }).from(usersTable)
@@ -380,17 +382,35 @@ router.get("/admin/companies", async (req, res) => {
     } else {
       companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
     }
+    const scopedUserIdSet = scopedUserIds ? new Set(scopedUserIds) : null;
     const result = await Promise.all(companies.map(async (c) => {
-      const [{ userCount }] = await db.select({ userCount: count() }).from(usersTable).where(eq(usersTable.companyId, c.id));
-      const [{ projectCount }] = await db.select({ projectCount: count() }).from(projectsTable).where(
-        and(
-          ne(projectsTable.status, "archived"),
-          sql`${projectsTable.id} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
-        )
-      );
-      const [{ fileCount }] = await db.select({ fileCount: count() }).from(filesTable).where(
-        sql`${filesTable.projectId} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
-      );
+      let userCount: number;
+      let projectCount: number;
+      let fileCount: number;
+      if (scopedUserIdSet && myProjectIds) {
+        const companyUsers = (await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.companyId, c.id))).map(u => u.id);
+        const scopedCompanyUsers = companyUsers.filter(uid => scopedUserIdSet.has(uid));
+        userCount = scopedCompanyUsers.length;
+        const companyProjectIds = scopedCompanyUsers.length > 0
+          ? [...new Set((await db.select({ pid: projectMembersTable.projectId }).from(projectMembersTable)
+              .where(sql`${projectMembersTable.userId} = ANY(ARRAY[${sql.raw(scopedCompanyUsers.join(","))}]::int[]) AND ${projectMembersTable.projectId} = ANY(ARRAY[${sql.raw(myProjectIds.join(","))}]::int[])`)).map(r => r.pid))]
+          : [];
+        projectCount = companyProjectIds.length;
+        [{ fileCount }] = companyProjectIds.length > 0
+          ? await db.select({ fileCount: count() }).from(filesTable).where(sql`${filesTable.projectId} = ANY(ARRAY[${sql.raw(companyProjectIds.join(","))}]::int[])`)
+          : [{ fileCount: 0 }];
+      } else {
+        [{ userCount }] = await db.select({ userCount: count() }).from(usersTable).where(eq(usersTable.companyId, c.id));
+        [{ projectCount }] = await db.select({ projectCount: count() }).from(projectsTable).where(
+          and(
+            ne(projectsTable.status, "archived"),
+            sql`${projectsTable.id} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
+          )
+        );
+        [{ fileCount }] = await db.select({ fileCount: count() }).from(filesTable).where(
+          sql`${filesTable.projectId} IN (SELECT DISTINCT project_id FROM project_members pm JOIN users u ON pm.user_id = u.id WHERE u.company_id = ${c.id})`
+        );
+      }
       return { ...c, createdAt: c.createdAt.toISOString(), userCount: Number(userCount), projectCount: Number(projectCount), fileCount: Number(fileCount) };
     }));
     res.json(result);
