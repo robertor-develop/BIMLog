@@ -347,6 +347,7 @@ function CompaniesTab({ token }: { token: string }) {
 
 // ── Projects Tab ──────────────────────────────────────────────────────────────
 function ProjectsTab({ token }: { token: string }) {
+  const [, setLocation] = useLocation();
   const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
   const [allUsers, setAllUsers] = useState<Record<string, unknown>[]>([]);
   const [transferModal, setTransferModal] = useState<number | null>(null);
@@ -407,7 +408,7 @@ function ProjectsTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <a href={`/projects/${p.id}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline">View</Button></a>
+                    <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</Button>
                     <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
                     <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
                     <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(p.id as number, String(p.name))}>Delete</Button>

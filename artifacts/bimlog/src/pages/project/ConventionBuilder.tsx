@@ -4576,7 +4576,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         state={ws} setState={setWs}
         token={token ?? ""}
         projectId={projectId}
-        onBack={() => setWs(s => ({ ...s, flowPhase: "main_wizard" }))}
+        onBack={() => setWs(s => ({ ...s, flowPhase: "checkpoint" }))}
         onResult={result => setWs(s => ({ ...s, reanalysisResult: result, flowPhase: "changes_review" }))}
       />
     );

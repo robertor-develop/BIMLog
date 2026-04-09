@@ -172,6 +172,11 @@ function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (
                 <span style={{ display: "flex", alignItems: "center", gap: 3 }}><Users size={11} /> {p.memberCount}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 3 }}><FileText size={11} /> {p.fileCount.toLocaleString()}</span>
               </div>
+              {(p.unassignedConventionCompanies?.length ?? 0) > 0 && (
+                <div style={{ marginTop: 6, fontSize: 10, fontWeight: 700, color: "#DC2626", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 4, padding: "2px 6px", display: "inline-block" }}>
+                  {p.unassignedConventionCompanies!.length} convention {p.unassignedConventionCompanies!.length === 1 ? "company" : "companies"} — no users assigned
+                </div>
+              )}
             </button>
           );
         })}
@@ -533,6 +538,7 @@ function TCCompaniesTab({ token }: { token: string }) {
 }
 
 function TCProjectsTab({ token }: { token: string }) {
+  const [, setLocation] = useLocation();
   const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
   const [allUsers, setAllUsers] = useState<Record<string, unknown>[]>([]);
   const [transferModal, setTransferModal] = useState<number | null>(null);
@@ -581,7 +587,7 @@ function TCProjectsTab({ token }: { token: string }) {
                 <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(p.createdAt)).toLocaleDateString()}</TCTd>
                 <TCTd>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <a href={`/projects/${p.id}`} target="_blank" rel="noreferrer"><TCButton>View</TCButton></a>
+                    <TCButton onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</TCButton>
                     <TCButton onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</TCButton>
                     <TCButton onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</TCButton>
                     <TCButton variant="danger" onClick={() => doDelete(p.id as number, String(p.name))}>Delete</TCButton>
@@ -806,7 +812,7 @@ export function TotalControl() {
             <button key={tab} onClick={() => setActiveTab(i)} style={{
               padding: "10px 18px", fontSize: 13, fontWeight: activeTab === i ? 700 : 500, border: "none",
               borderBottom: activeTab === i ? "2px solid #3B82F6" : "2px solid transparent",
-              background: "none", cursor: "pointer", color: activeTab === i ? "#93C5FD" : "#6B7280",
+              background: "none", cursor: "pointer", color: activeTab === i ? "#93C5FD" : "#D1D5DB",
               whiteSpace: "nowrap", transition: "all 0.15s",
             }}>
               {tab}

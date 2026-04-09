@@ -1,0 +1,188 @@
+Stop. Do not build new features. Do not continue reports intelligence. Do not redesign. We are now doing a strict live stabilization pass only.
+
+This is now the active build task:
+
+ISSUE — LIVE ADMIN / PROJECT / NAVIGATION / SOURCE-OF-TRUTH STABILIZATION
+
+Confirmed live behavior:
+
+Regular Admin and Total Control are showing inconsistent project/company/user information
+Project cards are not consistent between the two admin surfaces
+Project Administration “View” leads to “Project not found”
+Companies tab says the project has convention companies but does not list them properly
+Users tab appears incomplete for the live project
+Total Control cards/metrics are inconsistent and partially unclear
+dark header contrast is weak
+Convention Builder “Open Convention History” still does nothing in live use
+branch flows like “Add More Evidence” do not provide a correct return path
+browser back throws the user to the dashboard instead of the prior project flow
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must be based on live production app behavior, live production DB reality, and live production code only.
+
+We are not resetting data.
+We are not starting fresh.
+We are stabilizing the current live project and current live system first.
+
+Do not implement random fixes.
+Do this in the exact order below.
+
+STEP 1 — DEFINE ONE SOURCE OF TRUTH FOR PROJECT COUNTS
+
+For the active live project, show the exact live DB truth for:
+
+project row
+project_members rows
+users linked to those project_members
+companies linked to those users
+naming_conventions row
+latest naming_convention_versions row
+
+From that, define exactly and separately:
+
+convention companies count
+participating companies count
+project users count
+
+Then show which current screens are using which source today:
+
+Regular Admin project card
+Regular Admin companies tab
+Regular Admin users tab
+Total Control project card
+Total Control company table
+Total Control users tab
+
+We need exact proof of where the inconsistencies are introduced.
+
+STEP 2 — FIX PROJECT ROUTING FIRST
+
+Fix the exact live route bug where:
+
+Regular Admin > Projects > View
+goes to “Project not found”
+
+Show exact frontend route/code path and exact fix.
+After fix, clicking View must open the correct live project every time.
+
+STEP 3 — FIX REGULAR ADMIN CONSISTENCY
+
+Using the one source of truth defined in Step 1, make Regular Admin consistent.
+
+Requirements:
+
+Projects tab must show the correct project
+project card / row counts must reflect the same truth
+Companies tab must clearly distinguish:
+convention companies
+participating companies
+Users tab must show all users actually linked to the project
+no vague partial counts
+no contradiction between projects tab, companies tab, and users tab
+
+Do not redesign yet.
+Make it correct first.
+
+STEP 4 — FIX TOTAL CONTROL CONSISTENCY
+
+Using the same one source of truth, make Total Control consistent.
+
+Requirements:
+
+project cards must use the same project-truth definitions as Regular Admin
+company count must clearly distinguish platform companies vs project-participating companies where relevant
+if a company exists platform-wide but is not linked to the active project, do not make the active project card imply it is participating
+user count on project card must match project_members truth
+remove or relabel any mini-metric that is unclear or misleading
+improve text contrast in the dark Total Control header/tabs so labels are clearly readable
+project cards must be clickable/useful where appropriate
+
+Do not add new features.
+Make it truthful and legible.
+
+STEP 5 — FIX CONVENTION BUILDER HISTORY AND RETURN PATHS
+
+Fix the exact live workflow bugs:
+
+A. “Open Convention History” must visibly open history every time from the live project
+B. “Add More Evidence” and other branch flows must provide a visible return/back action inside the app
+C. browser back / app back behavior must return to the previous project flow, not dump the user to dashboard, whenever the user is still inside the same project workflow
+
+Show exact route/state logic causing the current bad behavior and fix it.
+
+STEP 6 — DO NOT TOUCH THESE YET
+
+Do not expand reports
+Do not expand AI
+Do not redesign dashboards broadly
+Do not create new test projects
+Do not wipe data
+Do not add new modules
+
+This step is stabilization only.
+
+STEP 7 — LIVE VALIDATION
+
+After implementation, show exact outputs for:
+
+A. exact DB truth for the active live project:
+
+convention companies count
+participating companies count
+project users count
+
+B. Regular Admin:
+
+Projects tab visible result
+Users tab visible result
+Companies tab visible result
+View route visible result
+
+C. Total Control:
+
+project card visible result
+companies tab/table visible result
+users tab visible result
+header/tab readability result
+
+D. Convention Builder:
+
+Open Convention History visible result
+Add More Evidence return-path visible result
+back-navigation visible result
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL PROOF
+
+At the end provide only this exact block:
+
+LIVE STABILIZATION STATUS
+
+Project routing fixed: yes/no
+Regular Admin counts consistent: yes/no
+Total Control counts consistent: yes/no
+Regular Admin and Total Control use same project truth: yes/no
+Convention companies vs participating companies clearly distinguished: yes/no
+Project users count correct across surfaces: yes/no
+Open Convention History works: yes/no
+Branch flow return paths work: yes/no
+Back navigation stays in project workflow: yes/no
+Remaining inconsistencies:
+Exact files changed:
+
+Do only this.
+Nothing more.
