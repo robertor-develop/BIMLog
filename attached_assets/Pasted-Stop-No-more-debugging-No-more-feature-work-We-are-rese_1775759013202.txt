@@ -1,0 +1,124 @@
+Stop. No more debugging. No more feature work. We are resetting the system to a clean, stable baseline and locking the environment. This is final. Do not create new databases again.
+
+This is now the active task:
+
+ISSUE — FULL CLEAN RESET + ENVIRONMENT LOCK FOR CONTROLLED TESTING
+
+Confirmed situation:
+
+current data is inconsistent and has changed across runs
+previous debugging used different database states
+we cannot validate system behavior reliably until the environment is stable
+from this point forward we will use ONE persistent database only
+
+Critical rules:
+
+DO NOT create a new database
+DO NOT reseed automatically on restart
+DO NOT switch between dev and production DB silently
+DO NOT auto-insert demo/test data
+this must be a persistent, stable database from now on
+
+STEP 1 — CLEAR ALL DATA (SAFE RESET)
+
+Delete all non-system data from the current database:
+
+projects
+project_members
+users (except super admin account if required for access)
+companies (except system-required if any)
+naming_conventions
+naming_convention_versions
+files
+activity_log
+
+Preserve only:
+
+system admin account required for login
+authentication/roles structure
+
+Show exact SQL used for each table cleanup.
+
+STEP 2 — VERIFY EMPTY STATE
+
+After cleanup, show exact DB state:
+
+projects count = 0
+users count = 1 (super admin only) or minimal required
+companies count = 0 or minimal required
+project_members = 0
+naming_conventions = 0
+naming_convention_versions = 0
+files = 0
+
+Also show:
+
+app loads correctly
+admin panels load with empty state (no crashes, no broken UI)
+
+STEP 3 — LOCK DATABASE CONFIGURATION
+
+Show exact configuration proving:
+
+single database connection string
+no fallback to secondary DB
+no dev/prod switching
+no auto-migration creating new DB
+no seed scripts running on startup
+
+Explain clearly:
+
+what DB is used
+where it is hosted
+how persistence is guaranteed across restarts
+
+STEP 4 — REMOVE ANY AUTO-SEED OR DEMO DATA LOGIC
+
+Search and remove any code that:
+
+inserts default users
+inserts demo projects
+inserts sample companies
+recreates test data on startup
+
+Show exact files changed.
+
+STEP 5 — VERIFY PERSISTENCE
+
+Perform this test:
+
+Create one test project manually
+Restart server
+Confirm project still exists
+
+Show exact before/after DB query proving persistence.
+
+STEP 6 — FINAL STATE
+
+System must now be:
+
+empty
+stable
+persistent
+no hidden data
+no background seeding
+no environment switching
+
+STEP 7 — OUTPUT FORMAT
+
+Return ONLY this:
+
+CLEAN RESET + ENVIRONMENT LOCK STATUS
+
+All data cleared: yes/no
+Only required admin user remains: yes/no
+All tables verified empty: yes/no
+Single database confirmed: yes/no
+No auto-seeding present: yes/no
+Persistence verified after restart: yes/no
+Database location/type:
+Connection method:
+Files changed:
+
+Do only this.
+Nothing more.

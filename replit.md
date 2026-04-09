@@ -99,6 +99,16 @@ Both panels have identical CRUD capabilities:
 
 **Projects list endpoint**: `GET /admin/projects-list` (lightweight id/code/name for dropdowns, supports `?scope=mine`).
 
+## Database Configuration (LOCKED)
+
+- **Single database**: Replit-managed PostgreSQL at `postgresql://postgres:password@helium/heliumdb?sslmode=disable`
+- **Connection**: Single `DATABASE_URL` env var, no fallback, no secondary DB, no dev/prod switching
+- **Persistence**: Guaranteed by Replit infrastructure across restarts
+- **Auto-seeding**: NONE. Seed script exists at `scripts/src/seed.ts` but is manual-only (`pnpm --filter scripts seed`)
+- **Auto-migration**: NONE. No drizzle-kit push runs on startup
+- **Clean state**: All data cleared on 2026-04-09. Only super admin (user 16, Roberto Rodriguez, roberto@ignitesmart.com, company IgniteSmart id=14) remains
+- **System config preserved**: feature_flags (6 rows), config_options (33 rows)
+
 ## Database Schema
 
 Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
