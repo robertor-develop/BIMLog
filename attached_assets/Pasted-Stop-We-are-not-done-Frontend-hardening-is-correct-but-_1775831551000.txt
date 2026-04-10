@@ -1,0 +1,171 @@
+Stop. We are not done. Frontend hardening is correct, but the backend status transition must now be locked down so setup_status can never be set incorrectly.
+
+This is now the active build task:
+
+ISSUE — BACKEND setup_status TRANSITIONS MUST BE HARD-LOCKED
+
+Confirmed concern:
+
+frontend is now guarded correctly
+
+but the backend can still break everything if setup_status is set to completed too early or in the wrong path
+
+we do not want any hidden backend failure point
+
+Critical rule:
+Do not run validation yourself.
+Do not create test projects yourself.
+Do not assume any project currently exists.
+Do not use mock data.
+Fix the backend transition logic completely.
+The user will test manually after the fix.
+
+STEP 1 — FIND EVERY BACKEND WRITE PATH FOR setup_status
+
+Show exact code for every place in the backend that can:
+
+create a naming_conventions row
+
+update naming_conventions.setup_status
+
+insert naming_convention_versions
+
+upsert convention fields
+
+write foundational data
+
+touch convention completion state directly or indirectly
+
+Use a full search, not guesses.
+
+We need the exact complete list of backend write paths that can affect setup_status.
+
+STEP 2 — DEFINE THE ONLY ALLOWED BACKEND TRANSITIONS
+
+Lock the backend to these exact rules only:
+
+not_started
+Only when the project/convention exists but the setup has not actually begun
+
+in_progress
+Only when the user has started setup work but has not truly completed the initial setup
+
+completed
+Only when the true final completion action of the initial setup flow occurs
+
+No other backend path may set completed.
+No partial save.
+No draft save.
+No foundational-only save.
+No placeholder row.
+No version insert by itself.
+No auxiliary process.
+
+Show exactly where each allowed transition happens.
+
+STEP 3 — REMOVE ALL EARLY OR INDIRECT completed TRANSITIONS
+
+Find and remove every backend path where completed can currently be set because of weak conditions such as:
+
+fields array exists
+
+fields length > 0
+
+convention row exists
+
+version row inserted
+
+partial foundational save
+
+checkpoint snapshot
+
+any other indirect heuristic
+
+After this step, completed must only be set by one explicit final completion path.
+
+Show the exact offending line(s) you removed or changed.
+
+STEP 4 — CREATE ONE EXPLICIT COMPLETION PATH
+
+Implement one single explicit backend completion path for initial setup.
+
+Requirements:
+
+there must be one clearly defined moment where setup_status changes to completed
+
+that moment must correspond to the real final completion of the first-run setup
+
+all earlier saves must leave setup_status as not_started or in_progress as appropriate
+
+If needed, add a dedicated finalization action/flag in the existing save flow, but do not redesign the whole API.
+Keep it minimal and deterministic.
+
+STEP 5 — HARD GUARD THE BACKEND
+
+Add backend protections so illegal transitions cannot happen silently.
+
+Examples:
+
+if setup_status is not_started, version inserts or partial saves must not auto-promote to completed
+
+if setup_status is in_progress, partial saves must stay in_progress
+
+if a request tries to mark completed without the required final completion condition, reject it or keep it in_progress
+
+If an invalid transition is attempted, fail loudly or force the correct state.
+No silent drift.
+
+STEP 6 — HANDLE EDGE CASES EXPLICITLY
+
+Make backend state remain correct even if:
+
+a naming_conventions row is auto-created
+
+a partial foundational save happens
+
+a draft version is inserted
+
+a user refreshes mid-flow
+
+a version row exists before completion
+
+a project has fields/data but has not reached true final completion
+
+None of these may set completed by accident.
+
+STEP 7 — PASSWORD FIELD
+
+Do not change anything further there.
+Just preserve the eye toggle already added.
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+BACKEND SETUP_STATUS HARDENING COMPLETE
+
+All backend write paths audited: yes/no
+Only one explicit completed transition remains: yes/no
+Early/indirect completed transitions removed: yes/no
+Illegal backend transitions blocked: yes/no
+Partial saves remain not_started/in_progress only: yes/no
+Edge cases handled explicitly: yes/no
+Password eye toggle preserved: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.

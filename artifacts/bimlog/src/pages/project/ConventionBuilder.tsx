@@ -4434,7 +4434,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       { label: "Revision",     fieldOrder: 7, allowedValues: revCodes },
     ];
     setIsSaving(true);
-    mutate({ projectId, data: { separator: ws.separator, isActive: true, enforceUppercase: ws.enforceUppercase, applyCharLimits: ws.applyCharLimits, fields, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } });
+    mutate({ projectId, data: { separator: ws.separator, isActive: true, enforceUppercase: ws.enforceUppercase, applyCharLimits: ws.applyCharLimits, fields, markCompleted: true, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } as any });
   };
 
   const [foundationalUnlocked, setFoundationalUnlocked] = useState(false);

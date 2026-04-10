@@ -97,6 +97,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
 router.put("/projects/:projectId/conventions", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId } = UpsertConventionParams.parse({ projectId: req.params.projectId });
+    const explicitComplete = req.body?.markCompleted === true;
     const body = UpsertConventionBody.parse(req.body);
 
     const existing = await db
@@ -107,8 +108,16 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
 
     let conventionId: number;
 
-    const hasFields = body.fields && body.fields.length > 0;
-    const newSetupStatus = hasFields ? "completed" : "in_progress";
+    const currentStatus = existing.length > 0 ? (existing[0].setupStatus ?? "not_started") : "not_started";
+
+    let newSetupStatus: string;
+    if (currentStatus === "completed") {
+      newSetupStatus = "completed";
+    } else if (explicitComplete) {
+      newSetupStatus = "completed";
+    } else {
+      newSetupStatus = "in_progress";
+    }
 
     if (existing.length > 0) {
       const updateSet: Record<string, unknown> = {
@@ -148,7 +157,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       conventionId = created.id;
     }
 
-    if (hasFields) {
+    if (body.fields && body.fields.length > 0) {
       interface ConventionField {
         label: string;
         fieldOrder: number;
