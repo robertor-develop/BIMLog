@@ -77,6 +77,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       companyCode: convention.companyCode ?? "",
       isActive: convention.isActive,
       userGuidance: convention.userGuidance ?? null,
+      setupStatus: convention.setupStatus ?? "not_started",
       companyAssignmentStatus,
       fields: fields.map((f) => ({
         id: f.id,
@@ -106,10 +107,14 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
 
     let conventionId: number;
 
+    const hasFields = body.fields && body.fields.length > 0;
+    const newSetupStatus = hasFields ? "completed" : "in_progress";
+
     if (existing.length > 0) {
       const updateSet: Record<string, unknown> = {
         separator: body.separator,
         isActive: body.isActive,
+        setupStatus: newSetupStatus,
         updatedAt: new Date(),
       };
       if (typeof body.enforceUppercase === "boolean") updateSet.enforceUppercase = body.enforceUppercase;
@@ -132,6 +137,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
           projectId,
           separator: body.separator,
           isActive: body.isActive,
+          setupStatus: newSetupStatus,
           ...(typeof body.enforceUppercase === "boolean" ? { enforceUppercase: body.enforceUppercase } : {}),
           ...(typeof body.applyCharLimits === "boolean" ? { applyCharLimits: body.applyCharLimits } : {}),
           ...(typeof body.companyCode === "string" ? { companyCode: body.companyCode } : {}),
@@ -142,7 +148,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       conventionId = created.id;
     }
 
-    if (body.fields && body.fields.length > 0) {
+    if (hasFields) {
       interface ConventionField {
         label: string;
         fieldOrder: number;
@@ -179,6 +185,7 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       companyCode: convention[0].companyCode ?? "",
       isActive: convention[0].isActive,
       userGuidance: convention[0].userGuidance ?? null,
+      setupStatus: convention[0].setupStatus ?? "not_started",
       fields: fields.map((f) => ({
         id: f.id,
         label: f.label,

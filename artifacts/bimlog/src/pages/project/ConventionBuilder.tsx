@@ -4301,24 +4301,34 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
     }));
   }, [convention]);
 
+  const setupStatus: "not_started" | "in_progress" | "completed" =
+    (convention as any)?.setupStatus === "completed" ? "completed"
+    : (convention as any)?.setupStatus === "in_progress" ? "in_progress"
+    : "not_started";
+
   const hasAutoLoaded = useRef(false);
   useEffect(() => {
     if (hasAutoLoaded.current || !token) return;
     hasAutoLoaded.current = true;
+
+    if (setupStatus === "not_started") return;
+
     fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.ok ? r.json() : [])
       .then((versions: ConventionVersionSnapshot[]) => {
-        if (!Array.isArray(versions)) return;
-        // Find the most recent version that has actual discipline/docType content.
-        // If all versions are empty (e.g. a re-analysis snapshot with no results was saved),
-        // fall back to routing the wizard to checkpoint without discipline hydration, so the
-        // user sees the checkpoint screen rather than the setup-context front door.
+        if (!Array.isArray(versions) || versions.length === 0) {
+          if (setupStatus === "completed") {
+            setWs(s => s.flowPhase === "setup_context" ? { ...s, flowPhase: "checkpoint", step: 0 } : s);
+          }
+          return;
+        }
         const latest = versions.find(v => (v.acceptedDisciplines?.length ?? 0) > 0 || (v.acceptedDocTypes?.length ?? 0) > 0);
         if (!latest) {
-          if (versions.length === 0) return;
-          setWs(s => s.flowPhase === "setup_context" ? { ...s, flowPhase: "checkpoint", step: 0 } : s);
+          if (setupStatus === "completed") {
+            setWs(s => s.flowPhase === "setup_context" ? { ...s, flowPhase: "checkpoint", step: 0 } : s);
+          }
           return;
         }
         const syntheticDr: DiscoveryResult = {
@@ -4354,7 +4364,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         });
       })
       .catch(() => {});
-  }, []);
+  }, [setupStatus]);
 
   const { mutate } = useUpsertConvention({
     mutation: {
@@ -4429,7 +4439,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
   if (isLoading) return <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}</div>;
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
 
-  const hasExisting = convention && convention.fields && convention.fields.length > 0;
+  const hasExisting = setupStatus === "completed";
 
   // ── routing logic: determine the next phase after Step 0 ──────────────────
   function handleSetupContinue() {
@@ -4500,7 +4510,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         }}
         savedFlash={savedFlash}
         refetchKey={checkpointRefetchKey}
-        isFirstRun={!hasExisting}
+        isFirstRun={setupStatus !== "completed"}
       />
     );
   }

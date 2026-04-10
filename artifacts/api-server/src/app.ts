@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
+import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
 const DB_HOST = process.env.PGHOST || "unknown";
@@ -41,5 +42,15 @@ app.get("/api/v1/env-check", (_req: Request, res: Response) => {
 app.use("/api/v1", router);
 
 startOverdueNotifier();
+
+(async () => {
+  try {
+    await pool.query(`ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`);
+    await pool.query(`UPDATE naming_conventions SET setup_status = 'completed' WHERE setup_status = 'not_started' AND id IN (SELECT DISTINCT convention_id FROM naming_fields)`);
+    console.log("[migration] setup_status column ensured");
+  } catch (e) {
+    console.error("[migration] setup_status migration failed:", e);
+  }
+})();
 
 export default app;
