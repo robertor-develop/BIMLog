@@ -1,0 +1,175 @@
+Stop. The previous fix is the correct direction, but it is not finished until all state transitions and all entry points are locked down. We do not want hidden failure points. We are hardening this completely.
+
+This is now the active build task:
+
+ISSUE — FIRST-RUN / IN-PROGRESS / COMPLETED SETUP STATE MUST BE FULLY LOCKED DOWN
+
+Confirmed requirement:
+
+we now have an explicit setup_status model
+
+that is correct
+
+but this is not finished until there are zero hidden paths that can set the wrong status, bypass the status, or infer flow from old signals
+
+we do not want any remaining failure points
+
+Critical rule:
+Do not run validation yourself.
+Do not create test projects yourself.
+Do not assume any project currently exists.
+Do not use mock data.
+Fix the logic completely and harden it.
+The user will test manually after the fix.
+
+STEP 1 — FIND EVERY PLACE THAT CAN AFFECT SETUP STATE
+
+Show exact code for every place in the system that can:
+
+create a naming_conventions row
+
+update naming_conventions
+
+insert naming_convention_versions
+
+change flowPhase
+
+change step
+
+decide whether to show checkpoint
+
+decide whether to show edit mode
+
+decide whether to show first-run mode
+
+Use a full search, not guesses.
+
+We need the exact list of all code paths that can still influence first-run vs existing behavior.
+
+STEP 2 — REMOVE ALL OLD INFERENCE LOGIC
+
+Find and remove every remaining place where first-run vs existing is still inferred from weak signals such as:
+
+versions.length
+
+convention.fields.length
+
+hasExisting derived from fields
+
+selectedVersion existence
+
+checkpoint presence
+
+snapshot presence
+
+any other indirect heuristic
+
+After this step, routing/state decisions for first-run vs in-progress vs completed must come only from the explicit setup_status model.
+
+STEP 3 — LOCK STATUS TRANSITIONS
+
+Implement exact deterministic rules for setup_status:
+
+not_started
+Only immediately after project creation / convention row creation before the user begins the setup.
+
+in_progress
+Set the first moment the user actually begins the setup flow or saves partial foundational work.
+This must NOT be treated as completed.
+
+completed
+Set only after the initial setup flow reaches the true final completion point and the convention is actually completed.
+Never earlier.
+
+Show exact code for where each transition happens.
+
+STEP 4 — PROTECT AGAINST ILLEGAL TRANSITIONS
+
+Add hard guards so the system cannot silently jump states incorrectly.
+
+Examples of required protections:
+
+a project with setup_status = not_started cannot land in checkpoint/edit mode
+
+a project with setup_status = in_progress cannot be treated as completed just because versions exist
+
+a project with setup_status = completed can enter edit/checkpoint/history modes
+
+If an illegal state/route combination is attempted, force the correct state path instead of letting UI drift.
+
+STEP 5 — HANDLE ALL EDGE CASES EXPLICITLY
+
+Make the state model remain correct even if any of these exist:
+
+naming_conventions row exists but setup_status = not_started
+
+draft or partial version rows exist
+
+fields array exists but setup_status is not completed
+
+selectedVersion is present from stale UI state
+
+user refreshes page mid-flow
+
+user leaves and returns later
+
+post-create redirect happens before auxiliary rows are fully written
+
+Do not let any of these cases promote the project into completed/edit mode incorrectly.
+
+STEP 6 — SINGLE SOURCE OF TRUTH RULE
+
+Make setup_status the only allowed source of truth for onboarding state.
+
+Allowed uses:
+routing
+button text
+entry mode
+step mode
+checkpoint visibility
+edit visibility
+
+Disallowed:
+versions count
+fields count
+existing snapshot count
+other inferred flags
+
+If other values are still needed for display, that is fine, but they must not drive onboarding mode.
+
+STEP 7 — PASSWORD FIELD
+
+Do not change anything further here unless needed.
+Just confirm the show/hide eye toggle remains in place and working in the Create User flow.
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+FIRST-RUN FLOW HARDENING COMPLETE
+
+All setup-state entry points audited: yes/no
+Old inference logic removed: yes/no
+Status transitions explicitly locked: yes/no
+Illegal transitions blocked: yes/no
+Edge cases handled explicitly: yes/no
+setup_status is now sole source of truth: yes/no
+Password eye toggle preserved: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.

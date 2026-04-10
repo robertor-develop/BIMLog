@@ -3764,14 +3764,19 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
             ? w("Start Building Convention", "Comenzar a crear convención", lang)
             : w("Continue Editing Convention", "Continuar editando convención", lang)}
         </Button>
+        {!isFirstRun && (
         <Button variant="outline" onClick={onReEvidence} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <RefreshCw style={{ width: 14, height: 14 }} />
           {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
         </Button>
+        )}
+        {!isFirstRun && (
         <Button variant="outline" onClick={onToggleHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <Clock style={{ width: 14, height: 14 }} />
           {w(showHistory ? "Close Convention History" : "Open Convention History", showHistory ? "Cerrar historial de convención" : "Abrir historial de convención", lang)}
         </Button>
+        )}
+        {!isFirstRun && (
         <Button
           variant="outline"
           onClick={onEditFoundational}
@@ -3780,12 +3785,14 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           <Lock style={{ width: 14, height: 14 }} />
           {w("Edit Foundational Settings", "Editar ajustes fundacionales", lang)}
         </Button>
+        )}
       </div>
-      {/* Foundational settings warning note */}
+      {!isFirstRun && (
       <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", marginBottom: 16, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 6, fontSize: 11, color: "#92400E" }}>
         <AlertTriangle style={{ width: 13, height: 13, flexShrink: 0, marginTop: 1 }} />
         <span>{w("Edit Foundational Settings controls company codes, separator, uppercase enforcement, and character limits. Changes affect all future file naming across this project.", "Editar ajustes fundacionales controla códigos de empresa, separador, mayúsculas y límites de caracteres. Los cambios afectan todos los futuros nombres de archivo en este proyecto.", lang)}</span>
       </div>
+      )}
 
       {/* Latest Accepted Convention Snapshot */}
       <div id="convention-snapshot-section" style={{ border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden", fontSize: 12, background: "#fff" }}>
@@ -4487,6 +4494,13 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
 
   const { flowPhase } = ws;
 
+  // ── HARD GUARD: non-completed projects cannot reach checkpoint/edit/re-evidence ──
+  useEffect(() => {
+    if (setupStatus !== "completed" && (flowPhase === "checkpoint" || flowPhase === "edit_foundation" || flowPhase === "re_evidence" || flowPhase === "changes_review")) {
+      setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
+    }
+  }, [setupStatus, flowPhase]);
+
   // ── Checkpoint — re-entry for projects with an accepted convention ─────────
   if (flowPhase === "checkpoint") {
     return (
@@ -4674,14 +4688,18 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
           {step === 0
             ? foundationalEditMode
               ? null
-              : <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
+              : hasExisting
+                ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: "checkpoint" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Return to Checkpoint","Volver al checkpoint",lang)}</Button>
+                : <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
             : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
           }
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {hasExisting && (
           <Button variant="outline" onClick={() => setWs(s => ({ ...s, importState: { sampleNames: "", rawFolderText: "", rawIndexText: "", rawNotes: "", analyzing: false, error: "", extractionWarning: "", uploadedFiles: [] }, flowPhase: "re_evidence" }))} style={{ gap: 6, fontSize: 13 }}>
             <RefreshCw style={{ width: 14, height: 14 }} /> Add More Evidence and Re-run Discovery
           </Button>
+          )}
           {step < 4 && <Button onClick={() => setWs(s => ({ ...s, step: s.step + 1 }))} style={{ gap: 6, fontSize: 13 }}>{step === 3 ? w("Go to Review","Ir a Revisión",lang) : w("Next","Siguiente",lang)}<ChevronRight style={{ width: 15, height: 15 }} /></Button>}
         </div>
       </div>
