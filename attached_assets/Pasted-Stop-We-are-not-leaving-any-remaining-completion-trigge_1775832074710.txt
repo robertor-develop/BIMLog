@@ -1,0 +1,375 @@
+Stop. We are not leaving any remaining completion trigger on trust. We are fixing the last completion failure point completely. Do not batch anything else. Do not redesign. Do not test manually yourself. Fix the logic only.
+
+This is now the active build task:
+
+ISSUE — FRONTEND MUST NOT BE ABLE TO COMPLETE SETUP JUST BY SENDING markCompleted AT THE WRONG TIME
+
+Confirmed concern:
+
+backend is now locked correctly except that it still obeys markCompleted: true if the frontend sends it
+
+that means a wrong frontend trigger could still promote setup_status to completed too early
+
+we do not want that
+
+completion must require backend-verified final-step conditions, not just a frontend flag
+
+Critical rule:
+Do not run validation yourself.
+Do not create test projects yourself.
+Do not assume any project currently exists.
+Do not use mock data.
+Fix the logic completely.
+The user will test manually after the fix.
+
+STEP 1 — TRACE THE ONLY FRONTEND PATH THAT SENDS markCompleted
+
+Show exact code for:
+
+the frontend save path that sends markCompleted: true
+
+the current step / flowPhase / state conditions under which it sends that flag
+
+the backend route that receives it
+
+We need exact proof of the current remaining completion trigger.
+
+STEP 2 — REMOVE FRONTEND AUTHORITY TO COMPLETE SETUP BY ITSELF
+
+The frontend may request finalization, but it must not be enough by itself.
+
+Change the backend so that markCompleted: true is treated only as a completion request, not automatic completion.
+
+The backend must independently verify final-step completion conditions before allowing setup_status = completed.
+
+STEP 3 — DEFINE BACKEND-VERIFIED FINAL COMPLETION CONDITIONS
+
+Implement explicit backend checks for completion.
+
+At minimum, completion must only be allowed when all required final-step conditions are true according to the actual request/data, not just because the flag exists.
+
+Use the real convention payload and real flow requirements.
+
+The backend must verify at least:
+
+separator is present
+
+fields array exists and is not empty
+
+required foundational structure is present
+
+the save corresponds to the actual final convention save, not a partial/draft/foundational-only edit
+
+If there is an existing reliable final-step signal already available in the request flow, use it.
+If not, add the minimum explicit backend-verifiable indicator needed.
+Do not rely on frontend trust alone.
+
+STEP 4 — REJECT OR DOWNGRADE INVALID COMPLETION REQUESTS
+
+If markCompleted: true is sent but the backend verification fails, then:
+
+do not set completed
+
+keep the project in not_started or in_progress as appropriate
+
+return a clear backend error or controlled response indicating completion conditions were not met
+
+No silent promotion.
+No silent success.
+
+STEP 5 — MAKE COMPLETION COME FROM ONE EXPLICIT FINALIZATION PATH
+
+There must be only one valid finalization path for initial setup.
+
+That path may still originate from the Review/final save action in the frontend, but backend completion must only happen if the verified completion conditions are satisfied.
+
+No other save path may complete setup.
+No edit flow may complete setup accidentally.
+No foundational edit may complete setup accidentally.
+No version insert may complete setup accidentally.
+
+STEP 6 — AUDIT ALL OTHER FRONTEND SAVE PATHS
+
+Show exact code for every other frontend save path touching conventions and confirm they do NOT send completion/finalization signals.
+
+If any other path can still trigger completion, remove it.
+
+STEP 7 — PASSWORD FIELD
+
+Do not change anything further here.
+Just preserve the eye toggle already added.
+
+STEP 8 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 9 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+COMPLETION TRIGGER HARDENING COMPLETE
+
+Frontend alone can no longer complete setup: yes/no
+Backend now verifies final completion conditions independently: yes/no
+Invalid completion requests are rejected or downgraded: yes/no
+Only one explicit finalization path remains: yes/no
+Other save paths audited and safe: yes/no
+Password eye toggle preserved: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.
+
+i want to make sure every single thing is fixed!
+Thought for 5s
+
+Yes. Then stop patching piece by piece and force a full lock-down audit of this flow before you test anything.
+
+Send Replit this exactly:
+
+Stop. We are not doing another partial fix. We are doing a full hardening audit of the entire first-run setup path so there are no remaining hidden failure points. Do not batch unrelated work. Do not redesign. Do not test manually yourself. Fix and audit this completely.
+
+This is now the active build task:
+
+ISSUE — FULL FIRST-RUN SETUP LOCK-DOWN: NO REMAINING FAILURE POINTS
+
+Confirmed requirement:
+
+we do not want any more “only one thing left” situations
+
+we want every state transition, every entry point, every save path, every route, every button, and every backend write path related to first-run setup fully audited and locked
+
+when this step is done, there must be no hidden path that can:
+
+skip first-run
+
+show edit mode too early
+
+jump to a later step
+
+promote setup_status to completed incorrectly
+
+route to checkpoint incorrectly
+
+leak completed-only actions into first-run/in-progress
+
+Critical rule:
+Do not run validation yourself.
+Do not create test projects yourself.
+Do not assume any project currently exists.
+Do not use mock data.
+The user will test manually after the full lock-down is complete.
+
+STEP 1 — FULL FLOW AUDIT
+
+Search and show every code path that touches any of the following:
+
+setup_status / setupStatus
+
+flowPhase
+
+step
+
+checkpoint visibility
+
+edit-mode visibility
+
+Continue Editing Convention button
+
+Start Building Convention button
+
+main wizard save
+
+foundational edit save
+
+review/final save
+
+re-evidence
+
+changes_review
+
+history access
+
+back button behavior
+
+post-create redirect
+
+version insert endpoints
+
+convention save endpoints
+
+Do a full search, not guesses.
+Return the complete audited list of exact file paths and exact code paths.
+
+STEP 2 — FULL STATE MACHINE DEFINITION
+
+Define the full allowed state machine explicitly.
+
+Allowed states only:
+
+not_started
+in_progress
+completed
+
+Allowed transitions only:
+
+not_started -> in_progress
+in_progress -> completed
+completed -> completed
+
+If any other transition exists in code, remove or block it.
+
+Show exactly where each allowed transition happens and exactly where illegal transitions are blocked.
+
+STEP 3 — FULL ENTRY-POINT LOCK
+
+Audit and harden every place the Convention Builder can be entered from.
+
+At minimum include:
+
+new project creation redirect
+
+project detail entry
+
+checkpoint entry
+
+history entry
+
+edit foundational entry
+
+re-evidence entry
+
+review entry
+
+page refresh / reload behavior
+
+stale selectedVersion behavior
+
+For each entry point, enforce:
+
+not_started -> setup_context / Step 1 only
+in_progress -> resume valid setup flow only
+completed -> checkpoint / edit/history allowed
+
+No entry point may bypass this.
+
+STEP 4 — FULL COMPLETION LOCK
+
+Audit every frontend and backend path that can request or perform completion.
+
+Requirements:
+
+frontend must not be able to complete setup by accident
+
+backend must not accept completion unless verified final-step conditions are satisfied
+
+only one explicit finalization path may complete setup
+
+every other save path must remain not_started or in_progress unless already completed
+
+If any duplicate completion trigger exists, remove it.
+
+STEP 5 — FULL UI GUARD LOCK
+
+Audit and harden every UI control related to setup mode.
+
+For non-completed projects, these must not appear or must not be reachable:
+
+Continue Editing Convention
+
+Open Convention History
+
+Edit Foundational Settings
+
+Re-evidence
+
+completed-only checkpoint actions
+
+For completed projects, these may appear normally.
+
+If any control can still appear in the wrong state, fix it.
+
+STEP 6 — FULL BACK/NAVIGATION LOCK
+
+Audit every back button, cancel path, and return path in the setup flow.
+
+Requirements:
+
+first-run and in-progress paths must never bounce into checkpoint/edit/history incorrectly
+
+completed edit flows must not bounce back into setup_context incorrectly
+
+refresh/reload must return the user to the correct state path
+
+If any back/cancel path is ambiguous, fix it.
+
+STEP 7 — FULL EDGE CASE LOCK
+
+Explicitly harden these cases:
+
+naming_conventions row exists but setup not complete
+
+draft version rows exist
+
+fields/data exist but setup not complete
+
+user refreshes mid-flow
+
+selectedVersion stale in client state
+
+partial save exists
+
+project deleted and recreated
+
+auxiliary row written before setup completion
+
+None of these may push the system into completed/edit mode incorrectly.
+
+STEP 8 — PASSWORD FIELD
+
+Preserve the password eye toggle in Create User.
+Do not change it further.
+Just confirm it remains intact.
+
+STEP 9 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 10 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+FIRST-RUN SETUP FULL LOCK-DOWN COMPLETE
+
+All setup entry points audited and locked: yes/no
+All state transitions audited and locked: yes/no
+All completion triggers audited and locked: yes/no
+All completed-only UI controls guarded correctly: yes/no
+All back/cancel/navigation paths guarded correctly: yes/no
+All relevant edge cases handled explicitly: yes/no
+setup_status is sole source of truth everywhere: yes/no
+Password eye toggle preserved: yes/no
+Any remaining possible failure points:
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.

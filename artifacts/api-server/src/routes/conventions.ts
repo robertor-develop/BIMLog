@@ -110,10 +110,31 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
 
     const currentStatus = existing.length > 0 ? (existing[0].setupStatus ?? "not_started") : "not_started";
 
+    const REQUIRED_FIELD_LABELS = ["Project Code", "Originator", "Discipline", "Level", "Type", "Sequence", "Status", "Revision"];
+
+    function verifyCompletionPayload(): string | null {
+      if (!body.separator || body.separator.trim().length === 0) return "Missing separator";
+      if (!body.fields || !Array.isArray(body.fields) || body.fields.length === 0) return "Missing fields";
+      const presentLabels = new Set(body.fields.map((f: { label: string }) => f.label));
+      const missingLabels = REQUIRED_FIELD_LABELS.filter(l => !presentLabels.has(l));
+      if (missingLabels.length > 0) return `Missing required fields: ${missingLabels.join(", ")}`;
+      for (const f of body.fields) {
+        if (!f.allowedValues || !Array.isArray(f.allowedValues) || f.allowedValues.length === 0) {
+          return `Field "${f.label}" has no allowed values`;
+        }
+      }
+      return null;
+    }
+
     let newSetupStatus: string;
     if (currentStatus === "completed") {
       newSetupStatus = "completed";
     } else if (explicitComplete) {
+      const completionError = verifyCompletionPayload();
+      if (completionError) {
+        res.status(400).json({ error: `Completion rejected: ${completionError}` });
+        return;
+      }
       newSetupStatus = "completed";
     } else {
       newSetupStatus = "in_progress";
