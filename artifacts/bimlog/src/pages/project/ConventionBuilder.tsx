@@ -3687,7 +3687,7 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
 }
 
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
-function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onEditFoundational, savedFlash, refetchKey, showHistory, historyVersions, historyLoading, onToggleHistory }: {
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onEditFoundational, savedFlash, refetchKey, showHistory, historyVersions, historyLoading, onToggleHistory, isFirstRun }: {
   ws: WizardState;
   projectId: number;
   token: string;
@@ -3701,6 +3701,7 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
   historyVersions: ConventionVersionSnapshot[];
   historyLoading: boolean;
   onToggleHistory: () => void;
+  isFirstRun?: boolean;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
 
@@ -3759,7 +3760,9 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
         <Button onClick={onContinueEditing} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <Edit2 style={{ width: 14, height: 14 }} />
-          {w("Continue Editing Convention", "Continuar editando convención", lang)}
+          {isFirstRun
+            ? w("Start Building Convention", "Comenzar a crear convención", lang)
+            : w("Continue Editing Convention", "Continuar editando convención", lang)}
         </Button>
         <Button variant="outline" onClick={onReEvidence} style={{ gap: 7, fontSize: 13, height: 40 }}>
           <RefreshCw style={{ width: 14, height: 14 }} />
@@ -4314,7 +4317,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         // user sees the checkpoint screen rather than the setup-context front door.
         const latest = versions.find(v => (v.acceptedDisciplines?.length ?? 0) > 0 || (v.acceptedDocTypes?.length ?? 0) > 0);
         if (!latest) {
-          // All versions empty: if this project already has a saved convention, skip setup_context.
+          if (versions.length === 0) return;
           setWs(s => s.flowPhase === "setup_context" ? { ...s, flowPhase: "checkpoint", step: 0 } : s);
           return;
         }
@@ -4482,7 +4485,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         projectId={projectId}
         token={token ?? ""}
         lang={lang}
-        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: "main_wizard", step: 4 }))}
+        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: hasExisting ? "main_wizard" : "setup_context", step: hasExisting ? 4 : 0 }))}
         onReEvidence={() => setWs(s => ({ ...s, importState: defaultImportState(), flowPhase: "re_evidence" }))}
         showHistory={showHistory}
         historyVersions={historyVersions}
@@ -4497,6 +4500,7 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
         }}
         savedFlash={savedFlash}
         refetchKey={checkpointRefetchKey}
+        isFirstRun={!hasExisting}
       />
     );
   }

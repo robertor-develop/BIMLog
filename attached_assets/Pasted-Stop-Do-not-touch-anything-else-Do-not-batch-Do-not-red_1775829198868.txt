@@ -1,0 +1,113 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. We are fixing one issue only.
+
+This is now the active build task:
+
+ISSUE — NEW PROJECT FIRST-RUN FLOW IS WRONG
+
+Confirmed behavior:
+
+on first creation of a brand new project, the system behaves like the project was already configured
+
+it shows edit-style language like “Continue Editing Convention” on first creation
+
+it can jump into later steps instead of starting properly from the beginning
+
+this is incorrect
+
+Also fix this small UX issue in the same pass:
+
+the Create User password field is missing the show/hide eye toggle
+
+Critical rule:
+Do not run validation yourself.
+Do not create test projects yourself.
+Do not assume any current project exists.
+Do not use mock data.
+Fix the logic only.
+The user will test manually after the fix.
+
+STEP 1 — TRACE THE FIRST-RUN LOGIC
+
+Show exact frontend and backend code for:
+
+create project submit path
+
+post-create redirect logic
+
+Convention Builder entry logic
+
+the code that shows “Continue Editing Convention”
+
+the code that decides which step opens first
+
+We need exact proof of why a brand new project is being treated like an existing configured one.
+
+STEP 2 — IDENTIFY THE WRONG STATE ASSUMPTION
+
+Find the exact logic that is causing one of these wrong behaviors:
+
+a new project is being born with edit-mode state
+
+the UI is assuming a convention already exists just because the project exists
+
+the flow is defaulting to a later step instead of true first-run state
+
+Show the exact offending line(s).
+
+STEP 3 — FIX FIRST-RUN FLOW ONLY
+
+Implement the minimum correct fix.
+
+Required behavior:
+
+a brand new project must enter first-run setup mode
+
+it must start at Step 1
+
+it must not show edit-mode language on first creation
+
+it must not jump directly to Step 4 or any later step on first creation
+
+only after the initial setup is actually completed should the system behave like an editable existing convention
+
+Do not redesign the wizard.
+Do not redesign the screens.
+Fix only the routing/state logic.
+
+STEP 4 — FIX PASSWORD FIELD ONLY
+
+In the regular admin Create User flow:
+
+add a show/hide eye toggle to the password field
+
+it must work while typing
+
+it must not change validation logic
+
+Do not touch any other create-user behavior in this step.
+
+STEP 5 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 6 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+FIRST-RUN FLOW FIX READY
+
+Root cause:
+Exact fix applied:
+Password eye toggle added: yes/no
+Exact files changed:
+
+Do only this.
+Nothing more.

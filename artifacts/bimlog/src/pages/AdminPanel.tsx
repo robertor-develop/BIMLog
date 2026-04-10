@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,6 +137,7 @@ function UsersTab({ token }: { token: string }) {
   const [resetModal, setResetModal] = useState<number | null>(null);
   const [newPw, setNewPw] = useState("");
   const [createForm, setCreateForm] = useState({ fullName: "", email: "", password: "", companyName: "", projectId: "" });
+  const [showPw, setShowPw] = useState(false);
   const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
 
@@ -220,7 +222,16 @@ function UsersTab({ token }: { token: string }) {
           {["fullName", "email", "password", "companyName"].map(field => (
             <div key={field} style={{ marginBottom: 12 }}>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>{field.replace(/([A-Z])/g, " $1")}</label>
-              <Input type={field === "password" ? "password" : "text"} value={(createForm as Record<string, string>)[field]} onChange={e => setCreateForm(f => ({ ...f, [field]: e.target.value }))} />
+              {field === "password" ? (
+                <div style={{ position: "relative" }}>
+                  <Input type={showPw ? "text" : "password"} value={createForm.password} onChange={e => setCreateForm(f => ({ ...f, password: e.target.value }))} style={{ paddingRight: 38 }} />
+                  <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, color: "hsl(var(--muted-foreground))" }}>
+                    {showPw ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
+                  </button>
+                </div>
+              ) : (
+                <Input type="text" value={(createForm as Record<string, string>)[field]} onChange={e => setCreateForm(f => ({ ...f, [field]: e.target.value }))} />
+              )}
             </div>
           ))}
           <div style={{ marginBottom: 12 }}>
