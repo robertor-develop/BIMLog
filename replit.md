@@ -106,7 +106,7 @@ Both panels have identical CRUD capabilities:
 - **Persistence**: Guaranteed by Replit infrastructure across restarts
 - **Auto-seeding**: NONE. Seed script exists at `scripts/src/seed.ts` but is manual-only (`pnpm --filter scripts seed`)
 - **Auto-migration**: NONE. No drizzle-kit push runs on startup
-- **Clean state**: All data cleared on 2026-04-09. ZERO users, ZERO companies. Completely empty.
+- **Clean state**: Full reset 2026-04-09. One super admin: user 11 (Roberto Rodriguez, robertor@rryasociados.com, company 30 RRY Asociados).
 - **System config preserved**: feature_flags (6 rows), config_options (33 rows, 8 categories)
 
 ## Database Schema

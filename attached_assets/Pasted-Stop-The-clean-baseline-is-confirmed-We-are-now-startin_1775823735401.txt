@@ -1,0 +1,87 @@
+Stop. The clean baseline is confirmed. We are now starting the controlled rebuild from scratch.
+
+This is now the active task:
+
+ISSUE — CREATE THE ONE CORRECT SUPER ADMIN ACCOUNT AND PREPARE CLEAN FIRST-USE STATE
+
+Critical rule:
+We do not use preview.
+We do not use mock data.
+We do not use local or temporary database.
+Everything must use the single persistent database already verified.
+
+We are not creating demo data.
+We are not creating extra users or projects yet.
+We are only creating the one correct super admin account and confirming the app is ready for first real use.
+
+STEP 1 — CREATE ONE SUPER ADMIN ACCOUNT
+
+Create exactly one user account with super admin privileges.
+
+Do not create any other users.
+Do not create any companies unless strictly required by the schema.
+Do not create any projects.
+
+If company is required for the user record, use the correct intended company only and say exactly what was created.
+
+STEP 2 — SHOW EXACT DB RESULT
+
+Show exact DB rows for:
+
+users
+companies if one was required
+any auth/session/role linkage relevant to super admin access
+
+We need exact proof of what now exists.
+
+STEP 3 — VERIFY LOGIN AND ACCESS
+
+Using the live app and the real persistent database, verify:
+
+login works
+dashboard loads
+admin route loads
+total control route loads
+system behaves as a clean first-use state with no projects yet
+
+STEP 4 — VERIFY EMPTY FIRST-USE EXPERIENCE
+
+Show exact visible behavior for:
+
+dashboard with zero projects
+regular admin panel with zero projects
+total control with zero projects
+any empty-state messages
+
+We need to know whether the clean app is understandable and stable before we start creating the new project.
+
+STEP 5 — NO EXTRA CREATION
+
+Do not create:
+
+extra users
+extra companies
+extra projects
+conventions
+files
+
+This step is only the one correct super admin account and first-use readiness check.
+
+STEP 6 — OUTPUT FORMAT
+
+Return ONLY this:
+
+FIRST-USE READY STATUS
+
+Super admin account created: yes/no
+Company created for super admin: yes/no
+Login works: yes/no
+Dashboard works on empty state: yes/no
+Admin panel works on empty state: yes/no
+Total Control works on empty state: yes/no
+Any weird empty-state issues:
+Exact rows created:
+Exact files changed:
+
+Do only this.
+Nothing more.
