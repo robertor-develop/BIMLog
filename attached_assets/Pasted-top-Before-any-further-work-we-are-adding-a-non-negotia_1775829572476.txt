@@ -1,0 +1,102 @@
+top. Before any further work, we are adding a non-negotiable environment safety rule. Do not build features in this step. Do not clean data. Do not run fixes. Do not touch any records yet.
+
+This is now the active task:
+
+ISSUE — ENVIRONMENT SAFETY LOCK: REPLIT MUST NOT DRIFT BETWEEN DEV / PREVIEW / TEMP / PRODUCTION DATA
+
+Confirmed problem:
+
+even when instructed not to use preview, mock data, local DB, or temporary databases, the workflow still drifts into other environments
+
+this caused cleanup confusion and data inconsistency
+
+this is unacceptable
+
+Critical rule:
+From this point forward, no work may proceed unless environment truth is explicitly proven first.
+
+STEP 1 — SHOW CURRENT ENVIRONMENT TRUTH
+
+Show exactly:
+
+A. frontend app URL currently being used
+B. backend API base URL currently being used
+C. database connection target currently being used
+D. exact environment variables controlling these
+E. exact proof of whether this is production, development, preview, or local
+
+Do not summarize vaguely.
+Show exact values with secrets redacted only where required.
+
+STEP 2 — ADD A HARD STOP ENVIRONMENT CHECK
+
+Implement a guardrail so that before any destructive or data-changing action, the system/replit workflow must explicitly verify:
+
+frontend target = expected environment
+backend target = expected environment
+database target = expected environment
+
+If these are not aligned, the workflow must stop and return a clear error:
+
+ENVIRONMENT MISMATCH — STOPPED BEFORE DATA CHANGE
+
+This is not app UX for customers.
+This is an internal operational safety guard for build/debug workflow.
+
+STEP 3 — DEFINE ONE SOURCE OF TRUTH RULE
+
+Implement and document this exact rule:
+
+If validating production behavior, then:
+frontend must point to production
+backend must point to production
+database must be production
+
+If validating development behavior, then:
+frontend must point to development
+backend must point to development
+database must be development
+
+No mixed-mode validation allowed.
+No “dev code, prod UI, other DB” combinations allowed.
+
+STEP 4 — NO SILENT FALLBACKS
+
+Find and remove or disable any behavior where the workflow can silently fall back to:
+
+preview
+temporary DB
+local DB
+different API target
+different seeded environment
+
+If a fallback exists, it must fail loudly instead of proceeding.
+
+STEP 5 — SHOW THE OPERATIONAL CHECKLIST
+
+Return the exact short checklist that must be run before every future fix:
+
+current frontend target
+current backend target
+current DB target
+environment match yes/no
+
+This must become mandatory before any cleanup, migration, or live fix.
+
+STEP 6 — OUTPUT FORMAT
+
+At the end provide only this exact block:
+
+ENVIRONMENT SAFETY LOCK — EXACT OUTPUTS
+
+Frontend target:
+Backend target:
+DB target:
+All three in sync: yes/no
+Mixed-environment fallback removed/blocked: yes/no
+Hard stop added on mismatch: yes/no
+Exact files changed:
+Required pre-flight check for future work:
+
+Do only this.
+Nothing more.

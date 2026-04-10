@@ -99,14 +99,33 @@ Both panels have identical CRUD capabilities:
 
 **Projects list endpoint**: `GET /admin/projects-list` (lightweight id/code/name for dropdowns, supports `?scope=mine`).
 
+## Environment Safety Lock (MANDATORY)
+
+**Two separate databases exist. They are NOT the same.**
+- **Development DB**: `postgresql://postgres:password@helium/heliumdb` -- used by dev server in Replit workspace
+- **Production DB**: separate Replit-managed instance -- used by the published/deployed app only
+- Cleaning dev DB does NOT clean production DB. They are independent.
+- To modify production DB: either use `executeSql({environment:"production"})` (read-only) or deploy code that performs the change on startup (then remove it).
+
+**Environment check endpoint**: `GET /api/v1/env-check` returns `{mode, dbHost, dbName, nodeEnv}`. In development: `mode=DEVELOPMENT, dbHost=helium`. In production: `mode=PRODUCTION, dbHost=<production-host>`.
+
+**Startup banner**: API server logs `[ENV] MODE / DB_HOST / DB_NAME / NODE_ENV` on every boot. Visible in workflow console and deployment logs.
+
+**Pre-flight checklist (MUST run before any data change)**:
+1. `curl /api/v1/env-check` -- confirm mode matches intent
+2. `psql $DATABASE_URL -c "SELECT current_database(), inet_server_addr()"` -- confirm DB target
+3. If changing production data: use `executeSql({environment:"production"})` to verify first
+4. Never assume dev cleanup affects production
+
+**No silent fallbacks**: No secondary DB, no dev/prod switching, no auto-seeding, no in-memory DB. If `DATABASE_URL` is missing, the app crashes with a clear error.
+
 ## Database Configuration (LOCKED)
 
-- **Single database**: Replit-managed PostgreSQL at `postgresql://postgres:password@helium/heliumdb?sslmode=disable`
-- **Connection**: Single `DATABASE_URL` env var, no fallback, no secondary DB, no dev/prod switching
+- **Connection**: Single `DATABASE_URL` env var per environment, no fallback
 - **Persistence**: Guaranteed by Replit infrastructure across restarts
-- **Auto-seeding**: NONE. Seed script exists at `scripts/src/seed.ts` but is manual-only (`pnpm --filter scripts seed`)
+- **Auto-seeding**: NONE. Seed script at `scripts/src/seed.ts` is manual-only
 - **Auto-migration**: NONE. No drizzle-kit push runs on startup
-- **Clean state**: Full reset 2026-04-09. One super admin: user 11 (Roberto Rodriguez, robertor@rryasociados.com, company 30 RRY Asociados).
+- **Clean state**: Full reset 2026-04-09. One super admin: user 11 (Roberto Rodriguez, robertor@rryasociados.com, company 30 RRY Asociados). Production DB has user 18 (same email/credentials).
 - **System config preserved**: feature_flags (6 rows), config_options (33 rows, 8 categories)
 
 ## Database Schema
