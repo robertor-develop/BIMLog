@@ -106,12 +106,22 @@ Both panels have identical CRUD capabilities:
 - **Persistence**: Guaranteed by Replit infrastructure across restarts
 - **Auto-seeding**: NONE. Seed script exists at `scripts/src/seed.ts` but is manual-only (`pnpm --filter scripts seed`)
 - **Auto-migration**: NONE. No drizzle-kit push runs on startup
-- **Clean state**: All data cleared on 2026-04-09. Only super admin (user 16, Roberto Rodriguez, roberto@ignitesmart.com, company IgniteSmart id=14) remains
-- **System config preserved**: feature_flags (6 rows), config_options (33 rows)
+- **Clean state**: All data cleared on 2026-04-09. ZERO users, ZERO companies. Completely empty.
+- **System config preserved**: feature_flags (6 rows), config_options (33 rows, 8 categories)
 
 ## Database Schema
 
-Tables: companies, users, projects, project_members, files, rfis, submittals, activity_log, naming_conventions, naming_fields, config_options
+32 tables total:
+- **Core**: users, companies, projects, project_members
+- **Documents**: files, naming_conventions, naming_fields, naming_convention_versions
+- **RFIs**: rfis, rfi_responses, rfi_ball_in_court_history, rfi_view_events
+- **Submittals**: submittals, submittal_register, submittal_view_events
+- **Transmittals**: transmittals, transmittal_items
+- **Change Orders**: change_orders, change_order_documents
+- **Meetings**: meeting_minutes, meeting_attendees, action_items
+- **Project Mgmt**: project_directory, project_invitations, project_milestones
+- **System**: activity_log, admin_actions_log, email_log, notifications, contact_submissions
+- **Config**: config_options, feature_flags
 
 **users columns**: id, email, password_hash, full_name, company_id, created_at, job_title, phone, avatar_url, signature_url, api_token, notification_preferences (jsonb)
 

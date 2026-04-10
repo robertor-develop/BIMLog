@@ -1,0 +1,200 @@
+Stop. Do not delete anything else. The data has already been cleaned manually. We are now verifying the clean state, locking the environment, and auditing the system before fresh testing.
+
+This is now the active task:
+
+ISSUE — VERIFY CLEAN BASELINE + LOCK ENVIRONMENT + DEEP AUDIT BEFORE REBUILDING FROM SCRATCH
+
+Confirmed situation:
+
+all data was manually cleaned
+even the previous super admin data was wrong
+we now need to verify the system is truly empty and stable
+from this point forward there must be one persistent database only
+no new hidden data, no seeding, no environment switching
+
+Critical rules:
+
+DO NOT create a new database
+DO NOT reseed automatically on restart
+DO NOT switch between dev and production DB silently
+DO NOT auto-insert demo/test data
+DO NOT recreate any user, company, or project unless explicitly instructed after this audit
+this must be a persistent, stable database from now on
+
+STEP 1 — VERIFY CLEAN EMPTY STATE
+
+Show exact DB state now:
+
+projects count
+users count
+companies count
+project_members count
+naming_conventions count
+naming_convention_versions count
+files count
+activity_log count
+rfis count
+rfi_responses count
+submittals count
+transmittals count
+transmittal_items count
+change_orders count
+meeting_minutes count
+meeting_attendees count
+action_items count
+notifications count
+admin_actions_log count
+any audit/report tables if they exist
+
+Show exact SQL used to verify each or grouped verification queries.
+Do not guess.
+
+STEP 2 — VERIFY ACCESS BASELINE
+
+Show exactly what account(s) remain for login and why.
+
+Requirements:
+
+identify the one correct super admin account if one exists
+if no valid super admin account exists, say so explicitly
+do not create one yet unless necessary and approved
+show exact DB truth for auth-related records required for login
+
+STEP 3 — LOCK DATABASE CONFIGURATION
+
+Show exact configuration proving:
+
+single database connection string
+no fallback to secondary DB
+no dev/prod switching
+no hidden alternate environment in current runtime
+no auto-migration creating new DB
+no seed scripts running on startup
+
+Explain clearly:
+
+what DB is used
+where it is hosted
+how persistence is guaranteed across restarts
+
+STEP 4 — REMOVE OR DISABLE ANY AUTO-SEED / DEMO LOGIC
+
+Search for and remove or disable any code that:
+
+inserts default users
+inserts demo projects
+inserts sample companies
+recreates test data on startup
+swaps DB connection by environment silently
+runs hidden setup/reset scripts
+
+Show exact files changed.
+If none exist, say none exist and show proof.
+
+STEP 5 — VERIFY PERSISTENCE
+
+Perform this exact test:
+
+create one temporary test project manually
+restart the server
+confirm the test project still exists
+delete that temporary test project again
+confirm system returns to empty baseline
+
+Show exact before/after DB proof.
+
+STEP 6 — DEEP SYSTEM AUDIT
+
+After confirming the clean baseline and locked environment, run a full audit to understand exactly what the system is doing and why before we begin fresh testing.
+
+Run as many checks as needed.
+
+Audit at minimum:
+
+A. database truth audit
+
+schema
+foreign keys
+orphan checks
+duplicate checks
+required constraints
+
+B. route audit
+
+dashboard
+total control
+regular admin
+convention builder
+reports
+files
+project routing
+dead routes
+mismatched routes
+
+C. source-of-truth audit
+For each of these, show exactly which DB tables and endpoints they depend on:
+
+project users
+participating companies
+convention companies
+project cards
+dashboard cards
+reports counts
+admin counts
+
+D. navigation/state audit
+
+project view routing
+back navigation
+branch flow return paths
+convention history path
+add more evidence path
+any place where UI can strand user or jump to wrong screen
+
+E. permissions/scope audit
+
+super admin
+project admin
+platform-wide vs project-scoped actions
+capability mismatches
+
+F. environment audit
+
+confirm again there is only one DB
+no hidden switching
+no stale alternate runtime
+
+Do not start building fixes from this audit unless absolutely required for baseline integrity.
+This audit is to expose the complete truth before fresh testing.
+
+STEP 7 — FINAL STATE
+
+System must now be:
+
+empty
+stable
+persistent
+no hidden data
+no background seeding
+no environment switching
+fully audited so we know exactly what it is doing and why
+
+STEP 8 — OUTPUT FORMAT
+
+Return ONLY this:
+
+CLEAN BASELINE VERIFICATION STATUS
+
+System empty and verified: yes/no
+Valid super admin account confirmed: yes/no
+Single database confirmed: yes/no
+No auto-seeding present: yes/no
+Persistence verified after restart: yes/no
+Deep system audit completed: yes/no
+Main issues discovered in audit:
+Database location/type:
+Connection method:
+Files changed:
+
+Do only this.
+Nothing more.
