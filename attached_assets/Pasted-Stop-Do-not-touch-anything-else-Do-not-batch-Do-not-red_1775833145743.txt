@@ -1,0 +1,150 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. We are fixing one issue only and hard-locking it so this build vs production asset-path mismatch never happens again.
+
+This is now the active build task:
+
+ISSUE — BUILD / PRODUCTION BASE PATH MISMATCH IS CAUSING BLANK SCREENS
+
+Confirmed live behavior:
+
+production blank screen happened because the built app referenced assets at:
+
+/bimlog/assets/...
+
+but production serves the app at:
+
+/
+
+so the JS/CSS assets 404ed and the app never loaded
+
+this is not just a one-time bug
+
+this is a build/deploy configuration safety failure and it must be hard-locked so it cannot happen again
+
+Critical rule:
+Do not use preview.
+Do not use mock data.
+Do not use local or temporary database as a substitute for production truth.
+Everything must be grounded in the real production serving path and the real production build output.
+
+We are not fixing app logic in this step.
+We are fixing build/deploy safety and render safety for production.
+
+STEP 1 — TRACE THE REAL BASE PATH SOURCE OF TRUTH
+
+Show exact code/config for all places that define or influence frontend base path and production asset URLs:
+
+vite config
+
+artifact.toml
+
+build scripts
+
+package.json scripts if relevant
+
+any env var such as BASE_PATH
+
+any deploy/build command currently used by Replit
+
+Show exactly which one is supposed to be the source of truth and why.
+
+STEP 2 — REMOVE CONFIGURATION DRIFT
+
+Make the production build source of truth deterministic.
+
+Requirements:
+
+there must be one authoritative production base path
+
+the build must not be able to silently use /bimlog if production serves at /
+
+the build command and config must agree with artifact.toml
+
+if BASE_PATH is overridden incorrectly, the build must fail loudly instead of producing a bad deploy artifact
+
+Do not leave this dependent on memory or manual care.
+
+STEP 3 — ADD A HARD BUILD GUARD
+
+Add a build-time or startup validation that detects asset path mismatch before deploy.
+
+At minimum, enforce:
+
+if production serving path is /
+then built index.html must reference /assets/... and not /bimlog/assets/...
+
+If a mismatch is detected, fail the build or fail the deploy step loudly.
+
+No silent success with a broken asset base path.
+
+STEP 4 — ADD A POST-BUILD VERIFICATION STEP
+
+After building, verify automatically:
+
+built index.html asset paths
+
+actual JS/CSS asset references
+
+consistency with production serving root
+
+This must become mandatory before publish.
+
+Show the exact check command or script.
+
+STEP 5 — ADD A RENDER SAFETY RULE FOR FUTURE WORK
+
+Document and enforce this rule for future fixes:
+
+No frontend change is considered ready until the production build output is checked for:
+
+correct asset base path
+
+route loads
+
+no blank screen
+
+visible loading/error states still present
+
+This must be added to the operational workflow so this keeps stopping happening.
+
+STEP 6 — SHOW THE EXACT FIX APPLIED NOW
+
+Show exactly what is being changed now so the current production build uses the correct path.
+
+If the fix is:
+
+rebuild with correct BASE_PATH=/
+then show exactly where that is now enforced permanently so it cannot drift again.
+
+Do not leave this as “remember to build correctly.”
+Lock it down.
+
+STEP 7 — CODE / CONFIG OUTPUT
+
+Show exact code/config changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 8 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+BUILD / PRODUCTION PATH LOCK — READY
+
+Production base-path source of truth fixed: yes/no
+Config drift between build and production removed: yes/no
+Wrong BASE_PATH now fails loudly: yes/no
+Post-build asset-path verification added: yes/no
+Future blank-screen-from-asset-path mismatch prevented: yes/no
+Current production build now targets correct /assets path: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.

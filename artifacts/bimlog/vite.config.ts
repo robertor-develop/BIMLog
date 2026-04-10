@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { readFileSync } from "fs";
 
 const rawPort = process.env.PORT;
 
@@ -18,11 +19,23 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
+const PRODUCTION_BASE_PATH = "/";
 
-if (!basePath) {
+const basePath = process.env.BASE_PATH ?? PRODUCTION_BASE_PATH;
+
+if (basePath !== PRODUCTION_BASE_PATH) {
+  console.warn(
+    `[vite] WARNING: BASE_PATH="${basePath}" differs from production path "${PRODUCTION_BASE_PATH}". ` +
+    `Built assets will NOT work in production. Only use non-"/" BASE_PATH for local dev proxy.`
+  );
+}
+
+const isBuild = process.argv.includes("build");
+if (isBuild && basePath !== PRODUCTION_BASE_PATH) {
   throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
+    `BUILD BLOCKED: BASE_PATH="${basePath}" but production serves at "${PRODUCTION_BASE_PATH}". ` +
+    `Production builds MUST use BASE_PATH="${PRODUCTION_BASE_PATH}". ` +
+    `Remove or fix the BASE_PATH env var and retry.`
   );
 }
 

@@ -117,6 +117,14 @@ Both panels have identical CRUD capabilities:
 3. If changing production data: use `executeSql({environment:"production"})` to verify first
 4. Never assume dev cleanup affects production
 
+**Frontend build rule (LOCKED)**:
+- Production base path is `/`. Defined in `artifact.toml` as `BASE_PATH = "/"`.
+- Build command: `pnpm --filter @workspace/bimlog run build` (uses env from artifact.toml).
+- Manual builds: `PORT=22858 BASE_PATH=/ pnpm --filter @workspace/bimlog run build`.
+- NEVER use `BASE_PATH=/bimlog` for builds. Vite config has a hard guard that blocks builds with wrong BASE_PATH.
+- Post-build verification runs automatically: `scripts/verify-build.sh` checks asset paths in index.html.
+- If verify fails, the build exits non-zero and no deploy artifact is produced.
+
 **No silent fallbacks**: No secondary DB, no dev/prod switching, no auto-seeding, no in-memory DB. If `DATABASE_URL` is missing, the app crashes with a clear error.
 
 ## Database Configuration (LOCKED)
