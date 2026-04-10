@@ -33,6 +33,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
         companyCode: "",
         isActive: false,
         fields: [],
+        setupStatus: "not_started",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

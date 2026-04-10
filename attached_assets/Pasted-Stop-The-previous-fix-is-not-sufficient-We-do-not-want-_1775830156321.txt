@@ -1,0 +1,162 @@
+Stop. The previous fix is not sufficient. We do not want a fragile fix based only on versions.length === 0. We are fixing this correctly at the state-model level.
+
+This is now the active build task:
+
+ISSUE — FIRST-RUN PROJECT FLOW MUST BE DETERMINISTIC, NOT INFERRED
+
+Confirmed problem:
+
+a brand new project was being treated like an already-configured project
+
+the previous fix only prevented one bad branch when versions.length === 0
+
+that is not robust enough
+
+we do not want first-run vs existing behavior inferred indirectly from partial data like version count alone
+
+we want a correct explicit source of truth
+
+Also still include this small UX fix in the same pass:
+
+Create User password field must have a show/hide eye toggle
+
+Critical rule:
+Do not run the validation yourself.
+Do not create test projects yourself.
+Do not assume any project currently exists.
+Do not use mock data.
+Fix the logic correctly and completely.
+The user will test manually after the fix.
+
+STEP 1 — IDENTIFY THE REAL SOURCE OF TRUTH FOR PROJECT SETUP STATE
+
+Show exact current code and DB/data paths used to infer whether a project is:
+
+brand new / first-run
+in progress
+fully configured / existing editable convention
+
+Show exactly what the system is using now:
+project row
+naming_conventions row
+naming_convention_versions rows
+checkpoint state
+selectedVersion
+hasExisting
+flowPhase
+any other flags or assumptions
+
+We need exact proof of where first-run state is currently being inferred incorrectly.
+
+STEP 2 — IMPLEMENT AN EXPLICIT SETUP STATE MODEL
+
+Implement a deterministic setup state for project convention onboarding.
+
+Use one explicit project-scoped state model only, for example:
+
+not_started
+in_progress
+completed
+
+If an equivalent project-scoped field already exists, use it.
+If not, add the minimum correct field(s) needed.
+
+The system must stop guessing first-run vs existing mode from indirect evidence alone.
+
+STEP 3 — ENFORCE THE CORRECT RULES
+
+Required behavior:
+
+A. brand new project
+must enter first-run setup mode
+must start at Step 1 / first step only
+must not show edit-mode language
+must not show checkpoint/edit-style entry first
+must not jump to Step 4 or any later step
+
+B. in-progress setup
+must resume from the correct in-progress state
+must not be treated as completed
+must not jump to review/edit mode unless actually appropriate
+
+C. completed setup
+may show edit-mode language
+may show checkpoint/history/edit entry points
+may continue editing convention
+
+These rules must be driven by the explicit setup state, not by version count alone.
+
+STEP 4 — FIX THE ENTRY LOGIC COMPLETELY
+
+Update the Convention Builder entry logic so that:
+
+project creation sets explicit first-run setup state correctly
+
+post-create redirect enters first-run setup deterministically
+
+checkpoint screen is only shown when setup state allows it
+
+“Continue Editing Convention” only appears for completed setup
+
+“Start Building Convention” appears only for true first-run state
+
+step selection is driven by explicit state, not by accidental snapshot/version presence
+
+If empty versions or draft rows exist, they must not incorrectly promote the project into completed/edit mode.
+
+STEP 5 — HANDLE EDGE CASES
+
+The fix must remain correct even if:
+
+a naming_conventions row exists but setup is not completed
+
+a draft or placeholder version row exists
+
+a project was started but not finished
+
+a project has partial foundational data but no completed setup
+
+We do not want any of those cases to push the user into edit-mode incorrectly.
+
+STEP 6 — FIX PASSWORD FIELD ONLY
+
+In the regular admin Create User flow:
+
+add a show/hide eye toggle to the password field
+
+it must work while typing
+
+it must not change validation logic
+
+Do not touch any other create-user behavior in this step.
+
+STEP 7 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 8 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+FIRST-RUN FLOW HARD FIX READY
+
+Explicit setup state model added/fixed: yes/no
+First-run no longer inferred from version count alone: yes/no
+Brand new project now forced into Step 1 correctly: yes/no
+Edit-mode language restricted to completed setup only: yes/no
+Step-jump to later stages eliminated for first-run: yes/no
+Password eye toggle added: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.

@@ -21,6 +21,7 @@ export const namingConventionsTable = pgTable("naming_conventions", {
   analysisOnlyMode: boolean("analysis_only_mode").default(false),
   conventionVersion: integer("convention_version").default(1),
   userGuidance: text("user_guidance"),
+  setupStatus: text("setup_status").notNull().default("not_started"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
