@@ -1,0 +1,176 @@
+Stop. Do not touch anything else. Do not batch. Do not redesign. We are fixing one issue only.
+
+This is now the active build task:
+
+ISSUE — AFTER CREATE PROJECT, /projects/:id/convention RENDERS A BLANK SCREEN
+
+Confirmed live behavior:
+
+after clicking Create Project, production routes to:
+
+/projects/23/convention
+
+and the user gets a blank screen with nothing rendered
+
+this is unacceptable
+
+The problem is not only logic.
+You must also verify render safety.
+Replit keeps fixing logic and missing the actual render/output failure.
+This time you must double-check the render path completely.
+
+Critical rule:
+Do not use preview.
+Do not use mock data.
+Do not use local or temporary database.
+Everything must come from live production code, live production logs, live production route behavior, and live production API behavior only.
+
+Do not ask the user to validate first.
+Fix the render failure and prove the screen can render safely.
+
+STEP 1 — TRACE THE EXACT RENDER PATH
+
+Show exact frontend code for:
+
+route that handles /projects/:id/convention
+
+component tree from route entry to ConventionBuilder
+
+any guards/loaders/error boundaries used
+
+the project fetch path
+
+the convention fetch path
+
+the loading state render
+
+the error state render
+
+the null/undefined fallback render
+
+We need exact proof of where the blank render is happening.
+
+STEP 2 — TRACE THE EXACT PRODUCTION FAILURE
+
+Using the live production logs and live production route behavior, show exactly:
+
+whether the route is mounting
+
+whether ConventionBuilder is mounting
+
+whether project data is undefined
+
+whether convention data is undefined
+
+whether a runtime exception is thrown
+
+whether a render branch returns null/empty fragment with no visible fallback
+
+whether a hook is waiting forever
+
+Show the exact failing line or exact failing render condition.
+
+STEP 3 — FIX THE RENDER FAILURE ONLY
+
+Implement the minimum correct fix.
+
+Requirements:
+
+after project creation, /projects/:id/convention must never show a blank screen
+
+if project is loading, show a visible loading state
+
+if convention/setup state is loading, show a visible loading state
+
+if required data is missing unexpectedly, show a visible error state with exact reason
+
+if setup_status = not_started, the page must still render the first-run setup UI correctly
+
+no render path may silently return nothing
+
+no undefined/null state may crash the screen
+
+STEP 4 — ADD RENDER SAFETY GUARDS
+
+You must explicitly harden all first-run render paths.
+
+At minimum guard:
+
+project undefined
+
+convention undefined
+
+setupStatus missing
+
+versions missing
+
+selectedVersion missing
+
+flowPhase mismatch
+
+route param missing/invalid
+
+If any of these occur, the page must render a visible state, not blank.
+
+STEP 5 — VERIFY THE POST-CREATE HANDOFF
+
+Audit the exact handoff after Create Project:
+
+create project response
+
+redirect path
+
+route mount
+
+initial data fetch
+
+first visible rendered state
+
+We need to ensure the redirect into /projects/:id/convention is safe for a just-created project and does not depend on data that is not ready yet.
+
+STEP 6 — DOUBLE-CHECK THE ACTUAL RENDER OUTPUT
+
+Do not stop at “logic fixed.”
+
+You must explicitly verify:
+
+the route renders a visible screen
+
+the loading state is visible when appropriate
+
+the error state is visible when appropriate
+
+the first-run setup UI is visible when appropriate
+
+No blank white screen allowed.
+
+STEP 7 — CODE OUTPUT
+
+Show exact code changed only.
+
+Required format:
+
+// exact file path
+// BEFORE
+...
+// AFTER
+...
+
+STEP 8 — FINAL OUTPUT
+
+At the end provide only this exact block:
+
+BLANK SCREEN AFTER CREATE PROJECT — FIX READY
+
+Route render path audited: yes/no
+Production failure point identified: yes/no
+Blank render path eliminated: yes/no
+Visible loading state added/verified: yes/no
+Visible error state added/verified: yes/no
+First-run convention screen now renders safely: yes/no
+Root cause:
+Exact fix applied:
+Exact files changed:
+
+Do only this.
+Nothing more.
