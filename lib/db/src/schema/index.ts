@@ -23,3 +23,4 @@ export * from "./change-orders";
 export * from "./meeting-minutes";
 export * from "./action-items";
 export * from "./project-milestones";
+export * from "./coordination_intake_events";

@@ -6,7 +6,7 @@ import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
-  BookOpen, Send, RefreshCw, CalendarDays
+  BookOpen, Send, RefreshCw, CalendarDays, GitMerge
 } from "lucide-react";
 
 interface SidebarProps {
@@ -20,6 +20,7 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
+  { id: "coordination",  label: "Coordination Hub",            icon: GitMerge,      section: "Project" },
   { id: "analytics",     label: "Analytics",                  icon: BarChart2,     section: "Project" },
   { id: "files",         label: "project.tabs.files",          icon: FolderOpen,    section: "Project" },
   { id: "rfis",          label: "project.tabs.rfis",           icon: MessageSquare, section: "Project" },

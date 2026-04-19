@@ -1,0 +1,28 @@
+import { pgTable, serial, integer, text, timestamp, boolean } from "drizzle-orm/pg-core";
+
+export const coordinationIntakeEventsTable = pgTable("coordination_intake_events", {
+  id:                    serial("id").primaryKey(),
+  projectId:             integer("project_id").notNull(),
+  uploaderId:            integer("uploader_id").notNull(),
+  uploaderCompany:       text("uploader_company"),
+  originalFilename:      text("original_filename").notNull(),
+  proposedFilename:      text("proposed_filename"),
+  finalFilename:         text("final_filename"),
+  fileType:              text("file_type"),
+  fileSizeBytes:         integer("file_size_bytes"),
+  detectedDiscipline:    text("detected_discipline"),
+  detectedDocType:       text("detected_doc_type"),
+  detectedLevel:         text("detected_level"),
+  detectedOriginator:    text("detected_originator"),
+  aiConfidence:          text("ai_confidence"),
+  aiSummary:             text("ai_summary"),
+  aiExtractedKeywords:   text("ai_extracted_keywords"),
+  warningsTriggered:     boolean("warnings_triggered").default(false),
+  warningDetail:         text("warning_detail"),
+  userAction:            text("user_action"),
+  manualFieldsChanged:   text("manual_fields_changed"),
+  destinationAction:     text("destination_action"),
+  conventionId:          integer("convention_id"),
+  conventionSnapshot:    text("convention_snapshot"),
+  createdAt:             timestamp("created_at").defaultNow().notNull(),
+});

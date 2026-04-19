@@ -23,6 +23,7 @@ import searchRouter from "./search";
 import reportsRouter from "./reports";
 import dashboardBriefingRouter from "./dashboard_briefing";
 import intelligenceRouter from "./intelligence";
+import coordinationRouter from "./coordination";
 
 const router: IRouter = Router();
 
@@ -50,5 +51,6 @@ router.use(searchRouter);
 router.use(reportsRouter);
 router.use(dashboardBriefingRouter);
 router.use(intelligenceRouter);
+router.use(coordinationRouter);
 
 export default router;

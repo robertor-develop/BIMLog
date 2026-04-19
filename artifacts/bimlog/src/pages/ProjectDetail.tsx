@@ -19,6 +19,7 @@ import { TransmittalsTab } from "./project/TransmittalsTab";
 import { ChangeOrdersTab } from "./project/ChangeOrdersTab";
 import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
+import { CoordinationHub } from "./project/CoordinationHub";
 import { ChevronLeft, HelpCircle, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -121,6 +122,7 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
+          {tab === "coordination"   && <CoordinationHub  projectId={projectId} canWrite={canWrite} />}
           {tab === "analytics"      && <AnalyticsTab     projectId={projectId} />}
           {tab === "files"          && <FilesTab          projectId={projectId} canWrite={canWrite} />}
           {tab === "rfis"           && <RfisTab           projectId={projectId} canWrite={canWrite} />}
