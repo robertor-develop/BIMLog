@@ -1,25 +1,24 @@
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { Globe, Info, ChevronDown } from "lucide-react";
+import { Info, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef } from "react";
 import { getMe } from "@workspace/api-client-react";
 
-const INFO_LINKS = [
-  { label: "How It Works", href: "/setup-guide" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Features", href: "/features" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
-  { label: "Platform Disclaimer", href: "/disclaimer" },
-  { label: "Data Retention", href: "/data-retention" },
-];
-
 export function Navbar() {
-  const { t, language, setLanguage } = useI18n();
+  const { t, tt } = useI18n();
+  const INFO_LINKS = [
+    { label: tt("How It Works", "Cómo Funciona"),       href: "/setup-guide" },
+    { label: tt("Pricing", "Precios"),                  href: "/pricing" },
+    { label: tt("Features", "Funcionalidades"),         href: "/features" },
+    { label: tt("About", "Acerca de"),                  href: "/about" },
+    { label: tt("Contact", "Contacto"),                 href: "/contact" },
+    { label: tt("Privacy Policy", "Política de Privacidad"), href: "/privacy" },
+    { label: tt("Terms of Service", "Términos del Servicio"), href: "/terms" },
+    { label: tt("Platform Disclaimer", "Aviso Legal de la Plataforma"), href: "/disclaimer" },
+    { label: tt("Data Retention", "Retención de Datos"), href: "/data-retention" },
+  ];
   const { user, token, logout } = useAuthStore();
   const [location] = useLocation();
   const isLanding = location === "/";
@@ -58,24 +57,6 @@ export function Navbar() {
 
   if (isProjectPage || isDashboard) return null;
 
-  const langBtn = (
-    <button
-      onClick={() => setLanguage(language === "en" ? "es" : "en")}
-      style={{
-        display: "flex", alignItems: "center", gap: 5,
-        padding: "5px 10px", borderRadius: 6,
-        fontSize: 11, fontWeight: 600,
-        color: "hsl(var(--muted-foreground))",
-        background: "hsl(var(--secondary))",
-        border: "1px solid hsl(var(--border))",
-        cursor: "pointer",
-      }}
-    >
-      <Globe style={{ width: 13, height: 13 }} />
-      {language.toUpperCase()}
-    </button>
-  );
-
   const infoDropdown = (
     <div ref={infoRef} style={{ position: "relative" }}>
       <button
@@ -91,7 +72,7 @@ export function Navbar() {
         }}
       >
         <Info style={{ width: 13, height: 13 }} />
-        Information
+        {tt("Information", "Información")}
         <ChevronDown style={{ width: 11, height: 11, transform: infoOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
       {infoOpen && (
@@ -132,8 +113,7 @@ export function Navbar() {
         </div>
       </Link>
 
-      <div className="flex items-center gap-2 ml-auto">
-        {langBtn}
+      <div className="flex items-center gap-2 ml-auto" style={{ marginRight: 56 }}>
         {infoDropdown}
 
         {user ? (
@@ -169,7 +149,7 @@ export function Navbar() {
               >
                 {!avatarUrl && (user.fullName?.charAt(0).toUpperCase() ?? "?")}
               </div>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>Profile</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>{tt("Profile", "Perfil")}</span>
             </Link>
 
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>

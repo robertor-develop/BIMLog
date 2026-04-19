@@ -28,6 +28,7 @@ import { Contact } from "@/pages/Contact";
 import { Features } from "@/pages/Features";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
+import { LangToggle } from "@/components/layout/LangToggle";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,11 @@ function App() {
               <main className="flex-1">
                 <Router />
               </main>
+              {/* Global language toggle: floats above all layouts so it is
+                  visible on every page (landing, dashboard, project tabs,
+                  admin, settings, modals, etc.) including layouts that hide
+                  the marketing navbar. */}
+              <LangToggle floating />
             </div>
           </WouterRouter>
           <Toaster />
