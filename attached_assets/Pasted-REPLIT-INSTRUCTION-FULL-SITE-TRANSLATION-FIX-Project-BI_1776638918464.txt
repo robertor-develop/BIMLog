@@ -1,0 +1,44 @@
+REPLIT INSTRUCTION — FULL SITE TRANSLATION FIX
+Project: BIMLog v1.9 — April 2026 — single focused fix
+CRITICAL RULE: This is a translation-only fix. Do NOT change any layout, logic, or functionality. Only add missing Spanish translations. Show BEFORE/AFTER diffs.
+
+THE PROBLEM: When Spanish (es) is selected, multiple sections of the site remain in English. This must be 100% consistent — if the language is Spanish, every visible text string on every page must be Spanish. No exceptions.
+
+STEP 1 — AUDIT EVERY TRANSLATION FILE
+Find all translation/i18n files in the codebase (likely in src/lib/i18n/, src/locales/, or similar). List every English string that has no Spanish equivalent. Then add every missing Spanish translation.
+
+STEP 2 — LANDING PAGE (the marketing/home page shown before login)
+Find the landing page component. Every hardcoded English string must be wrapped in the existing translation function (t(), useTranslation(), or whatever pattern is already used). Add these Spanish translations:
+"Works with your existing tools" → "Compatible con tus herramientas actuales"
+"100% server-side validation" → "100% validación del lado del servidor"
+"Real-time audit trail" → "Registro de auditoría en tiempo real"
+"ISO 19650 standards aligned" → "Alineado con estándar ISO 19650"
+"Built for precision. Designed for teams." → "Construido para la precisión. Diseñado para equipos."
+"Every feature in BIMLog exists to eliminate coordination failures and establish clear accountability." → "Cada función de BIMLog existe para eliminar fallas de coordinación y establecer responsabilidad clara."
+"Get Started" / "Empezar" — verify this is already correct
+"Sign In" / "Iniciar Sesión" — verify this is already correct
+Any other hardcoded English strings on the landing page — translate all of them.
+
+STEP 3 — APP INTERIOR PAGES
+Go through every page and component file. Find every string that is hardcoded in English and NOT going through the translation system. This includes but is not limited to:
+All button labels, empty state messages, error messages, tooltip text, placeholder text, section headers, card titles, modal titles, confirmation dialogs, toast notifications, and table column headers.
+Do not translate proper nouns: BIMLog, ISO 19650, SHA-256, IBQ, PDF, DOCX, RFI, BIM, API. These stay in English in both languages.
+
+STEP 4 — VERIFY LANGUAGE TOGGLE APPLIES GLOBALLY
+The language toggle must update ALL text on the page immediately without a page reload. Verify that the language state is stored in a global context or store that every component reads from. If any component reads language from a local state or prop instead of the global store, fix it to read from the global store.
+
+FINAL OUTPUT — output only this:
+FULL TRANSLATION FIX — COMPLETE
+Landing page fully translated to Spanish: yes/no
+App interior pages fully translated to Spanish: yes/no
+Language toggle applies globally without reload: yes/no
+Zero English strings visible when Spanish is selected (except proper nouns): yes/no
+Files modified: list every file changed
+Do only this. Nothing more.also the es for spanish or english only apears in some tabs in others it does not!!!Add this to the same instruction before the FINAL OUTPUT section:
+
+STEP 5 — LANGUAGE TOGGLE VISIBLE ON EVERY PAGE
+The ES/EN language toggle currently appears only on some tabs/pages and disappears on others. This is wrong. The toggle must be visible and functional on every single page of the application without exception — landing page, all project tabs, settings, admin panel, convention builder, coordination hub, every modal, every page.
+Find where the language toggle component is rendered. It is currently placed inside specific page layouts or tab components instead of in the global layout. Move it to the global layout wrapper — the component that wraps ALL pages, likely MasterLayout.tsx, AppShell.tsx, or the root App.tsx layout. Remove it from any individual page or tab where it currently lives. Place it once in the global header or navbar where it is always visible regardless of which page the user is on.
+Verify after the fix: navigate to landing page, command center, a project's coordination hub, convention builder, team tab, admin panel, and settings — the language toggle must be visible and functional on all of them.
+
+Give this full updated instruction to Replit now as one combined pass with Steps 1 through 5.

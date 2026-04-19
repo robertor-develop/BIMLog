@@ -1,0 +1,33 @@
+REPLIT INSTRUCTION — TWO FIXES
+Project: BIMLog v1.9 — April 2026
+CRITICAL RULES: Do NOT redesign anything outside this scope. Show BEFORE/AFTER diffs. No mock data.
+
+FIX 1 — CONVENTION BUILDER BLANK PAGE CRASH
+The route /projects/:projectId/convention renders a blank white page. This means ConventionBuilder.tsx is crashing silently on load for this project.
+Add a top-level error boundary around the ConventionBuilder component in ProjectDetail.tsx. Use a try/catch in a React ErrorBoundary class component that catches render errors and shows a visible error message instead of a blank page — show the actual error text so we can diagnose.
+Also add console.error logging at the top of ConventionBuilder.tsx in a useEffect that runs on mount — log the projectId, the convention data returned from the API, and any errors. This will expose what is causing the crash.
+Additionally check: if the convention data for this project returns null or an unexpected shape, the component must render a safe empty state instead of crashing. Add null guards on every convention data access at the top of the component.
+Fix the "Go to Name Generator" button navigation — verify the route it pushes to exists and matches the actual route definition in the router. If it navigates to /projects/:id/name-generator but the route is defined differently, correct the navigation target.
+
+FIX 2 — CONVENTION BUILDER: AI PROPOSES MISSING VALUES FROM DOCUMENT ANALYSIS
+Context: when the Coordination Hub analyzes a file and finds that a value from the document is NOT in the convention's allowed values, it currently just warns the user. The next step should be: propose adding that value to the convention directly, with the right path depending on the user's role.
+This fix has two parts.
+PART 2A — New API endpoint: POST /projects/:projectId/conventions/suggest-value
+Accepts: { fieldLabel: string, suggestedValue: string, reason: string, sourceFile: string }
+If the calling user has role project_admin or convention_manager: immediately add the value to that field's allowedValues in the namingFieldsTable and return { added: true }.
+If the calling user has a different role: do NOT add the value. Instead return { added: false, adminName: string, adminEmail: string, conventionManagerName: string | null, conventionManagerEmail: string | null } — pull admin and convention manager info from the project members.
+PART 2B — Update CoordinationHub.tsx action banners.
+Currently when action.type is VALUE_NOT_IN_CONVENTION, the banner shows a blue or yellow message. Extend this:
+For users with permission (project_admin or convention_manager): add a button next to "Fix in Convention Builder →" that says "Add '[value]' now". When clicked, it calls POST /projects/:projectId/conventions/suggest-value with the field label, the value from the filename/document, and the reason from the AI. On success, show a green confirmation: "'IBQ' added to Project Code — re-analyze to update this file." On failure, show the error.
+For users without permission: below the existing yellow banner, add two buttons. First button: "Prepare email to admin" — when clicked, opens the user's default mail client with mailto: pre-filled with the admin/convention manager email, subject "BIMLog — Convention update needed for [project name]", and body: "Hi [admin name], I uploaded [original filename] to the Coordination Hub and BIMLog detected that the value '[value]' is not in the allowed list for the [fieldLabel] field. Please add it to the Convention Builder so the file can be correctly named. Project: [project name]. File: [original filename]." Second button: "Copy message" — copies that same text to clipboard without opening email.
+
+VALIDATION:
+Convention Builder loads without blank page for project 23. Error boundary shows error details if crash occurs. Go to Name Generator navigates correctly. "Add '[value]' now" button appears for admins on VALUE_NOT_IN_CONVENTION fields. Clicking it adds the value to the convention immediately. Non-admin users see "Prepare email" and "Copy message" buttons with pre-filled content.
+
+FINAL OUTPUT:
+FIX 1 — Convention Builder blank page fixed: yes/no
+FIX 1 — Go to Name Generator navigation fixed: yes/no
+FIX 2 — suggest-value endpoint adds value for admins: yes/no
+FIX 2 — "Add now" button in action banner for admins: yes/no
+FIX 2 — "Prepare email" + "Copy message" for non-admins: yes/no
+Do only this. Nothing more.

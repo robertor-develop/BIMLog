@@ -257,6 +257,102 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
   }
 });
 
+// ── Suggest a missing value for a convention field (Coordination Hub flow) ──
+// Admins / convention managers: value is added immediately to allowedValues.
+// Other roles: returns admin + convention-manager contact info so the UI can
+// offer a "prepare email" / "copy message" path.
+router.post("/projects/:projectId/conventions/suggest-value", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId), 10);
+    if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
+
+    const fieldLabel = typeof req.body?.fieldLabel === "string" ? req.body.fieldLabel.trim() : "";
+    const suggestedValue = typeof req.body?.suggestedValue === "string" ? req.body.suggestedValue.trim() : "";
+    const reason = typeof req.body?.reason === "string" ? req.body.reason : "";
+    const sourceFile = typeof req.body?.sourceFile === "string" ? req.body.sourceFile : "";
+    if (!fieldLabel || !suggestedValue) {
+      res.status(400).json({ error: "fieldLabel and suggestedValue are required" });
+      return;
+    }
+
+    const role = req.memberRole ?? "";
+    const canEdit = role === "project_admin" || role === "convention_manager";
+
+    if (canEdit) {
+      const conventions = await db
+        .select()
+        .from(namingConventionsTable)
+        .where(eq(namingConventionsTable.projectId, projectId))
+        .limit(1);
+      if (conventions.length === 0) {
+        res.status(404).json({ error: "No convention exists for this project" });
+        return;
+      }
+      const convention = conventions[0];
+      const fields = await db
+        .select()
+        .from(namingFieldsTable)
+        .where(eq(namingFieldsTable.conventionId, convention.id));
+      const target = fields.find(f => f.label === fieldLabel);
+      if (!target) {
+        res.status(404).json({ error: `Field "${fieldLabel}" not found in convention` });
+        return;
+      }
+      const current: string[] = Array.isArray(target.allowedValues) ? target.allowedValues : [];
+      if (current.includes(suggestedValue)) {
+        res.json({ added: true, alreadyPresent: true });
+        return;
+      }
+      const next = [...current, suggestedValue];
+      await db
+        .update(namingFieldsTable)
+        .set({ allowedValues: next })
+        .where(eq(namingFieldsTable.id, target.id));
+
+      try {
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: (req as any).userId ?? null,
+          actionType: "convention_value_added",
+          entityType: "naming_field",
+          entityId: target.id,
+          metadata: { fieldLabel, suggestedValue, reason, sourceFile },
+        } as any);
+      } catch {
+        // activity log is best-effort
+      }
+
+      res.json({ added: true, alreadyPresent: false });
+      return;
+    }
+
+    // Non-admin: return admin + convention-manager contact details.
+    const memberRows = await db
+      .select({
+        role: projectMembersTable.role,
+        userFullName: usersTable.fullName,
+        userEmail: usersTable.email,
+      })
+      .from(projectMembersTable)
+      .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
+      .where(eq(projectMembersTable.projectId, projectId));
+
+    const admin = memberRows.find(m => m.role === "project_admin");
+    const cm = memberRows.find(m => m.role === "convention_manager");
+
+    res.json({
+      added: false,
+      adminName: admin?.userFullName ?? "",
+      adminEmail: admin?.userEmail ?? "",
+      conventionManagerName: cm?.userFullName ?? null,
+      conventionManagerEmail: cm?.userEmail ?? null,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
+  }
+});
+
 // ── Convention Discovery (AI-powered) ────────────────────────────────────────
 router.post("/projects/:projectId/convention/discover", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

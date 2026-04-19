@@ -4353,8 +4353,22 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: convention, isLoading, isError, refetch } = useGetConvention(projectId);
+  const { data: convention, isLoading, isError, error: convError, refetch } = useGetConvention(projectId);
   const [forceWizard, setForceWizard] = useState(false);
+
+  // Diagnostic logging — exposes blank-page crashes by surfacing API state in console.
+  useEffect(() => {
+    console.log("[ConventionBuilder] mount/update", {
+      projectId,
+      isLoading,
+      isError,
+      convError: convError ? String(convError) : null,
+      convention,
+      conventionType: convention === null ? "null" : convention === undefined ? "undefined" : typeof convention,
+      hasFields: Array.isArray((convention as any)?.fields),
+      fieldCount: Array.isArray((convention as any)?.fields) ? (convention as any).fields.length : null,
+    });
+  }, [projectId, isLoading, isError, convError, convention]);
 
   const { token } = useAuthStore();
   const initDisciplines = (): DisciplineEntry[] => DEFAULT_DISCIPLINES.map(d => ({ ...d, id: uid(), selected: true }));

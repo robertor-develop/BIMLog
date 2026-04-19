@@ -3,10 +3,11 @@ import { Link } from "wouter";
 import {
   Upload, AlertTriangle, CheckCircle2, X, Loader2, FileText,
   Download, Inbox, ChevronDown, ArrowRight, ShieldAlert,
-  Wrench, HelpCircle,
+  Wrench, HelpCircle, Plus, Mail, Copy,
 } from "lucide-react";
 import {
   useGetConvention,
+  useGetProject,
   useCoordinationEvents,
   useCoordinationIntake,
   useCoordinationConfirm,
@@ -14,7 +15,11 @@ import {
   type CoordinationProposedField,
   type CoordinationConventionFieldSnapshot,
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
+
+const COORD_API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 // ── chip palette (same as NameGenerator.tsx) ─────────────────────────────────
 const CHIP_COLORS = [
@@ -159,6 +164,8 @@ export function CoordinationHub({
   const canFix = currentUserRole === "project_admin" || currentUserRole === "convention_manager";
   const { toast } = useToast();
   const { data: convention, isLoading: convLoading } = useGetConvention(projectId);
+  const { data: projectInfo } = useGetProject(projectId);
+  const projectName = projectInfo?.name ?? `Project ${projectId}`;
   const { data: events = [], isLoading: eventsLoading } = useCoordinationEvents(projectId);
   const intakeMutation = useCoordinationIntake(projectId);
   const confirmMutation = useCoordinationConfirm(projectId);
@@ -456,6 +463,7 @@ export function CoordinationHub({
           canFix={canFix}
           helpContact={helpContact}
           helpContactRoleLabel={helpContactRoleLabel}
+          projectName={projectName}
         />
       )}
 
@@ -492,12 +500,13 @@ function ReviewPanel({
   result, fields, overrides, setOverride, editing, setEditing,
   finalFilename,
   onConfirmDownload, onConfirmQueue, onReject, confirming,
-  canFix, helpContact, helpContactRoleLabel,
+  canFix, helpContact, helpContactRoleLabel, projectName,
 }: {
   projectId: number;
   canFix: boolean;
   helpContact: { userFullName: string; userEmail?: string } | null;
   helpContactRoleLabel: string;
+  projectName: string;
   result: CoordinationIntakeResponse;
   fields: CoordinationConventionFieldSnapshot[];
   overrides: Record<string, string>;
@@ -615,6 +624,11 @@ function ReviewPanel({
                     helpContact={helpContact}
                     helpContactRoleLabel={helpContactRoleLabel}
                     projectId={projectId}
+                    fieldLabel={label}
+                    suggestedValue={value || pf?.proposedValue || ""}
+                    reason={pf?.reasoning ?? ""}
+                    originalFilename={result.originalFilename}
+                    projectName={projectName}
                   />
                 )}
                 {idx < orderedFields.length - 1 && (
@@ -711,39 +725,146 @@ function ReviewPanel({
 
 function ActionBanner({
   action, canFix, helpContact, helpContactRoleLabel, projectId,
+  fieldLabel, suggestedValue, reason, originalFilename, projectName,
 }: {
   action: { type: string; text: string };
   canFix: boolean;
   helpContact: { userFullName: string; userEmail?: string } | null;
   helpContactRoleLabel: string;
   projectId: number;
+  fieldLabel: string;
+  suggestedValue: string;
+  reason: string;
+  originalFilename: string;
+  projectName: string;
 }) {
+  const { token } = useAuthStore();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
   const showFixLink =
     canFix && (action.type === "VALUE_NOT_IN_CONVENTION" || action.type === "CONVENTION_INCOMPLETE");
+  const showAddNow =
+    canFix && action.type === "VALUE_NOT_IN_CONVENTION" && !!suggestedValue;
+  const showMemberEmail =
+    !canFix && action.type === "VALUE_NOT_IN_CONVENTION" && !!suggestedValue;
+
+  async function handleAddNow() {
+    if (!suggestedValue) return;
+    setAdding(true);
+    try {
+      const r = await fetch(`${COORD_API_BASE}/api/v1/projects/${projectId}/conventions/suggest-value`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ fieldLabel, suggestedValue, reason, sourceFile: originalFilename }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || data?.added !== true) {
+        throw new Error(data?.error || "Could not add value");
+      }
+      setAdded(true);
+      // Refresh convention so the chip dropdowns include the new value.
+      // Generated query key is the URL path itself (see generated/api.ts).
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/conventions`] });
+    } catch (e) {
+      toast({
+        title: "Could not add value",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  const adminName = helpContact?.userFullName || "team admin";
+  const adminEmail = helpContact?.userEmail || "";
+  const emailSubject = `BIMLog — Convention update needed for ${projectName}`;
+  const emailBody =
+    `Hi ${adminName},\n\n` +
+    `I uploaded ${originalFilename} to the Coordination Hub and BIMLog detected ` +
+    `that the value "${suggestedValue}" is not in the allowed list for the ${fieldLabel} field. ` +
+    `Please add it to the Convention Builder so the file can be correctly named.\n\n` +
+    `Project: ${projectName}\n` +
+    `File: ${originalFilename}`;
+
+  function handlePrepareEmail() {
+    const url = `mailto:${encodeURIComponent(adminEmail)}` +
+      `?subject=${encodeURIComponent(emailSubject)}` +
+      `&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = url;
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(`${emailSubject}\n\n${emailBody}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Copy failed", description: "Clipboard not available", variant: "destructive" });
+    }
+  }
 
   if (canFix) {
     return (
       <div style={{
-        marginTop: 6, maxWidth: 220,
+        marginTop: 6, maxWidth: 240,
         padding: "6px 8px", borderRadius: 5,
-        background: "#EFF6FF", border: "1px solid #BFDBFE",
-        color: "#1E3A8A", fontSize: 10, lineHeight: 1.4,
+        background: added ? "#ECFDF5" : "#EFF6FF",
+        border: `1px solid ${added ? "#A7F3D0" : "#BFDBFE"}`,
+        color: added ? "#065F46" : "#1E3A8A",
+        fontSize: 10, lineHeight: 1.4,
       }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 5 }}>
-          <Wrench style={{ width: 11, height: 11, flexShrink: 0, marginTop: 1 }} />
-          <span>{action.text}</span>
+          {added
+            ? <CheckCircle2 style={{ width: 11, height: 11, flexShrink: 0, marginTop: 1 }} />
+            : <Wrench style={{ width: 11, height: 11, flexShrink: 0, marginTop: 1 }} />}
+          <span>
+            {added
+              ? `'${suggestedValue}' added to ${fieldLabel} — re-analyze to update this file.`
+              : action.text}
+          </span>
         </div>
-        {showFixLink && (
-          <Link
-            href={`/projects/${projectId}/convention`}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 3,
-              marginTop: 4, fontSize: 10, fontWeight: 700,
-              color: "#1D4ED8", textDecoration: "none",
-            }}
-          >
-            Fix in Convention Builder <ArrowRight style={{ width: 10, height: 10 }} />
-          </Link>
+        {!added && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 5, alignItems: "center" }}>
+            {showFixLink && (
+              <Link
+                href={`/projects/${projectId}/convention`}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  fontSize: 10, fontWeight: 700,
+                  color: "#1D4ED8", textDecoration: "none",
+                }}
+              >
+                Fix in Convention Builder <ArrowRight style={{ width: 10, height: 10 }} />
+              </Link>
+            )}
+            {showAddNow && (
+              <button
+                type="button"
+                onClick={handleAddNow}
+                disabled={adding}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  padding: "3px 8px", borderRadius: 4,
+                  background: "#1D4ED8", color: "white", border: "none",
+                  fontSize: 10, fontWeight: 700, cursor: adding ? "default" : "pointer",
+                  opacity: adding ? 0.6 : 1,
+                }}
+              >
+                {adding
+                  ? <Loader2 style={{ width: 10, height: 10 }} className="animate-spin" />
+                  : <Plus style={{ width: 10, height: 10 }} />}
+                Add '{suggestedValue}' now
+              </button>
+            )}
+          </div>
         )}
       </div>
     );
@@ -756,7 +877,7 @@ function ActionBanner({
   );
   return (
     <div style={{
-      marginTop: 6, maxWidth: 220,
+      marginTop: 6, maxWidth: 240,
       padding: "6px 8px", borderRadius: 5,
       background: "#FEF9C3", border: "1px solid #FDE68A",
       color: "#854D0E", fontSize: 10, lineHeight: 1.4,
@@ -776,6 +897,41 @@ function ActionBanner({
               </a>
             </>
           )}
+        </div>
+      )}
+      {showMemberEmail && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+          <button
+            type="button"
+            onClick={handlePrepareEmail}
+            disabled={!adminEmail}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 3,
+              padding: "3px 8px", borderRadius: 4,
+              background: "#854D0E", color: "white", border: "none",
+              fontSize: 10, fontWeight: 700,
+              cursor: adminEmail ? "pointer" : "not-allowed",
+              opacity: adminEmail ? 1 : 0.5,
+            }}
+          >
+            <Mail style={{ width: 10, height: 10 }} />
+            Prepare email to admin
+          </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 3,
+              padding: "3px 8px", borderRadius: 4,
+              background: "white", color: "#854D0E", border: "1px solid #FDE68A",
+              fontSize: 10, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            {copied
+              ? <CheckCircle2 style={{ width: 10, height: 10 }} />
+              : <Copy style={{ width: 10, height: 10 }} />}
+            {copied ? "Copied" : "Copy message"}
+          </button>
         </div>
       )}
     </div>
