@@ -322,7 +322,9 @@ router.post(
       if (sev && sevReason) warningDetailParts.push(`severe: ${sevReason}`);
       if (warningAcknowledged) warningDetailParts.push("user_acknowledged_severe_warning");
 
-      const inserted = await db.insert(coordinationIntakeEventsTable).values({
+      let inserted: { id: number }[];
+      try {
+        inserted = await db.insert(coordinationIntakeEventsTable).values({
         projectId,
         uploaderId: req.user!.userId,
         uploaderCompany,
@@ -345,7 +347,16 @@ router.post(
         destinationAction: userAction === "rejected" ? "pending" : destinationAction,
         conventionId: conventionId ?? null,
         conventionSnapshot: conventionSnapshot ? JSON.stringify(conventionSnapshot) : null,
-      }).returning({ id: coordinationIntakeEventsTable.id });
+        }).returning({ id: coordinationIntakeEventsTable.id });
+      } catch (insertErr) {
+        console.error("[coordination/confirm] insert into coordination_intake_events FAILED", {
+          projectId, userId: req.user!.userId, originalFilename: cached.originalFilename,
+          error: insertErr instanceof Error ? insertErr.message : String(insertErr),
+          stack: insertErr instanceof Error ? insertErr.stack : undefined,
+        });
+        res.status(500).json({ error: `Failed to log intake event: ${insertErr instanceof Error ? insertErr.message : "unknown"}` });
+        return;
+      }
 
       const eventId = inserted[0].id;
 

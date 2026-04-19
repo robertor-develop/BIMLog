@@ -1,0 +1,39 @@
+DATABASE RULE — MANDATORY — READ THIS FIRST EVERY SESSION
+You are working with TWO separate databases: development and production. Never run migrations against production without confirming with me first. State clearly which DB you are targeting before every schema or migration operation. Test in dev first, then apply to production as a separate explicit step.
+
+Stop. Do not add features. Do not redesign anything. Fix only the issues listed below in order. Show exact code diffs for each fix before moving to the next.
+ISSUE 1 — Convention Builder completion flow
+After a convention is successfully saved, do not return to the wizard start screen. Show a completion screen with: a green confirmation header "Convention Saved — Version X", a summary showing separator, number of fields, discipline count, doc type count. Then show four action buttons: Continue Editing Convention, Add More Evidence and Re-run Discovery, Go to Coordination Hub, Go to Name Generator. This screen should be the default state when convention.isActive is true and the user has just saved. No user should ever be dumped back to the wizard start after a successful save.
+ISSUE 2 — Double field value warning and Project Code suggestion
+In the Convention Builder, after any field value is entered, run a live duplicate-value check across all fields. If two fields share the same value in their first allowed value, show a yellow inline warning: "Warning: [Field A] and [Field B] both start with [value] — this will produce duplicate segments in your file names." Also: when the Project Code field is being set up, pre-suggest the actual project code from the project record (the projectCode column from the projects table for this projectId). The user can override it but at least they see their real project code as the default suggestion.
+ISSUE 3 — Convention editing must work for admin only
+The Continue Editing Convention button in the Convention Status page must open the full convention editor with all fields editable: field labels, allowed values, separator, all of it. Only users with isAdmin true on this project can access this. Non-admins see the convention as read-only. Verify this button currently navigates correctly and the editor opens with all existing data populated.
+ISSUE 4 — Coordination Hub Recent Intake persistence
+The GET /api/v1/projects/:projectId/coordination/events endpoint must return rows from coordination_intake_events ordered by createdAt descending. Verify the confirm endpoint is actually inserting rows into the production DB and not silently failing. Add a console.error log if the insert fails. Then verify the events GET reads from the same DB. If rows exist in dev but not production that means the confirm write is hitting dev — fix it.
+ISSUE 5 — Clear download state after rename confirmation
+After the user clicks Confirm and Download, and the file download is triggered, replace the review panel with a success state showing: a green checkmark, the text "File renamed and downloaded", the final filename in monospace, and two buttons: "Process Another File" which resets to upload state, and "View in Recent Intake" which scrolls to the queue. The user must never be left wondering what happened after confirming.
+ISSUE 6 — Connect Coordination Hub confirms to the Files module
+When a file is confirmed in Coordination Hub with userAction accepted or manually_corrected, create a corresponding record in the existing documents or files tracking table that Analytics reads from. Use the finalFilename, projectId, uploaderId, fileType, and timestamp. This makes Coordination Hub intake visible in Analytics, Files tab history, and Activity Log. Do not break existing Files tab upload logic — just add the write after a successful confirm.
+ISSUE 7 — Auto-populate Directory from project members
+In the Directory tab, instead of showing only manually added contacts, query projectMembersTable joined with usersTable and companiesTable for this projectId. Show each member as a contact card with name, company, role, and email. Manually added contacts (if any) continue to appear below under a separate "Additional Contacts" section. The data is already in the DB — it just is not being queried.
+ISSUE 8 — Activity Log must capture all meaningful events
+The activity log must record all of the following events, not just file uploads: convention created, convention updated, Coordination Hub file intake started, Coordination Hub file confirmed with accepted or manually corrected, Coordination Hub file rejected, convention version change. Each event must include: event type, user, company, timestamp, and a short description. The immutable audit trail badge is a core product promise — it cannot have blind spots.
+ISSUE 9 — Files tab declaration selector UX
+Replace the red popup blocker "Declaration required" with an inline selector shown directly above the upload zone. The four options (Created, Modified, Reference, Supporting) appear as pill buttons. One is selected by default (Created). The user can change it before uploading but is not blocked by a popup. The upload zone is active as soon as a declaration type is selected or defaults to Created.
+ISSUE 10 — First-visit onboarding overlay
+On first project visit for any user (tracked per userId plus projectId in localStorage), show a dismissable overlay modal explaining the workflow in five steps: 1 Set up your naming convention in Convention Builder. 2 Use Coordination Hub to intake files from all trades — BIMLog reads and renames them automatically. 3 Check Analytics for compliance and file health. 4 Use Files for manual file name validation. 5 Use Reports for PDF exports and compliance reports. Include a checkbox "Don't show this again" and a Close button. Store the dismissed state in localStorage keyed by userId plus projectId.
+After all ten fixes, provide only this block:
+BIMLog FIX PASS — READY
+Convention Builder completion screen implemented: yes/no
+Duplicate field value warning implemented: yes/no
+Project Code pre-suggests actual project code: yes/no
+Convention editing works for admin only: yes/no
+Coordination Hub Recent Intake persists across navigation: yes/no
+Clear download success state shown after confirm: yes/no
+Coordination Hub confirms feed into Analytics and Files: yes/no
+Directory auto-populates from project members: yes/no
+Activity Log captures all ten event types: yes/no
+Files tab declaration is inline not popup blocker: yes/no
+Onboarding overlay implemented: yes/no
+Exact files changed: list them all.
+Do only this. Nothing else.

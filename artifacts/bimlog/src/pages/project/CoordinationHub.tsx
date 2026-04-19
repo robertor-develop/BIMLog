@@ -147,7 +147,9 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
   const [editing, setEditing] = useState<string | null>(null);
   const [warningAck, setWarningAck] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [successInfo, setSuccessInfo] = useState<{ filename: string; mode: "downloaded" | "queued_sync" } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recentRef = useRef<HTMLDivElement>(null);
 
   const isActive = !!(convention?.isActive && (convention.fields?.length ?? 0) > 0);
   const fields = useMemo(
@@ -160,6 +162,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
     setOverrides({});
     setEditing(null);
     setWarningAck(false);
+    setSuccessInfo(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -231,11 +234,13 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
         a.href = url; a.download = filename;
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
-        toast({ title: "Downloaded", description: filename });
-      } else {
-        toast({ title: "Queued for sync", description: filename });
       }
-      reset();
+      setIntakeResult(null);
+      setOverrides({});
+      setEditing(null);
+      setWarningAck(false);
+      setSuccessInfo({ filename, mode: destinationAction });
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
       toast({ title: "Confirm failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
     }
@@ -325,8 +330,52 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
         </div>
       )}
 
+      {/* SUCCESS CARD — replaces upload zone after a successful confirm */}
+      {isActive && successInfo && (
+        <div style={{
+          marginTop: 16, padding: "20px 22px", borderRadius: 10,
+          background: "#F0FDF4", border: "1px solid #BBF7D0",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <CheckCircle2 style={{ width: 22, height: 22, color: "#16A34A" }} />
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#14532D" }}>
+              {successInfo.mode === "downloaded" ? "File renamed and downloaded" : "File renamed and queued for sync"}
+            </div>
+          </div>
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "#14532D",
+            background: "white", border: "1px solid #BBF7D0", borderRadius: 6,
+            padding: "8px 12px", marginBottom: 14, wordBreak: "break-all",
+          }}>{successInfo.filename}</div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={reset}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "9px 16px", borderRadius: 6, fontSize: 12, fontWeight: 700,
+                background: "#16A34A", color: "white", border: "none", cursor: "pointer",
+              }}
+            >
+              <Upload style={{ width: 13, height: 13 }} />
+              Process Another File
+            </button>
+            <button
+              onClick={() => recentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "9px 16px", borderRadius: 6, fontSize: 12, fontWeight: 700,
+                background: "white", color: "#16A34A", border: "1.5px solid #BBF7D0", cursor: "pointer",
+              }}
+            >
+              <Inbox style={{ width: 13, height: 13 }} />
+              View in Recent Intake
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ZONE B — Upload / Review */}
-      {isActive && !intakeResult && (
+      {isActive && !intakeResult && !successInfo && (
         <div
           onDragOver={e => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
@@ -389,7 +438,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
       )}
 
       {/* ZONE C — Recent events */}
-      <div style={{ marginTop: 28 }}>
+      <div ref={recentRef} style={{ marginTop: 28, scrollMarginTop: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
           Recent Intake
         </div>
