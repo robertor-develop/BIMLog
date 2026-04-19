@@ -1,0 +1,341 @@
+# REPLIT INSTRUCTION — COORDINATION HUB PHASE 1
+**Project: BIMLog v1.9**
+**Date: April 2026**
+
+---
+
+## CRITICAL RULES — READ BEFORE TOUCHING ANYTHING
+
+- Do NOT redesign or refactor any existing module outside this scope.
+- Do NOT use mock data, preview data, or temporary databases. Everything runs against live production DB and live API only.
+- Do NOT introduce new AI libraries. Anthropic is already installed and configured — use it.
+- Do NOT introduce new file parsing libraries. `pdf-parse`, `multer`, and `xlsx` are already in `artifacts/api-server/`.
+- Do NOT create a parallel convention system. The existing convention from `GET /api/v1/projects/:projectId/conventions` is the source of truth.
+- If anything is unclear, stop and ask — do not improvise.
+- After each step, show exact file diffs in `// BEFORE ... // AFTER` format.
+
+---
+
+## WHAT WE ARE BUILDING
+
+A new top-level project module called **Coordination Hub**.
+
+This is BIMLog's market-entry product: the coordinator-controlled intake space where all project participants upload their files and BIMLog automatically reads, understands, and renames them according to the active naming convention — acting as a smart AI middleware.
+
+**The flow is:**
+1. Any project member uploads a file
+2. BIMLog reads the filename + extracts document text/content (PDF, DOCX, XLSX)
+3. BIMLog uses the active naming convention + project context + document content together
+4. Claude (AI) proposes the corrected compliant filename automatically
+5. If normal confidence → user confirms
+6. If severe ambiguity / conflict → escalate with strong red warning, let user decide
+7. User confirms (or manually corrects within allowed convention values only)
+8. Everything is logged to the database
+9. User downloads the renamed file or queues it for sync
+
+---
+
+## STEP 1 — NEW DATABASE TABLE
+
+Add this table to the Drizzle schema in `lib/db/src/schema/`.
+
+Create a new file: `lib/db/src/schema/coordination_intake_events.ts`
+
+```typescript
+import { pgTable, serial, integer, text, timestamp, real, boolean } from "drizzle-orm/pg-core";
+
+export const coordinationIntakeEventsTable = pgTable("coordination_intake_events", {
+  id:                    serial("id").primaryKey(),
+  projectId:             integer("project_id").notNull(),
+  uploaderId:            integer("uploader_id").notNull(),
+  uploaderCompany:       text("uploader_company"),
+  originalFilename:      text("original_filename").notNull(),
+  proposedFilename:      text("proposed_filename"),
+  finalFilename:         text("final_filename"),
+  fileType:              text("file_type"),            // pdf, docx, xlsx, dwg, other
+  fileSizeBytes:         integer("file_size_bytes"),
+  detectedDiscipline:    text("detected_discipline"),
+  detectedDocType:       text("detected_doc_type"),
+  detectedLevel:         text("detected_level"),
+  detectedOriginator:    text("detected_originator"),
+  aiConfidence:          text("ai_confidence"),        // high | medium | low
+  aiSummary:             text("ai_summary"),           // 2-3 sentence summary of document content
+  aiExtractedKeywords:   text("ai_extracted_keywords"),// JSON array as text
+  warningsTriggered:     boolean("warnings_triggered").default(false),
+  warningDetail:         text("warning_detail"),
+  userAction:            text("user_action"),          // accepted | manually_corrected | rejected
+  manualFieldsChanged:   text("manual_fields_changed"),// JSON: which fields the user changed
+  destinationAction:     text("destination_action"),   // downloaded | queued_sync | pending
+  conventionId:          integer("convention_id"),
+  conventionSnapshot:    text("convention_snapshot"),  // JSON: separator + fields at time of intake
+  createdAt:             timestamp("created_at").defaultNow().notNull(),
+});
+```
+
+Export it from the schema index. Run the migration so the table exists in production DB.
+
+---
+
+## STEP 2 — NEW API ROUTE FILE
+
+Create: `artifacts/api-server/src/routes/coordination.ts`
+
+This file exposes two endpoints:
+
+### `GET /projects/:projectId/coordination/events`
+Returns recent intake events for a project (for the queue/history view).
+
+### `POST /projects/:projectId/coordination/intake`
+Accepts a file upload, runs AI analysis, returns the proposed filename + confidence + warnings.
+Does NOT yet write to DB — that happens on confirm (Step 2b).
+
+### `POST /projects/:projectId/coordination/confirm`
+Receives the user's final decision (accepted proposal / manual correction / rejected).
+Writes the full log record to `coordination_intake_events`.
+Returns the final renamed file as a download OR marks it as queued.
+
+**Implementation specifics — copy exactly from `artifacts/api-server/src/routes/conventions.ts`:**
+
+- Use the same `multer` setup: `multer({ storage: multer.memoryStorage(), limits: { fileSize: 50MB } })`
+- Accept file types: `pdf`, `docx`, `xlsx`, `sample` (generic), `dwg` (parse name only — cannot extract text)
+- For PDF: use `pdf-parse` exactly as in conventions.ts
+- For DOCX: use `mammoth` if available, otherwise parse filename only
+- For XLSX: use `xlsx` exactly as in conventions.ts
+- Use Anthropic at: `process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY`, `baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL`, model: `claude-sonnet-4-6`
+
+**The AI prompt for intake must include:**
+1. Original filename
+2. Extracted document text (if available, first 3000 chars)
+3. The active naming convention: separator + all fields + all allowed values per field
+4. Project name and project code (from DB lookup by projectId)
+5. Instruction: propose the corrected filename field by field, return confidence per field, flag severe conflicts
+
+**AI response must return JSON:**
+```json
+{
+  "proposedFields": [
+    { "fieldLabel": "string", "proposedValue": "string", "confidence": "high|medium|low", "reasoning": "string" }
+  ],
+  "proposedFilename": "string",
+  "overallConfidence": "high|medium|low",
+  "severe": true|false,
+  "severeReason": "string or null",
+  "aiSummary": "2-3 sentence summary of what this document appears to be",
+  "detectedDiscipline": "string or null",
+  "detectedDocType": "string or null",
+  "detectedLevel": "string or null",
+  "detectedOriginator": "string or null",
+  "keywords": ["array", "of", "strings"]
+}
+```
+
+**Register this route in the main router** exactly like conventions is registered — do not skip this.
+
+---
+
+## STEP 3 — ADD NAVIGATION ENTRY
+
+File: `artifacts/bimlog/src/components/layout/ProjectSidebar.tsx`
+
+In the `NAV_ITEMS` array, add this item **as the first item in the "Project" section** (before `analytics`):
+
+```typescript
+import { GitMerge } from "lucide-react"; // add to existing imports
+```
+
+```typescript
+{ id: "coordination", label: "Coordination Hub", icon: GitMerge, section: "Project" },
+```
+
+Place it first in the Project section. This is the entry point. It is not in Tools. It is not buried. It is first.
+
+---
+
+## STEP 4 — ADD ROUTING IN PROJECTDETAIL
+
+File: `artifacts/bimlog/src/pages/ProjectDetail.tsx`
+
+Add import:
+```typescript
+import { CoordinationHub } from "./project/CoordinationHub";
+```
+
+Add tab case alongside the existing ones:
+```typescript
+{tab === "coordination" && <CoordinationHub projectId={projectId} canWrite={canWrite} />}
+```
+
+---
+
+## STEP 5 — BUILD THE COORDINATIONHUB COMPONENT
+
+Create: `artifacts/bimlog/src/pages/project/CoordinationHub.tsx`
+
+This is a single React component. It has three visual zones:
+
+### ZONE A — HEADER STRIP (always visible)
+Shows:
+- Title: "Coordination Hub"
+- Active convention summary: separator chip + field chips with colors (reuse the chip color system from `NameGenerator.tsx` — same `CHIP_COLORS` array, same chip style)
+- If no active convention: warning badge "No active convention — go to Convention Builder" with link to `/projects/:id/convention`
+- Convention data: fetch using `useGetConvention(projectId)` — this hook already exists in `@workspace/api-client-react`
+
+### ZONE B — UPLOAD / INTAKE AREA
+A clean drag-and-drop upload zone at the top of the main content area.
+
+- Drag-and-drop or click-to-browse
+- Accepts: PDF, DOCX, XLSX, DWG, and common construction file types
+- On file selected: immediately call `POST /api/v1/projects/:projectId/coordination/intake` with the file as multipart form data
+- While analyzing: show a loading state with "BIMLog is reading your document…"
+- On response: transition to the REVIEW PANEL (see below)
+
+**Do NOT let user upload if no active convention exists.** Show a blocking message instead.
+
+### ZONE C — INTAKE QUEUE
+Below the upload zone, show the recent intake events from `GET /api/v1/projects/:projectId/coordination/events`.
+
+Show each event as a row:
+- Original filename (strikethrough style, muted)
+- Arrow →
+- Final filename (bold, colored by confidence: green=high, yellow=medium, red=low/severe)
+- User action badge: "Auto-accepted" | "Manually corrected" | "Rejected"
+- Uploader name + company
+- Timestamp
+
+---
+
+## STEP 6 — THE REVIEW PANEL (most important UI)
+
+When the AI analysis returns, show a full-width review panel that slides in or replaces the upload zone.
+
+This panel shows:
+
+### A — ORIGINAL vs PROPOSED
+```
+ORIGINAL:   MEP-COR-PLN-001.pdf
+PROPOSED:   [chip:PRJ123] - [chip:MEP] - [chip:00] - [chip:DWG] - [chip:S1] - [chip:P01]
+            full string: PRJ123-MEP-00-DWG-S1-P01
+```
+
+Each proposed field value is shown as a color-coded chip (same system as NameGenerator).
+Below each chip: the field label in small uppercase text.
+Below that: the AI reasoning in tiny muted text.
+Chips with `confidence: low` are shown with a yellow/orange border and a ⚠ icon.
+
+### B — SEVERE WARNING STATE
+If `severe: true`:
+- The entire panel gets a red left border
+- Red banner at top: "⚠ BIMLog detected a serious conflict or ambiguity — review carefully before confirming"
+- Show `severeReason` text
+- The confirm button is disabled until user explicitly checks a checkbox: "I have reviewed the warning and confirm this is correct"
+- This confirmation checkbox and all related actions are logged
+
+### C — MANUAL CORRECTION (if needed)
+Under each chip, a small "Edit" link.
+When clicked: opens a searchable dropdown (reuse the exact `SearchableSelect` logic from `NameGenerator.tsx`) showing only the allowed values for that field from the active convention.
+User can only select from allowed values — no free-form text allowed.
+Changed fields are highlighted with an orange border.
+
+### D — AI DOCUMENT SUMMARY
+Below the field chips:
+- "What BIMLog understood" section
+- Shows `aiSummary` text
+- Shows detected: discipline, doc type, level, originator if available
+- Shows `keywords` as small chips
+
+### E — ACTION BUTTONS
+- Primary: "Confirm & Download" — finalizes the name, calls `/confirm`, triggers file download with the new name
+- Secondary: "Queue for Sync" — finalizes the name, calls `/confirm` with `destinationAction: queued_sync`, does not download
+- Ghost: "Reject" — calls `/confirm` with `userAction: rejected`, logs it, returns to upload state
+
+---
+
+## STEP 7 — WIRE API CLIENT
+
+In `lib/api-client-react` (or wherever the existing hooks like `useGetConvention` are defined):
+
+Add the following hooks/functions:
+- `useCoordinationIntake(projectId)` — POST to `/projects/:projectId/coordination/intake`
+- `useCoordinationConfirm(projectId)` — POST to `/projects/:projectId/coordination/confirm`
+- `useCoordinationEvents(projectId)` — GET `/projects/:projectId/coordination/events`
+
+Follow the exact same pattern as the existing hooks. Do not invent a different pattern.
+
+---
+
+## STEP 8 — DO NOT TOUCH
+
+Do not modify:
+- `ConventionBuilder.tsx`
+- `NameGenerator.tsx`
+- `FilesTab.tsx`
+- Any existing route in `conventions.ts` other than importing from it
+- Any existing DB table
+- The auth middleware
+- The existing convention logic
+
+You may READ from these files to reuse patterns. You may IMPORT from them. Do not modify them.
+
+---
+
+## STEP 9 — VALIDATION CHECKLIST
+
+After implementation, confirm each of these by showing the actual code path:
+
+| # | Check | Expected |
+|---|-------|----------|
+| 1 | Navigation entry | "Coordination Hub" appears first in Project section of sidebar |
+| 2 | Route | `/projects/:id/coordination` renders `CoordinationHub` component |
+| 3 | Convention load | `useGetConvention` fetches from `GET /api/v1/projects/:projectId/conventions` |
+| 4 | No convention guard | Upload blocked + message shown if `convention.isActive === false` |
+| 5 | File upload | `POST /api/v1/projects/:projectId/coordination/intake` accepts multipart file |
+| 6 | PDF extraction | `pdf-parse` used for PDF files |
+| 7 | AI call | Anthropic `claude-sonnet-4-6` called with filename + content + convention + project context |
+| 8 | Proposed name | Returns field-by-field proposal with confidence per field |
+| 9 | Chip display | Each field shown as color-coded chip with label + reasoning |
+| 10 | Severe warning | Red border + checkbox gate when `severe: true` |
+| 11 | Manual correction | Searchable dropdown constrained to `field.allowedValues` only |
+| 12 | Confirm → log | `coordination_intake_events` row written with all fields populated |
+| 13 | Download | File served with corrected filename as Content-Disposition attachment |
+| 14 | Queue | `destinationAction: queued_sync` logged, no download triggered |
+| 15 | Events list | Recent events shown in queue below upload zone |
+
+---
+
+## STEP 10 — FINAL OUTPUT FORMAT
+
+At the end of the implementation, provide only this block:
+
+```
+COORDINATION HUB PHASE 1 — READY
+
+New top-level Coordination Hub module added:             yes/no
+AI uses filename + content + convention + project ctx:   yes/no
+Auto-proposed compliant rename implemented:              yes/no
+Field-by-field chip display with confidence:             yes/no
+Severe warning escalation with checkbox gate:            yes/no
+Manual correction constrained to allowed values only:    yes/no
+Confirm writes full log to coordination_intake_events:   yes/no
+Download with corrected filename implemented:            yes/no
+Queue action logged with queued_sync status:             yes/no
+Recent events queue visible below upload zone:           yes/no
+Existing modules untouched:                              yes/no
+
+Root cause this solves:
+  Subcontractors and trades upload files with wrong or chaotic names.
+  BIMLog intercepts, understands, and normalizes every file automatically
+  before it enters the coordination workflow.
+
+Exact files created:
+  - lib/db/src/schema/coordination_intake_events.ts
+  - artifacts/api-server/src/routes/coordination.ts
+  - artifacts/bimlog/src/pages/project/CoordinationHub.tsx
+
+Exact files modified:
+  - artifacts/bimlog/src/components/layout/ProjectSidebar.tsx
+  - artifacts/bimlog/src/pages/ProjectDetail.tsx
+  - lib/api-client-react/src/... (new hooks)
+  - lib/db/src/schema/index.ts (export new table)
+```
+
+Do only this. Nothing more than what is defined here.
