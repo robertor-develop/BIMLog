@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { Users } from "lucide-react";
+import { Users, UserCheck, UserPlus } from "lucide-react";
 
 interface DirectoryEntry {
   id: number; fullName: string; email: string; companyName?: string;
   role: string; bimlogStatus?: string; notes?: string;
+}
+
+interface MemberEntry {
+  id: number; userId: number; userFullName: string; userEmail: string;
+  userCompanyName?: string; role: string; joinedAt?: string;
 }
 
 const API = "/api/v1";
@@ -15,9 +20,9 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const { token } = useAuthStore();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
+  const [members, setMembers] = useState<MemberEntry[]>([]);
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ full_name: "", email: "", company_name: "", role: "", notes: "" });
@@ -30,12 +35,16 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const load = async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API}/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) setEntries(await r.json());
-    } finally { setLoading(false); setLoaded(true); }
+      const [rMembers, rDir] = await Promise.all([
+        fetch(`${API}/projects/${projectId}/members`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      if (rMembers.ok) setMembers(await rMembers.json());
+      if (rDir.ok) setEntries(await rDir.json());
+    } finally { setLoading(false); }
   };
 
-  if (!loaded && !loading) { load(); }
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [projectId]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +76,17 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
     await load();
   };
 
-  const filtered = entries.filter(e =>
+  // Exclude any "additional contact" already linked to a member (by email)
+  const memberEmails = new Set(members.map(m => m.userEmail.toLowerCase()));
+  const additionalContacts = entries.filter(e => !memberEmails.has((e.email || "").toLowerCase()));
+
+  const filteredMembers = members.filter(m =>
+    !search ||
+    m.userFullName.toLowerCase().includes(search.toLowerCase()) ||
+    m.userEmail.toLowerCase().includes(search.toLowerCase()) ||
+    (m.userCompanyName ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredContacts = additionalContacts.filter(e =>
     !search ||
     e.fullName.toLowerCase().includes(search.toLowerCase()) ||
     e.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -75,9 +94,14 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   );
 
   const statusBadge = (s?: string) => {
-    if (s === "active") return <span className="badge badge-success">BIMLog Active</span>;
+    if (s === "active") return <span className="badge badge-success">{t("BIMLog Active", "BIMLog Activo")}</span>;
     if (s === "invited") return <span className="badge badge-info">{t("Invited", "Invitado")}</span>;
     return <span className="badge badge-outline">{t("External", "Externo")}</span>;
+  };
+
+  const roleBadge = (role: string) => {
+    if (role === "admin" || role === "project_admin") return <span className="badge badge-warning">{t("Admin", "Admin")}</span>;
+    return <span className="badge badge-outline">{role}</span>;
   };
 
   return (
@@ -85,16 +109,19 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Project Directory", "Directorio del Proyecto")}</h2>
-          <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>{t("All stakeholders and contacts on this project", "Todos los interesados y contactos del proyecto")}</p>
+          <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
+            {t("Project members are auto-populated from the team. Add external stakeholders below.", "Los miembros del proyecto se completan automáticamente. Agrega interesados externos abajo.")}
+          </p>
         </div>
         {canWrite && (
           <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-            + {t("Add Contact", "Agregar Contacto")}
+            <UserPlus size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+            {t("Add External Contact", "Agregar Contacto Externo")}
           </button>
         )}
       </div>
 
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 16 }}>
         <input
           className="input" placeholder={t("Search by name, email or company…", "Buscar por nombre, correo o empresa…")}
           value={search} onChange={e => setSearch(e.target.value)}
@@ -104,7 +131,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
       {showForm && (
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("Add Contact", "Agregar Contacto")}</h3>
+          <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("Add External Contact", "Agregar Contacto Externo")}</h3>
           {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
           <form onSubmit={save} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
@@ -137,58 +164,117 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
       {loading && <div className="text-muted">{t("Loading…", "Cargando…")}</div>}
 
-      {!loading && filtered.length === 0 && (
-        <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Users size={40} color="#D1D5DB" /></div>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t("No contacts yet", "Sin contactos aún")}</div>
-          <div style={{ fontSize: 13 }}>{t("Add stakeholders to your project directory", "Agrega interesados al directorio del proyecto")}</div>
+      {/* SECTION 1 — Project Members (auto-populated) */}
+      {!loading && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <UserCheck size={16} color="#16A34A" />
+            <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0, color: "#111827" }}>
+              {t("Project Members", "Miembros del Proyecto")} ({filteredMembers.length})
+            </h3>
+            <span style={{ fontSize: 11, color: "#6B7280" }}>
+              · {t("Auto-populated from project team", "Auto-completado desde el equipo")}
+            </span>
+          </div>
+          {filteredMembers.length === 0 ? (
+            <div style={{ textAlign: "center", padding: 32, color: "#9CA3AF", border: "1px dashed #E5E7EB", borderRadius: 8 }}>
+              <Users size={28} color="#D1D5DB" style={{ marginBottom: 8 }} />
+              <div style={{ fontSize: 13 }}>{t("No project members yet", "Sin miembros del proyecto aún")}</div>
+            </div>
+          ) : (
+            <div className="card">
+              <table className="table" style={{ width: "100%" }}>
+                <thead>
+                  <tr>
+                    <th>{t("Name", "Nombre")}</th>
+                    <th>{t("Company", "Empresa")}</th>
+                    <th>{t("Role", "Rol")}</th>
+                    <th>{t("Status", "Estado")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMembers.map(m => (
+                    <tr key={`m-${m.id}`}>
+                      <td>
+                        <div style={{ fontWeight: 500 }}>{m.userFullName}</div>
+                        <div style={{ fontSize: 12, color: "#6B7280" }}>{m.userEmail}</div>
+                      </td>
+                      <td>{m.userCompanyName || "—"}</td>
+                      <td>{roleBadge(m.role)}</td>
+                      <td><span className="badge badge-success">{t("BIMLog Active", "BIMLog Activo")}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
-        <div className="card">
-          <table className="table" style={{ width: "100%" }}>
-            <thead>
-              <tr>
-                <th>{t("Name", "Nombre")}</th>
-                <th>{t("Company", "Empresa")}</th>
-                <th>{t("Role", "Rol")}</th>
-                <th>{t("Status", "Estado")}</th>
-                <th style={{ textAlign: "right" }}>{t("Actions", "Acciones")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(entry => (
-                <tr key={entry.id}>
-                  <td>
-                    <div style={{ fontWeight: 500 }}>{entry.fullName}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280" }}>{entry.email}</div>
-                  </td>
-                  <td>{entry.companyName || "—"}</td>
-                  <td>{entry.role}</td>
-                  <td>{statusBadge(entry.bimlogStatus)}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                      {canWrite && entry.bimlogStatus === "none" && (
-                        <button
-                          className="btn btn-sm btn-outline"
-                          onClick={() => invite(entry.id)}
-                          disabled={inviting === entry.id}
-                        >
-                          {inviting === entry.id ? t("Inviting…", "Invitando…") : t("Invite", "Invitar")}
-                        </button>
-                      )}
-                      {canWrite && (
-                        <button className="btn btn-sm btn-danger-outline" onClick={() => remove(entry.id)}>
-                          {t("Remove", "Eliminar")}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* SECTION 2 — Additional Contacts */}
+      {!loading && (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <Users size={16} color="#6B7280" />
+            <h3 style={{ fontWeight: 700, fontSize: 14, margin: 0, color: "#111827" }}>
+              {t("Additional Contacts", "Contactos Adicionales")} ({filteredContacts.length})
+            </h3>
+            <span style={{ fontSize: 11, color: "#6B7280" }}>
+              · {t("External stakeholders not yet on BIMLog", "Interesados externos aún no en BIMLog")}
+            </span>
+          </div>
+          {filteredContacts.length === 0 ? (
+            <div style={{ textAlign: "center", padding: 32, color: "#9CA3AF", border: "1px dashed #E5E7EB", borderRadius: 8 }}>
+              <UserPlus size={28} color="#D1D5DB" style={{ marginBottom: 8 }} />
+              <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{t("No additional contacts", "Sin contactos adicionales")}</div>
+              <div style={{ fontSize: 12 }}>{t("Add external stakeholders to track them on this project", "Agrega interesados externos para registrarlos en el proyecto")}</div>
+            </div>
+          ) : (
+            <div className="card">
+              <table className="table" style={{ width: "100%" }}>
+                <thead>
+                  <tr>
+                    <th>{t("Name", "Nombre")}</th>
+                    <th>{t("Company", "Empresa")}</th>
+                    <th>{t("Role", "Rol")}</th>
+                    <th>{t("Status", "Estado")}</th>
+                    <th style={{ textAlign: "right" }}>{t("Actions", "Acciones")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredContacts.map(entry => (
+                    <tr key={`c-${entry.id}`}>
+                      <td>
+                        <div style={{ fontWeight: 500 }}>{entry.fullName}</div>
+                        <div style={{ fontSize: 12, color: "#6B7280" }}>{entry.email}</div>
+                      </td>
+                      <td>{entry.companyName || "—"}</td>
+                      <td>{entry.role}</td>
+                      <td>{statusBadge(entry.bimlogStatus)}</td>
+                      <td style={{ textAlign: "right" }}>
+                        <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                          {canWrite && (entry.bimlogStatus === "none" || !entry.bimlogStatus) && (
+                            <button
+                              className="btn btn-sm btn-outline"
+                              onClick={() => invite(entry.id)}
+                              disabled={inviting === entry.id}
+                            >
+                              {inviting === entry.id ? t("Inviting…", "Invitando…") : t("Invite", "Invitar")}
+                            </button>
+                          )}
+                          {canWrite && (
+                            <button className="btn btn-sm btn-danger-outline" onClick={() => remove(entry.id)}>
+                              {t("Remove", "Eliminar")}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

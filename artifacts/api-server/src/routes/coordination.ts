@@ -7,7 +7,10 @@ import {
   projectsTable,
   usersTable,
   companiesTable,
+  activityLogTable,
+  filesTable,
 } from "@workspace/db/schema";
+import { createHash } from "crypto";
 import { eq, desc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import Anthropic from "@anthropic-ai/sdk";
@@ -359,6 +362,59 @@ router.post(
       }
 
       const eventId = inserted[0].id;
+
+      // ── Activity log (Issue 8) ───────────────────────────────────────────
+      try {
+        const actionLabel = userAction === "rejected"
+          ? "coordination_rejected"
+          : userAction === "manually_corrected"
+            ? "coordination_corrected"
+            : "coordination_accepted";
+        const detailsParts = [
+          `Coordination Hub: ${userAction}`,
+          finalFilename ? `→ ${finalFilename}` : "",
+          destinationAction === "downloaded" ? "(downloaded)" : destinationAction === "queued_sync" ? "(queued for sync)" : "",
+          sev ? `[severe warning${warningAcknowledged ? " acknowledged" : ""}]` : "",
+        ].filter(Boolean).join(" ");
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: actionLabel,
+          entityType: "coordination_intake",
+          entityId: eventId,
+          fileNameBefore: cached.originalFilename,
+          fileNameAfter: userAction === "rejected" ? null : finalFilename || null,
+          details: detailsParts,
+        });
+      } catch (logErr) {
+        console.error("[coordination/confirm] activity_log insert FAILED", logErr);
+      }
+
+      // ── Files table write (Issue 6): when queued for sync, create a file row ─
+      if (userAction !== "rejected" && destinationAction === "queued_sync" && finalFilename) {
+        try {
+          const hash = createHash("sha256").update(cached.buffer).digest("hex");
+          await db.insert(filesTable).values({
+            projectId,
+            fileName: finalFilename,
+            fileSize: cached.fileSize,
+            fileType: cached.fileType,
+            status: "compliant",
+            uploadedById: req.user!.userId,
+            fileHash: hash,
+            fileSizeBytes: cached.fileSize,
+            documentRelationship: "created",
+            documentRelationshipDeclaredAt: new Date(),
+            source: "coordination-hub",
+            isCompliant: true,
+            conventionVersion: conventionId ? String(conventionId) : null,
+          });
+        } catch (fileErr) {
+          console.error("[coordination/confirm] files insert FAILED", fileErr);
+        }
+      }
 
       // Download path: serve the file inline
       if (userAction !== "rejected" && destinationAction === "downloaded" && finalFilename) {

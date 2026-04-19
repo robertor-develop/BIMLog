@@ -1897,9 +1897,14 @@ function Step1({ state, setState, lang, readOnly, onUnlock }: { state: WizardSta
   const [editName, setEditName] = useState("");
   const [editCode, setEditCode] = useState("");
 
+  const proposedCode = (newCode.trim().toUpperCase() || newName.trim().slice(0, 3).toUpperCase());
+  const duplicateCode = !!proposedCode && state.companies.some(c => c.code === proposedCode);
+  const duplicateName = !!newName.trim() && state.companies.some(c => c.name.toLowerCase() === newName.trim().toLowerCase());
+
   const handleAdd = () => {
     if (!newName.trim()) return;
-    const code = newCode.trim().toUpperCase() || newName.trim().slice(0, 3).toUpperCase();
+    if (duplicateCode || duplicateName) return;
+    const code = proposedCode;
     setState(s => ({ ...s, companies: [...s.companies, { id: uid(), name: newName.trim(), code }] }));
     setNewName(""); setNewCode("");
   };
@@ -1954,11 +1959,45 @@ function Step1({ state, setState, lang, readOnly, onUnlock }: { state: WizardSta
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <Input value={newName} onChange={e => { setNewName(e.target.value); if (!newCode) setNewCode(e.target.value.slice(0,3).toUpperCase()); }} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder={w("Company Name", "Nombre de Empresa", lang)} style={{ flex: 2, fontSize: 13 }} />
           <Input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase().slice(0,8))} onKeyDown={e => e.key === "Enter" && handleAdd()} placeholder={w("Code (auto)", "Código (auto)", lang)} style={{ flex: 1, fontSize: 13, fontFamily: "var(--font-mono)" }} />
-          <Button onClick={handleAdd} size="sm" style={{ gap: 5, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 13, height: 13 }} />{w("Add", "Agregar", lang)}</Button>
+          <Button onClick={handleAdd} size="sm" disabled={duplicateCode || duplicateName} style={{ gap: 5, fontSize: 12, flexShrink: 0 }}><Plus style={{ width: 13, height: 13 }} />{w("Add", "Agregar", lang)}</Button>
         </div>
+        {(duplicateCode || duplicateName) && (
+          <div style={{
+            display: "flex", alignItems: "flex-start", gap: 6,
+            padding: "6px 10px", marginBottom: 8,
+            background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 5,
+            fontSize: 11, color: "#991B1B",
+          }}>
+            <AlertTriangle style={{ width: 12, height: 12, marginTop: 1, flexShrink: 0 }} />
+            <span>
+              {duplicateCode && duplicateName
+                ? w(`A company with name "${newName.trim()}" and code "${proposedCode}" already exists.`, `Ya existe una empresa con el nombre "${newName.trim()}" y código "${proposedCode}".`, lang)
+                : duplicateCode
+                  ? w(`Code "${proposedCode}" is already used. Each company must have a unique code.`, `El código "${proposedCode}" ya está en uso. Cada empresa debe tener un código único.`, lang)
+                  : w(`A company named "${newName.trim()}" already exists.`, `Ya existe una empresa con el nombre "${newName.trim()}".`, lang)}
+            </span>
+          </div>
+        )}
         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
           {w("Each person will be identified by their company code in every file name. Codes can be up to 8 characters.", "Cada persona se identificará por el código de su empresa. Los códigos pueden tener hasta 8 caracteres.", lang)}
         </div>
+        {state.companies.length === 1 && (
+          <div style={{
+            display: "flex", alignItems: "flex-start", gap: 6,
+            marginTop: 8, padding: "8px 10px",
+            background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 5,
+            fontSize: 11, color: "#1E40AF",
+          }}>
+            <Info style={{ width: 12, height: 12, marginTop: 1, flexShrink: 0 }} />
+            <span>
+              {w(
+                `Tip: "${state.companies[0].code}" will be used as the Project Code by default. Add more companies if multiple originators will submit files.`,
+                `Sugerencia: "${state.companies[0].code}" se usará como Código de Proyecto por defecto. Agrega más empresas si varios originadores enviarán archivos.`,
+                lang,
+              )}
+            </span>
+          </div>
+        )}
 
         {/* Edit modal overlay */}
         {editId && (
@@ -4214,7 +4253,7 @@ function ConventionStatusPanel({ projectId, token, flowPhase, enteredFromDiscove
 }
 
 // ─── main export ──────────────────────────────────────────────────────────────
-export function ConventionBuilder({ projectId }: { projectId: number }) {
+export function ConventionBuilder({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
   const { lang } = useI18n();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
@@ -4500,6 +4539,69 @@ export function ConventionBuilder({ projectId }: { projectId: number }) {
       setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
     }
   }, [setupStatus, flowPhase]);
+
+  // ── ADMIN-ONLY GUARD (Issue 3): non-admins see read-only summary ──────────
+  if (!isAdmin) {
+    return (
+      <div style={{ padding: "20px 28px 60px", maxWidth: 900, margin: "0 auto" }}>
+        <div style={{
+          background: "#FEF3C7", border: "1px solid #FDE68A", borderLeft: "4px solid #D97706",
+          borderRadius: 8, padding: "14px 18px", marginBottom: 20,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <Lock style={{ width: 18, height: 18, color: "#D97706", flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#78350F" }}>
+              {w("Convention Builder is admin-only", "Convention Builder es solo para administradores", lang)}
+            </div>
+            <div style={{ fontSize: 12, color: "#92400E", marginTop: 4 }}>
+              {w(
+                "Only project administrators can create or edit the naming convention. You can still view the active convention below.",
+                "Solo los administradores del proyecto pueden crear o editar la convención. Puedes ver la convención activa abajo.",
+                lang,
+              )}
+            </div>
+          </div>
+        </div>
+        {convention && setupStatus === "completed" && convention.fields && convention.fields.length > 0 ? (
+          <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
+              {w("Active Convention", "Convención Activa", lang)} · {w("separator", "separador", lang)}{" "}
+              <code style={{ fontFamily: "var(--font-mono)", background: "#F3F4F6", padding: "1px 6px", borderRadius: 3 }}>{convention.separator}</code>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {[...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder).map((f: any, i: number) => {
+                const colors = [
+                  { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE" },
+                  { bg: "#F0FDF4", color: "#166534", border: "#BBF7D0" },
+                  { bg: "#FFF7ED", color: "#9A3412", border: "#FED7AA" },
+                  { bg: "#FEF9C3", color: "#854D0E", border: "#FDE68A" },
+                  { bg: "#F5F3FF", color: "#5B21B6", border: "#DDD6FE" },
+                  { bg: "#FCE7F3", color: "#9D174D", border: "#FBCFE8" },
+                ];
+                const c = colors[i % colors.length];
+                return (
+                  <span key={f.id} style={{
+                    display: "inline-flex", alignItems: "center", padding: "4px 10px",
+                    borderRadius: 5, background: c.bg, color: c.color, border: `1px solid ${c.border}`,
+                    fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
+                  }}>{f.label}</span>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: "white", border: "1px dashed hsl(var(--border))", borderRadius: 10, padding: "30px 20px", textAlign: "center", color: "#6B7280" }}>
+            <ShieldAlert style={{ width: 28, height: 28, color: "#D1D5DB", margin: "0 auto 10px" }} />
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{w("No active convention yet", "Sin convención activa aún", lang)}</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>
+              {w("A project administrator must set up the naming convention.", "Un administrador del proyecto debe configurar la convención.", lang)}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // ── Checkpoint — re-entry for projects with an accepted convention ─────────
   if (flowPhase === "checkpoint") {

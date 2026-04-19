@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -205,6 +205,32 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       .from(namingFieldsTable)
       .where(eq(namingFieldsTable.conventionId, conventionId))
       .orderBy(namingFieldsTable.fieldOrder);
+
+    // Activity log (Issue 8) — record convention save / completion
+    try {
+      const wasNew = existing.length === 0;
+      const becameComplete = currentStatus !== "completed" && newSetupStatus === "completed";
+      const action = wasNew ? "convention_created" : becameComplete ? "convention_completed" : "convention_updated";
+      const detail = becameComplete
+        ? `Naming convention activated with ${body.fields?.length ?? 0} fields`
+        : wasNew
+          ? `Naming convention created (status: ${newSetupStatus})`
+          : `Naming convention updated (status: ${newSetupStatus})`;
+      if (req.user) {
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: req.user.userId,
+          userFullName: req.user.fullName,
+          userCompanyName: req.user.companyName,
+          actionType: action,
+          entityType: "convention",
+          entityId: conventionId,
+          details: detail,
+        });
+      }
+    } catch (logErr) {
+      console.error("[conventions/upsert] activity_log insert FAILED", logErr);
+    }
 
     res.json({
       id: convention[0].id,

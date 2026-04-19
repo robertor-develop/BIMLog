@@ -798,7 +798,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [success, setSuccess] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
-  const [documentRelationship, setDocumentRelationship] = useState<string>("");
+  const [documentRelationship, setDocumentRelationship] = useState<string>("created");
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
@@ -869,17 +869,14 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setSuccess(false);
     setFileName(file.name);
     setFileRef(file);
-    if (!documentRelationship) {
-      toast({ title: "Declaration required", description: "Please select a declaration type — Created, Modified, Reference, or Supporting — before uploading.", variant: "destructive" });
-      return;
-    }
+    const declaration = documentRelationship || "created";
     setIsUploading(true);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const formData = new FormData();
       formData.append("file", file);
       formData.append("fileName", file.name);
-      formData.append("documentRelationship", documentRelationship);
+      formData.append("documentRelationship", declaration);
       const resp = await fetch(`/api/v1/projects/${projectId}/files`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -956,37 +953,40 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
-      {/* Document Relationship Declaration */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
-          Document Relationship <span style={{ color: "#BE123C" }}>*</span>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-          {([
-            { value: "created", label: "Created", desc: "New document originating from this project", color: "#16A34A", bg: "#F0FDF4", border: "#86EFAC" },
-            { value: "modified", label: "Modified", desc: "Revised version of an existing document", color: "#D97706", bg: "#FFFBEB", border: "#FCD34D" },
-            { value: "reference", label: "Reference", desc: "External or standard document cited", color: "#2563EB", bg: "#EFF6FF", border: "#93C5FD" },
-            { value: "supporting", label: "Supporting", desc: "Supplementary or background material", color: "#7C3AED", bg: "#F5F3FF", border: "#C4B5FD" },
-          ] as const).map(opt => (
+      {/* Document Relationship Declaration — inline pills */}
+      <div style={{ marginBottom: 10, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          Declaration:
+        </span>
+        {([
+          { value: "created", label: "Created", color: "#16A34A", bg: "#F0FDF4", border: "#86EFAC" },
+          { value: "modified", label: "Modified", color: "#D97706", bg: "#FFFBEB", border: "#FCD34D" },
+          { value: "reference", label: "Reference", color: "#2563EB", bg: "#EFF6FF", border: "#93C5FD" },
+          { value: "supporting", label: "Supporting", color: "#7C3AED", bg: "#F5F3FF", border: "#C4B5FD" },
+        ] as const).map(opt => {
+          const sel = documentRelationship === opt.value;
+          return (
             <button
               key={opt.value}
-              onClick={() => setDocumentRelationship(documentRelationship === opt.value ? "" : opt.value)}
+              type="button"
+              onClick={() => setDocumentRelationship(opt.value)}
               style={{
-                padding: "8px 6px",
-                borderRadius: 8,
-                border: `2px solid ${documentRelationship === opt.value ? opt.color : opt.border}`,
-                background: documentRelationship === opt.value ? opt.bg : "white",
+                padding: "5px 12px",
+                borderRadius: 999,
+                border: `1.5px solid ${sel ? opt.color : opt.border}`,
+                background: sel ? opt.bg : "white",
+                color: opt.color,
                 cursor: "pointer",
-                textAlign: "left",
+                fontSize: 11,
+                fontWeight: 700,
                 transition: "border-color 0.15s, background 0.15s",
-                outline: "none",
               }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 700, color: opt.color, marginBottom: 2 }}>{opt.label}</div>
-              <div style={{ fontSize: 10, color: "#6B7280", lineHeight: 1.3 }}>{opt.desc}</div>
-            </button>
-          ))}
-        </div>
+            >{opt.label}</button>
+          );
+        })}
+        <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginLeft: "auto" }}>
+          Defaults to Created — change before uploading if different.
+        </span>
       </div>
 
       {/* Drag and drop zone */}
