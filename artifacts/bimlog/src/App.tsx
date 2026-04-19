@@ -14,6 +14,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { ProjectDetail } from "@/pages/ProjectDetail";
 import { SetupGuide } from "@/pages/SetupGuide";
 import { Profile } from "@/pages/Profile";
+import { CompanyProfile } from "@/pages/CompanyProfile";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
@@ -67,6 +68,9 @@ function Router() {
       <Route path="/setup-guide" component={SetupGuide} />
       <Route path="/profile">
         {() => <ProtectedRoute component={Profile} />}
+      </Route>
+      <Route path="/settings/company-profile">
+        {() => <ProtectedRoute component={CompanyProfile} />}
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}

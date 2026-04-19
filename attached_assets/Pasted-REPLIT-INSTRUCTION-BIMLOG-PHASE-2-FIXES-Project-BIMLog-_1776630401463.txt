@@ -1,0 +1,65 @@
+REPLIT INSTRUCTION — BIMLOG PHASE 2 FIXES
+Project: BIMLog v1.9 — April 2026 — 8 fixes in one pass
+CRITICAL RULES: Do NOT redesign or refactor anything outside this scope. Do NOT use mock data. Everything runs against live production DB and live API only. Do NOT touch ConventionBuilder.tsx, NameGenerator.tsx, existing DB table columns, auth middleware, or any existing API route logic outside what is listed here. Show exact file diffs in // BEFORE ... // AFTER format after each fix. If anything is unclear, stop and ask — do not improvise.
+
+FIX 1 — ROLE ARCHITECTURE
+1A — Find the table that defines project member roles (likely project_members). Change the role enum/column to support exactly these 6 values: project_admin, convention_manager, discipline_lead, member, sub_trade, read_only. Migration: map old roles as follows — "Project Admin" to project_admin, "Company Lead" to discipline_lead, "Drafter" to member, "Read Only" to read_only. Do not drop existing data.
+1B — Create artifacts/bimlog/src/lib/roles.ts with a ROLES constant object. Each role has: label, description, color (Tailwind bg+text classes), canTransfer boolean. project_admin: "Full control. Can transfer admin to another member. Only one per project." canTransfer true. convention_manager: "Can create and edit naming conventions. Delegated by Project Admin." canTransfer false. discipline_lead: "Leads a specific discipline. Can approve files in their discipline." canTransfer false. member: "Standard team member. Can upload and use Coordination Hub." canTransfer false. sub_trade: "External subcontractor. Can only upload via Coordination Hub. Cannot view other modules." canTransfer false. read_only: "Can view files and reports. Cannot upload or edit." canTransfer false.
+1C — In TeamTab.tsx: replace hardcoded role labels with values from roles.ts, show role badge colors, show role descriptions as tooltip, add all 6 roles to the invite/edit member modal. Add a "Transfer Admin" button next to any member when the current user is project_admin — on confirm, that member becomes project_admin and current user becomes discipline_lead. Add "Grant Convention Manager" option in member actions dropdown available to project_admin and convention_manager users.
+1D — In ConventionBuilder.tsx, at the very top before rendering anything, check if currentUserRole is project_admin or convention_manager. If not, render only this: a ShieldAlert icon with text "Convention Manager access required — Ask your Project Admin or Convention Manager to grant you access." Do not modify any other logic in this file.
+1E — In CoordinationHub.tsx, block the upload zone only for read_only role. sub_trade and member CAN upload. Show a read-only message if role is read_only.
+
+FIX 2 — COMPANY BRANDING AND LOGO UPLOAD
+2A — Create lib/db/src/schema/company_profiles.ts with table company_profiles: id serial PK, userId integer NOT NULL UNIQUE, companyName text, companyRole text, logoUrl text, website text, phone text, city text, country text, updatedAt timestamp defaultNow. Export from schema index. Run migration.
+2B — Create artifacts/api-server/src/routes/company-profile.ts with three routes. GET /users/me/company-profile returns current user's company profile. POST /users/me/company-profile upserts all text fields. POST /users/me/company-logo accepts multipart image upload max 2MB jpg/png/svg, stores as base64 in logoUrl column, returns the logoUrl. Register this route file in the main router exactly like other routes are registered.
+2C — Create artifacts/bimlog/src/pages/settings/CompanyProfile.tsx — a settings form with: company name text input, role/type dropdown (Owner, General Contractor, Architect, MEP Engineer, Civil Engineer, Structural Engineer, BIM Manager, Subcontractor, Other), website, phone, city, country text inputs. Logo upload zone: drag-and-drop or click, shows current logo if set, accepts jpg/png/svg max 2MB, shows preview immediately after selecting. Logo uploads immediately on file select via POST /users/me/company-logo — user does not need to click Save for the logo. Save button POSTs remaining fields to /users/me/company-profile. Add this page to wherever settings navigation lives, label "Company Profile".
+2D — In the top nav or sidebar header where the user avatar/name shows: if companyProfile.logoUrl exists, show it at 32x32px next to the user name. Fallback to current initials avatar if no logo set.
+
+FIX 3 — ADMIN INFO ON PROJECT DASHBOARD
+3A — In DashboardTab.tsx, add a compact card in the upper section — must be visible without scrolling — titled "Responsable del Proyecto". Pull the project_admin member from the project members list. Show: company logo from company_profiles at 40x40px + company name + admin full name + admin email + phone if available. If no logo, show initials in a colored circle. Below the admin info, list any members with role convention_manager with a small "Convention Manager" label next to each name.
+3B — Near the project title on the dashboard, show the active convention's Project Code field value as a small badge. Read it from the convention data already loaded on the page — do not add a new DB call for this. If no active convention exists, show nothing.
+
+FIX 4 — AI COORDINATION HUB FLOW REWRITE
+This fix is in CoordinationHub.tsx, review panel section only. Do not touch the upload zone, events queue, or API routes.
+Rule 1: The Confirm button is ALWAYS active and clickable. It is NEVER disabled. If severe is true, the button text changes to "Confirmar con advertencias" and the color is bg-yellow-500 text-white — but it is still clickable.
+Rule 2: When the AI analysis returns and the review panel appears, ALL field chips are immediately shown as open searchable dropdowns pre-filled with the AI proposed value. The user does not need to click "Edit" first. Reuse the exact SearchableSelect component from NameGenerator.tsx — same component, same logic, constrained to allowedValues only. No free-form text.
+Rule 3: Confidence is visual only and never blocks anything. high confidence field = green chip, no icon. medium = yellow chip with small warning icon. low = orange chip with warning icon, field pre-highlighted to draw attention. severe true = red left border on the entire panel + red banner at top showing severeReason text. None of these states disable any button or action.
+Rule 4: Remove the checkbox confirmation gate entirely. It no longer exists. If severe is true, log warningsTriggered: true automatically in the DB record — no user checkbox required.
+Rule 5: In the review panel header add a small text link: "¿Valores incorrectos? → Editar convención" — navigates to /projects/:projectId/convention in the same tab.
+
+FIX 5 — ANALYTICS: COORDINATION HUB FILES NOT APPEARING
+In artifacts/api-server/src/routes/coordination.ts, in the POST /confirm handler, after the existing write to coordination_intake_events, also insert a record into the files table (find the correct table — likely documents, files, or project_files). Insert: projectId from route params, filename = finalFilename from the confirm payload, uploadedBy = uploaderId, source = "coordination_hub", createdAt = now(). If the files table does not have a source column, add it as nullable text defaulting to null via a Drizzle migration — existing records keep null, coordination hub files get "coordination_hub". Confirm that the analytics endpoint reads from this same table so the new records appear automatically.
+
+FIX 6 — CONVENTION BUILDER PROJECT CODE SUGGESTION
+In ConventionBuilder.tsx, when the user adds a field and its label matches "Project Code", "Código de Proyecto", or "Proyecto" (case insensitive): fetch the current project's code value from GET /projects/:projectId — add the code field to that response if it is not already there. If a code value exists in the project, show a suggestion chip in the Allowed Values input area labeled "Sugerido: IBQ" (or whatever the actual value is). Clicking the chip adds that value to the allowed values list. The user can ignore it. This is UI-only and forces nothing.
+
+FIX 7 — SMART GUIDE ACTIONABLE TIPS
+In SmartGuide.tsx, add a nextStep string field to each tab's tip entry. At the bottom of the guide panel, after the tips list, add a section separated by a top border showing the nextStep text in small blue font labeled "Próximo paso:".
+Use these nextStep values exactly:
+coordination — Próximo paso: sube tu primer archivo de prueba para ver el análisis AI en acción.
+convention — Próximo paso: activa tu convención para que el Coordination Hub pueda analizar archivos.
+files — Próximo paso: confirma un archivo en Coordination Hub y aparecerá aquí automáticamente.
+analytics — Próximo paso: cuando tengas 5+ archivos confirmados, revisa los patrones de actividad.
+directory — Próximo paso: invita a tus subcontratistas con rol Sub-trade para que puedan subir archivos.
+team — Próximo paso: asigna un Convention Manager si quieres delegar la gestión de convenciones.
+reports — Próximo paso: genera tu primer reporte después de tener 10+ archivos confirmados.
+
+FIX 8 — FILES TAB EMPTY STATE
+In FilesTab.tsx, find the empty state shown when no files exist. Replace its content with: a FileStack icon, heading "No hay archivos aún", then this text: "Los archivos confirmados desde el Coordination Hub aparecen aquí automáticamente, ya con el nombre correcto según tu convención activa." Then a second line: "También puedes subir archivos directamente desde esta vista una vez que tengas una convención activa." Then a button "Ir a Coordination Hub" that calls onTabChange("coordination"). If the prop onTabChange does not exist in FilesTab, add it as optional: onTabChange?: (tab: string) => void, and wire it from ProjectDetail.tsx the same way other tab navigation callbacks are already wired.
+
+VALIDATION — after all 8 fixes confirm each one:
+6 roles exist in DB and show correctly in Team page with colors and descriptions. Transfer Admin button works. Convention Builder shows blocked message for non-authorized roles. Company Profile settings page works and logo uploads and previews. Logo appears in nav bar. Admin card visible on project dashboard without scrolling. Project code badge shows near project title. Confirm button in Coordination Hub is never disabled. All fields open as dropdowns on load. Severe state shows yellow button only, no checkbox. Convention Builder link appears in review panel. After confirming a file in Coordination Hub it appears in Analytics Recent Files. Project code suggestion chip appears in Convention Builder when adding a Project Code field. Every Smart Guide tab has a Próximo paso line. Files tab empty state shows explanation and Ir a Coordination Hub button.
+
+FINAL OUTPUT — after all fixes output only this block:
+BIMLOG PHASE 2 FIXES — COMPLETE
+FIX 1 — Role architecture: yes/no
+FIX 2 — Company branding + logo upload: yes/no
+FIX 3 — Admin info + project code on dashboard: yes/no
+FIX 4 — AI flow rewrite (never block, all fields open, yellow confirm): yes/no
+FIX 5 — Analytics shows Coordination Hub files: yes/no
+FIX 6 — Convention Builder project code suggestion: yes/no
+FIX 7 — Smart Guide actionable next steps per tab: yes/no
+FIX 8 — Files tab empty state with explanation + navigation: yes/no
+Exact files created: artifacts/bimlog/src/lib/roles.ts, artifacts/bimlog/src/pages/settings/CompanyProfile.tsx, artifacts/api-server/src/routes/company-profile.ts, lib/db/src/schema/company_profiles.ts
+Exact files modified: lib/db/src/schema/[members table], artifacts/bimlog/src/pages/project/TeamTab.tsx, artifacts/bimlog/src/pages/project/ConventionBuilder.tsx, artifacts/bimlog/src/pages/project/CoordinationHub.tsx, artifacts/bimlog/src/pages/project/DashboardTab.tsx, artifacts/bimlog/src/pages/project/FilesTab.tsx, artifacts/bimlog/src/components/layout/SmartGuide.tsx, artifacts/api-server/src/routes/coordination.ts, lib/db/src/schema/index.ts
+Do only this. Nothing more than what is defined here.

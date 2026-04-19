@@ -26,6 +26,7 @@ export function Navbar() {
   const isProjectPage = location.startsWith("/projects/");
   const isDashboard = location === "/dashboard";
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,13 @@ export function Navbar() {
       .then(data => {
         if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
         if (data.isSuperAdmin) setIsSuperAdmin(true);
+      })
+      .catch(() => {});
+    const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+    fetch(`${BASE}/api/v1/users/me/company-profile`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then((cp: { logoUrl?: string | null } | null) => {
+        if (cp?.logoUrl) setCompanyLogoUrl(cp.logoUrl);
       })
       .catch(() => {});
   }, [user?.id, token]);
@@ -138,6 +146,16 @@ export function Navbar() {
 
 
             <Link href="/profile" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
+              {companyLogoUrl && (
+                <div
+                  title="Company logo"
+                  style={{
+                    width: 26, height: 26, borderRadius: 4, flexShrink: 0,
+                    background: `url(${companyLogoUrl}) center/contain no-repeat #fff`,
+                    border: "1px solid hsl(var(--border))",
+                  }}
+                />
+              )}
               <div
                 style={{
                   width: 30, height: 30, borderRadius: "50%", flexShrink: 0,

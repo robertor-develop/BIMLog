@@ -392,8 +392,8 @@ router.post(
         console.error("[coordination/confirm] activity_log insert FAILED", logErr);
       }
 
-      // ── Files table write (Issue 6): when queued for sync, create a file row ─
-      if (userAction !== "rejected" && destinationAction === "queued_sync" && finalFilename) {
+      // ── Files table write (Fix 5): always insert on accepted/manually_corrected ──
+      if (userAction !== "rejected" && finalFilename) {
         try {
           const hash = createHash("sha256").update(cached.buffer).digest("hex");
           await db.insert(filesTable).values({
@@ -407,7 +407,7 @@ router.post(
             fileSizeBytes: cached.fileSize,
             documentRelationship: "created",
             documentRelationshipDeclaredAt: new Date(),
-            source: "coordination-hub",
+            source: "coordination_hub",
             isCompliant: true,
             conventionVersion: conventionId ? String(conventionId) : null,
           });

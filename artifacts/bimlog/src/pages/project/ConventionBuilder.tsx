@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
+import { useGetConvention, useUpsertConvention, useGetProject } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -3302,6 +3302,8 @@ function SmartSuggestInput({ value, onChange, fieldLabel, lang }: {
 function EditMode({ convention, onRunWizard, lang, projectId }: { convention: any; onRunWizard: () => void; lang: string; projectId: number; }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: project } = useGetProject(projectId);
+  const projectCode = (project as { code?: string } | undefined)?.code ?? "";
   const [fields, setFields] = useState(
     [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder)
       .map((f: any) => ({ ...f, values: (f.allowedValues || []).join(", ") }))
@@ -3386,12 +3388,36 @@ function EditMode({ convention, onRunWizard, lang, projectId }: { convention: an
               <div style={{ cursor: "grab", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}><GripVertical style={{ width: 14, height: 14 }} /></div>
               <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 5, background: c.bg, color: c.color, border: `1px solid ${c.border}`, fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{idx + 1}</span>
               <Input value={f.label} onChange={e => setFields(prev => prev.map((x, i) => i === idx ? { ...x, label: e.target.value } : x))} style={{ fontSize: 13 }} />
-              <SmartSuggestInput
-                value={f.values}
-                onChange={v => setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: v } : x))}
-                fieldLabel={f.label}
-                lang={lang}
-              />
+              <div>
+                <SmartSuggestInput
+                  value={f.values}
+                  onChange={v => setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: v } : x))}
+                  fieldLabel={f.label}
+                  lang={lang}
+                />
+                {/* Fix 6: project code suggestion chip */}
+                {projectCode && /project\s*code|^code$/i.test(f.label) && !f.values.split(",").map((s: string) => s.trim()).includes(projectCode) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const parts = f.values.split(",").map((s: string) => s.trim()).filter(Boolean);
+                      const next = [projectCode, ...parts].join(", ");
+                      setFields(prev => prev.map((x, i) => i === idx ? { ...x, values: next } : x));
+                    }}
+                    style={{
+                      marginTop: 4, display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "2px 8px", borderRadius: 999,
+                      background: "#EFF6FF", color: "#1D4ED8", border: "1px dashed #93C5FD",
+                      fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
+                      cursor: "pointer",
+                    }}
+                    title={w("Click to add this project's code as an allowed value", "Haz clic para agregar el código del proyecto como valor permitido", lang)}
+                  >
+                    <Plus style={{ width: 9, height: 9 }} />
+                    {w("Use project code", "Usar código de proyecto", lang)}: {projectCode}
+                  </button>
+                )}
+              </div>
               <button onClick={() => setFields(prev => prev.filter((_, i) => i !== idx))} style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 4 }} onMouseEnter={e => (e.currentTarget.style.color = "#DC2626")} onMouseLeave={e => (e.currentTarget.style.color = "hsl(var(--muted-foreground))")}>
                 <Trash2 style={{ width: 13, height: 13 }} />
               </button>
@@ -4318,7 +4344,9 @@ function ConventionStatusPanel({ projectId, token, flowPhase, enteredFromDiscove
 }
 
 // ─── main export ──────────────────────────────────────────────────────────────
-export function ConventionBuilder({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
+export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole }: { projectId: number; isAdmin?: boolean; currentUserRole?: string }) {
+  // Fix 1D: project_admin OR convention_manager can edit. `isAdmin` is now passed as canEdit.
+  void currentUserRole;
   const [, setLocationCB] = useLocation();
   const { lang } = useI18n();
   const { user } = useAuthStore();
@@ -4618,12 +4646,12 @@ export function ConventionBuilder({ projectId, isAdmin = false }: { projectId: n
           <Lock style={{ width: 18, height: 18, color: "#D97706", flexShrink: 0, marginTop: 2 }} />
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#78350F" }}>
-              {w("Convention Builder is admin-only", "Convention Builder es solo para administradores", lang)}
+              {w("Convention Builder requires Project Admin or Convention Manager", "Convention Builder requiere Administrador de Proyecto o Gerente de Convención", lang)}
             </div>
             <div style={{ fontSize: 12, color: "#92400E", marginTop: 4 }}>
               {w(
-                "Only project administrators can create or edit the naming convention. You can still view the active convention below.",
-                "Solo los administradores del proyecto pueden crear o editar la convención. Puedes ver la convención activa abajo.",
+                "Only the Project Admin and the Convention Manager (delegated by the admin) can create or edit the naming convention. You can still view the active convention below.",
+                "Solo el Administrador del Proyecto y el Gerente de Convención (delegado por el administrador) pueden crear o editar la convención. Puedes ver la convención activa abajo.",
                 lang,
               )}
             </div>

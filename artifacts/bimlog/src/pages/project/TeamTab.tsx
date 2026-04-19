@@ -6,8 +6,10 @@ import { useConfig } from "@/lib/config-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Plus, X, Trash2, Building2, Shield, Mail, Clock, UserCheck } from "lucide-react";
+import { Users, Plus, X, Trash2, Building2, Shield, Mail, Clock, UserCheck, ArrowRightLeft } from "lucide-react";
 import { format } from "date-fns";
+import { ROLES, ROLE_KEYS, getRole, type RoleKey } from "@/lib/roles";
+import { useAuthStore } from "@/store/auth";
 
 const AVATAR_COLORS = ["av-blue", "av-purple", "av-green", "av-orange", "av-teal", "av-red"];
 
@@ -19,9 +21,14 @@ function getAvatarColor(name: string): string {
 
 export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
   const { t } = useI18n();
-  const { getLabel, adminRoles } = useConfig();
+  const { adminRoles } = useConfig();
+  const { user: authUser } = useAuthStore();
   const { data: members, isLoading } = useListMembers(projectId);
   const [showAdd, setShowAdd] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+
+  const myMembership = (members ?? []).find(m => m.userId === authUser?.id);
+  const iAmAdmin = isAdmin && myMembership?.role === "project_admin";
 
   const byCompany = (members ?? []).reduce<Record<string, typeof members>>((acc, m) => {
     const co = m.userCompanyName || "Unknown";
@@ -44,12 +51,29 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
           </div>
         </div>
         {isAdmin && !showAdd && (
-          <Button size="sm" onClick={() => setShowAdd(true)} style={{ gap: 6, fontSize: 12 }}>
-            <Plus style={{ width: 13, height: 13 }} />
-            {t("team.add")}
-          </Button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {iAmAdmin && (members?.length ?? 0) > 1 && (
+              <Button variant="outline" size="sm" onClick={() => setShowTransfer(true)} style={{ gap: 6, fontSize: 12 }}>
+                <ArrowRightLeft style={{ width: 13, height: 13 }} />
+                Transfer Admin
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setShowAdd(true)} style={{ gap: 6, fontSize: 12 }}>
+              <Plus style={{ width: 13, height: 13 }} />
+              {t("team.add")}
+            </Button>
+          </div>
         )}
       </div>
+
+      {showTransfer && myMembership && (
+        <TransferAdminForm
+          projectId={projectId}
+          currentAdminMemberId={myMembership.id}
+          candidates={(members ?? []).filter(m => m.userId !== authUser?.id).map(m => ({ id: m.id, name: m.userFullName ?? m.userEmail ?? "Unknown", company: m.userCompanyName ?? "" }))}
+          onClose={() => setShowTransfer(false)}
+        />
+      )}
 
       {/* Add member form */}
       {showAdd && (
@@ -123,14 +147,25 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
                             {member.userEmail}
                           </td>
                           <td>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              {isAdminRole && (
-                                <Shield style={{ width: 11, height: 11, color: "#2563EB", flexShrink: 0 }} />
-                              )}
-                              <span className={`badge ${isAdminRole ? "badge-blue" : "badge-gray"}`}>
-                                {getLabel("member_role", member.role)}
-                              </span>
-                            </div>
+                            {(() => {
+                              const r = getRole(member.role);
+                              return (
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }} title={r?.description ?? member.role}>
+                                  {isAdminRole && (
+                                    <Shield style={{ width: 11, height: 11, color: r?.badgeText ?? "#2563EB", flexShrink: 0 }} />
+                                  )}
+                                  <span style={{
+                                    display: "inline-flex", alignItems: "center",
+                                    padding: "2px 8px", borderRadius: 999,
+                                    fontSize: 10, fontWeight: 700,
+                                    background: r?.badgeBg ?? "#F3F4F6",
+                                    color: r?.badgeText ?? "#374151",
+                                  }}>
+                                    {r?.label ?? member.role}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
                             {format(new Date(member.joinedAt), "MMM d, yyyy")}
@@ -192,22 +227,33 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
           <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
             Role permissions
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-            {[
-              { role: "project_admin", desc: "Full access — configure convention, manage team, all file operations" },
-              { role: "company_lead",  desc: "Manage own company members, upload and rename files" },
-              { role: "drafter",       desc: "Upload files using Name Generator, view all project content" },
-              { role: "read_only",     desc: "View all content and reports — no upload or edit permissions" },
-            ].map(item => (
-              <div key={item.role} style={{ padding: "8px 10px", background: "hsl(var(--card))", borderRadius: 6, border: "1px solid hsl(var(--border))" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#2563EB", marginBottom: 3, textTransform: "capitalize" }}>
-                  {item.role.replace("_", " ")}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+            {ROLE_KEYS.map(key => {
+              const r = ROLES[key];
+              return (
+                <div key={key} style={{ padding: "8px 10px", background: "hsl(var(--card))", borderRadius: 6, border: "1px solid hsl(var(--border))" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                    <span style={{
+                      width: 8, height: 8, borderRadius: "50%",
+                      background: r.badgeText,
+                    }} />
+                    <span style={{ fontSize: 10, fontWeight: 700, color: r.badgeText }}>
+                      {r.label}
+                    </span>
+                    {r.canTransfer && (
+                      <span style={{
+                        fontSize: 8, fontWeight: 700, padding: "1px 5px",
+                        background: "rgba(37,99,235,0.1)", color: "#1D4ED8",
+                        borderRadius: 3, marginLeft: "auto",
+                      }}>1 PER PROJECT</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", lineHeight: 1.4 }}>
+                    {r.description}
+                  </div>
                 </div>
-                <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", lineHeight: 1.4 }}>
-                  {item.desc}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -431,11 +477,8 @@ function RoleSelector({ projectId, member }: {
   projectId: number;
   member: { id: number; role: string; userFullName?: string };
 }) {
-  const { lang } = useI18n();
-  const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const roleOptions = getOptions("member_role");
   const [role, setRole] = useState(member.role);
 
   const { mutate } = useUpdateMember({
@@ -444,24 +487,96 @@ function RoleSelector({ projectId, member }: {
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/members`] });
         toast({ title: "Role updated" });
       },
+      onError: (e: unknown) => toast({ title: "Failed to update role", description: e instanceof Error ? e.message : "", variant: "destructive" }),
     },
   });
+
+  // Block selecting project_admin from this dropdown — admin transfer happens via the Transfer Admin button.
+  const selectable = ROLE_KEYS.filter(k => k !== "project_admin" || member.role === "project_admin");
 
   return (
     <select
       value={role}
+      disabled={member.role === "project_admin"}
+      title={member.role === "project_admin" ? "Use Transfer Admin to change the Project Admin." : undefined}
       onChange={e => {
-        setRole(e.target.value);
-        mutate({ projectId, memberId: member.id, data: { role: e.target.value } });
+        const v = e.target.value;
+        setRole(v);
+        mutate({ projectId, memberId: member.id, data: { role: v } });
       }}
-      style={{ height: 28, fontSize: 11, minWidth: 110, borderRadius: 5 }}
+      style={{ height: 28, fontSize: 11, minWidth: 130, borderRadius: 5 }}
     >
-      {roleOptions.map(opt => (
-        <option key={opt.value} value={opt.value}>
-          {lang === "es" ? opt.labelEs : opt.label}
+      {selectable.map(key => (
+        <option key={key} value={key}>
+          {ROLES[key].label}
         </option>
       ))}
     </select>
+  );
+}
+
+function TransferAdminForm({ projectId, currentAdminMemberId, candidates, onClose }: {
+  projectId: number;
+  currentAdminMemberId: number;
+  candidates: { id: number; name: string; company: string }[];
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [target, setTarget] = useState<number | null>(candidates[0]?.id ?? null);
+  const [busy, setBusy] = useState(false);
+  const { mutateAsync: updateMember } = useUpdateMember({});
+
+  const handleTransfer = async () => {
+    if (!target) return;
+    if (!confirm("Transfer Project Admin? You will be demoted to Discipline Lead. Only one admin can exist per project.")) return;
+    setBusy(true);
+    try {
+      // 1. Promote target to project_admin
+      await updateMember({ projectId, memberId: target, data: { role: "project_admin" } });
+      // 2. Demote self to discipline_lead
+      await updateMember({ projectId, memberId: currentAdminMemberId, data: { role: "discipline_lead" } });
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/members`] });
+      toast({ title: "Admin transferred", description: "The new admin now has full control of the project." });
+      onClose();
+    } catch (e) {
+      toast({ title: "Transfer failed", description: e instanceof Error ? e.message : "Unknown", variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="inline-form" style={{ marginBottom: 16, background: "#FFF7ED", border: "1px solid #FED7AA" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#9A3412", display: "flex", alignItems: "center", gap: 6 }}>
+          <ArrowRightLeft style={{ width: 14, height: 14 }} />
+          Transfer Project Admin
+        </div>
+        <button onClick={onClose} style={{ padding: 5, border: "none", background: "transparent", cursor: "pointer", color: "#9A3412" }}>
+          <X style={{ width: 13, height: 13 }} />
+        </button>
+      </div>
+      <div style={{ fontSize: 11, color: "#7C2D12", marginBottom: 10, lineHeight: 1.5 }}>
+        Only one Project Admin can exist per project. Choose the team member who will take over — you will be demoted to Discipline Lead. This action is logged.
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <select
+          value={target ?? ""}
+          onChange={e => setTarget(parseInt(e.target.value, 10))}
+          style={{ flex: 1, height: 36, fontSize: 12, borderRadius: 5 }}
+        >
+          {candidates.map(c => (
+            <option key={c.id} value={c.id}>
+              {c.name}{c.company ? ` — ${c.company}` : ""}
+            </option>
+          ))}
+        </select>
+        <Button variant="outline" size="sm" onClick={handleTransfer} disabled={busy || !target} style={{ minWidth: 110 }}>
+          {busy ? "Transferring…" : "Transfer Admin"}
+        </Button>
+      </div>
+    </div>
   );
 }
 

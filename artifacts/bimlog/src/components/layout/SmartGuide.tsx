@@ -3,14 +3,16 @@ import { HelpCircle, X } from "lucide-react";
 
 const STORAGE_KEY = "bimlog_guide_enabled";
 
-const TIPS: Record<string, { title: string; body: string }> = {
+const TIPS: Record<string, { title: string; body: string; nextStep?: string }> = {
   coordination: {
     title: "Coordination Hub",
     body: "You are in the Coordination Hub. Drop any file here — BIMLog reads it, understands the content, and proposes the correct name based on your active convention. Review the proposal, confirm or adjust, then download the renamed file. Everything is logged automatically.",
+    nextStep: "sube tu primer archivo de prueba para ver el análisis AI en acción.",
   },
   convention: {
     title: "Convention Builder",
     body: "You are in Convention Builder. Define your naming convention here — choose your separator, add your fields, and set the allowed values for each field. When done, save and activate. Only project admins can edit the convention. All other modules use this convention as their source of truth.",
+    nextStep: "activa tu convención para que el Coordination Hub pueda analizar archivos.",
   },
   generator: {
     title: "Name Generator",
@@ -19,10 +21,12 @@ const TIPS: Record<string, { title: string; body: string }> = {
   files: {
     title: "Files",
     body: "You are in Files. Upload a file here to check whether its existing name passes your active convention. This module validates names only — it does not rename or store files. Use Coordination Hub if you want BIMLog to rename the file for you.",
+    nextStep: "confirma un archivo en Coordination Hub y aparecerá aquí automáticamente.",
   },
   analytics: {
     title: "Analytics",
     body: "You are in Analytics. This dashboard shows your project naming compliance in real time. Files processed through Coordination Hub and Files both feed into these charts. No data here means no files have been processed yet.",
+    nextStep: "cuando tengas 5+ archivos confirmados, revisa los patrones de actividad.",
   },
   rfis: {
     title: "RFIs",
@@ -39,6 +43,7 @@ const TIPS: Record<string, { title: string; body: string }> = {
   reports: {
     title: "Reports",
     body: "You are in Reports. Generate PDF exports of your project data here — compliance reports, RFI logs, submittal status, meeting minutes, and more. All reports pull from live production data.",
+    nextStep: "genera tu primer reporte después de tener 10+ archivos confirmados.",
   },
   activity: {
     title: "Activity Log",
@@ -47,6 +52,12 @@ const TIPS: Record<string, { title: string; body: string }> = {
   directory: {
     title: "Project Directory",
     body: "You are in the Project Directory. All team members and stakeholders on this project appear here automatically from the project team. You can also add additional contacts manually.",
+    nextStep: "invita a tus subcontratistas con rol Sub-trade para que puedan subir archivos.",
+  },
+  team: {
+    title: "Team",
+    body: "You are in the Team page. Manage project members and their roles here. Each role controls what the user can do — see role descriptions on hover.",
+    nextStep: "asigna un Convention Manager si quieres delegar la gestión de convenciones.",
   },
   meetings: {
     title: "Meetings",
@@ -61,7 +72,7 @@ const TIPS: Record<string, { title: string; body: string }> = {
 const DEFAULT_TIP = {
   title: "Smart Guide",
   body: "Select a module from the sidebar to get started. Coordination Hub is the recommended starting point for new projects — it is where files come in and get normalized to your naming convention.",
-};
+} as { title: string; body: string; nextStep?: string };
 
 export function SmartGuide({ activeTab }: { activeTab: string }) {
   const [isOpen, setIsOpen] = useState<boolean>(() => {
@@ -137,6 +148,20 @@ export function SmartGuide({ activeTab }: { activeTab: string }) {
           <div style={{ padding: "12px 14px", fontSize: 12, color: "#374151", lineHeight: 1.55 }}>
             {tip.body}
           </div>
+          {tip.nextStep && (
+            <div
+              style={{
+                padding: "10px 14px",
+                fontSize: 11,
+                color: "#1D4ED8",
+                borderTop: "1px solid hsl(var(--border))",
+                background: "#F8FAFC",
+                lineHeight: 1.5,
+              }}
+            >
+              <span style={{ fontWeight: 700 }}>Próximo paso:</span> {tip.nextStep}
+            </div>
+          )}
           <div
             style={{
               padding: "8px 14px 10px",

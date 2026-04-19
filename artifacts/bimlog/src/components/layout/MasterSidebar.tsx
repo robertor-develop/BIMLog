@@ -33,6 +33,7 @@ export function MasterSidebar() {
   const [showTotalControl, setShowTotalControl] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
 
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -58,6 +59,13 @@ export function MasterSidebar() {
         if (d.isSuperAdmin === true) { setShowAdminPanel(true); setShowTotalControl(true); }
         if (d.avatarUrl) setAvatarUrl(d.avatarUrl);
         if (d.companyName) setCompanyName(d.companyName);
+      })
+      .catch(() => {});
+    fetch(`${API_BASE}/api/v1/users/me/company-profile`, { headers })
+      .then(r => r.ok ? r.json() : null)
+      .then((cp: { logoUrl?: string | null; companyName?: string | null } | null) => {
+        if (cp?.logoUrl) setCompanyLogoUrl(cp.logoUrl);
+        if (cp?.companyName) setCompanyName(prev => prev || cp.companyName!);
       })
       .catch(() => {});
     fetch(`${API_BASE}/api/v1/projects`, { headers })
@@ -363,8 +371,20 @@ export function MasterSidebar() {
               <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {user.fullName}
               </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)" }}>
-                {companyName || user.companyName || ""}
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
+                {companyLogoUrl && (
+                  <span
+                    aria-hidden
+                    style={{
+                      display: "inline-block", width: 12, height: 12, borderRadius: 2,
+                      background: `url(${companyLogoUrl}) center/contain no-repeat #fff`,
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {companyName || user.companyName || ""}
+                </span>
               </div>
             </div>
             <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>Profile →</div>

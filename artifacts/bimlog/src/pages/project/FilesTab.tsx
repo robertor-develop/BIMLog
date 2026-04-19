@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
+import { Button } from "@/components/ui/button";
 import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
 
@@ -765,10 +766,17 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
             <div className="empty-icon">
               <FileText style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} />
             </div>
-            <div className="empty-title">{t("files.empty")}</div>
-            <div className="empty-desc">
-              Upload a file to test naming convention validation. Files that don't match the active convention will be rejected automatically.
+            <div className="empty-title">No files yet</div>
+            <div className="empty-desc" style={{ maxWidth: 460, margin: "0 auto" }}>
+              Files appear here automatically once you confirm them in the <strong>Coordination Hub</strong>.
+              The Hub reads each upload, proposes the correct name from your active convention, and writes the result here with full provenance.
             </div>
+            <Link href={`/projects/${projectId}/coordination`}>
+              <Button size="sm" style={{ marginTop: 14, gap: 6 }}>
+                <Inbox style={{ width: 13, height: 13 }} />
+                Go to Coordination Hub
+              </Button>
+            </Link>
           </div>
         )
       )}

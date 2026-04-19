@@ -20,9 +20,10 @@ import { ChangeOrdersTab } from "./project/ChangeOrdersTab";
 import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
 import { CoordinationHub } from "./project/CoordinationHub";
-import { ChevronLeft, HelpCircle, Link2 } from "lucide-react";
+import { ChevronLeft, HelpCircle, Link2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SmartGuide } from "@/components/layout/SmartGuide";
+import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 
 export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab");
@@ -41,6 +42,10 @@ export function ProjectDetail() {
   const memberRole = currentMember?.role || "";
   const isAdmin = adminRoles.includes(memberRole);
   const canWrite = writeRoles.includes(memberRole);
+  const canEditConvention = memberRole === "project_admin" || memberRole === "convention_manager";
+
+  const adminMember = members?.find(m => m.role === "project_admin");
+  const myRoleInfo = getRole(memberRole);
 
   if (isLoading) {
     return (
@@ -96,14 +101,43 @@ export function ProjectDetail() {
           </div>
 
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{
-              display: "inline-flex", alignItems: "center",
-              height: 30, padding: "0 12px",
-              fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
-              background: "rgba(245,158,11,0.12)", color: "#D97706",
-              border: "1px solid rgba(245,158,11,0.3)",
-              borderRadius: 999,
-            }}>{project.code}</span>
+            {/* Project Code badge (Fix 3B) */}
+            <span
+              title="Project Code (used in file naming)"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                height: 30, padding: "0 12px",
+                fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
+                background: "rgba(245,158,11,0.12)", color: "#D97706",
+                border: "1px solid rgba(245,158,11,0.3)",
+                borderRadius: 999,
+              }}>
+              <span style={{ fontWeight: 600, opacity: 0.7, fontFamily: "inherit" }}>CODE</span>
+              {project.code}
+            </span>
+
+            {/* Admin / Role card (Fix 3A) */}
+            {adminMember && (
+              <span
+                title={
+                  myRoleInfo
+                    ? `Your role: ${myRoleInfo.label} — ${myRoleInfo.description}\nProject Admin: ${adminMember.userFullName}`
+                    : `Project Admin: ${adminMember.userFullName}`
+                }
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  height: 30, padding: "0 10px",
+                  fontSize: 11, fontWeight: 700,
+                  background: myRoleInfo?.badgeBg ?? "#F3F4F6",
+                  color: myRoleInfo?.badgeText ?? "#374151",
+                  border: `1px solid ${myRoleInfo?.badgeBg ?? "#E5E7EB"}`,
+                  borderRadius: 999,
+                }}>
+                <Shield style={{ width: 12, height: 12 }} />
+                {myRoleInfo?.label ?? "Member"}
+                <span style={{ opacity: 0.7, fontWeight: 500 }}>· admin: {adminMember.userFullName}</span>
+              </span>
+            )}
             <Link href={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${tab}`)}`}>
               <button style={{
                 display: "inline-flex", alignItems: "center", gap: 5,
@@ -131,7 +165,7 @@ export function ProjectDetail() {
           {tab === "activity"       && <ActivityTab       projectId={projectId} />}
           {tab === "team"           && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
           {tab === "generator"      && <NameGenerator     projectId={projectId} onGoToConvention={() => setLocation(`/projects/${projectId}/convention`)} />}
-          {tab === "convention"     && <ConventionBuilder projectId={projectId} isAdmin={isAdmin} />}
+          {tab === "convention"     && <ConventionBuilder projectId={projectId} isAdmin={canEditConvention} currentUserRole={memberRole as RoleKey} />}
           {tab === "reports"        && <ReportsTab        projectId={projectId} isAdmin={isAdmin} />}
           {tab === "integrations"   && <IntegrationsTab   projectId={projectId} />}
           {tab === "directory"      && <DirectoryTab      projectId={projectId} canWrite={canWrite} />}

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import {
-  Upload, AlertTriangle, CheckCircle2, X, Edit2, Loader2, FileText,
+  Upload, AlertTriangle, CheckCircle2, X, Loader2, FileText,
   Download, Inbox, ChevronDown, ArrowRight, ShieldAlert,
 } from "lucide-react";
 import {
@@ -145,7 +145,6 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
   const [intakeResult, setIntakeResult] = useState<CoordinationIntakeResponse | null>(null);
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [editing, setEditing] = useState<string | null>(null);
-  const [warningAck, setWarningAck] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [successInfo, setSuccessInfo] = useState<{ filename: string; mode: "downloaded" | "queued_sync" } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -161,7 +160,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
     setIntakeResult(null);
     setOverrides({});
     setEditing(null);
-    setWarningAck(false);
+
     setSuccessInfo(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
@@ -175,7 +174,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
       const result = await intakeMutation.mutateAsync(file);
       setIntakeResult(result);
       setOverrides({});
-      setWarningAck(false);
+  
     } catch (e) {
       toast({
         title: "Intake failed",
@@ -226,7 +225,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
         analysis: intakeResult.analysis,
         conventionId: intakeResult.conventionId,
         conventionSnapshot: intakeResult.conventionSnapshot,
-        warningAcknowledged: intakeResult.analysis.severe ? warningAck : false,
+        warningAcknowledged: intakeResult.analysis.severe,
       });
       if (destinationAction === "downloaded" && r.blob) {
         const url = URL.createObjectURL(r.blob);
@@ -238,7 +237,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
       setIntakeResult(null);
       setOverrides({});
       setEditing(null);
-      setWarningAck(false);
+  
       setSuccessInfo({ filename, mode: destinationAction });
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
@@ -427,8 +426,6 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
           setOverride={(label, val) => setOverrides(o => ({ ...o, [label]: val }))}
           editing={editing}
           setEditing={setEditing}
-          warningAck={warningAck}
-          setWarningAck={setWarningAck}
           finalFilename={buildFinalFilename().filename}
           onConfirmDownload={() => doConfirm("downloaded")}
           onConfirmQueue={() => doConfirm("queued_sync")}
@@ -467,7 +464,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
 // ── review panel ─────────────────────────────────────────────────────────────
 function ReviewPanel({
   result, fields, overrides, setOverride, editing, setEditing,
-  warningAck, setWarningAck, finalFilename,
+  finalFilename,
   onConfirmDownload, onConfirmQueue, onReject, confirming,
 }: {
   result: CoordinationIntakeResponse;
@@ -476,8 +473,6 @@ function ReviewPanel({
   setOverride: (label: string, val: string) => void;
   editing: string | null;
   setEditing: (s: string | null) => void;
-  warningAck: boolean;
-  setWarningAck: (b: boolean) => void;
   finalFilename: string;
   onConfirmDownload: () => void;
   onConfirmQueue: () => void;
@@ -551,45 +546,36 @@ function ReviewPanel({
             const value = overrides[label] ?? pf?.proposedValue ?? "";
             const changed = overrides[label] && overrides[label] !== pf?.proposedValue;
             const lowConf = pf?.confidence === "low";
-            const borderColor = changed ? "#F59E0B" : (lowConf ? "#F59E0B" : c.border);
+            const hasOptions = allowed.length > 0;
             return (
-              <div key={label} style={{ minWidth: 110 }}>
-                {editing === label ? (
+              <div key={label} style={{ minWidth: 120 }}>
+                {hasOptions ? (
                   <SearchableSelect
                     value={value}
-                    onChange={v => { setOverride(label, v); setEditing(null); }}
+                    onChange={v => setOverride(label, v)}
                     options={allowed}
                     color={c}
                   />
                 ) : (
                   <div style={{
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                    padding: "5px 10px", borderRadius: 6,
-                    background: c.bg, color: c.color, border: `1.5px solid ${borderColor}`,
+                    display: "inline-flex", alignItems: "center", gap: 4, height: 32,
+                    padding: "0 10px", borderRadius: 6,
+                    background: c.bg, color: c.color, border: `1px solid ${c.border}`,
                     fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 800,
                   }}>
-                    {(lowConf || changed) && <AlertTriangle style={{ width: 11, height: 11 }} />}
                     {value || "—"}
                   </div>
                 )}
-                <div style={{ fontSize: 8, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 4 }}>
-                  {label}
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                  {(lowConf || changed) && <AlertTriangle style={{ width: 9, height: 9, color: "#D97706" }} />}
+                  <div style={{ fontSize: 8, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    {label}{changed ? " · edited" : (lowConf ? " · low conf." : "")}
+                  </div>
                 </div>
                 {pf?.reasoning && (
                   <div style={{ fontSize: 9, color: "#9CA3AF", fontStyle: "italic", marginTop: 2, maxWidth: 180, lineHeight: 1.4 }}>
                     {pf.reasoning}
                   </div>
-                )}
-                {allowed.length > 0 && editing !== label && (
-                  <button
-                    onClick={() => setEditing(label)}
-                    style={{
-                      marginTop: 4, fontSize: 9, color: "#1D4ED8", background: "none", border: "none",
-                      cursor: "pointer", padding: 0, display: "inline-flex", alignItems: "center", gap: 3,
-                    }}
-                  >
-                    <Edit2 style={{ width: 9, height: 9 }} /> Edit
-                  </button>
                 )}
                 {idx < orderedFields.length - 1 && (
                   <div style={{ display: "none" }}>{sep}</div>
@@ -635,31 +621,16 @@ function ReviewPanel({
         )}
       </div>
 
-      {severe && (
-        <label style={{
-          marginTop: 14, display: "flex", alignItems: "center", gap: 8,
-          padding: "8px 12px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6,
-          fontSize: 12, color: "#7F1D1D", fontWeight: 600, cursor: "pointer",
-        }}>
-          <input
-            type="checkbox"
-            checked={warningAck}
-            onChange={e => setWarningAck(e.target.checked)}
-          />
-          I have reviewed this warning and confirm the proposed name is correct.
-        </label>
-      )}
-
-      {/* Action buttons */}
+      {/* Action buttons (Fix 4: always active, no checkbox) */}
       <div style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button
           onClick={onConfirmDownload}
-          disabled={confirming || (severe && !warningAck)}
+          disabled={confirming}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 6, fontSize: 12, fontWeight: 700,
-            background: (severe && !warningAck) ? "#9CA3AF" : "#1D4ED8", color: "white",
-            border: "none", cursor: (severe && !warningAck) ? "not-allowed" : "pointer",
+            background: "#1D4ED8", color: "white",
+            border: "none", cursor: "pointer",
             opacity: confirming ? 0.6 : 1,
           }}
         >
@@ -668,17 +639,17 @@ function ReviewPanel({
         </button>
         <button
           onClick={onConfirmQueue}
-          disabled={confirming || (severe && !warningAck)}
+          disabled={confirming}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 6, fontSize: 12, fontWeight: 700,
             background: "white", color: "#1D4ED8", border: "1.5px solid #BFDBFE",
-            cursor: (severe && !warningAck) ? "not-allowed" : "pointer",
-            opacity: (confirming || (severe && !warningAck)) ? 0.6 : 1,
+            cursor: "pointer",
+            opacity: confirming ? 0.6 : 1,
           }}
         >
           <CheckCircle2 style={{ width: 13, height: 13 }} />
-          Queue for Sync
+          Confirm & Queue for Sync
         </button>
         <button
           onClick={onReject}
