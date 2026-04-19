@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import { useGetConvention, useUpsertConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -3726,7 +3727,7 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
 }
 
 // ─── Checkpoint Screen ────────────────────────────────────────────────────────
-function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onEditFoundational, savedFlash, refetchKey, showHistory, historyVersions, historyLoading, onToggleHistory, isFirstRun }: {
+function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReEvidence, onEditFoundational, savedFlash, refetchKey, showHistory, historyVersions, historyLoading, onToggleHistory, isFirstRun, onGoToCoordination, onGoToGenerator }: {
   ws: WizardState;
   projectId: number;
   token: string;
@@ -3741,6 +3742,8 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
   historyLoading: boolean;
   onToggleHistory: () => void;
   isFirstRun?: boolean;
+  onGoToCoordination?: () => void;
+  onGoToGenerator?: () => void;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
 
@@ -3787,6 +3790,74 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           {savedFlash}
         </div>
       )}
+
+      {/* ── Issue 1: Completion Screen (active convention) ─────────────────── */}
+      {!isFirstRun && snap && (
+        <div style={{
+          background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%)",
+          border: "1px solid #86EFAC",
+          borderLeft: "4px solid #16A34A",
+          borderRadius: 10,
+          padding: "16px 20px",
+          marginBottom: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <CheckCircle2 style={{ width: 22, height: 22, color: "#15803D", flexShrink: 0 }} />
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#14532D" }}>
+              {w(`Convention Saved — Version ${snap.conventionVersion}`, `Convención Guardada — Versión ${snap.conventionVersion}`, lang)}
+            </div>
+          </div>
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 18,
+            padding: "10px 14px", background: "#FFFFFFB3",
+            border: "1px solid #BBF7D0", borderRadius: 8,
+            fontSize: 12, color: "#14532D",
+          }}>
+            <div>
+              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Separator", "Separador", lang)}:</span>{" "}
+              <code style={{ fontFamily: "var(--font-mono)", background: "#DCFCE7", padding: "1px 6px", borderRadius: 3, fontWeight: 700 }}>{sep}</code>
+            </div>
+            <div>
+              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Fields", "Campos", lang)}:</span>{" "}
+              <strong>{snap.acceptedFieldOrder.length}</strong>
+            </div>
+            <div>
+              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Disciplines", "Disciplinas", lang)}:</span>{" "}
+              <strong>{snap.acceptedDisciplines.length}</strong>
+            </div>
+            <div>
+              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Document Types", "Tipos de documento", lang)}:</span>{" "}
+              <strong>{snap.acceptedDocTypes.length}</strong>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isFirstRun && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <Button onClick={onContinueEditing} style={{ gap: 7, fontSize: 13, height: 40 }}>
+            <Edit2 style={{ width: 14, height: 14 }} />
+            {w("Continue Editing Convention", "Continuar editando convención", lang)}
+          </Button>
+          <Button variant="outline" onClick={onReEvidence} style={{ gap: 7, fontSize: 13, height: 40 }}>
+            <RefreshCw style={{ width: 14, height: 14 }} />
+            {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
+          </Button>
+          {onGoToCoordination && (
+            <Button variant="outline" onClick={onGoToCoordination} style={{ gap: 7, fontSize: 13, height: 40, borderColor: "#2563EB", color: "#1D4ED8" }}>
+              <Upload style={{ width: 14, height: 14 }} />
+              {w("Go to Coordination Hub", "Ir a Coordination Hub", lang)}
+            </Button>
+          )}
+          {onGoToGenerator && (
+            <Button variant="outline" onClick={onGoToGenerator} style={{ gap: 7, fontSize: 13, height: 40, borderColor: "#7C3AED", color: "#6D28D9" }}>
+              <FileText style={{ width: 14, height: 14 }} />
+              {w("Go to Name Generator", "Ir al Generador de Nombres", lang)}
+            </Button>
+          )}
+        </div>
+      )}
+
       <ConventionStatusPanel
         projectId={projectId}
         token={token}
@@ -3795,19 +3866,13 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
         lang={lang}
       />
 
-      {/* Action buttons */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-        <Button onClick={onContinueEditing} style={{ gap: 7, fontSize: 13, height: 40 }}>
-          <Edit2 style={{ width: 14, height: 14 }} />
-          {isFirstRun
-            ? w("Start Building Convention", "Comenzar a crear convención", lang)
-            : w("Continue Editing Convention", "Continuar editando convención", lang)}
-        </Button>
-        {!isFirstRun && (
-        <Button variant="outline" onClick={onReEvidence} style={{ gap: 7, fontSize: 13, height: 40 }}>
-          <RefreshCw style={{ width: 14, height: 14 }} />
-          {w("Add More Evidence and Re-run Discovery", "Agregar evidencia y re-ejecutar análisis", lang)}
-        </Button>
+      {/* Secondary action buttons */}
+      <div style={{ display: "grid", gridTemplateColumns: isFirstRun ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 20 }}>
+        {isFirstRun && (
+          <Button onClick={onContinueEditing} style={{ gap: 7, fontSize: 13, height: 40 }}>
+            <Edit2 style={{ width: 14, height: 14 }} />
+            {w("Start Building Convention", "Comenzar a crear convención", lang)}
+          </Button>
         )}
         {!isFirstRun && (
         <Button variant="outline" onClick={onToggleHistory} style={{ gap: 7, fontSize: 13, height: 40 }}>
@@ -4254,6 +4319,7 @@ function ConventionStatusPanel({ projectId, token, flowPhase, enteredFromDiscove
 
 // ─── main export ──────────────────────────────────────────────────────────────
 export function ConventionBuilder({ projectId, isAdmin = false }: { projectId: number; isAdmin?: boolean }) {
+  const [, setLocationCB] = useLocation();
   const { lang } = useI18n();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
@@ -4627,6 +4693,8 @@ export function ConventionBuilder({ projectId, isAdmin = false }: { projectId: n
         savedFlash={savedFlash}
         refetchKey={checkpointRefetchKey}
         isFirstRun={setupStatus !== "completed"}
+        onGoToCoordination={() => setLocationCB(`/projects/${projectId}/coordination`)}
+        onGoToGenerator={() => setLocationCB(`/projects/${projectId}/generator`)}
       />
     );
   }

@@ -20,8 +20,9 @@ import { ChangeOrdersTab } from "./project/ChangeOrdersTab";
 import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
 import { CoordinationHub } from "./project/CoordinationHub";
-import { ChevronLeft, HelpCircle, Link2 } from "lucide-react";
+import { ChevronLeft, HelpCircle, Link2, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab");
@@ -40,6 +41,25 @@ export function ProjectDetail() {
   const memberRole = currentMember?.role || "";
   const isAdmin = adminRoles.includes(memberRole);
   const canWrite = writeRoles.includes(memberRole);
+
+  // ── Issue 10: First-visit onboarding overlay ─────────────────────────────
+  const onboardingKey = user?.id && projectId ? `bimlog_onboarding_${user.id}_${projectId}` : "";
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(true);
+  useEffect(() => {
+    if (!onboardingKey) return;
+    try {
+      if (!localStorage.getItem(onboardingKey)) {
+        setShowOnboarding(true);
+      }
+    } catch { /* localStorage may be unavailable */ }
+  }, [onboardingKey]);
+  const closeOnboarding = () => {
+    if (dontShowAgain && onboardingKey) {
+      try { localStorage.setItem(onboardingKey, new Date().toISOString()); } catch { /* noop */ }
+    }
+    setShowOnboarding(false);
+  };
 
   if (isLoading) {
     return (
@@ -159,6 +179,107 @@ export function ProjectDetail() {
           )}
         </div>
       </div>
+
+      {/* ── Issue 10: First-visit onboarding overlay ───────────────────── */}
+      {showOnboarding && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={closeOnboarding}
+          style={{
+            position: "fixed", inset: 0, zIndex: 1000,
+            background: "rgba(15, 23, 42, 0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "white",
+              borderRadius: 12,
+              maxWidth: 560, width: "100%",
+              maxHeight: "90vh", overflowY: "auto",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)",
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
+            <div style={{
+              padding: "18px 22px",
+              borderBottom: "1px solid hsl(var(--border))",
+              display: "flex", alignItems: "center", gap: 10,
+              background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+              borderTopLeftRadius: 12, borderTopRightRadius: 12,
+            }}>
+              <Sparkles style={{ width: 20, height: 20, color: "#1D4ED8", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "#1E3A8A" }}>
+                  Welcome to {project.name}
+                </div>
+                <div style={{ fontSize: 12, color: "#1E40AF", marginTop: 2 }}>
+                  Here's how BIMLog helps you coordinate this project.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeOnboarding}
+                aria-label="Close"
+                style={{
+                  padding: 6, border: "none", background: "transparent",
+                  cursor: "pointer", color: "#1E40AF",
+                  display: "flex", alignItems: "center", borderRadius: 6,
+                }}
+              >
+                <X style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+
+            <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { n: 1, title: "Set up your naming convention", body: "Use Convention Builder to define how every file in this project should be named." },
+                { n: 2, title: "Use Coordination Hub to intake files from all trades", body: "BIMLog reads and renames them automatically to match your convention." },
+                { n: 3, title: "Check Analytics for compliance and file health", body: "Track adoption, naming compliance, and overall project file quality." },
+                { n: 4, title: "Use Files for manual file name validation", body: "Validate, rename, and manage individual files with full version history." },
+                { n: 5, title: "Use Reports for PDF exports", body: "Generate audit-ready reports for stakeholders, owners, and regulators." },
+              ].map(s => (
+                <div key={s.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <div style={{
+                    flexShrink: 0, width: 28, height: 28, borderRadius: "50%",
+                    background: "#1D4ED8", color: "white",
+                    fontSize: 13, fontWeight: 800,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>{s.n}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{s.title}</div>
+                    <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2, lineHeight: 1.5 }}>{s.body}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              padding: "14px 22px",
+              borderTop: "1px solid hsl(var(--border))",
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+              background: "hsl(var(--secondary))",
+              borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
+            }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={e => setDontShowAgain(e.target.checked)}
+                  style={{ width: 14, height: 14, cursor: "pointer" }}
+                />
+                Don't show this again
+              </label>
+              <Button onClick={closeOnboarding} size="sm" style={{ fontSize: 12 }}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
