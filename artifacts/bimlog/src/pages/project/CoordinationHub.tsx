@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import {
   Upload, AlertTriangle, CheckCircle2, X, Loader2, FileText,
   Download, Inbox, ChevronDown, ArrowRight, ShieldAlert,
+  Wrench, HelpCircle,
 } from "lucide-react";
 import {
   useGetConvention,
@@ -135,7 +136,27 @@ function confColor(c: string | null | undefined): string {
 }
 
 // ── component ────────────────────────────────────────────────────────────────
-export function CoordinationHub({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+interface CoordHubMember {
+  userId: number;
+  userFullName: string;
+  userEmail?: string;
+  userCompanyName?: string;
+  role: string;
+}
+
+export function CoordinationHub({
+  projectId, canWrite, currentUserRole = "", members = [],
+}: {
+  projectId: number;
+  canWrite: boolean;
+  currentUserRole?: string;
+  members?: CoordHubMember[];
+}) {
+  const conventionManager = members.find(m => m.role === "convention_manager");
+  const projectAdmin = members.find(m => m.role === "project_admin");
+  const helpContact = conventionManager ?? projectAdmin ?? null;
+  const helpContactRoleLabel = conventionManager ? "Convention Manager" : "Convention Admin";
+  const canFix = currentUserRole === "project_admin" || currentUserRole === "convention_manager";
   const { toast } = useToast();
   const { data: convention, isLoading: convLoading } = useGetConvention(projectId);
   const { data: events = [], isLoading: eventsLoading } = useCoordinationEvents(projectId);
@@ -420,6 +441,7 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
       {/* REVIEW PANEL */}
       {isActive && intakeResult && (
         <ReviewPanel
+          projectId={projectId}
           result={intakeResult}
           fields={intakeResult.conventionSnapshot.fields}
           overrides={overrides}
@@ -431,6 +453,9 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
           onConfirmQueue={() => doConfirm("queued_sync")}
           onReject={doReject}
           confirming={confirmMutation.isPending}
+          canFix={canFix}
+          helpContact={helpContact}
+          helpContactRoleLabel={helpContactRoleLabel}
         />
       )}
 
@@ -463,10 +488,16 @@ export function CoordinationHub({ projectId, canWrite }: { projectId: number; ca
 
 // ── review panel ─────────────────────────────────────────────────────────────
 function ReviewPanel({
+  projectId,
   result, fields, overrides, setOverride, editing, setEditing,
   finalFilename,
   onConfirmDownload, onConfirmQueue, onReject, confirming,
+  canFix, helpContact, helpContactRoleLabel,
 }: {
+  projectId: number;
+  canFix: boolean;
+  helpContact: { userFullName: string; userEmail?: string } | null;
+  helpContactRoleLabel: string;
   result: CoordinationIntakeResponse;
   fields: CoordinationConventionFieldSnapshot[];
   overrides: Record<string, string>;
@@ -577,6 +608,15 @@ function ReviewPanel({
                     {pf.reasoning}
                   </div>
                 )}
+                {pf?.action && (
+                  <ActionBanner
+                    action={pf.action}
+                    canFix={canFix}
+                    helpContact={helpContact}
+                    helpContactRoleLabel={helpContactRoleLabel}
+                    projectId={projectId}
+                  />
+                )}
                 {idx < orderedFields.length - 1 && (
                   <div style={{ display: "none" }}>{sep}</div>
                 )}
@@ -665,6 +705,79 @@ function ReviewPanel({
           Reject
         </button>
       </div>
+    </div>
+  );
+}
+
+function ActionBanner({
+  action, canFix, helpContact, helpContactRoleLabel, projectId,
+}: {
+  action: { type: string; text: string };
+  canFix: boolean;
+  helpContact: { userFullName: string; userEmail?: string } | null;
+  helpContactRoleLabel: string;
+  projectId: number;
+}) {
+  const showFixLink =
+    canFix && (action.type === "VALUE_NOT_IN_CONVENTION" || action.type === "CONVENTION_INCOMPLETE");
+
+  if (canFix) {
+    return (
+      <div style={{
+        marginTop: 6, maxWidth: 220,
+        padding: "6px 8px", borderRadius: 5,
+        background: "#EFF6FF", border: "1px solid #BFDBFE",
+        color: "#1E3A8A", fontSize: 10, lineHeight: 1.4,
+      }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 5 }}>
+          <Wrench style={{ width: 11, height: 11, flexShrink: 0, marginTop: 1 }} />
+          <span>{action.text}</span>
+        </div>
+        {showFixLink && (
+          <Link
+            href={`/projects/${projectId}/convention`}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 3,
+              marginTop: 4, fontSize: 10, fontWeight: 700,
+              color: "#1D4ED8", textDecoration: "none",
+            }}
+          >
+            Fix in Convention Builder <ArrowRight style={{ width: 10, height: 10 }} />
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  // Member view: yellow banner with rephrased text + contact line
+  const memberText = action.text.replace(
+    /A Convention Manager must/g,
+    "Ask your Convention Manager to",
+  );
+  return (
+    <div style={{
+      marginTop: 6, maxWidth: 220,
+      padding: "6px 8px", borderRadius: 5,
+      background: "#FEF9C3", border: "1px solid #FDE68A",
+      color: "#854D0E", fontSize: 10, lineHeight: 1.4,
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 5 }}>
+        <HelpCircle style={{ width: 11, height: 11, flexShrink: 0, marginTop: 1 }} />
+        <span>{memberText}</span>
+      </div>
+      {helpContact && (
+        <div style={{ marginTop: 4, fontWeight: 700 }}>
+          {helpContactRoleLabel}: {helpContact.userFullName}
+          {helpContact.userEmail && (
+            <>
+              {" — "}
+              <a href={`mailto:${helpContact.userEmail}`} style={{ color: "#854D0E", textDecoration: "underline" }}>
+                {helpContact.userEmail}
+              </a>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

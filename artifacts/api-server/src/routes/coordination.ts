@@ -202,10 +202,16 @@ ${textSnippet || "(no extractable text — base inference on filename + project 
 TASK:
 Propose the corrected compliant filename, field-by-field. For each field, pick a value from its allowedValues whenever possible. If the evidence does not clearly map to one allowed value, mark that field as "low" confidence and pick the closest match. If two or more allowed values are equally plausible OR if the evidence contradicts the project context (e.g. wrong project code, wrong discipline), set "severe": true and explain in "severeReason".
 
+For each field where you cannot determine the correct value OR where the value indicated by the original filename / document is not in the field's allowedValues list, you MUST include an "action" object in that field's entry. The action must be exactly one of:
+- Type 1 — VALUE_NOT_IN_CONVENTION: the value exists in the document/filename but is not in the convention's allowed values. Action text: "The value [X] is not in the allowed list for [FieldLabel]. A Convention Manager must add it to the Convention Builder under the [FieldLabel] field."
+- Type 2 — CANNOT_DETERMINE: not enough information to determine the correct value. Action text: "This field cannot be determined from the filename or document content. Select the correct value manually from the dropdown."
+- Type 3 — CONVENTION_INCOMPLETE: the convention field has no allowed values defined (allowedValues is empty). Action text: "The [FieldLabel] field has no allowed values defined. A Convention Manager must configure this field in Convention Builder before this document can be properly named."
+If confidence is "high" and the chosen proposedValue is in allowedValues, set "action": null.
+
 Return ONLY this JSON shape (no markdown, no code block):
 {
   "proposedFields": [
-    { "fieldLabel": "string", "proposedValue": "string", "confidence": "high|medium|low", "reasoning": "string" }
+    { "fieldLabel": "string", "proposedValue": "string", "confidence": "high|medium|low", "reasoning": "string", "action": { "type": "VALUE_NOT_IN_CONVENTION|CANNOT_DETERMINE|CONVENTION_INCOMPLETE", "text": "string" } | null }
   ],
   "proposedFilename": "string",
   "overallConfidence": "high|medium|low",

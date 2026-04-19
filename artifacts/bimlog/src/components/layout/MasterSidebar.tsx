@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { getMe } from "@workspace/api-client-react";
-import { Bell, Search, X } from "lucide-react";
+import { Bell, Search, X, Building2 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -318,6 +318,18 @@ export function MasterSidebar() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Company Profile — visible to every authenticated user */}
+          <div style={{ padding: "0 14px 4px" }}>
+            <button
+              className="sidebar-nav-item"
+              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}
+              onClick={() => setLocation("/settings/company-profile")}
+            >
+              <Building2 style={{ width: 14, height: 14, flexShrink: 0 }} />
+              {t("Company Profile", "Perfil de Empresa")}
+            </button>
           </div>
 
           {/* Admin links — right above the divider/profile */}

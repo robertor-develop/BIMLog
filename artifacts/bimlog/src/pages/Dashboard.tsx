@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
-import { useListProjects, useCreateProject } from "@workspace/api-client-react";
+import { useListProjects, useCreateProject, useListMembers } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -737,6 +737,11 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const { t } = useI18n();
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
+  const { data: members } = useListMembers(project.id);
+  const adminMember = members?.find(m => m.role === "project_admin");
+  const adminInitials = adminMember?.userFullName
+    ? adminMember.userFullName.split(/\s+/).map(s => s.charAt(0).toUpperCase()).slice(0, 2).join("")
+    : "?";
 
   return (
     <div style={{ position: "relative" }}>
@@ -792,12 +797,40 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
             </div>
             <div style={{
               fontSize: 12, color: "hsl(var(--muted-foreground))",
-              lineHeight: 1.5, marginBottom: 14,
+              lineHeight: 1.5, marginBottom: 10,
               display: "-webkit-box", WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical", overflow: "hidden"
             }}>
               {project.description || t("dashboard.noDescription")}
             </div>
+
+            {/* Admin info — always visible */}
+            {adminMember && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
+                padding: "6px 8px", background: "#F8FAFC",
+                border: "1px solid #E2E8F0", borderRadius: 6,
+              }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  background: "#1D4ED8", color: "white",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 9, fontWeight: 700, flexShrink: 0,
+                }}>
+                  {adminInitials}
+                </div>
+                <div style={{ minWidth: 0, flex: 1, fontSize: 11, lineHeight: 1.3 }}>
+                  <div style={{ fontWeight: 600, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {adminMember.userFullName}
+                  </div>
+                  {adminMember.userCompanyName && (
+                    <div style={{ color: "#6B7280", fontSize: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {adminMember.userCompanyName}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}

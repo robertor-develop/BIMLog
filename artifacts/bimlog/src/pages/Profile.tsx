@@ -555,6 +555,13 @@ export function Profile() {
         </Link>
         <span style={{ color: "hsl(var(--muted-foreground))", fontSize: 12 }}>/</span>
         <span style={{ fontSize: 14, fontWeight: 600 }}>My Profile</span>
+        <div style={{ marginLeft: "auto" }}>
+          <Link href="/settings/company-profile">
+            <Button variant="outline" size="sm" style={{ fontSize: 12, padding: "4px 10px" }}>
+              Company Profile
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

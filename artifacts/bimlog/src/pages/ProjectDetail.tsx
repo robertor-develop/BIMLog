@@ -116,26 +116,50 @@ export function ProjectDetail() {
               {project.code}
             </span>
 
-            {/* Admin / Role card (Fix 3A) */}
-            {adminMember && (
+            {/* Role badge */}
+            {myRoleInfo && (
               <span
-                title={
-                  myRoleInfo
-                    ? `Your role: ${myRoleInfo.label} — ${myRoleInfo.description}\nProject Admin: ${adminMember.userFullName}`
-                    : `Project Admin: ${adminMember.userFullName}`
-                }
+                title={myRoleInfo.description}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   height: 30, padding: "0 10px",
                   fontSize: 11, fontWeight: 700,
-                  background: myRoleInfo?.badgeBg ?? "#F3F4F6",
-                  color: myRoleInfo?.badgeText ?? "#374151",
-                  border: `1px solid ${myRoleInfo?.badgeBg ?? "#E5E7EB"}`,
+                  background: myRoleInfo.badgeBg,
+                  color: myRoleInfo.badgeText,
+                  border: `1px solid ${myRoleInfo.badgeBg}`,
                   borderRadius: 999,
                 }}>
                 <Shield style={{ width: 12, height: 12 }} />
-                {myRoleInfo?.label ?? "Member"}
-                <span style={{ opacity: 0.7, fontWeight: 500 }}>· admin: {adminMember.userFullName}</span>
+                {myRoleInfo.label}
+              </span>
+            )}
+
+            {/* Admin inline card (Fix A) — visible without hover */}
+            {adminMember && (
+              <span
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  height: 30, padding: "0 12px",
+                  fontSize: 11, fontWeight: 600,
+                  background: "#F8FAFC", color: "#0F172A",
+                  border: "1px solid #E2E8F0",
+                  borderRadius: 8,
+                }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Admin
+                </span>
+                <span style={{ fontWeight: 700 }}>{adminMember.userFullName}</span>
+                {adminMember.userCompanyName && (
+                  <span style={{ color: "#64748B", fontWeight: 500 }}>· {adminMember.userCompanyName}</span>
+                )}
+                {adminMember.userEmail && (
+                  <a
+                    href={`mailto:${adminMember.userEmail}`}
+                    style={{ color: "#1D4ED8", textDecoration: "none", fontWeight: 500 }}
+                  >
+                    · {adminMember.userEmail}
+                  </a>
+                )}
               </span>
             )}
             <Link href={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${tab}`)}`}>
@@ -157,7 +181,7 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
-          {tab === "coordination"   && <CoordinationHub  projectId={projectId} canWrite={canWrite} />}
+          {tab === "coordination"   && <CoordinationHub  projectId={projectId} canWrite={canWrite} currentUserRole={memberRole} members={members ?? []} />}
           {tab === "analytics"      && <AnalyticsTab     projectId={projectId} />}
           {tab === "files"          && <FilesTab          projectId={projectId} canWrite={canWrite} />}
           {tab === "rfis"           && <RfisTab           projectId={projectId} canWrite={canWrite} />}

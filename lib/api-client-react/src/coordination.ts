@@ -1,11 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "./custom-fetch";
 
+export type CoordinationActionType =
+  | "VALUE_NOT_IN_CONVENTION"
+  | "CANNOT_DETERMINE"
+  | "CONVENTION_INCOMPLETE";
+
+export interface CoordinationFieldAction {
+  type: CoordinationActionType;
+  text: string;
+}
+
 export interface CoordinationProposedField {
   fieldLabel: string;
   proposedValue: string;
   confidence: "high" | "medium" | "low";
   reasoning: string;
+  action?: CoordinationFieldAction | null;
 }
 
 export interface CoordinationAnalysis {

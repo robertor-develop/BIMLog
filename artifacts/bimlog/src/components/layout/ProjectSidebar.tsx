@@ -20,24 +20,30 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: "coordination",  label: "Coordination Hub",            icon: GitMerge,      section: "Project" },
-  { id: "analytics",     label: "Analytics",                  icon: BarChart2,     section: "Project" },
+  { id: "coordination",  label: "project.tabs.coordination",   icon: GitMerge,      section: "Project" },
+  { id: "analytics",     label: "project.tabs.analytics",      icon: BarChart2,     section: "Project" },
   { id: "files",         label: "project.tabs.files",          icon: FolderOpen,    section: "Project" },
   { id: "rfis",          label: "project.tabs.rfis",           icon: MessageSquare, section: "Project" },
   { id: "submittals",    label: "project.tabs.submittals",     icon: FileCheck,     section: "Project" },
-  { id: "transmittals",  label: "Transmittals",                icon: Send,          section: "Project" },
-  { id: "change-orders", label: "Change Orders",               icon: RefreshCw,     section: "Project" },
-  { id: "meetings",      label: "Meetings",                    icon: BookOpen,      section: "Project" },
-  { id: "schedule",      label: "Schedule",                    icon: CalendarDays,  section: "Project" },
-  { id: "directory",     label: "Directory",                   icon: Users,         section: "Project" },
+  { id: "transmittals",  label: "project.tabs.transmittals",   icon: Send,          section: "Project" },
+  { id: "change-orders", label: "project.tabs.changeOrders",   icon: RefreshCw,     section: "Project" },
+  { id: "meetings",      label: "project.tabs.meetings",       icon: BookOpen,      section: "Project" },
+  { id: "schedule",      label: "project.tabs.schedule",       icon: CalendarDays,  section: "Project" },
+  { id: "directory",     label: "project.tabs.directory",      icon: Users,         section: "Project" },
   { id: "activity",      label: "project.tabs.activity",       icon: Activity,      section: "Project" },
   { id: "team",          label: "project.tabs.team",           icon: Users,         section: "Admin" },
   { id: "generator",     label: "project.tabs.generator",      icon: Wand2,         section: "Tools" },
   { id: "convention",    label: "project.tabs.convention",     icon: Settings2,     section: "Tools", adminOnly: true },
-  { id: "reports",       label: "Reports & PDF",               icon: FileBarChart2, section: "Tools" },
-  { id: "clash-reports", label: "Clash Reports",               icon: BarChart2,     section: "Tools" },
-  { id: "integrations",  label: "Integrations",                icon: Puzzle,        section: "Tools" },
+  { id: "reports",       label: "project.tabs.reports",        icon: FileBarChart2, section: "Tools" },
+  { id: "clash-reports", label: "project.tabs.clashReports",   icon: BarChart2,     section: "Tools" },
+  { id: "integrations",  label: "project.tabs.integrations",   icon: Puzzle,        section: "Tools" },
 ];
+
+const SECTION_LABELS: Record<string, string> = {
+  Project: "project.section.project",
+  Admin:   "project.section.admin",
+  Tools:   "project.section.tools",
+};
 
 const PLATFORM_ITEMS = [
   { name: "Procore",       logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC" },
@@ -233,7 +239,7 @@ export function ProjectSidebar({
             if (!items.length) return null;
             return (
               <div key={section}>
-                <span className="sidebar-section-label">{section}</span>
+                <span className="sidebar-section-label">{getLabel(section, SECTION_LABELS[section] ?? section)}</span>
                 {items.map(item => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
@@ -254,7 +260,7 @@ export function ProjectSidebar({
           })}
 
           {/* INTEGRATIONS section */}
-          <span className="sidebar-section-label" style={{ marginTop: 8 }}>Integrations</span>
+          <span className="sidebar-section-label" style={{ marginTop: 8 }}>{getLabel("integrations-section", "project.section.integrations")}</span>
 
           {/* Item 1: Validate and Download */}
           <button

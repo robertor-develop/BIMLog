@@ -1,0 +1,61 @@
+REPLIT INSTRUCTION — BIMLOG PHASE 2 CORRECTIONS + COORDINATION HUB ACTIONABLE GUIDANCE
+Project: BIMLog v1.9 — April 2026
+CRITICAL RULES: Do NOT redesign or refactor anything outside this scope. Do NOT use mock data. Show exact file diffs in // BEFORE ... // AFTER format after each fix. If anything is unclear, stop and ask.
+
+FIX A — ADMIN CARD VISIBLE ON COMMAND CENTER DASHBOARD
+The admin badge currently shows only on hover as a tooltip inside ProjectDetail.tsx. It is not visible on the main Command Center (Command Center = the home page after login, file is likely Dashboard.tsx or CommandCenter.tsx or similar).
+Find the Command Center / home dashboard file. In the "Your Projects" section, for each project card, add a visible line below the project name showing: a small colored circle with the admin's initials + admin full name + admin company name. Pull this data from the project members endpoint — the member with role "project_admin". Keep it compact, one line, always visible without hover.
+Additionally, in ProjectDetail.tsx header where the admin badge currently is: expand it from a tooltip-only badge to a small visible inline card showing admin name + company name + email. It must be readable without hovering.
+
+FIX B — COMPANY PROFILE NAVIGATION ENTRY
+Company Profile page exists at /company-profile or similar but has no navigation entry. The user cannot find it.
+In MasterSidebar.tsx (the left sidebar), in the bottom section near "Notifications" and "Admin Panel", add a menu item "Company Profile" with a Building2 icon. It should navigate to the CompanyProfile page. Place it above "Sign Out".
+Also add a "Company Profile" link in the user profile dropdown or profile menu — wherever the user's name/avatar is clicked.
+
+FIX C — LANGUAGE CONSISTENCY
+The Spanish/English toggle is incomplete. The sidebar currently has a mix: "Registro de Actividad" in Spanish but "Change Orders", "Schedule", "Reports & PDF", "Clash Reports", "Integrations" in English when Spanish is selected.
+Find the sidebar nav items translation file or the nav items array. Apply the same language/translation logic already used for "Registro de Actividad" to ALL nav items. The Spanish translations should be:
+Change Orders → Órdenes de Cambio
+Schedule → Cronograma
+Reports & PDF → Reportes y PDF
+Clash Reports → Reportes de Interferencias
+Integrations → Integraciones
+Meetings → Reuniones
+Directory → Directorio
+Files → Archivos
+Analytics → Analítica
+Team → Equipo
+Settings → Configuración
+Coordination Hub → Centro de Coordinación
+Convention Builder → Constructor de Convención
+Name Generator → Generador de Nombres
+Do not change the English labels. Only apply translations when the active language is Spanish (es).
+
+FIX D — COORDINATION HUB: ACTIONABLE GUIDANCE PER FIELD (most important)
+This requires two changes: the AI prompt in coordination.ts and the UI in CoordinationHub.tsx.
+PART D1 — Update AI prompt in coordination.ts, POST /intake handler.
+Add to the existing AI prompt, after the current instructions, this additional instruction:
+"For each field where you cannot determine the correct value OR where the original filename value is not in the allowedValues list, you MUST include an 'action' field in your response. The action must be one of three types:
+Type 1 — VALUE_NOT_IN_CONVENTION: The value exists in the document/filename but is not in the convention's allowed values. Action text: 'The value [X] is not in the allowed list for [FieldLabel]. A Convention Manager must add it to the Convention Builder under the [FieldLabel] field.'
+Type 2 — CANNOT_DETERMINE: Not enough information to determine the correct value. Action text: 'This field cannot be determined from the filename or document content. Select the correct value manually from the dropdown.'
+Type 3 — CONVENTION_INCOMPLETE: The convention field has no allowed values defined. Action text: 'The [FieldLabel] field has no allowed values defined. A Convention Manager must configure this field in Convention Builder before this document can be properly named.'
+Also add to the response JSON a new field per proposedField entry: 'action': { 'type': string, 'text': string } or null if confidence is high and value is valid."
+Updated AI response JSON per field must include:
+{ "fieldLabel": "string", "proposedValue": "string", "confidence": "high|medium|low", "reasoning": "string", "action": { "type": "VALUE_NOT_IN_CONVENTION|CANNOT_DETERMINE|CONVENTION_INCOMPLETE", "text": "string" } | null }
+PART D2 — Update CoordinationHub.tsx review panel.
+For each field chip in the review panel, below the reasoning text, if field.action is not null, show an action banner:
+If the current user's role is "project_admin" or "convention_manager": show a blue action banner with a wrench icon and the action.text. Add a direct link button: if action.type is VALUE_NOT_IN_CONVENTION or CONVENTION_INCOMPLETE, the link says "Fix in Convention Builder →" and navigates to /projects/:projectId/convention.
+If the current user's role is "member", "sub_trade", "discipline_lead", or "read_only": show a yellow action banner saying the action.text but replace "A Convention Manager must" with "Ask your Convention Manager to". Then on a new line show: "Convention Manager: [name of convention_manager member] — [email]" OR if no convention_manager is assigned: "Convention Admin: [project_admin name] — [project_admin email]". Pull this from the members list already loaded in the component — find the first member with role "convention_manager", fallback to "project_admin".
+The action banner should be compact — one small box below the reasoning text, with appropriate color (blue for admin/can-fix, yellow for member/needs-help).
+
+VALIDATION — after all fixes confirm:
+Command Center shows admin name + company on each project card without hover. ProjectDetail header shows admin name + email visible without hover. Company Profile link appears in left sidebar. All sidebar nav items translate consistently when Spanish is selected. Coordination Hub shows action banners below reasoning on low-confidence fields. Users with edit permission see blue banner + "Fix in Convention Builder →" link. Users without permission see yellow banner with convention manager name and email.
+
+FINAL OUTPUT — output only this:
+BIMLOG CORRECTIONS — COMPLETE
+FIX A — Admin card visible on Command Center: yes/no
+FIX B — Company Profile navigation entry: yes/no
+FIX C — Language consistency all nav items: yes/no
+FIX D — Coordination Hub actionable guidance with role-aware contact info: yes/no
+Exact files modified: Dashboard.tsx or CommandCenter.tsx, ProjectDetail.tsx, MasterSidebar.tsx, artifacts/api-server/src/routes/coordination.ts, artifacts/bimlog/src/pages/project/CoordinationHub.tsx, sidebar nav translation file
+Do only this. Nothing more than what is defined here.
