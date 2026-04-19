@@ -1,0 +1,48 @@
+DATABASE RULE — MANDATORY — READ THIS FIRST EVERY SESSION
+You are working with TWO separate databases: development and production. Never run migrations against production without confirming first. State which DB you are targeting before every schema or migration operation.
+
+Stop. Do not touch anything already built. Build only this one new feature.
+WHAT WE ARE BUILDING
+A persistent floating Smart Guide button that lives in every project page. It is always visible, always accessible, toggleable on/off, and gives contextual help based on which module the user is currently on. It replaces the one-time onboarding modal built in the previous pass.
+Remove the one-time onboarding modal from ProjectDetail.tsx entirely. Replace it with this.
+HOW IT WORKS
+A small floating button sits fixed at the bottom right corner of every project page. It shows a question mark icon and the label "Guide". When clicked it opens a contextual tip panel. When clicked again it closes. The user's on/off preference is stored in localStorage under the key bimlog_guide_enabled. Default state is open on first visit, closed after first dismissal.
+The tip panel shows contextual content based on the current active tab. When the tab changes the tip content updates automatically.
+CONTEXTUAL TIPS PER TAB
+coordination: You are in the Coordination Hub. Drop any file here — BIMLog reads it, understands the content, and proposes the correct name based on your active convention. Review the proposal, confirm or adjust, then download the renamed file. Everything is logged automatically.
+convention: You are in Convention Builder. Define your naming convention here — choose your separator, add your fields, and set the allowed values for each field. When done, save and activate. Only project admins can edit the convention. All other modules use this convention as their source of truth.
+generator: You are in the Name Generator. Select values for each field to manually build a compliant file name. All options come from your active convention. Use this when you already know what you want to name a file and just need to build it quickly.
+files: You are in Files. Upload a file here to check whether its existing name passes your active convention. This module validates names only — it does not rename or store files. Use Coordination Hub if you want BIMLog to rename the file for you.
+analytics: You are in Analytics. This dashboard shows your project naming compliance in real time. Files processed through Coordination Hub and Files both feed into these charts. No data here means no files have been processed yet.
+rfis: You are in RFIs. Create and track Requests for Information here. RFIs have a ball-in-court system that tracks who is responsible for the next action and timestamps every response. Overdue RFIs appear in red.
+submittals: You are in Submittals. Track all submittals here with status, reviewer, and due dates. Submittals feed into the compliance dashboard and delay attribution engine.
+transmittals: You are in Transmittals. Formal document transmittal records with acknowledgement tracking. Every file sent to external parties should have a transmittal.
+reports: You are in Reports. Generate PDF exports of your project data here — compliance reports, RFI logs, submittal status, meeting minutes, and more. All reports pull from live production data.
+activity: You are in the Activity Log. Every event on this project is permanently and immutably recorded here — file uploads, renames, RFI actions, convention changes, everything. This log cannot be edited or deleted.
+directory: You are in the Project Directory. All team members and stakeholders on this project appear here automatically from the project team. You can also add additional contacts manually.
+meetings: You are in Meetings. Record meeting minutes here with attendees, agenda items, and action items. Meeting records are linked to the project timeline.
+schedule: You are in Schedule. Import your MS Project file to activate delay attribution tracking. BIMLog will classify delays by responsible party based on RFI response times and ball-in-court history.
+Default tip for any other tab: Select a module from the sidebar to get started. Coordination Hub is the recommended starting point for new projects — it is where files come in and get normalized to your naming convention.
+COMPONENT STRUCTURE
+Create a new file: artifacts/bimlog/src/components/layout/SmartGuide.tsx
+The component receives one prop: activeTab as a string.
+It manages two pieces of state: isOpen (boolean, initialized from localStorage bimlog_guide_enabled, default true) and the current tip content derived from activeTab.
+When isOpen changes, write the new value to localStorage bimlog_guide_enabled.
+The floating button is always rendered regardless of isOpen. It is fixed position, bottom 24px, right 24px, z-index 1000. It shows a HelpCircle icon from lucide-react and the text Guide. When isOpen is true the button has a filled blue background. When false it has a white background with a border.
+The tip panel appears above the button when isOpen is true. It is a card with a shadow, max-width 320px, fixed position above the button. It has a header with the current tab name and a small X close button. The body shows the contextual tip text for the current tab. At the bottom show a small muted line: "Click Guide anytime to bring this back."
+WIRE IT INTO PROJECTDETAIL
+In artifacts/bimlog/src/pages/ProjectDetail.tsx:
+Import SmartGuide. Remove the one-time onboarding modal that was added in the previous pass. Add SmartGuide at the bottom of the project layout, outside the main content area, passing activeTab as the current tab value. It must appear on every tab automatically.
+BUILD AND PUBLISH
+After implementing, build and publish. Then confirm:
+SMART GUIDE — READY
+One-time onboarding modal removed: yes/no
+SmartGuide component created: yes/no
+Floating Guide button visible on all project tabs: yes/no
+Tip content updates when tab changes: yes/no
+Open/closed state persists in localStorage: yes/no
+Build passes: yes/no
+Published: yes/no
+Exact files created: list them.
+Exact files modified: list them.
+Do only this. Nothing else.
