@@ -25,7 +25,7 @@ export function LangToggle({ floating = false }: { floating?: boolean }) {
   };
 
   const floatStyle: React.CSSProperties = floating
-    ? { position: "fixed", top: 12, right: 12, zIndex: 2147483000 }
+    ? { position: "fixed", top: 14, right: 70, zIndex: 2147483000 }
     : {};
 
   return (

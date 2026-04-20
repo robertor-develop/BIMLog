@@ -1618,6 +1618,8 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
   onDiscard: () => void;
 }) {
   const result = state.reanalysisResult!;
+  const { lang: cbLang } = useI18n();
+  const cw = (en: string, es: string) => cbLang === "es" ? es : en;
   const [decisions, setDecisions] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -1779,13 +1781,13 @@ function ChangesReview({ state, token, projectId, userGuidance, onGuidanceChange
         <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "16px 20px", marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
             <Plus style={{ width: 14, height: 14, color: "#2563EB" }} />
-            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#2563EB" }}>Newly Suggested Items</span>
-            <span style={{ fontSize: 11, color: "#9CA3AF", marginLeft: 4 }}>— click to accept</span>
+            <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#2563EB" }}>{cw("Newly Suggested Items", "Elementos Nuevos Sugeridos")}</span>
+            <span style={{ fontSize: 11, color: "#9CA3AF", marginLeft: 4 }}>— {cw("click to accept", "clic para aceptar")}</span>
           </div>
-          {ni.disciplines.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Disciplines</div>{ni.disciplines.map((d, i) => itemRow(d, `nd_${i}`))}</div>)}
-          {ni.systems.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Systems</div>{ni.systems.map((s, i) => itemRow(s, `ns_${i}`))}</div>)}
-          {ni.documentTypes.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Document types</div>{ni.documentTypes.map((d, i) => itemRow(d, `ndt_${i}`))}</div>)}
-          {ni.extraFields.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Extra fields</div>{ni.extraFields.map((f, i) => itemRow(f, `nef_${i}`))}</div>)}
+          {ni.disciplines.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>{cw("Disciplines", "Disciplinas")}</div>{ni.disciplines.map((d, i) => itemRow(d, `nd_${i}`))}</div>)}
+          {ni.systems.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>{cw("Systems", "Sistemas")}</div>{ni.systems.map((s, i) => itemRow(s, `ns_${i}`))}</div>)}
+          {ni.documentTypes.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>{cw("Document types", "Tipos de documento")}</div>{ni.documentTypes.map((d, i) => itemRow(d, `ndt_${i}`))}</div>)}
+          {ni.extraFields.length > 0 && (<div style={{ marginBottom: 12 }}><div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>{cw("Extra fields", "Campos adicionales")}</div>{ni.extraFields.map((f, i) => itemRow(f, `nef_${i}`))}</div>)}
         </div>
       )}
 

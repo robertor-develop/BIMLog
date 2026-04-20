@@ -35,13 +35,11 @@ export function MasterSidebar() {
   const [companyName, setCompanyName] = useState<string>("");
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
 
-  // Notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showBell, setShowBell] = useState(false);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
 
-  // Search
   const [showSearch, setShowSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
@@ -76,7 +74,6 @@ export function MasterSidebar() {
         }
       })
       .catch(() => {});
-    // Initial notification count
     loadNotifications();
   }, [user?.id, token]);
 
@@ -113,7 +110,6 @@ export function MasterSidebar() {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  // Close bell/search on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) setShowBell(false);
@@ -123,7 +119,6 @@ export function MasterSidebar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Debounced search
   useEffect(() => {
     if (!searchQ || searchQ.length < 2) { setSearchResults(null); return; }
     if (searchTimer.current) clearTimeout(searchTimer.current);
@@ -160,7 +155,6 @@ export function MasterSidebar() {
 
   return (
     <div className="sidebar">
-      {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-mark">B</div>
         <div>
@@ -169,37 +163,18 @@ export function MasterSidebar() {
         </div>
       </div>
 
-      {/* Search trigger */}
       <div ref={searchRef} style={{ position: "relative", padding: "0 10px 10px" }}>
-        <button
-          onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); }}
-          style={{
-            display: "flex", alignItems: "center", gap: 6, width: "100%",
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)",
-            cursor: "pointer", fontSize: 11,
-          }}
-        >
+        <button onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
           <Search style={{ width: 13, height: 13 }} />
           {t("Search everything…", "Buscar todo…")}
         </button>
 
         {showSearch && (
-          <div style={{
-            position: "absolute", left: 10, top: "calc(100% - 4px)", width: "280px", zIndex: 9999,
-            background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-            border: "1px solid #E5E7EB", overflow: "hidden",
-          }}>
+          <div style={{ position: "absolute", left: 10, top: "calc(100% - 4px)", width: "280px", zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
             <div style={{ padding: "10px 12px", borderBottom: "1px solid #F3F4F6" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Search style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} />
-                <input
-                  autoFocus
-                  value={searchQ}
-                  onChange={e => setSearchQ(e.target.value)}
-                  placeholder={t("Type to search…", "Escribe para buscar…")}
-                  style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#111" }}
-                />
+                <input autoFocus value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder={t("Type to search…", "Escribe para buscar…")} style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#111" }} />
                 {searchQ && (
                   <button onClick={() => { setSearchQ(""); setSearchResults(null); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 2 }}>
                     <X style={{ width: 13, height: 13 }} />
@@ -216,23 +191,7 @@ export function MasterSidebar() {
             {!searchLoading && allSearchResults.length > 0 && (
               <div style={{ maxHeight: 320, overflowY: "auto" }}>
                 {allSearchResults.map((item, idx) => (
-                  <button
-                    key={`${item.type}-${item.id}-${idx}`}
-                    onClick={() => {
-                      if (item.type !== "person" && item.projectId) {
-                        const route = typeRoutes[item.type]?.({ id: item.id, projectId: item.projectId });
-                        if (route) setLocation(route);
-                      }
-                      setShowSearch(false);
-                    }}
-                    style={{
-                      display: "flex", alignItems: "flex-start", gap: 10, width: "100%",
-                      padding: "8px 12px", background: "none", border: "none", cursor: "pointer",
-                      textAlign: "left", borderBottom: "1px solid #F9FAFB",
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                  >
+                  <button key={`${item.type}-${item.id}-${idx}`} onClick={() => { if (item.type !== "person" && item.projectId) { const route = typeRoutes[item.type]?.({ id: item.id, projectId: item.projectId }); if (route) setLocation(route); } setShowSearch(false); }} style={{ display: "flex", alignItems: "flex-start", gap: 10, width: "100%", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #F9FAFB" }} onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => (e.currentTarget.style.background = "none")}>
                     <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", paddingTop: 2, minWidth: 60 }}>{item.type.replace(/_/g, " ")}</span>
                     <span style={{ fontSize: 12, color: "#111", lineHeight: 1.4 }}>{item.label}</span>
                   </button>
@@ -243,41 +202,22 @@ export function MasterSidebar() {
         )}
       </div>
 
-      {/* Middle nav — spacer */}
       <div className="sidebar-nav" style={{ flex: 1 }} />
 
-      {/* Bottom section */}
       {user && (
         <div style={{ padding: "0 0 8px" }}>
 
-          {/* Notification Bell */}
           <div ref={bellRef} style={{ position: "relative", padding: "0 14px 10px" }}>
-            <button
-              onClick={() => { setShowBell(!showBell); if (!showBell) loadNotifications(); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 8, width: "100%",
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
-                borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)",
-                fontSize: 12,
-              }}
-            >
+            <button onClick={() => { setShowBell(!showBell); if (!showBell) loadNotifications(); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)", fontSize: 12 }}>
               <Bell style={{ width: 14, height: 14 }} />
               <span style={{ flex: 1, textAlign: "left" }}>{t("Notifications", "Notificaciones")}</span>
               {unreadCount > 0 && (
-                <span style={{
-                  background: "#DC2626", color: "white", borderRadius: "50%",
-                  width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 700,
-                }}>{unreadCount > 9 ? "9+" : unreadCount}</span>
+                <span style={{ background: "#DC2626", color: "white", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
             </button>
 
             {showBell && (
-              <div style={{
-                position: "absolute", bottom: "calc(100% + 4px)", left: 14, width: 300, zIndex: 9999,
-                background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-                border: "1px solid #E5E7EB", overflow: "hidden",
-              }}>
+              <div style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 14, width: 300, zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderBottom: "1px solid #F3F4F6" }}>
                   <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>{t("Notifications", "Notificaciones")}</span>
                   {unreadCount > 0 && (
@@ -297,14 +237,7 @@ export function MasterSidebar() {
                 )}
                 <div style={{ maxHeight: 320, overflowY: "auto" }}>
                   {notifications.map(n => (
-                    <div
-                      key={n.id}
-                      style={{
-                        padding: "10px 14px", borderBottom: "1px solid #F9FAFB",
-                        background: n.isRead ? "white" : "#EFF6FF",
-                        display: "flex", gap: 8, alignItems: "flex-start",
-                      }}
-                    >
+                    <div key={n.id} style={{ padding: "10px 14px", borderBottom: "1px solid #F9FAFB", background: n.isRead ? "white" : "#EFF6FF", display: "flex", gap: 8, alignItems: "flex-start" }}>
                       <div style={{ flex: 1, cursor: "pointer" }} onClick={() => { markRead(n.id); if (n.actionUrl) setLocation(n.actionUrl); setShowBell(false); }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "#111", marginBottom: 2 }}>{n.title}</div>
                         <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4 }}>{n.message}</div>
@@ -320,110 +253,53 @@ export function MasterSidebar() {
             )}
           </div>
 
-          {/* Company Profile — visible to every authenticated user */}
           <div style={{ padding: "0 14px 4px" }}>
-            <button
-              className="sidebar-nav-item"
-              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}
-              onClick={() => setLocation("/settings/company-profile")}
-            >
+            <button className="sidebar-nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }} onClick={() => setLocation("/settings/company-profile")}>
               <Building2 style={{ width: 14, height: 14, flexShrink: 0 }} />
               {t("Company Profile", "Perfil de Empresa")}
             </button>
           </div>
 
-          {/* Admin links — right above the divider/profile */}
           {(showAdminPanel || showTotalControl) && (
             <div style={{ padding: "0 14px 8px" }}>
               {showAdminPanel && (
-                <button
-                  className="sidebar-nav-item"
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-                  onClick={() => setLocation("/admin")}
-                >
+                <button className="sidebar-nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }} onClick={() => setLocation("/admin")}>
                   <div className="nav-dot" />
-                  Admin Panel
+                  {t("Admin Panel", "Panel de Administración")}
                 </button>
               )}
               {showTotalControl && (
-                <button
-                  className="sidebar-nav-item"
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-                  onClick={() => setLocation("/total-control")}
-                >
+                <button className="sidebar-nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }} onClick={() => setLocation("/total-control")}>
                   <div className="nav-dot" />
-                  Total Control
+                  {t("Total Control", "Control Total")}
                 </button>
               )}
             </div>
           )}
 
-          {/* Divider */}
           <div style={{ height: 1, background: "var(--sidebar-border)", margin: "0 14px 10px" }} />
 
-          {/* Avatar + name + company + profile link */}
-          <a
-            href="#"
-            className="sidebar-footer"
-            style={{ textDecoration: "none", cursor: "pointer" }}
-            title="My Profile"
-            onClick={e => { e.preventDefault(); setLocation("/profile"); }}
-          >
-            <div
-              className="avatar avatar-sm av-blue"
-              style={avatarUrl ? {
-                backgroundImage: `url(${avatarUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : {}}
-            >
+          <a href="#" className="sidebar-footer" style={{ textDecoration: "none", cursor: "pointer" }} title="My Profile" onClick={e => { e.preventDefault(); setLocation("/profile"); }}>
+            <div className="avatar avatar-sm av-blue" style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}>
               {!avatarUrl && (user.fullName?.charAt(0).toUpperCase() ?? "?")}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {user.fullName}
-              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
                 {companyLogoUrl && (
-                  <span
-                    aria-hidden
-                    style={{
-                      display: "inline-block", width: 12, height: 12, borderRadius: 2,
-                      background: `url(${companyLogoUrl}) center/contain no-repeat #fff`,
-                      flexShrink: 0,
-                    }}
-                  />
+                  <span aria-hidden style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: `url(${companyLogoUrl}) center/contain no-repeat #fff`, flexShrink: 0 }} />
                 )}
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {companyName || user.companyName || ""}
-                </span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{companyName || user.companyName || ""}</span>
               </div>
             </div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>Profile →</div>
+            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>{t("Profile →", "Perfil →")}</div>
           </a>
 
-          {/* Sign out */}
-          <button
-            onClick={logout}
-            style={{
-              display: "block", width: "calc(100% - 28px)", margin: "6px 14px 0",
-              padding: "5px 0", borderRadius: 5, cursor: "pointer",
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
-              color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500,
-            }}
-          >
-            Sign Out
+          <button onClick={logout} style={{ display: "block", width: "calc(100% - 28px)", margin: "6px 14px 0", padding: "5px 0", borderRadius: 5, cursor: "pointer", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500 }}>
+            {t("Sign Out", "Cerrar Sesión")}
           </button>
-          <button
-            onClick={() => { localStorage.removeItem("bimlog-auth"); logout(); window.location.href = "/"; }}
-            style={{
-              display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0",
-              padding: "3px 0", background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.7)", fontSize: 10, textAlign: "center",
-              textDecoration: "underline", textUnderlineOffset: 2,
-            }}
-          >
-            Clear session &amp; sign in again
+          <button onClick={() => { localStorage.removeItem("bimlog-auth"); logout(); window.location.href = "/"; }} style={{ display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0", padding: "3px 0", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 10, textAlign: "center", textDecoration: "underline", textUnderlineOffset: 2 }}>
+            {t("Clear session & sign in again", "Limpiar sesión e iniciar sesión")}
           </button>
         </div>
       )}
