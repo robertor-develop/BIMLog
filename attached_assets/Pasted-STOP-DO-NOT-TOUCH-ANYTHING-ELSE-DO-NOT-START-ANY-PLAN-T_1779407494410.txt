@@ -1,0 +1,100 @@
+STOP. DO NOT TOUCH ANYTHING ELSE. DO NOT START ANY PLAN.
+TWO TASKS ONLY. PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES.
+
+═══════════════════════════════════════════════════════════
+TASK 1 — ADD GLOBAL DEBUG MODE
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/lib/debug.ts
+
+Create this new file with exactly this content:
+
+export const isDebug = () => {
+  try { return localStorage.getItem("bimlog_debug") === "true"; } catch { return false; }
+};
+
+export const debugError = (context: string, err: unknown) => {
+  if (isDebug()) {
+    console.error(`[BIMLog Debug] ${context}`, err);
+    return err instanceof Error ? `[${context}] ${err.message}` : `[${context}] ${String(err)}`;
+  }
+  return null;
+};
+
+FILE: artifacts/bimlog/src/components/DebugBanner.tsx
+
+Create this new file with exactly this content:
+
+import { useState, useEffect } from "react";
+import { isDebug } from "@/lib/debug";
+
+export function DebugBanner() {
+  const [debug, setDebug] = useState(false);
+  useEffect(() => { setDebug(isDebug()); }, []);
+  if (!debug) return null;
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 99999,
+      background: "#DC2626", color: "white", textAlign: "center",
+      padding: "4px 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em"
+    }}>
+      DEBUG MODE ON — errors show full details —
+      type: localStorage.removeItem('bimlog_debug') to turn off
+    </div>
+  );
+}
+
+FILE: artifacts/bimlog/src/App.tsx or the root layout file
+(find the root component that wraps everything)
+
+Add import at top:
+import { DebugBanner } from "@/components/DebugBanner";
+
+Add <DebugBanner /> as the very first child inside the root return.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+Find this line in the handleUpload function:
+        setError(d.message || d.error || "Upload failed");
+
+Replace with:
+        const debugMsg = isDebug() ? ` | Raw: ${JSON.stringify(d)}` : "";
+        setError((d.message || d.error || "Upload failed") + debugMsg);
+
+Add this import at the top of ClashReportsTab.tsx:
+import { isDebug } from "@/lib/debug";
+
+FILE: artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+Find this line in the catch block of handleAudioUpload:
+      setError(`Audio upload failed: ${err instanceof Error ? err.message : String(err)}`);
+
+Replace with:
+      setError(`Audio upload failed: ${err instanceof Error ? err.message : String(err)}${isDebug() ? " (debug: check console)" : ""}`);
+
+Add this import at the top of MeetingsTab.tsx:
+import { isDebug } from "@/lib/debug";
+
+═══════════════════════════════════════════════════════════
+TASK 2 — VERIFY CLASH REPORTS WIRED CORRECTLY
+═══════════════════════════════════════════════════════════
+
+Run these checks and print raw output:
+
+Check 1:
+grep -n "clash" artifacts/api-server/src/routes/index.ts
+
+Check 2:
+grep -n "ClashReports\|clash" artifacts/bimlog/src/pages/ProjectDetail.tsx | head -15
+
+Check 3:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clash_reports' ORDER BY ordinal_position;
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clashes' ORDER BY ordinal_position;
+
+Check 4:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+═══════════════════════════════════════════════════════════
+AFTER BOTH TASKS — REBUILD FRONTEND ONLY. PUBLISH.
+PRINT ALL CHECK OUTPUTS AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES.
+═══════════════════════════════════════════════════════════

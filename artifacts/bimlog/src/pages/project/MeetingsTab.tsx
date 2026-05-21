@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { isDebug } from "@/lib/debug";
 import {
   ClipboardList, CheckCircle2, Calendar, MapPin, Users,
   Sparkles, AlertTriangle, Plus, Download, ChevronDown,
@@ -163,7 +164,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       if (data.aiSummary) setAiSummaryText(data.aiSummary);
       setAudioProgress("");
     } catch (err) {
-      setError(`Audio upload failed: ${err instanceof Error ? err.message : String(err)}`);
+      setError(`Audio upload failed: ${err instanceof Error ? err.message : String(err)}${isDebug() ? " (debug: check console)" : ""}`);
     } finally {
       setAudioUploading(false);
       setAudioProgress("");

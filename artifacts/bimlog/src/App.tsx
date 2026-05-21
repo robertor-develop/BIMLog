@@ -28,6 +28,7 @@ import { Contact } from "@/pages/Contact";
 import { Features } from "@/pages/Features";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
+import { DebugBanner } from "@/components/DebugBanner";
 import { LangToggle } from "@/components/layout/LangToggle";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <DebugBanner />
       <I18nProvider>
         <ConfigProvider>
         <TooltipProvider>

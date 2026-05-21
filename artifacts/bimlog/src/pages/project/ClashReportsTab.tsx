@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, Fragment } from "react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { Upload, ChevronLeft, AlertTriangle } from "lucide-react";
+import { isDebug } from "@/lib/debug";
 
 const API = "/api/v1";
 
@@ -99,7 +100,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        setError(d.message || d.error || "Upload failed");
+        const debugMsg = isDebug() ? ` | Raw: ${JSON.stringify(d)}` : "";
+        setError((d.message || d.error || "Upload failed") + debugMsg);
         return;
       }
       const data = await r.json();
