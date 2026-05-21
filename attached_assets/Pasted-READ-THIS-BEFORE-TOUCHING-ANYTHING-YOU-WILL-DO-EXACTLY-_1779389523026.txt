@@ -1,0 +1,189 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL ALL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+
+═══════════════════════════════════════════════════════════
+TASK — ADD SMART AUDIO CHUNKING TO TRANSCRIBE-AUDIO ENDPOINT
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/api-server/src/routes/meeting_minutes.ts
+
+Find the existing POST /projects/:projectId/meetings/transcribe-audio endpoint.
+Replace the entire endpoint handler with this new version:
+
+router.post("/projects/:projectId/meetings/transcribe-audio",
+  authMiddleware,
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } }).single("audio"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      // Check user has OpenAI key
+      const [userRow] = await db.select({ openaiApiKey: usersTable.openaiApiKey })
+        .from(usersTable)
+        .where(eq(usersTable.id, req.user!.userId));
+      if (!userRow?.openaiApiKey) {
+        res.status(400).json({ error: "no_openai_key", message: "OpenAI API key not configured. Add it in your Profile." });
+        return;
+      }
+
+      if (!req.file) {
+        res.status(400).json({ error: "no_file", message: "No audio file uploaded." });
+        return;
+      }
+
+      const allowed = ["audio/mpeg","audio/mp4","audio/x-m4a","audio/wav","audio/webm","audio/ogg","video/mp4","audio/x-wav"];
+      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
+      const allowedExts = ["mp3","mp4","m4a","wav","webm","ogg"];
+      if (!allowedExts.includes(ext)) {
+        res.status(400).json({ error: "invalid_format", message: "Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG." });
+        return;
+      }
+
+      const CHUNK_SIZE = 20 * 1024 * 1024; // 20MB per chunk
+      const fileBuffer = req.file.buffer;
+      const fileSizeMB = Math.round(fileBuffer.length / 1024 / 1024);
+
+      // Helper: transcribe one buffer via Whisper
+      async function transcribeBuffer(buf: Buffer, filename: string): Promise<string> {
+        const formData = new FormData();
+        const blob = new Blob([buf], { type: "audio/mpeg" });
+        formData.append("file", blob, filename);
+        formData.append("model", "whisper-1");
+        const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${userRow.openaiApiKey}` },
+          body: formData,
+        });
+        if (!whisperRes.ok) {
+          const err = await whisperRes.text();
+          throw new Error(`Whisper error: ${err}`);
+        }
+        const data = await whisperRes.json() as { text: string };
+        return data.text ?? "";
+      }
+
+      let fullTranscript = "";
+
+      if (fileBuffer.length <= CHUNK_SIZE) {
+        // Single upload — no chunking needed
+        // Compress to mono MP3 first using ffmpeg
+        const { execSync } = await import("child_process");
+        const os = await import("os");
+        const fs = await import("fs");
+        const path = await import("path");
+        const tmpDir = os.tmpdir();
+        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
+        const outputPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        fs.writeFileSync(inputPath, fileBuffer);
+        try {
+          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y 2>/dev/null`);
+          const compressed = fs.readFileSync(outputPath);
+          fullTranscript = await transcribeBuffer(compressed, "audio.mp3");
+        } finally {
+          try { fs.unlinkSync(inputPath); } catch {}
+          try { fs.unlinkSync(outputPath); } catch {}
+        }
+      } else {
+        // Large file — compress first then chunk
+        const { execSync } = await import("child_process");
+        const os = await import("os");
+        const fs = await import("fs");
+        const path = await import("path");
+        const tmpDir = os.tmpdir();
+        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
+        const compressedPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        fs.writeFileSync(inputPath, fileBuffer);
+
+        try {
+          // Compress to mono 64kbps MP3
+          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y 2>/dev/null`);
+          const compressedBuffer = fs.readFileSync(compressedPath);
+          const compressedSizeMB = Math.round(compressedBuffer.length / 1024 / 1024);
+
+          if (compressedBuffer.length <= CHUNK_SIZE) {
+            // Compression was enough — single transcription
+            fullTranscript = await transcribeBuffer(compressedBuffer, "audio.mp3");
+          } else {
+            // Still too large — split into chunks
+            const numChunks = Math.ceil(compressedBuffer.length / CHUNK_SIZE);
+            const transcripts: string[] = [];
+            for (let i = 0; i < numChunks; i++) {
+              const start = i * CHUNK_SIZE;
+              const end = Math.min(start + CHUNK_SIZE, compressedBuffer.length);
+              const chunk = compressedBuffer.subarray(start, end);
+              const chunkPath = path.join(tmpDir, `bimlog_chunk_${Date.now()}_${i}.mp3`);
+              fs.writeFileSync(chunkPath, chunk);
+              try {
+                const chunkTranscript = await transcribeBuffer(chunk, `chunk_${i}.mp3`);
+                transcripts.push(chunkTranscript);
+              } finally {
+                try { fs.unlinkSync(chunkPath); } catch {}
+              }
+            }
+            fullTranscript = transcripts.join(" ");
+          }
+        } finally {
+          try { fs.unlinkSync(inputPath); } catch {}
+          try { fs.unlinkSync(compressedPath); } catch {}
+        }
+      }
+
+      // Claude extraction
+      const anthropic = new Anthropic();
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        messages: [{
+          role: "user",
+          content: `You are a construction project coordinator assistant.
+Extract structured meeting information from this transcript.
+Return ONLY valid JSON, no markdown, no explanation.
+
+Transcript:
+${fullTranscript}
+
+Return this exact JSON structure:
+{
+  "title": "meeting title or topic if mentioned",
+  "agenda": ["item 1", "item 2"],
+  "attendees": [{ "trade": "", "company": "", "fullName": "", "role": "", "email": "", "phone": "" }],
+  "rfis": [{ "rfiNumber": "", "description": "", "status": "PENDING", "responsible": "" }],
+  "deliverables": [{ "floor": "", "description": "", "plumbing": "", "hvac": "", "fireProt": "", "electrical": "", "other": "", "coordinator": "", "deadline": "" }],
+  "viewpoints": [{ "floor": "", "responsible": "", "holdUps": "", "viewpoint": "", "description": "", "deadline": "" }],
+  "aiSummary": "two sentence summary of the meeting"
+}
+For deliverable status fields use only: PENDING, COMPLETE, N/A, or empty string.
+For deadlines use MM-DD-YY format if mentioned.
+If information is not mentioned use empty string or empty array.`
+        }],
+      });
+
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+      const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+      res.json({ ...parsed, transcript: fullTranscript, fileSizeMB });
+
+    } catch (err) {
+      res.status(500).json({ error: "transcription_failed", message: err instanceof Error ? err.message : "Transcription failed" });
+    }
+  }
+);
+
+═══════════════════════════════════════════════════════════
+TASK 2 — UPDATE FRONTEND TO SHOW SIZE INFO AND PROGRESS
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+Find the handleAudioUpload function.
+
+CHANGE 1 — Remove the 25MB size check entirely:
+Find and delete these lines:
+    if (file.size > 25 * 1024 * 1024) {
+      setError("File too large. Maximum 25MB.");
+      return;
+    }
+
+CHANGE 2 — Update the progress messa
