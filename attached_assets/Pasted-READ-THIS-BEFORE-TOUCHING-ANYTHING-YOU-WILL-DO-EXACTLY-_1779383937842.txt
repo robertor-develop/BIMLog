@@ -1,3 +1,24 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT ADD FEATURES. DO NOT IMPROVE THINGS. DO NOT REFACTOR OTHER FILES.
+DO NOT TOUCH ANY FILE NOT EXPLICITLY LISTED HERE.
+DO NOT PUBLISH UNTIL ALL CHECKS PASS.
+AFTER EVERY STEP PRINT THE FULL CHECK OUTPUT AS PLAIN TEXT IN THE CHAT.
+NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+IF YOU DO ANYTHING NOT IN THIS INSTRUCTION YOU HAVE FAILED.
+
+═══════════════════════════════════════════════════════════
+TASK — REPLACE MeetingsTab.tsx WITH THE EXACT CODE BELOW
+═══════════════════════════════════════════════════════════
+
+Replace the ENTIRE contents of:
+artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+With EXACTLY this code. Do not change a single character.
+Do not add imports. Do not remove imports. Do not reformat.
+Copy it exactly as written:
+
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -602,3 +623,21 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     </div>
   );
 }
+
+═══════════════════════════════════════════════════════════
+AFTER WRITING THE FILE — RUN THESE CHECKS
+DO NOT SKIP. DO NOT PUBLISH UNTIL BOTH PASS.
+PRINT EVERY LINE OF OUTPUT AS PLAIN TEXT IN THE CHAT.
+═══════════════════════════════════════════════════════════
+
+Check 1 — TypeScript errors (expected: same number as before, no new errors):
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Check 2 — Confirm key sections exist in the new file:
+grep -n "SectionHeader\|Deliverable\|Viewpoint\|RFIRow\|buildNotes\|exportPDF\|generateAISummary" artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+REBUILD FRONTEND ONLY.
+DO NOT TOUCH THE BACKEND.
+DO NOT TOUCH ANY OTHER FILE.
+PUBLISH.
+PRINT ALL CHECK OUTPUT AS PLAIN TEXT IN THE CHAT. NO COLLAPSED BOXES.
