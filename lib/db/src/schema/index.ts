@@ -25,3 +25,4 @@ export * from "./action-items";
 export * from "./project-milestones";
 export * from "./coordination_intake_events";
 export * from "./company_profiles";
+export * from "./clash_reports";

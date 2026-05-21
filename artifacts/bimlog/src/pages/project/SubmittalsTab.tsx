@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useListSubmittals, useCreateSubmittal } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -11,7 +11,7 @@ import * as XLSX from "xlsx";
 import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
   Sparkles, CheckCircle2, Clock, Search, Filter, ExternalLink, Eye, Shield,
-  BookOpen, List, Loader2, Copy, TriangleAlert,
+  BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList,
 } from "lucide-react";
 import { format, differenceInDays, isValid } from "date-fns";
 
@@ -216,10 +216,144 @@ function AiBadge({ result }: { result: "pass" | "possible_issue" | "fail" }) {
   );
 }
 
+// ─── Submittal Tracking List ──────────────────────────────────────────────────
+function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
+  submittals: Submittal[]; lang: string; onGoSubmittals: () => void;
+}) {
+  const { toast } = useToast();
+
+  if (submittals.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
+        <ClipboardList size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
+        <div style={{ fontWeight: 600, marginBottom: 10 }}>
+          {w("No submittals yet. Create submittals in the Submittals tab to see them here.",
+             "Sin entregables aún. Crea entregables en la pestaña de Entregables para verlos aquí.", lang)}
+        </div>
+        <Button size="sm" onClick={onGoSubmittals}>
+          {w("Go to Submittals", "Ir a Entregables", lang)}
+        </Button>
+      </div>
+    );
+  }
+
+  const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Other"];
+  function tradeOf(s: Submittal): string {
+    const t = (s.submittalCategory ?? s.submittalType ?? "").toLowerCase();
+    if (t.includes("plumb")) return "Plumbing";
+    if (t.includes("hvac") || t.includes("mechanical")) return "HVAC";
+    if (t.includes("fire")) return "Fire Protection";
+    if (t.includes("electr")) return "Electrical";
+    return "Other";
+  }
+  function floorOf(s: Submittal): string {
+    return (s as any).level || (s as any).floor || s.drawingNumber || w("Unassigned", "Sin asignar", lang);
+  }
+
+  const grouped: Record<string, Record<string, Submittal[]>> = {};
+  for (const s of submittals) {
+    const tr = tradeOf(s);
+    const fl = floorOf(s);
+    if (!grouped[tr]) grouped[tr] = {};
+    if (!grouped[tr][fl]) grouped[tr][fl] = [];
+    grouped[tr][fl].push(s);
+  }
+
+  function approvalCell(s: Submittal) {
+    const d = (s.reviewDecision ?? "").toLowerCase();
+    let bg = "#F3F4F6", color = "#374151", label = w("Pending", "Pendiente", lang);
+    if (d === "approved") { bg = "#DCFCE7"; color = "#16A34A"; label = w("Approved", "Aprobado", lang); }
+    else if (d === "approved_as_noted" || d === "approved as noted") { bg = "#FEF3C7"; color = "#D97706"; label = w("Approved as Noted", "Aprobado c/Notas", lang); }
+    else if (d === "rejected") { bg = "#FEE2E2"; color = "#DC2626"; label = w("Rejected", "Rechazado", lang); }
+    else if (d === "for_record" || d === "for record") { bg = "#DBEAFE"; color = "#1D4ED8"; label = w("For Record", "Para Registro", lang); }
+    return (
+      <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 10, fontSize: 11, fontWeight: 700, background: bg, color }}>
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: "#1E3A5F" }}>
+            {w("Shop Drawing Submittal Tracker", "Seguimiento de Entregables", lang)}
+          </div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+            {w("Latest version and RFI status per drawing — share with client",
+               "Última versión y estado de RFI por plano — compartir con cliente", lang)}
+          </div>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => toast({ title: w("Export PDF coming soon", "Exportar PDF próximamente", lang) })}>
+          <Download style={{ width: 13, height: 13, marginRight: 4 }} />
+          {w("Export PDF", "Exportar PDF", lang)}
+        </Button>
+      </div>
+
+      <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#F9FAFB" }}>
+              {["Floor","Shop","Sleeve V","Sleeve H","Submittal","Date","Description","Status","Version","RFI Open","RFI Close","RFI Description"].map(h => (
+                <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "#374151",
+                  textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {TRADE_ORDER.filter(tr => grouped[tr]).map(tr => (
+              <Fragment key={tr}>
+                <tr>
+                  <td colSpan={12} style={{ background: "#1E3A5F", color: "white", padding: "6px 12px",
+                    fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr}</td>
+                </tr>
+                {Object.keys(grouped[tr]).sort().map(fl => (
+                  <Fragment key={tr + fl}>
+                    <tr>
+                      <td colSpan={12} style={{ background: "#F0F7FF", color: "#1E40AF", padding: "5px 12px",
+                        fontWeight: 700, fontSize: 11 }}>{fl}</td>
+                    </tr>
+                    {grouped[tr][fl].map(s => {
+                      const isShop = (s.submittalType ?? "").toLowerCase().includes("shop");
+                      return (
+                        <tr key={s.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{fl}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{isShop ? "✓" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("vert") ? "X" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("horiz") ? "X" : ""}</td>
+                          <td style={{ padding: "6px 10px" }}>{approvalCell(s)}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, whiteSpace: "nowrap" }}>
+                            {s.reviewedAt ? format(new Date(s.reviewedAt), "MM/dd/yy") : "—"}
+                          </td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, maxWidth: 240 }}>{s.title}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{s.status}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, color: "#374151", whiteSpace: "nowrap" }}>
+                            R{(s as any).revisionNumber ?? 0}
+                          </td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "—"}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>—</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", maxWidth: 200 }}>
+                            {s.ballInCourt ? `${w("Ball in Court","Pelota en Cancha", lang)}: ${s.ballInCourt}` : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
+                ))}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main SubmittalsTab ───────────────────────────────────────────────────────
 export function SubmittalsTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
-  const [view, setView] = useState<"register" | "submittals">("submittals");
+  const [view, setView] = useState<"register" | "submittals" | "tracking">("submittals");
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
 
@@ -275,6 +409,19 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
               <BookOpen style={{ width: 12, height: 12 }} />
               {w("Register", "Registro", lang)}
             </button>
+            <button
+              onClick={() => setView("tracking")}
+              style={{
+                padding: "5px 12px", borderRadius: 5, border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                background: view === "tracking" ? "white" : "transparent",
+                color: view === "tracking" ? "#1E3A5F" : "#6B7280",
+                boxShadow: view === "tracking" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                display: "flex", alignItems: "center", gap: 5,
+              }}
+            >
+              <ClipboardList style={{ width: 12, height: 12 }} />
+              {w("Tracking List", "Lista de Seguimiento", lang)}
+            </button>
           </div>
           {canWrite && view === "submittals" && (
             <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
@@ -298,6 +445,8 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
 
       {view === "register" ? (
         <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
+      ) : view === "tracking" ? (
+        <SubmittalTrackingList submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
       ) : (
         <SubmittalsList
           projectId={projectId}

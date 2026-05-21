@@ -1,0 +1,700 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL ALL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+IF YOU DO ANYTHING NOT IN THIS INSTRUCTION YOU HAVE FAILED.
+
+═══════════════════════════════════════════════════════════
+STEP 1 — FIX CLASH TABLES IN DB
+═══════════════════════════════════════════════════════════
+
+In the Drizzle schema file find clash_reports and clashes.
+They exist but have zero columns. Add all columns now.
+
+clash_reports:
+id serial primary key
+project_id integer not null references projects.id
+uploaded_by_id integer not null references users.id
+file_name text not null
+format text not null
+total_clashes integer default 0
+p1_count integer default 0
+p2_count integer default 0
+p3_count integer default 0
+p4_count integer default 0
+status text default 'processing'
+ai_summary text
+created_at timestamp default now()
+updated_at timestamp default now()
+
+clashes:
+id serial primary key
+clash_report_id integer not null references clash_reports.id
+project_id integer not null references projects.id
+clash_id_original text
+description text
+element_1 text
+element_2 text
+discipline_1 text
+discipline_2 text
+grid_location text
+level text
+clash_type text
+priority text
+priority_reason text
+status text default 'open'
+assigned_to_name text
+assigned_to_email text
+linked_rfi_id integer
+resolution_notes text
+due_date timestamp
+created_at timestamp default now()
+updated_at timestamp default now()
+
+Push schema to DB.
+
+Check 1:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clash_reports' ORDER BY ordinal_position;
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clashes' ORDER BY ordinal_position;
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 2 — BUILD CLASH REPORTS BACKEND
+═══════════════════════════════════════════════════════════
+
+Create new file: artifacts/api-server/src/routes/clash_reports.ts
+
+Import: Router from express, db, clashReportsTable and clashesTable from schema,
+eq desc from drizzle-orm, authMiddleware requireProjectMember requirePermission from middlewares,
+multer, XLSX from xlsx, Anthropic from anthropic sdk, activityLogTable from schema.
+
+const router = Router();
+const anthropic = new Anthropic();
+
+ENDPOINT 1 — GET /projects/:projectId/clash-reports
+authMiddleware, requireProjectMember()
+Return all clash_reports for projectId ordered by created_at desc.
+
+ENDPOINT 2 — POST /projects/:projectId/clash-reports/upload
+authMiddleware, requirePermission("admin","write")
+multer memoryStorage limit 50MB single field "file"
+
+Logic:
+const ext = req.file.originalname.split(".").pop().toLowerCase();
+if (!["xlsx","xls","csv"].includes(ext)) return 400 invalid format
+
+Parse with XLSX:
+const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+const sheet = workbook.Sheets[workbook.SheetNames[0]];
+const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" }) as any[][];
+
+Find header row index — first row where more than 2 cells have text content.
+const headerIdx = rows.findIndex(r => r.filter((c:any) => String(c).trim()).length > 2);
+if headerIdx === -1 use row 0.
+const headers = rows[headerIdx].map((h:any) => String(h).toLowerCase().trim());
+
+Column mapping function:
+function colIdx(keywords: string[]): number {
+  for (const kw of keywords) {
+    const i = headers.findIndex(h => h.includes(kw));
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+const idCol = colIdx(["clash","id","number","#"]);
+const descCol = colIdx(["description","issue","name","title","comment"]);
+const el1Col = colIdx(["element 1","item 1","component 1","layer 1"]);
+const el2Col = colIdx(["element 2","item 2","component 2","layer 2"]);
+const disc1Col = colIdx(["discipline","trade","system","category"]);
+const disc2Col = colIdx(["discipline 2","trade 2","system 2"]);
+const locCol = colIdx(["location","grid","area","gridpoint"]);
+const levelCol = colIdx(["level","floor","elevation"]);
+const typeCol = colIdx(["type","clash type","kind"]);
+const assignCol = colIdx(["responsible","assigned","owner","contractor"]);
+const statusCol = colIdx(["status","state"]);
+
+const dataRows = rows.slice(headerIdx + 1);
+const parsed = dataRows
+  .map((row: any[]) => ({
+    clashIdOriginal: String(row[idCol] ?? row[0] ?? "").trim(),
+    description: String(row[descCol] ?? row[1] ?? "").trim(),
+    element1: String(row[el1Col] ?? row[2] ?? "").trim(),
+    element2: String(row[el2Col] ?? row[3] ?? "").trim(),
+    discipline1: String(row[disc1Col] ?? row[4] ?? "").trim(),
+    discipline2: String(row[disc2Col] ?? "").trim(),
+    gridLocation: String(row[locCol] ?? row[5] ?? "").trim(),
+    level: String(row[levelCol] ?? row[6] ?? "").trim(),
+    clashType: String(row[typeCol] ?? "").trim(),
+    assignedToName: String(row[assignCol] ?? "").trim(),
+    status: "open",
+  }))
+  .filter((r: any) => r.description || r.clashIdOriginal);
+
+Insert clash_report record:
+const [report] = await db.insert(clashReportsTable).values({
+  projectId,
+  uploadedById: req.user!.userId,
+  fileName: req.file.originalname,
+  format: "excel",
+  totalClashes: parsed.length,
+  status: "processing",
+}).returning();
+
+Insert all clashes:
+if (parsed.length > 0) {
+  await db.insert(clashesTable).values(
+    parsed.map(p => ({
+      clashReportId: report.id,
+      projectId,
+      clashIdOriginal: p.clashIdOriginal || null,
+      description: p.description || null,
+      element1: p.element1 || null,
+      element2: p.element2 || null,
+      discipline1: p.discipline1 || null,
+      discipline2: p.discipline2 || null,
+      gridLocation: p.gridLocation || null,
+      level: p.level || null,
+      clashType: p.clashType || null,
+      assignedToName: p.assignedToName || null,
+      status: "open",
+    }))
+  );
+}
+
+Return immediately:
+res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
+
+Then run AI ranking async (do not await):
+rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
+
+RANK FUNCTION:
+async function rankClashesWithAI(reportId: number, projectId: number, clashList: any[], anthropicClient: Anthropic) {
+  try {
+    const msg = await anthropicClient.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2000,
+      messages: [{
+        role: "user",
+        content: `You are a BIM coordination expert. Rank each clash by construction priority.
+P1 = life safety or critical path blocker, resolve immediately.
+P2 = must resolve this week, affects schedule.
+P3 = monitor, resolve within 2 weeks.
+P4 = cosmetic or minor, low urgency.
+Return a JSON array only. No markdown. No explanation.
+Each item: { "index": 0, "priority": "P1", "priority_reason": "one sentence" }
+
+Clashes: ${JSON.stringify(clashList.map((c,i) => ({ index: i, description: c.description, element_1: c.element1, element_2: c.element2, discipline_1: c.discipline1, level: c.level })))}`
+      }],
+    });
+    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+    const ranked = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as { index: number; priority: string; priority_reason: string }[];
+    const allClashes = await db.select().from(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+    for (const r of ranked) {
+      if (allClashes[r.index]) {
+        await db.update(clashesTable).set({ priority: r.priority, priorityReason: r.priority_reason }).where(eq(clashesTable.id, allClashes[r.index].id));
+      }
+    }
+    const p1 = ranked.filter(r => r.priority === "P1").length;
+    const p2 = ranked.filter(r => r.priority === "P2").length;
+    const p3 = ranked.filter(r => r.priority === "P3").length;
+    const p4 = ranked.filter(r => r.priority === "P4").length;
+    await db.update(clashReportsTable).set({
+      status: "complete", p1Count: p1, p2Count: p2, p3Count: p3, p4Count: p4,
+      aiSummary: `${p1} critical, ${p2} this week, ${p3} monitor, ${p4} low priority.`,
+      updatedAt: new Date(),
+    }).where(eq(clashReportsTable.id, reportId));
+  } catch {
+    await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
+  }
+}
+
+ENDPOINT 3 — GET /projects/:projectId/clash-reports/:reportId
+authMiddleware, requireProjectMember()
+Return report + all its clashes.
+Accept query params priority, status, discipline — filter clashes accordingly.
+
+ENDPOINT 4 — PATCH /projects/:projectId/clash-reports/:reportId/clashes/:clashId
+authMiddleware, requireProjectMember()
+Update: status, resolution_notes, assigned_to_name, assigned_to_email, due_date.
+Set updatedAt = new Date().
+Return updated clash.
+
+Register in artifacts/api-server/src/routes/index.ts:
+import clashReportsRouter from "./clash_reports";
+router.use(clashReportsRouter);
+
+Check 2:
+grep -n "clash" artifacts/api-server/src/routes/index.ts
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 3 — BUILD ClashReportsTab.tsx
+═══════════════════════════════════════════════════════════
+
+Create new file: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+Write this complete file exactly:
+
+import { useState, useEffect, useRef } from "react";
+import { useAuthStore } from "@/store/auth";
+import { useI18n } from "@/lib/i18n";
+import { Upload, ChevronLeft, AlertTriangle } from "lucide-react";
+
+const API = "/api/v1";
+
+interface ClashReport {
+  id: number; fileName: string; format: string; totalClashes: number;
+  p1Count: number; p2Count: number; p3Count: number; p4Count: number;
+  status: string; aiSummary?: string; createdAt: string;
+}
+
+interface Clash {
+  id: number; clashIdOriginal?: string; description?: string;
+  element1?: string; element2?: string; discipline1?: string;
+  discipline2?: string; gridLocation?: string; level?: string;
+  priority?: string; priorityReason?: string; status: string;
+  assignedToName?: string; resolutionNotes?: string;
+}
+
+const P_COLORS: Record<string, { bg: string; text: string }> = {
+  P1: { bg: "#FEE2E2", text: "#DC2626" },
+  P2: { bg: "#FEF3C7", text: "#D97706" },
+  P3: { bg: "#FEF9C3", text: "#CA8A04" },
+  P4: { bg: "#F3F4F6", text: "#6B7280" },
+};
+
+function PBadge({ p }: { p?: string }) {
+  const c = P_COLORS[p ?? ""] ?? { bg: "#F3F4F6", text: "#6B7280" };
+  return (
+    <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11,
+      fontWeight: 700, background: c.bg, color: c.text }}>
+      {p ?? "—"}
+    </span>
+  );
+}
+
+export function ClashReportsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+  const { token } = useAuthStore();
+  const { lang } = useI18n();
+  const t = (en: string, es: string) => lang === "es" ? es : en;
+  const headers = { Authorization: `Bearer ${token}` };
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const [reports, setReports] = useState<ClashReport[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState("");
+  const [error, setError] = useState("");
+  const [selectedReport, setSelectedReport] = useState<ClashReport | null>(null);
+  const [clashes, setClashes] = useState<Clash[]>([]);
+  const [clashLoading, setClashLoading] = useState(false);
+  const [filterPriority, setFilterPriority] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [search, setSearch] = useState("");
+  const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
+
+  const loadReports = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports`, { headers });
+      if (r.ok) setReports(await r.json());
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadReports(); }, [projectId]);
+
+  const loadClashes = async (report: ClashReport) => {
+    setSelectedReport(report);
+    setClashLoading(true);
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/${report.id}`, { headers });
+      if (r.ok) {
+        const data = await r.json();
+        setClashes(data.clashes ?? []);
+      }
+    } finally { setClashLoading(false); }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!["xlsx","xls","csv"].includes(ext ?? "")) {
+      setError("Unsupported format. Use Excel (.xlsx, .xls) or CSV.");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    setUploadMsg("Uploading clash register...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/upload`, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setError(d.message || d.error || "Upload failed");
+        return;
+      }
+      const data = await r.json();
+      setUploadMsg(`${data.total_parsed} clashes imported. AI is ranking by priority...`);
+      await loadReports();
+      setTimeout(() => loadReports(), 5000);
+      setTimeout(() => { loadReports(); setUploadMsg(""); }, 12000);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const updateClash = async (clashId: number, updates: Partial<Clash>) => {
+    if (!selectedReport) return;
+    await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${clashId}`, {
+      method: "PATCH",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    setClashes(prev => prev.map(c => c.id === clashId ? { ...c, ...updates } : c));
+  };
+
+  const filteredClashes = clashes
+    .filter(c => filterPriority === "all" || c.priority === filterPriority)
+    .filter(c => filterStatus === "all" || c.status === filterStatus)
+    .filter(c => !search || (c.description ?? "").toLowerCase().includes(search.toLowerCase()) || (c.element1 ?? "").toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      const order = { P1: 0, P2: 1, P3: 2, P4: 3 };
+      return (order[a.priority as keyof typeof order] ?? 4) - (order[b.priority as keyof typeof order] ?? 4);
+    });
+
+  if (selectedReport) return (
+    <div className="tab-content-wrapper">
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <button className="btn btn-outline btn-sm" onClick={() => setSelectedReport(null)}
+          style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <ChevronLeft size={14} /> {t("Back", "Volver")}
+        </button>
+        <div>
+          <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{selectedReport.fileName}</h2>
+          <p style={{ margin: "2px 0 0", color: "#6B7280", fontSize: 12 }}>
+            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
+          </p>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 16 }}>
+        {[
+          { label: t("Total","Total"), value: selectedReport.totalClashes, color: "#1D4ED8" },
+          { label: "P1 Critical", value: selectedReport.p1Count, color: "#DC2626" },
+          { label: "P2 This Week", value: selectedReport.p2Count, color: "#D97706" },
+          { label: "P3 Monitor", value: selectedReport.p3Count, color: "#CA8A04" },
+          { label: "P4 Low", value: selectedReport.p4Count, color: "#6B7280" },
+        ].map(s => (
+          <div key={s.label} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px" }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {selectedReport.aiSummary && (
+        <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8,
+          padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#1E40AF" }}>
+          {selectedReport.aiSummary}
+        </div>
+      )}
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}>
+          <option value="all">{t("All Priorities","Todas las Prioridades")}</option>
+          <option value="P1">P1 Critical</option>
+          <option value="P2">P2 This Week</option>
+          <option value="P3">P3 Monitor</option>
+          <option value="P4">P4 Low</option>
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}>
+          <option value="all">{t("All Statuses","Todos los Estados")}</option>
+          <option value="open">{t("Open","Abierto")}</option>
+          <option value="in_progress">{t("In Progress","En Progreso")}</option>
+          <option value="resolved">{t("Resolved","Resuelto")}</option>
+        </select>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t("Search clashes...","Buscar choques...")}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, flex: 1, minWidth: 200 }} />
+      </div>
+
+      {clashLoading
+        ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading clashes...","Cargando choques...")}</div>
+        : (
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "#1E3A5F" }}>
+                  {["Priority","ID","Description","Element 1","Element 2","Discipline","Level","Status","Assigned To","Notes"].map(h => (
+                    <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
+                      color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClashes.map(c => (
+                  <>
+                    <tr key={c.id} style={{ borderBottom: "1px solid #F3F4F6",
+                      background: c.status === "resolved" ? "#F0FDF4" : "white" }}>
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><PBadge p={c.priority} /></td>
+                      <td style={{ padding: "8px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{c.clashIdOriginal || "—"}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 12, maxWidth: 200 }}>{c.description || "—"}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.element1 || "—"}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.element2 || "—"}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.discipline1 || "—"}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 11, whiteSpace: "nowrap" }}>{c.level || "—"}</td>
+                      <td style={{ padding: "8px 10px" }}>
+                        <select value={c.status}
+                          onChange={e => updateClash(c.id, { status: e.target.value })}
+                          style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11,
+                            padding: "2px 4px", fontWeight: 600,
+                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "in_progress" ? "#DBEAFE" : "#FEF3C7",
+                            color: c.status === "resolved" ? "#16A34A" : c.status === "in_progress" ? "#1D4ED8" : "#D97706" }}>
+                          <option value="open">Open</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="wont_fix">Won't Fix</option>
+                        </select>
+                      </td>
+                      <td style={{ padding: "8px 10px" }}>
+                        <input value={c.assignedToName || ""}
+                          onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, assignedToName: e.target.value } : x))}
+                          onBlur={e => updateClash(c.id, { assignedToName: e.target.value })}
+                          style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px",
+                            fontSize: 11, width: 100 }} />
+                      </td>
+                      <td style={{ padding: "8px 10px" }}>
+                        <button className="btn btn-sm btn-outline"
+                          onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: !prev[c.id] }))}>
+                          {expandedNotes[c.id] ? "▲" : "▼"}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedNotes[c.id] && (
+                      <tr key={`notes-${c.id}`} style={{ background: "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+                        <td colSpan={10} style={{ padding: "8px 16px" }}>
+                          <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>
+                            {c.priorityReason && <div style={{ marginBottom: 6, fontStyle: "italic" }}>AI: {c.priorityReason}</div>}
+                            Resolution Notes:
+                          </div>
+                          <textarea value={c.resolutionNotes || ""}
+                            onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, resolutionNotes: e.target.value } : x))}
+                            onBlur={e => updateClash(c.id, { resolutionNotes: e.target.value })}
+                            rows={2} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6,
+                              padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                ))}
+              </tbody>
+            </table>
+            {filteredClashes.length === 0 && (
+              <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
+                {t("No clashes match your filters","Ningún choque coincide con los filtros")}
+              </div>
+            )}
+          </div>
+        )
+      }
+    </div>
+  );
+
+  return (
+    <div className="tab-content-wrapper">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Clash Reports","Reportes de Choques")}</h2>
+          <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
+            {t("Upload clash register from Navisworks, Revit, or Excel — AI ranks every clash by priority","Sube el registro de choques — IA clasifica por prioridad")}
+          </p>
+        </div>
+        {canWrite && (
+          <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
+            <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv"
+              onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
+            <div className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 6,
+              opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? "none" : "auto" }}>
+              <Upload size={14} />
+              {uploading ? t("Processing...","Procesando...") : t("Upload Clash Register","Subir Registro de Choques")}
+            </div>
+          </label>
+        )}
+      </div>
+
+      {error && (
+        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8,
+          padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
+          {error}
+        </div>
+      )}
+
+      {uploadMsg && (
+        <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8,
+          padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginBottom: 14,
+          display: "flex", alignItems: "center", gap: 8 }}>
+          <AlertTriangle size={14} /> {uploadMsg}
+        </div>
+      )}
+
+      {loading
+        ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading...","Cargando...")}</div>
+        : reports.length === 0
+          ? (
+            <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
+              <Upload size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>
+                {t("No clash reports yet","Sin reportes de choques aún")}
+              </div>
+              <div style={{ fontSize: 13 }}>
+                {t("Upload your clash register Excel file to get started","Sube tu archivo Excel de choques para comenzar")}
+              </div>
+            </div>
+          )
+          : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {reports.map(r => (
+                <div key={r.id} style={{ background: "white", border: "1px solid #E5E7EB",
+                  borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{r.fileName}</div>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalClashes} {t("clashes","choques")}
+                      {r.aiSummary && <span> · {r.aiSummary}</span>}
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                        background: r.status === "complete" ? "#DCFCE7" : "#FEF3C7",
+                        color: r.status === "complete" ? "#16A34A" : "#D97706" }}>
+                        {r.status === "complete" ? t("Complete","Completo") : t("Processing","Procesando")}
+                      </span>
+                      {r.p1Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FEE2E2", color: "#DC2626" }}>P1: {r.p1Count}</span>}
+                      {r.p2Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FEF3C7", color: "#D97706" }}>P2: {r.p2Count}</span>}
+                      {r.p3Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#FEF9C3", color: "#CA8A04" }}>P3: {r.p3Count}</span>}
+                      {r.p4Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>P4: {r.p4Count}</span>}
+                    </div>
+                  </div>
+                  <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)}
+                    style={{ marginLeft: 16 }}>
+                    {t("View Clashes","Ver Choques")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )
+      }
+    </div>
+  );
+}
+
+═══════════════════════════════════════════════════════════
+STEP 4 — WIRE ClashReportsTab INTO ProjectDetail
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/pages/ProjectDetail.tsx
+
+Find where tabs are imported and rendered.
+If ClashReportsTab is already imported as a placeholder replace the import.
+If not already imported add:
+import { ClashReportsTab } from "./project/ClashReportsTab";
+
+Find where the clash tab is rendered (look for "clash" or "Clash" in the tab rendering).
+Make sure it renders:
+<ClashReportsTab projectId={projectId} canWrite={canWrite} />
+
+Check 3:
+grep -n "ClashReports\|clash" artifacts/bimlog/src/pages/ProjectDetail.tsx | head -15
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 5 — BUILD SUBMITTAL TRACKING LIST
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
+
+DO NOT REWRITE THE FILE.
+ADD a new view called "Tracking List" to the existing view toggle.
+
+Find the existing view toggle buttons (there should be buttons for different views).
+Add a new button: "Tracking List" that sets view to "tracking".
+
+When view === "tracking" render this component inline:
+
+A full submittal tracking table grouped by trade then by floor.
+
+HEADER ROW above the table:
+Title: "Shop Drawing Submittal Tracker"
+Subtitle: "Latest version and RFI status per drawing — share with client"
+Button: "Export PDF" (disabled for now, shows coming soon toast on click)
+
+TABLE STRUCTURE:
+Group rows by trade (Plumbing, HVAC, Fire Protection, Electrical, Other).
+Show a trade header row spanning all columns:
+  background #1E3A5F, white text, bold, uppercase trade name.
+
+Within each trade group by floor/level.
+Show floor sub-header:
+  background #F0F7FF, blue text, bold floor name.
+
+Data columns per row:
+  FLOOR | SHOP (checkbox icon if shop drawing) | SLEEVE VERTICAL (X if applicable) | SLEEVE HORIZONTAL (X if applicable) | SUBMITTAL (approval status) | DATE | DESCRIPTION | STATUS | VERSION | RFI OPEN | RFI CLOSE | RFI DESCRIPTION
+
+Pull data from existing submittals for this project via:
+GET /api/v1/projects/:projectId/submittals
+
+Map submittal fields:
+  title → DESCRIPTION
+  trade → trade grouping
+  status → SUBMITTAL status
+  review_decision → approval status (Approved / Approved as Noted / Rejected / Pending)
+  reviewed_at → DATE
+  revision_number → VERSION (show as R{revision_number}-V{version})
+  linked_rfi_id → RFI OPEN (show RFI number if open)
+  ball_in_court → current holder
+
+Status color coding:
+  Approved = green background #DCFCE7
+  Approved as Noted = yellow background #FEF3C7
+  Rejected = red background #FEE2E2
+  Pending / null = gray background #F3F4F6
+  For Record = blue background #DBEAFE
+
+If no submittals exist show:
+  Empty state: "No submittals yet. Create submittals in the Submittals tab to see them here."
+  With a button: "Go to Submittals" that switches view back to the main submittals view.
+
+Check 4:
+grep -n "tracking\|Tracking\|Shop Drawing\|trade.*group\|groupBy" artifacts/bimlog/src/pages/project/SubmittalsTab.tsx | head -15
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════════════════
+
+Check 5 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Check 6 — clash backend route exists:
+wc -l artifacts/api-server/src/routes/clash_reports.ts
+
+Check 7 — ClashReportsTab exists:
+wc -l artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text in chat. No collapsed boxes.
