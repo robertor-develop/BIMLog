@@ -251,21 +251,22 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
       const fileSizeMB = Math.round(fileBuffer.length / 1024 / 1024);
 
       async function transcribeBuffer(buf: Buffer, filename: string): Promise<string> {
-        const formData = new FormData();
-        const blob = new Blob([new Uint8Array(buf)], { type: "audio/mpeg" });
-        formData.append("file", blob, filename);
-        formData.append("model", "whisper-1");
-        const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${userRow.openaiApiKey}` },
-          body: formData,
-        });
-        if (!whisperRes.ok) {
-          const err = await whisperRes.text();
-          throw new Error(`Whisper error: ${err}`);
+        const fs = await import("fs");
+        const path = await import("path");
+        const os = await import("os");
+        const { OpenAI } = await import("openai");
+        const openaiClient = new OpenAI({ apiKey: userRow.openaiApiKey as string });
+        const tmpPath = path.join(os.tmpdir(), `whisper_${Date.now()}_${filename}`);
+        fs.writeFileSync(tmpPath, buf);
+        try {
+          const response = await openaiClient.audio.transcriptions.create({
+            file: fs.createReadStream(tmpPath) as any,
+            model: "whisper-1",
+          });
+          return response.text ?? "";
+        } finally {
+          try { fs.unlinkSync(tmpPath); } catch {}
         }
-        const data = await whisperRes.json() as { text: string };
-        return data.text ?? "";
       }
 
       let fullTranscript = "";
