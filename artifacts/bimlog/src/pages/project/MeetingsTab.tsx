@@ -411,26 +411,26 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
       <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16, marginBottom: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 150px 130px 1fr", gap: 12, alignItems: "start" }}>
-          <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Meeting #", "Reunión #")}</label>
-            <input className="input" value={meetingNumber} onChange={e => setMeetingNumber(e.target.value)} placeholder="01" style={{ marginTop: 4 }} />
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", width: 90, flexShrink: 0 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", marginBottom: 4, display: "block" }}>{t("Meeting #", "Reunión #")}</label>
+            <input className="input" value={meetingNumber} onChange={e => setMeetingNumber(e.target.value)} placeholder="01" style={{ marginTop: 0 }} />
           </div>
-          <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Title", "Título")} *</label>
-            <input className="input" required value={title} onChange={e => setTitle(e.target.value)} placeholder={t("e.g. Underground Coordination", "ej. Coordinación Subterránea")} style={{ marginTop: 4 }} />
+          <div style={{ display: "flex", flexDirection: "column", flex: 2, minWidth: 200 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", marginBottom: 4, display: "block" }}>{t("Title", "Título")} *</label>
+            <input className="input" required value={title} onChange={e => setTitle(e.target.value)} placeholder={t("e.g. Underground Coordination", "ej. Coordinación Subterránea")} style={{ marginTop: 0 }} />
           </div>
-          <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Date", "Fecha")} *</label>
-            <input className="input" type="date" required value={meetingDate} onChange={e => setMeetingDate(e.target.value)} style={{ marginTop: 4 }} />
+          <div style={{ display: "flex", flexDirection: "column", width: 150, flexShrink: 0 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", marginBottom: 4, display: "block" }}>{t("Date", "Fecha")} *</label>
+            <input className="input" type="date" required value={meetingDate} onChange={e => setMeetingDate(e.target.value)} style={{ marginTop: 0 }} />
           </div>
-          <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Time", "Hora")}</label>
-            <input className="input" type="time" value={meetingTime} onChange={e => setMeetingTime(e.target.value)} style={{ marginTop: 4 }} />
+          <div style={{ display: "flex", flexDirection: "column", width: 120, flexShrink: 0 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", marginBottom: 4, display: "block" }}>{t("Time", "Hora")}</label>
+            <input className="input" type="time" value={meetingTime} onChange={e => setMeetingTime(e.target.value)} style={{ marginTop: 0 }} />
           </div>
-          <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 4 }}>{t("Location", "Lugar")}</label>
-            <input className="input" value={location} onChange={e => setLocation(e.target.value)} placeholder={t("Conference Room / Zoom / Site", "Sala / Zoom / Obra")} />
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 160 }}>
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", marginBottom: 4, display: "block" }}>{t("Location", "Lugar")}</label>
+            <input className="input" value={location} onChange={e => setLocation(e.target.value)} placeholder={t("Conference Room / Zoom / Site", "Sala / Zoom / Obra")} style={{ marginTop: 0 }} />
           </div>
         </div>
       </div>
