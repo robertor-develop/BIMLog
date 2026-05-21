@@ -144,11 +144,11 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         body: formData,
       });
       if (!r.ok) {
-        const d = await r.json();
+        const d = await r.json().catch(() => ({ error: "parse_failed", message: "Could not read server response" }));
         if (d.error === "no_openai_key") {
           setShowNoKeyModal(true);
         } else {
-          setError(d.message || "Transcription failed");
+          setError(`Error: ${d.message || d.error || "Unknown — check API server logs"}`);
         }
         return;
       }
@@ -162,8 +162,8 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       if (data.viewpoints?.length) setViewpoints(data.viewpoints);
       if (data.aiSummary) setAiSummaryText(data.aiSummary);
       setAudioProgress("");
-    } catch {
-      setError("Audio upload failed. Please try again.");
+    } catch (err) {
+      setError(`Audio upload failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setAudioUploading(false);
       setAudioProgress("");
