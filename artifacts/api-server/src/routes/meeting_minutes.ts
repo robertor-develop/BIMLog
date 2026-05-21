@@ -11,6 +11,8 @@ import { sendEmail } from "../lib/email";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 
+const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
+
 const router: Router = Router();
 const anthropic = new Anthropic();
 const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -278,7 +280,7 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
         const outputPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
         fs.writeFileSync(inputPath, fileBuffer);
         try {
-          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y 2>/dev/null`);
+          execSync(`${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y`, { stdio: "pipe" });
           const compressed = fs.readFileSync(outputPath);
           fullTranscript = await transcribeBuffer(compressed, "audio.mp3");
         } finally {
@@ -296,7 +298,7 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
         fs.writeFileSync(inputPath, fileBuffer);
 
         try {
-          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y 2>/dev/null`);
+          execSync(`${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y`, { stdio: "pipe" });
           const compressedBuffer = fs.readFileSync(compressedPath);
 
           if (compressedBuffer.length <= CHUNK_SIZE) {
@@ -358,7 +360,9 @@ If information is not mentioned use empty string or empty array.`
       res.json({ ...parsed, transcript: fullTranscript, fileSizeMB });
 
     } catch (err) {
-      res.status(500).json({ error: "transcription_failed", message: err instanceof Error ? err.message : "Transcription failed" });
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.error("[transcribe-audio] FAILED:", errMsg);
+      res.status(500).json({ error: "transcription_failed", message: errMsg });
     }
   }
 );
