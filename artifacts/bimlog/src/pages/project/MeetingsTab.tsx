@@ -125,12 +125,15 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       setError("Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG.");
       return;
     }
-    if (file.size > 25 * 1024 * 1024) {
-      setError("File too large. Maximum 25MB.");
-      return;
-    }
     setAudioUploading(true);
-    setAudioProgress("Uploading audio...");
+    const fileSizeMB = Math.round(file.size / 1024 / 1024);
+    if (fileSizeMB > 100) {
+      setAudioProgress(`Large file (${fileSizeMB}MB) — compressing and splitting into parts. This may take a few minutes...`);
+    } else if (fileSizeMB > 25) {
+      setAudioProgress(`File is ${fileSizeMB}MB — compressing before upload...`);
+    } else {
+      setAudioProgress(`Uploading (${fileSizeMB}MB)...`);
+    }
     setError("");
     try {
       const formData = new FormData();
@@ -444,7 +447,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           </div>
           <div style={{ fontSize: 12, color: "#3B82F6", lineHeight: 1.5 }}>
             Upload an audio file and AI will auto-fill this entire form.
-            Supports MP3, MP4, M4A, WAV. Max 25MB.
+            Supports MP3, MP4, M4A, WAV, WebM, OGG. Any file size — large files are compressed and split automatically.
             {audioProgress && <span style={{ display: "block", marginTop: 4, fontWeight: 600 }}>{audioProgress}</span>}
           </div>
         </div>

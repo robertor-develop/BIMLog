@@ -218,56 +218,124 @@ router.patch("/projects/:projectId/action-items/:itemId", authMiddleware, requir
 });
 
 // ── POST /projects/:projectId/meetings/transcribe-audio ───────────────────────
-router.post(
-  "/projects/:projectId/meetings/transcribe-audio",
+router.post("/projects/:projectId/meetings/transcribe-audio",
   authMiddleware,
-  requireProjectMember(),
-  audioUpload.single("audio"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } }).single("audio"),
   async (req, res) => {
+    const projectId = Number(req.params.projectId);
     try {
+      const [userRow] = await db.select({ openaiApiKey: usersTable.openaiApiKey })
+        .from(usersTable)
+        .where(eq(usersTable.id, req.user!.userId));
+      if (!userRow?.openaiApiKey) {
+        res.status(400).json({ error: "no_openai_key", message: "OpenAI API key not configured. Add it in your Profile." });
+        return;
+      }
+
       if (!req.file) {
-        res.status(400).json({ error: "no_file", message: "No audio file provided" });
+        res.status(400).json({ error: "no_file", message: "No audio file uploaded." });
         return;
       }
 
-      const allowedExt = [".mp3", ".mp4", ".m4a", ".wav", ".webm", ".ogg"];
-      const allowedMime = ["audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/wav", "audio/wave", "audio/x-wav", "audio/webm", "video/webm", "audio/ogg", "video/mp4"];
-      const ext = "." + (req.file.originalname.split(".").pop() || "").toLowerCase();
-      if (!allowedExt.includes(ext) && !allowedMime.includes(req.file.mimetype)) {
-        res.status(400).json({ error: "unsupported_format", message: "Unsupported audio format. Use MP3, MP4, M4A, WAV, WebM, or OGG." });
+      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
+      const allowedExts = ["mp3","mp4","m4a","wav","webm","ogg"];
+      if (!allowedExts.includes(ext)) {
+        res.status(400).json({ error: "invalid_format", message: "Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG." });
         return;
       }
 
-      const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
-      if (!user?.openaiApiKey) {
-        res.status(400).json({ error: "no_openai_key", message: "OpenAI API key not configured" });
-        return;
+      const CHUNK_SIZE = 20 * 1024 * 1024;
+      const fileBuffer = req.file.buffer;
+      const fileSizeMB = Math.round(fileBuffer.length / 1024 / 1024);
+
+      async function transcribeBuffer(buf: Buffer, filename: string): Promise<string> {
+        const formData = new FormData();
+        const blob = new Blob([new Uint8Array(buf)], { type: "audio/mpeg" });
+        formData.append("file", blob, filename);
+        formData.append("model", "whisper-1");
+        const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${userRow.openaiApiKey}` },
+          body: formData,
+        });
+        if (!whisperRes.ok) {
+          const err = await whisperRes.text();
+          throw new Error(`Whisper error: ${err}`);
+        }
+        const data = await whisperRes.json() as { text: string };
+        return data.text ?? "";
       }
 
-      const form = new FormData();
-      const blob = new Blob([new Uint8Array(req.file.buffer)], { type: req.file.mimetype });
-      form.append("file", blob, req.file.originalname);
-      form.append("model", "whisper-1");
+      let fullTranscript = "";
 
-      const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${user.openaiApiKey}` },
-        body: form,
-      });
-      if (!whisperRes.ok) {
-        const errText = await whisperRes.text();
-        res.status(502).json({ error: "whisper_failed", message: `Whisper API error: ${errText}` });
-        return;
-      }
-      const whisperJson = await whisperRes.json() as { text?: string };
-      const transcript = whisperJson.text || "";
-      if (!transcript) {
-        res.status(502).json({ error: "empty_transcript", message: "Whisper returned empty transcript" });
-        return;
+      if (fileBuffer.length <= CHUNK_SIZE) {
+        const { execSync } = await import("child_process");
+        const os = await import("os");
+        const fs = await import("fs");
+        const path = await import("path");
+        const tmpDir = os.tmpdir();
+        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
+        const outputPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        fs.writeFileSync(inputPath, fileBuffer);
+        try {
+          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y 2>/dev/null`);
+          const compressed = fs.readFileSync(outputPath);
+          fullTranscript = await transcribeBuffer(compressed, "audio.mp3");
+        } finally {
+          try { fs.unlinkSync(inputPath); } catch {}
+          try { fs.unlinkSync(outputPath); } catch {}
+        }
+      } else {
+        const { execSync } = await import("child_process");
+        const os = await import("os");
+        const fs = await import("fs");
+        const path = await import("path");
+        const tmpDir = os.tmpdir();
+        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
+        const compressedPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        fs.writeFileSync(inputPath, fileBuffer);
+
+        try {
+          execSync(`ffmpeg -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y 2>/dev/null`);
+          const compressedBuffer = fs.readFileSync(compressedPath);
+
+          if (compressedBuffer.length <= CHUNK_SIZE) {
+            fullTranscript = await transcribeBuffer(compressedBuffer, "audio.mp3");
+          } else {
+            const numChunks = Math.ceil(compressedBuffer.length / CHUNK_SIZE);
+            const transcripts: string[] = [];
+            for (let i = 0; i < numChunks; i++) {
+              const start = i * CHUNK_SIZE;
+              const end = Math.min(start + CHUNK_SIZE, compressedBuffer.length);
+              const chunk = compressedBuffer.subarray(start, end);
+              const chunkPath = path.join(tmpDir, `bimlog_chunk_${Date.now()}_${i}.mp3`);
+              fs.writeFileSync(chunkPath, chunk);
+              try {
+                const chunkTranscript = await transcribeBuffer(chunk, `chunk_${i}.mp3`);
+                transcripts.push(chunkTranscript);
+              } finally {
+                try { fs.unlinkSync(chunkPath); } catch {}
+              }
+            }
+            fullTranscript = transcripts.join(" ");
+          }
+        } finally {
+          try { fs.unlinkSync(inputPath); } catch {}
+          try { fs.unlinkSync(compressedPath); } catch {}
+        }
       }
 
-      const prompt = `Extract from this meeting transcript:
-${transcript}
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2000,
+        messages: [{
+          role: "user",
+          content: `You are a construction project coordinator assistant.
+Extract structured meeting information from this transcript.
+Return ONLY valid JSON, no markdown, no explanation.
+
+Transcript:
+${fullTranscript}
 
 Return this exact JSON structure:
 {
@@ -281,20 +349,16 @@ Return this exact JSON structure:
 }
 For deliverable status fields use only: PENDING, COMPLETE, N/A, or empty string.
 For deadlines use MM-DD-YY format if mentioned.
-If information is not mentioned, use empty string or empty array.`;
-
-      const msg = await anthropic.messages.create({
-        model: "claude-opus-4-5",
-        max_tokens: 2000,
-        system: "You are a construction project coordinator assistant. Extract structured meeting information from this transcript. Return ONLY valid JSON, no markdown, no explanation.",
-        messages: [{ role: "user", content: prompt }],
+If information is not mentioned use empty string or empty array.`
+        }],
       });
+
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
-      const cleaned = text.replace(/```json\n?|```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-      res.json(parsed);
+      const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+      res.json({ ...parsed, transcript: fullTranscript, fileSizeMB });
+
     } catch (err) {
-      res.status(500).json({ error: "transcription_error", message: err instanceof Error ? err.message : "Internal server error" });
+      res.status(500).json({ error: "transcription_failed", message: err instanceof Error ? err.message : "Transcription failed" });
     }
   }
 );
