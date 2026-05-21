@@ -1,0 +1,79 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT ADD FEATURES. DO NOT IMPROVE THINGS. DO NOT REFACTOR OTHER FILES.
+DO NOT TOUCH ANY FILE NOT EXPLICITLY LISTED BELOW.
+DO NOT PUBLISH UNTIL ALL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN THE CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+IF YOU DO ANYTHING NOT IN THIS INSTRUCTION YOU HAVE FAILED.
+
+═══════════════════════════════════════════════════════════
+STEP 1 — ADD OPENAI API KEY TO USER PROFILE (BACKEND)
+═══════════════════════════════════════════════════════════
+
+In the Drizzle schema, find the users table.
+Add one column:
+  openai_api_key: text, nullable
+
+Push schema to DB.
+
+Check 1 — confirm column exists:
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'users' AND column_name = 'openai_api_key';
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 2 — ADD OPENAI KEY TO PROFILE ROUTE
+═══════════════════════════════════════════════════════════
+
+Find the profile/user update route in artifacts/api-server/src/routes/auth.ts
+or wherever PATCH /auth/profile or PATCH /users/:id is handled.
+
+When the user updates their profile, if body.openai_api_key is present:
+- If it is an empty string, save null
+- If it is a non-empty string, save it as-is (user owns their key)
+
+When GET /auth/me is called, return openai_api_key as:
+- null if not set
+- "configured" if set (never return the actual key to the frontend for security)
+
+Add a new endpoint:
+POST /auth/openai-key
+Body: { key: string }
+Auth: authMiddleware required
+- Validates key is non-empty string starting with "sk-"
+- Saves to users table for req.user.userId
+- Returns { success: true }
+
+DELETE /auth/openai-key
+Auth: authMiddleware required
+- Sets openai_api_key = null for req.user.userId
+- Returns { success: true }
+
+Check 2:
+grep -n "openai_api_key\|openai-key" artifacts/api-server/src/routes/auth.ts | head -20
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 3 — ADD OPENAI KEY FIELD TO PROFILE PAGE (FRONTEND)
+═══════════════════════════════════════════════════════════
+
+File: artifacts/bimlog/src/pages/Profile.tsx
+
+Find the section where API token is shown (there is already an API token section).
+After that section, add a new card for OpenAI API Key.
+
+The card must look exactly like this:
+
+Title: "OpenAI API Key"
+Subtitle: "Required for audio transcription in Meeting Minutes. Your key is used only for your account — you pay OpenAI directly at $0.006/minute (~$0.36 per hour of audio)."
+
+If key is NOT configured (user.openai_api_key === null):
+  Show an input field with placeholder "sk-..."
+  Show a "Save Key" button
+  Show a note in gray: "Get your key at platform.openai.com/api-keys"
+
+If key IS configured (user.openai_api_key === "configured"):
+  Show a green badge: "✓ C
