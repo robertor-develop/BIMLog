@@ -438,30 +438,21 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         </div>
       </div>
 
-      <div style={{ background: "#F0F7FF", border: "1px solid #BFDBFE",
+      <div style={{ background: "#F9FAFB", border: "1px dashed #D1D5DB",
         borderRadius: 10, padding: 16, marginBottom: 12,
         display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: "#1E40AF", marginBottom: 2 }}>
-            Upload Meeting Recording
+          <div style={{ fontWeight: 700, fontSize: 14, color: "#6B7280", marginBottom: 2 }}>
+            Upload Meeting Recording — Coming Soon
           </div>
-          <div style={{ fontSize: 12, color: "#3B82F6", lineHeight: 1.5 }}>
-            Upload an audio file and AI will auto-fill this entire form.
-            Supports MP3, MP4, M4A, WAV, WebM, OGG. Any file size — large files are compressed and split automatically.
-            {audioProgress && <span style={{ display: "block", marginTop: 4, fontWeight: 600 }}>{audioProgress}</span>}
+          <div style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.5 }}>
+            Upload an audio or video file and AI will auto-fill this form. Available in the next update.
           </div>
         </div>
-        <label style={{ cursor: audioUploading ? "not-allowed" : "pointer" }}>
-          <input type="file" accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg"
-            onChange={handleAudioUpload} disabled={audioUploading}
-            style={{ display: "none" }} />
-          <div className="btn btn-primary" style={{
-            opacity: audioUploading ? 0.6 : 1,
-            display: "flex", alignItems: "center", gap: 6, pointerEvents: audioUploading ? "none" : "auto"
-          }}>
-            {audioUploading ? "Processing..." : "Upload Audio"}
-          </div>
-        </label>
+        <div style={{ fontSize: 11, background: "#F3F4F6", border: "1px solid #E5E7EB",
+          borderRadius: 6, padding: "4px 10px", color: "#9CA3AF", fontWeight: 600 }}>
+          COMING SOON
+        </div>
       </div>
 
       <div style={{ marginBottom: 12 }}>
