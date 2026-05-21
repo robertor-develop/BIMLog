@@ -9,9 +9,11 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
 import Anthropic from "@anthropic-ai/sdk";
+import multer from "multer";
 
 const router: Router = Router();
 const anthropic = new Anthropic();
+const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 // ── GET /projects/:projectId/meetings ─────────────────────────────────────────
 router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -214,5 +216,87 @@ router.patch("/projects/:projectId/action-items/:itemId", authMiddleware, requir
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
+
+// ── POST /projects/:projectId/meetings/transcribe-audio ───────────────────────
+router.post(
+  "/projects/:projectId/meetings/transcribe-audio",
+  authMiddleware,
+  requireProjectMember(),
+  audioUpload.single("audio"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "no_file", message: "No audio file provided" });
+        return;
+      }
+
+      const allowedExt = [".mp3", ".mp4", ".m4a", ".wav", ".webm", ".ogg"];
+      const allowedMime = ["audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/wav", "audio/wave", "audio/x-wav", "audio/webm", "video/webm", "audio/ogg", "video/mp4"];
+      const ext = "." + (req.file.originalname.split(".").pop() || "").toLowerCase();
+      if (!allowedExt.includes(ext) && !allowedMime.includes(req.file.mimetype)) {
+        res.status(400).json({ error: "unsupported_format", message: "Unsupported audio format. Use MP3, MP4, M4A, WAV, WebM, or OGG." });
+        return;
+      }
+
+      const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      if (!user?.openaiApiKey) {
+        res.status(400).json({ error: "no_openai_key", message: "OpenAI API key not configured" });
+        return;
+      }
+
+      const form = new FormData();
+      const blob = new Blob([new Uint8Array(req.file.buffer)], { type: req.file.mimetype });
+      form.append("file", blob, req.file.originalname);
+      form.append("model", "whisper-1");
+
+      const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.openaiApiKey}` },
+        body: form,
+      });
+      if (!whisperRes.ok) {
+        const errText = await whisperRes.text();
+        res.status(502).json({ error: "whisper_failed", message: `Whisper API error: ${errText}` });
+        return;
+      }
+      const whisperJson = await whisperRes.json() as { text?: string };
+      const transcript = whisperJson.text || "";
+      if (!transcript) {
+        res.status(502).json({ error: "empty_transcript", message: "Whisper returned empty transcript" });
+        return;
+      }
+
+      const prompt = `Extract from this meeting transcript:
+${transcript}
+
+Return this exact JSON structure:
+{
+  "title": "meeting title or topic if mentioned",
+  "agenda": ["item 1", "item 2"],
+  "attendees": [{ "trade": "", "company": "", "fullName": "", "role": "", "email": "", "phone": "" }],
+  "rfis": [{ "rfiNumber": "", "description": "", "status": "PENDING", "responsible": "" }],
+  "deliverables": [{ "floor": "", "description": "", "plumbing": "", "hvac": "", "fireProt": "", "electrical": "", "other": "", "coordinator": "", "deadline": "" }],
+  "viewpoints": [{ "floor": "", "responsible": "", "holdUps": "", "viewpoint": "", "description": "", "deadline": "" }],
+  "aiSummary": "two sentence summary of the meeting"
+}
+For deliverable status fields use only: PENDING, COMPLETE, N/A, or empty string.
+For deadlines use MM-DD-YY format if mentioned.
+If information is not mentioned, use empty string or empty array.`;
+
+      const msg = await anthropic.messages.create({
+        model: "claude-opus-4-5",
+        max_tokens: 2000,
+        system: "You are a construction project coordinator assistant. Extract structured meeting information from this transcript. Return ONLY valid JSON, no markdown, no explanation.",
+        messages: [{ role: "user", content: prompt }],
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+      const cleaned = text.replace(/```json\n?|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
+      res.json(parsed);
+    } catch (err) {
+      res.status(500).json({ error: "transcription_error", message: err instanceof Error ? err.message : "Internal server error" });
+    }
+  }
+);
 
 export default router;

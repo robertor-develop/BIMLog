@@ -154,6 +154,7 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
     apiToken: u.apiToken || null,
     notificationPreferences: u.notificationPreferences || null,
     isSuperAdmin: u.isSuperAdmin,
+    openai_api_key: u.openaiApiKey ? "configured" : null,
     company: c ? {
       id: c.id,
       name: c.name,
@@ -167,7 +168,7 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
 
 router.patch("/users/me", authMiddleware, async (req, res) => {
   try {
-    const { fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences } = req.body;
+    const { fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences, openai_api_key } = req.body;
     const userId = req.user!.userId;
 
     const updates: Partial<typeof usersTable.$inferInsert> = {};
@@ -177,6 +178,7 @@ router.patch("/users/me", authMiddleware, async (req, res) => {
     if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
     if (signatureUrl !== undefined) updates.signatureUrl = signatureUrl;
     if (notificationPreferences !== undefined) updates.notificationPreferences = notificationPreferences;
+    if (openai_api_key !== undefined) updates.openaiApiKey = openai_api_key === "" ? null : openai_api_key;
 
     await db.update(usersTable).set(updates).where(eq(usersTable.id, userId));
 
@@ -265,6 +267,29 @@ router.patch("/users/me/password", authMiddleware, async (req, res) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Password update failed";
     res.status(400).json({ error: message });
+  }
+});
+
+router.post("/auth/openai-key", authMiddleware, async (req, res) => {
+  try {
+    const { key } = req.body as { key?: string };
+    if (!key || typeof key !== "string" || !key.startsWith("sk-")) {
+      res.status(400).json({ error: "Invalid OpenAI API key. Must be a non-empty string starting with sk-." });
+      return;
+    }
+    await db.update(usersTable).set({ openaiApiKey: key }).where(eq(usersTable.id, req.user!.userId));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to save OpenAI key" });
+  }
+});
+
+router.delete("/auth/openai-key", authMiddleware, async (req, res) => {
+  try {
+    await db.update(usersTable).set({ openaiApiKey: null }).where(eq(usersTable.id, req.user!.userId));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to remove OpenAI key" });
   }
 });
 

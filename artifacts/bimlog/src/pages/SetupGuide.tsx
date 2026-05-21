@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor } from "lucide-react";
+import { ChevronLeft, UserPlus, Settings2, Wand2, Upload, MessageSquare, Puzzle, Monitor, Mic } from "lucide-react";
 import { useState } from "react";
 import { Footer } from "@/components/layout/Footer";
 
@@ -120,6 +120,19 @@ const sections = [
       {
         label: "Escalation notifications",
         desc: "Items approaching their due date generate escalation alerts visible in the project dashboard. Overdue items are flagged automatically so nothing is missed.",
+      },
+    ],
+  },
+  {
+    id: "audio-transcription",
+    icon: Mic,
+    iconBg: "#F0F7FF",
+    iconColor: "#1E40AF",
+    title: "Audio Transcription — Meeting Minutes",
+    steps: [
+      {
+        label: "Audio Transcription — Meeting Minutes",
+        desc: "Upload a recording of your coordination meeting and BIMLog will automatically fill in the attendees, agenda, RFIs, deliverables, viewpoints, and action items using AI.\n\nRequires your own OpenAI API key — add it once in your Profile. Cost: approximately $0.006 per minute of audio (~$0.36 per hour). You pay OpenAI directly. BIMLog does not charge for transcription.\n\nSupported formats: MP3, MP4, M4A, WAV, WebM, OGG. Maximum 25MB per file.\n\nTo get started: Profile → OpenAI API Key → paste your key → Save.",
       },
     ],
   },

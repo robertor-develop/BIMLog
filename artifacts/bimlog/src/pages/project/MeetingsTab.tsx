@@ -98,6 +98,9 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     { floor: "", responsible: "", holdUps: "", viewpoint: "", description: "", deadline: "" }
   ]);
   const [aiSummaryText, setAiSummaryText] = useState("");
+  const [audioUploading, setAudioUploading] = useState(false);
+  const [showNoKeyModal, setShowNoKeyModal] = useState(false);
+  const [audioProgress, setAudioProgress] = useState("");
 
   const loadMeetings = async () => {
     setLoading(true);
@@ -112,6 +115,58 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   };
 
   useEffect(() => { loadMeetings(); }, [projectId]);
+
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = [".mp3",".mp4",".m4a",".wav",".webm",".ogg"];
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!allowed.includes(ext)) {
+      setError("Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG.");
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      setError("File too large. Maximum 25MB.");
+      return;
+    }
+    setAudioUploading(true);
+    setAudioProgress("Uploading audio...");
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("audio", file);
+      const r = await fetch(`${API}/projects/${projectId}/meetings/transcribe-audio`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!r.ok) {
+        const d = await r.json();
+        if (d.error === "no_openai_key") {
+          setShowNoKeyModal(true);
+        } else {
+          setError(d.message || "Transcription failed");
+        }
+        return;
+      }
+      setAudioProgress("Extracting meeting data with AI...");
+      const data = await r.json();
+      if (data.title) setTitle(data.title);
+      if (data.agenda?.length) setAgendaItems(data.agenda);
+      if (data.attendees?.length) setAttendees(data.attendees);
+      if (data.rfis?.length) setRfis(data.rfis);
+      if (data.deliverables?.length) setDeliverables(data.deliverables);
+      if (data.viewpoints?.length) setViewpoints(data.viewpoints);
+      if (data.aiSummary) setAiSummaryText(data.aiSummary);
+      setAudioProgress("");
+    } catch {
+      setError("Audio upload failed. Please try again.");
+    } finally {
+      setAudioUploading(false);
+      setAudioProgress("");
+      e.target.value = "";
+    }
+  };
 
   const toggleSection = (key: string) =>
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -380,6 +435,32 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         </div>
       </div>
 
+      <div style={{ background: "#F0F7FF", border: "1px solid #BFDBFE",
+        borderRadius: 10, padding: 16, marginBottom: 12,
+        display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: "#1E40AF", marginBottom: 2 }}>
+            Upload Meeting Recording
+          </div>
+          <div style={{ fontSize: 12, color: "#3B82F6", lineHeight: 1.5 }}>
+            Upload an audio file and AI will auto-fill this entire form.
+            Supports MP3, MP4, M4A, WAV. Max 25MB.
+            {audioProgress && <span style={{ display: "block", marginTop: 4, fontWeight: 600 }}>{audioProgress}</span>}
+          </div>
+        </div>
+        <label style={{ cursor: audioUploading ? "not-allowed" : "pointer" }}>
+          <input type="file" accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg"
+            onChange={handleAudioUpload} disabled={audioUploading}
+            style={{ display: "none" }} />
+          <div className="btn btn-primary" style={{
+            opacity: audioUploading ? 0.6 : 1,
+            display: "flex", alignItems: "center", gap: 6, pointerEvents: audioUploading ? "none" : "auto"
+          }}>
+            {audioUploading ? "Processing..." : "Upload Audio"}
+          </div>
+        </label>
+      </div>
+
       <div style={{ marginBottom: 12 }}>
         <SectionHeader label={t("Agenda", "Agenda")} sectionKey="agenda" />
         {expandedSections.agenda && (
@@ -599,6 +680,39 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           {saving ? t("Saving…", "Guardando…") : t("Save Meeting", "Guardar Reunión")}
         </button>
       </div>
+
+      {showNoKeyModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 12, padding: 28,
+            maxWidth: 480, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8, color: "#111827" }}>
+              OpenAI API Key Required
+            </div>
+            <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6, marginBottom: 20 }}>
+              Audio transcription uses OpenAI Whisper. You need to add your own
+              OpenAI API key in your Profile to use this feature.
+              <br /><br />
+              <strong>Cost:</strong> ~$0.006 per minute of audio (~$0.36 per hour).
+              You pay OpenAI directly — BIMLog never charges for transcription.
+              <br /><br />
+              <strong>How to get a key:</strong> Go to{" "}
+              <a href="https://platform.openai.com/api-keys" target="_blank"
+                rel="noreferrer" style={{ color: "#2563EB" }}>
+                platform.openai.com/api-keys
+              </a>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="btn btn-primary" onClick={() => { setShowNoKeyModal(false); window.location.href = "/profile"; }}>
+                Go to Profile → Add Key
+              </button>
+              <button className="btn btn-outline" onClick={() => setShowNoKeyModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
