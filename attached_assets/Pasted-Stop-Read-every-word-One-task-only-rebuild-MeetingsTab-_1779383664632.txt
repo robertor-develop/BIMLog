@@ -1,0 +1,148 @@
+Stop. Read every word. One task only — rebuild MeetingsTab.tsx completely.
+Do not touch any other file except where noted.
+Print ALL output as plain text in the chat when done. No collapsed boxes.
+
+═══════════════════════════════════════════════════════════
+TASK — REBUILD MeetingsTab.tsx
+═══════════════════════════════════════════════════════════
+
+Replace the entire contents of:
+artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+With this complete file:
+
+---
+
+import { useState, useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
+import { useAuthStore } from "@/store/auth";
+import {
+  ClipboardList, CheckCircle2, Calendar, MapPin, Users,
+  Sparkles, AlertTriangle, Plus, Download, ChevronDown,
+  ChevronUp, Trash2
+} from "lucide-react";
+
+const API = "/api/v1";
+
+interface Meeting {
+  id: number; title: string; meetingDate: string; location?: string;
+  notes?: string; aiSummary?: string; attendeeCount: number;
+  openActionItems: number; actionItemCount: number; createdAt: string;
+}
+
+interface Attendee {
+  id?: number; trade: string; company: string; fullName: string;
+  role: string; email: string; phone: string;
+}
+
+interface RFIRow {
+  rfiNumber: string; description: string; status: string; responsible: string;
+}
+
+interface DeliverableRow {
+  floor: string; description: string; plumbing: string; hvac: string;
+  fireProt: string; electrical: string; other: string; coordinator: string; deadline: string;
+}
+
+interface ViewpointRow {
+  floor: string; responsible: string; holdUps: string;
+  viewpoint: string; description: string; deadline: string;
+}
+
+interface ActionItem {
+  id: number; description: string; assignedToName?: string;
+  dueDate?: string; status: string; isOverdue?: boolean;
+}
+
+const STATUS_OPTIONS = ["PENDING", "COMPLETE", "N/A", ""];
+const CELL_STYLE = {
+  border: "1px solid #E5E7EB", padding: "6px 8px",
+  fontSize: 12, verticalAlign: "middle" as const
+};
+const TH_STYLE = {
+  ...CELL_STYLE, background: "#1E3A5F", color: "white",
+  fontWeight: 700, fontSize: 11, textTransform: "uppercase" as const
+};
+
+function StatusCell({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const color = value === "COMPLETE" ? "#DCFCE7" : value === "PENDING" ? "#FEF3C7" : value === "N/A" ? "#F3F4F6" : "white";
+  const textColor = value === "COMPLETE" ? "#16A34A" : value === "PENDING" ? "#D97706" : "#6B7280";
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)}
+      style={{ background: color, color: textColor, border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, fontWeight: 600, padding: "2px 4px", width: "100%" }}>
+      {STATUS_OPTIONS.map(o => <option key={o} value={o}>{o || "—"}</option>)}
+    </select>
+  );
+}
+
+export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+  const { lang } = useI18n();
+  const { token } = useAuthStore();
+  const t = (en: string, es: string) => lang === "es" ? es : en;
+  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+  const [view, setView] = useState<"list" | "new" | "detail" | "actions">("list");
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    agenda: true, attendees: true, rfis: true, deliverables: true, viewpoints: true
+  });
+
+  // New meeting form state
+  const [meetingNumber, setMeetingNumber] = useState("");
+  const [title, setTitle] = useState("");
+  const [meetingDate, setMeetingDate] = useState("");
+  const [meetingTime, setMeetingTime] = useState("10:00");
+  const [location, setLocation] = useState("");
+  const [agendaItems, setAgendaItems] = useState<string[]>(["", "", "", ""]);
+  const [attendees, setAttendees] = useState<Attendee[]>([
+    { trade: "", company: "", fullName: "", role: "", email: "", phone: "" }
+  ]);
+  const [rfis, setRfis] = useState<RFIRow[]>([
+    { rfiNumber: "", description: "", status: "PENDING", responsible: "" }
+  ]);
+  const [deliverables, setDeliverables] = useState<DeliverableRow[]>([
+    { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+    { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+    { floor: "1ST FLOOR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+  ]);
+  const [viewpoints, setViewpoints] = useState<ViewpointRow[]>([
+    { floor: "", responsible: "", holdUps: "", viewpoint: "", description: "", deadline: "" }
+  ]);
+  const [aiSummaryText, setAiSummaryText] = useState("");
+
+  const loadMeetings = async () => {
+    setLoading(true);
+    try {
+      const [mr, ar] = await Promise.all([
+        fetch(`${API}/projects/${projectId}/meetings`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/projects/${projectId}/action-items`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      if (mr.ok) setMeetings(await mr.json());
+      if (ar.ok) setActionItems(await ar.json());
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadMeetings(); }, [projectId]);
+
+  const toggleSection = (key: string) =>
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const resetForm = () => {
+    const nextNum = String(meetings.length + 1).padStart(2, "0");
+    setMeetingNumber(nextNum);
+    setTitle(""); setMeetingDate(""); setMeetingTime("10:00"); setLocation("");
+    setAgendaItems(["", "", "", ""]);
+    setAttendees([{ trade: "", company: "", fullName: "", role: "", email: "", phone: "" }]);
+    setRfis([{ rfiNumber: "", description: "", status: "PENDING", responsible: "" }]);
+    setDeliverables([
+      { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+      { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+      { floor: "1ST FLOOR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
+    ]);
+    setViewpoints([{ floor: "", responsible: "", holdUps: "", viewpoint:
