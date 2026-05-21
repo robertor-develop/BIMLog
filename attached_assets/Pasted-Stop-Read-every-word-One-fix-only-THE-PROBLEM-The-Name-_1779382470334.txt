@@ -1,0 +1,98 @@
+Stop. Read every word. One fix only.
+
+THE PROBLEM:
+The Name Generator is skipping "Project Code" in the generated name.
+The backend requires a field labeled exactly "Project Code" as the first field.
+The Convention Builder is not saving it, so the name goes straight to contractor/originator.
+
+THE FIX — two parts:
+
+═══════════════════════════════════════════════
+PART 1 — BACKEND: conventions.ts
+═══════════════════════════════════════════════
+
+In the PUT /projects/:projectId/conventions route,
+after conventionId is set and BEFORE inserting the fields,
+add this logic:
+
+Fetch the project code from the projects table:
+const projectRow = await db
+  .select({ code: projectsTable.code })
+  .from(projectsTable)
+  .where(eq(projectsTable.id, projectId))
+  .limit(1);
+const projectCode = projectRow[0]?.code ?? "";
+
+Then when inserting fields into namingFieldsTable,
+check if the incoming body.fields already has a field
+with label === "Project Code".
+
+If it does NOT exist, prepend it automatically:
+const fieldsToInsert = [
+  {
+    conventionId,
+    label: "Project Code",
+    fieldOrder: 0,
+    allowedValues: projectCode ? [projectCode] : [],
+  },
+  ...body.fields.map((f: any, i: number) => ({
+    conventionId,
+    label: f.label,
+    fieldOrder: i + 1,
+    allowedValues: f.allowedValues ?? [],
+  }))
+];
+
+If it DOES already exist, insert as-is but ensure it has
+fieldOrder: 0 and allowedValues includes the project code.
+
+Make sure to import projectsTable at the top of the file.
+
+Check:
+grep -n "Project Code\|projectCode\|projectsTable" \
+artifacts/api-server/src/routes/conventions.ts | head -15
+
+═══════════════════════════════════════════════
+PART 2 — FRONTEND: NameGenerator.tsx
+═══════════════════════════════════════════════
+
+In the Name Generator, the "Project Code" field should be
+displayed as READ-ONLY — it is fixed, not a dropdown the user picks.
+
+Find where fields are rendered (the map over fields that creates
+the selector dropdowns).
+
+Add this condition: if field.label === "Project Code", render it
+as a static display chip instead of a dropdown:
+
+<div style={{
+  padding: "8px 14px",
+  background: "#EFF6FF",
+  border: "1px solid #BFDBFE",
+  borderRadius: 8,
+  fontSize: 13,
+  fontWeight: 700,
+  color: "#1D4ED8",
+  letterSpacing: "0.05em"
+}}>
+  {field.allowedValues?.[0] ?? "—"}
+</div>
+
+This way the project code is always visible, always first,
+and the user cannot accidentally change it.
+
+Check:
+grep -n "Project Code\|projectCode\|fieldOrder\|allowedValues" \
+artifacts/bimlog/src/pages/project/NameGenerator.tsx | head -20
+
+═══════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════
+
+Check 1: grep from Part 1 above
+Check 2: grep from Part 2 above
+Check 3 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild both frontend and backend. Restart API. Publish.
+Paste all 3 check results. Nothing else.

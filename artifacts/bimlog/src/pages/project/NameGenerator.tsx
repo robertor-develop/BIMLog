@@ -327,6 +327,7 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
           const c = CHIP_COLORS[idx % CHIP_COLORS.length];
           const vals: string[] = field.allowedValues || [];
           const current = selections[field.label] || "";
+          const isProjectCode = field.label === "Project Code";
           return (
             <div key={field.label}>
               <label style={{
@@ -336,7 +337,21 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
               }}>
                 {field.label}
               </label>
-              {vals.length > 0 ? (
+              {isProjectCode ? (
+                <div style={{
+                  padding: "8px 14px",
+                  background: "#EFF6FF",
+                  border: "1px solid #BFDBFE",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#1D4ED8",
+                  letterSpacing: "0.05em",
+                  fontFamily: "var(--font-mono)",
+                }}>
+                  {vals[0] ?? "—"}
+                </div>
+              ) : vals.length > 0 ? (
                 <SearchableSelect
                   value={current}
                   onChange={v => setSelections(prev => ({ ...prev, [field.label]: v }))}

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
+import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable, activityLogTable, projectsTable } from "@workspace/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -178,20 +178,40 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       conventionId = created.id;
     }
 
-    if (body.fields && body.fields.length > 0) {
-      interface ConventionField {
-        label: string;
-        fieldOrder: number;
-        allowedValues: string[];
-      }
-      await db.insert(namingFieldsTable).values(
-        body.fields.map((f: ConventionField) => ({
-          conventionId,
-          label: f.label,
-          fieldOrder: f.fieldOrder,
-          allowedValues: f.allowedValues,
-        }))
-      );
+    // Ensure "Project Code" field is always first with the project's code as allowed value
+    const projectRow = await db
+      .select({ code: projectsTable.code })
+      .from(projectsTable)
+      .where(eq(projectsTable.id, projectId))
+      .limit(1);
+    const projectCode = projectRow[0]?.code ?? "";
+
+    interface ConventionField {
+      label: string;
+      fieldOrder: number;
+      allowedValues: string[];
+    }
+    const incoming: ConventionField[] = (body.fields ?? []) as ConventionField[];
+    const existingPC = incoming.find(f => f.label === "Project Code");
+    const otherFields = incoming.filter(f => f.label !== "Project Code");
+    const pcAllowed = existingPC?.allowedValues && existingPC.allowedValues.length > 0
+      ? (existingPC.allowedValues.includes(projectCode) || !projectCode
+          ? existingPC.allowedValues
+          : [projectCode, ...existingPC.allowedValues])
+      : (projectCode ? [projectCode] : []);
+
+    const fieldsToInsert = [
+      { conventionId, label: "Project Code", fieldOrder: 0, allowedValues: pcAllowed },
+      ...otherFields.map((f, i) => ({
+        conventionId,
+        label: f.label,
+        fieldOrder: i + 1,
+        allowedValues: f.allowedValues ?? [],
+      })),
+    ];
+
+    if (fieldsToInsert.length > 0) {
+      await db.insert(namingFieldsTable).values(fieldsToInsert);
     }
 
     const convention = await db
