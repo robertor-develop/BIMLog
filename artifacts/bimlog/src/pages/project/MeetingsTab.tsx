@@ -411,7 +411,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
       <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16, marginBottom: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 160px 160px 1fr", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 150px 130px 1fr", gap: 12, alignItems: "start" }}>
           <div>
             <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Meeting #", "Reunión #")}</label>
             <input className="input" value={meetingNumber} onChange={e => setMeetingNumber(e.target.value)} placeholder="01" style={{ marginTop: 4 }} />
@@ -429,8 +429,8 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
             <input className="input" type="time" value={meetingTime} onChange={e => setMeetingTime(e.target.value)} style={{ marginTop: 4 }} />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase" }}>{t("Location", "Lugar")}</label>
-            <input className="input" value={location} onChange={e => setLocation(e.target.value)} placeholder={t("Conference Room / Zoom / Site", "Sala / Zoom / Obra")} style={{ marginTop: 4 }} />
+            <label style={{ fontSize: 11, color: "#6B7280", fontWeight: 600, textTransform: "uppercase", display: "block", marginBottom: 4 }}>{t("Location", "Lugar")}</label>
+            <input className="input" value={location} onChange={e => setLocation(e.target.value)} placeholder={t("Conference Room / Zoom / Site", "Sala / Zoom / Obra")} />
           </div>
         </div>
       </div>
