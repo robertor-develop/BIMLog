@@ -287,4 +287,18 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
   }
 });
 
+router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(clashReportsTable).where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    await db.delete(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+    await db.delete(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "delete_failed", message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 export default router;
