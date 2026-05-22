@@ -436,7 +436,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       });
 
       const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true });
+      const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true, autoFirstPage: true });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
       doc.pipe(res);
@@ -595,6 +595,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         }
       });
 
+      doc.flushPages();
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(range.start + i);
