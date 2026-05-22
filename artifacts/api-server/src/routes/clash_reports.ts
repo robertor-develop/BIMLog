@@ -67,6 +67,10 @@ router.post("/projects/:projectId/clash-reports/upload",
       const typeCol = colIdx(["type", "clash type", "kind"]);
       const assignCol = colIdx(["responsible", "assigned", "owner", "contractor"]);
 
+      console.log("[clash-upload] Total rows:", rows.length);
+      console.log("[clash-upload] Header row index:", headerIdx);
+      console.log("[clash-upload] Headers found:", headers);
+      console.log("[clash-upload] idCol:", idCol, "descCol:", descCol, "el1Col:", el1Col);
       const dataRows = rows.slice(headerIdx + 1);
       const parsed = dataRows
         .map((row: any[]) => ({
@@ -83,6 +87,9 @@ router.post("/projects/:projectId/clash-reports/upload",
           status: "open",
         }))
         .filter((r: any) => r.description || r.clashIdOriginal);
+      console.log("[clash-upload] Parsed rows count:", parsed.length);
+      if (parsed.length > 0) console.log("[clash-upload] First parsed row:", JSON.stringify(parsed[0]));
+      if (parsed.length === 0) console.log("[clash-upload] WARNING: 0 rows parsed — first 3 data rows:", JSON.stringify(rows.slice(headerIdx + 1, headerIdx + 4)));
 
       const [report] = await db.insert(clashReportsTable).values({
         projectId,
