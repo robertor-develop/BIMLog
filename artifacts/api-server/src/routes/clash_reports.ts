@@ -120,9 +120,8 @@ router.post("/projects/:projectId/clash-reports/upload",
         );
       }
 
-      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
-
-      rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
+      await rankClashesWithAI(report.id, projectId, parsed, anthropic);
+      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "complete" });
     } catch (err) {
       console.error("[clash-reports/upload] FAILED:", err);
       res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
