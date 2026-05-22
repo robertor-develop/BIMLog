@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable } from "@workspace/db/schema";
 import { eq, desc, and } from "drizzle-orm";
+import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -341,5 +342,208 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
     res.status(500).json({ error: "delete_failed", message: err instanceof Error ? err.message : String(err) });
   }
 });
+
+router.get("/projects/:projectId/clash-reports/:reportId/pdf",
+  async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1] || (req.query.token as string);
+    if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
+    let userId: number;
+    try {
+      const jwt = await import("jsonwebtoken");
+      const decoded = jwt.default.verify(token, process.env.JWT_SECRET!) as any;
+      userId = decoded.userId || decoded.id;
+    } catch { res.status(401).json({ error: "Invalid token" }); return; }
+
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    try {
+      const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
+      if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+
+      const [user] = await db.select({
+        fullName: usersTable.fullName,
+        email: usersTable.email,
+        companyName: companiesTable.name,
+      }).from(usersTable)
+        .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(eq(usersTable.id, userId));
+
+      const [report] = await db.select().from(clashReportsTable)
+        .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
+      if (!report) { res.status(404).json({ error: "Report not found" }); return; }
+
+      const clashes = await db.select().from(clashesTable)
+        .where(eq(clashesTable.clashReportId, reportId));
+
+      clashes.sort((a, b) => {
+        const order: Record<string, number> = { P1: 0, P2: 1, P3: 2, P4: 3 };
+        return (order[a.priority ?? ""] ?? 4) - (order[b.priority ?? ""] ?? 4);
+      });
+
+      const PDFDocument = (await import("pdfkit")).default;
+      const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true });
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
+      doc.pipe(res);
+
+      const W = doc.page.width;
+      const M = 50;
+      const CW = W - M * 2;
+
+      doc.rect(0, 0, W, 120).fill("#1E3A5F");
+      doc.fontSize(28).font("Helvetica-Bold").fillColor("white").text("BIMLog", M, 30);
+      doc.fontSize(11).font("Helvetica").fillColor("#93C5FD").text("by IgniteSmart", M, 62);
+      doc.fontSize(14).font("Helvetica-Bold").fillColor("white")
+        .text("CLASH COORDINATION REPORT", M, 35, { align: "right", width: CW });
+      doc.fontSize(10).font("Helvetica").fillColor("#93C5FD")
+        .text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 58, { align: "right", width: CW });
+
+      doc.rect(0, 120, W, 60).fill("#F8FAFC");
+      doc.fontSize(16).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 135);
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 158);
+
+      doc.y = 210;
+
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
+      doc.moveDown(0.5);
+
+      const cardY = doc.y;
+      const cardW = (CW - 30) / 4;
+      const cards = [
+        { label: "P1 CRITICAL", value: report.p1Count, bg: "#FEE2E2", text: "#DC2626", border: "#FECACA" },
+        { label: "P2 THIS WEEK", value: report.p2Count, bg: "#FEF3C7", text: "#D97706", border: "#FDE68A" },
+        { label: "P3 MONITOR", value: report.p3Count, bg: "#FEF9C3", text: "#CA8A04", border: "#FDE68A" },
+        { label: "P4 LOW", value: report.p4Count, bg: "#F3F4F6", text: "#6B7280", border: "#E5E7EB" },
+      ];
+      cards.forEach((card, i) => {
+        const x = M + i * (cardW + 10);
+        doc.rect(x, cardY, cardW, 70).fillAndStroke(card.bg, card.border);
+        doc.fontSize(28).font("Helvetica-Bold").fillColor(card.text)
+          .text(String(card.value), x, cardY + 10, { width: cardW, align: "center" });
+        doc.fontSize(8).font("Helvetica-Bold").fillColor(card.text)
+          .text(card.label, x, cardY + 46, { width: cardW, align: "center" });
+      });
+
+      doc.y = cardY + 85;
+
+      if (report.aiSummary) {
+        doc.rect(M, doc.y, CW, 40).fill("#EFF6FF");
+        doc.fontSize(10).font("Helvetica").fillColor("#1E40AF")
+          .text(`AI Assessment: ${report.aiSummary}`, M + 10, doc.y + 8, { width: CW - 20 });
+        doc.y += 50;
+      }
+
+      doc.moveDown(0.5);
+
+      doc.fontSize(9).font("Helvetica").fillColor("#6B7280")
+        .text(`Generated by: ${user?.fullName ?? "Unknown"}  |  ${user?.companyName ?? ""}  |  ${user?.email ?? ""}`, M);
+      doc.moveDown(0.3);
+      doc.moveTo(M, doc.y).lineTo(W - M, doc.y).strokeColor("#E5E7EB").lineWidth(1).stroke();
+      doc.moveDown(0.5);
+
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Clash Register", M);
+      doc.moveDown(0.5);
+
+      const cols = [
+        { label: "Priority", w: 45 },
+        { label: "ID", w: 35 },
+        { label: "Description", w: 150 },
+        { label: "Element 1", w: 70 },
+        { label: "Element 2", w: 70 },
+        { label: "Discipline", w: 60 },
+        { label: "Level", w: 50 },
+        { label: "Status", w: 55 },
+        { label: "Assigned To", w: 70 },
+      ];
+
+      const drawTableHeader = () => {
+        const hY = doc.y;
+        doc.rect(M, hY, CW, 18).fill("#1E3A5F");
+        let x = M;
+        cols.forEach(col => {
+          doc.fontSize(7).font("Helvetica-Bold").fillColor("white")
+            .text(col.label.toUpperCase(), x + 3, hY + 5, { width: col.w - 6 });
+          x += col.w;
+        });
+        doc.y = hY + 20;
+      };
+
+      drawTableHeader();
+
+      const P_COLORS_PDF: Record<string, { bg: string; text: string }> = {
+        P1: { bg: "#FEE2E2", text: "#DC2626" },
+        P2: { bg: "#FEF3C7", text: "#D97706" },
+        P3: { bg: "#FEF9C3", text: "#CA8A04" },
+        P4: { bg: "#F3F4F6", text: "#6B7280" },
+      };
+
+      clashes.forEach((c, idx) => {
+        const rowH = 22;
+        if (doc.y + rowH > doc.page.height - 70) {
+          doc.addPage();
+          doc.rect(0, 0, W, 30).fill("#1E3A5F");
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
+            .text(`${project.name} (${project.code}) — Clash Report`, M, 10);
+          doc.fontSize(7).font("Helvetica").fillColor("#93C5FD")
+            .text(`Page ${doc.bufferedPageRange().count}`, M, 10, { align: "right", width: CW });
+          doc.y = 45;
+          drawTableHeader();
+        }
+
+        const rY = doc.y;
+        const rowBg = idx % 2 === 0 ? "white" : "#F9FAFB";
+        doc.rect(M, rY, CW, rowH).fill(rowBg);
+
+        let x = M;
+        const pColor = P_COLORS_PDF[c.priority ?? ""] ?? { bg: "#F3F4F6", text: "#6B7280" };
+        doc.rect(x + 2, rY + 4, 38, 14).fill(pColor.bg);
+        doc.fontSize(8).font("Helvetica-Bold").fillColor(pColor.text)
+          .text(c.priority ?? "—", x + 2, rY + 7, { width: 38, align: "center" });
+        x += cols[0].w;
+
+        const vals = [
+          c.clashIdOriginal ?? "—",
+          c.description ?? "—",
+          c.element1 ?? "—",
+          c.element2 ?? "—",
+          c.discipline1 ?? "—",
+          c.level ?? "—",
+          c.status ?? "—",
+          c.assignedToName ?? "—",
+        ];
+        vals.forEach((val, i) => {
+          doc.fontSize(7).font("Helvetica").fillColor("#111827")
+            .text(String(val).slice(0, 30), x + 2, rY + 7, { width: cols[i + 1].w - 4, lineBreak: false });
+          x += cols[i + 1].w;
+        });
+
+        doc.rect(M, rY, CW, rowH).stroke("#E5E7EB");
+        doc.y = rY + rowH;
+
+        if (c.resolutionNotes) {
+          const nY = doc.y;
+          doc.rect(M, nY, CW, 16).fill("#F0F9FF");
+          doc.fontSize(7).font("Helvetica").fillColor("#1E40AF")
+            .text(`Note: ${c.resolutionNotes.slice(0, 120)}`, M + 5, nY + 4, { width: CW - 10 });
+          doc.y = nY + 18;
+        }
+      });
+
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+          .text(`Confidential — Generated by BIMLog by IgniteSmart | ${project.name} | Page ${i + 1} of ${range.count}`,
+            M, doc.page.height - 35, { align: "center", width: CW });
+      }
+
+      doc.end();
+    } catch (err) {
+      console.error("[clash-pdf] FAILED:", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+    }
+  }
+);
 
 export default router;

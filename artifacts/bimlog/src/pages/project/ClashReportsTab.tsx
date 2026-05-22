@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Upload, ChevronLeft, AlertTriangle } from "lucide-react";
+import { Upload, ChevronLeft, AlertTriangle, Download } from "lucide-react";
 import { isDebug } from "@/lib/debug";
 
 const API = "/api/v1";
@@ -156,6 +156,15 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
           </p>
         </div>
+        <a
+          href={`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/pdf?token=${token}`}
+          target="_blank"
+          rel="noreferrer"
+          className="btn btn-primary btn-sm"
+          style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", textDecoration: "none" }}
+        >
+          <Download size={14} /> Export PDF
+        </a>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 16 }}>
