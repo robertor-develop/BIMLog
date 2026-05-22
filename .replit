@@ -29,6 +29,7 @@ timeoutMs = 20000
 
 [userenv.shared]
 JWT_SECRET = "126de412e9783135c5900b4db02cc2f76b7bb79026737c9ea82eeb4ecbdfb045"
+PROD_DATABASE_URL = "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require"
 
 [nix]
 channel = "stable-25_05"

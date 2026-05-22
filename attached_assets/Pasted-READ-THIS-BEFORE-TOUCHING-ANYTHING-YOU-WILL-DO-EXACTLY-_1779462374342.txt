@@ -1,0 +1,49 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+
+DO OPTION 2 EXACTLY AS FOLLOWS:
+
+STEP 1 — Set the secret:
+Set a new environment variable called PROD_DATABASE_URL with this value:
+postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require
+
+STEP 2 — Update the DB connection file:
+FILE: lib/db/src/index.ts
+
+Find this exact block:
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
+}
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+Replace with:
+const connectionString = process.env.PROD_DATABASE_URL ?? process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
+}
+console.log("[DB] Connecting to:", connectionString.replace(/:\/\/.*@/, "://***@"));
+export const pool = new Pool({ connectionString });
+
+Check 1 — confirm file change:
+grep -n "PROD_DATABASE_URL\|connectionString" lib/db/src/index.ts | head -10
+
+Check 2 — confirm secret is set:
+node -e "console.log('PROD_DATABASE_URL:', process.env.PROD_DATABASE_URL ? 'SET' : 'NOT SET')"
+
+Check 3 — restart API server and confirm it connects to Neon:
+After restart, the server log should show:
+[DB] Connecting to: postgresql://***@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb
+
+Check 4 — confirm production data is visible:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT id, name FROM projects ORDER BY id DESC LIMIT 5;"
+
+Rebuild backend only. Restart API server.
+Print ALL check outputs as plain text in chat. No collapsed boxes.
