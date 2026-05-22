@@ -8,4 +8,11 @@ router.get("/healthz", (_req, res) => {
   res.json(data);
 });
 
+router.get("/debug-db", async (_req, res) => {
+  const { db } = await import("@workspace/db");
+  const { sql } = await import("drizzle-orm");
+  const result = await db.execute(sql`SELECT current_database(), inet_server_addr(), COUNT(*) as project_count FROM projects`);
+  res.json(result.rows);
+});
+
 export default router;
