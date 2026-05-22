@@ -348,27 +348,11 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       {r.p4Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>P4: {r.p4Count}</span>}
                     </div>
                   </div>
-                  <button
-                    className="btn btn-sm btn-outline"
-                    onClick={async () => {
-                      const res = await fetch(
-                        `${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,
-                        { method: "POST", headers }
-                      );
-                      if (res.ok) {
-                        alert("Re-ranking started. Refresh in 30 seconds.");
-                        setTimeout(() => loadReports(), 15000);
-                        setTimeout(() => loadReports(), 30000);
-                      }
-                    }}
-                    style={{ marginRight: 8 }}
-                  >
-                    Re-rank AI
-                  </button>
-                  <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)}
-                    style={{ marginLeft: 16 }}>
-                    {t("View Clashes","Ver Choques")}
-                  </button>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 16 }}>
+                    <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)} style={{ fontSize: 12, padding: "4px 12px" }}>View Clashes</button>
+                    <button className="btn btn-sm btn-outline" onClick={async () => { const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`, { method: "POST", headers }); if (res.ok) { setTimeout(() => loadReports(), 3000); setTimeout(() => loadReports(), 8000); } }} style={{ fontSize: 12, padding: "4px 12px" }}>Re-rank AI</button>
+                    <button onClick={async () => { if (!confirm(`Delete "${r.fileName}"? This cannot be undone.`)) return; const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}`, { method: "DELETE", headers }); if (res.ok) loadReports(); else { const d = await res.json().catch(() => ({})); alert(d.message || "Delete failed"); } }} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                  </div>
                 </div>
               ))}
             </div>
