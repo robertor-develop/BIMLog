@@ -17,7 +17,7 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
     const rows = await db.select().from(clashReportsTable)
       .where(eq(clashReportsTable.projectId, projectId))
       .orderBy(desc(clashReportsTable.createdAt));
-    res.json({ rows, _version: "v2-sync-ranking" });
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "list_failed", message: err instanceof Error ? err.message : String(err) });
   }
@@ -120,8 +120,8 @@ router.post("/projects/:projectId/clash-reports/upload",
         );
       }
 
-      await rankClashesWithAI(report.id, projectId, parsed, anthropic);
-      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "complete" });
+      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
+      rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
     } catch (err) {
       console.error("[clash-reports/upload] FAILED:", err);
       res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
