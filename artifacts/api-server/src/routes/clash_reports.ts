@@ -108,7 +108,19 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
       }
 
       const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined && row[idx] !== null ? String(row[idx]).trim() : "";
-      const getDate = (row: any[], idx: number) => { if (idx < 0 || !row[idx]) return null; try { const d = new Date(row[idx]); return isNaN(d.getTime()) ? null : d; } catch { return null; } };
+      const getDate = (row: any[], idx: number) => {
+        if (idx < 0 || !row[idx]) return null;
+        try {
+          const val = row[idx];
+          if (typeof val === "number") {
+            const excelEpoch = new Date(1899, 11, 30);
+            const d = new Date(excelEpoch.getTime() + val * 86400000);
+            return isNaN(d.getTime()) ? null : d;
+          }
+          const d = new Date(val);
+          return isNaN(d.getTime()) ? null : d;
+        } catch { return null; }
+      };
 
       const parsed = dataRows
         .map((row: any[]) => ({

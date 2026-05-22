@@ -295,7 +295,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       </td>
                       <td style={{ padding: "4px 8px" }}>
                         <input type="date"
-                          value={c.dueDate && !c.dueDate.toString().startsWith("1970") ? new Date(c.dueDate).toISOString().split("T")[0] : ""}
+                          value={(c.dueDate && !String(c.dueDate).startsWith("1970") ? new Date(c.dueDate).toISOString().split("T")[0] : "")}
                           onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, dueDate: e.target.value } : x))}
                           onBlur={e => updateClash(c.id, { dueDate: e.target.value })}
                           style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 4px",
