@@ -385,6 +385,27 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           </p>
         </div>
         {canWrite && (
+          <button
+            className="btn btn-sm btn-outline"
+            style={{ marginRight: 8 }}
+            onClick={async () => {
+              const res = await fetch(`${API}/projects/${projectId}/clash-reports`, {
+                method: "POST",
+                headers: { ...headers, "Content-Type": "application/json" },
+                body: JSON.stringify({ fileName: "New Manual Report" }),
+              });
+              if (res.ok) {
+                const report = await res.json();
+                setSelectedReport(report);
+                setClashes([]);
+              }
+            }}
+          >
+            + New Report
+          </button>
+        )}
+
+        {canWrite && (
           <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
             <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv"
               onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
