@@ -240,8 +240,14 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
       await db.update(clashReportsTable)
         .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
         .where(eq(clashReportsTable.id, reportId));
-      rankClashesWithAI(reportId, projectId, clashList, anthropic).catch(console.error);
-      res.json({ message: "Re-ranking started", total_clashes: clashes.length });
+      try {
+        await rankClashesWithAI(reportId, projectId, clashList, anthropic);
+        const updated = await db.select().from(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+        res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
+      } catch (err) {
+        console.error("[rerank] FAILED:", err);
+        res.status(500).json({ error: "rerank_failed", message: err instanceof Error ? err.message : String(err) });
+      }
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
