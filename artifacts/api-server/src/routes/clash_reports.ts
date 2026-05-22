@@ -436,18 +436,18 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       });
 
       const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true, autoFirstPage: true });
+      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
       doc.pipe(res);
 
       const W = doc.page.width;
-      const M = 50;
+      const M = 40;
       const CW = W - M * 2;
 
       // ── COVER PAGE ──────────────────────────────────────────────────────
       // Dark header bar
-      doc.rect(0, 0, W, 130).fill("#1E3A5F");
+      doc.rect(0, 0, W, 110).fill("#1E3A5F");
 
       // USER COMPANY — protagonist
       doc.fontSize(26).font("Helvetica-Bold").fillColor("white")
@@ -462,13 +462,13 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         .text("CLASH COORDINATION REPORT", M, 35, { align: "right", width: CW });
 
       // Project info section
-      doc.rect(0, 130, W, 60).fill("#F8FAFC");
+      doc.rect(0, 110, W, 50).fill("#F8FAFC");
       doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F")
-        .text(project.name, M, 145);
+        .text(project.name, M, 120);
       doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
-        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 170);
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 143);
 
-      doc.y = 220;
+      doc.y = 185;
 
       doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
       doc.moveDown(0.5);
@@ -511,15 +511,15 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       doc.moveDown(0.5);
 
       const cols = [
-        { label: "Priority", w: 45 },
-        { label: "Viewpoint", w: 55 },
-        { label: "Description", w: 145 },
-        { label: "Hold Ups", w: 75 },
-        { label: "Trade", w: 50 },
-        { label: "Floor", w: 55 },
-        { label: "Status", w: 55 },
-        { label: "Responsible", w: 65 },
-        { label: "Deadline", w: 55 },
+        { label: "Priority", w: 48 },
+        { label: "Viewpoint", w: 60 },
+        { label: "Description", w: 170 },
+        { label: "Hold Ups", w: 80 },
+        { label: "Trade", w: 55 },
+        { label: "Floor", w: 70 },
+        { label: "Status", w: 65 },
+        { label: "Responsible", w: 80 },
+        { label: "Deadline", w: 65 },
       ];
 
       const drawTableHeader = () => {
@@ -544,15 +544,13 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       };
 
       clashes.forEach((c, idx) => {
-        const rowH = 22;
+        const rowH = 26;
         if (doc.y + rowH > doc.page.height - 70) {
           doc.addPage();
-          doc.rect(0, 0, W, 30).fill("#1E3A5F");
+          doc.rect(0, 0, W, 25).fill("#1E3A5F");
           doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
-            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) — Clash Coordination Report`, M, 10);
-          doc.fontSize(7).font("Helvetica").fillColor("#93C5FD")
-            .text(`Page ${doc.bufferedPageRange().count}`, M, 10, { align: "right", width: CW });
-          doc.y = 45;
+            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) — Clash Coordination Report`, M, 8, { width: CW });
+          doc.y = 35;
           drawTableHeader();
         }
 
@@ -578,8 +576,10 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
           c.dueDate && !String(c.dueDate).startsWith("1970") ? new Date(c.dueDate).toLocaleDateString() : "—",
         ];
         vals.forEach((val, i) => {
+          const colW = cols[i + 1].w - 4;
+          const text = String(val);
           doc.fontSize(7).font("Helvetica").fillColor("#111827")
-            .text(String(val).slice(0, 30), x + 2, rY + 7, { width: cols[i + 1].w - 4, lineBreak: false });
+            .text(text, x + 2, rY + 4, { width: colW, height: rowH - 6, ellipsis: true, lineBreak: false });
           x += cols[i + 1].w;
         });
 
