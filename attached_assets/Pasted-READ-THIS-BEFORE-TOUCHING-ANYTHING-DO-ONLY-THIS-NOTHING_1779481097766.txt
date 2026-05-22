@@ -1,0 +1,53 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+In the reports list, find where the report fileName is displayed:
+<div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{r.fileName}</div>
+
+Replace with:
+<div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>
+  <input
+    value={r.fileName}
+    onChange={e => setReports(prev => prev.map(x => x.id === r.id ? { ...x, fileName: e.target.value } : x))}
+    onBlur={async e => {
+      await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: e.target.value }),
+      });
+    }}
+    style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB",
+      background: "transparent", outline: "none", width: "100%", cursor: "text" }}
+  />
+</div>
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Add this endpoint before the DELETE endpoint:
+
+router.patch("/projects/:projectId/clash-reports/:reportId/rename", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [updated] = await db.update(clashReportsTable)
+      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+Check 1:
+grep -n "rename\|fileName.*input\|borderBottom.*dashed" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -5
+
+Check 2:
+grep -n "rename" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print all check outputs as plain text. No collapsed boxes.

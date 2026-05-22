@@ -474,7 +474,21 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                 <div key={r.id} style={{ background: "white", border: "1px solid #E5E7EB",
                   borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{r.fileName}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>
+                      <input
+                        value={r.fileName}
+                        onChange={e => setReports(prev => prev.map(x => x.id === r.id ? { ...x, fileName: e.target.value } : x))}
+                        onBlur={async e => {
+                          await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`, {
+                            method: "PATCH",
+                            headers: { ...headers, "Content-Type": "application/json" },
+                            body: JSON.stringify({ fileName: e.target.value }),
+                          });
+                        }}
+                        style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB",
+                          background: "transparent", outline: "none", width: "100%", cursor: "text" }}
+                      />
+                    </div>
                     <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
                       {new Date(r.createdAt).toLocaleDateString()} · {r.totalClashes} {t("clashes","choques")}
                       {r.aiSummary && <span> · {r.aiSummary}</span>}

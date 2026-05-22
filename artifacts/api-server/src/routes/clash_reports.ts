@@ -369,6 +369,21 @@ router.post("/projects/:projectId/clash-reports/:reportId/clashes",
   }
 );
 
+router.patch("/projects/:projectId/clash-reports/:reportId/rename", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [updated] = await db.update(clashReportsTable)
+      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
