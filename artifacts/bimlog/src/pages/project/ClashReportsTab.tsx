@@ -348,6 +348,23 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       {r.p4Count > 0 && <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "#F3F4F6", color: "#6B7280" }}>P4: {r.p4Count}</span>}
                     </div>
                   </div>
+                  <button
+                    className="btn btn-sm btn-outline"
+                    onClick={async () => {
+                      const res = await fetch(
+                        `${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,
+                        { method: "POST", headers }
+                      );
+                      if (res.ok) {
+                        alert("Re-ranking started. Refresh in 30 seconds.");
+                        setTimeout(() => loadReports(), 15000);
+                        setTimeout(() => loadReports(), 30000);
+                      }
+                    }}
+                    style={{ marginRight: 8 }}
+                  >
+                    Re-rank AI
+                  </button>
                   <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)}
                     style={{ marginLeft: 16 }}>
                     {t("View Clashes","Ver Choques")}

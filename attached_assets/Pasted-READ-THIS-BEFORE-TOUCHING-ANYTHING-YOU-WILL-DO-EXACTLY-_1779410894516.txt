@@ -1,0 +1,246 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+
+THE PROBLEM:
+Debug mode shows a red banner but does nothing useful.
+It needs to show ALL server errors, API responses, and console logs
+directly on screen in a panel so the developer never has to open
+the browser console or look at server logs.
+
+FILE: artifacts/bimlog/src/components/DebugBanner.tsx
+
+Replace entire file contents with exactly this:
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { isDebug, toggleDebug } from "@/lib/debug";
+
+interface LogEntry {
+  time: string;
+  type: "error" | "warn" | "info" | "fetch";
+  message: string;
+}
+
+export function DebugBanner() {
+  const [debug, setDebug] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [open, setOpen] = useState(true);
+  const logsRef = useRef<HTMLDivElement>(null);
+
+  const addLog = useCallback((type: LogEntry["type"], message: string) => {
+    const time = new Date().toLocaleTimeString();
+    setLogs(prev => [...prev.slice(-99), { time, type, message }]);
+    setTimeout(() => {
+      if (logsRef.current) logsRef.current.scrollTop = logsRef.current.scrollHeight;
+    }, 50);
+  }, []);
+
+  useEffect(() => {
+    setDebug(isDebug());
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "F2") { e.preventDefault(); setShowConfirm(true); }
+    };
+    window.addEventListener("keydown", handleKey);
+
+    if (!isDebug()) return () => window.removeEventListener("keydown", handleKey);
+
+    // Intercept console.error and console.warn
+    const origError = console.error.bind(console);
+    const origWarn = console.warn.bind(console);
+    const origLog = console.log.bind(console);
+
+    console.error = (...args) => {
+      origError(...args);
+      addLog("error", args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" "));
+    };
+    console.warn = (...args) => {
+      origWarn(...args);
+      addLog("warn", args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" "));
+    };
+    console.log = (...args) => {
+      origLog(...args);
+      addLog("info", args.map(a => typeof a === "object" ? JSON.stringify(a) : String(a)).join(" "));
+    };
+
+    // Intercept all fetch calls
+    const origFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : (input as Request).url;
+      const method = init?.method ?? "GET";
+      addLog("fetch", `${method} ${url}`);
+      try {
+        const res = await origFetch(input, init);
+        const cloned = res.clone();
+        if (!res.ok) {
+          cloned.text().then(body => {
+            addLog("error", `${method} ${url} => ${res.status} ${res.statusText} | ${body.slice(0, 300)}`);
+          }).catch(() => {});
+        } else {
+          addLog("fetch", `${method} ${url} => ${res.status} OK`);
+        }
+        return res;
+      } catch (err) {
+        addLog("error", `${method} ${url} => NETWORK ERROR: ${err instanceof Error ? err.message : String(err)}`);
+        throw err;
+      }
+    };
+
+    // Intercept unhandled errors
+    const handleError = (e: ErrorEvent) => {
+      addLog("error", `Unhandled: ${e.message} at ${e.filename}:${e.lineno}`);
+    };
+    const handleRejection = (e: PromiseRejectionEvent) => {
+      addLog("error", `Unhandled promise: ${e.reason}`);
+    };
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleRejection);
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleRejection);
+      console.error = origError;
+      console.warn = origWarn;
+      console.log = origLog;
+      window.fetch = origFetch;
+    };
+  }, [debug, addLog]);
+
+  const confirm = useCallback((yes: boolean) => {
+    setShowConfirm(false);
+    if (yes) {
+      const newState = toggleDebug();
+      setDebug(newState);
+      if (!newState) setLogs([]);
+    }
+  }, []);
+
+  const LOG_COLORS: Record<LogEntry["type"], string> = {
+    error: "#FEE2E2",
+    warn: "#FEF3C7",
+    info: "#F0F9FF",
+    fetch: "#F0FDF4",
+  };
+  const LOG_TEXT: Record<LogEntry["type"], string> = {
+    error: "#DC2626",
+    warn: "#D97706",
+    info: "#0369A1",
+    fetch: "#16A34A",
+  };
+
+  return (
+    <>
+      {showConfirm && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999
+        }}>
+          <div style={{
+            background: "white", borderRadius: 12, padding: 28,
+            maxWidth: 380, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            textAlign: "center"
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#DC2626", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Developer Tools
+            </div>
+            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 8, color: "#111827" }}>
+              {debug ? "Turn OFF Debug Mode?" : "Turn ON Debug Mode?"}
+            </div>
+            <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 20, lineHeight: 1.6 }}>
+              {debug
+                ? "Debug mode will be disabled. Errors will show generic messages."
+                : "Debug mode will show all API calls, errors, and logs in a panel on screen."}
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={() => confirm(true)} style={{
+                background: debug ? "#DC2626" : "#2563EB", color: "white",
+                border: "none", borderRadius: 8, padding: "10px 24px",
+                fontWeight: 700, fontSize: 14, cursor: "pointer"
+              }}>
+                {debug ? "Yes, Turn Off" : "Yes, Turn On"}
+              </button>
+              <button onClick={() => confirm(false)} style={{
+                background: "#F3F4F6", color: "#374151",
+                border: "none", borderRadius: 8, padding: "10px 24px",
+                fontWeight: 700, fontSize: 14, cursor: "pointer"
+              }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {debug && (
+        <>
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, zIndex: 99998,
+            background: "#DC2626", color: "white", textAlign: "center",
+            padding: "4px 12px", fontSize: 11, fontWeight: 700,
+            letterSpacing: "0.05em", cursor: "pointer",
+            display: "flex", justifyContent: "space-between", alignItems: "center"
+          }}>
+            <span>DEBUG MODE ON — F2 to toggle</span>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setLogs([])} style={{
+                background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                borderRadius: 4, padding: "2px 8px", fontSize: 11, cursor: "pointer", fontWeight: 700
+              }}>CLEAR</button>
+              <button onClick={() => setOpen(o => !o)} style={{
+                background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                borderRadius: 4, padding: "2px 8px", fontSize: 11, cursor: "pointer", fontWeight: 700
+              }}>{open ? "HIDE" : "SHOW"} PANEL</button>
+            </div>
+          </div>
+
+          {open && (
+            <div ref={logsRef} style={{
+              position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 99997,
+              height: 220, background: "#111827", overflowY: "auto",
+              borderTop: "2px solid #DC2626", fontFamily: "monospace"
+            }}>
+              {logs.length === 0 && (
+                <div style={{ padding: "12px 16px", color: "#6B7280", fontSize: 12 }}>
+                  Waiting for activity... make an API call or trigger an error.
+                </div>
+              )}
+              {logs.map((log, i) => (
+                <div key={i} style={{
+                  padding: "3px 12px", fontSize: 11, borderBottom: "1px solid #1F2937",
+                  background: i % 2 === 0 ? "#111827" : "#0F172A",
+                  display: "flex", gap: 10, alignItems: "flex-start"
+                }}>
+                  <span style={{ color: "#4B5563", flexShrink: 0 }}>{log.time}</span>
+                  <span style={{
+                    flexShrink: 0, padding: "0 6px", borderRadius: 3, fontSize: 10,
+                    fontWeight: 700, background: LOG_COLORS[log.type], color: LOG_TEXT[log.type]
+                  }}>{log.type.toUpperCase()}</span>
+                  <span style={{ color: log.type === "error" ? "#FCA5A5" : log.type === "warn" ? "#FCD34D" : "#D1D5DB", wordBreak: "break-all" }}>
+                    {log.message}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+Check 1 — no emojis:
+grep -Pn "[^\x00-\x7F]" artifacts/bimlog/src/components/DebugBanner.tsx | head -5
+
+Check 2 — key functions exist:
+grep -n "fetch\|console.error\|addLog\|LOG_COLORS\|CLEAR\|HIDE" artifacts/bimlog/src/components/DebugBanner.tsx | head -15
+
+Check 3 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text in chat. No collapsed boxes.

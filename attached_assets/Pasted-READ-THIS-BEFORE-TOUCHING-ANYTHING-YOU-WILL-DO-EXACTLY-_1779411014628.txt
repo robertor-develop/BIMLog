@@ -1,0 +1,172 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+IF YOU DO ANYTHING NOT IN THIS INSTRUCTION YOU HAVE FAILED.
+
+═══════════════════════════════════════════════════════════
+TASK 1 — FIX DEBUG PANEL SO IT DOES NOT OVERLAP CONTENT
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/components/DebugBanner.tsx
+
+The debug panel sits on top of content. Fix it by adding
+body padding when debug mode is on.
+
+Find the useEffect that sets up debug mode.
+Add this logic inside the useEffect WHEN debug is true:
+
+    // Push page content down for top bar and up for bottom panel
+    document.body.style.paddingTop = "24px";
+    document.body.style.paddingBottom = "220px";
+
+Add cleanup when debug turns off:
+    return () => {
+      document.body.style.paddingTop = "";
+      document.body.style.paddingBottom = "";
+    };
+
+Also find the bottom debug panel div that has:
+position: "fixed", bottom: 0
+
+Make sure it has zIndex: 99997 and does NOT have any top margin.
+
+Check 1:
+grep -n "paddingTop\|paddingBottom\|body.style" artifacts/bimlog/src/components/DebugBanner.tsx | head -10
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+TASK 2 — FIX AI CLASH RANKING NOT SAVING P1/P2/P3/P4
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+THE PROBLEM: rankClashesWithAI runs async after the response is sent.
+It completes but p1_count, p2_count, p3_count, p4_count stay at 0.
+The AI returns rankings but the update is failing silently.
+
+ADD a manual re-rank endpoint so we can trigger it on demand
+AND fix the async ranking to log every step.
+
+CHANGE 1 — In rankClashesWithAI function, add console.log after every major step:
+
+After the anthropic.messages.create call succeeds, add:
+    console.log("[rankAI] Claude responded, parsing...");
+    console.log("[rankAI] Raw text:", text.slice(0, 200));
+
+After parsing ranked array, add:
+    console.log("[rankAI] Parsed rankings count:", ranked.length);
+    console.log("[rankAI] Sample:", JSON.stringify(ranked.slice(0, 2)));
+
+After fetching allClashes, add:
+    console.log("[rankAI] Clashes in DB for report:", allClashes.length);
+
+After the update loop, add:
+    console.log("[rankAI] Updated clashes. P1:", p1, "P2:", p2, "P3:", p3, "P4:", p4);
+
+After updating clash_reports, add:
+    console.log("[rankAI] Report updated to complete.");
+
+CHANGE 2 — Add a new endpoint to manually trigger re-ranking:
+
+POST /projects/:projectId/clash-reports/:reportId/rerank
+authMiddleware, requirePermission("admin", "write")
+
+Logic:
+const projectId = Number(req.params.projectId);
+const reportId = Number(req.params.reportId);
+try {
+  const [report] = await db.select().from(clashReportsTable)
+    .where(eq(clashReportsTable.id, reportId));
+  if (!report) { res.status(404).json({ error: "not_found" }); return; }
+  const clashes = await db.select().from(clashesTable)
+    .where(eq(clashesTable.clashReportId, reportId));
+  const clashList = clashes.map(c => ({
+    clashIdOriginal: c.clashIdOriginal,
+    description: c.description,
+    element1: c.element1,
+    element2: c.element2,
+    discipline1: c.discipline1,
+    level: c.level,
+  }));
+  await db.update(clashReportsTable)
+    .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
+    .where(eq(clashReportsTable.id, reportId));
+  rankClashesWithAI(reportId, projectId, clashList, anthropic).catch(console.error);
+  res.json({ message: "Re-ranking started", total_clashes: clashes.length });
+} catch (err) {
+  res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+}
+
+CHANGE 3 — Add a "Re-rank with AI" button to ClashReportsTab.tsx
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+In the reports list, find where each report card is rendered.
+Add a "Re-rank AI" button next to the "View Clashes" button:
+
+<button
+  className="btn btn-sm btn-outline"
+  onClick={async () => {
+    const res = await fetch(
+      `${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,
+      { method: "POST", headers }
+    );
+    if (res.ok) {
+      alert("Re-ranking started. Refresh in 30 seconds.");
+      setTimeout(() => loadReports(), 15000);
+      setTimeout(() => loadReports(), 30000);
+    }
+  }}
+  style={{ marginRight: 8 }}
+>
+  Re-rank AI
+</button>
+
+═══════════════════════════════════════════════════════════
+TASK 3 — DELETE DUPLICATE CLASH REPORTS
+═══════════════════════════════════════════════════════════
+
+Run this SQL to keep only the most recent clash report and delete duplicates:
+
+DELETE FROM clashes WHERE clash_report_id IN (
+  SELECT id FROM clash_reports
+  WHERE project_id = 23
+  AND id NOT IN (
+    SELECT MAX(id) FROM clash_reports WHERE project_id = 23
+  )
+);
+
+DELETE FROM clash_reports
+WHERE project_id = 23
+AND id NOT IN (
+  SELECT MAX(id) FROM clash_reports WHERE project_id = 23
+);
+
+Verify:
+SELECT id, status, p1_count, p2_count, p3_count, p4_count, total_clashes FROM clash_reports WHERE project_id = 23;
+
+═══════════════════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════════════════
+
+Check 1 — debug body padding:
+grep -n "paddingTop\|paddingBottom" artifacts/bimlog/src/components/DebugBanner.tsx | head -5
+
+Check 2 — rerank endpoint exists:
+grep -n "rerank" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+Check 3 — rerank button in frontend:
+grep -n "rerank\|Re-rank" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -5
+
+Check 4 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Check 5 — only one clash report remains:
+SELECT id, status, p1_count, p2_count, p3_count, p4_count FROM clash_reports WHERE project_id = 23;
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text in chat. No collapsed boxes.

@@ -153,8 +153,13 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
       }],
     });
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+    console.log("[rankAI] Claude responded, parsing...");
+    console.log("[rankAI] Raw text:", text.slice(0, 200));
     const ranked = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as { index: number; priority: string; priority_reason: string }[];
+    console.log("[rankAI] Parsed rankings count:", ranked.length);
+    console.log("[rankAI] Sample:", JSON.stringify(ranked.slice(0, 2)));
     const allClashes = await db.select().from(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+    console.log("[rankAI] Clashes in DB for report:", allClashes.length);
     for (const r of ranked) {
       if (allClashes[r.index]) {
         await db.update(clashesTable).set({ priority: r.priority, priorityReason: r.priority_reason }).where(eq(clashesTable.id, allClashes[r.index].id));
@@ -164,11 +169,13 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
     const p2 = ranked.filter(r => r.priority === "P2").length;
     const p3 = ranked.filter(r => r.priority === "P3").length;
     const p4 = ranked.filter(r => r.priority === "P4").length;
+    console.log("[rankAI] Updated clashes. P1:", p1, "P2:", p2, "P3:", p3, "P4:", p4);
     await db.update(clashReportsTable).set({
       status: "complete", p1Count: p1, p2Count: p2, p3Count: p3, p4Count: p4,
       aiSummary: `${p1} critical, ${p2} this week, ${p3} monitor, ${p4} low priority.`,
       updatedAt: new Date(),
     }).where(eq(clashReportsTable.id, reportId));
+    console.log("[rankAI] Report updated to complete.");
   } catch (err) {
     console.error("[rankClashesWithAI] FAILED:", err);
     await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
@@ -195,6 +202,37 @@ router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requi
     res.status(500).json({ error: "fetch_failed", message: err instanceof Error ? err.message : String(err) });
   }
 });
+
+router.post("/projects/:projectId/clash-reports/:reportId/rerank",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    try {
+      const [report] = await db.select().from(clashReportsTable)
+        .where(eq(clashReportsTable.id, reportId));
+      if (!report) { res.status(404).json({ error: "not_found" }); return; }
+      const clashes = await db.select().from(clashesTable)
+        .where(eq(clashesTable.clashReportId, reportId));
+      const clashList = clashes.map(c => ({
+        clashIdOriginal: c.clashIdOriginal,
+        description: c.description,
+        element1: c.element1,
+        element2: c.element2,
+        discipline1: c.discipline1,
+        level: c.level,
+      }));
+      await db.update(clashReportsTable)
+        .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
+        .where(eq(clashReportsTable.id, reportId));
+      rankClashesWithAI(reportId, projectId, clashList, anthropic).catch(console.error);
+      res.json({ message: "Re-ranking started", total_clashes: clashes.length });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
   const reportId = Number(req.params.reportId);

@@ -17,6 +17,18 @@ export function DebugBanner() {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
+  useEffect(() => {
+    if (debug) {
+      // Push page content down for top bar and up for bottom panel
+      document.body.style.paddingTop = "24px";
+      document.body.style.paddingBottom = "220px";
+      return () => {
+        document.body.style.paddingTop = "";
+        document.body.style.paddingBottom = "";
+      };
+    }
+  }, [debug]);
+
   const confirm = useCallback((yes: boolean) => {
     setShowConfirm(false);
     if (yes) {
