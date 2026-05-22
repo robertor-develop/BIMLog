@@ -17,7 +17,7 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
     const rows = await db.select().from(clashReportsTable)
       .where(eq(clashReportsTable.projectId, projectId))
       .orderBy(desc(clashReportsTable.createdAt));
-    res.json(rows);
+    res.json({ rows, _version: "v2-sync-ranking" });
   } catch (err) {
     res.status(500).json({ error: "list_failed", message: err instanceof Error ? err.message : String(err) });
   }
