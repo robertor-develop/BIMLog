@@ -1,0 +1,78 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES.
+
+TWO FIXES ONLY.
+
+FIX 1 — Delete duplicate clash reports on project 23, keep only the most recent:
+
+Run this SQL against the production database:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "
+DELETE FROM clashes WHERE clash_report_id IN (1, 2, 3);
+DELETE FROM clash_reports WHERE id IN (1, 2, 3);
+"
+
+Verify:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT id, project_id, status, total_clashes, p1_count FROM clash_reports;"
+
+FIX 2 — Fix the AI ranking to properly save priorities:
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Find the rankClashesWithAI function.
+Find this exact section:
+    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+    console.log("[rankAI] Claude responded, parsing...");
+    console.log("[rankAI] Raw text:", text.slice(0, 200));
+    const ranked = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as { index: number; priority: string; priority_reason: string }[];
+
+Replace with:
+    const rawText = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+    console.log("[rankAI] Claude raw response:", rawText.slice(0, 500));
+    // Strip markdown, find JSON array
+    let jsonStr = rawText.replace(/```json\n?|```/g, "").trim();
+    // Find the first [ and last ] to extract just the array
+    const firstBracket = jsonStr.indexOf("[");
+    const lastBracket = jsonStr.lastIndexOf("]");
+    if (firstBracket !== -1 && lastBracket !== -1) {
+      jsonStr = jsonStr.slice(firstBracket, lastBracket + 1);
+    }
+    console.log("[rankAI] Cleaned JSON:", jsonStr.slice(0, 200));
+    const ranked = JSON.parse(jsonStr) as { index: number; priority: string; priority_reason: string }[];
+    console.log("[rankAI] Ranked count:", ranked.length);
+    // Validate priorities
+    const validPriorities = ["P1", "P2", "P3", "P4"];
+    const validRanked = ranked.filter(r => validPriorities.includes(r.priority));
+    console.log("[rankAI] Valid ranked:", validRanked.length);
+
+Then find this section:
+    for (const r of ranked) {
+      if (allClashes[r.index]) {
+        await db.update(clashesTable).set({ priority: r.priority, priorityReason: r.priority_reason }).where(eq(clashesTable.id, allClashes[r.index].id));
+      }
+    }
+
+Replace with:
+    for (const r of validRanked) {
+      if (allClashes[r.index]) {
+        console.log(`[rankAI] Updating clash ${allClashes[r.index].id} with priority ${r.priority}`);
+        await db.update(clashesTable)
+          .set({ priority: r.priority, priorityReason: r.priority_reason })
+          .where(eq(clashesTable.id, allClashes[r.index].id));
+      }
+    }
+    const p1 = validRanked.filter(r => r.priority === "P1").length;
+    const p2 = validRanked.filter(r => r.priority === "P2").length;
+    const p3 = validRanked.filter(r => r.priority === "P3").length;
+    const p4 = validRanked.filter(r => r.priority === "P4").length;
+
+Check 1 — duplicates deleted:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT id, project_id, status, total_clashes FROM clash_reports;"
+
+Check 2 — ranking fix in place:
+grep -n "validRanked\|firstBracket\|lastBracket\|validPriorities" artifacts/api-server/src/routes/clash_reports.ts | head -15
+
+Check 3 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text in chat. No collapsed boxes.

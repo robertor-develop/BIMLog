@@ -152,23 +152,37 @@ Each item: { "index": 0, "priority": "P1", "priority_reason": "one sentence" }
 Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.description, element_1: c.element1, element_2: c.element2, discipline_1: c.discipline1, level: c.level })))}`,
       }],
     });
-    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
-    console.log("[rankAI] Claude responded, parsing...");
-    console.log("[rankAI] Raw text:", text.slice(0, 200));
-    const ranked = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as { index: number; priority: string; priority_reason: string }[];
-    console.log("[rankAI] Parsed rankings count:", ranked.length);
-    console.log("[rankAI] Sample:", JSON.stringify(ranked.slice(0, 2)));
+    const rawText = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+    console.log("[rankAI] Claude raw response:", rawText.slice(0, 500));
+    // Strip markdown, find JSON array
+    let jsonStr = rawText.replace(/```json\n?|```/g, "").trim();
+    // Find the first [ and last ] to extract just the array
+    const firstBracket = jsonStr.indexOf("[");
+    const lastBracket = jsonStr.lastIndexOf("]");
+    if (firstBracket !== -1 && lastBracket !== -1) {
+      jsonStr = jsonStr.slice(firstBracket, lastBracket + 1);
+    }
+    console.log("[rankAI] Cleaned JSON:", jsonStr.slice(0, 200));
+    const ranked = JSON.parse(jsonStr) as { index: number; priority: string; priority_reason: string }[];
+    console.log("[rankAI] Ranked count:", ranked.length);
+    // Validate priorities
+    const validPriorities = ["P1", "P2", "P3", "P4"];
+    const validRanked = ranked.filter(r => validPriorities.includes(r.priority));
+    console.log("[rankAI] Valid ranked:", validRanked.length);
     const allClashes = await db.select().from(clashesTable).where(eq(clashesTable.clashReportId, reportId));
     console.log("[rankAI] Clashes in DB for report:", allClashes.length);
-    for (const r of ranked) {
+    for (const r of validRanked) {
       if (allClashes[r.index]) {
-        await db.update(clashesTable).set({ priority: r.priority, priorityReason: r.priority_reason }).where(eq(clashesTable.id, allClashes[r.index].id));
+        console.log(`[rankAI] Updating clash ${allClashes[r.index].id} with priority ${r.priority}`);
+        await db.update(clashesTable)
+          .set({ priority: r.priority, priorityReason: r.priority_reason })
+          .where(eq(clashesTable.id, allClashes[r.index].id));
       }
     }
-    const p1 = ranked.filter(r => r.priority === "P1").length;
-    const p2 = ranked.filter(r => r.priority === "P2").length;
-    const p3 = ranked.filter(r => r.priority === "P3").length;
-    const p4 = ranked.filter(r => r.priority === "P4").length;
+    const p1 = validRanked.filter(r => r.priority === "P1").length;
+    const p2 = validRanked.filter(r => r.priority === "P2").length;
+    const p3 = validRanked.filter(r => r.priority === "P3").length;
+    const p4 = validRanked.filter(r => r.priority === "P4").length;
     console.log("[rankAI] Updated clashes. P1:", p1, "P2:", p2, "P3:", p3, "P4:", p4);
     await db.update(clashReportsTable).set({
       status: "complete", p1Count: p1, p2Count: p2, p3Count: p3, p4Count: p4,
