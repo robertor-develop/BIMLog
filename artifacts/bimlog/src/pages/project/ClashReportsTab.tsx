@@ -230,8 +230,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       {clashLoading
         ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading clashes...","Cargando choques...")}</div>
         : (
-          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "auto", maxHeight: "70vh" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1100 }}>
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
+            <table style={{ width: "max-content", minWidth: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
               <thead>
                 <tr style={{ background: "#1E3A5F", position: "sticky", top: 0, zIndex: 10 }}>
                   {[
