@@ -18,6 +18,9 @@ interface Clash {
   discipline2?: string; gridLocation?: string; level?: string;
   priority?: string; priorityReason?: string; status: string;
   assignedToName?: string; resolutionNotes?: string;
+  viewpoint?: string;
+  deadline?: string;
+  floor?: string;
 }
 
 const P_COLORS: Record<string, { bg: string; text: string }> = {
@@ -192,6 +195,22 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, flex: 1, minWidth: 200 }} />
       </div>
 
+      {canWrite && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+          <button className="btn btn-sm btn-primary" onClick={async () => {
+            if (!selectedReport) return;
+            const res = await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes`, {
+              method: "POST",
+              headers: { ...headers, "Content-Type": "application/json" },
+              body: JSON.stringify({ description: "", status: "open" }),
+            });
+            if (res.ok) loadClashes(selectedReport);
+          }}>
+            + Add Clash
+          </button>
+        </div>
+      )}
+
       {clashLoading
         ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading clashes...","Cargando choques...")}</div>
         : (
@@ -208,42 +227,84 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
               <tbody>
                 {filteredClashes.map(c => (
                   <Fragment key={c.id}>
-                    <tr style={{ borderBottom: "1px solid #F3F4F6",
-                      background: c.status === "resolved" ? "#F0FDF4" : "white" }}>
-                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><PBadge p={c.priority} /></td>
-                      <td style={{ padding: "8px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{c.clashIdOriginal || "—"}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 12, maxWidth: 200 }}>{c.description || "—"}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.element1 || "—"}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.element2 || "—"}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 11 }}>{c.discipline1 || "—"}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 11, whiteSpace: "nowrap" }}>{c.level || "—"}</td>
-                      <td style={{ padding: "8px 10px" }}>
-                        <select value={c.status}
-                          onChange={e => updateClash(c.id, { status: e.target.value })}
-                          style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11,
-                            padding: "2px 4px", fontWeight: 600,
-                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "in_progress" ? "#DBEAFE" : "#FEF3C7",
-                            color: c.status === "resolved" ? "#16A34A" : c.status === "in_progress" ? "#1D4ED8" : "#D97706" }}>
-                          <option value="open">Open</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="resolved">Resolved</option>
-                          <option value="wont_fix">Won't Fix</option>
-                        </select>
-                      </td>
-                      <td style={{ padding: "8px 10px" }}>
-                        <input value={c.assignedToName || ""}
-                          onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, assignedToName: e.target.value } : x))}
-                          onBlur={e => updateClash(c.id, { assignedToName: e.target.value })}
-                          style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px",
-                            fontSize: 11, width: 100 }} />
-                      </td>
-                      <td style={{ padding: "8px 10px" }}>
-                        <button className="btn btn-sm btn-outline"
-                          onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: !prev[c.id] }))}>
-                          {expandedNotes[c.id] ? "▲" : "▼"}
-                        </button>
-                      </td>
-                    </tr>
+                    <tr style={{ borderBottom: "1px solid #F3F4F6", background: c.status === "resolved" ? "#F0FDF4" : "white" }}>
+  <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>
+    <select value={c.priority || ""} onChange={e => updateClash(c.id, { priority: e.target.value })}
+      style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 700,
+        background: P_COLORS[c.priority ?? ""]?.bg ?? "#F3F4F6", color: P_COLORS[c.priority ?? ""]?.text ?? "#6B7280" }}>
+      <option value="">—</option>
+      <option value="P1">P1</option>
+      <option value="P2">P2</option>
+      <option value="P3">P3</option>
+      <option value="P4">P4</option>
+    </select>
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.clashIdOriginal || ""} placeholder="ID"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, clashIdOriginal: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { clashIdOriginal: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 60,
+        background: !c.clashIdOriginal ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.description || ""} placeholder="Description"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, description: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { description: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 180,
+        background: !c.description ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.element1 || ""} placeholder="Element 1"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, element1: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { element1: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 100,
+        background: !c.element1 ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.element2 || ""} placeholder="Element 2"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, element2: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { element2: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 100,
+        background: !c.element2 ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.discipline1 || ""} placeholder="Discipline"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, discipline1: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { discipline1: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 80,
+        background: !c.discipline1 ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.level || ""} placeholder="Level"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, level: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { level: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 70,
+        background: !c.level ? "#FFFBEB" : "white" }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <select value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
+      style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 600,
+        background: c.status === "resolved" ? "#DCFCE7" : c.status === "in_progress" ? "#DBEAFE" : "#FEF3C7",
+        color: c.status === "resolved" ? "#16A34A" : c.status === "in_progress" ? "#1D4ED8" : "#D97706" }}>
+      <option value="open">Open</option>
+      <option value="in_progress">In Progress</option>
+      <option value="resolved">Resolved</option>
+      <option value="wont_fix">Won't Fix</option>
+    </select>
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <input value={c.assignedToName || ""} placeholder="Assigned to"
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, assignedToName: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { assignedToName: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 6px", fontSize: 11, width: 90 }} />
+  </td>
+  <td style={{ padding: "4px 8px" }}>
+    <button className="btn btn-sm btn-outline"
+      onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: !prev[c.id] }))}>
+      {expandedNotes[c.id] ? "▲" : "▼"}
+    </button>
+  </td>
+</tr>
                     {expandedNotes[c.id] && (
                       <tr style={{ background: "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
                         <td colSpan={10} style={{ padding: "8px 16px" }}>

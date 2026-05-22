@@ -268,12 +268,20 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
   const clashId = Number(req.params.clashId);
   try {
     const allowed: Record<string, any> = {};
-    const { status, resolutionNotes, assignedToName, assignedToEmail, dueDate } = req.body ?? {};
+    const { status, resolutionNotes, assignedToName, assignedToEmail, dueDate,
+            clashIdOriginal, description, element1, element2, discipline1, level, priority } = req.body ?? {};
     if (status !== undefined) allowed.status = status;
     if (resolutionNotes !== undefined) allowed.resolutionNotes = resolutionNotes;
     if (assignedToName !== undefined) allowed.assignedToName = assignedToName;
     if (assignedToEmail !== undefined) allowed.assignedToEmail = assignedToEmail;
     if (dueDate !== undefined) allowed.dueDate = dueDate ? new Date(dueDate) : null;
+    if (clashIdOriginal !== undefined) allowed.clashIdOriginal = clashIdOriginal;
+    if (description !== undefined) allowed.description = description;
+    if (element1 !== undefined) allowed.element1 = element1;
+    if (element2 !== undefined) allowed.element2 = element2;
+    if (discipline1 !== undefined) allowed.discipline1 = discipline1;
+    if (level !== undefined) allowed.level = level;
+    if (priority !== undefined) allowed.priority = priority;
     allowed.updatedAt = new Date();
     const [updated] = await db.update(clashesTable).set(allowed)
       .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId))).returning();
@@ -286,6 +294,39 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
     res.status(500).json({ error: "update_failed", message: err instanceof Error ? err.message : String(err) });
   }
 });
+
+router.post("/projects/:projectId/clash-reports/:reportId/clashes",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    try {
+      const [report] = await db.select().from(clashReportsTable)
+        .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
+      if (!report) { res.status(404).json({ error: "not_found" }); return; }
+      const body = req.body ?? {};
+      const [clash] = await db.insert(clashesTable).values({
+        clashReportId: reportId,
+        projectId,
+        clashIdOriginal: body.clashIdOriginal ?? null,
+        description: body.description ?? null,
+        element1: body.element1 ?? null,
+        element2: body.element2 ?? null,
+        discipline1: body.discipline1 ?? null,
+        level: body.level ?? null,
+        status: "open",
+        priority: body.priority ?? null,
+      }).returning();
+      await db.update(clashReportsTable)
+        .set({ totalClashes: report.totalClashes + 1 })
+        .where(eq(clashReportsTable.id, reportId));
+      res.status(201).json(clash);
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
