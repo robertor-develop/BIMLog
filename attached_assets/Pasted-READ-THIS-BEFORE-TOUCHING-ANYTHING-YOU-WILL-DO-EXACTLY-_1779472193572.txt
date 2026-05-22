@@ -1,0 +1,74 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+IF YOU DO ANYTHING NOT IN THIS INSTRUCTION YOU HAVE FAILED.
+
+TASK 1 — ADD DELETE ENDPOINT TO BACKEND
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Add this complete endpoint at the end of the file before export default router:
+
+router.delete("/projects/:projectId/clash-reports/:reportId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    try {
+      const [report] = await db.select().from(clashReportsTable)
+        .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
+      if (!report) {
+        res.status(404).json({ error: "not_found", message: "Clash report not found" });
+        return;
+      }
+      await db.delete(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+      await db.delete(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+      res.json({ success: true, deleted_clashes: report.totalClashes });
+    } catch (err) {
+      console.error("[clash-reports/delete] FAILED:", err);
+      res.status(500).json({ error: "delete_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+TASK 2 — UPDATE FRONTEND BUTTONS
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+Find the report card buttons section. It currently has Re-rank AI and View Clashes buttons.
+Replace the entire buttons div with exactly this:
+
+<div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 16 }}>
+  <button
+    className="btn btn-sm btn-outline"
+    onClick={() => loadClashes(r)}
+    style={{ fontSize: 12, padding: "4px 12px" }}
+  >
+    View Clashes
+  </button>
+  <button
+    className="btn btn-sm btn-outline"
+    onClick={async () => {
+      const res = await fetch(
+        `${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,
+        { method: "POST", headers }
+      );
+      if (res.ok) {
+        setTimeout(() => loadReports(), 3000);
+        setTimeout(() => loadReports(), 8000);
+      }
+    }}
+    style={{ fontSize: 12, padding: "4px 12px" }}
+  >
+    Re-rank AI
+  </button>
+  <button
+    onClick={async () => {
+      if (!confirm(`Delete "${r.fileName}"? This cannot be undone.`)) return;
+      const res = await fetch(
+        `${API}/projects/${projectId}/clash-reports/${r.id}`,
+        { method: "DELETE",
