@@ -1,0 +1,75 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+CHANGE 1 — Wrap the table in a horizontally scrollable container with sticky header.
+
+Find this exact line:
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+
+Replace with:
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "auto", maxHeight: "70vh" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1100 }}>
+
+CHANGE 2 — Make the header row sticky.
+
+Find this exact line:
+                <tr style={{ background: "#1E3A5F" }}>
+
+Replace with:
+                <tr style={{ background: "#1E3A5F", position: "sticky", top: 0, zIndex: 10 }}>
+
+CHANGE 3 — Set fixed column widths so everything fits and add Deadline column.
+
+Find this exact line:
+                  {["Priority","Viewpoint","Description","Trade","Floor","Status","Responsible","Notes"].map(h => (
+
+Replace with:
+                  {[
+                    { label: "Priority", w: 80 },
+                    { label: "Viewpoint", w: 100 },
+                    { label: "Description", w: 220 },
+                    { label: "Trade", w: 80 },
+                    { label: "Floor", w: 100 },
+                    { label: "Status", w: 110 },
+                    { label: "Responsible", w: 110 },
+                    { label: "Deadline", w: 100 },
+                    { label: "Notes", w: 70 },
+                  ].map(h => (
+                    <th key={h.label} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
+                      color: "white", textAlign: "left", textTransform: "uppercase",
+                      whiteSpace: "nowrap", width: h.w, minWidth: h.w, background: "#1E3A5F" }}>{h.label}</th>
+                  ))}
+
+Also add a Deadline cell to the table row BEFORE the Notes/Edit button cell.
+Find the Responsible input cell (the last input before the Edit button).
+After the Responsible td, add:
+
+  <td style={{ padding: "4px 8px" }}>
+    <input type="date"
+      value={c.dueDate ? new Date(c.dueDate).toISOString().split("T")[0] : ""}
+      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, dueDate: e.target.value } : x))}
+      onBlur={e => updateClash(c.id, { dueDate: e.target.value })}
+      style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 4px",
+        fontSize: 11, width: 95,
+        background: !c.dueDate || c.dueDate.startsWith("1970") ? "#FFFBEB" : "white" }} />
+  </td>
+
+CHANGE 4 — Fix the 1970 date bug. In the expanded panel deadline field:
+Find:
+      value={c.dueDate ? new Date(c.dueDate).toISOString().split("T")[0] : ""}
+
+Replace with:
+      value={c.dueDate && !c.dueDate.toString().startsWith("1970") ? new Date(c.dueDate).toISOString().split("T")[0] : ""}
+
+Check 1:
+grep -n "sticky\|maxHeight\|minWidth.*1100\|Deadline.*w.*100" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -10
+
+Check 2 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.

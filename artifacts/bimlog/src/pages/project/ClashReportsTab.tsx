@@ -20,6 +20,7 @@ interface Clash {
   assignedToName?: string; resolutionNotes?: string;
   viewpoint?: string;
   deadline?: string;
+  dueDate?: string | null;
   floor?: string;
 }
 
@@ -229,13 +230,24 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       {clashLoading
         ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading clashes...","Cargando choques...")}</div>
         : (
-          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "auto", maxHeight: "70vh" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1100 }}>
               <thead>
-                <tr style={{ background: "#1E3A5F" }}>
-                  {["Priority","Viewpoint","Description","Trade","Floor","Status","Responsible","Notes"].map(h => (
-                    <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
-                      color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                <tr style={{ background: "#1E3A5F", position: "sticky", top: 0, zIndex: 10 }}>
+                  {[
+                    { label: "Priority", w: 80 },
+                    { label: "Viewpoint", w: 100 },
+                    { label: "Description", w: 220 },
+                    { label: "Trade", w: 80 },
+                    { label: "Floor", w: 100 },
+                    { label: "Status", w: 110 },
+                    { label: "Responsible", w: 110 },
+                    { label: "Deadline", w: 100 },
+                    { label: "Notes", w: 70 },
+                  ].map(h => (
+                    <th key={h.label} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
+                      color: "white", textAlign: "left", textTransform: "uppercase",
+                      whiteSpace: "nowrap", width: h.w, minWidth: h.w, background: "#1E3A5F" }}>{h.label}</th>
                   ))}
                 </tr>
               </thead>
@@ -280,6 +292,15 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: !c.assignedToName ? "#9CA3AF" : "#111827" }}>
                           {c.assignedToName || "—"}
                         </div>
+                      </td>
+                      <td style={{ padding: "4px 8px" }}>
+                        <input type="date"
+                          value={c.dueDate && !c.dueDate.toString().startsWith("1970") ? new Date(c.dueDate).toISOString().split("T")[0] : ""}
+                          onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, dueDate: e.target.value } : x))}
+                          onBlur={e => updateClash(c.id, { dueDate: e.target.value })}
+                          style={{ border: "1px solid #E5E7EB", borderRadius: 4, padding: "2px 4px",
+                            fontSize: 11, width: 95,
+                            background: !c.dueDate || c.dueDate.toString().startsWith("1970") ? "#FFFBEB" : "white" }} />
                       </td>
                       <td style={{ padding: "4px 8px" }}>
                         <button className="btn btn-sm btn-outline"
