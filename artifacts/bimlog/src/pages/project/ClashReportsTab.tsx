@@ -233,7 +233,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "#1E3A5F" }}>
-                  {["Priority","Viewpoint","Description","Hold Ups","Trade","Floor","Status","Responsible","Notes"].map(h => (
+                  {["Priority","Viewpoint","Description","Trade","Floor","Status","Responsible","Notes"].map(h => (
                     <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
                       color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
@@ -250,9 +250,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                           <option value="">—</option><option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option><option value="P4">P4</option>
                         </select>
                       </td>
-                      {(["clashIdOriginal","description","element1","element2","discipline1","level"] as const).map(field => {
+                      {(["clashIdOriginal","description","discipline1","level"] as const).map(field => {
                         const val = (c as any)[field] as string | undefined;
-                        const widths: Record<string, number> = { clashIdOriginal: 60, description: 180, element1: 100, element2: 100, discipline1: 80, level: 70 };
+                        const widths: Record<string, number> = { clashIdOriginal: 60, description: 180, discipline1: 80, level: 70 };
                         return (
                           <td key={field} style={{ padding: "4px 8px" }}
                               onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: true }))}>
@@ -292,34 +292,71 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       <tr style={{ background: "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
                         <td colSpan={10} style={{ padding: "12px 16px" }}>
                           {c.priorityReason && <div style={{ marginBottom: 10, fontStyle: "italic", fontSize: 11, color: "#6B7280" }}>AI: {c.priorityReason}</div>}
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 10 }}>
-                            {([
-                              ["clashIdOriginal","ID"],
-                              ["description","Description"],
-                              ["element1","Element 1"],
-                              ["element2","Element 2"],
-                              ["discipline1","Discipline"],
-                              ["level","Level"],
-                              ["assignedToName","Assigned To"],
-                            ] as const).map(([field, label]) => (
-                              <label key={field} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{label}</span>
-                                <input value={((c as any)[field] as string) || ""}
-                                  onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, [field]: e.target.value } : x))}
-                                  onBlur={e => updateClash(c.id, { [field]: e.target.value })}
-                                  style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12,
-                                    background: !((c as any)[field]) ? "#FFFBEB" : "white" }} />
-                              </label>
-                            ))}
-                          </div>
-                          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            <span style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>Resolution Notes</span>
-                            <textarea value={c.resolutionNotes || ""}
-                              onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, resolutionNotes: e.target.value } : x))}
-                              onBlur={e => updateClash(c.id, { resolutionNotes: e.target.value })}
-                              rows={2} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6,
-                                padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
-                          </label>
+                          {(() => {
+                            const inputStyle = (v: any) => ({ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, background: !v ? "#FFFBEB" : "white" });
+                            const lblStyle = { fontSize: 11, fontWeight: 600, color: "#374151" };
+                            const renderInput = (field: string) => (
+                              <input value={((c as any)[field] as string) || ""}
+                                onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, [field]: e.target.value } : x))}
+                                onBlur={e => updateClash(c.id, { [field]: e.target.value })}
+                                style={inputStyle((c as any)[field])} />
+                            );
+                            const dueVal = (c as any).dueDate ? String((c as any).dueDate).slice(0, 10) : "";
+                            return (
+                              <>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 10 }}>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Viewpoint ID</span>
+                                    {renderInput("clashIdOriginal")}
+                                  </label>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Description</span>
+                                    {renderInput("description")}
+                                  </label>
+                                </div>
+                                <label style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+                                  <span style={lblStyle}>Hold Ups</span>
+                                  <input value={((c as any).element1 as string) || ""}
+                                    onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, element1: e.target.value } : x))}
+                                    onBlur={e => updateClash(c.id, { element1: e.target.value })}
+                                    style={{ ...inputStyle((c as any).element1), width: "100%" }} />
+                                </label>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 10 }}>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Trade</span>
+                                    {renderInput("discipline1")}
+                                  </label>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Floor</span>
+                                    {renderInput("level")}
+                                  </label>
+                                </div>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 10 }}>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Responsible</span>
+                                    {renderInput("assignedToName")}
+                                  </label>
+                                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={lblStyle}>Deadline</span>
+                                    <input type="date" value={dueVal}
+                                      onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, dueDate: e.target.value } as any : x))}
+                                      onBlur={e => updateClash(c.id, { dueDate: e.target.value } as any)}
+                                      style={inputStyle(dueVal)} />
+                                  </label>
+                                </div>
+                                <label style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+                                  <span style={lblStyle}>Response / Direction</span>
+                                  <textarea value={c.resolutionNotes || ""}
+                                    onChange={e => setClashes(prev => prev.map(x => x.id === c.id ? { ...x, resolutionNotes: e.target.value } : x))}
+                                    onBlur={e => updateClash(c.id, { resolutionNotes: e.target.value })}
+                                    rows={2} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
+                                </label>
+                                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                  <button className="btn btn-sm btn-outline" onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: false }))}>Done</button>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </td>
                       </tr>
                     )}

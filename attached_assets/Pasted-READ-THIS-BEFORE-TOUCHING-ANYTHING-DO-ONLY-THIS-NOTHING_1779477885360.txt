@@ -1,0 +1,59 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+CHANGE 1 — Fix the table header row to match exact data columns.
+Find this exact line:
+                  {["Priority","Viewpoint","Description","Hold Ups","Trade","Floor","Status","Responsible","Notes"].map(h => (
+
+Replace with:
+                  {["Priority","Viewpoint","Description","Trade","Floor","Status","Responsible","Notes"].map(h => (
+
+CHANGE 2 — Fix the table data row to match correct columns.
+Find the entire table row cells after the priority badge cell.
+The cells currently show: clashIdOriginal, description, element1, element2, discipline1, level, status, assignedToName
+
+Remove the element1 and element2 cells completely.
+Keep only: clashIdOriginal, description, discipline1, level, status, assignedToName
+
+The row should show exactly these cells in this order:
+1. Priority (dropdown) — already there
+2. Viewpoint (clashIdOriginal input)
+3. Description (description input)
+4. Trade (discipline1 input)
+5. Floor (level input)
+6. Status (status dropdown)
+7. Responsible (assignedToName input)
+8. Notes/Edit button
+
+CHANGE 3 — Fix the expanded edit panel labels.
+Find the expanded panel. It currently shows old labels like "ID", "Element 1", "Element 2", "Discipline", "Level", "Assigned To".
+
+Replace ALL labels in the expanded panel:
+- "ID" → "Viewpoint ID"
+- "Element 1" → "Hold Ups"
+- "Element 2" → remove this field entirely
+- "Discipline" → "Trade"
+- "Level" → "Floor"
+- "Assigned To" → "Responsible"
+- "Resolution Notes" → "Response / Direction"
+- Add a "Deadline" date input field
+
+The expanded panel grid should have these fields:
+Row 1: Viewpoint ID | Description
+Row 2: Hold Ups (full width)
+Row 3: Trade | Floor
+Row 4: Responsible | Deadline (date input)
+Row 5: Response / Direction (textarea, full width)
+Row 6: Done button (right aligned)
+
+Check 1 — correct headers:
+grep -n "Viewpoint\|Hold Ups\|Trade\|Floor\|Responsible\|Response" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -15
+
+Check 2 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text in chat. No collapsed boxes.
