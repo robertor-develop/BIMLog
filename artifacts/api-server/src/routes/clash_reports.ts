@@ -132,7 +132,9 @@ router.post("/projects/:projectId/clash-reports/upload",
 
 async function rankClashesWithAI(reportId: number, _projectId: number, clashList: any[], anthropicClient: Anthropic) {
   try {
+    console.log("[rankAI] Starting — clashList length:", clashList.length, "reportId:", reportId);
     if (clashList.length === 0) {
+      console.log("[rankAI] EARLY EXIT — empty clashList");
       await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
       return;
     }
@@ -229,6 +231,11 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
       if (!report) { res.status(404).json({ error: "not_found" }); return; }
       const clashes = await db.select().from(clashesTable)
         .where(eq(clashesTable.clashReportId, reportId));
+      console.log("[rerank] Report ID:", reportId, "Clashes found:", clashes.length);
+      if (clashes.length === 0) {
+        res.status(400).json({ error: "no_clashes", message: `No clashes found for report ${reportId}. Found 0 rows.` });
+        return;
+      }
       const clashList = clashes.map(c => ({
         clashIdOriginal: c.clashIdOriginal,
         description: c.description,
