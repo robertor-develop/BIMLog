@@ -52,48 +52,61 @@ router.post("/projects/:projectId/clash-reports/upload",
       if (headerIdx === -1) headerIdx = 0;
       const headers = (rows[headerIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
 
-      function colIdx(keywords: string[]): number {
-        for (const kw of keywords) {
-          const i = headers.findIndex(h => h.includes(kw));
-          if (i >= 0) return i;
-        }
-        return -1;
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
+      if (hIdx === -1) hIdx = 0;
+      const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+      const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+
+      let mapping: Record<string, number> = { clashId: -1, description: -1, element1: -1, element2: -1, discipline: -1, level: -1, assignedTo: -1, status: -1, resolutionNotes: -1, deadline: -1, viewpoint: -1, holdUps: -1 };
+      try {
+        const mapMsg = await anthropic.messages.create({
+          model: "claude-sonnet-4-5",
+          max_tokens: 400,
+          messages: [{
+            role: "user",
+            content: `Construction clash report headers (0-indexed array): ${JSON.stringify(hdrs)}
+Sample row: ${JSON.stringify(dataRows[0] ?? [])}
+
+Map to column indices. Return ONLY valid JSON, no markdown:
+{"clashId":<idx or -1>,"description":<idx>,"holdUps":<idx or -1>,"discipline":<idx or -1>,"level":<idx or -1>,"assignedTo":<idx or -1>,"status":<idx or -1>,"resolutionNotes":<idx or -1>,"deadline":<idx or -1>,"viewpoint":<idx or -1>}
+
+Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking issues column, resolutionNotes=response/direction/resolution column, level=floor/level column, discipline=trade/discipline column, assignedTo=responsible/assigned column, clashId=sequence number column`
+          }]
+        });
+        const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
+        mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
+        console.log("[clash-upload] AI mapping:", JSON.stringify(mapping));
+      } catch (e) {
+        console.error("[clash-upload] AI mapping failed:", e);
+        mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
       }
 
-      const idCol = colIdx(["clash", "id", "number", "#"]);
-      const descCol = colIdx(["description", "issue", "name", "title", "comment"]);
-      const el1Col = colIdx(["element 1", "item 1", "component 1", "layer 1"]);
-      const el2Col = colIdx(["element 2", "item 2", "component 2", "layer 2"]);
-      const disc1Col = colIdx(["discipline", "trade", "system", "category"]);
-      const disc2Col = colIdx(["discipline 2", "trade 2", "system 2"]);
-      const locCol = colIdx(["location", "grid", "area", "gridpoint"]);
-      const levelCol = colIdx(["level", "floor", "elevation"]);
-      const typeCol = colIdx(["type", "clash type", "kind"]);
-      const assignCol = colIdx(["responsible", "assigned", "owner", "contractor"]);
+      const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined && row[idx] !== null ? String(row[idx]).trim() : "";
+      const getDate = (row: any[], idx: number) => { if (idx < 0 || !row[idx]) return null; try { const d = new Date(row[idx]); return isNaN(d.getTime()) ? null : d; } catch { return null; } };
 
-      console.log("[clash-upload] Total rows:", rows.length);
-      console.log("[clash-upload] Header row index:", headerIdx);
-      console.log("[clash-upload] Headers found:", headers);
-      console.log("[clash-upload] idCol:", idCol, "descCol:", descCol, "el1Col:", el1Col);
-      const dataRows = rows.slice(headerIdx + 1);
       const parsed = dataRows
         .map((row: any[]) => ({
-          clashIdOriginal: String(row[idCol] ?? row[0] ?? "").trim(),
-          description: String(row[descCol] ?? row[1] ?? "").trim(),
-          element1: String(row[el1Col] ?? row[2] ?? "").trim(),
-          element2: String(row[el2Col] ?? row[3] ?? "").trim(),
-          discipline1: String(row[disc1Col] ?? row[4] ?? "").trim(),
-          discipline2: String(row[disc2Col] ?? "").trim(),
-          gridLocation: String(row[locCol] ?? row[5] ?? "").trim(),
-          level: String(row[levelCol] ?? row[6] ?? "").trim(),
-          clashType: String(row[typeCol] ?? "").trim(),
-          assignedToName: String(row[assignCol] ?? "").trim(),
+          clashIdOriginal: get(row, mapping.viewpoint) || get(row, mapping.clashId) || "",
+          description: get(row, mapping.description),
+          holdUps: get(row, mapping.holdUps),
+          discipline1: get(row, mapping.discipline),
+          level: get(row, mapping.level),
+          assignedToName: get(row, mapping.assignedTo),
+          resolutionNotes: get(row, mapping.resolutionNotes),
           status: "open",
+          dueDate: getDate(row, mapping.deadline),
         }))
         .filter((r: any) => r.description || r.clashIdOriginal);
-      console.log("[clash-upload] Parsed rows count:", parsed.length);
-      if (parsed.length > 0) console.log("[clash-upload] First parsed row:", JSON.stringify(parsed[0]));
-      if (parsed.length === 0) console.log("[clash-upload] WARNING: 0 rows parsed — first 3 data rows:", JSON.stringify(rows.slice(headerIdx + 1, headerIdx + 4)));
+      console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
 
       const [report] = await db.insert(clashReportsTable).values({
         projectId,
@@ -111,14 +124,12 @@ router.post("/projects/:projectId/clash-reports/upload",
             projectId,
             clashIdOriginal: p.clashIdOriginal || null,
             description: p.description || null,
-            element1: p.element1 || null,
-            element2: p.element2 || null,
+            element1: p.holdUps || null,
             discipline1: p.discipline1 || null,
-            discipline2: p.discipline2 || null,
-            gridLocation: p.gridLocation || null,
             level: p.level || null,
-            clashType: p.clashType || null,
             assignedToName: p.assignedToName || null,
+            resolutionNotes: p.resolutionNotes || null,
+            dueDate: p.dueDate || null,
             status: "open",
           }))
         );
@@ -447,14 +458,13 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       const cols = [
         { label: "Priority", w: 45 },
-        { label: "ID", w: 35 },
-        { label: "Description", w: 150 },
-        { label: "Element 1", w: 70 },
-        { label: "Element 2", w: 70 },
-        { label: "Discipline", w: 60 },
-        { label: "Level", w: 50 },
+        { label: "Viewpoint", w: 45 },
+        { label: "Description", w: 155 },
+        { label: "Hold Ups", w: 80 },
+        { label: "Trade", w: 55 },
+        { label: "Floor", w: 50 },
         { label: "Status", w: 55 },
-        { label: "Assigned To", w: 70 },
+        { label: "Responsible", w: 70 },
       ];
 
       const drawTableHeader = () => {

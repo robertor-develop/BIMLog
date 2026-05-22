@@ -233,7 +233,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "#1E3A5F" }}>
-                  {["Priority","ID","Description","Element 1","Element 2","Discipline","Level","Status","Assigned To","Notes"].map(h => (
+                  {["Priority","Viewpoint","Description","Hold Ups","Trade","Floor","Status","Responsible","Notes"].map(h => (
                     <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700,
                       color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
