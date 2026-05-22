@@ -463,7 +463,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
     });
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-sonnet-4-5",
       max_tokens: 8192,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
@@ -658,7 +658,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
       });
 
       const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-6",
+        model: "claude-sonnet-4-5",
         max_tokens: 8192,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
@@ -1034,7 +1034,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
       });
 
       const message = await anthropic.messages.create({
-        model: "claude-sonnet-4-6",
+        model: "claude-sonnet-4-5",
         max_tokens: 8192,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
