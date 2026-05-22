@@ -27,6 +27,23 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
   }
 });
 
+router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const [report] = await db.insert(clashReportsTable).values({
+      projectId,
+      uploadedById: req.user!.userId,
+      fileName: req.body?.fileName || "Manual Report",
+      format: "manual",
+      totalClashes: 0,
+      status: "complete",
+    }).returning();
+    res.status(201).json(report);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 router.post("/projects/:projectId/clash-reports/upload",
   authMiddleware,
   requirePermission("admin", "write"),
