@@ -14,7 +14,10 @@ import multer from "multer";
 const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
 
 const router: Router = Router();
-const anthropic = new Anthropic();
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
 const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 // ── GET /projects/:projectId/meetings ─────────────────────────────────────────

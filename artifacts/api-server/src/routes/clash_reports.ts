@@ -8,7 +8,10 @@ import * as XLSX from "xlsx";
 import Anthropic from "@anthropic-ai/sdk";
 
 const router: Router = Router();
-const anthropic = new Anthropic();
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectMember(), async (req, res) => {
