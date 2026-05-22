@@ -502,13 +502,14 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       const cols = [
         { label: "Priority", w: 45 },
-        { label: "Viewpoint", w: 45 },
-        { label: "Description", w: 155 },
-        { label: "Hold Ups", w: 80 },
-        { label: "Trade", w: 55 },
-        { label: "Floor", w: 50 },
+        { label: "Viewpoint", w: 55 },
+        { label: "Description", w: 145 },
+        { label: "Hold Ups", w: 75 },
+        { label: "Trade", w: 50 },
+        { label: "Floor", w: 55 },
         { label: "Status", w: 55 },
-        { label: "Responsible", w: 70 },
+        { label: "Responsible", w: 65 },
+        { label: "Deadline", w: 55 },
       ];
 
       const drawTableHeader = () => {
@@ -560,11 +561,11 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
           c.clashIdOriginal ?? "—",
           c.description ?? "—",
           c.element1 ?? "—",
-          c.element2 ?? "—",
           c.discipline1 ?? "—",
           c.level ?? "—",
           c.status ?? "—",
           c.assignedToName ?? "—",
+          c.dueDate && !String(c.dueDate).startsWith("1970") ? new Date(c.dueDate).toLocaleDateString() : "—",
         ];
         vals.forEach((val, i) => {
           doc.fontSize(7).font("Helvetica").fillColor("#111827")
