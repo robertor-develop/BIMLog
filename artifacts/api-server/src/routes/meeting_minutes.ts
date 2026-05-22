@@ -128,7 +128,7 @@ Notes: ${meeting.notes ?? "(no notes)"}
 Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "assigned_to_name": "...", "assigned_to_email": "...", "due_date": "YYYY-MM-DD or null" }] }`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-opus-4-5", max_tokens: 800,
+      model: "claude-sonnet-4-5", max_tokens: 800,
       messages: [{ role: "user", content: prompt }],
     });
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
@@ -332,7 +332,7 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
       }
 
       const msg = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 2000,
         messages: [{
           role: "user",

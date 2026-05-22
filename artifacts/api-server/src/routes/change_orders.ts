@@ -164,7 +164,7 @@ Linked Submittals: ${subs.map(s => `${s.number}: ${s.title}`).join(", ") || "non
 Return JSON only: { "description": "...", "suggested_cost_impact": "...", "suggested_schedule_impact": "..." }`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-opus-4-5", max_tokens: 400,
+      model: "claude-sonnet-4-5", max_tokens: 400,
       messages: [{ role: "user", content: prompt }],
     });
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";

@@ -191,7 +191,7 @@ Items: ${items.map(i => i.description ?? `File ${i.fileId}`).join(", ")}
 Return JSON only: { "purpose": "...", "description": "..." }`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-opus-4-5", max_tokens: 300,
+      model: "claude-sonnet-4-5", max_tokens: 300,
       messages: [{ role: "user", content: prompt }],
     });
     const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";

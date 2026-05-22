@@ -145,7 +145,7 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
     const todaysDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     const msg = await anthropic.messages.create({
-      model: "claude-opus-4-5",
+      model: "claude-sonnet-4-5",
       max_tokens: 200,
       system: "You are BIMLog's intelligence engine. Return ONLY valid JSON. No markdown. No explanation.",
       messages: [{
