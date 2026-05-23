@@ -7,6 +7,7 @@ import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import Anthropic from "@anthropic-ai/sdk";
+import multer from "multer";
 import PDFDocument from "pdfkit";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
@@ -1579,5 +1580,73 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
+
+router.post("/projects/:projectId/rfis/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropicClient = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+      });
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropicClient.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all RFI records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "rfi");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.subject && !r.number) continue;
+        await db.insert(rfisTable).values({
+          projectId,
+          number: r.number || `RFI-${String(imported + 1).padStart(3, "0")}`,
+          subject: r.subject || "Imported RFI",
+          description: r.description || null,
+          status: r.status || "open",
+          priority: r.priority || "medium",
+          createdById: req.user!.userId,
+          submittedByCompany: r.submittedByCompany || null,
+          submittedByContact: r.submittedByContact || null,
+          dueDate: r.dueDate ? new Date(r.dueDate) : null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "rfi", entityId: projectId,
+        details: `Imported ${imported} RFIs from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} RFIs imported successfully` });
+    } catch (err) {
+      console.error("[rfi-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 export default router;

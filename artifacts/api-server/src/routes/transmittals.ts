@@ -9,6 +9,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
 import Anthropic from "@anthropic-ai/sdk";
+import multer from "multer";
 import PDFDocument from "pdfkit";
 
 const router: Router = Router();
@@ -255,5 +256,66 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
+
+router.post("/projects/:projectId/transmittals/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all transmittal records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"T-001","title":"transmittal title","purpose":"purpose or notes","recipient":"recipient name","status":"draft/sent/acknowledged","sentDate":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "transmittal");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(transmittalsTable).values({
+          projectId,
+          number: r.number || `T-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Transmittal",
+          purpose: r.purpose || null,
+          sentById: req.user!.userId,
+          sentTo: r.recipient ? [r.recipient] : [],
+          status: r.status || "draft",
+          sentAt: r.sentDate ? new Date(r.sentDate) : null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "transmittal", entityId: projectId,
+        details: `Imported ${imported} transmittals from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} transmittals imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 export default router;

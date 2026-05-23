@@ -8,6 +8,7 @@ import { eq, and, desc, inArray } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import Anthropic from "@anthropic-ai/sdk";
+import multer from "multer";
 import PDFDocument from "pdfkit";
 
 const router: Router = Router();
@@ -214,5 +215,65 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
+
+router.post("/projects/:projectId/change-orders/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all change order records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"CO-001","title":"description","description":"full details","status":"draft/pending_approval/approved/rejected","contractValueImpact":"dollar amount or null","dateIssued":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "change_order");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(changeOrdersTable).values({
+          projectId,
+          number: r.number || `CO-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Change Order",
+          description: r.description || null,
+          status: r.status || "draft",
+          initiatedById: req.user!.userId,
+          contractValueImpact: r.contractValueImpact || null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "change_order", entityId: projectId,
+        details: `Imported ${imported} change orders from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} change orders imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 export default router;
