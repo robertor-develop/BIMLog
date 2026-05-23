@@ -65,6 +65,7 @@
   "project.tabs.files": "Files",
   "project.tabs.rfis": "RFIs",
   "project.tabs.submittals": "Submittals",
+  "project.tabs.submittalTracker": "Submittal Tracker",
   "project.tabs.activity": "Activity Log",
   "project.tabs.team": "Team",
   "project.tabs.convention": "Convention Builder",

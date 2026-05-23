@@ -65,6 +65,7 @@
   "project.tabs.files": "Archivos",
   "project.tabs.rfis": "RFIs",
   "project.tabs.submittals": "Entregables",
+  "project.tabs.submittalTracker": "Registro de Submittals",
   "project.tabs.activity": "Registro de Actividad",
   "project.tabs.team": "Equipo",
   "project.tabs.convention": "Constructor de Convención",
