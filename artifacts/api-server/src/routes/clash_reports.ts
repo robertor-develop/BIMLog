@@ -469,8 +469,8 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         .text(user?.email ?? "", M, 70, { align: "right", width: CW });
 
       // Powered by — very subtle bottom right
-      doc.fontSize(7).font("Helvetica").fillColor("#6B9ED4")
-        .text("Powered by BIMLog by IgniteSmart", M, 106, { align: "right", width: CW });
+      doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE")
+        .text("Powered by BIMLog by IgniteSmart", M, 98, { align: "right", width: CW });
 
       // Project info band
       doc.rect(0, 120, W, 45).fill("#F0F4F8");
