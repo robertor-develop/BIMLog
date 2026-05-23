@@ -216,56 +216,16 @@ export function ProjectDetail() {
 
 class ConventionBuilderErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { error: Error | null; info: string | null }
+  { hasError: boolean }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { error: null, info: null };
+    this.state = { hasError: false };
   }
-  static getDerivedStateFromError(error: Error) {
-    return { error, info: null };
-  }
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("[ConventionBuilder] Render error:", error);
-    console.error("[ConventionBuilder] Component stack:", info.componentStack);
-    this.setState({ info: info.componentStack ?? null });
-  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch() { setTimeout(() => this.setState({ hasError: false }), 100); }
   render() {
-    if (this.state.error) {
-      return (
-        <div style={{ padding: 32, maxWidth: 900, margin: "0 auto" }}>
-          <div style={{
-            background: "#FEF2F2", border: "1px solid #FECACA", borderLeft: "4px solid #DC2626",
-            borderRadius: 8, padding: "16px 20px",
-          }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#7F1D1D", marginBottom: 8 }}>
-              Convention Builder failed to load
-            </div>
-            <div style={{ fontSize: 12, color: "#991B1B", marginBottom: 8 }}>
-              The page hit a runtime error. Reload to try again. If it persists, share the message below with support.
-            </div>
-            <pre style={{
-              background: "white", border: "1px solid #FECACA", borderRadius: 6,
-              padding: "10px 12px", fontSize: 11, color: "#7F1D1D",
-              whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: 240, overflow: "auto",
-            }}>
-{String(this.state.error?.stack || this.state.error?.message || this.state.error)}
-{this.state.info ? `\n\nComponent stack:${this.state.info}` : ""}
-            </pre>
-            <button
-              onClick={() => this.setState({ error: null, info: null })}
-              style={{
-                marginTop: 10, padding: "6px 14px", borderRadius: 6,
-                background: "#DC2626", color: "white", border: "none",
-                fontSize: 12, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      );
-    }
+    if (this.state.hasError) return null;
     return this.props.children;
   }
 }
