@@ -459,7 +459,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       });
 
       const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
+      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
       doc.pipe(res);
@@ -584,8 +584,11 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         if (doc.y + rowH > doc.page.height - 70) {
           doc.addPage();
           doc.rect(0, 0, W, 25).fill("#1E3A5F");
+          const pageDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
           doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
-            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) — Clash Coordination Report`, M, 8, { width: CW });
+            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) — Clash Coordination Report`, M, 8, { width: CW - 100 });
+          doc.fontSize(8).font("Helvetica").fillColor("#93C5FD")
+            .text(pageDate, M, 8, { align: "right", width: CW });
           doc.y = 35;
           drawTableHeader();
         }
@@ -640,7 +643,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
           .text(
             `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
-            M, doc.page.height - 25, { align: "center", width: CW }
+            M, doc.page.height - 30, { align: "center", width: CW, lineBreak: false }
           );
       }
 
