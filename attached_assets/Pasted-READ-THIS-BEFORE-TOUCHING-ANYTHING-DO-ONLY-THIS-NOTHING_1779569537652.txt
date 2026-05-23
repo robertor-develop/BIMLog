@@ -1,0 +1,236 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add AI import endpoints to 5 route files. Each accepts ANY file, Claude extracts records.
+
+═══════════════════════════════════════════════════════════
+FILE 1: artifacts/api-server/src/routes/rfis.ts
+═══════════════════════════════════════════════════════════
+
+Add multer import at top if not present:
+grep -n "multer" artifacts/api-server/src/routes/rfis.ts | head -3
+
+Then add this endpoint before export default router:
+
+router.post("/projects/:projectId/rfis/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropic = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+      });
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `You are analyzing a construction RFI (Request for Information) log document.
+Extract all RFI records from this document.
+Document content:
+${fileContent}
+
+Return a JSON array of RFI objects. Each object should have these fields (use null if not found):
+{
+  "number": "RFI number like RFI-001",
+  "subject": "RFI subject/title",
+  "description": "full description",
+  "status": "open/closed/pending",
+  "assignedToName": "person responsible",
+  "submittedByCompany": "company that submitted",
+  "dueDate": "due date string or null",
+  "discipline": "trade/discipline"
+}
+Return ONLY a JSON array. No markdown. No explanation.`
+        }]
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+      const clean = text.replace(/```json\n?|```/g, "").trim();
+      const records = JSON.parse(clean) as any[];
+      let imported = 0;
+      for (const r of records) {
+        if (!r.subject && !r.number) continue;
+        await db.insert(rfisTable).values({
+          projectId,
+          number: r.number || `RFI-${String(imported + 1).padStart(3, "0")}`,
+          subject: r.subject || "Imported RFI",
+          description: r.description || null,
+          status: r.status || "open",
+          assignedToId: null,
+          submittedById: req.user!.userId,
+          submittedByCompany: r.submittedByCompany || null,
+          dueDate: r.dueDate ? new Date(r.dueDate) : null,
+          discipline: r.discipline || null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "import",
+        entityType: "rfi",
+        entityId: projectId,
+        details: `Imported ${imported} RFIs from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} RFIs imported successfully` });
+    } catch (err) {
+      console.error("[rfi-import] FAILED:", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+═══════════════════════════════════════════════════════════
+FILE 2: artifacts/api-server/src/routes/transmittals.ts
+═══════════════════════════════════════════════════════════
+
+Add before export default router:
+
+router.post("/projects/:projectId/transmittals/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `You are analyzing a construction transmittal log.
+Extract all transmittal records from this document:
+${fileContent}
+
+Return a JSON array:
+[{"number":"T-001","title":"transmittal title","recipient":"recipient name","sentDate":"date or null","status":"draft/sent/acknowledged","notes":"notes or null"}]
+Return ONLY a JSON array. No markdown.`
+        }]
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+      const records = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as any[];
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(transmittalsTable).values({
+          projectId,
+          number: r.number || `T-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Transmittal",
+          recipient: r.recipient || null,
+          sentDate: r.sentDate ? new Date(r.sentDate) : null,
+          status: r.status || "draft",
+          notes: r.notes || null,
+          createdById: req.user!.userId,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "transmittal", entityId: projectId,
+        details: `Imported ${imported} transmittals from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} transmittals imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+═══════════════════════════════════════════════════════════
+FILE 3: artifacts/api-server/src/routes/change_orders.ts
+═══════════════════════════════════════════════════════════
+
+Add before export default router:
+
+router.post("/projects/:projectId/change-orders/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `You are analyzing a construction change order log.
+Extract all change order records:
+${fileContent}
+
+Return a JSON array:
+[{"number":"CO-001","title":"description","amount":"dollar amount as string or null","status":"draft/pending_approval/approved/rejected","requestedBy":"company name or null","dateIssued":"date or null"}]
+Return ONLY a JSON array. No markdown.`
+        }]
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "[]";
+      const records = JSON.parse(text.replace(/```json\n?|```/g, "").trim()) as any[];
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(changeOrdersTable).values({
+          projectId,
+          number: r.number || `CO-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Change Order",
+          amount: r.amount ? parseFloat(r.amount.replace(/[^0-9.]/g, "")) : null,
+          status: r.status || "draft",
+          requestedBy: r.requestedBy || null,
+          dateIssued: r.dateIssued ? new Date(r.dateIssued) : null,
+          createdById: req.user!.userId,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "change_order", entityId: projectId,
+        details: `Imported ${imported} change orders from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} change orders imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+═══════════════════════════════════════════════════════════
+FILE 4: artifacts/api-server/src/routes/rfis.ts — also add multer
+═══════════════════════════════════════════════════════════
+
+Check if multer is imported in rfis.ts:
+grep -n "multer" artifacts/api-server/src/routes/rfis.ts | head -3
+
+If NOT imported add at top:
+import multer from "multer";
+
+═══════════════════════════════════════════════════════════
+FILE 5 — ADD DIRECTORY IMPORT ROUTE
+Create new endpoint in existing directory route or add to projects.ts
+═══════════════════════════════════════════════════════════
+
+Check where directory routes live:
+grep -rn "project-directory\|projectDirectory\|directory" artifacts/api-server/src/routes/index.ts | head -5
+
+Print raw output only for the checks. Then apply all changes.
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -5
+
+Check final:
+grep -n "rfis/import\|transmittals/import\|change-orders/import" artifacts/api-server/src/routes/rfis.ts artifacts/api-server/src/routes/transmittals.ts artifacts/api-server/src/routes/change_orders.ts | head -10
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL outputs as plain text. No collapsed boxes.
