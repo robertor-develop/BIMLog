@@ -320,11 +320,21 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
             {t("Record meetings, track deliverables, and manage action items", "Registra reuniones, entregables y acción items")}
           </p>
         </div>
-        {canWrite && (
-          <button className="btn btn-primary" onClick={openNew} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Plus size={14} /> {t("New Meeting", "Nueva Reunión")}
-          </button>
-        )}
+        <div style={{ display: "flex", gap: 8 }}>
+          {canWrite && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <div className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: 6, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                <Download size={14} /> {importing ? t("Importing...","Importando...") : t("Import Minutes","Importar Acta")}
+              </div>
+            </label>
+          )}
+          {canWrite && (
+            <button className="btn btn-primary" onClick={openNew} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Plus size={14} /> {t("New Meeting", "Nueva Reunión")}
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
@@ -445,6 +455,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       </div>
 
       {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 16 }}>{error}</div>}
+      {importMsg && <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginBottom: 14 }}>{importMsg}</div>}
 
       <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16, marginBottom: 12 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start" }}>
