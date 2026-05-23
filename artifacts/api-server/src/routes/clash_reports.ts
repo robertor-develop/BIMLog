@@ -451,7 +451,9 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       // USER COMPANY — protagonist
       doc.fontSize(26).font("Helvetica-Bold").fillColor("white")
-        .text(user?.companyName ?? "Company", M, 28);
+        .text(user?.companyName ?? "Company", M, 22);
+      doc.fontSize(8).font("Helvetica").fillColor("#93C5FD")
+        .text("Powered by BIMLog by IgniteSmart", M, 52);
       doc.fontSize(11).font("Helvetica").fillColor("#93C5FD")
         .text(`Prepared by: ${user?.fullName ?? ""}  |  ${user?.email ?? ""}`, M, 60);
       doc.fontSize(10).font("Helvetica").fillColor("#93C5FD")
