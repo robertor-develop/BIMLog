@@ -1,0 +1,323 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+STEP 1 — Create import intelligence file.
+Create file: artifacts/api-server/src/lib/import-intelligence.ts
+
+With this exact content:
+
+import Anthropic from "@anthropic-ai/sdk";
+import { db } from "@workspace/db";
+import { rfisTable, clashesTable, submittalItemsTable, transmittalsTable, changeOrdersTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
+
+export interface DuplicateWarning {
+  recordIndex: number;
+  matchType: "duplicate" | "related" | "conflict";
+  existingEntity: string;
+  existingId: number;
+  message: string;
+  suggestedAction: "skip" | "link" | "update" | "create_anyway";
+}
+
+export interface IntelligenceResult {
+  safeIndices: number[];
+  warnings: DuplicateWarning[];
+  crossLinks: { fromRef: string; toType: string; toRef: string; confidence: string }[];
+}
+
+export async function checkImportIntelligence(
+  projectId: number,
+  records: any[],
+  entityType: string
+): Promise<IntelligenceResult> {
+  try {
+    const [rfis, clashes, submittalItems, transmittals, changeOrders] = await Promise.all([
+      db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject, status: rfisTable.status }).from(rfisTable).where(eq(rfisTable.projectId, projectId)),
+      db.select({ id: clashesTable.id, clashIdOriginal: clashesTable.clashIdOriginal, description: clashesTable.description, status: clashesTable.status }).from(clashesTable).where(eq(clashesTable.projectId, projectId)),
+      db.select({ id: submittalItemsTable.id, fileName: submittalItemsTable.fileName, submittalStatus: submittalItemsTable.submittalStatus }).from(submittalItemsTable).where(eq(submittalItemsTable.projectId, projectId)),
+      db.select({ id: transmittalsTable.id, number: transmittalsTable.number, title: transmittalsTable.title }).from(transmittalsTable).where(eq(transmittalsTable.projectId, projectId)),
+      db.select({ id: changeOrdersTable.id, number: changeOrdersTable.number, title: changeOrdersTable.title }).from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId)),
+    ]);
+
+    const msg = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 2000,
+      messages: [{
+        role: "user",
+        content: `You are a construction document intelligence system.
+Analyze these ${entityType} records being imported and check against existing project data.
+
+RECORDS TO IMPORT (${records.length} total):
+${JSON.stringify(records.slice(0, 15))}
+
+EXISTING PROJECT DATA:
+RFIs: ${JSON.stringify(rfis.slice(0, 20))}
+Clashes: ${JSON.stringify(clashes.slice(0, 20))}
+Submittal Items: ${JSON.stringify(submittalItems.slice(0, 20))}
+Transmittals: ${JSON.stringify(transmittals.slice(0, 10))}
+Change Orders: ${JSON.stringify(changeOrders.slice(0, 10))}
+
+Check for:
+1. DUPLICATES — same number or very similar subject already exists
+2. RELATED — record references an existing item in another module
+3. CONFLICTS — imported status contradicts existing status
+
+Return ONLY valid JSON, no markdown:
+{
+  "safeIndices": [0,1,2],
+  "warnings": [{"recordIndex":0,"matchType":"duplicate","existingEntity":"rfi","existingId":5,"message":"RFI-001 already exists with subject X","suggestedAction":"skip"}],
+  "crossLinks": [{"fromRef":"RFI-001","toType":"clash","toRef":"C.013","confidence":"high"}]
+}`
+      }]
+    });
+
+    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+    const result = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+    return {
+      safeIndices: result.safeIndices ?? records.map((_: any, i: number) => i),
+      warnings: result.warnings ?? [],
+      crossLinks: result.crossLinks ?? [],
+    };
+  } catch (err) {
+    console.error("[import-intelligence] failed:", err);
+    return {
+      safeIndices: records.map((_: any, i: number) => i),
+      warnings: [],
+      crossLinks: [],
+    };
+  }
+}
+
+STEP 2 — Add import endpoints to rfis.ts, transmittals.ts, change_orders.ts.
+
+FILE: artifacts/api-server/src/routes/rfis.ts
+
+Check if multer is imported:
+grep -n "multer" artifacts/api-server/src/routes/rfis.ts | head -3
+
+If not present add at top:
+import multer from "multer";
+
+Add this endpoint before export default router:
+
+router.post("/projects/:projectId/rfis/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropicClient = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+      });
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropicClient.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all RFI records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "rfi");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.subject && !r.number) continue;
+        await db.insert(rfisTable).values({
+          projectId,
+          number: r.number || `RFI-${String(imported + 1).padStart(3, "0")}`,
+          subject: r.subject || "Imported RFI",
+          description: r.description || null,
+          status: r.status || "open",
+          priority: r.priority || "medium",
+          createdById: req.user!.userId,
+          submittedByCompany: r.submittedByCompany || null,
+          submittedByContact: r.submittedByContact || null,
+          dueDate: r.dueDate ? new Date(r.dueDate) : null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "rfi", entityId: projectId,
+        details: `Imported ${imported} RFIs from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} RFIs imported successfully` });
+    } catch (err) {
+      console.error("[rfi-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+FILE: artifacts/api-server/src/routes/transmittals.ts
+
+Add this endpoint before export default router:
+
+router.post("/projects/:projectId/transmittals/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all transmittal records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"T-001","title":"transmittal title","purpose":"purpose or notes","recipient":"recipient name","status":"draft/sent/acknowledged","sentDate":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "transmittal");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(transmittalsTable).values({
+          projectId,
+          number: r.number || `T-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Transmittal",
+          purpose: r.purpose || null,
+          sentById: req.user!.userId,
+          sentTo: r.recipient ? [r.recipient] : [],
+          status: r.status || "draft",
+          sentAt: r.sentDate ? new Date(r.sentDate) : null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "transmittal", entityId: projectId,
+        details: `Imported ${imported} transmittals from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} transmittals imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+FILE: artifacts/api-server/src/routes/change_orders.ts
+
+Add this endpoint before export default router:
+
+router.post("/projects/:projectId/change-orders/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all change order records from this construction document. Return ONLY a JSON array, no markdown:
+[{"number":"CO-001","title":"description","description":"full details","status":"draft/pending_approval/approved/rejected","contractValueImpact":"dollar amount or null","dateIssued":"date or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      const forceImport = req.body?.forceImport === "true";
+      if (!forceImport && records.length > 0) {
+        const { checkImportIntelligence } = await import("../lib/import-intelligence");
+        const intelligence = await checkImportIntelligence(projectId, records, "change_order");
+        if (intelligence.warnings.length > 0) {
+          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+          return;
+        }
+      }
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(changeOrdersTable).values({
+          projectId,
+          number: r.number || `CO-${String(imported + 1).padStart(3, "0")}`,
+          title: r.title || "Imported Change Order",
+          description: r.description || null,
+          status: r.status || "draft",
+          initiatedById: req.user!.userId,
+          contractValueImpact: r.contractValueImpact || null,
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "change_order", entityId: projectId,
+        details: `Imported ${imported} change orders from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} change orders imported` });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+Also add directory import endpoint. Check what route handles directory:
+grep -rn "projectDirectory\|project-directory\|directory" artifacts/api-server/src/routes/index.ts | head -5
+
+Check 1:
+grep -n "rfis/import\|transmittals/import\|change-orders/import" artifacts/api-server/src/routes/rfis.ts artifacts/api-server/src/routes/transmittals.ts artifacts/api-server/src/routes/change_orders.ts 2>/dev/null | head -10
+
+Check 2:
+ls artifacts/api-server/src/lib/
+
+Check 3 — backend TypeScript:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -5
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
