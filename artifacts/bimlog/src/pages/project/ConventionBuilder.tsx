@@ -4420,6 +4420,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   const [saved, setSaved] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
   const [savedFlash, setSavedFlash] = useState("");
+  const [justSaved, setJustSaved] = useState(false);
   const [checkpointRefetchKey, setCheckpointRefetchKey] = useState(0);
 
   useEffect(() => {
@@ -4559,6 +4560,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
         setCheckpointRefetchKey(k => k + 1);
         setFoundationalEditMode(false);
         setFoundationalUnlocked(false);
+        setJustSaved(true);
         setWs(s => ({ ...s, flowPhase: "checkpoint", step: 0 }));
       },
       onError: () => { toast({ title: "Error saving convention", variant: "destructive" }); setIsSaving(false); },
@@ -4645,10 +4647,11 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
 
   // ── HARD GUARD: non-completed projects cannot reach checkpoint/edit/re-evidence ──
   useEffect(() => {
+    if (justSaved) return;
     if (setupStatus !== "completed" && (flowPhase === "checkpoint" || flowPhase === "edit_foundation" || flowPhase === "re_evidence" || flowPhase === "changes_review")) {
       setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
     }
-  }, [setupStatus, flowPhase]);
+  }, [setupStatus, flowPhase, justSaved]);
 
   // ── ADMIN-ONLY GUARD (Issue 3): non-admins see read-only summary ──────────
   if (!isAdmin) {
