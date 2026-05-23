@@ -15,7 +15,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
   baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
 });
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 }, fileFilter: (_req: any, _file: any, cb: any) => cb(null, true) });
 
 // GET all reports
 router.get("/projects/:projectId/submittal-reports", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -66,68 +66,139 @@ router.post("/projects/:projectId/submittal-reports/upload",
     try {
       if (!req.file) { res.status(400).json({ error: "no_file", message: "No file uploaded" }); return; }
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
-      if (!["xlsx","xls","csv"].includes(ext)) {
-        res.status(400).json({ error: "invalid_format", message: "Use Excel or CSV" });
-        return;
+      let fileText = "";
+      const useXLSX = ["xlsx","xls","csv"].includes(ext);
+
+      let workbook: any = null;
+      if (useXLSX) {
+        workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      } else {
+        fileText = req.file.buffer.toString("utf-8").slice(0, 15000);
       }
 
-      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
-      let bestRowCount = 0;
-      for (const sheetName of workbook.SheetNames) {
-        const s = workbook.Sheets[sheetName];
-        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
-        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
-        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      let allRows: any[][] = [];
+      if (useXLSX && workbook) {
+        let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+        let bestRowCount = 0;
+        for (const sheetName of workbook.SheetNames) {
+          const s = workbook.Sheets[sheetName];
+          const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+          const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+          if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+        }
+        allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
       }
-      const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
-      let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
-      if (hIdx === -1) hIdx = 0;
-      const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
-      const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
 
-      // AI column mapping
-      let mapping: Record<string, number> = { trade: -1, type: -1, floor: -1, fileName: -1, revision: -1, version: -1, status: -1, date: -1, description: -1, openItems: -1, rfiOpen: -1, rfiClose: -1, rfiDescription: -1, pdfUrl: -1 };
-      try {
-        const mapMsg = await anthropic.messages.create({
-          model: "claude-sonnet-4-5",
-          max_tokens: 400,
-          messages: [{
-            role: "user",
-            content: `Construction submittal tracking spreadsheet headers (0-indexed): ${JSON.stringify(hdrs)}
-Sample row: ${JSON.stringify(dataRows[0] ?? [])}
+      let parsed: any[] = [];
+
+      if (!useXLSX || allRows.length === 0) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `You are analyzing a construction submittal tracking document. Extract all submittal records from this document.
+
+Document content:
+${fileText || allRows.map(r => r.join("\t")).join("\n").slice(0, 8000)}
+
+Return a JSON array of submittal objects. Each object should have these fields (use null if not found):
+{
+  "trade": "trade/discipline name",
+  "submittalType": "SHOP/SLEEVE/etc",
+  "floor": "floor/level",
+  "fileName": "document file name",
+  "revision": "revision number like R-0 R-1",
+  "version": "version number like V-0 V-1",
+  "submittalStatus": "open/closed/pending/approved etc — interpret YES as open, NO as pending",
+  "date": "date string",
+  "description": "description",
+  "openItems": "open items or pending equipment",
+  "rfiOpen": "open RFI number or null",
+  "rfiClose": "closed RFI number or null",
+  "rfiDescription": "RFI description",
+  "pdfUrl": "URL or link to document"
+}
+
+Return ONLY a JSON array. No markdown. No explanation.`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const cleanExtract = extractText.replace(/```json\n?|```/g, "").trim();
+          parsed = JSON.parse(cleanExtract);
+          console.log("[submittal-upload] AI extracted:", parsed.length, "items from non-Excel file");
+        } catch (e) {
+          console.error("[submittal-upload] AI extraction failed:", e);
+          parsed = [];
+        }
+      } else {
+        let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
+        if (hIdx === -1) hIdx = 0;
+        const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+        const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+
+        let mapping: Record<string, number> = { trade: -1, type: -1, floor: -1, fileName: -1, revision: -1, version: -1, status: -1, date: -1, description: -1, openItems: -1, rfiOpen: -1, rfiClose: -1, rfiDescription: -1, pdfUrl: -1 };
+        try {
+          const mapMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 500,
+            messages: [{
+              role: "user",
+              content: `Construction submittal tracking spreadsheet headers (0-indexed): ${JSON.stringify(hdrs)}
+Sample rows: ${JSON.stringify(dataRows.slice(0, 3))}
 
 Map to column indices. Return ONLY valid JSON, no markdown:
 {"trade":<idx or -1>,"type":<idx or -1>,"floor":<idx or -1>,"fileName":<idx or -1>,"revision":<idx or -1>,"version":<idx or -1>,"status":<idx or -1>,"date":<idx or -1>,"description":<idx or -1>,"openItems":<idx or -1>,"rfiOpen":<idx or -1>,"rfiClose":<idx or -1>,"rfiDescription":<idx or -1>,"pdfUrl":<idx or -1>}
 
-Rules: trade=discipline/trade/system, type=SHOP/SLEEVE/submittal type, floor=floor/level/area, fileName=file name/document name, revision=revision/rev, version=version/ver, status=approval status/submittal status, date=date/submitted date, description=description/comments, openItems=open items/pending items, rfiOpen=rfi open/open rfi, rfiClose=rfi close/closed rfi, pdfUrl=url/link/sharepoint`
-          }]
-        });
-        const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
-        mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
-        console.log("[submittal-upload] AI mapping:", JSON.stringify(mapping));
-      } catch (e) {
-        console.error("[submittal-upload] AI mapping failed:", e);
+CRITICAL RULES:
+- status = the column that indicates if document is open/active/pending — look for: OpenDocument, IsOpen, Status, Active, Open
+- If status values are YES/NO: YES means open/active, NO means pending/not yet submitted
+- trade = discipline/trade/system/contractor
+- type = SHOP/SLEEVE/submittal type
+- floor = floor/level/area
+- fileName = file name/document name/drawing name
+- revision = revision/rev (R-0, R-1 etc)
+- version = version/ver (V-0, V-1 etc)
+- openItems = open items/pending equipment/equipment list
+- rfiOpen = open RFI number
+- pdfUrl = SharePoint URL/link/url`
+            }]
+          });
+          const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
+          mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
+          console.log("[submittal-upload] AI mapping:", JSON.stringify(mapping));
+        } catch (e) {
+          console.error("[submittal-upload] AI mapping failed:", e);
+        }
+
+        const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined ? String(row[idx]).trim() : "";
+        const getStatus = (row: any[], idx: number) => {
+          const raw = get(row, idx).toUpperCase();
+          if (raw === "YES" || raw === "OPEN" || raw === "ACTIVE" || raw === "1" || raw === "TRUE") return "open";
+          if (raw === "NO" || raw === "CLOSED" || raw === "COMPLETE" || raw === "0" || raw === "FALSE") return "pending";
+          return raw || "pending";
+        };
+
+        parsed = dataRows
+          .map((row: any[]) => ({
+            trade: get(row, mapping.trade),
+            submittalType: get(row, mapping.type),
+            floor: get(row, mapping.floor),
+            fileName: get(row, mapping.fileName),
+            revision: get(row, mapping.revision),
+            version: get(row, mapping.version),
+            submittalStatus: getStatus(row, mapping.status),
+            date: get(row, mapping.date),
+            description: get(row, mapping.description),
+            openItems: get(row, mapping.openItems),
+            rfiOpen: get(row, mapping.rfiOpen),
+            rfiClose: get(row, mapping.rfiClose),
+            rfiDescription: get(row, mapping.rfiDescription),
+            pdfUrl: get(row, mapping.pdfUrl),
+          }))
+          .filter((r: any) => r.fileName || r.description || r.trade);
       }
-
-      const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined ? String(row[idx]).trim() : "";
-
-      const parsed = dataRows.map((row: any[]) => ({
-        trade: get(row, mapping.trade),
-        submittalType: get(row, mapping.type),
-        floor: get(row, mapping.floor),
-        fileName: get(row, mapping.fileName),
-        revision: get(row, mapping.revision),
-        version: get(row, mapping.version),
-        submittalStatus: get(row, mapping.status),
-        date: get(row, mapping.date),
-        description: get(row, mapping.description),
-        openItems: get(row, mapping.openItems),
-        rfiOpen: get(row, mapping.rfiOpen),
-        rfiClose: get(row, mapping.rfiClose),
-        rfiDescription: get(row, mapping.rfiDescription),
-        pdfUrl: get(row, mapping.pdfUrl),
-      })).filter(r => r.fileName || r.description || r.trade);
 
       const existingReportsU = await db.select({ rn: submittalReportsTable.reportNumber })
         .from(submittalReportsTable).where(eq(submittalReportsTable.projectId, projectId));

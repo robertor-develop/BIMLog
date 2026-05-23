@@ -64,8 +64,7 @@ export function SubmittalTrackerTab({ projectId, canWrite }: { projectId: number
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["xlsx","xls","csv"].includes(ext ?? "")) { setError("Use Excel (.xlsx, .xls) or CSV"); return; }
+    // Accept any file type — AI handles extraction
     setUploading(true); setError(""); setUploadMsg("Uploading and mapping columns with AI...");
     try {
       const formData = new FormData();
@@ -508,7 +507,7 @@ export function SubmittalTrackerTab({ projectId, canWrite }: { projectId: number
           )}
           {canWrite && (
             <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
-              <input type="file" accept=".xlsx,.xls,.csv" onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
+              <input type="file" accept="*" onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
               <div className="btn btn-primary btn-sm" style={{ display: "flex", alignItems: "center", gap: 6, opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? "none" : "auto" }}>
                 <Upload size={13} /> {uploading ? t("Processing...","Procesando...") : t("Upload Submittal Log","Subir Registro")}
               </div>
