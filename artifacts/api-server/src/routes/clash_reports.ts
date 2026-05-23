@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable } from "@workspace/db/schema";
 import { eq, desc, and } from "drizzle-orm";
-import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -48,6 +48,16 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
       status: "complete",
       reportNumber: autoNum2,
     }).returning();
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName ?? "",
+      userCompanyName: req.user!.companyName ?? "",
+      actionType: "create",
+      entityType: "clash_report",
+      entityId: report.id,
+      details: `Created manual clash report: ${report.fileName} (${autoNum2})`,
+    });
     res.status(201).json(report);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -184,6 +194,16 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
         );
       }
 
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "upload",
+        entityType: "clash_report",
+        entityId: report.id,
+        details: `Uploaded clash report: ${req.file.originalname} — ${parsed.length} clashes imported (${autoReportNumber})`,
+      });
       res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
       rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
     } catch (err) {
@@ -313,6 +333,16 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
       try {
         await rankClashesWithAI(reportId, projectId, clashList, anthropic);
         const updated = await db.select().from(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName ?? "",
+          userCompanyName: req.user!.companyName ?? "",
+          actionType: "rerank",
+          entityType: "clash_report",
+          entityId: reportId,
+          details: `Re-ranked clash report ${reportId} — AI assigned priorities to ${clashes.length} clashes`,
+        });
         res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
       } catch (err) {
         console.error("[rerank] FAILED:", err);
@@ -415,6 +445,16 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
     await db.delete(clashesTable).where(eq(clashesTable.clashReportId, reportId));
     await db.delete(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName ?? "",
+      userCompanyName: req.user!.companyName ?? "",
+      actionType: "delete",
+      entityType: "clash_report",
+      entityId: reportId,
+      details: `Deleted clash report: ${report.fileName}`,
+    });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "delete_failed", message: err instanceof Error ? err.message : String(err) });

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { submittalReportsTable, submittalItemsTable } from "@workspace/db/schema";
 import { eq, desc, and } from "drizzle-orm";
-import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -50,6 +50,16 @@ router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePer
       status: "complete",
       reportNumber: autoNum,
     }).returning();
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName ?? "",
+      userCompanyName: req.user!.companyName ?? "",
+      actionType: "create",
+      entityType: "submittal_report",
+      entityId: report.id,
+      details: `Created submittal tracker: ${report.fileName} (${autoNum})`,
+    });
     res.status(201).json(report);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -223,6 +233,16 @@ CRITICAL RULES:
         );
       }
 
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "upload",
+        entityType: "submittal_report",
+        entityId: report.id,
+        details: `Uploaded submittal tracker: ${req.file.originalname} — ${parsed.length} items imported (${autoNumU})`,
+      });
       res.status(201).json({ report_id: report.id, total_parsed: parsed.length, status: "complete" });
     } catch (err) {
       console.error("[submittal-upload] FAILED:", err);
@@ -322,6 +342,16 @@ router.delete("/projects/:projectId/submittal-reports/:reportId", authMiddleware
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
     await db.delete(submittalItemsTable).where(eq(submittalItemsTable.reportId, reportId));
     await db.delete(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName ?? "",
+      userCompanyName: req.user!.companyName ?? "",
+      actionType: "delete",
+      entityType: "submittal_report",
+      entityId: reportId,
+      details: `Deleted submittal tracker: ${report.fileName}`,
+    });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });

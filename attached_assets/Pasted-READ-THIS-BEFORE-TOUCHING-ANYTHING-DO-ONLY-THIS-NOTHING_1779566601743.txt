@@ -1,0 +1,136 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+CHANGE 1 — Add activityLogTable import.
+Find:
+import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+
+Replace with:
+import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
+
+CHANGE 2 — Log clash report upload.
+Find this exact line in the upload endpoint:
+      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
+
+Add BEFORE it:
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "upload",
+        entityType: "clash_report",
+        entityId: report.id,
+        details: `Uploaded clash report: ${req.file.originalname} — ${parsed.length} clashes imported (${autoReportNumber})`,
+      });
+
+CHANGE 3 — Log manual report creation.
+Find the POST /projects/:projectId/clash-reports endpoint insert returning.
+After the insert add:
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "create",
+        entityType: "clash_report",
+        entityId: report.id,
+        details: `Created manual clash report: ${report.fileName} (${autoNum2})`,
+      });
+
+CHANGE 4 — Log rerank.
+Find the rerank endpoint. After:
+        const updated = await db.select().from(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+        res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
+
+Add BEFORE res.json:
+        await db.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName ?? "",
+          userCompanyName: req.user!.companyName ?? "",
+          actionType: "rerank",
+          entityType: "clash_report",
+          entityId: reportId,
+          details: `Re-ranked clash report ${reportId} — AI assigned priorities to ${clashes.length} clashes`,
+        });
+
+CHANGE 5 — Log report deletion.
+Find the DELETE endpoint. After the deletes and before res.json({ success: true }):
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete",
+        entityType: "clash_report",
+        entityId: reportId,
+        details: `Deleted clash report: ${report.fileName}`,
+      });
+
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+CHANGE 6 — Add activityLogTable import.
+Find:
+import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+
+Replace with:
+import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
+
+CHANGE 7 — Log submittal report upload.
+Find this line in the upload endpoint:
+      res.status(201).json({ report_id: report.id, total_parsed: parsed.length, status: "complete" });
+
+Add BEFORE it:
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "upload",
+        entityType: "submittal_report",
+        entityId: report.id,
+        details: `Uploaded submittal tracker: ${req.file.originalname} — ${parsed.length} items imported (${autoNum})`,
+      });
+
+CHANGE 8 — Log manual tracker creation.
+Find the POST /projects/:projectId/submittal-reports endpoint.
+After the insert add:
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "create",
+        entityType: "submittal_report",
+        entityId: report.id,
+        details: `Created submittal tracker: ${report.fileName} (${autoNum})`,
+      });
+
+CHANGE 9 — Log deletion.
+Find the DELETE submittal report endpoint. After the deletes and before res.json({ success: true }):
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete",
+        entityType: "submittal_report",
+        entityId: reportId,
+        details: `Deleted submittal tracker: ${report.fileName}`,
+      });
+
+Check 1 — activity log inserts in clash_reports:
+grep -n "activityLogTable\|activity_log" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 2 — activity log inserts in submittal_reports:
+grep -n "activityLogTable\|activity_log" artifacts/api-server/src/routes/submittal_reports.ts | head -10
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
