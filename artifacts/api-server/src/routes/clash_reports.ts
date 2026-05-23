@@ -30,6 +30,10 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
 router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
+    const existingReports2 = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+    const nextNum2 = String(existingReports2.length + 1).padStart(3, "0");
+    const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+    const autoNum2 = `${project2?.code ?? "PRJ"}-CR-${nextNum2}`;
     const [report] = await db.insert(clashReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
@@ -37,6 +41,7 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
       format: "manual",
       totalClashes: 0,
       status: "complete",
+      reportNumber: autoNum2,
     }).returning();
     res.status(201).json(report);
   } catch (err) {
@@ -137,6 +142,10 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
         .filter((r: any) => r.description || r.clashIdOriginal);
       console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
 
+      const existingReports = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+      const nextNum = String(existingReports.length + 1).padStart(3, "0");
+      const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+      const autoReportNumber = `${project?.code ?? "PRJ"}-CR-${nextNum}`;
       const [report] = await db.insert(clashReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
@@ -144,6 +153,7 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
         format: "excel",
         totalClashes: parsed.length,
         status: "processing",
+        reportNumber: autoReportNumber,
       }).returning();
 
       if (parsed.length > 0) {
@@ -373,8 +383,11 @@ router.patch("/projects/:projectId/clash-reports/:reportId/rename", authMiddlewa
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   try {
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (req.body.fileName !== undefined) updates.fileName = req.body.fileName;
+    if (req.body.reportNumber !== undefined) updates.reportNumber = req.body.reportNumber;
     const [updated] = await db.update(clashReportsTable)
-      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .set(updates)
       .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)))
       .returning();
     if (!updated) { res.status(404).json({ error: "not_found" }); return; }
@@ -447,7 +460,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       // ── COVER PAGE ──────────────────────────────────────────────────────
       // Dark header bar
-      doc.rect(0, 0, W, 120).fill("#1E3A5F");
+      doc.rect(0, 0, W, 135).fill("#1E3A5F");
 
       // Company name — large and prominent
       doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
@@ -469,20 +482,19 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         .text(user?.email ?? "", M, 70, { align: "right", width: CW });
 
       // Powered by — very subtle bottom right
-      doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE")
-        .text("Powered by BIMLog by IgniteSmart", M, 98, { align: "right", width: CW });
+      doc.fontSize(7.5).font("Helvetica").fillColor("#7BA4C8")
+        .text("Powered by BIMLog | IgniteSmart.ai", M, 112, { align: "right", width: CW });
 
       // Project info band
-      doc.rect(0, 120, W, 45).fill("#F0F4F8");
+      doc.rect(0, 135, W, 45).fill("#F0F4F8");
 
       // Project info section
-      doc.rect(0, 110, W, 50).fill("#F8FAFC");
       doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F")
-        .text(project.name, M, 120);
+        .text(project.name, M, 143);
       doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
-        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 143);
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 165);
 
-      doc.y = 185;
+      doc.y = 198;
 
       doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
       doc.moveDown(0.5);
@@ -613,8 +625,10 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       const range = doc.bufferedPageRange();
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(range.start + i);
+        const reportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
+        const reportDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
         doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
-          .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog`,
+          .text(`${user?.companyName ?? ""} | ${project.name} | ${reportNum}${reportDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
             M, doc.page.height - 35, { align: "center", width: CW });
       }
 

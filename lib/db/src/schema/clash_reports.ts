@@ -15,6 +15,7 @@ export const clashReportsTable = pgTable("clash_reports", {
   p4Count: integer("p4_count").default(0),
   status: text("status").default("processing"),
   aiSummary: text("ai_summary"),
+  reportNumber: text("report_number"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

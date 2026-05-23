@@ -1,0 +1,169 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+STEP 1 — Add report_number column to clash_reports table.
+
+FILE: lib/db/src/schema/clash_reports.ts
+
+Find the clashReportsTable definition.
+Add this field before createdAt:
+  reportNumber: text("report_number"),
+
+Push schema to DB.
+
+Check 1:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clash_reports' AND column_name = 'report_number';
+
+STEP 2 — Update clash_reports backend.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+CHANGE 1 — Auto-suggest report number on upload.
+Find the insert into clashReportsTable in the upload endpoint:
+const [report] = await db.insert(clashReportsTable).values({
+  projectId,
+  uploadedById: req.user!.userId,
+  fileName: req.file.originalname,
+  format: "excel",
+  totalClashes: parsed.length,
+  status: "processing",
+}).returning();
+
+Replace with:
+const existingReports = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+const nextNum = String(existingReports.length + 1).padStart(3, "0");
+const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+const autoReportNumber = `${project?.code ?? "PRJ"}-CR-${nextNum}`;
+const [report] = await db.insert(clashReportsTable).values({
+  projectId,
+  uploadedById: req.user!.userId,
+  fileName: req.file.originalname,
+  format: "excel",
+  totalClashes: parsed.length,
+  status: "processing",
+  reportNumber: autoReportNumber,
+}).returning();
+
+CHANGE 2 — Auto-suggest report number on manual create.
+Find the POST /projects/:projectId/clash-reports endpoint (the empty report creator).
+Find its insert and add reportNumber the same way:
+const existingReports2 = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+const nextNum2 = String(existingReports2.length + 1).padStart(3, "0");
+const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+const autoNum2 = `${project2?.code ?? "PRJ"}-CR-${nextNum2}`;
+
+And add reportNumber: autoNum2 to the insert values.
+
+CHANGE 3 — Accept reportNumber in rename endpoint.
+Find the PATCH rename endpoint.
+Find:
+    const [updated] = await db.update(clashReportsTable)
+      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+
+Replace with:
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (req.body.fileName !== undefined) updates.fileName = req.body.fileName;
+    if (req.body.reportNumber !== undefined) updates.reportNumber = req.body.reportNumber;
+    const [updated] = await db.update(clashReportsTable)
+      .set(updates)
+
+CHANGE 4 — Fix PDF header and footer.
+Find this exact line:
+      doc.rect(0, 0, W, 120).fill("#1E3A5F");
+
+Replace with:
+      doc.rect(0, 0, W, 135).fill("#1E3A5F");
+
+Find:
+      doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE")
+        .text("Powered by BIMLog | IgniteSmart.ai", M, 98, { align: "right", width: CW });
+
+Replace with:
+      doc.fontSize(7.5).font("Helvetica").fillColor("#7BA4C8")
+        .text("Powered by BIMLog | IgniteSmart.ai", M, 112, { align: "right", width: CW });
+
+Find:
+      doc.rect(0, 120, W, 45).fill("#F0F4F8");
+      doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 130);
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 152);
+      doc.y = 185;
+
+Replace with:
+      doc.rect(0, 135, W, 45).fill("#F0F4F8");
+      doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 143);
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 165);
+      doc.y = 198;
+
+CHANGE 5 — Fix footer on all pages to include report number and date.
+Find:
+      .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+
+Replace with:
+      const reportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
+      const reportDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      .text(`${user?.companyName ?? ""} | ${project.name} | ${reportNum}${reportDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+
+STEP 3 — Update ClashReportsTab frontend.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+CHANGE 1 — Add reportNumber to ClashReport interface.
+Find:
+  status: string; aiSummary?: string; createdAt: string;
+
+Replace with:
+  status: string; aiSummary?: string; createdAt: string; reportNumber?: string;
+
+CHANGE 2 — Add report number editable field in the detail view header.
+Find the detail view header where fileName and date are shown:
+          <div style={{ fontSize: 12, color: "#6B7280" }}>
+            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
+          </div>
+
+Replace with:
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
+            <input
+              value={selectedReport.reportNumber || ""}
+              onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
+              onBlur={async e => {
+                await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
+                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                  body: JSON.stringify({ reportNumber: e.target.value }),
+                });
+              }}
+              placeholder="Report No. (e.g. ELA01-CR-001)"
+              style={{ fontSize: 12, border: "none", borderBottom: "1px dashed #D1D5DB",
+                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200 }}
+            />
+            <span style={{ fontSize: 12, color: "#6B7280" }}>
+              {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
+            </span>
+          </div>
+
+CHANGE 3 — Show report number on the reports list card.
+Find where each report card shows the date:
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalClashes} {t("clashes","choques")}
+
+Replace with:
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
+                      {r.reportNumber && <span style={{ color: "#1D4ED8", fontWeight: 700, marginRight: 8 }}>{r.reportNumber}</span>}
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalClashes} {t("clashes","choques")}
+
+Check 1 — report_number column:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'clash_reports' AND column_name = 'report_number';
+
+Check 2 — reportNumber in frontend:
+grep -n "reportNumber\|report_number\|Report No" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -10
+
+Check 3 — footer fix:
+grep -n "reportNum\|reportDate\|7BA4C8" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+Check 4 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text in chat. No collapsed boxes.

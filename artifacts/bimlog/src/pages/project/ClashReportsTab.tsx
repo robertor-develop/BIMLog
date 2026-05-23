@@ -9,7 +9,7 @@ const API = "/api/v1";
 interface ClashReport {
   id: number; fileName: string; format: string; totalClashes: number;
   p1Count: number; p2Count: number; p3Count: number; p4Count: number;
-  status: string; aiSummary?: string; createdAt: string;
+  status: string; aiSummary?: string; createdAt: string; reportNumber?: string;
 }
 
 interface Clash {
@@ -153,9 +153,24 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         </button>
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{selectedReport.fileName}</h2>
-          <p style={{ margin: "2px 0 0", color: "#6B7280", fontSize: 12 }}>
-            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
-          </p>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
+            <input
+              value={selectedReport.reportNumber || ""}
+              onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
+              onBlur={async e => {
+                await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
+                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                  body: JSON.stringify({ reportNumber: e.target.value }),
+                });
+              }}
+              placeholder="Report No. (e.g. ELA01-CR-001)"
+              style={{ fontSize: 12, border: "none", borderBottom: "1px dashed #D1D5DB",
+                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200 }}
+            />
+            <span style={{ fontSize: 12, color: "#6B7280" }}>
+              {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}
+            </span>
+          </div>
         </div>
         <a
           href={`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/pdf?token=${token}`}
@@ -490,6 +505,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       />
                     </div>
                     <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 8 }}>
+                      {r.reportNumber && <span style={{ color: "#1D4ED8", fontWeight: 700, marginRight: 8 }}>{r.reportNumber}</span>}
                       {new Date(r.createdAt).toLocaleDateString()} · {r.totalClashes} {t("clashes","choques")}
                       {r.aiSummary && <span> · {r.aiSummary}</span>}
                     </div>
