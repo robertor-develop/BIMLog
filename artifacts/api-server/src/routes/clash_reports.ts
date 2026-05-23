@@ -635,6 +635,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       });
 
       doc.flushPages();
+      console.log("[pdf-debug] page.width:", doc.page.width, "page.height:", doc.page.height, "margins:", doc.page.margins);
       const range = doc.bufferedPageRange();
       const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
       const footerReportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
@@ -643,7 +644,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
           .text(
             `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
-            M, doc.page.height - 45, { align: "center", width: CW, lineBreak: false }
+            M, 590, { align: "center", width: CW, lineBreak: false }
           );
       }
 
