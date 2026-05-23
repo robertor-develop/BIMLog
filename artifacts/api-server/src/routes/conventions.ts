@@ -670,7 +670,8 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
       let parsed: Record<string, unknown>;
       try {
-        parsed = JSON.parse(block.text.trim()) as Record<string, unknown>;
+        const cleanJson = block.text.replace(/```json\n?|```/g, "").trim();
+        parsed = JSON.parse(cleanJson) as Record<string, unknown>;
       } catch {
         res.status(422).json({
           error: "AI returned non-JSON response",
