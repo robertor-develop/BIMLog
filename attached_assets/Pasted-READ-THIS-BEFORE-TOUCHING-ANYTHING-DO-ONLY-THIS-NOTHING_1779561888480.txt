@@ -1,0 +1,155 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx
+
+CHANGE 1 — Add detail panel state and click handler.
+
+Find this state declaration section (after the existing useState declarations):
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+
+Add after it:
+  const [detailItem, setDetailItem] = useState<SubmittalItem | null>(null);
+
+CHANGE 2 — Make the FILE NAME cell clickable to open detail panel.
+
+Find this exact cell in the table row:
+                      <td style={CELL}>
+                        <input value={item.fileName || ""} placeholder="File name"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, fileName: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { fileName: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: !item.fileName ? "#FFFBEB" : "transparent", fontFamily: "monospace" }} />
+                      </td>
+
+Replace with:
+                      <td style={CELL}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <input value={item.fileName || ""} placeholder="File name"
+                            onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, fileName: e.target.value } : x))}
+                            onBlur={e => updateItem(item.id, { fileName: e.target.value })}
+                            style={{ border: "none", outline: "none", flex: 1, fontSize: 11, background: !item.fileName ? "#FFFBEB" : "transparent", fontFamily: "monospace" }} />
+                          <button
+                            onClick={() => setDetailItem(item)}
+                            style={{ background: "none", border: "none", cursor: "pointer", color: "#2563EB", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap", padding: "0 4px" }}
+                            title="View full details">
+                            Details
+                          </button>
+                        </div>
+                      </td>
+
+CHANGE 3 — Add the detail panel modal.
+
+Find the closing </div> of the tab-content-wrapper in the detail view (the very last </div> before the final return closes).
+
+Add this BEFORE the last closing </div>:
+
+      {detailItem && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: "white", borderRadius: 12, padding: 28,
+            width: "90%", maxWidth: 700, maxHeight: "85vh", overflowY: "auto",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", fontWeight: 700, marginBottom: 4 }}>Submittal Detail</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", fontFamily: "monospace" }}>{detailItem.fileName || "—"}</div>
+              </div>
+              <button onClick={() => setDetailItem(null)}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "#6B7280", lineHeight: 1 }}>
+                x
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              {[
+                { label: "Trade", value: detailItem.trade },
+                { label: "Type", value: detailItem.submittalType },
+                { label: "Floor", value: detailItem.floor },
+                { label: "Status", value: detailItem.submittalStatus },
+                { label: "Date", value: detailItem.date },
+                { label: "Revision", value: detailItem.revision },
+                { label: "Version", value: detailItem.version },
+                { label: "Responsible", value: detailItem.assignedToName },
+              ].map(f => (
+                <div key={f.label} style={{ background: "#F9FAFB", borderRadius: 8, padding: "10px 14px" }}>
+                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>{f.label}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{f.value || "—"}</div>
+                </div>
+              ))}
+            </div>
+
+            {detailItem.openItems && (
+              <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "10px 14px", marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#92400E", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Open Items</div>
+                <div style={{ fontSize: 13, color: "#92400E" }}>{detailItem.openItems}</div>
+              </div>
+            )}
+
+            {(detailItem.rfiOpen || detailItem.rfiClose) && (
+              <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "10px 14px", marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#1D4ED8", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>RFIs</div>
+                <div style={{ display: "flex", gap: 16 }}>
+                  {detailItem.rfiOpen && detailItem.rfiOpen !== "NO" && (
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", marginBottom: 2 }}>Open RFI</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#DC2626" }}>{detailItem.rfiOpen}</div>
+                    </div>
+                  )}
+                  {detailItem.rfiClose && detailItem.rfiClose !== "NO" && (
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", marginBottom: 2 }}>Closed RFI</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#16A34A" }}>{detailItem.rfiClose}</div>
+                    </div>
+                  )}
+                </div>
+                {detailItem.rfiDescription && (
+                  <div style={{ fontSize: 12, color: "#374151", marginTop: 8 }}>{detailItem.rfiDescription}</div>
+                )}
+              </div>
+            )}
+
+            {detailItem.description && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Description</div>
+                <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>{detailItem.description}</div>
+              </div>
+            )}
+
+            {detailItem.pdfUrl && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Document Link</div>
+                <a href={detailItem.pdfUrl} target="_blank" rel="noreferrer"
+                  style={{ fontSize: 13, color: "#2563EB", textDecoration: "underline" }}>
+                  {detailItem.pdfUrl}
+                </a>
+              </div>
+            )}
+
+            {detailItem.notes && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Notes</div>
+                <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>{detailItem.notes}</div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+              <button className="btn btn-primary" onClick={() => setDetailItem(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+Check 1:
+grep -n "detailItem\|Details.*button\|Submittal Detail" artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx | head -15
+
+Check 2 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.
