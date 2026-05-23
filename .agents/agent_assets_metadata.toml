@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "J36ApglUS1ACktNLx830A"
+uri = "file://bimlog_src.tar.gz"
+type = "unspecified"
+title = "BIMLog source archive (486M)"
