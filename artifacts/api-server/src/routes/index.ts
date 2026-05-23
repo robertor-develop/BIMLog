@@ -26,6 +26,7 @@ import intelligenceRouter from "./intelligence";
 import coordinationRouter from "./coordination";
 import companyProfileRouter from "./company-profile";
 import clashReportsRouter from "./clash_reports";
+import submittalReportsRouter from "./submittal_reports";
 
 const router: IRouter = Router();
 
@@ -56,5 +57,6 @@ router.use(intelligenceRouter);
 router.use(coordinationRouter);
 router.use(companyProfileRouter);
 router.use(clashReportsRouter);
+router.use(submittalReportsRouter);
 
 export default router;

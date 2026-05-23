@@ -1,0 +1,390 @@
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { submittalReportsTable, submittalItemsTable } from "@workspace/db/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import multer from "multer";
+import * as XLSX from "xlsx";
+import Anthropic from "@anthropic-ai/sdk";
+import PDFDocument from "pdfkit";
+import jwt from "jsonwebtoken";
+
+const router: Router = Router();
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+// GET all reports
+router.get("/projects/:projectId/submittal-reports", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const rows = await db.select().from(submittalReportsTable)
+      .where(eq(submittalReportsTable.projectId, projectId))
+      .orderBy(desc(submittalReportsTable.createdAt));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST create empty report
+router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const [report] = await db.insert(submittalReportsTable).values({
+      projectId,
+      uploadedById: req.user!.userId,
+      fileName: req.body?.fileName || "New Submittal Tracker",
+      format: "manual",
+      totalItems: 0,
+      status: "complete",
+    }).returning();
+    res.status(201).json(report);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST upload Excel
+router.post("/projects/:projectId/submittal-reports/upload",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  upload.single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file", message: "No file uploaded" }); return; }
+      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
+      if (!["xlsx","xls","csv"].includes(ext)) {
+        res.status(400).json({ error: "invalid_format", message: "Use Excel or CSV" });
+        return;
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
+      if (hIdx === -1) hIdx = 0;
+      const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+      const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+
+      // AI column mapping
+      let mapping: Record<string, number> = { trade: -1, type: -1, floor: -1, fileName: -1, revision: -1, version: -1, status: -1, date: -1, description: -1, openItems: -1, rfiOpen: -1, rfiClose: -1, rfiDescription: -1, pdfUrl: -1 };
+      try {
+        const mapMsg = await anthropic.messages.create({
+          model: "claude-sonnet-4-5",
+          max_tokens: 400,
+          messages: [{
+            role: "user",
+            content: `Construction submittal tracking spreadsheet headers (0-indexed): ${JSON.stringify(hdrs)}
+Sample row: ${JSON.stringify(dataRows[0] ?? [])}
+
+Map to column indices. Return ONLY valid JSON, no markdown:
+{"trade":<idx or -1>,"type":<idx or -1>,"floor":<idx or -1>,"fileName":<idx or -1>,"revision":<idx or -1>,"version":<idx or -1>,"status":<idx or -1>,"date":<idx or -1>,"description":<idx or -1>,"openItems":<idx or -1>,"rfiOpen":<idx or -1>,"rfiClose":<idx or -1>,"rfiDescription":<idx or -1>,"pdfUrl":<idx or -1>}
+
+Rules: trade=discipline/trade/system, type=SHOP/SLEEVE/submittal type, floor=floor/level/area, fileName=file name/document name, revision=revision/rev, version=version/ver, status=approval status/submittal status, date=date/submitted date, description=description/comments, openItems=open items/pending items, rfiOpen=rfi open/open rfi, rfiClose=rfi close/closed rfi, pdfUrl=url/link/sharepoint`
+          }]
+        });
+        const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
+        mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
+        console.log("[submittal-upload] AI mapping:", JSON.stringify(mapping));
+      } catch (e) {
+        console.error("[submittal-upload] AI mapping failed:", e);
+      }
+
+      const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined ? String(row[idx]).trim() : "";
+
+      const parsed = dataRows.map((row: any[]) => ({
+        trade: get(row, mapping.trade),
+        submittalType: get(row, mapping.type),
+        floor: get(row, mapping.floor),
+        fileName: get(row, mapping.fileName),
+        revision: get(row, mapping.revision),
+        version: get(row, mapping.version),
+        submittalStatus: get(row, mapping.status),
+        date: get(row, mapping.date),
+        description: get(row, mapping.description),
+        openItems: get(row, mapping.openItems),
+        rfiOpen: get(row, mapping.rfiOpen),
+        rfiClose: get(row, mapping.rfiClose),
+        rfiDescription: get(row, mapping.rfiDescription),
+        pdfUrl: get(row, mapping.pdfUrl),
+      })).filter(r => r.fileName || r.description || r.trade);
+
+      const [report] = await db.insert(submittalReportsTable).values({
+        projectId,
+        uploadedById: req.user!.userId,
+        fileName: req.file.originalname,
+        format: "excel",
+        totalItems: parsed.length,
+        status: "complete",
+      }).returning();
+
+      if (parsed.length > 0) {
+        await db.insert(submittalItemsTable).values(
+          parsed.map(p => ({ reportId: report.id, projectId, ...p }))
+        );
+      }
+
+      res.status(201).json({ report_id: report.id, total_parsed: parsed.length, status: "complete" });
+    } catch (err) {
+      console.error("[submittal-upload] FAILED:", err);
+      res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// GET single report with items
+router.get("/projects/:projectId/submittal-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    const items = await db.select().from(submittalItemsTable)
+      .where(eq(submittalItemsTable.reportId, reportId));
+    res.json({ report, items });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// PATCH rename report
+router.patch("/projects/:projectId/submittal-reports/:reportId/rename", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [updated] = await db.update(submittalReportsTable)
+      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// PATCH update item
+router.patch("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const reportId = Number(req.params.reportId);
+  const itemId = Number(req.params.itemId);
+  try {
+    const allowed: Record<string, any> = { updatedAt: new Date() };
+    const fields = ["trade","submittalType","floor","fileName","revision","version","submittalStatus","date","description","openItems","rfiOpen","rfiClose","rfiDescription","pdfUrl","notes","status"];
+    for (const f of fields) {
+      if (req.body[f] !== undefined) allowed[f] = req.body[f];
+    }
+    const [updated] = await db.update(submittalItemsTable).set(allowed)
+      .where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST add item
+router.post("/projects/:projectId/submittal-reports/:reportId/items", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    const [item] = await db.insert(submittalItemsTable).values({
+      reportId, projectId,
+      trade: req.body.trade ?? null,
+      submittalType: req.body.submittalType ?? null,
+      floor: req.body.floor ?? null,
+      fileName: req.body.fileName ?? null,
+      description: req.body.description ?? null,
+      status: "active",
+    }).returning();
+    await db.update(submittalReportsTable)
+      .set({ totalItems: (report.totalItems ?? 0) + 1 })
+      .where(eq(submittalReportsTable.id, reportId));
+    res.status(201).json(item);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// DELETE report
+router.delete("/projects/:projectId/submittal-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    await db.delete(submittalItemsTable).where(eq(submittalItemsTable.reportId, reportId));
+    await db.delete(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// DELETE item
+router.delete("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const itemId = Number(req.params.itemId);
+  const reportId = Number(req.params.reportId);
+  try {
+    await db.delete(submittalItemsTable).where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// GET PDF export
+router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1] || (req.query.token as string);
+  if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
+  let userId: number;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    userId = decoded.userId || decoded.id;
+  } catch { res.status(401).json({ error: "Invalid token" }); return; }
+
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
+    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+
+    const [user] = await db.select({
+      fullName: usersTable.fullName,
+      email: usersTable.email,
+      companyName: companiesTable.name,
+    }).from(usersTable)
+      .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+      .where(eq(usersTable.id, userId));
+
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "Report not found" }); return; }
+
+    const items = await db.select().from(submittalItemsTable)
+      .where(eq(submittalItemsTable.reportId, reportId));
+
+    const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="submittal-tracker-${project.code}-${reportId}.pdf"`);
+    doc.pipe(res);
+
+    const W = doc.page.width;
+    const M = 40;
+    const CW = W - M * 2;
+
+    // Header
+    doc.rect(0, 0, W, 120).fill("#1E3A5F");
+    doc.fontSize(30).font("Helvetica-Bold").fillColor("white").text(user?.companyName ?? "Company", M, 22);
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text("SUBMITTAL TRACKING REPORT", M, 22, { align: "right", width: CW });
+    doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(user?.email ?? "", M, 70, { align: "right", width: CW });
+    doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE").text("Powered by BIMLog by IgniteSmart", M, 98, { align: "right", width: CW });
+
+    doc.rect(0, 120, W, 45).fill("#F0F4F8");
+    doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 130);
+    doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+      .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
+
+    doc.y = 185;
+
+    doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Submittal Register", M);
+    doc.moveDown(0.5);
+
+    const cols = [
+      { label: "Trade", w: 55 },
+      { label: "Type", w: 50 },
+      { label: "Floor", w: 55 },
+      { label: "File Name", w: 130 },
+      { label: "Rev", w: 35 },
+      { label: "Ver", w: 35 },
+      { label: "Status", w: 80 },
+      { label: "Date", w: 60 },
+      { label: "Open Items", w: 100 },
+      { label: "RFI Open", w: 60 },
+      { label: "RFI Close", w: 60 },
+    ];
+
+    const drawHeader = () => {
+      const hY = doc.y;
+      doc.rect(M, hY, CW, 18).fill("#1E3A5F");
+      let x = M;
+      cols.forEach(col => {
+        doc.fontSize(7).font("Helvetica-Bold").fillColor("white")
+          .text(col.label.toUpperCase(), x + 3, hY + 5, { width: col.w - 6 });
+        x += col.w;
+      });
+      doc.y = hY + 20;
+    };
+
+    drawHeader();
+
+    items.forEach((item, idx) => {
+      const rowH = 22;
+      if (doc.y + rowH > doc.page.height - 50) {
+        doc.addPage();
+        doc.rect(0, 0, W, 25).fill("#1E3A5F");
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
+          .text(`${user?.companyName ?? ""} | ${project.name} — Submittal Tracking Report`, M, 8, { width: CW });
+        doc.y = 35;
+        drawHeader();
+      }
+      const rY = doc.y;
+      doc.rect(M, rY, CW, rowH).fill(idx % 2 === 0 ? "white" : "#F9FAFB");
+      let x = M;
+      const vals = [
+        item.trade ?? "—",
+        item.submittalType ?? "—",
+        item.floor ?? "—",
+        item.fileName ?? "—",
+        item.revision ?? "—",
+        item.version ?? "—",
+        item.submittalStatus ?? "—",
+        item.date ?? "—",
+        item.openItems ?? "—",
+        item.rfiOpen ?? "—",
+        item.rfiClose ?? "—",
+      ];
+      vals.forEach((val, i) => {
+        doc.fontSize(7).font("Helvetica").fillColor("#111827")
+          .text(String(val), x + 2, rY + 7, { width: cols[i].w - 4, lineBreak: false, ellipsis: true });
+        x += cols[i].w;
+      });
+      doc.rect(M, rY, CW, rowH).stroke("#E5E7EB");
+      doc.y = rY + rowH;
+    });
+
+    doc.flushPages();
+    const range = doc.bufferedPageRange();
+    for (let i = 0; i < range.count; i++) {
+      doc.switchToPage(range.start + i);
+      doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+        .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog`,
+          M, doc.page.height - 25, { align: "center", width: CW });
+    }
+    doc.end();
+  } catch (err) {
+    console.error("[submittal-pdf] FAILED:", err);
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+export default router;

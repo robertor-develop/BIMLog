@@ -26,3 +26,4 @@ export * from "./project-milestones";
 export * from "./coordination_intake_events";
 export * from "./company_profiles";
 export * from "./clash_reports";
+export * from "./submittal_reports";

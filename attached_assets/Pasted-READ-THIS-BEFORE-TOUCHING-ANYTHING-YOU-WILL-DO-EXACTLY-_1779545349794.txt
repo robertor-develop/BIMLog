@@ -1,0 +1,972 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+YOU WILL DO EXACTLY WHAT IS WRITTEN HERE. NOTHING MORE. NOTHING LESS.
+DO NOT TOUCH ANY FILE NOT LISTED BELOW.
+DO NOT PUBLISH UNTIL ALL CHECKS PASS.
+PRINT ALL OUTPUT AS PLAIN TEXT IN CHAT. NO COLLAPSED BOXES. NO SUMMARIES. EVERY LINE RAW.
+
+═══════════════════════════════════════════════════════════
+STEP 1 — CREATE DB SCHEMA
+═══════════════════════════════════════════════════════════
+
+Create new file: lib/db/src/schema/submittal_reports.ts
+
+With exactly this content:
+
+import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+import { usersTable } from "./users";
+
+export const submittalReportsTable = pgTable("submittal_reports", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
+  fileName: text("file_name").notNull(),
+  format: text("format").notNull().default("manual"),
+  totalItems: integer("total_items").default(0),
+  status: text("status").default("complete"),
+  aiSummary: text("ai_summary"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const submittalItemsTable = pgTable("submittal_items", {
+  id: serial("id").primaryKey(),
+  reportId: integer("report_id").references(() => submittalReportsTable.id).notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  trade: text("trade"),
+  submittalType: text("submittal_type"),
+  floor: text("floor"),
+  fileName: text("file_name"),
+  revision: text("revision"),
+  version: text("version"),
+  submittalStatus: text("submittal_status"),
+  date: text("date"),
+  description: text("description"),
+  openItems: text("open_items"),
+  rfiOpen: text("rfi_open"),
+  rfiClose: text("rfi_close"),
+  rfiDescription: text("rfi_description"),
+  pdfUrl: text("pdf_url"),
+  notes: text("notes"),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+Add exports to lib/db/src/schema/index.ts:
+export * from "./submittal_reports";
+
+Push schema to DB.
+
+Check 1:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'submittal_reports' ORDER BY ordinal_position;
+SELECT column_name FROM information_schema.columns WHERE table_name = 'submittal_items' ORDER BY ordinal_position;
+
+Print raw output in chat.
+
+═══════════════════════════════════════════════════════════
+STEP 2 — BUILD BACKEND ROUTE
+═══════════════════════════════════════════════════════════
+
+Create new file: artifacts/api-server/src/routes/submittal_reports.ts
+
+With this complete content:
+
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { submittalReportsTable, submittalItemsTable } from "@workspace/db/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { projectsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import multer from "multer";
+import * as XLSX from "xlsx";
+import Anthropic from "@anthropic-ai/sdk";
+import PDFDocument from "pdfkit";
+import jwt from "jsonwebtoken";
+
+const router: Router = Router();
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+
+// GET all reports
+router.get("/projects/:projectId/submittal-reports", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const rows = await db.select().from(submittalReportsTable)
+      .where(eq(submittalReportsTable.projectId, projectId))
+      .orderBy(desc(submittalReportsTable.createdAt));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST create empty report
+router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const [report] = await db.insert(submittalReportsTable).values({
+      projectId,
+      uploadedById: req.user!.userId,
+      fileName: req.body?.fileName || "New Submittal Tracker",
+      format: "manual",
+      totalItems: 0,
+      status: "complete",
+    }).returning();
+    res.status(201).json(report);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST upload Excel
+router.post("/projects/:projectId/submittal-reports/upload",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  upload.single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file", message: "No file uploaded" }); return; }
+      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
+      if (!["xlsx","xls","csv"].includes(ext)) {
+        res.status(400).json({ error: "invalid_format", message: "Use Excel or CSV" });
+        return;
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
+      if (hIdx === -1) hIdx = 0;
+      const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+      const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+
+      // AI column mapping
+      let mapping: Record<string, number> = { trade: -1, type: -1, floor: -1, fileName: -1, revision: -1, version: -1, status: -1, date: -1, description: -1, openItems: -1, rfiOpen: -1, rfiClose: -1, rfiDescription: -1, pdfUrl: -1 };
+      try {
+        const mapMsg = await anthropic.messages.create({
+          model: "claude-sonnet-4-5",
+          max_tokens: 400,
+          messages: [{
+            role: "user",
+            content: `Construction submittal tracking spreadsheet headers (0-indexed): ${JSON.stringify(hdrs)}
+Sample row: ${JSON.stringify(dataRows[0] ?? [])}
+
+Map to column indices. Return ONLY valid JSON, no markdown:
+{"trade":<idx or -1>,"type":<idx or -1>,"floor":<idx or -1>,"fileName":<idx or -1>,"revision":<idx or -1>,"version":<idx or -1>,"status":<idx or -1>,"date":<idx or -1>,"description":<idx or -1>,"openItems":<idx or -1>,"rfiOpen":<idx or -1>,"rfiClose":<idx or -1>,"rfiDescription":<idx or -1>,"pdfUrl":<idx or -1>}
+
+Rules: trade=discipline/trade/system, type=SHOP/SLEEVE/submittal type, floor=floor/level/area, fileName=file name/document name, revision=revision/rev, version=version/ver, status=approval status/submittal status, date=date/submitted date, description=description/comments, openItems=open items/pending items, rfiOpen=rfi open/open rfi, rfiClose=rfi close/closed rfi, pdfUrl=url/link/sharepoint`
+          }]
+        });
+        const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
+        mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
+        console.log("[submittal-upload] AI mapping:", JSON.stringify(mapping));
+      } catch (e) {
+        console.error("[submittal-upload] AI mapping failed:", e);
+      }
+
+      const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined ? String(row[idx]).trim() : "";
+
+      const parsed = dataRows.map((row: any[]) => ({
+        trade: get(row, mapping.trade),
+        submittalType: get(row, mapping.type),
+        floor: get(row, mapping.floor),
+        fileName: get(row, mapping.fileName),
+        revision: get(row, mapping.revision),
+        version: get(row, mapping.version),
+        submittalStatus: get(row, mapping.status),
+        date: get(row, mapping.date),
+        description: get(row, mapping.description),
+        openItems: get(row, mapping.openItems),
+        rfiOpen: get(row, mapping.rfiOpen),
+        rfiClose: get(row, mapping.rfiClose),
+        rfiDescription: get(row, mapping.rfiDescription),
+        pdfUrl: get(row, mapping.pdfUrl),
+      })).filter(r => r.fileName || r.description || r.trade);
+
+      const [report] = await db.insert(submittalReportsTable).values({
+        projectId,
+        uploadedById: req.user!.userId,
+        fileName: req.file.originalname,
+        format: "excel",
+        totalItems: parsed.length,
+        status: "complete",
+      }).returning();
+
+      if (parsed.length > 0) {
+        await db.insert(submittalItemsTable).values(
+          parsed.map(p => ({ reportId: report.id, projectId, ...p }))
+        );
+      }
+
+      res.status(201).json({ report_id: report.id, total_parsed: parsed.length, status: "complete" });
+    } catch (err) {
+      console.error("[submittal-upload] FAILED:", err);
+      res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// GET single report with items
+router.get("/projects/:projectId/submittal-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    const items = await db.select().from(submittalItemsTable)
+      .where(eq(submittalItemsTable.reportId, reportId));
+    res.json({ report, items });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// PATCH rename report
+router.patch("/projects/:projectId/submittal-reports/:reportId/rename", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [updated] = await db.update(submittalReportsTable)
+      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// PATCH update item
+router.patch("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const reportId = Number(req.params.reportId);
+  const itemId = Number(req.params.itemId);
+  try {
+    const allowed: Record<string, any> = { updatedAt: new Date() };
+    const fields = ["trade","submittalType","floor","fileName","revision","version","submittalStatus","date","description","openItems","rfiOpen","rfiClose","rfiDescription","pdfUrl","notes","status"];
+    for (const f of fields) {
+      if (req.body[f] !== undefined) allowed[f] = req.body[f];
+    }
+    const [updated] = await db.update(submittalItemsTable).set(allowed)
+      .where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "not_found" }); return; }
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST add item
+router.post("/projects/:projectId/submittal-reports/:reportId/items", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    const [item] = await db.insert(submittalItemsTable).values({
+      reportId, projectId,
+      trade: req.body.trade ?? null,
+      submittalType: req.body.submittalType ?? null,
+      floor: req.body.floor ?? null,
+      fileName: req.body.fileName ?? null,
+      description: req.body.description ?? null,
+      status: "active",
+    }).returning();
+    await db.update(submittalReportsTable)
+      .set({ totalItems: report.totalItems + 1 })
+      .where(eq(submittalReportsTable.id, reportId));
+    res.status(201).json(item);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// DELETE report
+router.delete("/projects/:projectId/submittal-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "not_found" }); return; }
+    await db.delete(submittalItemsTable).where(eq(submittalItemsTable.reportId, reportId));
+    await db.delete(submittalReportsTable).where(eq(submittalReportsTable.id, reportId));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// GET PDF export
+router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1] || (req.query.token as string);
+  if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
+  let userId: number;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    userId = decoded.userId || decoded.id;
+  } catch { res.status(401).json({ error: "Invalid token" }); return; }
+
+  const projectId = Number(req.params.projectId);
+  const reportId = Number(req.params.reportId);
+  try {
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
+    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+
+    const [user] = await db.select({
+      fullName: usersTable.fullName,
+      email: usersTable.email,
+      companyName: companiesTable.name,
+    }).from(usersTable)
+      .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+      .where(eq(usersTable.id, userId));
+
+    const [report] = await db.select().from(submittalReportsTable)
+      .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
+    if (!report) { res.status(404).json({ error: "Report not found" }); return; }
+
+    const items = await db.select().from(submittalItemsTable)
+      .where(eq(submittalItemsTable.reportId, reportId));
+
+    const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="submittal-tracker-${project.code}-${reportId}.pdf"`);
+    doc.pipe(res);
+
+    const W = doc.page.width;
+    const M = 40;
+    const CW = W - M * 2;
+
+    // Header
+    doc.rect(0, 0, W, 120).fill("#1E3A5F");
+    doc.fontSize(30).font("Helvetica-Bold").fillColor("white").text(user?.companyName ?? "Company", M, 22);
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text("SUBMITTAL TRACKING REPORT", M, 22, { align: "right", width: CW });
+    doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
+    doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(user?.email ?? "", M, 70, { align: "right", width: CW });
+    doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE").text("Powered by BIMLog by IgniteSmart", M, 98, { align: "right", width: CW });
+
+    doc.rect(0, 120, W, 45).fill("#F0F4F8");
+    doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 130);
+    doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+      .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
+
+    doc.y = 185;
+
+    // Summary
+    doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Submittal Register", M);
+    doc.moveDown(0.5);
+
+    const cols = [
+      { label: "Trade", w: 55 },
+      { label: "Type", w: 50 },
+      { label: "Floor", w: 55 },
+      { label: "File Name", w: 130 },
+      { label: "Rev", w: 35 },
+      { label: "Ver", w: 35 },
+      { label: "Status", w: 80 },
+      { label: "Date", w: 60 },
+      { label: "Open Items", w: 100 },
+      { label: "RFI Open", w: 60 },
+      { label: "RFI Close", w: 60 },
+    ];
+
+    const drawHeader = () => {
+      const hY = doc.y;
+      doc.rect(M, hY, CW, 18).fill("#1E3A5F");
+      let x = M;
+      cols.forEach(col => {
+        doc.fontSize(7).font("Helvetica-Bold").fillColor("white")
+          .text(col.label.toUpperCase(), x + 3, hY + 5, { width: col.w - 6 });
+        x += col.w;
+      });
+      doc.y = hY + 20;
+    };
+
+    drawHeader();
+
+    items.forEach((item, idx) => {
+      const rowH = 22;
+      if (doc.y + rowH > doc.page.height - 50) {
+        doc.addPage();
+        doc.rect(0, 0, W, 25).fill("#1E3A5F");
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
+          .text(`${user?.companyName ?? ""} | ${project.name} — Submittal Tracking Report`, M, 8, { width: CW });
+        doc.y = 35;
+        drawHeader();
+      }
+      const rY = doc.y;
+      doc.rect(M, rY, CW, rowH).fill(idx % 2 === 0 ? "white" : "#F9FAFB");
+      let x = M;
+      const vals = [
+        item.trade ?? "—",
+        item.submittalType ?? "—",
+        item.floor ?? "—",
+        item.fileName ?? "—",
+        item.revision ?? "—",
+        item.version ?? "—",
+        item.submittalStatus ?? "—",
+        item.date ?? "—",
+        item.openItems ?? "—",
+        item.rfiOpen ?? "—",
+        item.rfiClose ?? "—",
+      ];
+      vals.forEach((val, i) => {
+        doc.fontSize(7).font("Helvetica").fillColor("#111827")
+          .text(String(val), x + 2, rY + 7, { width: cols[i].w - 4, lineBreak: false, ellipsis: true });
+        x += cols[i].w;
+      });
+      doc.rect(M, rY, CW, rowH).stroke("#E5E7EB");
+      doc.y = rY + rowH;
+    });
+
+    doc.flushPages();
+    const range = doc.bufferedPageRange();
+    for (let i = 0; i < range.count; i++) {
+      doc.switchToPage(range.start + i);
+      doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+        .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog`,
+          M, doc.page.height - 25, { align: "center", width: CW });
+    }
+    doc.end();
+  } catch (err) {
+    console.error("[submittal-pdf] FAILED:", err);
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+export default router;
+
+Register in artifacts/api-server/src/routes/index.ts:
+import submittalReportsRouter from "./submittal_reports";
+router.use(submittalReportsRouter);
+
+Check 2:
+grep -n "submittalReports\|submittal-reports" artifacts/api-server/src/routes/index.ts | head -5
+
+Rebuild backend only. Restart API server.
+Print all check outputs as plain text in chat. No collapsed boxes.
+
+═══════════════════════════════════════════════════════════
+STEP 3 — BUILD SubmittalTrackerTab.tsx FRONTEND
+═══════════════════════════════════════════════════════════
+
+Create new file: artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx
+
+With this complete content:
+
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth";
+import { useI18n } from "@/lib/i18n";
+import { Upload, ChevronLeft, Download, Plus, Trash2 } from "lucide-react";
+
+const API = "/api/v1";
+
+interface SubmittalReport {
+  id: number; fileName: string; format: string; totalItems: number;
+  status: string; aiSummary?: string; createdAt: string;
+}
+
+interface SubmittalItem {
+  id: number; reportId: number; projectId: number;
+  trade?: string; submittalType?: string; floor?: string;
+  fileName?: string; revision?: string; version?: string;
+  submittalStatus?: string; date?: string; description?: string;
+  openItems?: string; rfiOpen?: string; rfiClose?: string;
+  rfiDescription?: string; pdfUrl?: string; notes?: string; status?: string;
+}
+
+const CELL = { border: "1px solid #E5E7EB", padding: "4px 6px", fontSize: 11, verticalAlign: "middle" as const };
+const TH = { ...CELL, background: "#1E3A5F", color: "white", fontWeight: 700, fontSize: 10, textTransform: "uppercase" as const, whiteSpace: "nowrap" as const };
+
+export function SubmittalTrackerTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+  const { token } = useAuthStore();
+  const { lang } = useI18n();
+  const t = (en: string, es: string) => lang === "es" ? es : en;
+  const headers = { Authorization: `Bearer ${token}` };
+
+  const [reports, setReports] = useState<SubmittalReport[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState("");
+  const [error, setError] = useState("");
+  const [selectedReport, setSelectedReport] = useState<SubmittalReport | null>(null);
+  const [items, setItems] = useState<SubmittalItem[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const [filterTrade, setFilterTrade] = useState("all");
+  const [filterType, setFilterType] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const loadReports = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/submittal-reports`, { headers });
+      if (r.ok) setReports(await r.json());
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadReports(); }, [projectId]);
+
+  const loadItems = async (report: SubmittalReport) => {
+    setSelectedReport(report);
+    setItemsLoading(true);
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/submittal-reports/${report.id}`, { headers });
+      if (r.ok) { const data = await r.json(); setItems(data.items ?? []); }
+    } finally { setItemsLoading(false); }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!["xlsx","xls","csv"].includes(ext ?? "")) { setError("Use Excel (.xlsx, .xls) or CSV"); return; }
+    setUploading(true); setError(""); setUploadMsg("Uploading and mapping columns with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const r = await fetch(`${API}/projects/${projectId}/submittal-reports/upload`, { method: "POST", headers, body: formData });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || "Upload failed"); return; }
+      const data = await r.json();
+      setUploadMsg(`${data.total_parsed} items imported successfully.`);
+      await loadReports();
+      setTimeout(() => setUploadMsg(""), 5000);
+    } finally { setUploading(false); e.target.value = ""; }
+  };
+
+  const updateItem = async (itemId: number, updates: Partial<SubmittalItem>) => {
+    if (!selectedReport) return;
+    await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/items/${itemId}`, {
+      method: "PATCH",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    setItems(prev => prev.map(x => x.id === itemId ? { ...x, ...updates } : x));
+  };
+
+  const addItem = async () => {
+    if (!selectedReport) return;
+    const r = await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/items`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    if (r.ok) loadItems(selectedReport);
+  };
+
+  const deleteReport = async (reportId: number, fileName: string) => {
+    if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
+    const r = await fetch(`${API}/projects/${projectId}/submittal-reports/${reportId}`, { method: "DELETE", headers });
+    if (r.ok) { setSelectedReport(null); loadReports(); }
+  };
+
+  const trades = ["all", ...Array.from(new Set(items.map(i => i.trade).filter(Boolean)))];
+  const types = ["all", ...Array.from(new Set(items.map(i => i.submittalType).filter(Boolean)))];
+
+  const filteredItems = items
+    .filter(i => filterTrade === "all" || i.trade === filterTrade)
+    .filter(i => filterType === "all" || i.submittalType === filterType)
+    .filter(i => !search || [i.fileName, i.description, i.trade, i.floor].some(f => f?.toLowerCase().includes(search.toLowerCase())));
+
+  const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+    "approved": { bg: "#DCFCE7", text: "#16A34A" },
+    "approved as noted": { bg: "#FEF3C7", text: "#D97706" },
+    "rejected": { bg: "#FEE2E2", text: "#DC2626" },
+    "for record": { bg: "#DBEAFE", text: "#1D4ED8" },
+    "sent": { bg: "#F3E8FF", text: "#7C3AED" },
+    "pending": { bg: "#F3F4F6", text: "#6B7280" },
+  };
+
+  const getStatusStyle = (status?: string) => {
+    if (!status) return { bg: "#F3F4F6", text: "#6B7280" };
+    const key = status.toLowerCase();
+    return STATUS_COLORS[key] ?? { bg: "#F3F4F6", text: "#6B7280" };
+  };
+
+  if (selectedReport) return (
+    <div className="tab-content-wrapper">
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <button className="btn btn-outline btn-sm" onClick={() => { setSelectedReport(null); setItems([]); }}
+          style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <ChevronLeft size={14} /> {t("Back", "Volver")}
+        </button>
+        <div style={{ flex: 1 }}>
+          <input value={selectedReport.fileName}
+            onChange={e => setSelectedReport(prev => prev ? { ...prev, fileName: e.target.value } : prev)}
+            onBlur={async e => {
+              await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/rename`, {
+                method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                body: JSON.stringify({ fileName: e.target.value }),
+              });
+            }}
+            style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "1px dashed #D1D5DB",
+              background: "transparent", outline: "none", width: "100%" }} />
+          <div style={{ fontSize: 12, color: "#6B7280" }}>
+            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalItems} {t("items","ítems")}
+          </div>
+        </div>
+        <a href={`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/pdf?token=${token}`}
+          target="_blank" rel="noreferrer" className="btn btn-primary btn-sm"
+          style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
+          <Download size={13} /> Export PDF
+        </a>
+        <button className="btn btn-sm" onClick={() => deleteReport(selectedReport.id, selectedReport.fileName)}
+          style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, padding: "4px 12px", fontWeight: 600, cursor: "pointer" }}>
+          Delete
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+        <select value={filterTrade} onChange={e => setFilterTrade(e.target.value)}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}>
+          {trades.map(t => <option key={t} value={t}>{t === "all" ? "All Trades" : t}</option>)}
+        </select>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}>
+          {types.map(t => <option key={t} value={t}>{t === "all" ? "All Types" : t}</option>)}
+        </select>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t("Search...","Buscar...")}
+          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, flex: 1, minWidth: 200 }} />
+        {canWrite && (
+          <button className="btn btn-sm btn-primary" onClick={addItem}
+            style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <Plus size={13} /> Add Row
+          </button>
+        )}
+      </div>
+
+      {itemsLoading
+        ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>Loading...</div>
+        : (
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
+            <table style={{ width: "max-content", minWidth: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ position: "sticky", top: 0, zIndex: 10 }}>
+                  {[
+                    { label: "Trade", w: 70 },
+                    { label: "Type", w: 70 },
+                    { label: "Floor", w: 80 },
+                    { label: "File Name", w: 160 },
+                    { label: "Revision", w: 70 },
+                    { label: "Version", w: 70 },
+                    { label: "Status", w: 120 },
+                    { label: "Date", w: 90 },
+                    { label: "Open Items", w: 120 },
+                    { label: "RFI Open", w: 80 },
+                    { label: "RFI Close", w: 80 },
+                    { label: "Notes", w: 70 },
+                  ].map(h => (
+                    <th key={h.label} style={{ ...TH, width: h.w, minWidth: h.w }}>{h.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredItems.map((item, idx) => (
+                  <>
+                    <tr key={item.id} style={{ borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "white" : "#FAFAFA" }}>
+                      <td style={CELL}>
+                        <input value={item.trade || ""} placeholder="Trade"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, trade: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { trade: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent", fontWeight: 600 }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.submittalType || ""} placeholder="Type"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, submittalType: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { submittalType: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.floor || ""} placeholder="Floor"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, floor: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { floor: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.fileName || ""} placeholder="File name"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, fileName: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { fileName: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: !item.fileName ? "#FFFBEB" : "transparent", fontFamily: "monospace" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.revision || ""} placeholder="R-0"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, revision: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { revision: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent", textAlign: "center" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.version || ""} placeholder="V-0"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, version: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { version: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent", textAlign: "center" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.submittalStatus || ""} placeholder="Status"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, submittalStatus: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { submittalStatus: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, fontWeight: 600,
+                            background: getStatusStyle(item.submittalStatus).bg,
+                            color: getStatusStyle(item.submittalStatus).text }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.date || ""} placeholder="Date"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, date: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { date: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.openItems || ""} placeholder="Open items"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, openItems: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { openItems: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: item.openItems ? "#FEF3C7" : "transparent" }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.rfiOpen || ""} placeholder="RFI #"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, rfiOpen: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { rfiOpen: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent", color: item.rfiOpen && item.rfiOpen !== "NO" ? "#1D4ED8" : "inherit", fontWeight: item.rfiOpen && item.rfiOpen !== "NO" ? 700 : 400 }} />
+                      </td>
+                      <td style={CELL}>
+                        <input value={item.rfiClose || ""} placeholder="RFI #"
+                          onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, rfiClose: e.target.value } : x))}
+                          onBlur={e => updateItem(item.id, { rfiClose: e.target.value })}
+                          style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent" }} />
+                      </td>
+                      <td style={CELL}>
+                        <button className="btn btn-sm btn-outline"
+                          onClick={() => setExpandedRows(prev => ({ ...prev, [item.id]: !prev[item.id] }))}>
+                          {expandedRows[item.id] ? "Done" : "Edit"}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedRows[item.id] && (
+                      <tr key={`expand-${item.id}`} style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB" }}>
+                        <td colSpan={12} style={{ padding: "14px 16px" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Description</label>
+                              <textarea value={item.description || ""} rows={2}
+                                onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, description: e.target.value } : x))}
+                                onBlur={e => updateItem(item.id, { description: e.target.value })}
+                                style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>RFI Description</label>
+                              <textarea value={item.rfiDescription || ""} rows={2}
+                                onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, rfiDescription: e.target.value } : x))}
+                                onBlur={e => updateItem(item.id, { rfiDescription: e.target.value })}
+                                style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>PDF / SharePoint URL</label>
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <input value={item.pdfUrl || ""} placeholder="https://..."
+                                  onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, pdfUrl: e.target.value } : x))}
+                                  onBlur={e => updateItem(item.id, { pdfUrl: e.target.value })}
+                                  style={{ flex: 1, border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12 }} />
+                                {item.pdfUrl && (
+                                  <a href={item.pdfUrl} target="_blank" rel="noreferrer"
+                                    style={{ padding: "6px 10px", background: "#1D4ED8", color: "white", borderRadius: 6, fontSize: 12, textDecoration: "none" }}>
+                                    Open
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Notes</label>
+                              <textarea value={item.notes || ""} rows={2}
+                                onChange={e => setItems(prev => prev.map(x => x.id === item.id ? { ...x, notes: e.target.value } : x))}
+                                onBlur={e => updateItem(item.id, { notes: e.target.value })}
+                                style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            {item.pdfUrl && (
+                              <a href={item.pdfUrl} target="_blank" rel="noreferrer"
+                                style={{ fontSize: 12, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 4 }}>
+                                View Document
+                              </a>
+                            )}
+                            <button className="btn btn-sm"
+                              onClick={async () => {
+                                if (!confirm("Delete this row?")) return;
+                                await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/items/${item.id}`, { method: "DELETE", headers });
+                                loadItems(selectedReport);
+                              }}
+                              style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer" }}>
+                              Delete Row
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                ))}
+              </tbody>
+            </table>
+            {filteredItems.length === 0 && (
+              <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
+                {t("No items match your filters","Ningún ítem coincide")}
+              </div>
+            )}
+          </div>
+        )
+      }
+    </div>
+  );
+
+  return (
+    <div className="tab-content-wrapper">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Submittal Tracker", "Registro de Submittals")}</h2>
+          <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
+            {t("Upload any submittal log — AI maps columns automatically", "Sube cualquier registro — IA mapea columnas automáticamente")}
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {canWrite && (
+            <button className="btn btn-sm btn-outline"
+              onClick={async () => {
+                const r = await fetch(`${API}/projects/${projectId}/submittal-reports`, {
+                  method: "POST", headers: { ...headers, "Content-Type": "application/json" },
+                  body: JSON.stringify({ fileName: "New Submittal Tracker" }),
+                });
+                if (r.ok) { const report = await r.json(); setSelectedReport(report); setItems([]); }
+              }}>
+              + New Tracker
+            </button>
+          )}
+          {canWrite && (
+            <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
+              <input type="file" accept=".xlsx,.xls,.csv" onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
+              <div className="btn btn-primary btn-sm" style={{ display: "flex", alignItems: "center", gap: 6, opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? "none" : "auto" }}>
+                <Upload size={13} /> {uploading ? t("Processing...","Procesando...") : t("Upload Submittal Log","Subir Registro")}
+              </div>
+            </label>
+          )}
+        </div>
+      </div>
+
+      {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>{error}</div>}
+      {uploadMsg && <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginBottom: 14 }}>{uploadMsg}</div>}
+
+      {loading
+        ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>Loading...</div>
+        : reports.length === 0
+          ? <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
+              <Upload size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>{t("No submittal trackers yet","Sin registros aún")}</div>
+              <div style={{ fontSize: 13 }}>{t("Upload a submittal log Excel or create a new tracker","Sube un Excel o crea un nuevo registro")}</div>
+            </div>
+          : <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {reports.map(r => (
+                <div key={r.id} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ flex: 1 }}>
+                    <input value={r.fileName}
+                      onChange={e => setReports(prev => prev.map(x => x.id === r.id ? { ...x, fileName: e.target.value } : x))}
+                      onBlur={async e => {
+                        await fetch(`${API}/projects/${projectId}/submittal-reports/${r.id}/rename`, {
+                          method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                          body: JSON.stringify({ fileName: e.target.value }),
+                        });
+                      }}
+                      style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB", background: "transparent", outline: "none", width: "100%" }} />
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalItems} {t("items","ítems")}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, marginLeft: 16 }}>
+                    <button className="btn btn-sm btn-outline" onClick={() => loadItems(r)}>View Items</button>
+                    <button onClick={() => deleteReport(r.id, r.fileName)}
+                      style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+      }
+    </div>
+  );
+}
+
+Also need to add DELETE item endpoint to the backend.
+
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+Add this endpoint before export default router:
+
+router.delete("/projects/:projectId/submittal-reports/:reportId/items/:itemId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const itemId = Number(req.params.itemId);
+  const reportId = Number(req.params.reportId);
+  try {
+    await db.delete(submittalItemsTable).where(and(eq(submittalItemsTable.id, itemId), eq(submittalItemsTable.reportId, reportId)));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+═══════════════════════════════════════════════════════════
+STEP 4 — ADD TO SIDEBAR AND PROJECTDETAIL
+═══════════════════════════════════════════════════════════
+
+FILE: artifacts/bimlog/src/components/layout/ProjectSidebar.tsx
+
+Find this line:
+  { id: "submittals",    label: "project.tabs.submittals",     icon: FileCheck,     section: "Project" },
+
+Add immediately after:
+  { id: "submittal-tracker", label: "project.tabs.submittalTracker", icon: ClipboardList, section: "Project" },
+
+Make sure ClipboardList is imported from lucide-react at the top of the file.
+
+FILE: artifacts/bimlog/src/pages/ProjectDetail.tsx
+
+Add import:
+import { SubmittalTrackerTab } from "./project/SubmittalTrackerTab";
+
+Find where tabs are rendered and add:
+          {tab === "submittal-tracker" && <SubmittalTrackerTab projectId={projectId} canWrite={canWrite} />}
+
+FILE: artifacts/bimlog/src/lib/i18n.ts or wherever translation keys are defined.
+Add if translations exist:
+"project.tabs.submittalTracker": "Submittal Tracker"
+
+═══════════════════════════════════════════════════════════
+FINAL CHECKS
+═══════════════════════════════════════════════════════════
+
+Check 1 — DB tables created:
+SELECT COUNT(*) FROM submittal_reports;
+SELECT COUNT(*) FROM submittal_items;
+
+Check 2 — Route registered:
+grep -n "submittal-reports\|submittalReports" artifacts/api-server/src/routes/index.ts | head -5
+
+Check 3 — Tab in sidebar:
+grep -n "submittal-tracker\|SubmittalTracker" artifacts/bimlog/src/components/layout/ProjectSidebar.tsx | head -5
+
+Check 4 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text in chat. No collapsed boxes.
