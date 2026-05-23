@@ -1,0 +1,116 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/dashboard_briefing.ts
+
+CHANGE 1 — Add imports for new tables.
+Find:
+import {
+  rfisTable, submittalsTable, filesTable, projectMembersTable, projectsTable,
+
+Replace with:
+import {
+  rfisTable, submittalsTable, filesTable, projectMembersTable, projectsTable,
+  clashReportsTable, clashesTable, submittalReportsTable, submittalItemsTable,
+
+CHANGE 2 — Add clash and submittal tracker queries to the stats endpoint.
+Find this exact block:
+  const [
+    activeProjectsRes,
+    allFilesRes,
+    compliantFilesRes,
+    attentionFilesRes,
+    openRfisRes,
+    pendingSubmittalsRes,
+  ] = await Promise.all([
+
+Replace with:
+  const [
+    activeProjectsRes,
+    allFilesRes,
+    compliantFilesRes,
+    attentionFilesRes,
+    openRfisRes,
+    pendingSubmittalsRes,
+    clashReportsRes,
+    openClashesRes,
+    submittalTrackersRes,
+    openSubmittalItemsRes,
+  ] = await Promise.all([
+
+Find the closing of the Promise.all array — the last item before the closing ]);
+It ends with:
+    db.select({ id: submittalsTable.id }).from(submittalsTable)
+      .where(and(
+        inArray(submittalsTable.projectId, projectIds),
+        inArray(submittalsTable.status, ["pending", "under_review"]),
+      )),
+  ]);
+
+Replace with:
+    db.select({ id: submittalsTable.id }).from(submittalsTable)
+      .where(and(
+        inArray(submittalsTable.projectId, projectIds),
+        inArray(submittalsTable.status, ["pending", "under_review"]),
+      )),
+    db.select({ id: clashReportsTable.id, totalClashes: clashReportsTable.totalClashes, p1Count: clashReportsTable.p1Count })
+      .from(clashReportsTable)
+      .where(inArray(clashReportsTable.projectId, projectIds)),
+    db.select({ id: clashesTable.id }).from(clashesTable)
+      .where(and(
+        inArray(clashesTable.projectId, projectIds),
+        eq(clashesTable.status, "open"),
+      )),
+    db.select({ id: submittalReportsTable.id })
+      .from(submittalReportsTable)
+      .where(inArray(submittalReportsTable.projectId, projectIds)),
+    db.select({ id: submittalItemsTable.id }).from(submittalItemsTable)
+      .where(and(
+        inArray(submittalItemsTable.projectId, projectIds),
+        eq(submittalItemsTable.submittalStatus, "open"),
+      )),
+  ]);
+
+CHANGE 3 — Add new stats to the response.
+Find:
+  res.json({
+    activeProjects: activeProjectsRes.length,
+    filesProcessed: totalFiles,
+    openRfis: openRfisRes.length,
+    pendingSubmittals: pendingSubmittalsRes.length,
+    complianceRate,
+    filesNeedingAttention: attentionFilesRes.length,
+  });
+
+Replace with:
+  const totalClashes = clashReportsRes.reduce((sum, r) => sum + (r.totalClashes ?? 0), 0);
+  const p1Clashes = clashReportsRes.reduce((sum, r) => sum + (r.p1Count ?? 0), 0);
+  res.json({
+    activeProjects: activeProjectsRes.length,
+    filesProcessed: totalFiles,
+    openRfis: openRfisRes.length,
+    pendingSubmittals: pendingSubmittalsRes.length,
+    complianceRate,
+    filesNeedingAttention: attentionFilesRes.length,
+    totalClashes,
+    openClashes: openClashesRes.length,
+    p1Clashes,
+    clashReports: clashReportsRes.length,
+    submittalTrackers: submittalTrackersRes.length,
+    openSubmittalItems: openSubmittalItemsRes.length,
+  });
+
+CHANGE 4 — Update the frontend dashboard to show new stats.
+FILE: artifacts/bimlog/src/pages/Dashboard.tsx (or wherever the stat cards are rendered)
+
+First check where the dashboard cards are:
+grep -n "activeProjects\|filesProcessed\|openRfis\|pendingSubmittals\|stat.*card\|StatCard" artifacts/bimlog/src/pages/Dashboard.tsx | head -20
+
+Print raw output only for this check. Then I will write the frontend update.
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server.
+Print ALL check outputs as plain text. No collapsed boxes.

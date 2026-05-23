@@ -47,6 +47,10 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
     attentionFilesRes,
     openRfisRes,
     pendingSubmittalsRes,
+    clashReportsRes,
+    openClashesRes,
+    submittalTrackersRes,
+    openSubmittalItemsRes,
   ] = await Promise.all([
     db.select({ id: projectsTable.id }).from(projectsTable)
       .where(and(
@@ -75,6 +79,22 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
         inArray(submittalsTable.projectId, projectIds),
         inArray(submittalsTable.status, ["pending", "under_review"]),
       )),
+    db.select({ id: clashReportsTable.id, totalClashes: clashReportsTable.totalClashes, p1Count: clashReportsTable.p1Count })
+      .from(clashReportsTable)
+      .where(inArray(clashReportsTable.projectId, projectIds)),
+    db.select({ id: clashesTable.id }).from(clashesTable)
+      .where(and(
+        inArray(clashesTable.projectId, projectIds),
+        eq(clashesTable.status, "open"),
+      )),
+    db.select({ id: submittalReportsTable.id })
+      .from(submittalReportsTable)
+      .where(inArray(submittalReportsTable.projectId, projectIds)),
+    db.select({ id: submittalItemsTable.id }).from(submittalItemsTable)
+      .where(and(
+        inArray(submittalItemsTable.projectId, projectIds),
+        eq(submittalItemsTable.submittalStatus, "open"),
+      )),
   ]);
 
   const totalFiles = allFilesRes.length;
@@ -82,6 +102,8 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
     ? Math.round((compliantFilesRes.length / totalFiles) * 100)
     : null;
 
+  const totalClashes = clashReportsRes.reduce((sum, r) => sum + (r.totalClashes ?? 0), 0);
+  const p1Clashes = clashReportsRes.reduce((sum, r) => sum + (r.p1Count ?? 0), 0);
   res.json({
     activeProjects: activeProjectsRes.length,
     filesProcessed: totalFiles,
@@ -89,6 +111,12 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
     pendingSubmittals: pendingSubmittalsRes.length,
     complianceRate,
     filesNeedingAttention: attentionFilesRes.length,
+    totalClashes,
+    openClashes: openClashesRes.length,
+    p1Clashes,
+    clashReports: clashReportsRes.length,
+    submittalTrackers: submittalTrackersRes.length,
+    openSubmittalItems: openSubmittalItemsRes.length,
   });
 });
 
