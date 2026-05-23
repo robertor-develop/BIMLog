@@ -643,7 +643,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
           .text(
             `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
-            M, 555, { align: "center", width: CW, lineBreak: false }
+            M, 560, { align: "center", width: CW, lineBreak: false }
           );
       }
 
