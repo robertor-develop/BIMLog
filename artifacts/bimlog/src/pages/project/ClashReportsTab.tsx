@@ -152,7 +152,19 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           <ChevronLeft size={14} /> {t("Back", "Volver")}
         </button>
         <div>
-          <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{selectedReport.fileName}</h2>
+          <input
+            value={selectedReport.fileName}
+            onChange={e => setSelectedReport(prev => prev ? { ...prev, fileName: e.target.value } : prev)}
+            onBlur={async e => {
+              await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
+                method: "PATCH",
+                headers: { ...headers, "Content-Type": "application/json" },
+                body: JSON.stringify({ fileName: e.target.value }),
+              });
+            }}
+            style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "2px solid #1E3A5F",
+              background: "transparent", outline: "none", width: "100%", cursor: "text" }}
+          />
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
             <input
               disabled={!canWrite}

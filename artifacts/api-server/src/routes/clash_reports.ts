@@ -633,13 +633,15 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       doc.flushPages();
       const range = doc.bufferedPageRange();
+      const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      const footerReportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
       for (let i = 0; i < range.count; i++) {
         doc.switchToPage(range.start + i);
-        const reportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
-        const reportDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
         doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
-          .text(`${user?.companyName ?? ""} | ${project.name} | ${reportNum}${reportDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
-            M, doc.page.height - 35, { align: "center", width: CW });
+          .text(
+            `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+            M, doc.page.height - 25, { align: "center", width: CW }
+          );
       }
 
       doc.end();

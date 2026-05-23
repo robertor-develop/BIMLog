@@ -1,0 +1,57 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+CHANGE 1 — Make the report title editable in the detail view.
+
+Find this exact line in the detail view header:
+        <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{selectedReport.fileName}</h2>
+
+Replace with:
+        <input
+          value={selectedReport.fileName}
+          onChange={e => setSelectedReport(prev => prev ? { ...prev, fileName: e.target.value } : prev)}
+          onBlur={async e => {
+            await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
+              method: "PATCH",
+              headers: { ...headers, "Content-Type": "application/json" },
+              body: JSON.stringify({ fileName: e.target.value }),
+            });
+          }}
+          style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "2px solid #1E3A5F",
+            background: "transparent", outline: "none", width: "100%", cursor: "text" }}
+        />
+
+CHANGE 2 — Fix PDF footer to show report number, date and page numbers.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Find the footer loop. It currently looks like:
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+
+Replace the entire footer loop with:
+      const range = doc.bufferedPageRange();
+      const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      const footerReportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+          .text(
+            `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+            M, doc.page.height - 25, { align: "center", width: CW }
+          );
+      }
+
+Check 1 — title is now input:
+grep -n "selectedReport.fileName\|borderBottom.*1E3A5F\|cursor.*text" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -5
+
+Check 2 — footer has report number and page count:
+grep -n "footerDate\|footerReportNum\|range.count" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print all check outputs as plain text. No collapsed boxes.
