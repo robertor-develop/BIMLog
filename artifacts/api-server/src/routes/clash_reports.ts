@@ -634,7 +634,6 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         }
       });
 
-      doc.flushPages();
       console.log("[pdf-debug] page.width:", doc.page.width, "page.height:", doc.page.height, "margins:", doc.page.margins);
       const range = doc.bufferedPageRange();
       const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
