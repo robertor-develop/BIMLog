@@ -102,7 +102,39 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   const [audioUploading, setAudioUploading] = useState(false);
   const [showNoKeyModal, setShowNoKeyModal] = useState(false);
   const [audioProgress, setAudioProgress] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
 
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/projects/${projectId}/meetings/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setImportMsg(d.message || "Import failed");
+        return;
+      }
+      const data = await res.json();
+      setImportMsg(`Meeting imported successfully — ${data.title || "untitled"}`);
+      await loadMeetings();
+      setTimeout(() => setImportMsg(""), 5000);
+    } catch (err) {
+      setImportMsg("Import failed — please try again");
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  };
+
+  // import message display handled inline
   const loadMeetings = async () => {
     setLoading(true);
     try {

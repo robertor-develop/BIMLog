@@ -1,0 +1,105 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+
+CHANGE 1 — Add upload state variables.
+Find:
+  const [audioProgress, setAudioProgress] = useState("");
+
+Add after:
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+CHANGE 2 — Add import handler function.
+Find:
+  const loadMeetings = async () => {
+
+Add BEFORE it:
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/projects/${projectId}/meetings/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setImportMsg(d.message || "Import failed");
+        return;
+      }
+      const data = await res.json();
+      setImportMsg(`Meeting imported successfully — ${data.title || "untitled"}`);
+      await loadMeetings();
+      setTimeout(() => setImportMsg(""), 5000);
+    } catch (err) {
+      setImportMsg("Import failed — please try again");
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  };
+
+CHANGE 3 — Add Import button next to New Meeting button.
+Find this exact section in the list view header:
+        {canWrite && (
+          <button className="btn btn-primary btn-sm"
+            onClick={() => setView("new")}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Plus size={14} /> {t("+ New Meeting", "+ Nueva Reunión")}
+          </button>
+        )}
+
+Replace with:
+        <div style={{ display: "flex", gap: 8 }}>
+          {canWrite && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <div className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                <Download size={14} /> {importing ? t("Importing...","Importando...") : t("Import Minutes","Importar Acta")}
+              </div>
+            </label>
+          )}
+          {canWrite && (
+            <button className="btn btn-primary btn-sm"
+              onClick={() => setView("new")}
+              style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Plus size={14} /> {t("+ New Meeting", "+ Nueva Reunión")}
+            </button>
+          )}
+        </div>
+
+CHANGE 4 — Show import message.
+Find:
+  const loadMeetings = async () => {
+
+Add BEFORE it (after the import handler):
+  // import message display handled inline
+
+Find where error is displayed in the list view:
+        {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>{error}</div>}
+
+Add after it:
+        {importMsg && <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginBottom: 14 }}>{importMsg}</div>}
+
+Check 1:
+grep -n "handleImport\|Import Minutes\|importing\|importMsg" artifacts/bimlog/src/pages/project/MeetingsTab.tsx | head -10
+
+Check 2 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Now add the backend import endpoint.
+
+FILE: artifacts/api-server/src/routes/meeting_minutes.ts
+
+Check what imports and structure exist:
+sed -n '1,30p' artifacts/api-server/src/routes/meeting_minutes.ts
+
+Print raw output only. Nothing else first before adding the endpoint.
