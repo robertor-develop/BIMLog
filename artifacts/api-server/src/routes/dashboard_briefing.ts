@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import {
   rfisTable, submittalsTable, filesTable, projectMembersTable, projectsTable,
+  clashReportsTable, clashesTable, submittalReportsTable, submittalItemsTable,
 } from "@workspace/db/schema";
 import { eq, and, inArray, ne } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
