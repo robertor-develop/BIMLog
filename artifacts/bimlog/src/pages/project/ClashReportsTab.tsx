@@ -155,6 +155,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{selectedReport.fileName}</h2>
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
             <input
+              disabled={!canWrite}
               value={selectedReport.reportNumber || ""}
               onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
               onBlur={async e => {
@@ -164,8 +165,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                 });
               }}
               placeholder="Report No. (e.g. ELA01-CR-001)"
-              style={{ fontSize: 12, border: "none", borderBottom: "1px dashed #D1D5DB",
-                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200 }}
+              style={{ fontSize: 12, border: "none", borderBottom: canWrite ? "1px dashed #D1D5DB" : "none",
+                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200,
+                cursor: canWrite ? "text" : "default" }}
             />
             <span style={{ fontSize: 12, color: "#6B7280" }}>
               {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalClashes} {t("clashes","choques")}

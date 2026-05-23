@@ -30,10 +30,15 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
 router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
-    const existingReports2 = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-    const nextNum2 = String(existingReports2.length + 1).padStart(3, "0");
+    const existingReports2 = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
     const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
-    const autoNum2 = `${project2?.code ?? "PRJ"}-CR-${nextNum2}`;
+    const usedNums2 = new Set(existingReports2.map(r => r.reportNumber).filter(Boolean));
+    let seqNum2 = existingReports2.length + 1;
+    let autoNum2 = `${project2?.code ?? "PRJ"}-CR-${String(seqNum2).padStart(3, "0")}`;
+    while (usedNums2.has(autoNum2)) {
+      seqNum2++;
+      autoNum2 = `${project2?.code ?? "PRJ"}-CR-${String(seqNum2).padStart(3, "0")}`;
+    }
     const [report] = await db.insert(clashReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
@@ -142,10 +147,15 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
         .filter((r: any) => r.description || r.clashIdOriginal);
       console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
 
-      const existingReports = await db.select().from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-      const nextNum = String(existingReports.length + 1).padStart(3, "0");
+      const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
       const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
-      const autoReportNumber = `${project?.code ?? "PRJ"}-CR-${nextNum}`;
+      const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
+      let seqNum = existingReports.length + 1;
+      let autoReportNumber = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
+      while (usedNums.has(autoReportNumber)) {
+        seqNum++;
+        autoReportNumber = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
+      }
       const [report] = await db.insert(clashReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
