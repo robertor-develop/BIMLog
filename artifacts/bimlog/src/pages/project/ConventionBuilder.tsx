@@ -3660,13 +3660,13 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
             {w("No companies added yet.", "Sin empresas agregadas.", lang)}
           </div>
         )}
-        {ws.companies.length > 0 && (convention as any)?.companyAssignmentStatus?.length > 0 && (
+        {ws.companies.length > 0 && (ws as any)?.companyAssignmentStatus?.length > 0 && (
           <CompanyAssignmentBlock
             projectId={projectId}
-            convention={convention}
+            convention={ws as any}
             lang={lang}
             token={token}
-            onRefresh={refetch}
+            onRefresh={() => {}}
           />
         )}
       </Card>
@@ -4540,9 +4540,9 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token ?? ""}` },
             body: JSON.stringify({
-              acceptedDisciplines: selectedDiscs.map(d => ({ code: d.code, label: d.label })),
+              acceptedDisciplines: selectedDiscs.map(d => ({ code: d.code, label: d.name })),
               acceptedSystems: [],
-              acceptedDocTypes: selectedDocs.map(d => ({ code: d.code, label: d.label })),
+              acceptedDocTypes: selectedDocs.map(d => ({ code: d.code, label: d.name })),
               acceptedExtraFields: [],
               acceptedFieldOrder: [],
               analysisSummary: "",
