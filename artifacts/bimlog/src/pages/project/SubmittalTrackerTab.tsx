@@ -7,7 +7,7 @@ const API = "/api/v1";
 
 interface SubmittalReport {
   id: number; fileName: string; format: string; totalItems: number;
-  status: string; aiSummary?: string; createdAt: string;
+  status: string; aiSummary?: string; createdAt: string; reportNumber?: string;
 }
 
 interface SubmittalItem {
@@ -145,8 +145,23 @@ export function SubmittalTrackerTab({ projectId, canWrite }: { projectId: number
             }}
             style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "1px dashed #D1D5DB",
               background: "transparent", outline: "none", width: "100%" }} />
-          <div style={{ fontSize: 12, color: "#6B7280" }}>
-            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalItems} {t("items","ítems")}
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
+            <input
+              value={selectedReport.reportNumber || ""}
+              onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
+              onBlur={async e => {
+                await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/rename`, {
+                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                  body: JSON.stringify({ reportNumber: e.target.value }),
+                });
+              }}
+              placeholder="Report No. (e.g. ELA01-ST-001)"
+              style={{ fontSize: 12, border: "none", borderBottom: "1px dashed #D1D5DB",
+                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200 }}
+            />
+            <span style={{ fontSize: 12, color: "#6B7280" }}>
+              {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalItems} {t("items","ítems")}
+            </span>
           </div>
         </div>
         <a href={`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/pdf?token=${token}`}
@@ -418,6 +433,7 @@ export function SubmittalTrackerTab({ projectId, canWrite }: { projectId: number
                       }}
                       style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB", background: "transparent", outline: "none", width: "100%" }} />
                     <div style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+                      {r.reportNumber && <span style={{ color: "#1D4ED8", fontWeight: 700, marginRight: 8 }}>{r.reportNumber}</span>}
                       {new Date(r.createdAt).toLocaleDateString()} · {r.totalItems} {t("items","ítems")}
                     </div>
                   </div>

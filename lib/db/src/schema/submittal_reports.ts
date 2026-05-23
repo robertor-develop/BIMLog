@@ -11,6 +11,7 @@ export const submittalReportsTable = pgTable("submittal_reports", {
   totalItems: integer("total_items").default(0),
   status: text("status").default("complete"),
   aiSummary: text("ai_summary"),
+  reportNumber: text("report_number"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

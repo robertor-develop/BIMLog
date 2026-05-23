@@ -1,0 +1,146 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+CHANGE 1 — Fix footer. Find the footer loop in the PDF endpoint:
+Find:
+      doc.flushPages();
+      const range = doc.bufferedPageRange();
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+          .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog`,
+            M, doc.page.height - 25, { align: "center", width: CW });
+      }
+
+Replace with:
+      const range = doc.bufferedPageRange();
+      const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      const footerReportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+          .text(
+            `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+            M, 560, { align: "center", width: CW, lineBreak: false }
+          );
+      }
+
+CHANGE 2 — Add report_number to submittal_reports schema.
+FILE: lib/db/src/schema/submittal_reports.ts
+
+Find submittalReportsTable definition.
+Add this field before createdAt:
+  reportNumber: text("report_number"),
+
+Push schema to DB.
+
+CHANGE 3 — Auto-generate report number on create and upload.
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+In the POST /projects/:projectId/submittal-reports endpoint (manual create):
+Before the insert add:
+      const existingReports = await db.select({ rn: submittalReportsTable.reportNumber })
+        .from(submittalReportsTable).where(eq(submittalReportsTable.projectId, projectId));
+      const existingNums = new Set(existingReports.map(r => r.rn));
+      const [proj] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+      let counter = existingReports.length + 1;
+      let autoNum = `${proj?.code ?? "PRJ"}-ST-${String(counter).padStart(3,"0")}`;
+      while (existingNums.has(autoNum)) { counter++; autoNum = `${proj?.code ?? "PRJ"}-ST-${String(counter).padStart(3,"0")}`; }
+
+Add reportNumber: autoNum to the insert values.
+
+Do the same in the upload endpoint POST /projects/:projectId/submittal-reports/upload.
+
+CHANGE 4 — Accept reportNumber in rename endpoint.
+Find the PATCH rename endpoint.
+Find:
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (req.body.fileName !== undefined) updates.fileName = req.body.fileName;
+
+Replace with:
+    const updates: Record<string, any> = { updatedAt: new Date() };
+    if (req.body.fileName !== undefined) updates.fileName = req.body.fileName;
+    if (req.body.reportNumber !== undefined) updates.reportNumber = req.body.reportNumber;
+
+CHANGE 5 — Add report number to PDF cover page.
+Find in the PDF endpoint:
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
+
+Replace with:
+      const reportNumDisplay = report.reportNumber ? `Report: ${report.reportNumber}  |  ` : "";
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`${reportNumDisplay}Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
+
+CHANGE 6 — Add report number editable field in SubmittalTrackerTab frontend.
+FILE: artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx
+
+Add reportNumber to SubmittalReport interface:
+Find:
+  status: string; aiSummary?: string; createdAt: string;
+Replace with:
+  status: string; aiSummary?: string; createdAt: string; reportNumber?: string;
+
+In the detail view header, find:
+          <div style={{ fontSize: 12, color: "#6B7280" }}>
+            {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalItems} {t("items","ítems")}
+          </div>
+
+Replace with:
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
+            <input
+              value={selectedReport.reportNumber || ""}
+              onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
+              onBlur={async e => {
+                await fetch(`${API}/projects/${projectId}/submittal-reports/${selectedReport.id}/rename`, {
+                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
+                  body: JSON.stringify({ reportNumber: e.target.value }),
+                });
+              }}
+              placeholder="Report No. (e.g. ELA01-ST-001)"
+              style={{ fontSize: 12, border: "none", borderBottom: "1px dashed #D1D5DB",
+                background: "transparent", outline: "none", color: "#1D4ED8", fontWeight: 600, width: 200 }}
+            />
+            <span style={{ fontSize: 12, color: "#6B7280" }}>
+              {new Date(selectedReport.createdAt).toLocaleDateString()} · {selectedReport.totalItems} {t("items","ítems")}
+            </span>
+          </div>
+
+Also make the title editable in detail view.
+Find:
+          <input value={selectedReport.fileName}
+
+That should already be there. If not add same pattern as clash reports.
+
+Also show report number badge on the reports list cards.
+Find:
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalItems} {t("items","ítems")}
+                    </div>
+
+Replace with:
+                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+                      {r.reportNumber && <span style={{ color: "#1D4ED8", fontWeight: 700, marginRight: 8 }}>{r.reportNumber}</span>}
+                      {new Date(r.createdAt).toLocaleDateString()} · {r.totalItems} {t("items","ítems")}
+                    </div>
+
+Check 1 — footer fix confirmed:
+grep -n "footerDate\|footerReportNum\|560" artifacts/api-server/src/routes/submittal_reports.ts | head -5
+
+Check 2 — report number in schema:
+SELECT column_name FROM information_schema.columns WHERE table_name = 'submittal_reports' AND column_name = 'report_number';
+
+Check 3 — report number in frontend:
+grep -n "reportNumber\|Report No" artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx | head -10
+
+Check 4 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

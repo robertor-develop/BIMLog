@@ -34,6 +34,13 @@ router.get("/projects/:projectId/submittal-reports", authMiddleware, requireProj
 router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
+    const existingReports = await db.select({ rn: submittalReportsTable.reportNumber })
+      .from(submittalReportsTable).where(eq(submittalReportsTable.projectId, projectId));
+    const existingNums = new Set(existingReports.map(r => r.rn));
+    const [proj] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+    let counter = existingReports.length + 1;
+    let autoNum = `${proj?.code ?? "PRJ"}-ST-${String(counter).padStart(3,"0")}`;
+    while (existingNums.has(autoNum)) { counter++; autoNum = `${proj?.code ?? "PRJ"}-ST-${String(counter).padStart(3,"0")}`; }
     const [report] = await db.insert(submittalReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
@@ -41,6 +48,7 @@ router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePer
       format: "manual",
       totalItems: 0,
       status: "complete",
+      reportNumber: autoNum,
     }).returning();
     res.status(201).json(report);
   } catch (err) {
@@ -121,6 +129,13 @@ Rules: trade=discipline/trade/system, type=SHOP/SLEEVE/submittal type, floor=flo
         pdfUrl: get(row, mapping.pdfUrl),
       })).filter(r => r.fileName || r.description || r.trade);
 
+      const existingReportsU = await db.select({ rn: submittalReportsTable.reportNumber })
+        .from(submittalReportsTable).where(eq(submittalReportsTable.projectId, projectId));
+      const existingNumsU = new Set(existingReportsU.map(r => r.rn));
+      const [projU] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+      let counterU = existingReportsU.length + 1;
+      let autoNumU = `${projU?.code ?? "PRJ"}-ST-${String(counterU).padStart(3,"0")}`;
+      while (existingNumsU.has(autoNumU)) { counterU++; autoNumU = `${projU?.code ?? "PRJ"}-ST-${String(counterU).padStart(3,"0")}`; }
       const [report] = await db.insert(submittalReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
@@ -128,6 +143,7 @@ Rules: trade=discipline/trade/system, type=SHOP/SLEEVE/submittal type, floor=flo
         format: "excel",
         totalItems: parsed.length,
         status: "complete",
+        reportNumber: autoNumU,
       }).returning();
 
       if (parsed.length > 0) {
@@ -166,7 +182,11 @@ router.patch("/projects/:projectId/submittal-reports/:reportId/rename", authMidd
   const reportId = Number(req.params.reportId);
   try {
     const [updated] = await db.update(submittalReportsTable)
-      .set({ fileName: req.body.fileName, updatedAt: new Date() })
+      .set({
+        ...(req.body.fileName !== undefined ? { fileName: req.body.fileName } : {}),
+        ...(req.body.reportNumber !== undefined ? { reportNumber: req.body.reportNumber } : {}),
+        updatedAt: new Date(),
+      })
       .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)))
       .returning();
     if (!updated) { res.status(404).json({ error: "not_found" }); return; }
@@ -302,7 +322,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
     doc.rect(0, 120, W, 45).fill("#F0F4F8");
     doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 130);
     doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
-      .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
+      .text(`${report.reportNumber ? `Report: ${report.reportNumber}  |  ` : ""}Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
 
     doc.y = 185;
 
@@ -372,13 +392,16 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
       doc.y = rY + rowH;
     });
 
-    doc.flushPages();
     const range = doc.bufferedPageRange();
+    const footerDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    const footerReportNum = report.reportNumber ? `${report.reportNumber} | ` : "";
     for (let i = 0; i < range.count; i++) {
       doc.switchToPage(range.start + i);
       doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
-        .text(`${user?.companyName ?? ""} | ${project.name} | Page ${i + 1} of ${range.count} | Powered by BIMLog`,
-          M, doc.page.height - 25, { align: "center", width: CW });
+        .text(
+          `${user?.companyName ?? ""} | ${project.name} | ${footerReportNum}${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`,
+          M, 560, { align: "center", width: CW, lineBreak: false }
+        );
     }
     doc.end();
   } catch (err) {
