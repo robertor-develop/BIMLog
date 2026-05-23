@@ -474,7 +474,8 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(block.text.trim());
+      const cleanText = block.text.replace(/```json\n?|```/g, "").trim();
+      parsed = JSON.parse(cleanText);
     } catch {
       res.status(422).json({
         error: "AI returned non-JSON response",
