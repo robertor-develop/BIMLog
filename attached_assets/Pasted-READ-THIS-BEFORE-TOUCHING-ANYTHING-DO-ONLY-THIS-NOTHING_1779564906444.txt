@@ -1,0 +1,55 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/Dashboard.tsx
+
+Find this exact line:
+            </div>
+          )}
+          {/* CVR Platform Health Ring */}
+
+Replace with:
+            </div>
+          )}
+
+          {/* Clash + Submittal Tracker Stats */}
+          {stats && (stats.totalClashes ?? 0) + (stats.submittalTrackers ?? 0) > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginTop: 16 }}>
+              <StatCard
+                label="Total Clashes"
+                value={stats?.totalClashes ?? 0}
+                sub={`${stats?.p1Clashes ?? 0} P1 Critical`}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
+              />
+              <StatCard
+                label="Open Clashes"
+                value={stats?.openClashes ?? 0}
+                sub="Unresolved coordination issues"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
+              />
+              <StatCard
+                label="Submittal Trackers"
+                value={stats?.submittalTrackers ?? 0}
+                sub="Active tracking logs"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittal-tracker` : "/projects")}
+              />
+              <StatCard
+                label="Open Submittals"
+                value={stats?.openSubmittalItems ?? 0}
+                sub="Items needing attention"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittal-tracker` : "/projects")}
+              />
+            </div>
+          )}
+
+          {/* CVR Platform Health Ring */}
+
+Check 1:
+grep -n "totalClashes\|openClashes\|submittalTrackers\|openSubmittalItems" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+
+Check 2 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.

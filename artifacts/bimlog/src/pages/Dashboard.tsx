@@ -397,6 +397,36 @@ export function Dashboard() {
             </div>
           )}
 
+          {/* Clash + Submittal Tracker Stats */}
+          {stats && (stats.totalClashes ?? 0) + (stats.submittalTrackers ?? 0) > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginTop: 16 }}>
+              <StatCard
+                label="Total Clashes"
+                value={stats?.totalClashes ?? 0}
+                sub={`${stats?.p1Clashes ?? 0} P1 Critical`}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
+              />
+              <StatCard
+                label="Open Clashes"
+                value={stats?.openClashes ?? 0}
+                sub="Unresolved coordination issues"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
+              />
+              <StatCard
+                label="Submittal Trackers"
+                value={stats?.submittalTrackers ?? 0}
+                sub="Active tracking logs"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittal-tracker` : "/projects")}
+              />
+              <StatCard
+                label="Open Submittals"
+                value={stats?.openSubmittalItems ?? 0}
+                sub="Items needing attention"
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittal-tracker` : "/projects")}
+              />
+            </div>
+          )}
+
           {/* CVR Platform Health Ring */}
           {cvrHealth && (
             <div style={{ marginBottom: 20 }}>
