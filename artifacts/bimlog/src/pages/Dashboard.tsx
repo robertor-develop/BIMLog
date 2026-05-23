@@ -184,6 +184,8 @@ export function Dashboard() {
       return r.json() as Promise<{
         activeProjects: number; filesProcessed: number; openRfis: number;
         pendingSubmittals: number; complianceRate: number | null; filesNeedingAttention: number;
+        totalClashes?: number; openClashes?: number; p1Clashes?: number;
+        clashReports?: number; submittalTrackers?: number; openSubmittalItems?: number;
       }>;
     },
     enabled: !!token,
