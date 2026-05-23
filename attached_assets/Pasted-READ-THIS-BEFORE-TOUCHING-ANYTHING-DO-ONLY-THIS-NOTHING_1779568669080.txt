@@ -1,0 +1,56 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add Import button with ANY file type and AI extraction to ALL modules.
+Pattern is identical for each: add Import button, add state, add handler that calls backend import endpoint.
+If backend endpoint doesn't exist yet, handler shows "Coming soon — AI import being built" toast.
+
+FILE: artifacts/bimlog/src/pages/project/RfisTab.tsx
+
+CHANGE 1 — Add import state and handler after the existing useState declarations.
+Find:
+  const [showForm, setShowForm] = useState(false);
+
+If that doesn't exist find the first useState in RfisTab and add after the last useState block:
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/projects/${projectId}/rfis/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
+
+CHANGE 2 — Add Import button next to New RFI button.
+Find:
+          {canWrite && (
+              <Plus style={{ width: 13, height: 13 }} />{w("New RFI", "Nuevo RFI", lang)}
+
+Find the full canWrite block for the New RFI button and wrap it:
+Find the exact block:
+          {canWrite && (
+            <button
+              style={{
+
+Show me lines 260-275 first:
+sed -n '260,275p' artifacts/bimlog/src/pages/project/RfisTab.tsx
+
+Print raw output only. Nothing else first.
