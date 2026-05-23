@@ -353,9 +353,35 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
 // ─── Main SubmittalsTab ───────────────────────────────────────────────────────
 export function SubmittalsTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
+  const { token } = useAuthStore();
   const [view, setView] = useState<"register" | "submittals" | "tracking">("submittals");
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/v1/projects/${projectId}/submittals/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} submittals imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
 
   const { data: submittals = [], isLoading } = useListSubmittals(projectId) as {
     data: Submittal[]; isLoading: boolean;
@@ -423,6 +449,15 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
               {w("Tracking List", "Lista de Seguimiento", lang)}
             </button>
           </div>
+          {canWrite && view === "submittals" && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <span className="btn btn-outline btn-sm" style={{ fontSize: 12, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                {importing ? w("Importing...","Importando...",lang) : w("Import","Importar",lang)}
+              </span>
+            </label>
+          )}
+          {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
           {canWrite && view === "submittals" && (
             <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
               <Plus style={{ width: 13, height: 13 }} />

@@ -94,7 +94,7 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
   const { getLabel, getOptions } = useConfig();
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { data: rfis, isLoading } = useListRfis(projectId);
   const { data: members } = useListMembers(projectId);
   const { toast } = useToast();
@@ -105,6 +105,31 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [revising, setRevising] = useState<Rfi | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/v1/projects/${projectId}/rfis/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
 
   const handleExportAllExcel = () => {
     if (!rfis) return;
@@ -260,6 +285,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               <Download style={{ width: 12, height: 12 }} />{w("Export All", "Exportar Todo", lang)}
             </Button>
           )}
+          {canWrite && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <span className="btn btn-outline btn-sm" style={{ fontSize: 12, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                {importing ? w("Importing...","Importando...",lang) : w("Import","Importar",lang)}
+              </span>
+            </label>
+          )}
+          {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
           {canWrite && (
             <Button size="sm" onClick={() => setShowCreate(true)} style={{ gap: 6, fontSize: 12 }}>
               <Plus style={{ width: 13, height: 13 }} />{w("New RFI", "Nuevo RFI", lang)}

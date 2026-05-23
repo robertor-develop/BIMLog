@@ -21,6 +21,31 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState<Transmittal | null>(null);
   const [form, setForm] = useState({ title: "", purpose: "" });
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/projects/${projectId}/transmittals/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
@@ -98,11 +123,22 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Transmittals", "Transmisiones")}</h2>
           <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>{t("Formal document transmittals with acknowledgement tracking", "Transmisiones formales con seguimiento de acuse")}</p>
         </div>
-        {canWrite && (
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-            + {t("New Transmittal", "Nueva Transmisión")}
-          </button>
-        )}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {canWrite && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <span className="btn btn-outline" style={{ opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                {importing ? t("Importing...","Importando...") : t("Import","Importar")}
+              </span>
+            </label>
+          )}
+          {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
+          {canWrite && (
+            <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+              + {t("New Transmittal", "Nueva Transmisión")}
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>

@@ -26,6 +26,31 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ full_name: "", email: "", company_name: "", role: "", notes: "" });
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/projects/${projectId}/directory/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} contacts imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
   const [saving, setSaving] = useState(false);
   const [inviting, setInviting] = useState<number | null>(null);
   const [error, setError] = useState("");
@@ -113,12 +138,23 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
             {t("Project members are auto-populated from the team. Add external stakeholders below.", "Los miembros del proyecto se completan automáticamente. Agrega interesados externos abajo.")}
           </p>
         </div>
-        {canWrite && (
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-            <UserPlus size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />
-            {t("Add External Contact", "Agregar Contacto Externo")}
-          </button>
-        )}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {canWrite && (
+            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
+              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <span className="btn btn-outline" style={{ opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
+                {importing ? t("Importing...","Importando...") : t("Import","Importar")}
+              </span>
+            </label>
+          )}
+          {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
+          {canWrite && (
+            <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+              <UserPlus size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+              {t("Add External Contact", "Agregar Contacto Externo")}
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ marginBottom: 16 }}>

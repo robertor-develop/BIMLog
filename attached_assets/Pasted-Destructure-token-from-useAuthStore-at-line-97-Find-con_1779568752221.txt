@@ -1,0 +1,57 @@
+Destructure token from useAuthStore at line 97.
+Find:
+  const { user } = useAuthStore();
+
+Replace with:
+  const { user, token } = useAuthStore();
+
+Then add const API = "/api/v1"; after the imports if not present.
+
+Then apply CHANGE 1 — add importing/importMsg state and handleImport function after line 105 (after showCreate useState).
+
+Use this handleImport:
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true); setImportMsg("Reading document with AI...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/v1/projects/${projectId}/rfis/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+      } else {
+        setImportMsg("Import failed — please try again");
+      }
+    } catch { setImportMsg("Import failed"); }
+    finally { setImporting(false); e.target.value = ""; }
+  };
+
+Then for CHANGE 2 — show me lines 260-275 of RfisTab.tsx and apply the Import button next to the New RFI button using the same pattern as Meetings — wrap existing canWrite button in a div with the Import label before it.
+
+Then do the same pattern for ALL remaining modules:
+- TransmittalsTab.tsx — next to "+ New Transmittal" button
+- ChangeOrdersTab.tsx — next to "+ New Change Order" button  
+- ScheduleTab.tsx — next to "+ Add Milestone" button
+- DirectoryTab.tsx — next to "Add External Contact" button
+- SubmittalsTab.tsx — next to "New Submittal" button
+
+For each module:
+1. Add token destructuring if missing
+2. Add const API = "/api/v1" if missing
+3. Add importing/importMsg state
+4. Add handleImport function calling /api/v1/projects/${projectId}/{module}/import
+5. Add Import button (any file type) next to existing primary button
+
+After all changes:
+Check 1 — TypeScript errors:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.
