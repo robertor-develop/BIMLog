@@ -447,21 +447,33 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       // ── COVER PAGE ──────────────────────────────────────────────────────
       // Dark header bar
-      doc.rect(0, 0, W, 110).fill("#1E3A5F");
+      doc.rect(0, 0, W, 120).fill("#1E3A5F");
 
-      // USER COMPANY — protagonist
-      doc.fontSize(26).font("Helvetica-Bold").fillColor("white")
-        .text(user?.companyName ?? "Company", M, 22);
-      doc.fontSize(8).font("Helvetica").fillColor("#93C5FD")
-        .text("Powered by BIMLog by IgniteSmart", M, 52);
-      doc.fontSize(11).font("Helvetica").fillColor("#93C5FD")
-        .text(`Prepared by: ${user?.fullName ?? ""}  |  ${user?.email ?? ""}`, M, 60);
-      doc.fontSize(10).font("Helvetica").fillColor("#93C5FD")
-        .text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 78);
+      // Company name — large and prominent
+      doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+        .text(user?.companyName ?? "Company", M, 20);
 
-      // Report title on right
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("white")
-        .text("CLASH COORDINATION REPORT", M, 35, { align: "right", width: CW });
+      // Report title top right
+      doc.fontSize(12).font("Helvetica-Bold").fillColor("white")
+        .text("CLASH COORDINATION REPORT", M, 20, { align: "right", width: CW });
+
+      // Separator line
+      doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
+
+      // Prepared by and date
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
+        .text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
+        .text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
+        .text(user?.email ?? "", M, 70, { align: "right", width: CW });
+
+      // Powered by — very subtle bottom right
+      doc.fontSize(7).font("Helvetica").fillColor("#6B9ED4")
+        .text("Powered by BIMLog by IgniteSmart", M, 106, { align: "right", width: CW });
+
+      // Project info band
+      doc.rect(0, 120, W, 45).fill("#F0F4F8");
 
       // Project info section
       doc.rect(0, 110, W, 50).fill("#F8FAFC");
