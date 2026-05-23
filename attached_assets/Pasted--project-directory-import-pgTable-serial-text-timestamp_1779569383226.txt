@@ -1,0 +1,44 @@
+===project-directory===
+import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+import { usersTable } from "./users";
+
+export const projectDirectoryTable = pgTable("project_directory", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
+  companyName: text("company_name"),
+  role: text("role").notNull(),
+  bimlogStatus: text("bimlog_status").default("none"),
+  notes: text("notes"),
+  addedById: integer("added_by_id").references(() => usersTable.id),
+  linkedUserId: integer("linked_user_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type ProjectDirectoryEntry = typeof projectDirectoryTable.$inferSelect;
+===rfis routes===
+3:import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable } from "@workspace/db/schema";
+36:function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unknown> = {}) {
+68:  rfi: typeof rfisTable.$inferSelect,
+259:  getBic: (r: typeof rfisTable.$inferSelect) => string,
+261:): [string, (r: typeof rfisTable.$inferSelect) => string][] {
+280:  colDefs: [string, (r: typeof rfisTable.$inferSelect) => string][],
+281:  rfis: (typeof rfisTable.$inferSelect)[],
+298:  rfis: (typeof rfisTable.$inferSelect)[],
+305:  const getBic = (rfi: typeof rfisTable.$inferSelect) => {
+322:    [header, colWidths[i], getter] as [string, number, (r: typeof rfisTable.$inferSelect) => string],
+===transmittals===
+4:  transmittalsTable, transmittalItemsTable, activityLogTable,
+21:  const existing = await db.select({ id: transmittalsTable.id })
+22:    .from(transmittalsTable).where(eq(transmittalsTable.projectId, projectId));
+31:    const rows = await db.select().from(transmittalsTable)
+32:      .where(eq(transmittalsTable.projectId, projectId))
+===change_orders===
+4:  changeOrdersTable, changeOrderDocumentsTable, activityLogTable,
+20:  const existing = await db.select({ id: changeOrdersTable.id })
+21:    .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
+30:    const rows = await db.select().from(changeOrdersTable)
+31:      .where(eq(changeOrdersTable.projectId, projectId))
