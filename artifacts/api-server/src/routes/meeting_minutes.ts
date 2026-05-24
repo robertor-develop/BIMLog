@@ -371,4 +371,99 @@ If information is not mentioned use empty string or empty array.`
   }
 );
 
+router.post("/projects/:projectId/meetings/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `You are analyzing a construction meeting minutes document.
+Extract the meeting information. Return ONLY valid JSON, no markdown:
+{
+  "title": "meeting title",
+  "meetingDate": "date string or null",
+  "meetingTime": "time string or null",
+  "location": "location or null",
+  "meetingNumber": "meeting number or null",
+  "notes": "general notes or null",
+  "attendees": [{"trade":"","company":"","fullName":"","role":"","email":"","phone":""}],
+  "actionItems": [{"description":"","assignedToName":"","dueDate":"date or null","status":"open"}]
+}
+
+Document:
+${fileContent}`
+        }]
+      });
+      const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
+      const clean = text.replace(/```json\n?|```/g, "").trim();
+      const data = JSON.parse(clean);
+
+      const [meeting] = await db.insert(meetingMinutesTable).values({
+        projectId,
+        title: data.title || req.file.originalname,
+        meetingDate: data.meetingDate ? new Date(data.meetingDate) : new Date(),
+        location: data.location || null,
+        notes: data.notes || null,
+        createdById: req.user!.userId,
+      }).returning();
+
+      if (data.attendees?.length > 0) {
+        const validAttendees = data.attendees.filter((a: any) => a.fullName);
+        if (validAttendees.length > 0) {
+          await db.insert(meetingAttendeesTable).values(
+            validAttendees.map((a: any) => ({
+              meetingId: meeting.id,
+              fullName: a.fullName,
+              company: a.company || null,
+              role: a.role || null,
+              externalEmail: a.email || null,
+              userId: null,
+            }))
+          );
+        }
+      }
+
+      if (data.actionItems?.length > 0) {
+        const validItems = data.actionItems.filter((ai: any) => ai.description);
+        if (validItems.length > 0) {
+          await db.insert(actionItemsTable).values(
+            validItems.map((ai: any) => ({
+              meetingId: meeting.id,
+              projectId,
+              description: ai.description,
+              assignedToName: ai.assignedToName || null,
+              dueDate: ai.dueDate ? new Date(ai.dueDate) : null,
+              status: ai.status || "open",
+            }))
+          );
+        }
+      }
+
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "import",
+        entityType: "meeting",
+        entityId: meeting.id,
+        details: `Imported meeting minutes from ${req.file.originalname} — ${data.attendees?.length ?? 0} attendees, ${data.actionItems?.length ?? 0} action items`,
+      });
+
+      res.json({ imported: 1, meetingId: meeting.id, title: meeting.title, message: "Meeting imported successfully" });
+    } catch (err) {
+      console.error("[meeting-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 export default router;

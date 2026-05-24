@@ -1,0 +1,56 @@
+Use these corrected inserts for the meeting import endpoint:
+
+meetingMinutesTable insert:
+        const [meeting] = await db.insert(meetingMinutesTable).values({
+          projectId,
+          title: data.title || req.file.originalname,
+          meetingDate: data.meetingDate ? new Date(data.meetingDate) : new Date(),
+          location: data.location || null,
+          notes: data.notes || null,
+          createdById: req.user!.userId,
+        }).returning();
+
+meetingAttendeesTable insert:
+      if (data.attendees?.length > 0) {
+        const validAttendees = data.attendees.filter((a: any) => a.fullName);
+        if (validAttendees.length > 0) {
+          await db.insert(meetingAttendeesTable).values(
+            validAttendees.map((a: any) => ({
+              meetingId: meeting.id,
+              fullName: a.fullName,
+              company: a.company || null,
+              role: a.role || null,
+              externalEmail: a.email || null,
+              userId: null,
+            }))
+          );
+        }
+      }
+
+actionItemsTable insert:
+      if (data.actionItems?.length > 0) {
+        const validItems = data.actionItems.filter((ai: any) => ai.description);
+        if (validItems.length > 0) {
+          await db.insert(actionItemsTable).values(
+            validItems.map((ai: any) => ({
+              meetingId: meeting.id,
+              projectId,
+              description: ai.description,
+              assignedToName: ai.assignedToName || null,
+              dueDate: ai.dueDate ? new Date(ai.dueDate) : null,
+              status: ai.status || "open",
+            }))
+          );
+        }
+      }
+
+Apply the full endpoint with these corrected inserts. Everything else stays the same.
+
+Check 1:
+grep -n "meetings/import" artifacts/api-server/src/routes/meeting_minutes.ts | head -3
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print check output as plain text. No collapsed boxes.
