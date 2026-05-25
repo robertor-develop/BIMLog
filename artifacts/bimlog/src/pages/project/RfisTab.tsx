@@ -122,8 +122,25 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       });
       if (res.ok) {
         const data = await res.json();
-        setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
-        setTimeout(() => setImportMsg(""), 5000);
+        if (data.requiresConfirmation) {
+          const warningText = data.warnings.slice(0,3).map((w: any) => `${w.message}`).join("\n");
+          const proceed = confirm(`AI found potential issues:\n\n${warningText}\n\n${data.safeCount ?? 0} records are safe to import.\n\nProceed with safe records only?`);
+          if (proceed) {
+            const fd2 = new FormData();
+            fd2.append("file", e.target.files![0]);
+            fd2.append("forceImport", "true");
+            const r2 = await fetch(`/api/v1/projects/${projectId}/rfis/import`, {
+              method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd2,
+            });
+            const d2 = await r2.json();
+            setImportMsg(`${d2.imported ?? 0} RFIs imported (duplicates skipped)`);
+          } else {
+            setImportMsg("Import cancelled.");
+          }
+        } else {
+          setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+        }
+        setTimeout(() => setImportMsg(""), 8000);
       } else {
         setImportMsg("Import failed — please try again");
       }
@@ -293,7 +310,11 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               </span>
             </label>
           )}
-          {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
+          {importMsg && (
+            <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginTop: 10 }}>
+              {importMsg}
+            </div>
+          )}
           {canWrite && (
             <Button size="sm" onClick={() => setShowCreate(true)} style={{ gap: 6, fontSize: 12 }}>
               <Plus style={{ width: 13, height: 13 }} />{w("New RFI", "Nuevo RFI", lang)}
