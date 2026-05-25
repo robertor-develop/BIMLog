@@ -1,0 +1,155 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+STEP 1 — Create linked_items schema.
+
+Create new file: lib/db/src/schema/linked-items.ts
+
+With this exact content:
+
+import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+import { usersTable } from "./users";
+
+export const linkedItemsTable = pgTable("linked_items", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  fromType: text("from_type").notNull(),
+  fromId: integer("from_id").notNull(),
+  toType: text("to_type").notNull(),
+  toId: integer("to_id").notNull(),
+  linkType: text("link_type").notNull().default("related"),
+  notes: text("notes"),
+  createdById: integer("created_by_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type LinkedItem = typeof linkedItemsTable.$inferSelect;
+
+STEP 2 — Export from schema index.
+
+FILE: lib/db/src/schema/index.ts
+
+Add at the end:
+export * from "./linked-items";
+
+STEP 3 — Push schema to DB.
+
+Check 1 — table created:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT column_name FROM information_schema.columns WHERE table_name = 'linked_items' ORDER BY ordinal_position;"
+
+STEP 4 — Create linked_items route.
+
+Create new file: artifacts/api-server/src/routes/linked_items.ts
+
+With this exact content:
+
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { linkedItemsTable, activityLogTable } from "@workspace/db/schema";
+import { eq, and, or } from "drizzle-orm";
+import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+
+const router: Router = Router();
+
+// GET all links for a specific entity
+router.get("/projects/:projectId/links/:entityType/:entityId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const entityType = req.params.entityType;
+  const entityId = Number(req.params.entityId);
+  try {
+    const links = await db.select().from(linkedItemsTable)
+      .where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, entityType), eq(linkedItemsTable.fromId, entityId)),
+          and(eq(linkedItemsTable.toType, entityType), eq(linkedItemsTable.toId, entityId))
+        )
+      ));
+    res.json(links);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST create a link
+router.post("/projects/:projectId/links", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const { fromType, fromId, toType, toId, linkType, notes } = req.body ?? {};
+  try {
+    // Check if link already exists
+    const existing = await db.select().from(linkedItemsTable)
+      .where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        eq(linkedItemsTable.fromType, fromType),
+        eq(linkedItemsTable.fromId, fromId),
+        eq(linkedItemsTable.toType, toType),
+        eq(linkedItemsTable.toId, toId)
+      ));
+    if (existing.length > 0) {
+      res.json({ existing: true, link: existing[0] });
+      return;
+    }
+    const [link] = await db.insert(linkedItemsTable).values({
+      projectId,
+      fromType,
+      fromId,
+      toType,
+      toId,
+      linkType: linkType || "related",
+      notes: notes || null,
+      createdById: req.user!.userId,
+    }).returning();
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName ?? "",
+      userCompanyName: req.user!.companyName ?? "",
+      actionType: "link",
+      entityType: fromType,
+      entityId: fromId,
+      details: `Linked ${fromType} #${fromId} to ${toType} #${toId} (${linkType || "related"})`,
+    });
+    res.status(201).json(link);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// DELETE a link
+router.delete("/projects/:projectId/links/:linkId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const linkId = Number(req.params.linkId);
+  try {
+    await db.delete(linkedItemsTable)
+      .where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId)));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+export default router;
+
+STEP 5 — Register route in index.ts.
+
+FILE: artifacts/api-server/src/routes/index.ts
+
+Add import:
+import linkedItemsRouter from "./linked_items";
+
+Add to router.use:
+router.use(linkedItemsRouter);
+
+Check 2 — route registered:
+grep -n "linkedItems\|linked_items" artifacts/api-server/src/routes/index.ts | head -5
+
+Check 3 — table columns:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT column_name FROM information_schema.columns WHERE table_name = 'linked_items' ORDER BY ordinal_position;"
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
