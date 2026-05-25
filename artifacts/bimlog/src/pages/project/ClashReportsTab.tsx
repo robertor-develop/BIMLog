@@ -61,6 +61,23 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [search, setSearch] = useState("");
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
   const [clashLinks, setClashLinks] = useState<Record<number, any[]>>({});
+  const [linkableItems, setLinkableItems] = useState<{ submittalItems: any[]; rfis: any[]; meetings: any[] }>({ submittalItems: [], rfis: [], meetings: [] });
+
+  const loadLinkableItems = async () => {
+    try {
+      const [siRes, rfiRes, meetRes] = await Promise.all([
+        fetch(`${API}/projects/${projectId}/submittal-reports`, { headers }),
+        fetch(`${API}/projects/${projectId}/rfis`, { headers }),
+        fetch(`${API}/projects/${projectId}/meetings`, { headers }),
+      ]);
+      const submittalReports = siRes.ok ? await siRes.json() : [];
+      const rfis = rfiRes.ok ? await rfiRes.json() : [];
+      const meetings = meetRes.ok ? await meetRes.json() : [];
+      setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
+    } catch (e) {
+      console.error("[loadLinkableItems]", e);
+    }
+  };
 
   const loadClashLinks = async (clashId: number) => {
     const r = await fetch(`${API}/projects/${projectId}/links/clash/${clashId}`, { headers });
@@ -90,6 +107,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   useEffect(() => { loadReports(); }, [projectId]);
 
   const loadClashes = async (report: ClashReport) => {
+    loadLinkableItems();
     setSelectedReport(report);
     setClashLoading(true);
     try {
@@ -162,6 +180,12 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       const order = { P1: 0, P2: 1, P3: 2, P4: 3 };
       return (order[a.priority as keyof typeof order] ?? 4) - (order[b.priority as keyof typeof order] ?? 4);
     });
+
+  const getRecordOptions = (type: string) => {
+    if (type === "rfi") return linkableItems.rfis.map((r: any) => `<option value="${r.id}">${r.number} — ${r.subject}</option>`).join("");
+    if (type === "meeting") return linkableItems.meetings.map((m: any) => `<option value="${m.id}">${m.title}</option>`).join("");
+    return linkableItems.submittalItems.map((s: any) => `<option value="${s.id}">${s.fileName || s.reportNumber || `Tracker #${s.id}`}</option>`).join("");
+  };
 
   if (selectedReport) return (
     <div className="tab-content-wrapper">
@@ -443,14 +467,23 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                                 }} style={{ marginLeft: "auto", background: "none", border: "none", color: "#DC2626", cursor: "pointer", fontSize: 12 }}>×</button>
                               </div>
                             ))}
-                            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                              <select id={`link-type-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
-                                <option value="submittal_item">Submittal</option>
+                            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                              <select id={`link-type-${c.id}`}
+                                onChange={() => {
+                                  const typeEl = document.getElementById(`link-type-${c.id}`) as HTMLSelectElement;
+                                  const recordEl = document.getElementById(`link-record-${c.id}`) as HTMLSelectElement;
+                                  if (recordEl) recordEl.innerHTML = getRecordOptions(typeEl?.value);
+                                }}
+                                style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="submittal_report">Submittal Tracker</option>
                                 <option value="rfi">RFI</option>
                                 <option value="meeting">Meeting</option>
                               </select>
-                              <input id={`link-id-${c.id}`} placeholder="ID number" type="number"
-                                style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, width: 100 }} />
+                              <select id={`link-record-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, flex: 1, minWidth: 200 }}>
+                                {linkableItems.submittalItems.map((s: any) => (
+                                  <option key={s.id} value={s.id}>{s.fileName || s.reportNumber || `Tracker #${s.id}`}</option>
+                                ))}
+                              </select>
                               <select id={`link-rel-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
                                 <option value="resolves">Resolves</option>
                                 <option value="related">Related</option>
@@ -459,10 +492,10 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                               </select>
                               <button className="btn btn-sm btn-primary" onClick={() => {
                                 const toType = (document.getElementById(`link-type-${c.id}`) as HTMLSelectElement)?.value;
-                                const toId = Number((document.getElementById(`link-id-${c.id}`) as HTMLInputElement)?.value);
+                                const toId = Number((document.getElementById(`link-record-${c.id}`) as HTMLSelectElement)?.value);
                                 const linkType = (document.getElementById(`link-rel-${c.id}`) as HTMLSelectElement)?.value;
                                 if (toId) addClashLink(c.id, toType, toId, linkType);
-                              }}>Link</button>
+                              }}>+ Link</button>
                             </div>
                           </div>
                                 <div style={{ display: "flex", justifyContent: "flex-end" }}>

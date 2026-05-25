@@ -1,0 +1,111 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
+
+CHANGE 1 — Add state for linkable records.
+Find:
+  const [clashLinks, setClashLinks] = useState<Record<number, any[]>>({});
+
+Add after:
+  const [linkableItems, setLinkableItems] = useState<{ submittalItems: any[]; rfis: any[]; meetings: any[] }>({ submittalItems: [], rfis: [], meetings: [] });
+
+  const loadLinkableItems = async () => {
+    try {
+      const [siRes, rfiRes, meetRes] = await Promise.all([
+        fetch(`${API}/projects/${projectId}/submittal-reports`, { headers }),
+        fetch(`${API}/projects/${projectId}/rfis`, { headers }),
+        fetch(`${API}/projects/${projectId}/meetings`, { headers }),
+      ]);
+      const submittalReports = siRes.ok ? await siRes.json() : [];
+      const rfis = rfiRes.ok ? await rfiRes.json() : [];
+      const meetings = meetRes.ok ? await meetRes.json() : [];
+      setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
+    } catch (e) {
+      console.error("[loadLinkableItems]", e);
+    }
+  };
+
+CHANGE 2 — Load linkable items when entering clash view.
+Find:
+  const loadClashes = async (report: ClashReport) => {
+
+Add at the start of that function after the opening brace:
+    loadLinkableItems();
+
+CHANGE 3 — Replace the manual ID input with smart dropdowns showing real records.
+Find this exact block:
+                            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                              <select id={`link-type-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="submittal_item">Submittal</option>
+                                <option value="rfi">RFI</option>
+                                <option value="meeting">Meeting</option>
+                              </select>
+                              <input id={`link-id-${c.id}`} placeholder="ID number" type="number"
+                                style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, width: 100 }} />
+                              <select id={`link-rel-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="resolves">Resolves</option>
+                                <option value="related">Related</option>
+                                <option value="caused_by">Caused by</option>
+                                <option value="blocks">Blocks</option>
+                              </select>
+                              <button className="btn btn-sm btn-primary" onClick={() => {
+                                const toType = (document.getElementById(`link-type-${c.id}`) as HTMLSelectElement)?.value;
+                                const toId = Number((document.getElementById(`link-id-${c.id}`) as HTMLInputElement)?.value);
+                                const linkType = (document.getElementById(`link-rel-${c.id}`) as HTMLSelectElement)?.value;
+                                if (toId) addClashLink(c.id, toType, toId, linkType);
+                              }}>Link</button>
+                            </div>
+
+Replace with:
+                            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                              <select id={`link-type-${c.id}`}
+                                onChange={() => {
+                                  const typeEl = document.getElementById(`link-type-${c.id}`) as HTMLSelectElement;
+                                  const recordEl = document.getElementById(`link-record-${c.id}`) as HTMLSelectElement;
+                                  if (recordEl) recordEl.innerHTML = getRecordOptions(typeEl?.value);
+                                }}
+                                style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="submittal_report">Submittal Tracker</option>
+                                <option value="rfi">RFI</option>
+                                <option value="meeting">Meeting</option>
+                              </select>
+                              <select id={`link-record-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, flex: 1, minWidth: 200 }}>
+                                {linkableItems.submittalItems.map((s: any) => (
+                                  <option key={s.id} value={s.id}>{s.fileName || s.reportNumber || `Tracker #${s.id}`}</option>
+                                ))}
+                              </select>
+                              <select id={`link-rel-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="resolves">Resolves</option>
+                                <option value="related">Related</option>
+                                <option value="caused_by">Caused by</option>
+                                <option value="blocks">Blocks</option>
+                              </select>
+                              <button className="btn btn-sm btn-primary" onClick={() => {
+                                const toType = (document.getElementById(`link-type-${c.id}`) as HTMLSelectElement)?.value;
+                                const toId = Number((document.getElementById(`link-record-${c.id}`) as HTMLSelectElement)?.value);
+                                const linkType = (document.getElementById(`link-rel-${c.id}`) as HTMLSelectElement)?.value;
+                                if (toId) addClashLink(c.id, toType, toId, linkType);
+                              }}>+ Link</button>
+                            </div>
+
+Also add helper function before the return statement:
+Find:
+  if (selectedReport) return (
+
+Add BEFORE it:
+  const getRecordOptions = (type: string) => {
+    if (type === "rfi") return linkableItems.rfis.map((r: any) => `<option value="${r.id}">${r.number} — ${r.subject}</option>`).join("");
+    if (type === "meeting") return linkableItems.meetings.map((m: any) => `<option value="${m.id}">${m.title}</option>`).join("");
+    return linkableItems.submittalItems.map((s: any) => `<option value="${s.id}">${s.fileName || s.reportNumber || `Tracker #${s.id}`}</option>`).join("");
+  };
+
+Check 1:
+grep -n "linkableItems\|loadLinkableItems\|link-record\|getRecordOptions" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -10
+
+Check 2 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.
