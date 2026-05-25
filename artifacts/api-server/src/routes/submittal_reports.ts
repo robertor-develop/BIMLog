@@ -9,6 +9,7 @@ import * as XLSX from "xlsx";
 import Anthropic from "@anthropic-ai/sdk";
 import PDFDocument from "pdfkit";
 import jwt from "jsonwebtoken";
+import { extractFileText } from "../lib/extract-file-text";
 
 const router: Router = Router();
 const anthropic = new Anthropic({
@@ -83,7 +84,8 @@ router.post("/projects/:projectId/submittal-reports/upload",
       if (useXLSX) {
         workbook = XLSX.read(req.file.buffer, { type: "buffer" });
       } else {
-        fileText = req.file.buffer.toString("utf-8").slice(0, 15000);
+        const { text: extractedText } = await extractFileText(req.file.buffer, req.file.originalname);
+        fileText = extractedText;
       }
 
       let allRows: any[][] = [];

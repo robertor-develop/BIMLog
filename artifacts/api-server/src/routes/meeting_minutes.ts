@@ -10,6 +10,7 @@ import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
+import { extractFileText } from "../lib/extract-file-text";
 
 const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
 
@@ -379,7 +380,7 @@ router.post("/projects/:projectId/meetings/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
       const extractMsg = await anthropic.messages.create({
         model: "claude-sonnet-4-5",
         max_tokens: 4000,

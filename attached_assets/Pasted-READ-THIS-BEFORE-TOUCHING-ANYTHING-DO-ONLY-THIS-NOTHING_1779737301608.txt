@@ -1,0 +1,159 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Create a shared file extraction utility that ALL import endpoints use.
+
+Create new file: artifacts/api-server/src/lib/extract-file-text.ts
+
+With this exact content:
+
+import pdfParse from "pdf-parse";
+import * as XLSX from "xlsx";
+
+export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][] }> {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+
+  if (isSpreadsheet) {
+    try {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      const text = rows.map(r => r.join("\t")).join("\n").slice(0, 15000);
+      return { text, isSpreadsheet: true, rows };
+    } catch (err) {
+      console.error("[extract-file-text] Excel parse failed:", err);
+      return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+    }
+  }
+
+  if (ext === "pdf") {
+    try {
+      const pdfData = await pdfParse(buffer);
+      console.log("[extract-file-text] PDF extracted:", pdfData.text.slice(0, 100));
+      return { text: pdfData.text.slice(0, 15000), isSpreadsheet: false };
+    } catch (err) {
+      console.error("[extract-file-text] PDF parse failed:", err);
+      return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+    }
+  }
+
+  // Any other file — try UTF-8 text
+  return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+}
+
+Now update ALL import endpoints to use this utility.
+
+FILE: artifacts/api-server/src/routes/rfis.ts
+
+Add import at top:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find:
+      let fileContent = "";
+      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
+      if (ext === "pdf") {
+        try {
+          const pdfData = await pdfParse(req.file.buffer);
+          fileContent = pdfData.text.slice(0, 15000);
+          console.log("[rfi-import] PDF text extracted:", fileContent.slice(0, 200));
+        } catch (pdfErr) {
+          console.error("[rfi-import] PDF parse failed:", pdfErr);
+          fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+        }
+      } else {
+        fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      }
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/transmittals.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in transmittal import endpoint:
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/change_orders.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in change order import endpoint:
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/meeting_minutes.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in meeting import endpoint:
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/submittals.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in submittal import endpoint:
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/project_directory.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in directory import endpoint:
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+Add import:
+import { extractFileText } from "../lib/extract-file-text";
+
+Find in upload endpoint where fileText is set:
+        fileText = req.file.buffer.toString("utf-8").slice(0, 15000);
+
+Replace with:
+        const { text: extractedText } = await extractFileText(req.file.buffer, req.file.originalname);
+        fileText = extractedText;
+
+Check 1 — utility file created:
+ls artifacts/api-server/src/lib/
+
+Check 2 — used across routes:
+grep -rn "extractFileText" artifacts/api-server/src/routes/ | head -15
+
+Check 3 — backend TypeScript:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

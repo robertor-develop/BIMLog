@@ -9,6 +9,7 @@ import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../mi
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
+import { extractFileText } from "../lib/extract-file-text";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
@@ -1593,7 +1594,7 @@ router.post("/projects/:projectId/rfis/import",
         apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
         baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
       });
-      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
       const extractMsg = await anthropicClient.messages.create({
         model: "claude-sonnet-4-5",
         max_tokens: 4000,
