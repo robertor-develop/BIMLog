@@ -91,6 +91,34 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
 }
 
 // ─── main export ─────────────────────────────────────────────────────────────
+const RefFieldWithSearch = ({ label, value, onChange, placeholder, fieldKey, fileSearch, setFileSearch, files, lang }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder: string; fieldKey: string;
+  fileSearch: string | null; setFileSearch: (v: string | null) => void; files: any[]; lang: string;
+}) => (
+  <FormField label={label}>
+    <div style={{ position: "relative" }}>
+      <div style={{ display: "flex", gap: 4 }}>
+        <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{ fontSize: 12, flex: 1 }} />
+        <button
+          type="button"
+          title={w("Search project files", "Buscar archivos del proyecto", lang)}
+          onClick={() => setFileSearch(fileSearch === fieldKey ? null : fieldKey)}
+          style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: fileSearch === fieldKey ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: fileSearch === fieldKey ? "white" : "hsl(var(--muted-foreground))" }}
+        >
+          <Search style={{ width: 12, height: 12 }} />
+        </button>
+      </div>
+      {fileSearch === fieldKey && (
+        <FileSearchDropdown
+          files={files || []}
+          onSelect={(name) => { onChange(name); setFileSearch(null); }}
+          onClose={() => setFileSearch(null)}
+        />
+      )}
+    </div>
+  </FormField>
+);
+
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
   const { getLabel, getOptions } = useConfig();
@@ -691,34 +719,6 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
     });
   };
 
-  // Fix 3 — inline file search input+dropdown for a field
-  const RefFieldWithSearch = ({ label, value, onChange, placeholder, fieldKey }: {
-    label: string; value: string; onChange: (v: string) => void; placeholder: string; fieldKey: string;
-  }) => (
-    <FormField label={label}>
-      <div style={{ position: "relative" }}>
-        <div style={{ display: "flex", gap: 4 }}>
-          <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{ fontSize: 12, flex: 1 }} />
-          <button
-            type="button"
-            title={w("Search project files", "Buscar archivos del proyecto", lang)}
-            onClick={() => setFileSearch(fileSearch === fieldKey ? null : fieldKey)}
-            style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: fileSearch === fieldKey ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: fileSearch === fieldKey ? "white" : "hsl(var(--muted-foreground))" }}
-          >
-            <Search style={{ width: 12, height: 12 }} />
-          </button>
-        </div>
-        {fileSearch === fieldKey && (
-          <FileSearchDropdown
-            files={files || []}
-            onSelect={(name) => { onChange(name); setFileSearch(null); }}
-            onClose={() => setFileSearch(null)}
-          />
-        )}
-      </div>
-    </FormField>
-  );
-
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex" }}>
       <div style={{ flex: 1, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
@@ -854,11 +854,11 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
           {/* Fix 3 — meaningful placeholders + file search buttons */}
           <SectionHeader title={w("4. Reference Information", "4. Información de Referencia", lang)} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px", marginTop: 10 }}>
-            <RefFieldWithSearch label={w("Drawing Number", "Número de Plano", lang)} value={drawingNum} onChange={setDrawingNum} placeholder="e.g. A-101" fieldKey="drawingNum" />
-            <RefFieldWithSearch label={w("Drawing Title", "Título del Plano", lang)} value={drawingTitle} onChange={setDrawingTitle} placeholder="e.g. Floor Plan Level 3" fieldKey="drawingTitle" />
-            <RefFieldWithSearch label={w("Spec Section", "Sección de Especificación", lang)} value={specSection} onChange={setSpecSection} placeholder="e.g. 23 00 00" fieldKey="specSection" />
-            <RefFieldWithSearch label={w("Detail Number", "Número de Detalle", lang)} value={detailNum} onChange={setDetailNum} placeholder="e.g. 5/A-301" fieldKey="detailNum" />
-            <RefFieldWithSearch label={w("Note Number", "Número de Nota", lang)} value={noteNum} onChange={setNoteNum} placeholder="e.g. NOTE 3" fieldKey="noteNum" />
+            <RefFieldWithSearch label={w("Drawing Number", "Número de Plano", lang)} value={drawingNum} onChange={setDrawingNum} placeholder="e.g. A-101" fieldKey="drawingNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
+            <RefFieldWithSearch label={w("Drawing Title", "Título del Plano", lang)} value={drawingTitle} onChange={setDrawingTitle} placeholder="e.g. Floor Plan Level 3" fieldKey="drawingTitle" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
+            <RefFieldWithSearch label={w("Spec Section", "Sección de Especificación", lang)} value={specSection} onChange={setSpecSection} placeholder="e.g. 23 00 00" fieldKey="specSection" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
+            <RefFieldWithSearch label={w("Detail Number", "Número de Detalle", lang)} value={detailNum} onChange={setDetailNum} placeholder="e.g. 5/A-301" fieldKey="detailNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
+            <RefFieldWithSearch label={w("Note Number", "Número de Nota", lang)} value={noteNum} onChange={setNoteNum} placeholder="e.g. NOTE 3" fieldKey="noteNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
             <FormField label={w("Location Description", "Descripción de Ubicación", lang)} full>
               <Input value={location} onChange={e => setLocation(e.target.value)} placeholder={w("e.g. Level 2 North Wing, Grid B-C/3-4", "ej. Nivel 2 Ala Norte, Cuadrícula B-C/3-4", lang)} style={{ fontSize: 12 }} />
             </FormField>
