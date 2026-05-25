@@ -644,6 +644,8 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
   const companyPeople = (company: string) => members.filter(m => m.userCompanyName === company);
 
+  const lastRfiData = useRef<any>(null);
+
   const { mutate: createRfi, isPending } = useCreateRfi({
     mutation: {
       onSuccess: () => {
@@ -651,7 +653,24 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
         toast({ title: w(isRevision ? "RFI revision created" : "RFI created", isRevision ? "Revisión de RFI creada" : "RFI creado", lang) });
         onClose();
       },
-      onError: () => toast({ title: w("Error creating RFI", "Error al crear RFI", lang), variant: "destructive" }),
+      onError: (error: any) => {
+        const data = error?.response?.data ?? error?.data ?? {};
+        if (data.error === "duplicate_number" && data.suggestedNumber) {
+          const msg = `${data.message}\n\nSuggested number: ${data.suggestedNumber}\n\nUse suggested number?`;
+          if (confirm(msg)) {
+            createRfi({
+              projectId,
+              data: {
+                ...(lastRfiData.current ?? {}),
+                number: data.suggestedNumber,
+                forceNumber: true,
+              } as any,
+            });
+          }
+        } else {
+          toast({ title: w("Error creating RFI", "Error al crear RFI", lang), variant: "destructive" });
+        }
+      },
     },
   });
 
@@ -687,6 +706,31 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
     if (!subject.trim()) {
       toast({ title: w("Subject is required", "El asunto es requerido", lang), variant: "destructive" }); return;
     }
+    lastRfiData.current = {
+      subject, priority,
+      dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
+      dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
+      projectAddress: projectAddress || undefined,
+      submittedByCompany: sByCompany || undefined,
+      submittedByContact: sByContact || undefined,
+      submittedByAddress: sByAddress || undefined,
+      submittedByPhone: sByPhone || undefined,
+      submittedByEmail: sByEmail || undefined,
+      submittedToCompany: sToCompany || undefined,
+      submittedToPerson: sToPerson || undefined,
+      submittedToEmail: sToEmail || undefined,
+      drawingNumber: drawingNum || undefined,
+      drawingTitle: drawingTitle || undefined,
+      specSection: specSection || undefined,
+      detailNumber: detailNum || undefined,
+      noteNumber: noteNum || undefined,
+      locationDescription: location || undefined,
+      question: question || undefined,
+      costImpact: costImpact || undefined,
+      scheduleImpact: schedImpact || undefined,
+      distributionList: distList.length > 0 ? distList : undefined,
+      attachmentsJson: attachments.length > 0 ? attachments : undefined,
+    };
     createRfi({
       projectId,
       data: {

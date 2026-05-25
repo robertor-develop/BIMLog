@@ -1,0 +1,85 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/RfisTab.tsx
+
+Find the onError handler for createRfi:
+    onError: () => toast({ title: w("Error creating RFI", "Error al crear RFI", lang), variant: "destructive" }),
+
+Replace with:
+    onError: (error: any) => {
+      const data = error?.response?.data ?? error?.data ?? {};
+      if (data.error === "duplicate_number" && data.suggestedNumber) {
+        const msg = `${data.message}\n\nSuggested number: ${data.suggestedNumber}\n\nUse suggested number?`;
+        if (confirm(msg)) {
+          createRfi({
+            projectId,
+            data: {
+              ...(lastRfiData.current ?? {}),
+              number: data.suggestedNumber,
+              forceNumber: true,
+            } as any,
+          });
+        }
+      } else {
+        toast({ title: w("Error creating RFI", "Error al crear RFI", lang), variant: "destructive" });
+      }
+    },
+
+Also add a ref to store the last submitted RFI data.
+Find:
+  const { mutate: createRfi, isPending } = useCreateRfi({
+
+Add BEFORE it:
+  const lastRfiData = useRef<any>(null);
+
+Also find the handleSubmit function where createRfi is called:
+Find:
+    createRfi({
+      projectId,
+      data: {
+
+Add before that call:
+    lastRfiData.current = {
+      subject, priority,
+      dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
+      dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
+      projectAddress: projectAddress || undefined,
+      submittedByCompany: sByCompany || undefined,
+      submittedByContact: sByContact || undefined,
+      submittedByAddress: sByAddress || undefined,
+      submittedByPhone: sByPhone || undefined,
+      submittedByEmail: sByEmail || undefined,
+      submittedToCompany: sToCompany || undefined,
+      submittedToPerson: sToPerson || undefined,
+      submittedToEmail: sToEmail || undefined,
+      drawingNumber: drawingNum || undefined,
+      drawingTitle: drawingTitle || undefined,
+      specSection: specSection || undefined,
+      detailNumber: detailNum || undefined,
+      noteNumber: noteNum || undefined,
+      locationDescription: location || undefined,
+      question: question || undefined,
+      costImpact: costImpact || undefined,
+      scheduleImpact: schedImpact || undefined,
+      distributionList: distList.length > 0 ? distList : undefined,
+      attachmentsJson: attachments.length > 0 ? attachments : undefined,
+    };
+
+Make sure useRef is imported at the top:
+grep -n "useRef" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -3
+
+If not imported add it to the react import line.
+
+Check 1:
+grep -n "lastRfiData\|duplicate_number\|suggestedNumber\|forceNumber" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+
+Check 2 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
