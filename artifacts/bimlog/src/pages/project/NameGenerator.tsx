@@ -179,6 +179,11 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
 
   // Build fields from convention — one selected value per field
   const [selections, setSelections] = useState<Record<string, string>>({});
+  const [disabledFields, setDisabledFields] = useState<Record<string, boolean>>({});
+
+  const toggleField = (label: string) => {
+    setDisabledFields(prev => ({ ...prev, [label]: !prev[label] }));
+  };
   const [copied, setCopied] = useState(false);
   const [savedNames, setSavedNames] = useState<SavedName[]>([]);
   const [recentNames, setRecentNames] = useState<{ name: string; ts: string }[]>([]);
@@ -250,8 +255,10 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
   const fields = [...convention.fields]
     .sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
 
-  const tokens = fields.map((field: any) => selections[field.label] || "");
-  const generatedName = tokens.join(sep);
+  const tokens = fields
+    .filter((field: any) => !disabledFields[field.label])
+    .map((field: any) => selections[field.label] || "");
+  const generatedName = tokens.filter(Boolean).join(sep);
 
   const handleCopy = () => {
     if (!generatedName) return;
