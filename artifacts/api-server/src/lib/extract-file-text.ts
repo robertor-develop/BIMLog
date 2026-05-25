@@ -20,11 +20,11 @@ export async function extractFileText(buffer: Buffer, filename: string): Promise
         if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
       }
       const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
-      const text = rows.map(r => r.join("\t")).join("\n").slice(0, 15000);
+      const text = rows.map(r => r.join("\t")).join("\n").slice(0, 100000);
       return { text, isSpreadsheet: true, rows };
     } catch (err) {
       console.error("[extract-file-text] Excel parse failed:", err);
-      return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+      return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
     }
   }
 
@@ -32,12 +32,12 @@ export async function extractFileText(buffer: Buffer, filename: string): Promise
     try {
       const pdfData = await pdfParse(buffer);
       console.log("[extract-file-text] PDF extracted:", pdfData.text.slice(0, 100));
-      return { text: pdfData.text.slice(0, 15000), isSpreadsheet: false };
+      return { text: pdfData.text.slice(0, 100000), isSpreadsheet: false };
     } catch (err) {
       console.error("[extract-file-text] PDF parse failed:", err);
-      return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+      return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
     }
   }
 
-  return { text: buffer.toString("utf-8").slice(0, 15000), isSpreadsheet: false };
+  return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
 }

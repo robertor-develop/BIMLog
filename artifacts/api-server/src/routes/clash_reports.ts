@@ -145,7 +145,7 @@ router.post("/projects/:projectId/clash-reports/upload",
       if (!isSpreadsheet && parsed.length === 0) {
         // Non-spreadsheet: use AI to extract directly (XML, HTML, BCF, TXT, etc.)
         try {
-          const fileText = req.file.buffer.toString("utf-8").slice(0, 15000);
+          const fileText = req.file.buffer.toString("utf-8").slice(0, 100000);
           const extractMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
             max_tokens: 4000,
