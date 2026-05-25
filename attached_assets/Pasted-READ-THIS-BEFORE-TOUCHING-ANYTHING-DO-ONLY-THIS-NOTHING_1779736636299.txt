@@ -1,0 +1,424 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+STEP 1 — Create agent_insights table schema.
+
+Create new file: lib/db/src/schema/agent-insights.ts
+
+With this exact content:
+
+import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+
+export const agentInsightsTable = pgTable("agent_insights", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  agentType: text("agent_type").notNull(),
+  entityType: text("entity_type"),
+  entityId: integer("entity_id"),
+  insightType: text("insight_type").notNull(),
+  message: text("message").notNull(),
+  recommendation: text("recommendation"),
+  severity: text("severity").default("info"),
+  isRead: boolean("is_read").default(false),
+  isActioned: boolean("is_actioned").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AgentInsight = typeof agentInsightsTable.$inferSelect;
+
+STEP 2 — Export from schema index.
+
+FILE: lib/db/src/schema/index.ts
+
+Add at the end:
+export * from "./agent-insights";
+
+STEP 3 — Push schema to DB.
+cd lib/db && npx drizzle-kit push 2>&1 | tail -5
+
+STEP 4 — Create agents directory and base agent.
+
+Create new file: artifacts/api-server/src/agents/base-agent.ts
+
+With this exact content:
+
+import Anthropic from "@anthropic-ai/sdk";
+import { db } from "@workspace/db";
+import { agentInsightsTable, linkedItemsTable, activityLogTable } from "@workspace/db/schema";
+import { eq, and, or } from "drizzle-orm";
+
+export const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
+
+export interface AgentContext {
+  projectId: number;
+  entityType?: string;
+  entityId?: number;
+  triggerEvent?: string;
+}
+
+export async function saveInsight(
+  projectId: number,
+  agentType: string,
+  entityType: string,
+  entityId: number,
+  insightType: string,
+  message: string,
+  recommendation: string,
+  severity: "info" | "warning" | "critical" = "info"
+) {
+  await db.insert(agentInsightsTable).values({
+    projectId,
+    agentType,
+    entityType,
+    entityId,
+    insightType,
+    message,
+    recommendation,
+    severity,
+  });
+}
+
+export async function getLinkedItems(projectId: number, entityType: string, entityId: number) {
+  return db.select().from(linkedItemsTable).where(
+    and(
+      eq(linkedItemsTable.projectId, projectId),
+      or(
+        and(eq(linkedItemsTable.fromType, entityType), eq(linkedItemsTable.fromId, entityId)),
+        and(eq(linkedItemsTable.toType, entityType), eq(linkedItemsTable.toId, entityId))
+      )
+    )
+  );
+}
+
+STEP 5 — Create Clash Agent.
+
+Create new file: artifacts/api-server/src/agents/clash-agent.ts
+
+With this exact content:
+
+import { db } from "@workspace/db";
+import { clashesTable, clashReportsTable, rfisTable, submittalItemsTable } from "@workspace/db/schema";
+import { eq, and } from "drizzle-orm";
+import { anthropic, saveInsight, getLinkedItems } from "./base-agent";
+
+export async function runClashAgent(projectId: number, clashId?: number) {
+  try {
+    // Get clashes to analyze
+    const clashes = clashId
+      ? await db.select().from(clashesTable).where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId)))
+      : await db.select().from(clashesTable).where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.status, "open")));
+
+    if (clashes.length === 0) return;
+
+    // Get existing RFIs and submittals for context
+    const rfis = await db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject, status: rfisTable.status })
+      .from(rfisTable).where(eq(rfisTable.projectId, projectId));
+    const submittals = await db.select({ id: submittalItemsTable.id, fileName: submittalItemsTable.fileName, submittalStatus: submittalItemsTable.submittalStatus })
+      .from(submittalItemsTable).where(eq(submittalItemsTable.projectId, projectId));
+
+    for (const clash of clashes.slice(0, 10)) {
+      const links = await getLinkedItems(projectId, "clash", clash.id);
+
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 500,
+        system: `You are the Clash Coordination Agent for a construction project. 
+You analyze clashes and identify issues, resolution paths, and recommend actions.
+You follow ISO 9001 documentation standards.
+Always respond with valid JSON only.`,
+        messages: [{
+          role: "user",
+          content: `Analyze this clash:
+${JSON.stringify(clash)}
+
+Existing links: ${JSON.stringify(links)}
+Available RFIs: ${JSON.stringify(rfis.slice(0, 10))}
+Available Submittals: ${JSON.stringify(submittals.slice(0, 10))}
+
+Return JSON:
+{
+  "hasIssue": true/false,
+  "issueType": "no_rfi|no_submittal|overdue|conflicting_status|resolved_by_submittal|null",
+  "severity": "critical|warning|info",
+  "message": "clear message for coordinator",
+  "recommendation": "specific action to take"
+}`
+        }]
+      });
+
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+      const result = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+
+      if (result.hasIssue) {
+        await saveInsight(
+          projectId,
+          "clash_agent",
+          "clash",
+          clash.id,
+          result.issueType,
+          result.message,
+          result.recommendation,
+          result.severity
+        );
+      }
+    }
+    console.log(`[clash-agent] Analyzed ${clashes.length} clashes for project ${projectId}`);
+  } catch (err) {
+    console.error("[clash-agent] FAILED:", err);
+  }
+}
+
+STEP 6 — Create RFI Agent.
+
+Create new file: artifacts/api-server/src/agents/rfi-agent.ts
+
+With this exact content:
+
+import { db } from "@workspace/db";
+import { rfisTable, clashesTable, submittalsTable } from "@workspace/db/schema";
+import { eq, and, ne, lt } from "drizzle-orm";
+import { anthropic, saveInsight, getLinkedItems } from "./base-agent";
+
+export async function runRfiAgent(projectId: number, rfiId?: number) {
+  try {
+    const now = new Date();
+    const rfis = rfiId
+      ? await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId)))
+      : await db.select().from(rfisTable).where(and(eq(rfisTable.projectId, projectId), ne(rfisTable.status, "closed")));
+
+    for (const rfi of rfis.slice(0, 10)) {
+      const links = await getLinkedItems(projectId, "rfi", rfi.id);
+      const isOverdue = rfi.dueDate && new Date(rfi.dueDate) < now;
+
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 400,
+        system: `You are the RFI Agent for a construction project. Analyze RFIs for issues and recommend actions. ISO 9001 compliant. Respond with valid JSON only.`,
+        messages: [{
+          role: "user",
+          content: `Analyze this RFI:
+${JSON.stringify({ ...rfi, isOverdue })}
+Links: ${JSON.stringify(links)}
+
+Return JSON:
+{
+  "hasIssue": true/false,
+  "issueType": "overdue|no_response|no_linked_clash|stale|null",
+  "severity": "critical|warning|info",
+  "message": "clear message",
+  "recommendation": "specific action"
+}`
+        }]
+      });
+
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+      const result = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+
+      if (result.hasIssue) {
+        await saveInsight(projectId, "rfi_agent", "rfi", rfi.id, result.issueType, result.message, result.recommendation, result.severity);
+      }
+    }
+    console.log(`[rfi-agent] Analyzed ${rfis.length} RFIs for project ${projectId}`);
+  } catch (err) {
+    console.error("[rfi-agent] FAILED:", err);
+  }
+}
+
+STEP 7 — Create Briefing Agent.
+
+Create new file: artifacts/api-server/src/agents/briefing-agent.ts
+
+With this exact content:
+
+import { db } from "@workspace/db";
+import { agentInsightsTable, clashesTable, rfisTable, submittalItemsTable, actionItemsTable } from "@workspace/db/schema";
+import { eq, and, eq as eqOp } from "drizzle-orm";
+import { anthropic, saveInsight } from "./base-agent";
+import { runClashAgent } from "./clash-agent";
+import { runRfiAgent } from "./rfi-agent";
+
+export async function runBriefingAgent(projectId: number): Promise<string> {
+  try {
+    // Run all agents first
+    await Promise.all([
+      runClashAgent(projectId),
+      runRfiAgent(projectId),
+    ]);
+
+    // Gather all unread insights
+    const insights = await db.select().from(agentInsightsTable)
+      .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.isRead, false)));
+
+    // Get project summary
+    const [clashes, rfis, submittals, actionItems] = await Promise.all([
+      db.select({ id: clashesTable.id, priority: clashesTable.priority, status: clashesTable.status })
+        .from(clashesTable).where(eq(clashesTable.projectId, projectId)),
+      db.select({ id: rfisTable.id, status: rfisTable.status, dueDate: rfisTable.dueDate })
+        .from(rfisTable).where(eq(rfisTable.projectId, projectId)),
+      db.select({ id: submittalItemsTable.id, submittalStatus: submittalItemsTable.submittalStatus })
+        .from(submittalItemsTable).where(eq(submittalItemsTable.projectId, projectId)),
+      db.select({ id: actionItemsTable.id, status: actionItemsTable.status, dueDate: actionItemsTable.dueDate })
+        .from(actionItemsTable).where(eq(actionItemsTable.projectId, projectId)),
+    ]);
+
+    const now = new Date();
+    const p1Clashes = clashes.filter(c => c.priority === "P1" && c.status !== "resolved");
+    const openRfis = rfis.filter(r => r.status !== "closed");
+    const overdueRfis = openRfis.filter(r => r.dueDate && new Date(r.dueDate) < now);
+    const openSubmittals = submittals.filter(s => s.submittalStatus === "open");
+    const overdueActions = actionItems.filter(a => a.status !== "complete" && a.dueDate && new Date(a.dueDate) < now);
+    const criticalInsights = insights.filter(i => i.severity === "critical");
+    const warningInsights = insights.filter(i => i.severity === "warning");
+
+    const msg = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 1000,
+      system: `You are the BIMLog Morning Briefing Agent. You generate concise, actionable daily briefings for construction project coordinators. Be direct, professional, and specific. No fluff. ISO 9001 compliant documentation style.`,
+      messages: [{
+        role: "user",
+        content: `Generate a morning briefing for the project coordinator.
+
+PROJECT STATUS:
+- P1 Critical Clashes (open): ${p1Clashes.length}
+- Open RFIs: ${openRfis.length} (${overdueRfis.length} overdue)
+- Open Submittals: ${openSubmittals.length}
+- Overdue Action Items: ${overdueActions.length}
+
+AGENT INSIGHTS (${insights.length} total):
+Critical: ${criticalInsights.map(i => i.message).join("; ")}
+Warnings: ${warningInsights.slice(0,5).map(i => i.message).join("; ")}
+
+Generate a briefing with:
+1. Overall project health (1 sentence)
+2. Items needing immediate attention today (bullet points)
+3. Recommended actions (bullet points)
+4. Items to monitor this week
+
+Keep it under 300 words. Be specific with numbers and names.`
+      }]
+    });
+
+    const briefing = msg.content[0]?.type === "text" ? msg.content[0].text : "Briefing unavailable.";
+
+    // Mark insights as read
+    for (const insight of insights) {
+      await db.update(agentInsightsTable)
+        .set({ isRead: true })
+        .where(eq(agentInsightsTable.id, insight.id));
+    }
+
+    return briefing;
+  } catch (err) {
+    console.error("[briefing-agent] FAILED:", err);
+    return "Morning briefing temporarily unavailable.";
+  }
+}
+
+STEP 8 — Create agent runner endpoint.
+
+FILE: artifacts/api-server/src/routes/agents.ts
+
+Create with this content:
+
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { agentInsightsTable } from "@workspace/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { runBriefingAgent } from "../agents/briefing-agent";
+import { runClashAgent } from "../agents/clash-agent";
+import { runRfiAgent } from "../agents/rfi-agent";
+
+const router: Router = Router();
+
+// GET insights for a project
+router.get("/projects/:projectId/insights", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const insights = await db.select().from(agentInsightsTable)
+      .where(eq(agentInsightsTable.projectId, projectId))
+      .orderBy(desc(agentInsightsTable.createdAt))
+      .limit(50);
+    res.json(insights);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST run morning briefing
+router.post("/projects/:projectId/briefing", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const briefing = await runBriefingAgent(projectId);
+    res.json({ briefing });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST run clash agent for specific clash
+router.post("/projects/:projectId/agents/clash/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const clashId = Number(req.params.clashId);
+  try {
+    await runClashAgent(projectId, clashId);
+    const insights = await db.select().from(agentInsightsTable)
+      .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, clashId), eq(agentInsightsTable.entityType, "clash")))
+      .orderBy(desc(agentInsightsTable.createdAt))
+      .limit(5);
+    res.json({ insights });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// POST run RFI agent for specific RFI
+router.post("/projects/:projectId/agents/rfi/:rfiId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const rfiId = Number(req.params.rfiId);
+  try {
+    await runRfiAgent(projectId, rfiId);
+    const insights = await db.select().from(agentInsightsTable)
+      .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, rfiId), eq(agentInsightsTable.entityType, "rfi")))
+      .orderBy(desc(agentInsightsTable.createdAt))
+      .limit(5);
+    res.json({ insights });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+export default router;
+
+STEP 9 — Register agents route.
+
+FILE: artifacts/api-server/src/routes/index.ts
+
+Add import:
+import agentsRouter from "./agents";
+
+Add to router.use:
+router.use(agentsRouter);
+
+Check 1 — agent files created:
+ls artifacts/api-server/src/agents/
+
+Check 2 — agent_insights table:
+psql "postgresql://neondb_owner:npg_kqnR4Za2ILhp@ep-cold-wind-ajq5cidj.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require" -c "SELECT column_name FROM information_schema.columns WHERE table_name = 'agent_insights' ORDER BY ordinal_position;"
+
+Check 3 — route registered:
+grep -n "agentsRouter\|agents" artifacts/api-server/src/routes/index.ts | head -5
+
+Check 4 — backend TypeScript:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
