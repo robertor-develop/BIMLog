@@ -1,0 +1,122 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We need to add company logo to all PDF exports.
+The logo is stored as a base64 data URL in company_profiles.logo_url.
+
+STEP 1 — Create a shared PDF logo helper.
+
+FILE: artifacts/api-server/src/lib/pdf-logo.ts
+
+Create with this exact content:
+
+import { db } from "@workspace/db";
+import { companyProfilesTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
+
+export async function getCompanyLogo(userId: number): Promise<{ logoBase64: Buffer | null; logoType: "png" | "jpeg" | null }> {
+  try {
+    const [profile] = await db.select({ logoUrl: companyProfilesTable.logoUrl })
+      .from(companyProfilesTable)
+      .where(eq(companyProfilesTable.userId, userId));
+    if (!profile?.logoUrl) return { logoBase64: null, logoType: null };
+    const dataUrl = profile.logoUrl;
+    const match = dataUrl.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
+    if (!match) return { logoBase64: null, logoType: null };
+    const type = match[1] === "jpg" ? "jpeg" : match[1] as "png" | "jpeg";
+    const buffer = Buffer.from(match[2], "base64");
+    return { logoBase64: buffer, logoType: type };
+  } catch (err) {
+    console.error("[pdf-logo] failed:", err);
+    return { logoBase64: null, logoType: null };
+  }
+}
+
+STEP 2 — Add logo to clash report PDF.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Add import:
+import { getCompanyLogo } from "../lib/pdf-logo";
+
+Find the PDF endpoint. After getting the user data:
+Find:
+      const [user] = await db.select({
+        fullName: usersTable.fullName,
+        email: usersTable.email,
+        companyName: companiesTable.name,
+      }).from(usersTable)
+        .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(eq(usersTable.id, userId));
+
+Add after it:
+      const { logoBase64, logoType } = await getCompanyLogo(userId);
+
+Then find the cover page header section:
+Find:
+      // Company name — large and prominent
+      doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+        .text(user?.companyName ?? "Company", M, 22);
+
+Replace with:
+      // Company logo if available
+      if (logoBase64 && logoType) {
+        try {
+          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
+          doc.fontSize(18).font("Helvetica-Bold").fillColor("white")
+            .text(user?.companyName ?? "Company", M + 130, 22);
+        } catch {
+          doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+            .text(user?.companyName ?? "Company", M, 22);
+        }
+      } else {
+        doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+          .text(user?.companyName ?? "Company", M, 22);
+      }
+
+STEP 3 — Add logo to submittal report PDF.
+
+FILE: artifacts/api-server/src/routes/submittal_reports.ts
+
+Add import:
+import { getCompanyLogo } from "../lib/pdf-logo";
+
+After getting user data in PDF endpoint, add:
+      const { logoBase64, logoType } = await getCompanyLogo(userId);
+
+Find:
+      doc.fontSize(30).font("Helvetica-Bold").fillColor("white").text(user?.companyName ?? "Company", M, 22);
+
+Replace with:
+      if (logoBase64 && logoType) {
+        try {
+          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
+          doc.fontSize(18).font("Helvetica-Bold").fillColor("white")
+            .text(user?.companyName ?? "Company", M + 130, 22);
+        } catch {
+          doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+            .text(user?.companyName ?? "Company", M, 22);
+        }
+      } else {
+        doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+          .text(user?.companyName ?? "Company", M, 22);
+      }
+
+Check 1 — pdf-logo utility created:
+ls artifacts/api-server/src/lib/
+
+Check 2 — used in clash and submittal:
+grep -n "getCompanyLogo\|pdf-logo" artifacts/api-server/src/routes/clash_reports.ts artifacts/api-server/src/routes/submittal_reports.ts | head -8
+
+Check 3 — companyProfilesTable imported correctly:
+grep -n "companyProfilesTable" artifacts/api-server/src/lib/pdf-logo.ts | head -3
+
+Check 4 — backend tsc:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

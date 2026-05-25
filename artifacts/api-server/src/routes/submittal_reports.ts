@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { submittalReportsTable, submittalItemsTable } from "@workspace/db/schema";
 import { eq, desc, and } from "drizzle-orm";
+import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
@@ -396,6 +397,8 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
       .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
       .where(eq(usersTable.id, userId));
 
+    const { logoBase64, logoType } = await getCompanyLogo(userId);
+
     const [report] = await db.select().from(submittalReportsTable)
       .where(and(eq(submittalReportsTable.id, reportId), eq(submittalReportsTable.projectId, projectId)));
     if (!report) { res.status(404).json({ error: "Report not found" }); return; }
@@ -414,7 +417,19 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
 
     // Header
     doc.rect(0, 0, W, 120).fill("#1E3A5F");
-    doc.fontSize(30).font("Helvetica-Bold").fillColor("white").text(user?.companyName ?? "Company", M, 22);
+    if (logoBase64 && logoType) {
+      try {
+        doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
+        doc.fontSize(18).font("Helvetica-Bold").fillColor("white")
+          .text(user?.companyName ?? "Company", M + 130, 22);
+      } catch {
+        doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+          .text(user?.companyName ?? "Company", M, 22);
+      }
+    } else {
+      doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
+        .text(user?.companyName ?? "Company", M, 22);
+    }
     doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text("SUBMITTAL TRACKING REPORT", M, 22, { align: "right", width: CW });
     doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
     doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
