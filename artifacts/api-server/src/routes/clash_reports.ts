@@ -7,6 +7,9 @@ import { projectsTable, usersTable, companiesTable, activityLogTable } from "@wo
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
+import { parseString } from "xml2js";
+import { promisify } from "util";
+const parseXml = promisify(parseString);
 import Anthropic from "@anthropic-ai/sdk";
 
 const router: Router = Router();
@@ -78,10 +81,55 @@ router.post("/projects/:projectId/clash-reports/upload",
       }
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
       const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+      const isXml = ext === "xml";
 
       let parsed: { clashIdOriginal: string; description: string; holdUps: string; discipline1: string; level: string; assignedToName: string; resolutionNotes: string | null; status: string; dueDate: Date | null }[] = [];
 
-      if (!isSpreadsheet) {
+      if (isXml) {
+        // Navisworks XML — parse directly, extract ALL view elements
+        try {
+          const xmlContent = req.file.buffer.toString("utf-8");
+          const result = await parseXml(xmlContent) as any;
+          const viewfolders = result?.exchange?.viewpoints?.[0]?.viewfolder ?? [];
+          const allViews: any[] = [];
+          for (const folder of viewfolders) {
+            const folderName = folder?.$.name ?? "";
+            const views = folder?.view ?? [];
+            for (const view of views) {
+              const viewName = view?.$.name ?? "";
+              const match = viewName.match(/^([A-Z0-9]+\.[0-9]+)\s+(.+)$/);
+              const viewpointId = match ? match[1] : viewName.substring(0, 10);
+              const description = match ? match[2] : viewName;
+              const tradeLower = description.toLowerCase();
+              const discipline = tradeLower.includes(" fp ") || tradeLower.includes("fire") ? "FP"
+                : tradeLower.includes(" pb ") || tradeLower.includes("plumb") || tradeLower.includes("san") || tradeLower.includes("cw pipe") ? "PB"
+                : tradeLower.includes(" hvac ") || tradeLower.includes("duct") || tradeLower.includes("hvac") ? "HVAC"
+                : tradeLower.includes(" elec ") || tradeLower.includes("conduit") || tradeLower.includes("electrical") ? "ELEC"
+                : tradeLower.includes(" tx ") || tradeLower.includes(" kx ") ? "MECH"
+                : "COORD";
+              allViews.push({
+                clashIdOriginal: viewpointId,
+                description: description,
+                holdUps: "",
+                discipline1: discipline,
+                level: folderName.includes("UG") || viewpointId.startsWith("UG") ? "UNDERGROUND"
+                  : viewpointId.startsWith("12.") ? "12TH"
+                  : "",
+                assignedToName: "",
+                resolutionNotes: null,
+                status: "open",
+                dueDate: null,
+              });
+            }
+          }
+          parsed = allViews;
+          console.log("[clash-upload] XML parsed directly:", parsed.length, "viewpoints");
+        } catch (xmlErr) {
+          console.error("[clash-upload] XML parse failed, falling back to AI:", xmlErr);
+        }
+      }
+
+      if (!isSpreadsheet && parsed.length === 0) {
         // Non-spreadsheet: use AI to extract directly (XML, HTML, BCF, TXT, etc.)
         try {
           const fileText = req.file.buffer.toString("utf-8").slice(0, 15000);

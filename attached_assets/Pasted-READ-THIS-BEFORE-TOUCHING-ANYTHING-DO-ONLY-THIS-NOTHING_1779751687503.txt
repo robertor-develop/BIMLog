@@ -1,0 +1,106 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+The Navisworks XML import only reads 4 of 28 viewpoints because the XML is
+truncated at 15000 chars. We need to parse XML directly for .xml files.
+
+CHANGE 1 — Add XML parser import at top of file.
+Find:
+import * as XLSX from "xlsx";
+
+Add after:
+import { parseString } from "xml2js";
+import { promisify } from "util";
+const parseXml = promisify(parseString);
+
+Check if xml2js is installed:
+ls artifacts/api-server/node_modules | grep xml2js
+
+If not installed:
+cd artifacts/api-server && pnpm add xml2js @types/xml2js
+
+CHANGE 2 — Add XML parsing path in the upload endpoint.
+Find this exact line:
+      const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+
+Replace with:
+      const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+      const isXml = ext === "xml";
+
+CHANGE 3 — Add XML extraction before the isSpreadsheet check.
+Find:
+      if (!isSpreadsheet) {
+        // Non-spreadsheet: use AI to extract clash records directly
+
+Replace with:
+      if (isXml) {
+        // Navisworks XML — parse directly, extract ALL view elements
+        try {
+          const xmlContent = req.file.buffer.toString("utf-8");
+          const result = await parseXml(xmlContent) as any;
+          const viewfolders = result?.exchange?.viewpoints?.[0]?.viewfolder ?? [];
+          const allViews: any[] = [];
+          for (const folder of viewfolders) {
+            const folderName = folder?.$.name ?? "";
+            const views = folder?.view ?? [];
+            for (const view of views) {
+              const viewName = view?.$.name ?? "";
+              // Parse viewpoint ID and description from name
+              // Format: "C.123 DESCRIPTION" or "12.001 DESCRIPTION" or "UG.000 DESCRIPTION"
+              const match = viewName.match(/^([A-Z0-9]+\.[0-9]+)\s+(.+)$/);
+              const viewpointId = match ? match[1] : viewName.substring(0, 10);
+              const description = match ? match[2] : viewName;
+              // Infer trade from description
+              const tradeLower = description.toLowerCase();
+              const discipline = tradeLower.includes(" fp ") || tradeLower.includes("fire") ? "FP"
+                : tradeLower.includes(" pb ") || tradeLower.includes("plumb") || tradeLower.includes("san") || tradeLower.includes("cw pipe") ? "PB"
+                : tradeLower.includes(" hvac ") || tradeLower.includes("duct") || tradeLower.includes("hvac") ? "HVAC"
+                : tradeLower.includes(" elec ") || tradeLower.includes("conduit") || tradeLower.includes("electrical") ? "ELEC"
+                : tradeLower.includes(" tx ") || tradeLower.includes(" kx ") ? "MECH"
+                : "COORD";
+              allViews.push({
+                clashIdOriginal: viewpointId,
+                description: description,
+                holdUps: null,
+                discipline1: discipline,
+                level: folderName.includes("UG") || viewpointId.startsWith("UG") ? "UNDERGROUND"
+                  : viewpointId.startsWith("12.") ? "12TH"
+                  : "",
+                assignedToName: null,
+                resolutionNotes: null,
+                status: "open",
+                dueDate: null,
+              });
+            }
+          }
+          parsed = allViews;
+          console.log("[clash-upload] XML parsed directly:", parsed.length, "viewpoints");
+        } catch (xmlErr) {
+          console.error("[clash-upload] XML parse failed, falling back to AI:", xmlErr);
+          // Fall through to AI extraction
+        }
+      }
+
+      if (!isSpreadsheet && parsed.length === 0) {
+        // Non-spreadsheet: use AI to extract clash records directly
+
+CHANGE 4 — Fix the closing of the isSpreadsheet else block.
+Find:
+      if (!isSpreadsheet && parsed.length === 0) {
+
+Make sure the rest of the non-spreadsheet AI extraction block uses this condition.
+
+Check 1 — xml2js installed:
+ls artifacts/api-server/node_modules | grep xml2js
+
+Check 2 — XML parsing in route:
+grep -n "isXml\|parseXml\|xml2js\|viewfolder\|allViews" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
