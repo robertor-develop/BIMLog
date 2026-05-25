@@ -266,20 +266,28 @@ router.post("/projects/:projectId/transmittals/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
-      const extractMsg = await anthropic.messages.create({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [{
-          role: "user",
-          content: `Extract all transmittal records from this construction document. Return ONLY a JSON array, no markdown:
+      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all transmittal records from this construction document chunk. Return ONLY a JSON array, no markdown. If none found return []:
 [{"number":"T-001","title":"transmittal title","purpose":"purpose or notes","recipient":"recipient name","status":"draft/sent/acknowledged","sentDate":"date or null"}]
-Document:
-${fileContent}`
-        }]
-      });
-      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+Document chunk:
+${chunk}`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          records = [...records, ...chunkRecords];
+        } catch (e) {
+          console.error("[transmittal-import] chunk extraction failed:", e);
+        }
+      }
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

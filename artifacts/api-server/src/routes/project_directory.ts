@@ -159,21 +159,29 @@ router.post("/projects/:projectId/directory/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
-      const extractMsg = await anthropic.messages.create({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [{
-          role: "user",
-          content: `Extract all contact/directory records from this construction project document.
-Return ONLY a JSON array, no markdown:
+      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all contact/directory records from this construction project document chunk.
+Return ONLY a JSON array, no markdown. If none found return []:
 [{"fullName":"person name","email":"email or null","companyName":"company or null","role":"role or null","notes":"notes or null"}]
-Document:
-${fileContent}`
-        }]
-      });
-      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+Document chunk:
+${chunk}`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          records = [...records, ...chunkRecords];
+        } catch (e) {
+          console.error("[directory-import] chunk extraction failed:", e);
+        }
+      }
 
       let imported = 0;
       for (const r of records) {

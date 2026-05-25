@@ -1,0 +1,132 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/lib/extract-file-text.ts
+
+Replace the entire file content with this:
+
+import { createRequire } from "module";
+import * as XLSX from "xlsx";
+const require = createRequire(import.meta.url);
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse");
+
+const CHUNK_SIZE = 80000;
+
+function chunkText(text: string): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+    chunks.push(text.slice(i, i + CHUNK_SIZE));
+  }
+  return chunks.length > 0 ? chunks : [""];
+}
+
+export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[] }> {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+
+  if (isSpreadsheet) {
+    try {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      const text = rows.map(r => r.join("\t")).join("\n");
+      const chunks = chunkText(text);
+      return { text: chunks[0], isSpreadsheet: true, rows, chunks };
+    } catch (err) {
+      console.error("[extract-file-text] Excel parse failed:", err);
+      const text = buffer.toString("utf-8");
+      return { text, isSpreadsheet: false, chunks: chunkText(text) };
+    }
+  }
+
+  if (ext === "pdf") {
+    try {
+      const pdfData = await pdfParse(buffer);
+      console.log("[extract-file-text] PDF extracted:", pdfData.text.length, "chars");
+      const chunks = chunkText(pdfData.text);
+      console.log("[extract-file-text] PDF chunks:", chunks.length);
+      return { text: pdfData.text, isSpreadsheet: false, chunks };
+    } catch (err) {
+      console.error("[extract-file-text] PDF parse failed:", err);
+      const text = buffer.toString("utf-8");
+      return { text, isSpreadsheet: false, chunks: chunkText(text) };
+    }
+  }
+
+  // Any other file — try UTF-8 text
+  const text = buffer.toString("utf-8");
+  return { text, isSpreadsheet: false, chunks: chunkText(text) };
+}
+
+Now update ALL import endpoints to use chunks when the document is large.
+
+FILE: artifacts/api-server/src/routes/rfis.ts
+
+Find in the import endpoint:
+      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
+
+Replace with:
+      const { text: fileContent, chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+
+Then find where the AI extraction prompt is built:
+Find:
+          content: `Extract all RFI records from this construction document. Return ONLY a JSON array, no markdown:
+
+Replace the entire AI call block with a chunked version:
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all RFI records from this construction document chunk. Return ONLY a JSON array, no markdown. If no RFIs found return empty array []:
+[{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]
+Document chunk:
+${chunk}`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          records = [...records, ...chunkRecords];
+        } catch (e) {
+          console.error("[rfi-import] chunk extraction failed:", e);
+        }
+      }
+
+Do the same chunked extraction pattern for:
+FILE: artifacts/api-server/src/routes/transmittals.ts
+FILE: artifacts/api-server/src/routes/change_orders.ts
+FILE: artifacts/api-server/src/routes/meeting_minutes.ts
+FILE: artifacts/api-server/src/routes/submittals.ts
+FILE: artifacts/api-server/src/routes/project_directory.ts
+
+For each one:
+1. Change: const { text: fileContent } = await extractFileText(...)
+   To: const { text: fileContent, chunks } = await extractFileText(...)
+2. Wrap the AI extraction in a for loop over chunks
+3. Merge results into a single array
+
+Check 1 — chunks exported:
+grep -n "chunks" artifacts/api-server/src/lib/extract-file-text.ts | head -5
+
+Check 2 — chunked extraction in rfis:
+grep -n "chunks\|for.*chunk" artifacts/api-server/src/routes/rfis.ts | head -5
+
+Check 3 — backend tsc:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

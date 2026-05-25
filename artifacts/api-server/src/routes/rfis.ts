@@ -1606,20 +1606,28 @@ router.post("/projects/:projectId/rfis/import",
         apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
         baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
       });
-      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
-      const extractMsg = await anthropicClient.messages.create({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [{
-          role: "user",
-          content: `Extract all RFI records from this construction document. Return ONLY a JSON array, no markdown:
+      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all RFI records from this construction document chunk. Return ONLY a JSON array, no markdown. If no RFIs found return empty array []:
 [{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]
-Document:
-${fileContent}`
-        }]
-      });
-      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+Document chunk:
+${chunk}`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          records = [...records, ...chunkRecords];
+        } catch (e) {
+          console.error("[rfi-import] chunk extraction failed:", e);
+        }
+      }
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

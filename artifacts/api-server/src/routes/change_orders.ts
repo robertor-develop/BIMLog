@@ -225,20 +225,28 @@ router.post("/projects/:projectId/change-orders/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
-      const extractMsg = await anthropic.messages.create({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [{
-          role: "user",
-          content: `Extract all change order records from this construction document. Return ONLY a JSON array, no markdown:
+      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all change order records from this construction document chunk. Return ONLY a JSON array, no markdown. If none found return []:
 [{"number":"CO-001","title":"description","description":"full details","status":"draft/pending_approval/approved/rejected","contractValueImpact":"dollar amount or null","dateIssued":"date or null"}]
-Document:
-${fileContent}`
-        }]
-      });
-      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+Document chunk:
+${chunk}`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          records = [...records, ...chunkRecords];
+        } catch (e) {
+          console.error("[change-order-import] chunk extraction failed:", e);
+        }
+      }
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

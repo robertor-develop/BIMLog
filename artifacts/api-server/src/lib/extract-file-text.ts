@@ -1,10 +1,19 @@
 import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse");
 import * as XLSX from "xlsx";
+const require = createRequire(import.meta.url);
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse");
 
-export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][] }> {
+const CHUNK_SIZE = 80000;
+
+function chunkText(text: string): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+    chunks.push(text.slice(i, i + CHUNK_SIZE));
+  }
+  return chunks.length > 0 ? chunks : [""];
+}
+
+export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[] }> {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
   const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
 
@@ -20,24 +29,30 @@ export async function extractFileText(buffer: Buffer, filename: string): Promise
         if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
       }
       const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
-      const text = rows.map(r => r.join("\t")).join("\n").slice(0, 100000);
-      return { text, isSpreadsheet: true, rows };
+      const text = rows.map(r => r.join("\t")).join("\n");
+      const chunks = chunkText(text);
+      return { text: chunks[0], isSpreadsheet: true, rows, chunks };
     } catch (err) {
       console.error("[extract-file-text] Excel parse failed:", err);
-      return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
+      const text = buffer.toString("utf-8");
+      return { text, isSpreadsheet: false, chunks: chunkText(text) };
     }
   }
 
   if (ext === "pdf") {
     try {
       const pdfData = await pdfParse(buffer);
-      console.log("[extract-file-text] PDF extracted:", pdfData.text.slice(0, 100));
-      return { text: pdfData.text.slice(0, 100000), isSpreadsheet: false };
+      console.log("[extract-file-text] PDF extracted:", pdfData.text.length, "chars");
+      const chunks = chunkText(pdfData.text);
+      console.log("[extract-file-text] PDF chunks:", chunks.length);
+      return { text: pdfData.text, isSpreadsheet: false, chunks };
     } catch (err) {
       console.error("[extract-file-text] PDF parse failed:", err);
-      return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
+      const text = buffer.toString("utf-8");
+      return { text, isSpreadsheet: false, chunks: chunkText(text) };
     }
   }
 
-  return { text: buffer.toString("utf-8").slice(0, 100000), isSpreadsheet: false };
+  const text = buffer.toString("utf-8");
+  return { text, isSpreadsheet: false, chunks: chunkText(text) };
 }

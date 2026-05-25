@@ -380,16 +380,19 @@ router.post("/projects/:projectId/meetings/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { text: fileContent } = await extractFileText(req.file.buffer, req.file.originalname);
-      const extractMsg = await anthropic.messages.create({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [{
-          role: "user",
-          content: `You are analyzing a construction meeting minutes document.
-Extract the meeting information. Return ONLY valid JSON, no markdown:
+      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      let data: any = { title: null, meetingDate: null, meetingTime: null, location: null, meetingNumber: null, notes: null, attendees: [], actionItems: [] };
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `You are analyzing a chunk of a construction meeting minutes document.
+Extract the meeting information from this chunk. Return ONLY valid JSON, no markdown. Use null for fields not present in this chunk:
 {
-  "title": "meeting title",
+  "title": "meeting title or null",
   "meetingDate": "date string or null",
   "meetingTime": "time string or null",
   "location": "location or null",
@@ -399,13 +402,25 @@ Extract the meeting information. Return ONLY valid JSON, no markdown:
   "actionItems": [{"description":"","assignedToName":"","dueDate":"date or null","status":"open"}]
 }
 
-Document:
-${fileContent}`
-        }]
-      });
-      const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
-      const clean = text.replace(/```json\n?|```/g, "").trim();
-      const data = JSON.parse(clean);
+Document chunk:
+${chunk}`
+            }]
+          });
+          const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
+          const clean = text.replace(/```json\n?|```/g, "").trim();
+          const chunkData = JSON.parse(clean);
+          data.title = data.title || chunkData.title || null;
+          data.meetingDate = data.meetingDate || chunkData.meetingDate || null;
+          data.meetingTime = data.meetingTime || chunkData.meetingTime || null;
+          data.location = data.location || chunkData.location || null;
+          data.meetingNumber = data.meetingNumber || chunkData.meetingNumber || null;
+          data.notes = [data.notes, chunkData.notes].filter(Boolean).join("\n\n") || null;
+          if (Array.isArray(chunkData.attendees)) data.attendees = [...data.attendees, ...chunkData.attendees];
+          if (Array.isArray(chunkData.actionItems)) data.actionItems = [...data.actionItems, ...chunkData.actionItems];
+        } catch (e) {
+          console.error("[meeting-import] chunk extraction failed:", e);
+        }
+      }
 
       const [meeting] = await db.insert(meetingMinutesTable).values({
         projectId,
