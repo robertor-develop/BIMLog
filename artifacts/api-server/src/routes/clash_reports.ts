@@ -76,86 +76,121 @@ router.post("/projects/:projectId/clash-reports/upload",
         return;
       }
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
-      if (!["xlsx", "xls", "csv"].includes(ext)) {
-        res.status(400).json({ error: "invalid_format", message: "Unsupported format. Use Excel or CSV." });
-        return;
-      }
+      const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
 
-      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" }) as any[][];
+      let parsed: { clashIdOriginal: string; description: string; holdUps: string; discipline1: string; level: string; assignedToName: string; resolutionNotes: string | null; status: string; dueDate: Date | null }[] = [];
 
-      let headerIdx = rows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
-      if (headerIdx === -1) headerIdx = 0;
-      const headers = (rows[headerIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+      if (!isSpreadsheet) {
+        // Non-spreadsheet: use AI to extract directly (XML, HTML, BCF, TXT, etc.)
+        try {
+          const fileText = req.file.buffer.toString("utf-8").slice(0, 15000);
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `You are analyzing a construction clash/coordination report from software like Navisworks, Revit, Solibri, BIM 360, or similar tool.
+This may be XML, HTML, BCF, plain text, or any other format.
 
-      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
-      let bestRowCount = 0;
-      for (const sheetName of workbook.SheetNames) {
-        const s = workbook.Sheets[sheetName];
-        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
-        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
-        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
-      }
-      const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
-      let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
-      if (hIdx === -1) hIdx = 0;
-      const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
-      const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+IMPORTANT: Only extract COORDINATION CLASH viewpoints. Ignore documentation views, camera views, saved perspectives.
+For Navisworks: look for folders named COORD, coordination, clashes, or dated folders like COORD 05-20-26.
 
-      let mapping: Record<string, number> = { clashId: -1, description: -1, element1: -1, element2: -1, discipline: -1, level: -1, assignedTo: -1, status: -1, resolutionNotes: -1, deadline: -1, viewpoint: -1, holdUps: -1 };
-      try {
-        const mapMsg = await anthropic.messages.create({
-          model: "claude-sonnet-4-5",
-          max_tokens: 400,
-          messages: [{
-            role: "user",
-            content: `Construction clash report headers (0-indexed array): ${JSON.stringify(hdrs)}
+Document:
+${fileText}
+
+Return ONLY a JSON array, no markdown:
+[{"viewpoint":"C.001","description":"clash description","holdUps":"blocking issue or null","discipline":"PB or FP or ELEC or HVAC","level":"CELLAR or UNDERGROUND or 1ST","assignedTo":"contractor or null","resolutionNotes":"response/direction or null","status":"open or complete","deadline":"date or null"}]`
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const aiRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          parsed = aiRecords
+            .filter((r: any) => r.description || r.viewpoint)
+            .map((r: any) => ({
+              clashIdOriginal: r.viewpoint || "",
+              description: r.description || "",
+              holdUps: r.holdUps || "",
+              discipline1: r.discipline || "",
+              level: r.level || "",
+              assignedToName: r.assignedTo || "",
+              resolutionNotes: r.resolutionNotes || null,
+              status: r.status === "complete" ? "resolved" : "open",
+              dueDate: r.deadline ? new Date(r.deadline) : null,
+            }));
+          console.log("[clash-upload] AI extracted from non-spreadsheet:", parsed.length, "clashes");
+        } catch (e) {
+          console.error("[clash-upload] AI extraction failed:", e);
+          parsed = [];
+        }
+      } else {
+        // Spreadsheet: use column mapping
+        const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+        let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+        let bestRowCount = 0;
+        for (const sheetName of workbook.SheetNames) {
+          const s = workbook.Sheets[sheetName];
+          const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+          const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+          if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+        }
+        const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+        let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
+        if (hIdx === -1) hIdx = 0;
+        const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
+        const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+
+        let mapping: Record<string, number> = { clashId: -1, description: -1, element1: -1, element2: -1, discipline: -1, level: -1, assignedTo: -1, status: -1, resolutionNotes: -1, deadline: -1, viewpoint: -1, holdUps: -1 };
+        try {
+          const mapMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 400,
+            messages: [{
+              role: "user",
+              content: `Construction clash report headers (0-indexed): ${JSON.stringify(hdrs)}
 Sample row: ${JSON.stringify(dataRows[0] ?? [])}
-
 Map to column indices. Return ONLY valid JSON, no markdown:
 {"clashId":<idx or -1>,"description":<idx>,"holdUps":<idx or -1>,"discipline":<idx or -1>,"level":<idx or -1>,"assignedTo":<idx or -1>,"status":<idx or -1>,"resolutionNotes":<idx or -1>,"deadline":<idx or -1>,"viewpoint":<idx or -1>}
-
-Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking issues column, resolutionNotes=response/direction/resolution column, level=floor/level column, discipline=trade/discipline column, assignedTo=responsible/assigned column, clashId=sequence number column`
+Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionNotes=response/direction, level=floor/level, discipline=trade, assignedTo=responsible, clashId=sequence number`
           }]
         });
-        const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
-        mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
-        console.log("[clash-upload] AI mapping:", JSON.stringify(mapping));
-      } catch (e) {
-        console.error("[clash-upload] AI mapping failed:", e);
-        mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
-      }
+          const mt = mapMsg.content[0]?.type === "text" ? mapMsg.content[0].text : "{}";
+          mapping = { ...mapping, ...JSON.parse(mt.replace(/```json\n?|```/g, "").trim()) };
+          console.log("[clash-upload] AI mapping:", JSON.stringify(mapping));
+        } catch (e) {
+          console.error("[clash-upload] AI mapping failed:", e);
+          mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
+        }
 
-      const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined && row[idx] !== null ? String(row[idx]).trim() : "";
-      const getDate = (row: any[], idx: number) => {
-        if (idx < 0 || !row[idx]) return null;
-        try {
-          const val = row[idx];
-          if (typeof val === "number") {
-            const excelEpoch = new Date(1899, 11, 30);
-            const d = new Date(excelEpoch.getTime() + val * 86400000);
+        const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined && row[idx] !== null ? String(row[idx]).trim() : "";
+        const getDate = (row: any[], idx: number) => {
+          if (idx < 0 || !row[idx]) return null;
+          try {
+            const val = row[idx];
+            if (typeof val === "number") {
+              const excelEpoch = new Date(1899, 11, 30);
+              const d = new Date(excelEpoch.getTime() + val * 86400000);
+              return isNaN(d.getTime()) ? null : d;
+            }
+            const d = new Date(val);
             return isNaN(d.getTime()) ? null : d;
-          }
-          const d = new Date(val);
-          return isNaN(d.getTime()) ? null : d;
-        } catch { return null; }
-      };
+          } catch { return null; }
+        };
 
-      const parsed = dataRows
-        .map((row: any[]) => ({
-          clashIdOriginal: get(row, mapping.viewpoint) || get(row, mapping.clashId) || "",
-          description: get(row, mapping.description),
-          holdUps: get(row, mapping.holdUps),
-          discipline1: get(row, mapping.discipline),
-          level: get(row, mapping.level),
-          assignedToName: get(row, mapping.assignedTo),
-          resolutionNotes: get(row, mapping.resolutionNotes),
-          status: "open",
-          dueDate: getDate(row, mapping.deadline),
-        }))
-        .filter((r: any) => r.description || r.clashIdOriginal);
-      console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
+        parsed = dataRows
+          .map((row: any[]) => ({
+            clashIdOriginal: get(row, mapping.viewpoint) || get(row, mapping.clashId) || "",
+            description: get(row, mapping.description),
+            holdUps: get(row, mapping.holdUps),
+            discipline1: get(row, mapping.discipline),
+            level: get(row, mapping.level),
+            assignedToName: get(row, mapping.assignedTo),
+            resolutionNotes: get(row, mapping.resolutionNotes),
+            status: "open",
+            dueDate: getDate(row, mapping.deadline),
+          }))
+          .filter((r: any) => r.description || r.clashIdOriginal);
+        console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
+      }
 
       const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
       const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
@@ -170,7 +205,7 @@ Rules: viewpoint=viewpoint ID column (UG.001 etc), holdUps=hold ups/blocking iss
         projectId,
         uploadedById: req.user!.userId,
         fileName: req.file.originalname,
-        format: "excel",
+        format: isSpreadsheet ? "excel" : ext || "other",
         totalClashes: parsed.length,
         status: "processing",
         reportNumber: autoReportNumber,

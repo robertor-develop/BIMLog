@@ -457,7 +457,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
         {canWrite && (
           <label style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
-            <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv"
+            <input ref={fileRef} type="file" accept="*"
               onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
             <div className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 6,
               opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? "none" : "auto" }}>
