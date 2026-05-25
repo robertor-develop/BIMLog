@@ -60,6 +60,24 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
+  const [clashLinks, setClashLinks] = useState<Record<number, any[]>>({});
+
+  const loadClashLinks = async (clashId: number) => {
+    const r = await fetch(`${API}/projects/${projectId}/links/clash/${clashId}`, { headers });
+    if (r.ok) {
+      const links = await r.json();
+      setClashLinks(prev => ({ ...prev, [clashId]: links }));
+    }
+  };
+
+  const addClashLink = async (clashId: number, toType: string, toId: number, linkType: string) => {
+    const r = await fetch(`${API}/projects/${projectId}/links`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ fromType: "clash", fromId: clashId, toType, toId, linkType }),
+    });
+    if (r.ok) loadClashLinks(clashId);
+  };
 
   const loadReports = async () => {
     setLoading(true);
@@ -334,7 +352,11 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       </td>
                       <td style={{ padding: "4px 8px" }}>
                         <button className="btn btn-sm btn-outline"
-                          onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: !prev[c.id] }))}>
+                          onClick={() => {
+                            const nowOpen = !expandedNotes[c.id];
+                            setExpandedNotes(prev => ({ ...prev, [c.id]: nowOpen }));
+                            if (nowOpen) loadClashLinks(c.id);
+                          }}>
                           {expandedNotes[c.id] ? "Done" : "Edit"}
                         </button>
                       </td>
@@ -402,6 +424,44 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                                     onBlur={e => updateClash(c.id, { resolutionNotes: e.target.value })}
                                     rows={2} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, resize: "vertical" }} />
                                 </label>
+                          <div style={{ marginTop: 12, borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
+                            <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Linked Items</div>
+                            {(clashLinks[c.id] ?? []).length === 0 && (
+                              <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 8 }}>No linked items yet</div>
+                            )}
+                            {(clashLinks[c.id] ?? []).map((link: any) => (
+                              <div key={link.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 10px", background: "#EFF6FF", borderRadius: 6 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase" }}>{link.fromType === "clash" ? link.toType : link.fromType}</span>
+                                <span style={{ fontSize: 11, color: "#374151" }}>#{link.fromType === "clash" ? link.toId : link.fromId}</span>
+                                <span style={{ fontSize: 10, color: "#6B7280" }}>{link.linkType}</span>
+                                <button onClick={async () => {
+                                  await fetch(`${API}/projects/${projectId}/links/${link.id}`, { method: "DELETE", headers });
+                                  loadClashLinks(c.id);
+                                }} style={{ marginLeft: "auto", background: "none", border: "none", color: "#DC2626", cursor: "pointer", fontSize: 12 }}>×</button>
+                              </div>
+                            ))}
+                            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                              <select id={`link-type-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="submittal_item">Submittal</option>
+                                <option value="rfi">RFI</option>
+                                <option value="meeting">Meeting</option>
+                              </select>
+                              <input id={`link-id-${c.id}`} placeholder="ID number" type="number"
+                                style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, width: 100 }} />
+                              <select id={`link-rel-${c.id}`} style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
+                                <option value="resolves">Resolves</option>
+                                <option value="related">Related</option>
+                                <option value="caused_by">Caused by</option>
+                                <option value="blocks">Blocks</option>
+                              </select>
+                              <button className="btn btn-sm btn-primary" onClick={() => {
+                                const toType = (document.getElementById(`link-type-${c.id}`) as HTMLSelectElement)?.value;
+                                const toId = Number((document.getElementById(`link-id-${c.id}`) as HTMLInputElement)?.value);
+                                const linkType = (document.getElementById(`link-rel-${c.id}`) as HTMLSelectElement)?.value;
+                                if (toId) addClashLink(c.id, toType, toId, linkType);
+                              }}>Link</button>
+                            </div>
+                          </div>
                                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
                                   <button className="btn btn-sm btn-outline" onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: false }))}>Done</button>
                                 </div>
