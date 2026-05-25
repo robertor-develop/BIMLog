@@ -85,3 +85,45 @@ Return ONLY valid JSON, no markdown:
     };
   }
 }
+
+export async function getNextAvailableNumber(
+  projectId: number,
+  entityType: string,
+  proposedNumber: string
+): Promise<{ isDuplicate: boolean; suggestedNumber: string; existingNumbers: string[] }> {
+  try {
+    let existingNumbers: string[] = [];
+
+    if (entityType === "rfi") {
+      const rfis = await db.select({ number: rfisTable.number })
+        .from(rfisTable).where(eq(rfisTable.projectId, projectId));
+      existingNumbers = rfis.map(r => r.number);
+    } else if (entityType === "transmittal") {
+      const items = await db.select({ number: transmittalsTable.number })
+        .from(transmittalsTable).where(eq(transmittalsTable.projectId, projectId));
+      existingNumbers = items.map(r => r.number);
+    } else if (entityType === "change_order") {
+      const items = await db.select({ number: changeOrdersTable.number })
+        .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
+      existingNumbers = items.map(r => r.number);
+    }
+
+    const normalize = (n: string) => n.replace(/[^0-9]/g, "").replace(/^0+/, "");
+    const normalizedProposed = normalize(proposedNumber);
+    const isDuplicate = existingNumbers.some(n => normalize(n) === normalizedProposed || n === proposedNumber);
+
+    if (!isDuplicate) return { isDuplicate: false, suggestedNumber: proposedNumber, existingNumbers };
+
+    const prefix = proposedNumber.replace(/[0-9]+$/, "");
+    const usedNums = new Set(existingNumbers.map(n => parseInt(normalize(n) || "0")));
+    let next = 1;
+    while (usedNums.has(next)) next++;
+    const digits = proposedNumber.match(/[0-9]+$/)?.[0]?.length ?? 4;
+    const suggestedNumber = `${prefix}${String(next).padStart(digits, "0")}`;
+
+    return { isDuplicate: true, suggestedNumber, existingNumbers };
+  } catch (err) {
+    console.error("[getNextAvailableNumber] failed:", err);
+    return { isDuplicate: false, suggestedNumber: proposedNumber, existingNumbers: [] };
+  }
+}
