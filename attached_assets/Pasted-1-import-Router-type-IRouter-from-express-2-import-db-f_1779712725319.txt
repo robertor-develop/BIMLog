@@ -1,0 +1,121 @@
+1:import { Router, type IRouter } from "express";
+2:import { db } from "@workspace/db";
+3:import {
+8:import { sendEmail, makeSubmittalAssignedEmail, makeProcurementAlertEmail, makeRapidApprovalEmail, getUserLang, notifEnabled } from "../lib/email";
+9:import { eq, and, count } from "drizzle-orm";
+10:import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod";
+11:import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+12:import Anthropic from "@anthropic-ai/sdk";
+13:import PDFDocument from "pdfkit";
+64:router.get("/projects/:projectId/submittals", authMiddleware, requireProjectMember(), async (req, res) => {
+88:router.post("/projects/:projectId/submittals", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+196:router.get("/projects/:projectId/submittals/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
+306:router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+394:router.post("/projects/:projectId/submittals/:submittalId/view", authMiddleware, requireProjectMember(), async (req, res) => {
+413:router.get("/projects/:projectId/submittals/:submittalId/viewed-by", authMiddleware, requireProjectMember(), async (req, res) => {
+428:router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+540:router.post("/projects/:projectId/submittals/:submittalId/ai-check", authMiddleware, requireProjectMember(), async (req, res) => {
+550:    const anthropic = new Anthropic({
+622:router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), async (req, res) => {
+625:    const anthropic = new Anthropic({
+===schema files===
+submittal-register.ts
+submittal_reports.ts
+submittals.ts
+submittal-view-events.ts
+===schemas===
+import { pgTable, serial, text, timestamp, integer, date } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+
+export const submittalRegisterTable = pgTable("submittal_register", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  specSection: text("spec_section").notNull(),
+  description: text("description").notNull(),
+  trade: text("trade"),
+  submittalType: text("submittal_type"),
+  requiredByDate: date("required_by_date"),
+  leadTimeDays: integer("lead_time_days"),
+  responsibleCompany: text("responsible_company"),
+  status: text("status").default("pending"),
+  dateCreated: timestamp("date_created").defaultNow(),
+});
+
+export type SubmittalRegisterItem = typeof submittalRegisterTable.$inferSelect;
+import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { submittalsTable } from "./submittals";
+import { usersTable } from "./users";
+
+export const submittalViewEventsTable = pgTable("submittal_view_events", {
+  id: serial("id").primaryKey(),
+  submittalId: integer("submittal_id").references(() => submittalsTable.id).notNull(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  userFullName: text("user_full_name").notNull(),
+  userCompanyName: text("user_company_name").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+  eventType: text("event_type").notNull().default("viewed"),
+});
+
+export type SubmittalViewEvent = typeof submittalViewEventsTable.$inferSelect;
+import { pgTable, serial, text, timestamp, integer, boolean, json } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+import { usersTable } from "./users";
+
+export const submittalsTable = pgTable("submittals", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  number: text("number").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").notNull(),
+...
+  parentSubmittalId: integer("parent_submittal_id"),
+  revisionNumber: integer("revision_number").default(0),
+
+  distributionList: json("distribution_list").$type<string[]>().default([]),
+  attachmentsJson: json("attachments_json").$type<string[]>().default([]),
+  lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
+});
+
+export type Submittal = typeof submittalsTable.$inferSelect;
+import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { projectsTable } from "./projects";
+import { usersTable } from "./users";
+
+export const submittalReportsTable = pgTable("submittal_reports", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
+  fileName: text("file_name").notNull(),
+  format: text("format").notNull().default("manual"),
+  totalItems: integer("total_items").default(0),
+  status: text("status").default("complete"),
+  aiSummary: text("ai_summary"),
+  reportNumber: text("report_number"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const submittalItemsTable = pgTable("submittal_items", {
+  id: serial("id").primaryKey(),
+  reportId: integer("report_id").references(() => submittalReportsTable.id).notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  trade: text("trade"),
+  submittalType: text("submittal_type"),
+  floor: text("floor"),
+  fileName: text("file_name"),
+  revision: text("revision"),
+  version: text("version"),
+  submittalStatus: text("submittal_status"),
+  date: text("date"),
+  description: text("description"),
+  openItems: text("open_items"),
+  rfiOpen: text("rfi_open"),
+  rfiClose: text("rfi_close"),
+  rfiDescription: text("rfi_description"),
+  pdfUrl: text("pdf_url"),
+  notes: text("notes"),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
