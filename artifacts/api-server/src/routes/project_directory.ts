@@ -6,6 +6,13 @@ import {
 import { eq, and } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
+import Anthropic from "@anthropic-ai/sdk";
+import multer from "multer";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+});
 
 const router: Router = Router();
 
@@ -142,5 +149,58 @@ router.post("/projects/:projectId/directory/:entryId/invite", authMiddleware, re
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
+
+router.post("/projects/:projectId/directory/import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileContent = req.file.buffer.toString("utf-8").slice(0, 15000);
+      const extractMsg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 4000,
+        messages: [{
+          role: "user",
+          content: `Extract all contact/directory records from this construction project document.
+Return ONLY a JSON array, no markdown:
+[{"fullName":"person name","email":"email or null","companyName":"company or null","role":"role or null","notes":"notes or null"}]
+Document:
+${fileContent}`
+        }]
+      });
+      const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+      const records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+
+      let imported = 0;
+      for (const r of records) {
+        if (!r.fullName) continue;
+        await db.insert(projectDirectoryTable).values({
+          projectId,
+          fullName: r.fullName,
+          email: r.email || "imported@bimlog.io",
+          companyName: r.companyName || null,
+          role: r.role || "External Contact",
+          notes: r.notes || null,
+          addedById: req.user!.userId,
+          bimlogStatus: "none",
+        });
+        imported++;
+      }
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "import", entityType: "directory", entityId: projectId,
+        details: `Imported ${imported} contacts from ${req.file.originalname}`,
+      });
+      res.json({ imported, message: `${imported} contacts imported successfully` });
+    } catch (err) {
+      console.error("[directory-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 export default router;
