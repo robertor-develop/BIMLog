@@ -1,0 +1,59 @@
+Apply these 3 targeted fixes:
+
+FIX 1 — Replace the single-line status options in the table row select.
+Find this exact single line:
+                          <option value="open">Open</option><option value="in_progress">In Progress</option><option value="resolved">Resolved</option><option value="wont_fix">Won't Fix</option>
+
+Replace with:
+                          <option value="open">Active</option><option value="follow_up">Follow Up</option><option value="waiting_design">Waiting Design</option><option value="in_progress">In Progress</option><option value="approved">Approved</option><option value="resolved">Resolved</option><option value="wont_fix">Won't Fix</option>
+
+Also update the background/color style on that same select to handle new statuses.
+Find the style on that select:
+                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "in_progress" ? "#DBEAFE" : "#FEF3C7",
+                            color: c.status === "resolved" ? "#16A34A" : c.status === "in_progress" ? "#1D4ED8" : "#D97706"
+
+Replace with:
+                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "approved" ? "#D1FAE5" : c.status === "waiting_design" ? "#EDE9FE" : c.status === "follow_up" ? "#FEF3C7" : c.status === "in_progress" ? "#DBEAFE" : "#FEE2E2",
+                            color: c.status === "resolved" ? "#16A34A" : c.status === "approved" ? "#059669" : c.status === "waiting_design" ? "#7C3AED" : c.status === "follow_up" ? "#D97706" : c.status === "in_progress" ? "#1D4ED8" : "#DC2626"
+
+FIX 2 — Add status select to the expanded edit panel.
+In the expanded panel grid, find the Trade field label:
+                                  <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Trade</label>
+
+Add a new grid item BEFORE the Trade div for Status:
+                              <div>
+                                <label style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Status</label>
+                                <select value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
+                                  style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 8px", fontSize: 12, fontWeight: 600 }}>
+                                  <option value="open">Active</option>
+                                  <option value="follow_up">Follow Up</option>
+                                  <option value="waiting_design">Waiting Design</option>
+                                  <option value="in_progress">In Progress</option>
+                                  <option value="approved">Approved</option>
+                                  <option value="resolved">Resolved</option>
+                                  <option value="wont_fix">Won't Fix</option>
+                                </select>
+                              </div>
+
+FIX 3 — Update filter dropdown options.
+Find:
+          <option value="open">{t("Open","Abierto")}</option>
+          <option value="in_progress">{t("In Progress","En Progreso")}</option>
+          <option value="resolved">{t("Resolved","Resuelto")}</option>
+
+Replace with:
+          <option value="open">{t("Active","Activo")}</option>
+          <option value="follow_up">{t("Follow Up","Seguimiento")}</option>
+          <option value="waiting_design">{t("Waiting Design","Esperando Diseño")}</option>
+          <option value="in_progress">{t("In Progress","En Progreso")}</option>
+          <option value="approved">{t("Approved","Aprobado")}</option>
+          <option value="resolved">{t("Resolved","Resuelto")}</option>
+
+Check 1:
+grep -n "follow_up\|waiting_design\|Waiting Design\|Follow Up" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -10
+
+Check 2 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.

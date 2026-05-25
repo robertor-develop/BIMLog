@@ -250,8 +250,11 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 }}>
           <option value="all">{t("All Statuses","Todos los Estados")}</option>
-          <option value="open">{t("Open","Abierto")}</option>
+          <option value="open">{t("Active","Activo")}</option>
+          <option value="follow_up">{t("Follow Up","Seguimiento")}</option>
+          <option value="waiting_design">{t("Waiting Design","Esperando Diseño")}</option>
           <option value="in_progress">{t("In Progress","En Progreso")}</option>
+          <option value="approved">{t("Approved","Aprobado")}</option>
           <option value="resolved">{t("Resolved","Resuelto")}</option>
         </select>
         <input value={search} onChange={e => setSearch(e.target.value)}
@@ -328,9 +331,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                       <td style={{ padding: "4px 8px" }}>
                         <select value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
                           style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 600,
-                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "in_progress" ? "#DBEAFE" : "#FEF3C7",
-                            color: c.status === "resolved" ? "#16A34A" : c.status === "in_progress" ? "#1D4ED8" : "#D97706" }}>
-                          <option value="open">Open</option><option value="in_progress">In Progress</option><option value="resolved">Resolved</option><option value="wont_fix">Won't Fix</option>
+                            background: c.status === "resolved" ? "#DCFCE7" : c.status === "approved" ? "#D1FAE5" : c.status === "waiting_design" ? "#EDE9FE" : c.status === "follow_up" ? "#FEF3C7" : c.status === "in_progress" ? "#DBEAFE" : "#FEE2E2",
+                            color: c.status === "resolved" ? "#16A34A" : c.status === "approved" ? "#059669" : c.status === "waiting_design" ? "#7C3AED" : c.status === "follow_up" ? "#D97706" : c.status === "in_progress" ? "#1D4ED8" : "#DC2626" }}>
+                          <option value="open">Active</option><option value="follow_up">Follow Up</option><option value="waiting_design">Waiting Design</option><option value="in_progress">In Progress</option><option value="approved">Approved</option><option value="resolved">Resolved</option><option value="wont_fix">Won't Fix</option>
                         </select>
                       </td>
                       <td style={{ padding: "4px 8px" }} onClick={() => setExpandedNotes(prev => ({ ...prev, [c.id]: true }))}>
