@@ -101,20 +101,29 @@ router.post("/projects/:projectId/clash-reports/upload",
               const viewpointId = match ? match[1] : viewName.substring(0, 10);
               const description = match ? match[2] : viewName;
               const tradeLower = description.toLowerCase();
-              const discipline = tradeLower.includes(" fp ") || tradeLower.includes("fire") ? "FP"
-                : tradeLower.includes(" pb ") || tradeLower.includes("plumb") || tradeLower.includes("san") || tradeLower.includes("cw pipe") ? "PB"
-                : tradeLower.includes(" hvac ") || tradeLower.includes("duct") || tradeLower.includes("hvac") ? "HVAC"
-                : tradeLower.includes(" elec ") || tradeLower.includes("conduit") || tradeLower.includes("electrical") ? "ELEC"
-                : tradeLower.includes(" tx ") || tradeLower.includes(" kx ") ? "MECH"
+              const discipline =
+                tradeLower.includes(" fp ") || tradeLower.startsWith("fp ") || tradeLower.includes("fire pump") || tradeLower.includes("fire prot") ? "FP"
+                : tradeLower.includes(" pb ") || tradeLower.startsWith("pb ") || tradeLower.includes("plumb") || tradeLower.includes(" san ") || tradeLower.includes("sanitary") || tradeLower.includes("cw pipe") || tradeLower.includes("bath tub") || tradeLower.includes("trench drain") || tradeLower.includes("ref pip") ? "PB"
+                : tradeLower.includes("duct") || tradeLower.includes(" hvac") || tradeLower.includes("hvac ") || tradeLower.includes(" tx ") || tradeLower.includes(" kx ") || tradeLower.includes("grille") || (tradeLower.includes("riser") && tradeLower.includes("hvac")) ? "HVAC"
+                : tradeLower.includes("conduit") || tradeLower.includes(" elec") || tradeLower.includes("electrical") || tradeLower.includes(" poe") ? "ELEC"
+                : tradeLower.includes("struct") || tradeLower.includes("foundation") || tradeLower.includes("slab") || tradeLower.includes("beam") ? "STRUCT"
                 : "COORD";
+
+              const level =
+                viewpointId.startsWith("UG.") ? "UNDERGROUND"
+                : viewpointId.startsWith("C.") ? "CELLAR"
+                : viewpointId.startsWith("B.") ? "BASEMENT"
+                : viewpointId.startsWith("G.") ? "GROUND"
+                : viewpointId.startsWith("R.") ? "ROOF"
+                : viewpointId.match(/^(\d+)\./) ? `${viewpointId.match(/^(\d+)\./)?.[1]}TH FLOOR`
+                : folderName;
+
               allViews.push({
                 clashIdOriginal: viewpointId,
                 description: description,
                 holdUps: "",
                 discipline1: discipline,
-                level: folderName.includes("UG") || viewpointId.startsWith("UG") ? "UNDERGROUND"
-                  : viewpointId.startsWith("12.") ? "12TH"
-                  : "",
+                level: level,
                 assignedToName: "",
                 resolutionNotes: null,
                 status: "open",
