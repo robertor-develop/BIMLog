@@ -1,7 +1,7 @@
 import { createRequire } from "module";
 import * as XLSX from "xlsx";
-const require = createRequire(import.meta.url);
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse");
+const requireFrom = createRequire(typeof __filename !== "undefined" ? __filename : import.meta.url);
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = requireFrom("pdf-parse");
 
 const CHUNK_SIZE = 80000;
 
