@@ -1,5 +1,7 @@
-import * as pdfParseMod from "pdf-parse";
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (pdfParseMod as any).default ?? (pdfParseMod as any);
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse");
 import * as XLSX from "xlsx";
 
 export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][] }> {
