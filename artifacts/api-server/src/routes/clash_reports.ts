@@ -90,13 +90,17 @@ router.post("/projects/:projectId/clash-reports/upload",
         try {
           const xmlContent = req.file.buffer.toString("utf-8");
           const result = await parseXml(xmlContent) as any;
-          const viewfolders = result?.exchange?.viewpoints?.[0]?.viewfolder ?? [];
+          const exchange = result?.exchange ?? result;
+          const viewpointsNode = exchange?.viewpoints;
+          const viewpointsArr = Array.isArray(viewpointsNode) ? viewpointsNode[0] : viewpointsNode;
+          const viewfolders = viewpointsArr?.viewfolder ?? [];
+          console.log("[clash-upload] XML structure — viewfolders found:", viewfolders.length);
           const allViews: any[] = [];
           for (const folder of viewfolders) {
-            const folderName = folder?.$.name ?? "";
-            const views = folder?.view ?? [];
+            const folderName = folder?.$ ? folder.$.name : (folder?.name ?? "");
+            const views = Array.isArray(folder?.view) ? folder.view : [];
             for (const view of views) {
-              const viewName = view?.$.name ?? "";
+              const viewName = view?.$ ? view.$.name : (view?.name ?? "");
               const match = viewName.match(/^([A-Z0-9]+\.[0-9]+)\s+(.+)$/);
               const viewpointId = match ? match[1] : viewName.substring(0, 10);
               const description = match ? match[2] : viewName;
