@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable } from "@workspace/db/schema";
 import { sendEmail, makeRfiAssignedEmail, getUserLang, notifEnabled } from "../lib/email";
+import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { eq, and, count, max } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -615,7 +616,18 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     }
 
     const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
-    const number = `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
+    const proposedNumber = (req.body.number as string | undefined) || `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
+    const { isDuplicate, suggestedNumber } = await getNextAvailableNumber(projectId, "rfi", proposedNumber);
+    if (isDuplicate && !(req.body.forceNumber as boolean | undefined)) {
+      res.status(409).json({
+        error: "duplicate_number",
+        message: `An RFI with number ${proposedNumber} already exists.`,
+        suggestedNumber,
+        canForce: true,
+      });
+      return;
+    }
+    const number = isDuplicate ? suggestedNumber : proposedNumber;
 
     const defaultRfiStatus = await getDefaultValue("rfi_status");
     const [rfi] = await db.insert(rfisTable).values({
