@@ -93,8 +93,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["xlsx","xls","csv"].includes(ext ?? "")) {
-      setError("Unsupported format. Use Excel (.xlsx, .xls) or CSV.");
+    // Accept any file — AI handles extraction
+    if (false) {
+      setError("Unsupported format.");
       return;
     }
     setUploading(true);
