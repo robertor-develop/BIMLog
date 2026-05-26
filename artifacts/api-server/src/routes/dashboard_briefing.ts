@@ -4,7 +4,7 @@ import {
   rfisTable, submittalsTable, filesTable, projectMembersTable, projectsTable,
   clashReportsTable, clashesTable, submittalReportsTable, submittalItemsTable,
 } from "@workspace/db/schema";
-import { eq, and, inArray, ne } from "drizzle-orm";
+import { eq, and, inArray, ne, or } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -200,6 +200,98 @@ Return exactly:
     res.json(result);
   } catch {
     res.json(fallback);
+  }
+});
+
+// ── GET /dashboard/pending/rfis ───────────────────────────────────────────────
+router.get("/dashboard/pending/rfis", authMiddleware, async (req, res) => {
+  const userId = req.user!.userId;
+  try {
+    const memberships = await db.select({ projectId: projectMembersTable.projectId })
+      .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
+    const projectIds = memberships.map(m => m.projectId);
+    if (!projectIds.length) { res.json([]); return; }
+
+    const rows = await db.select({
+      id: rfisTable.id,
+      rfi_number: rfisTable.number,
+      title: rfisTable.subject,
+      status: rfisTable.status,
+      due_date: rfisTable.dueDate,
+      project_id: projectsTable.id,
+      project_name: projectsTable.name,
+      project_code: projectsTable.code,
+    })
+      .from(rfisTable)
+      .innerJoin(projectsTable, eq(rfisTable.projectId, projectsTable.id))
+      .where(and(inArray(rfisTable.projectId, projectIds), ne(rfisTable.status, "closed")));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── GET /dashboard/pending/submittals ─────────────────────────────────────────
+router.get("/dashboard/pending/submittals", authMiddleware, async (req, res) => {
+  const userId = req.user!.userId;
+  try {
+    const memberships = await db.select({ projectId: projectMembersTable.projectId })
+      .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
+    const projectIds = memberships.map(m => m.projectId);
+    if (!projectIds.length) { res.json([]); return; }
+
+    const rows = await db.select({
+      id: submittalsTable.id,
+      submittal_number: submittalsTable.number,
+      title: submittalsTable.title,
+      status: submittalsTable.status,
+      due_date: submittalsTable.dueDate,
+      project_id: projectsTable.id,
+      project_name: projectsTable.name,
+      project_code: projectsTable.code,
+    })
+      .from(submittalsTable)
+      .innerJoin(projectsTable, eq(submittalsTable.projectId, projectsTable.id))
+      .where(and(
+        inArray(submittalsTable.projectId, projectIds),
+        inArray(submittalsTable.status, ["pending", "awaiting_review", "under_review"]),
+      ));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── GET /dashboard/pending/files ──────────────────────────────────────────────
+router.get("/dashboard/pending/files", authMiddleware, async (req, res) => {
+  const userId = req.user!.userId;
+  try {
+    const memberships = await db.select({ projectId: projectMembersTable.projectId })
+      .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
+    const projectIds = memberships.map(m => m.projectId);
+    if (!projectIds.length) { res.json([]); return; }
+
+    const rows = await db.select({
+      id: filesTable.id,
+      file_name: filesTable.fileName,
+      compliance_status: filesTable.isCompliant,
+      cvr_workflow_status: filesTable.cvrWorkflowStatus,
+      project_id: projectsTable.id,
+      project_name: projectsTable.name,
+      project_code: projectsTable.code,
+    })
+      .from(filesTable)
+      .innerJoin(projectsTable, eq(filesTable.projectId, projectsTable.id))
+      .where(and(
+        inArray(filesTable.projectId, projectIds),
+        or(
+          eq(filesTable.cvrWorkflowStatus, "pending_review"),
+          eq(filesTable.isCompliant, false),
+        ),
+      ));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
 

@@ -549,19 +549,19 @@ export function Dashboard() {
                       label: "Open RFIs",
                       count: openRfisCount,
                       color: "#D97706", bg: "#FFFBEB", border: "#FDE68A",
-                      href: projects?.[0] ? `/projects/${projects[0].id}/rfis` : "/projects",
+                      href: "/pending?type=rfis",
                     },
                     {
                       label: "Pending Submittals",
                       count: pendingSubsCount,
                       color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE",
-                      href: projects?.[0] ? `/projects/${projects[0].id}/submittals` : "/projects",
+                      href: "/pending?type=submittals",
                     },
                     {
                       label: "Files Needing Attention",
                       count: filesAttnCount,
                       color: "#DC2626", bg: "#FEF2F2", border: "#FECACA",
-                      href: projects?.[0] ? `/projects/${projects[0].id}/files` : "/projects",
+                      href: "/pending?type=files",
                     },
                   ];
                   return (

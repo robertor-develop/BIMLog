@@ -1,0 +1,45 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Fix the Pending Items Go → buttons on the Dashboard. Right now they navigate to a hardcoded project. That is wrong. Pending items can belong to multiple different projects. Each Go → button must open a new cross-project list page showing all items of that type across all the user's projects, so the user can see which project each item belongs to and decide where to go.
+
+In artifacts/api-server/src/routes/dashboard_briefing.ts add 3 new GET endpoints. All require auth and return only items from the logged-in user's projects.
+
+GET /api/v1/dashboard/pending/rfis — query rfis joined with projects where status != 'closed'. Return: id, rfi_number, title, status, due_date, project_id, project_name, project_code.
+
+GET /api/v1/dashboard/pending/submittals — query submittals joined with projects where status = 'pending' or 'awaiting_review'. Return: id, submittal_number, title, status, due_date, project_id, project_name, project_code.
+
+GET /api/v1/dashboard/pending/files — query files joined with projects where cvr_workflow_status = 'pending_review' OR compliance_status = 'non_compliant'. Return: id, file_name, compliance_status, project_id, project_name, project_code.
+
+Register all 3 in artifacts/api-server/src/routes/index.ts.
+
+Create artifacts/bimlog/src/pages/PendingItems.tsx. It reads query param type (rfis, submittals, or files) and fetches from the matching endpoint above. Each row shows the project code badge in the same color style as the project cards, item number and title, status badge, due date if it exists, and an arrow that navigates to that project's specific tab. Header shows the type label and total count. Back button top left returns to /dashboard. If no items show "No pending items — you're all clear."
+
+In artifacts/bimlog/src/pages/Dashboard.tsx change the Go → buttons in the Pending Items section:
+Open RFIs → /pending?type=rfis
+Pending Submittals → /pending?type=submittals
+Files Needing Attention → /pending?type=files
+Remove any hardcoded project ID from these buttons.
+
+In artifacts/bimlog/src/App.tsx add route /pending pointing to PendingItems.
+
+Check 1:
+find artifacts/bimlog/src/pages -name "PendingItems*"
+
+Check 2:
+grep -n "pending/rfis\|pending/submittals\|pending/files" artifacts/api-server/src/routes/dashboard_briefing.ts | head -10
+
+Check 3:
+grep -n "pending?type\|/pending" artifacts/bimlog/src/pages/Dashboard.tsx | head -10
+
+Check 4:
+grep -n "PendingItems\|/pending" artifacts/bimlog/src/App.tsx | head -5
+
+Check 5:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

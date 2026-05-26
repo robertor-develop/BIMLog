@@ -11,6 +11,7 @@ import { Landing } from "@/pages/Landing";
 import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
+import { PendingItems } from "@/pages/PendingItems";
 import { ProjectDetail } from "@/pages/ProjectDetail";
 import { SetupGuide } from "@/pages/SetupGuide";
 import { Profile } from "@/pages/Profile";
@@ -63,6 +64,9 @@ function Router() {
       {/* Protected Routes */}
       <Route path="/dashboard">
         {() => <ProtectedRoute component={Dashboard} />}
+      </Route>
+      <Route path="/pending">
+        {() => <ProtectedRoute component={PendingItems} />}
       </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}
