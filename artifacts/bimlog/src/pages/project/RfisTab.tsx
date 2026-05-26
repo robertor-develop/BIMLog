@@ -167,6 +167,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           }
         } else {
           setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+          setTimeout(() => window.location.reload(), 1500);
         }
         setTimeout(() => setImportMsg(""), 8000);
       } else {
@@ -361,7 +362,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
         <Input placeholder={w("Search RFIs…", "Buscar RFIs…", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 280, fontSize: 12 }} />
         <div style={{ display: "flex", gap: 4 }}>
-          {["all", ...statusOptions.map(o => o.value)].map(s => (
+          {["all", ...([...new Set(statusOptions.map(o => o.value))])].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)} style={{
               padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
               border: statusFilter === s ? "1.5px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
