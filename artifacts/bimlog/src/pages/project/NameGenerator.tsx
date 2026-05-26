@@ -336,7 +336,23 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
           const current = selections[field.label] || "";
           const isProjectCode = field.label === "Project Code";
           return (
-            <div key={field.label}>
+            <div key={field.label} style={{ opacity: disabledFields[field.label] ? 0.4 : 1 }}>
+              {(field.label === "Sequence" || field.label === "Status" || field.label === "Revision") && (
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
+                  <button
+                    onClick={() => toggleField(field.label)}
+                    style={{
+                      fontSize: 10, fontWeight: 700, padding: "2px 8px",
+                      borderRadius: 4, cursor: "pointer",
+                      border: `1px solid ${disabledFields[field.label] ? "#D1D5DB" : "#1D4ED8"}`,
+                      background: disabledFields[field.label] ? "#F3F4F6" : "#EFF6FF",
+                      color: disabledFields[field.label] ? "#6B7280" : "#1D4ED8",
+                    }}
+                  >
+                    {disabledFields[field.label] ? "Include" : "Exclude"}
+                  </button>
+                </div>
+              )}
               <label style={{
                 display: "block", fontSize: 10, fontWeight: 700,
                 color: "hsl(var(--muted-foreground))",
