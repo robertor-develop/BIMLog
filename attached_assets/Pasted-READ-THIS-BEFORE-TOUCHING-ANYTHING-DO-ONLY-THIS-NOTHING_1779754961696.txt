@@ -1,0 +1,155 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/lib/extract-file-text.ts
+
+Replace the ENTIRE file with this:
+
+import * as XLSX from "xlsx";
+
+const CHUNK_SIZE = 80000;
+
+function chunkText(text: string): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+    chunks.push(text.slice(i, i + CHUNK_SIZE));
+  }
+  return chunks.length > 0 ? chunks : [""];
+}
+
+export async function extractFileText(
+  buffer: Buffer,
+  filename: string
+): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[]; isPdf: boolean; pdfBase64?: string }> {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+  const isPdf = ext === "pdf";
+
+  if (isSpreadsheet) {
+    try {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+      let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+      let bestRowCount = 0;
+      for (const sheetName of workbook.SheetNames) {
+        const s = workbook.Sheets[sheetName];
+        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
+        if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
+      }
+      const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      const text = rows.map((r: any[]) => r.join("\t")).join("\n");
+      const chunks = chunkText(text);
+      return { text: chunks[0], isSpreadsheet: true, rows, chunks, isPdf: false };
+    } catch (err) {
+      console.error("[extract-file-text] Excel parse failed:", err);
+      const text = buffer.toString("utf-8");
+      return { text, isSpreadsheet: false, chunks: chunkText(text), isPdf: false };
+    }
+  }
+
+  if (isPdf) {
+    // Pass PDF directly to Claude as base64 — let AI read it natively
+    const pdfBase64 = buffer.toString("base64");
+    console.log("[extract-file-text] PDF ready for Claude vision:", buffer.length, "bytes");
+    return { text: "", isSpreadsheet: false, chunks: [""], isPdf: true, pdfBase64 };
+  }
+
+  // Any other file — plain text
+  const text = buffer.toString("utf-8");
+  return { text, isSpreadsheet: false, chunks: chunkText(text), isPdf: false };
+}
+
+Now update the RFI import endpoint to pass PDF directly to Claude as a document.
+
+FILE: artifacts/api-server/src/routes/rfis.ts
+
+Find in the import endpoint:
+      const { text: fileContent, chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+
+Replace with:
+      const { text: fileContent, chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+
+Then find the chunked AI extraction loop:
+Find:
+      let records: any[] = [];
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all RFI records from this construction document chunk. Return ONLY a JSON array, no markdown. If no RFIs found return empty array []:
+
+Replace with:
+      let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        // Send PDF directly to Claude as a document
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                {
+                  type: "document",
+                  source: {
+                    type: "base64",
+                    media_type: "application/pdf",
+                    data: pdfBase64,
+                  },
+                },
+                {
+                  type: "text",
+                  text: `Extract all RFI records from this PDF document. Return ONLY a JSON array, no markdown. If no RFIs found return []:
+[{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]`
+                }
+              ]
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[rfi-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[rfi-import] PDF direct extraction failed:", e);
+        }
+      } else {
+      for (const chunk of chunks) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Extract all RFI records from this construction document chunk. Return ONLY a JSON array, no markdown. If no RFIs found return empty array []:
+
+Also close the else block — find the closing of the for loop:
+Find:
+      }
+
+      const forceImport = req.body?.forceImport === "true";
+
+Replace with:
+      }
+      } // end else (non-PDF)
+
+      const forceImport = req.body?.forceImport === "true";
+
+Do the same PDF direct extraction pattern for ALL other import endpoints:
+transmittals.ts, change_orders.ts, meeting_minutes.ts, submittals.ts, project_directory.ts
+
+For each one add the isPdf/pdfBase64 destructuring and the PDF direct Claude extraction block before the chunks loop.
+
+Check 1:
+grep -n "isPdf\|pdfBase64\|type.*document\|media_type.*pdf" artifacts/api-server/src/routes/rfis.ts | head -8
+
+Check 2:
+grep -n "isPdf\|pdfBase64" artifacts/api-server/src/lib/extract-file-text.ts | head -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

@@ -1606,8 +1606,29 @@ router.post("/projects/:projectId/rfis/import",
         apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
         baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
       });
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `Extract all RFI records from this PDF document. Return ONLY a JSON array, no markdown. If no RFIs found return []:
+[{"number":"RFI-001","subject":"subject text","description":"full description","status":"open/closed/pending","priority":"high/medium/low","submittedByCompany":"company","submittedByContact":"person name","dueDate":"date or null"}]` }
+              ] as any
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[rfi-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[rfi-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropicClient.messages.create({
@@ -1628,6 +1649,7 @@ ${chunk}`
           console.error("[rfi-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

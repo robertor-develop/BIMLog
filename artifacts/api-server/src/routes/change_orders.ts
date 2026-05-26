@@ -225,8 +225,29 @@ router.post("/projects/:projectId/change-orders/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `Extract all change order records from this PDF document. Return ONLY a JSON array, no markdown. If none found return []:
+[{"number":"CO-001","title":"description","description":"full details","status":"draft/pending_approval/approved/rejected","contractValueImpact":"dollar amount or null","dateIssued":"date or null"}]` }
+              ] as any
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[change-order-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[change-order-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropic.messages.create({
@@ -247,6 +268,7 @@ ${chunk}`
           console.error("[change-order-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

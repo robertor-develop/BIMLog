@@ -1,17 +1,5 @@
 import * as XLSX from "xlsx";
 
-async function parsePdf(buffer: Buffer): Promise<string> {
-  try {
-    const mod = await import("pdf-parse");
-    const pdfParse = mod.default ?? mod;
-    const data = await (pdfParse as any)(buffer);
-    return (data.text as string) ?? "";
-  } catch (err) {
-    console.error("[extract-file-text] pdf-parse failed:", err);
-    return "";
-  }
-}
-
 const CHUNK_SIZE = 80000;
 
 function chunkText(text: string): string[] {
@@ -22,9 +10,13 @@ function chunkText(text: string): string[] {
   return chunks.length > 0 ? chunks : [""];
 }
 
-export async function extractFileText(buffer: Buffer, filename: string): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[] }> {
+export async function extractFileText(
+  buffer: Buffer,
+  filename: string
+): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[]; isPdf: boolean; pdfBase64?: string }> {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
   const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+  const isPdf = ext === "pdf";
 
   if (isSpreadsheet) {
     try {
@@ -38,30 +30,22 @@ export async function extractFileText(buffer: Buffer, filename: string): Promise
         if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
       }
       const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
-      const text = rows.map(r => r.join("\t")).join("\n");
+      const text = rows.map((r: any[]) => r.join("\t")).join("\n");
       const chunks = chunkText(text);
-      return { text: chunks[0], isSpreadsheet: true, rows, chunks };
+      return { text: chunks[0], isSpreadsheet: true, rows, chunks, isPdf: false };
     } catch (err) {
       console.error("[extract-file-text] Excel parse failed:", err);
       const text = buffer.toString("utf-8");
-      return { text, isSpreadsheet: false, chunks: chunkText(text) };
+      return { text, isSpreadsheet: false, chunks: chunkText(text), isPdf: false };
     }
   }
 
-  if (ext === "pdf") {
-    try {
-      const pdfText = await parsePdf(buffer);
-      console.log("[extract-file-text] PDF extracted:", pdfText.length, "chars");
-      const chunks = chunkText(pdfText);
-      console.log("[extract-file-text] PDF chunks:", chunks.length);
-      return { text: pdfText, isSpreadsheet: false, chunks };
-    } catch (err) {
-      console.error("[extract-file-text] PDF parse failed:", err);
-      const text = buffer.toString("utf-8");
-      return { text, isSpreadsheet: false, chunks: chunkText(text) };
-    }
+  if (isPdf) {
+    const pdfBase64 = buffer.toString("base64");
+    console.log("[extract-file-text] PDF ready for Claude vision:", buffer.length, "bytes");
+    return { text: "", isSpreadsheet: false, chunks: [""], isPdf: true, pdfBase64 };
   }
 
   const text = buffer.toString("utf-8");
-  return { text, isSpreadsheet: false, chunks: chunkText(text) };
+  return { text, isSpreadsheet: false, chunks: chunkText(text), isPdf: false };
 }

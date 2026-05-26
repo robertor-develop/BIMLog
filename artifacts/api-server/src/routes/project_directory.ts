@@ -159,8 +159,29 @@ router.post("/projects/:projectId/directory/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `Extract all contact/directory records from this PDF document. Return ONLY a JSON array, no markdown. If none found return []:
+[{"fullName":"person name","email":"email or null","companyName":"company or null","role":"role or null","notes":"notes or null"}]` }
+              ] as any
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[directory-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[directory-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropic.messages.create({
@@ -182,6 +203,7 @@ ${chunk}`
           console.error("[directory-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       let imported = 0;
       for (const r of records) {

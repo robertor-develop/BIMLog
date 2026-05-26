@@ -1181,8 +1181,29 @@ router.post("/projects/:projectId/submittals/import",
         apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
         baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
       });
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropicClient.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `Extract all submittal records from this PDF document. Return ONLY a JSON array, no markdown. If none found return []:
+[{"number":"SUB-001","title":"submittal title","description":"description or null","status":"pending/under_review/approved/rejected","specSection":"spec section or null","submittalType":"SHOP/SLEEVE/etc or null","submittedByCompany":"company or null","submittedByPerson":"person or null"}]` }
+              ] as any
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[submittal-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[submittal-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropicClient.messages.create({
@@ -1203,6 +1224,7 @@ ${chunk}`
           console.error("[submittal-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

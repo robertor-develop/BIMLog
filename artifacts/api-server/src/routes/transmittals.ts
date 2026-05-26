@@ -266,8 +266,29 @@ router.post("/projects/:projectId/transmittals/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `Extract all transmittal records from this PDF document. Return ONLY a JSON array, no markdown. If none found return []:
+[{"number":"T-001","title":"transmittal title","purpose":"purpose or notes","recipient":"recipient name","status":"draft/sent/acknowledged","sentDate":"date or null"}]` }
+              ] as any
+            }]
+          });
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          records = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+          console.log("[transmittal-import] PDF direct extraction:", records.length, "records");
+        } catch (e) {
+          console.error("[transmittal-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropic.messages.create({
@@ -288,6 +309,7 @@ ${chunk}`
           console.error("[transmittal-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {

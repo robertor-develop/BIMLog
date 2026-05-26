@@ -380,8 +380,50 @@ router.post("/projects/:projectId/meetings/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { chunks } = await extractFileText(req.file.buffer, req.file.originalname);
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let data: any = { title: null, meetingDate: null, meetingTime: null, location: null, meetingNumber: null, notes: null, attendees: [], actionItems: [] };
+      if (isPdf && pdfBase64) {
+        try {
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+                { type: "text", text: `You are analyzing a construction meeting minutes PDF document.
+Extract the meeting information. Return ONLY valid JSON, no markdown. Use null for fields not present:
+{
+  "title": "meeting title or null",
+  "meetingDate": "date string or null",
+  "meetingTime": "time string or null",
+  "location": "location or null",
+  "meetingNumber": "meeting number or null",
+  "notes": "general notes or null",
+  "attendees": [{"trade":"","company":"","fullName":"","role":"","email":"","phone":""}],
+  "actionItems": [{"description":"","assignedToName":"","dueDate":"date or null","status":"open"}]
+}` }
+              ] as any
+            }]
+          });
+          const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
+          const clean = text.replace(/```json\n?|```/g, "").trim();
+          const parsed = JSON.parse(clean);
+          data = {
+            title: parsed.title ?? null,
+            meetingDate: parsed.meetingDate ?? null,
+            meetingTime: parsed.meetingTime ?? null,
+            location: parsed.location ?? null,
+            meetingNumber: parsed.meetingNumber ?? null,
+            notes: parsed.notes ?? null,
+            attendees: Array.isArray(parsed.attendees) ? parsed.attendees : [],
+            actionItems: Array.isArray(parsed.actionItems) ? parsed.actionItems : [],
+          };
+          console.log("[meeting-import] PDF direct extraction: attendees=", data.attendees.length, "actions=", data.actionItems.length);
+        } catch (e) {
+          console.error("[meeting-import] PDF direct extraction failed:", e);
+        }
+      } else {
       for (const chunk of chunks) {
         try {
           const extractMsg = await anthropic.messages.create({
@@ -421,6 +463,7 @@ ${chunk}`
           console.error("[meeting-import] chunk extraction failed:", e);
         }
       }
+      } // end else (non-PDF)
 
       const [meeting] = await db.insert(meetingMinutesTable).values({
         projectId,
