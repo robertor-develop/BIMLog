@@ -90,7 +90,7 @@ router.post("/projects/:projectId/clash-reports/upload",
           // Send full XML to Claude — Claude reads it natively, no parsing library needed
           const extractMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
-            max_tokens: 16000,
+            max_tokens: 8192,
             system: `You are a Navisworks XML coordination report analyzer. 
 You extract ALL clash viewpoints from Navisworks XML export files.
 You understand the Autodesk Navisworks Exchange XML format.
