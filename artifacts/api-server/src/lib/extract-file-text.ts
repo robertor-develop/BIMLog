@@ -2,12 +2,13 @@ import * as XLSX from "xlsx";
 
 async function parsePdf(buffer: Buffer): Promise<string> {
   try {
-    const { default: pdfParse } = await import("pdf-parse");
-    const data = await pdfParse(buffer);
-    return data.text ?? "";
+    const mod = await import("pdf-parse");
+    const pdfParse = mod.default ?? mod;
+    const data = await (pdfParse as any)(buffer);
+    return (data.text as string) ?? "";
   } catch (err) {
-    console.error("[extract-file-text] pdf-parse import failed:", err);
-    return buffer.toString("utf-8");
+    console.error("[extract-file-text] pdf-parse failed:", err);
+    return "";
   }
 }
 
