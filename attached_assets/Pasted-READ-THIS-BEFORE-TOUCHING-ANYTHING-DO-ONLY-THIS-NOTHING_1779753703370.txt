@@ -1,0 +1,49 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+The xml2js structure is confirmed:
+- result.exchange (object, not array)
+- result.exchange.viewpoints (array)
+- result.exchange.viewpoints[0].viewfolder (array)
+- each viewfolder has .$ for attributes and .view array
+- each view has .$ for attributes
+
+Update the XML parser to match exactly:
+
+Find:
+          // xml2js wraps everything in arrays — navigate carefully
+          console.log("[clash-upload] XML keys:", Object.keys(result ?? {}));
+          const exchange = Array.isArray(result?.exchange) ? result.exchange[0] : (result?.exchange ?? result);
+          console.log("[clash-upload] exchange keys:", Object.keys(exchange ?? {}));
+          const viewpointsNode = Array.isArray(exchange?.viewpoints) ? exchange.viewpoints[0] : exchange?.viewpoints;
+          console.log("[clash-upload] viewpointsNode keys:", Object.keys(viewpointsNode ?? {}));
+          const viewfolders = Array.isArray(viewpointsNode?.viewfolder) ? viewpointsNode.viewfolder : [];
+          console.log("[clash-upload] XML structure — viewfolders found:", viewfolders.length);
+
+Replace with:
+          // xml2js confirmed structure: result.exchange.viewpoints[0].viewfolder[]
+          const exchange = result?.exchange ?? {};
+          const viewfolders: any[] = exchange?.viewpoints?.[0]?.viewfolder ?? [];
+          console.log("[clash-upload] XML viewfolders found:", viewfolders.length);
+
+Also fix the view and attribute access — already confirmed .$ works:
+Find:
+              const folderName = folder?.$ ? folder.$.name : (folder?.name ?? "");
+              const views = Array.isArray(folder?.view) ? folder.view : [];
+            for (const view of views) {
+              const viewName = view?.$ ? view.$.name : (view?.name ?? "");
+
+Replace with:
+              const folderName = folder?.$?.name ?? "";
+              const views: any[] = Array.isArray(folder?.view) ? folder.view : [];
+            for (const view of views) {
+              const viewName = view?.$?.name ?? "";
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print check output as plain text. No collapsed boxes.

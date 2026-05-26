@@ -90,20 +90,16 @@ router.post("/projects/:projectId/clash-reports/upload",
         try {
           const xmlContent = req.file.buffer.toString("utf-8");
           const result = await parseXml(xmlContent) as any;
-          // xml2js wraps everything in arrays — navigate carefully
-          console.log("[clash-upload] XML keys:", Object.keys(result ?? {}));
-          const exchange = Array.isArray(result?.exchange) ? result.exchange[0] : (result?.exchange ?? result);
-          console.log("[clash-upload] exchange keys:", Object.keys(exchange ?? {}));
-          const viewpointsNode = Array.isArray(exchange?.viewpoints) ? exchange.viewpoints[0] : exchange?.viewpoints;
-          console.log("[clash-upload] viewpointsNode keys:", Object.keys(viewpointsNode ?? {}));
-          const viewfolders = Array.isArray(viewpointsNode?.viewfolder) ? viewpointsNode.viewfolder : [];
-          console.log("[clash-upload] XML structure — viewfolders found:", viewfolders.length);
+          // xml2js confirmed structure: result.exchange.viewpoints[0].viewfolder[]
+          const exchange = result?.exchange ?? {};
+          const viewfolders: any[] = exchange?.viewpoints?.[0]?.viewfolder ?? [];
+          console.log("[clash-upload] XML viewfolders found:", viewfolders.length);
           const allViews: any[] = [];
           for (const folder of viewfolders) {
-            const folderName = folder?.$ ? folder.$.name : (folder?.name ?? "");
-            const views = Array.isArray(folder?.view) ? folder.view : [];
+            const folderName = folder?.$?.name ?? "";
+            const views: any[] = Array.isArray(folder?.view) ? folder.view : [];
             for (const view of views) {
-              const viewName = view?.$ ? view.$.name : (view?.name ?? "");
+              const viewName = view?.$?.name ?? "";
               const match = viewName.match(/^([A-Z0-9]+\.[0-9]+)\s+(.+)$/);
               const viewpointId = match ? match[1] : viewName.substring(0, 10);
               const description = match ? match[2] : viewName;
