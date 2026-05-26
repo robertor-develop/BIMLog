@@ -1,0 +1,124 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/RfisTab.tsx
+
+CHANGE 1 — Add more state for company details.
+Find:
+  const [newCompanyName, setNewCompanyName] = useState("");
+
+Replace with:
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanyEmail, setNewCompanyEmail] = useState("");
+  const [newCompanyPhone, setNewCompanyPhone] = useState("");
+  const [newCompanyAddress, setNewCompanyAddress] = useState("");
+  const [newContactPerson, setNewContactPerson] = useState("");
+
+CHANGE 2 — Expand the Add Company form with full fields.
+Find this exact block:
+                <div style={{ display: "flex", gap: 8, marginTop: 6, padding: "8px 10px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                  <input
+                    value={newCompanyName}
+                    onChange={e => setNewCompanyName(e.target.value)}
+                    placeholder={w("Company name", "Nombre de empresa", lang)}
+                    style={{ flex: 1, fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "4px 8px" }}
+                  />
+                  <button type="button"
+                    onClick={async () => {
+                      if (!newCompanyName.trim()) return;
+                      const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+                      await fetch(`/api/v1/projects/${projectId}/directory`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          full_name: newCompanyName.trim(),
+                          email: `contact@${newCompanyName.trim().toLowerCase().replace(/\s+/g, "")}@bimlog.io`,
+                          company_name: newCompanyName.trim(),
+                          role: "External Company",
+                        }),
+                      });
+                      setsToCompany(newCompanyName.trim());
+                      setNewCompanyName("");
+                      setShowAddCompany(false);
+                    }}
+                    style={{ padding: "4px 12px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                    {w("Add", "Agregar", lang)}
+                  </button>
+                </div>
+
+Replace with:
+                <div style={{ marginTop: 6, padding: "12px 14px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>
+                    {w("New Company Details", "Detalles de Nueva Empresa", lang)}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Company Name *", "Nombre *", lang)}</div>
+                      <input value={newCompanyName} onChange={e => setNewCompanyName(e.target.value)}
+                        placeholder={w("e.g. VOREA Group", "ej. VOREA Group", lang)}
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Contact Person", "Persona de Contacto", lang)}</div>
+                      <input value={newContactPerson} onChange={e => setNewContactPerson(e.target.value)}
+                        placeholder={w("e.g. John Smith", "ej. Juan García", lang)}
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Email", "Correo", lang)}</div>
+                      <input value={newCompanyEmail} onChange={e => setNewCompanyEmail(e.target.value)}
+                        placeholder="email@company.com"
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Phone", "Teléfono", lang)}</div>
+                      <input value={newCompanyPhone} onChange={e => setNewCompanyPhone(e.target.value)}
+                        placeholder="+1 (555) 000-0000"
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Address", "Dirección", lang)}</div>
+                      <input value={newCompanyAddress} onChange={e => setNewCompanyAddress(e.target.value)}
+                        placeholder={w("Street address, City, State", "Calle, Ciudad, Estado", lang)}
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                    <button type="button" onClick={() => { setShowAddCompany(false); setNewCompanyName(""); setNewCompanyEmail(""); setNewCompanyPhone(""); setNewCompanyAddress(""); setNewContactPerson(""); }}
+                      style={{ padding: "5px 12px", fontSize: 11, borderRadius: 6, border: "1px solid #D1D5DB", background: "white", cursor: "pointer" }}>
+                      {w("Cancel", "Cancelar", lang)}
+                    </button>
+                    <button type="button"
+                      onClick={async () => {
+                        if (!newCompanyName.trim()) return;
+                        const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+                        await fetch(`/api/v1/projects/${projectId}/directory`, {
+                          method: "POST",
+                          headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            full_name: newContactPerson.trim() || newCompanyName.trim(),
+                            email: newCompanyEmail.trim() || `contact@bimlog.io`,
+                            company_name: newCompanyName.trim(),
+                            role: "External Company",
+                            notes: `Phone: ${newCompanyPhone} | Address: ${newCompanyAddress}`,
+                          }),
+                        });
+                        setsToCompany(newCompanyName.trim());
+                        setNewCompanyName(""); setNewCompanyEmail(""); setNewCompanyPhone(""); setNewCompanyAddress(""); setNewContactPerson("");
+                        setShowAddCompany(false);
+                      }}
+                      style={{ padding: "5px 14px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                      {w("Add Company", "Agregar Empresa", lang)}
+                    </button>
+                  </div>
+                </div>
+
+Check 1:
+grep -n "newCompanyEmail\|newCompanyPhone\|newCompanyAddress\|newContactPerson\|Add Company" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -10
+
+Check 2 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+Rebuild frontend only. Publish.
+Print all check outputs as plain text. No collapsed boxes.
