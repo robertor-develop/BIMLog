@@ -6,7 +6,7 @@ import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
 interface ChangeOrder {
   id: number; number: string; title: string; description?: string;
   status: string; contractValueImpact?: string; scheduleImpactDays?: number;
-  createdAt: string; approvedAt?: string;
+  createdAt: string; approvedAt?: string; initiatedByCompany?: string | null;
 }
 
 const API = "/api/v1";
@@ -25,7 +25,11 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "" });
+  const [form, setForm] = useState({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
+  const [showAddCoCompany, setShowAddCoCompany] = useState(false);
+  const [newCoCompany, setNewCoCompany] = useState("");
+  const [newCoContact, setNewCoContact] = useState("");
+  const [newCoEmail, setNewCoEmail] = useState("");
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
 
@@ -76,11 +80,13 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
     try {
       const body: Record<string, unknown> = { title: form.title, description: form.description || undefined, contract_value_impact: form.contract_value_impact || undefined };
       if (form.schedule_impact_days) body.schedule_impact_days = Number(form.schedule_impact_days);
+      if (form.initiated_by_company.trim()) body.initiated_by_company = form.initiated_by_company.trim();
       const r = await fetch(`${API}/projects/${projectId}/change-orders`, { method: "POST", headers, body: JSON.stringify(body) });
       if (!r.ok) { const d = await r.json(); setError(d.error || "Error"); return; }
       await load();
       setShowForm(false);
-      setForm({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "" });
+      setForm({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
+      setShowAddCoCompany(false); setNewCoCompany("");
     } finally { setSaving(false); }
   };
 
@@ -173,6 +179,62 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
             <div>
               <label className="label">{t("Schedule Impact (days)", "Impacto en Cronograma (días)")}</label>
               <input className="input" type="number" min={0} value={form.schedule_impact_days} onChange={e => setForm(f => ({ ...f, schedule_impact_days: e.target.value }))} />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label className="label">{t("Initiated By (Company)", "Iniciado Por (Empresa)")}</label>
+              <select className="input" value={form.initiated_by_company} onChange={e => setForm(f => ({ ...f, initiated_by_company: e.target.value }))}
+                style={{ height: 36 }}>
+                <option value="">{t("— Select company —", "— Seleccionar empresa —")}</option>
+                {[...new Set(items.map(i => i.initiatedByCompany).filter(Boolean))].map(c => (
+                  <option key={c as string} value={c as string}>{c as string}</option>
+                ))}
+              </select>
+              <button type="button" onClick={() => setShowAddCoCompany(!showAddCoCompany)}
+                style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddCoCompany ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content", marginTop: 4 }}>
+                + {t("Add company not in list", "Agregar empresa fuera de lista")}
+              </button>
+              {showAddCoCompany && (
+                <div style={{ marginTop: 6, padding: "12px 14px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>{t("New Company", "Nueva Empresa")}</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Company Name *", "Nombre *")}</div>
+                      <input value={newCoCompany} onChange={e => setNewCoCompany(e.target.value)} placeholder="e.g. VOREA Group"
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Contact Person", "Contacto")}</div>
+                      <input value={newCoContact} onChange={e => setNewCoContact(e.target.value)} placeholder="e.g. John Smith"
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>Email</div>
+                      <input value={newCoEmail} onChange={e => setNewCoEmail(e.target.value)} placeholder="email@company.com"
+                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                    <button type="button" onClick={() => { setShowAddCoCompany(false); setNewCoCompany(""); }}
+                      style={{ padding: "5px 12px", fontSize: 11, borderRadius: 6, border: "1px solid #D1D5DB", background: "white", cursor: "pointer" }}>
+                      {t("Cancel", "Cancelar")}
+                    </button>
+                    <button type="button" onClick={async () => {
+                      if (!newCoCompany.trim()) return;
+                      const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+                      await fetch(`/api/v1/projects/${projectId}/directory`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({ full_name: newCoContact.trim() || newCoCompany.trim(), email: newCoEmail.trim() || "contact@bimlog.io", company_name: newCoCompany.trim(), role: "External Company" }),
+                      });
+                      setForm(f => ({ ...f, initiated_by_company: newCoCompany.trim() }));
+                      setNewCoCompany(""); setNewCoContact(""); setNewCoEmail("");
+                      setShowAddCoCompany(false);
+                    }} style={{ padding: "5px 14px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                      {t("Add Company", "Agregar Empresa")}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
               <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create", "Crear")}</button>

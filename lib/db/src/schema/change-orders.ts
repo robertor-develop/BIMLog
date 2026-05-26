@@ -11,6 +11,7 @@ export const changeOrdersTable = pgTable("change_orders", {
   description: text("description"),
   status: text("status").default("draft").notNull(),
   initiatedById: integer("initiated_by_id").references(() => usersTable.id).notNull(),
+  initiatedByCompany: text("initiated_by_company"),
   approvedById: integer("approved_by_id").references(() => usersTable.id),
   contractValueImpact: text("contract_value_impact"),
   scheduleImpactDays: integer("schedule_impact_days"),

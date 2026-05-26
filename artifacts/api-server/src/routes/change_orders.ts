@@ -44,6 +44,7 @@ router.post("/projects/:projectId/change-orders", authMiddleware, requirePermiss
   const body = req.body as {
     title: string; description?: string; contract_value_impact?: string;
     schedule_impact_days?: number; linked_rfi_ids?: number[]; linked_submittal_ids?: number[];
+    initiated_by_company?: string;
   };
   if (!body.title) { res.status(400).json({ error: "title required" }); return; }
   try {
@@ -55,6 +56,7 @@ router.post("/projects/:projectId/change-orders", authMiddleware, requirePermiss
       description: body.description ?? null,
       status: "draft",
       initiatedById: req.user!.userId,
+      initiatedByCompany: body.initiated_by_company ?? null,
       contractValueImpact: body.contract_value_impact ?? null,
       scheduleImpactDays: body.schedule_impact_days ?? null,
       linkedRfiIds: body.linked_rfi_ids ?? null,
