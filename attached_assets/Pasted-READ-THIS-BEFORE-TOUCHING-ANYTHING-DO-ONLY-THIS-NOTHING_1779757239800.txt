@@ -1,0 +1,104 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+The XML block currently sends only the first chunk to Claude.
+We need to process ALL chunks and merge results.
+
+Find the entire isXml block:
+      if (isXml) {
+        try {
+          const xmlContent = req.file.buffer.toString("utf-8");
+          console.log("[clash-upload] XML file size:", xmlContent.length, "chars");
+
+          const extractMsg = await anthropic.messages.create({
+
+Replace the entire isXml block with:
+
+      if (isXml) {
+        try {
+          const xmlContent = req.file.buffer.toString("utf-8");
+          console.log("[clash-upload] XML file size:", xmlContent.length, "chars");
+
+          // Split into chunks if large
+          const CHUNK_SIZE = 80000;
+          const xmlChunks: string[] = [];
+          for (let i = 0; i < xmlContent.length; i += CHUNK_SIZE) {
+            xmlChunks.push(xmlContent.slice(i, i + CHUNK_SIZE));
+          }
+          console.log("[clash-upload] XML chunks:", xmlChunks.length);
+
+          for (const chunk of xmlChunks) {
+            try {
+              const extractMsg = await anthropic.messages.create({
+                model: "claude-sonnet-4-5",
+                max_tokens: 8192,
+                system: `You are a Navisworks XML coordination report analyzer. Extract ALL clash viewpoints from Navisworks XML export files. Never skip viewpoints. Always return valid JSON.`,
+                messages: [{
+                  role: "user",
+                  content: `Analyze this Navisworks XML chunk and extract ALL coordination viewpoints found in this chunk.
+
+RULES:
+- Extract every <view name="..."> element inside any viewfolder
+- Viewpoint ID = prefix before first space (C.123, 12.001, UG.000)
+- Description = everything after the ID
+- Discipline: FP=fire/sprinkler, PB=plumbing/sanitary/CW, HVAC=duct/mechanical, ELEC=conduit/electrical, STRUCT=structural, COORD=default
+- Level from ID: C.=CELLAR, UG.=UNDERGROUND, B.=BASEMENT, G.=GROUND, R.=ROOF, 12.=12TH FLOOR
+- Status: open by default, resolved if in COMPLETE folder
+- If no viewpoints found in this chunk return []
+
+Return ONLY valid JSON array, no markdown:
+[{"viewpoint":"C.123","description":"6 SAN IN CONFLICT WITH DUCT","holdUps":"","discipline":"PB","level":"CELLAR","assignedToName":"","resolutionNotes":null,"status":"open","dueDate":null}]
+
+XML CHUNK:
+${chunk}`
+                }]
+              });
+
+              const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+              const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
+              const mapped = chunkRecords
+                .filter((r: any) => r.description || r.viewpoint)
+                .map((r: any) => ({
+                  clashIdOriginal: String(r.viewpoint || ""),
+                  description: String(r.description || ""),
+                  holdUps: String(r.holdUps || ""),
+                  discipline1: String(r.discipline || "COORD"),
+                  level: String(r.level || ""),
+                  assignedToName: String(r.assignedToName || ""),
+                  resolutionNotes: r.resolutionNotes ? String(r.resolutionNotes) : null,
+                  status: r.status === "complete" || r.status === "resolved" ? "resolved" : "open",
+                  dueDate: r.dueDate ? new Date(r.dueDate) : null,
+                }));
+              parsed = [...parsed, ...mapped];
+              console.log("[clash-upload] XML chunk extracted:", mapped.length, "viewpoints, total so far:", parsed.length);
+            } catch (chunkErr) {
+              console.error("[clash-upload] XML chunk failed:", chunkErr);
+            }
+          }
+
+          // Deduplicate by viewpoint ID
+          const seen = new Set<string>();
+          parsed = parsed.filter(r => {
+            if (seen.has(r.clashIdOriginal)) return false;
+            seen.add(r.clashIdOriginal);
+            return true;
+          });
+
+          console.log("[clash-upload] XML total after dedup:", parsed.length, "viewpoints");
+        } catch (xmlErr) {
+          console.error("[clash-upload] XML failed:", xmlErr);
+          parsed = [];
+        }
+      }
+
+Check 1:
+grep -n "xmlChunks\|XML chunks\|XML chunk extracted\|dedup" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
