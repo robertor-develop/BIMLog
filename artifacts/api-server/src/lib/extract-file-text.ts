@@ -1,7 +1,15 @@
-import { createRequire } from "module";
 import * as XLSX from "xlsx";
-const requireFrom = createRequire(typeof __filename !== "undefined" ? __filename : import.meta.url);
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = requireFrom("pdf-parse");
+
+async function parsePdf(buffer: Buffer): Promise<string> {
+  try {
+    const { default: pdfParse } = await import("pdf-parse");
+    const data = await pdfParse(buffer);
+    return data.text ?? "";
+  } catch (err) {
+    console.error("[extract-file-text] pdf-parse import failed:", err);
+    return buffer.toString("utf-8");
+  }
+}
 
 const CHUNK_SIZE = 80000;
 
@@ -41,11 +49,11 @@ export async function extractFileText(buffer: Buffer, filename: string): Promise
 
   if (ext === "pdf") {
     try {
-      const pdfData = await pdfParse(buffer);
-      console.log("[extract-file-text] PDF extracted:", pdfData.text.length, "chars");
-      const chunks = chunkText(pdfData.text);
+      const pdfText = await parsePdf(buffer);
+      console.log("[extract-file-text] PDF extracted:", pdfText.length, "chars");
+      const chunks = chunkText(pdfText);
       console.log("[extract-file-text] PDF chunks:", chunks.length);
-      return { text: pdfData.text, isSpreadsheet: false, chunks };
+      return { text: pdfText, isSpreadsheet: false, chunks };
     } catch (err) {
       console.error("[extract-file-text] PDF parse failed:", err);
       const text = buffer.toString("utf-8");
