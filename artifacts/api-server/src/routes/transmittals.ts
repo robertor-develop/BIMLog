@@ -331,10 +331,12 @@ ${chunk}`
         return `${num}-DRF-${String(i).padStart(3,"0")}`;
       };
       let imported = 0;
+      const renamedTx: { original: string; renamed: string }[] = [];
       for (const r of records) {
         if (!r.title && !r.number) continue;
         const proposed = r.number || `T-${String(imported + 1).padStart(3, "0")}`;
         const finalNum = getDrfTx(proposed);
+        if (finalNum !== proposed) renamedTx.push({ original: proposed, renamed: finalNum });
         usedTxNums.add(finalNum);
         await db.insert(transmittalsTable).values({
           projectId,
@@ -354,7 +356,7 @@ ${chunk}`
         actionType: "import", entityType: "transmittal", entityId: projectId,
         details: `Imported ${imported} transmittals from ${req.file.originalname}`,
       });
-      res.json({ imported, message: `${imported} transmittals imported` });
+      res.json({ imported, message: `${imported} transmittals imported`, renamed: renamedTx, renameCount: renamedTx.length });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }

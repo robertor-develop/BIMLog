@@ -1,0 +1,174 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/rfis.ts
+
+Find:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.subject && !r.number) continue;
+        const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfNumber(proposed);
+        usedNumbers.add(finalNum);
+
+Replace with:
+      let imported = 0;
+      const renamedItems: { original: string; renamed: string }[] = [];
+      for (const r of records) {
+        if (!r.subject && !r.number) continue;
+        const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfNumber(proposed);
+        if (finalNum !== proposed) renamedItems.push({ original: proposed, renamed: finalNum });
+        usedNumbers.add(finalNum);
+
+Find:
+      res.json({ imported, message: `${imported} RFIs imported successfully` });
+
+Replace with:
+      res.json({
+        imported,
+        message: `${imported} RFIs imported successfully`,
+        renamed: renamedItems,
+        renameCount: renamedItems.length,
+      });
+
+Do the same for transmittals.ts, change_orders.ts, submittals.ts:
+
+FILE: artifacts/api-server/src/routes/transmittals.ts
+Find:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `T-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfTx(proposed);
+        usedTxNums.add(finalNum);
+
+Replace with:
+      let imported = 0;
+      const renamedTx: { original: string; renamed: string }[] = [];
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `T-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfTx(proposed);
+        if (finalNum !== proposed) renamedTx.push({ original: proposed, renamed: finalNum });
+        usedTxNums.add(finalNum);
+
+Find in transmittals:
+      res.json({ imported, message: `${imported} transmittals imported` });
+
+Replace with:
+      res.json({ imported, message: `${imported} transmittals imported`, renamed: renamedTx, renameCount: renamedTx.length });
+
+FILE: artifacts/api-server/src/routes/change_orders.ts
+Find:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `CO-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfCo(proposed);
+        usedCoNums.add(finalNum);
+
+Replace with:
+      let imported = 0;
+      const renamedCo: { original: string; renamed: string }[] = [];
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `CO-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfCo(proposed);
+        if (finalNum !== proposed) renamedCo.push({ original: proposed, renamed: finalNum });
+        usedCoNums.add(finalNum);
+
+Find in change_orders:
+      res.json({ imported, message: `${imported} change orders imported` });
+
+Replace with:
+      res.json({ imported, message: `${imported} change orders imported`, renamed: renamedCo, renameCount: renamedCo.length });
+
+FILE: artifacts/api-server/src/routes/submittals.ts
+Find:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `SUB-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfSub(proposed);
+        usedSubNums.add(finalNum);
+
+Replace with:
+      let imported = 0;
+      const renamedSub: { original: string; renamed: string }[] = [];
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `SUB-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfSub(proposed);
+        if (finalNum !== proposed) renamedSub.push({ original: proposed, renamed: finalNum });
+        usedSubNums.add(finalNum);
+
+Find in submittals:
+      res.json({ imported, message: `${imported} submittals imported successfully` });
+
+Replace with:
+      res.json({ imported, message: `${imported} submittals imported successfully`, renamed: renamedSub, renameCount: renamedSub.length });
+
+Now update ALL frontend import handlers to show DRF rename notification.
+
+FILE: artifacts/bimlog/src/pages/project/RfisTab.tsx
+Find:
+          setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
+          setTimeout(() => window.location.reload(), 1500);
+
+Replace with:
+          let msg = `${data.imported ?? 0} RFIs imported successfully`;
+          if (data.renameCount > 0) {
+            msg += `. ${data.renameCount} duplicate(s) renamed: ${data.renamed.slice(0,3).map((r: any) => `${r.original} → ${r.renamed}`).join(", ")}`;
+          }
+          setImportMsg(msg);
+          setTimeout(() => window.location.reload(), 2500);
+
+FILE: artifacts/bimlog/src/pages/project/TransmittalsTab.tsx
+Find:
+          setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
+          setTimeout(() => window.location.reload(), 1500);
+
+Replace with:
+          let msg = `${data.imported ?? 0} transmittals imported successfully`;
+          if (data.renameCount > 0) msg += `. ${data.renameCount} duplicate(s) renamed with DRF suffix`;
+          setImportMsg(msg);
+          setTimeout(() => window.location.reload(), 2500);
+
+FILE: artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx
+Find:
+          setImportMsg(`${data.imported ?? 0} change orders imported successfully`);
+          setTimeout(() => window.location.reload(), 1500);
+
+Replace with:
+          let msg = `${data.imported ?? 0} change orders imported successfully`;
+          if (data.renameCount > 0) msg += `. ${data.renameCount} duplicate(s) renamed with DRF suffix`;
+          setImportMsg(msg);
+          setTimeout(() => window.location.reload(), 2500);
+
+FILE: artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
+Find:
+          setImportMsg(`${data.imported ?? 0} submittals imported successfully`);
+          setTimeout(() => window.location.reload(), 1500);
+
+Replace with:
+          let msg = `${data.imported ?? 0} submittals imported successfully`;
+          if (data.renameCount > 0) msg += `. ${data.renameCount} duplicate(s) renamed with DRF suffix`;
+          setImportMsg(msg);
+          setTimeout(() => window.location.reload(), 2500);
+
+Check 1 — renamed tracking in backend:
+grep -rn "renamedItems\|renamedTx\|renamedCo\|renamedSub\|renameCount" artifacts/api-server/src/routes/ | head -10
+
+Check 2 — DRF message in frontend:
+grep -rn "renameCount\|renamed with DRF\|duplicate.*renamed" artifacts/bimlog/src/pages/project/ | head -8
+
+Check 3 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

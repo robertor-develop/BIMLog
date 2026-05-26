@@ -1246,10 +1246,12 @@ ${chunk}`
         return `${num}-DRF-${String(i).padStart(3,"0")}`;
       };
       let imported = 0;
+      const renamedSub: { original: string; renamed: string }[] = [];
       for (const r of records) {
         if (!r.title && !r.number) continue;
         const proposed = r.number || `SUB-${String(imported + 1).padStart(3, "0")}`;
         const finalNum = getDrfSub(proposed);
+        if (finalNum !== proposed) renamedSub.push({ original: proposed, renamed: finalNum });
         usedSubNums.add(finalNum);
         await db.insert(submittalsTable).values({
           projectId,
@@ -1272,7 +1274,7 @@ ${chunk}`
         actionType: "import", entityType: "submittal", entityId: projectId,
         details: `Imported ${imported} submittals from ${req.file.originalname}`,
       });
-      res.json({ imported, message: `${imported} submittals imported successfully` });
+      res.json({ imported, message: `${imported} submittals imported successfully`, renamed: renamedSub, renameCount: renamedSub.length });
     } catch (err) {
       console.error("[submittal-import]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });

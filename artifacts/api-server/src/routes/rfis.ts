@@ -1673,10 +1673,12 @@ ${chunk}`
       };
 
       let imported = 0;
+      const renamedItems: { original: string; renamed: string }[] = [];
       for (const r of records) {
         if (!r.subject && !r.number) continue;
         const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
         const finalNum = getDrfNumber(proposed);
+        if (finalNum !== proposed) renamedItems.push({ original: proposed, renamed: finalNum });
         usedNumbers.add(finalNum);
         await db.insert(rfisTable).values({
           projectId,
@@ -1698,7 +1700,12 @@ ${chunk}`
         actionType: "import", entityType: "rfi", entityId: projectId,
         details: `Imported ${imported} RFIs from ${req.file.originalname}`,
       });
-      res.json({ imported, message: `${imported} RFIs imported successfully` });
+      res.json({
+        imported,
+        message: `${imported} RFIs imported successfully`,
+        renamed: renamedItems,
+        renameCount: renamedItems.length,
+      });
     } catch (err) {
       console.error("[rfi-import]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });

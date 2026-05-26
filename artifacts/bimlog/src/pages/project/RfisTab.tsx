@@ -166,8 +166,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             setImportMsg("Import cancelled.");
           }
         } else {
-          setImportMsg(`${data.imported ?? 0} RFIs imported successfully`);
-          setTimeout(() => window.location.reload(), 1500);
+          let msg = `${data.imported ?? 0} RFIs imported successfully`;
+          if (data.renameCount > 0) {
+            msg += `. ${data.renameCount} duplicate(s) renamed: ${data.renamed.slice(0,3).map((r: any) => `${r.original} → ${r.renamed}`).join(", ")}`;
+          }
+          setImportMsg(msg);
+          setTimeout(() => window.location.reload(), 2500);
         }
         setTimeout(() => setImportMsg(""), 8000);
       } else {

@@ -38,8 +38,10 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
       });
       if (res.ok) {
         const data = await res.json();
-        setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
-        setTimeout(() => window.location.reload(), 1500);
+        let msg = `${data.imported ?? 0} transmittals imported successfully`;
+        if (data.renameCount > 0) msg += `. ${data.renameCount} duplicate(s) renamed with DRF suffix`;
+        setImportMsg(msg);
+        setTimeout(() => window.location.reload(), 2500);
       } else {
         setImportMsg("Import failed — please try again");
       }

@@ -290,10 +290,12 @@ ${chunk}`
         return `${num}-DRF-${String(i).padStart(3,"0")}`;
       };
       let imported = 0;
+      const renamedCo: { original: string; renamed: string }[] = [];
       for (const r of records) {
         if (!r.title && !r.number) continue;
         const proposed = r.number || `CO-${String(imported + 1).padStart(3, "0")}`;
         const finalNum = getDrfCo(proposed);
+        if (finalNum !== proposed) renamedCo.push({ original: proposed, renamed: finalNum });
         usedCoNums.add(finalNum);
         await db.insert(changeOrdersTable).values({
           projectId,
@@ -312,7 +314,7 @@ ${chunk}`
         actionType: "import", entityType: "change_order", entityId: projectId,
         details: `Imported ${imported} change orders from ${req.file.originalname}`,
       });
-      res.json({ imported, message: `${imported} change orders imported` });
+      res.json({ imported, message: `${imported} change orders imported`, renamed: renamedCo, renameCount: renamedCo.length });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
