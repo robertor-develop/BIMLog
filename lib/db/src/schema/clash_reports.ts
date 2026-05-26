@@ -43,4 +43,6 @@ export const clashesTable = pgTable("clashes", {
   dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });

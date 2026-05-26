@@ -3,8 +3,9 @@ import { db } from "@workspace/db";
 import {
   transmittalsTable, transmittalItemsTable, activityLogTable,
   projectsTable, usersTable, filesTable, projectMembersTable,
+  linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
@@ -31,7 +32,7 @@ router.get("/projects/:projectId/transmittals", authMiddleware, requireProjectMe
   const projectId = Number(req.params.projectId);
   try {
     const rows = await db.select().from(transmittalsTable)
-      .where(eq(transmittalsTable.projectId, projectId))
+      .where(and(eq(transmittalsTable.projectId, projectId), isNull(transmittalsTable.deletedAt)))
       .orderBy(desc(transmittalsTable.createdAt));
     res.json(rows);
   } catch (err) {
@@ -357,6 +358,54 @@ ${chunk}`
         details: `Imported ${imported} transmittals from ${req.file.originalname}`,
       });
       res.json({ imported, message: `${imported} transmittals imported`, renamed: renamedTx, renameCount: renamedTx.length });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── DELETE transmittal (soft delete) ──────────────────────────────────────────
+router.delete("/projects/:projectId/transmittals/:transmittalId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const transmittalId = Number(req.params.transmittalId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [existing] = await db.select().from(transmittalsTable)
+        .where(and(eq(transmittalsTable.id, transmittalId), eq(transmittalsTable.projectId, projectId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(transmittalsTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(transmittalsTable.id, transmittalId), eq(transmittalsTable.projectId, projectId)));
+
+      await db.delete(transmittalItemsTable).where(eq(transmittalItemsTable.transmittalId, transmittalId));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "transmittal"), eq(linkedItemsTable.fromId, transmittalId)),
+          and(eq(linkedItemsTable.toType, "transmittal"), eq(linkedItemsTable.toId, transmittalId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "transmittal", entityId: transmittalId,
+        details: JSON.stringify({ reason, number: existing.number, title: existing.title }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "transmittal", entityType: "transmittal", entityId: transmittalId,
+        insightType: "delete_pattern",
+        message: `Transmittal ${existing.number} deleted: ${reason ?? "no reason"}`,
+        recommendation: "Review transmittal delete patterns to detect drafting churn or duplicates.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }

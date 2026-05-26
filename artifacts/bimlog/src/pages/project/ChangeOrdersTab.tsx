@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { Trash2 } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
 
 interface ChangeOrder {
@@ -22,6 +24,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<ChangeOrder[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -286,11 +289,34 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                     </>
                   )}
                   <button className="btn btn-sm btn-outline" onClick={() => exportPdf(co.id)}>PDF</button>
+                  {canWrite && (
+                    <button
+                      title={t("Delete", "Eliminar")}
+                      onClick={() => setDeleteTarget({ id: co.id, label: co.number })}
+                      style={{ padding: "4px 8px", border: "1px solid #FECACA", borderRadius: 4, background: "#FEF2F2", color: "#DC2626", cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          open
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={() => {
+            setItems(prev => prev.filter(x => x.id !== deleteTarget.id));
+            setDeleteTarget(null);
+          }}
+          endpoint={`/api/v1/projects/${projectId}/change-orders/${deleteTarget.id}`}
+          entityLabel={`Change Order ${deleteTarget.label}`}
+          warning={t("Linked RFIs/submittals will be detached.", "Los RFIs/entregables enlazados serán desvinculados.")}
+        />
       )}
     </div>
   );

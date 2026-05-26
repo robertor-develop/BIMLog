@@ -63,4 +63,13 @@ router.use(submittalReportsRouter);
 router.use(linkedItemsRouter);
 router.use(agentsRouter);
 
+// Soft-delete routes are appended inside their existing route files:
+//   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId
+//   rfis.ts          → DELETE /projects/:projectId/rfis/:rfiId
+//   submittals.ts    → DELETE /projects/:projectId/submittals/:submittalId
+//   transmittals.ts  → DELETE /projects/:projectId/transmittals/:transmittalId
+//   change_orders.ts → DELETE /projects/:projectId/change-orders/:changeOrderId
+//   meeting_minutes.ts → DELETE /projects/:projectId/meetings/:meetingId
+// Those files are already registered via the .use(...) calls above.
+
 export default router;

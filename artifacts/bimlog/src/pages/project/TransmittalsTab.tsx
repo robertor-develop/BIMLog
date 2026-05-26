@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { Send, Sparkles } from "lucide-react";
+import { Trash2, Sparkles, Send } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -17,6 +18,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<Transmittal[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -285,11 +287,34 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
                     <button className="btn btn-sm btn-outline" onClick={() => acknowledge(tx.id)}>{t("Acknowledge", "Acusar")}</button>
                   )}
                   <button className="btn btn-sm btn-outline" onClick={() => exportPdf(tx.id)}>PDF</button>
+                  {canWrite && (
+                    <button
+                      title={t("Delete", "Eliminar")}
+                      onClick={() => setDeleteTarget({ id: tx.id, label: tx.number })}
+                      style={{ padding: "4px 8px", border: "1px solid #FECACA", borderRadius: 4, background: "#FEF2F2", color: "#DC2626", cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          open
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={() => {
+            setItems(prev => prev.filter(x => x.id !== deleteTarget.id));
+            setDeleteTarget(null);
+          }}
+          endpoint={`/api/v1/projects/${projectId}/transmittals/${deleteTarget.id}`}
+          entityLabel={`Transmittal ${deleteTarget.label}`}
+          warning={t("Items and linked references will be removed.", "Los items y referencias enlazadas serán eliminadas.")}
+        />
       )}
     </div>
   );

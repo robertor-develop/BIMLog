@@ -64,6 +64,8 @@ export const submittalsTable = pgTable("submittals", {
   distributionList: json("distribution_list").$type<string[]>().default([]),
   attachmentsJson: json("attachments_json").$type<string[]>().default([]),
   lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });
 
 export type Submittal = typeof submittalsTable.$inferSelect;

@@ -11,8 +11,9 @@ import * as XLSX from "xlsx";
 import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
   Sparkles, CheckCircle2, Clock, Search, Filter, ExternalLink, Eye, Shield,
-  BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList,
+  BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList, Trash2,
 } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -356,6 +357,8 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
   const { token } = useAuthStore();
   const [view, setView] = useState<"register" | "submittals" | "tracking">("submittals");
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
+  const submittalsQueryClient = useQueryClient();
   const [showNewForm, setShowNewForm] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
@@ -486,6 +489,7 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
         <SubmittalTrackingList submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
       ) : (
         <SubmittalsList
+          onRequestDelete={(s) => setDeleteTarget({ id: s.id, label: s.number })}
           projectId={projectId}
           submittals={submittals}
           isLoading={isLoading}
@@ -527,6 +531,20 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
           />
         )}
       </SlidePanel>
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          open
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={() => {
+            submittalsQueryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
+            setDeleteTarget(null);
+          }}
+          endpoint={`/api/v1/projects/${projectId}/submittals/${deleteTarget.id}`}
+          entityLabel={`Submittal ${deleteTarget.label}`}
+          warning={lang === "es" ? "Los elementos enlazados serán desvinculados." : "Linked items will be detached."}
+        />
+      )}
     </div>
   );
 }
@@ -762,7 +780,8 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
 }
 
 // ─── Submittals List ──────────────────────────────────────────────────────────
-function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSelect }: {
+function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSelect, onRequestDelete }: {
+  onRequestDelete: (s: Submittal) => void;
   projectId: number; submittals: Submittal[]; isLoading: boolean; lang: string; canWrite: boolean;
   onSelect: (s: Submittal) => void;
 }) {
@@ -948,6 +967,15 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                           title="Export Word"
                           style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", fontSize: 10, color: "#1D4ED8" }}
                         >DOC</button>
+                        {canWrite && (
+                          <button
+                            onClick={() => onRequestDelete(sub)}
+                            title="Delete submittal"
+                            style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #FECACA", background: "#FEF2F2", cursor: "pointer", color: "#DC2626", display: "flex", alignItems: "center" }}
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -1,0 +1,71 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Build smart soft-delete across all 6 modules. Every delete is a soft delete — the row stays in the database with deletedAt set, the reason is stored, the activity log gets an immutable record, and the clash/rfi/submittal agents save an insight so the agent layer can analyze delete patterns across projects. Nothing is ever truly gone. The UI just stops showing it.
+
+PART 1 — SCHEMA. Add deletedAt (timestamp, nullable) and deleteReason (text, nullable) columns to these 6 tables in lib/db/src/schema/:
+- clashesTable in clash_reports.ts
+- submittalsTable in submittals.ts
+- rfisTable in rfis.ts
+- transmittalsTable in transmittals.ts
+- changeOrdersTable in change-orders.ts
+- meetingMinutesTable in meeting-minutes.ts
+
+After adding all 6, push the schema: cd lib/db && npx drizzle-kit push
+
+PART 2 — BACKEND DELETE ROUTES. Add these 6 new routes. Every route does the same 4 things: (1) soft-delete the row by setting deletedAt=now() and deleteReason=req.body.reason, (2) hard-delete any rows in linked_items where source_id=entityId or target_id=entityId, (3) insert a row into activityLogTable with actionType="delete", entityType=the entity name, entityId=the id, userFullName and userCompanyName from the auth token, projectId, details=JSON.stringify({reason: req.body.reason, entityLabel: the number or title}), (4) insert a row into agentInsightsTable with projectId, agentType matching the entity (clash_agent for clashes, rfi_agent for rfis, else briefing_agent), entityType, entityId, and insight="Deleted: [entityLabel]. Reason: [reason]".
+
+router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId") in artifacts/api-server/src/routes/clash_reports.ts — soft-delete the clash row in clashesTable where id=clashId and clashReportId=reportId.
+
+router.delete("/projects/:projectId/submittals/:submittalId") in artifacts/api-server/src/routes/submittals.ts — soft-delete the submittal row in submittalsTable where id=submittalId and projectId=projectId. Also NULL out linkedRfiId in files table and clashes table where linkedRfiId matches (use a best-effort update, don't fail if column missing).
+
+router.delete("/projects/:projectId/rfis/:rfiId") in artifacts/api-server/src/routes/rfis.ts — soft-delete the rfi row in rfisTable where id=rfiId and projectId=projectId.
+
+router.delete("/projects/:projectId/transmittals/:transmittalId") in artifacts/api-server/src/routes/transmittals.ts — soft-delete the transmittal row, also hard-delete rows in transmittalItemsTable where transmittalId=transmittalId.
+
+router.delete("/projects/:projectId/change-orders/:changeOrderId") in artifacts/api-server/src/routes/change_orders.ts — soft-delete the change order row, also hard-delete rows in changeOrderDocumentsTable where changeOrderId=changeOrderId.
+
+router.delete("/projects/:projectId/meetings/:meetingId") in artifacts/api-server/src/routes/meeting_minutes.ts — soft-delete the meeting row, also hard-delete rows in meetingAttendeesTable where meetingId=meetingId.
+
+Register all 6 new routes in artifacts/api-server/src/routes/index.ts.
+
+PART 3 — FILTER SOFT-DELETED ROWS FROM ALL LIST QUERIES. In each route file, find the GET list queries that return rows for the UI and add WHERE deletedAt IS NULL (or .where(isNull(table.deletedAt)) in drizzle syntax). Do this for: clashesTable queries in clash_reports.ts, submittalsTable queries in submittals.ts, rfisTable queries in rfis.ts, transmittalsTable queries in transmittals.ts, changeOrdersTable queries in change_orders.ts, meetingMinutesTable queries in meeting_minutes.ts.
+
+PART 4 — FRONTEND SHARED MODAL. Create artifacts/bimlog/src/components/project/DeleteConfirmModal.tsx. Props: isOpen, onClose, onConfirm(reason: string), itemLabel (e.g. "RFI-003"), linkedCount (number). Shows the item label, a select dropdown with options: Wrong file version / Duplicate / Created by mistake / Superseded / Other, and if linkedCount > 0 a yellow warning box saying "This item is linked to [n] other record(s). Those links will also be removed." Two buttons: Cancel (gray) and Delete (red). Delete button disabled until a reason is selected. Calls onConfirm with the selected reason string.
+
+PART 5 — FRONTEND DELETE BUTTONS. In each of the 6 tabs import DeleteConfirmModal. Add a trash icon button (use the Trash2 icon from lucide-react) on each row. On click: fetch linked count from GET /api/v1/projects/:projectId/links?entityId=X&entityType=Y, open the modal with itemLabel and linkedCount. On confirm call the matching DELETE route with body {reason}, then reload the list.
+
+Tabs and their DELETE endpoints:
+- ClashReportsTab: trash on each clash row → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId
+- RfisTab: trash on each RFI row → DELETE /projects/:projectId/rfis/:rfiId
+- SubmittalsTab: trash on each submittal row (in all 3 views) → DELETE /projects/:projectId/submittals/:submittalId
+- TransmittalsTab: trash on each transmittal row → DELETE /projects/:projectId/transmittals/:transmittalId
+- ChangeOrdersTab: trash on each change order row → DELETE /projects/:projectId/change-orders/:changeOrderId
+- MeetingsTab: trash on each meeting row → DELETE /projects/:projectId/meetings/:meetingId
+
+Check 1 — schema columns added:
+grep -n "deletedAt\|delete_reason\|deleteReason" lib/db/src/schema/clash_reports.ts lib/db/src/schema/submittals.ts lib/db/src/schema/rfis.ts lib/db/src/schema/transmittals.ts lib/db/src/schema/change-orders.ts lib/db/src/schema/meeting-minutes.ts | head -20
+
+Check 2 — new DELETE routes exist:
+grep -rn "router.delete.*clashes\|router.delete.*rfis\|router.delete.*submittals\|router.delete.*transmittal\|router.delete.*change-order\|router.delete.*meeting" artifacts/api-server/src/routes/ | head -15
+
+Check 3 — activity log insert in delete routes:
+grep -rn "actionType.*delete\|delete.*activityLog" artifacts/api-server/src/routes/rfis.ts artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 4 — agent insight insert in delete routes:
+grep -rn "agentInsights\|agent_insights" artifacts/api-server/src/routes/rfis.ts artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 5 — DeleteConfirmModal exists:
+find artifacts/bimlog/src/components/project -name "DeleteConfirmModal*"
+
+Check 6 — Trash2 imported in tabs:
+grep -rn "Trash2\|DeleteConfirmModal" artifacts/bimlog/src/pages/project/ | head -15
+
+Check 7 — tsc clean:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

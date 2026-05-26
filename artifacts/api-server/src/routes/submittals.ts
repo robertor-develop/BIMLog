@@ -4,9 +4,10 @@ import {
   submittalsTable, usersTable, activityLogTable, projectsTable,
   projectMembersTable, companiesTable, rfisTable,
   submittalRegisterTable, submittalViewEventsTable,
+  linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
 import { sendEmail, makeSubmittalAssignedEmail, makeProcurementAlertEmail, makeRapidApprovalEmail, getUserLang, notifEnabled } from "../lib/email";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, isNull, or } from "drizzle-orm";
 import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import Anthropic from "@anthropic-ai/sdk";
@@ -67,7 +68,7 @@ router.get("/projects/:projectId/submittals", authMiddleware, requireProjectMemb
   try {
     const { projectId } = ListSubmittalsParams.parse({ projectId: req.params.projectId });
     const submittals = await db.select().from(submittalsTable)
-      .where(eq(submittalsTable.projectId, projectId))
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
       .orderBy(submittalsTable.createdAt);
 
     const results = await Promise.all(submittals.map(async (s) => {
@@ -1277,6 +1278,52 @@ ${chunk}`
       res.json({ imported, message: `${imported} submittals imported successfully`, renamed: renamedSub, renameCount: renamedSub.length });
     } catch (err) {
       console.error("[submittal-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── DELETE submittal (soft delete) ────────────────────────────────────────────
+router.delete("/projects/:projectId/submittals/:submittalId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const submittalId = Number(req.params.submittalId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [existing] = await db.select().from(submittalsTable)
+        .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(submittalsTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId)));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "submittal"), eq(linkedItemsTable.fromId, submittalId)),
+          and(eq(linkedItemsTable.toType, "submittal"), eq(linkedItemsTable.toId, submittalId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "submittal", entityId: submittalId,
+        details: JSON.stringify({ reason, number: existing.number, title: existing.title }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "submittal", entityType: "submittal", entityId: submittalId,
+        insightType: "delete_pattern",
+        message: `Submittal ${existing.number} deleted: ${reason ?? "no reason"}`,
+        recommendation: "Track delete reasons to detect duplicate or premature submittals.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
+    } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

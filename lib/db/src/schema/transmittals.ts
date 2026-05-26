@@ -18,6 +18,8 @@ export const transmittalsTable = pgTable("transmittals", {
   acknowledgedAt: timestamp("acknowledged_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });
 
 export const transmittalItemsTable = pgTable("transmittal_items", {

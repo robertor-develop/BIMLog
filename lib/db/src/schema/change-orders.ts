@@ -22,6 +22,8 @@ export const changeOrdersTable = pgTable("change_orders", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   approvedAt: timestamp("approved_at"),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });
 
 export const changeOrderDocumentsTable = pgTable("change_order_documents", {

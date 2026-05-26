@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
 import { sendEmail, makeRfiAssignedEmail, getUserLang, notifEnabled } from "../lib/email";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
-import { eq, and, count, max } from "drizzle-orm";
+import { eq, and, count, max, isNull, or } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
@@ -581,7 +581,7 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
 
     const rfis = await db.query.rfisTable.findMany({
-      where: eq(rfisTable.projectId, projectId),
+      where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
       orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
     });
 
@@ -1708,6 +1708,52 @@ ${chunk}`
       });
     } catch (err) {
       console.error("[rfi-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── DELETE RFI (soft delete) ──────────────────────────────────────────────────
+router.delete("/projects/:projectId/rfis/:rfiId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const rfiId = Number(req.params.rfiId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [existing] = await db.select().from(rfisTable)
+        .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(rfisTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId)));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "rfi"), eq(linkedItemsTable.fromId, rfiId)),
+          and(eq(linkedItemsTable.toType, "rfi"), eq(linkedItemsTable.toId, rfiId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "rfi", entityId: rfiId,
+        details: JSON.stringify({ reason, number: existing.number, subject: existing.subject }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "rfi", entityType: "rfi", entityId: rfiId,
+        insightType: "delete_pattern",
+        message: `RFI ${existing.number} deleted: ${reason ?? "no reason"}`,
+        recommendation: "Investigate delete reasons to surface duplicate-creation or workflow issues.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
+    } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

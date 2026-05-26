@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable } from "@workspace/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull, or } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
-import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
+import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -405,7 +405,7 @@ router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requi
       res.status(404).json({ error: "not_found" });
       return;
     }
-    let clashes = await db.select().from(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+    let clashes = await db.select().from(clashesTable).where(and(eq(clashesTable.clashReportId, reportId), isNull(clashesTable.deletedAt)));
     const { priority, status, discipline } = req.query;
     if (typeof priority === "string" && priority !== "all") clashes = clashes.filter(c => c.priority === priority);
     if (typeof status === "string" && status !== "all") clashes = clashes.filter(c => c.status === status);
@@ -818,6 +818,58 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
     } catch (err) {
       console.error("[clash-pdf] FAILED:", err);
       res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+    }
+  }
+);
+
+// ── DELETE individual clash (soft delete) ─────────────────────────────────────
+router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    const clashId = Number(req.params.clashId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [report] = await db.select({ id: clashReportsTable.id, projectId: clashReportsTable.projectId })
+        .from(clashReportsTable)
+        .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
+      if (!report) { res.status(404).json({ error: "report_not_found" }); return; }
+
+      const [existing] = await db.select().from(clashesTable)
+        .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(clashesTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId)));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "clash"), eq(linkedItemsTable.fromId, clashId)),
+          and(eq(linkedItemsTable.toType, "clash"), eq(linkedItemsTable.toId, clashId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "clash", entityId: clashId,
+        details: JSON.stringify({ reason, clashIdOriginal: existing.clashIdOriginal, description: existing.description }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "clash", entityType: "clash", entityId: clashId,
+        insightType: "delete_pattern",
+        message: `Clash ${existing.clashIdOriginal ?? clashId} deleted: ${reason ?? "no reason"}`,
+        recommendation: "Review delete reason for false-positive clashes or workflow issues.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }
 );

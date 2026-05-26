@@ -62,6 +62,8 @@ export const rfisTable = pgTable("rfis", {
 
   ballInCourt: text("ball_in_court"),
   lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });
 
 export type Rfi = typeof rfisTable.$inferSelect;

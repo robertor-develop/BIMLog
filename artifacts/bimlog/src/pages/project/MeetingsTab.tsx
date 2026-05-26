@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { Trash2 } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { isDebug } from "@/lib/debug";
 import {
   ClipboardList, CheckCircle2, Calendar, MapPin, Users,
   Sparkles, AlertTriangle, Plus, Download, ChevronDown,
-  ChevronUp, Trash2
+  ChevronUp
 } from "lucide-react";
 
 const API = "/api/v1";
@@ -69,6 +71,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
 
   const [view, setView] = useState<"list" | "new" | "detail" | "actions">("list");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -380,13 +383,38 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                       <span><CheckCircle2 size={11} style={{ marginRight: 3 }} />{m.openActionItems} {t("open", "abiertas")}</span>
                     </div>
                   </div>
-                  <button className="btn btn-sm btn-outline" onClick={() => exportPDF(m)}
-                    style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <Download size={12} /> PDF
-                  </button>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button className="btn btn-sm btn-outline" onClick={() => exportPDF(m)}
+                      style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <Download size={12} /> PDF
+                    </button>
+                    {canWrite && (
+                      <button
+                        title={t("Delete meeting", "Eliminar reunión")}
+                        onClick={() => setDeleteTarget({ id: m.id, label: m.title })}
+                        style={{ padding: "5px 9px", border: "1px solid #FECACA", borderRadius: 6, background: "#FEF2F2", color: "#DC2626", cursor: "pointer", display: "flex", alignItems: "center" }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          open
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={() => {
+            setMeetings(prev => prev.filter(x => x.id !== deleteTarget.id));
+            setDeleteTarget(null);
+          }}
+          endpoint={`${API}/projects/${projectId}/meetings/${deleteTarget.id}`}
+          entityLabel={`Meeting "${deleteTarget.label}"`}
+          warning={t("Attendees and linked items will be removed.", "Asistentes y elementos enlazados serán eliminados.")}
+        />
       )}
 
       {!loading && view === "actions" && (

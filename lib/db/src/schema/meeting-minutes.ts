@@ -13,6 +13,8 @@ export const meetingMinutesTable = pgTable("meeting_minutes", {
   aiSummary: text("ai_summary"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at"),
+  deleteReason: text("delete_reason"),
 });
 
 export const meetingAttendeesTable = pgTable("meeting_attendees", {

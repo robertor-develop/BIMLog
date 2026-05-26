@@ -16,8 +16,9 @@ import {
   MessageSquare, Plus, X, FileText, Download,
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
-  Search, UserPlus, Shield, Eye, DollarSign, Calendar,
+  Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
 } from "lucide-react";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -135,6 +136,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [revising, setRevising] = useState<Rfi | null>(null);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+  const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
+  const rfisQueryClient = useQueryClient();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -471,6 +474,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                             {w("View", "Ver", lang)}
                           </button>
                         )}
+                        {canWrite && (
+                          <button
+                            title={w("Delete RFI", "Eliminar RFI", lang)}
+                            style={{ padding: "3px 6px", fontSize: 10, border: "1px solid #FECACA", borderRadius: 4, background: "#FEF2F2", cursor: "pointer", color: "#DC2626", display: "flex", alignItems: "center" }}
+                            onClick={e => { e.stopPropagation(); setDeleteRfi({ id: rfi.id, label: rfi.number, projectId }); }}
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -535,6 +547,20 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             </tbody>
           </table>
         </div>
+      )}
+
+      {deleteRfi && (
+        <DeleteConfirmModal
+          open
+          onClose={() => setDeleteRfi(null)}
+          onDeleted={() => {
+            rfisQueryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+            setDeleteRfi(null);
+          }}
+          endpoint={`/api/v1/projects/${deleteRfi.projectId}/rfis/${deleteRfi.id}`}
+          entityLabel={`RFI ${deleteRfi.label}`}
+          warning={w("Linked items will be detached.", "Los elementos enlazados serán desvinculados.", lang)}
+        />
       )}
 
       {/* Slide-out Create Panel */}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Upload, ChevronLeft, AlertTriangle, Download } from "lucide-react";
+import { Upload, ChevronLeft, AlertTriangle, Download, Trash2 } from "lucide-react";
 import { isDebug } from "@/lib/debug";
+import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 
 const API = "/api/v1";
 
@@ -49,6 +50,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [reports, setReports] = useState<ClashReport[]>([]);
+  const [deleteClash, setDeleteClash] = useState<{ id: number; label: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
@@ -188,6 +190,17 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   };
 
   if (selectedReport) return (
+    <>
+    {deleteClash && (
+      <DeleteConfirmModal
+        open
+        onClose={() => setDeleteClash(null)}
+        onDeleted={() => { loadClashes(selectedReport); setDeleteClash(null); }}
+        endpoint={`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${deleteClash.id}`}
+        entityLabel={`Clash ${deleteClash.label}`}
+        warning={t("Linked items (RFIs, submittals) will be detached.", "Los elementos enlazados serán desvinculados.")}
+      />
+    )}
     <div className="tab-content-wrapper">
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <button className="btn btn-outline btn-sm" onClick={() => setSelectedReport(null)}
@@ -377,7 +390,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                             fontSize: 11, width: 95,
                             background: !c.dueDate || c.dueDate.toString().startsWith("1970") ? "#FFFBEB" : "white" }} />
                       </td>
-                      <td style={{ padding: "4px 8px" }}>
+                      <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>
                         <button className="btn btn-sm btn-outline"
                           onClick={() => {
                             const nowOpen = !expandedNotes[c.id];
@@ -386,6 +399,15 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                           }}>
                           {expandedNotes[c.id] ? "Done" : "Edit"}
                         </button>
+                        {canWrite && (
+                          <button
+                            title={t("Delete clash", "Eliminar choque")}
+                            onClick={() => setDeleteClash({ id: c.id, label: c.clashIdOriginal || `Clash #${c.id}` })}
+                            style={{ marginLeft: 4, padding: "3px 6px", border: "1px solid #FECACA", borderRadius: 4, background: "#FEF2F2", color: "#DC2626", cursor: "pointer" }}
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                     {expandedNotes[c.id] && (
@@ -520,6 +542,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         )
       }
     </div>
+    </>
   );
 
   return (

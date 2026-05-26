@@ -3,8 +3,9 @@ import { db } from "@workspace/db";
 import {
   meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
   activityLogTable, usersTable,
+  linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, ne } from "drizzle-orm";
+import { eq, and, desc, ne, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
@@ -26,7 +27,7 @@ router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember
   const projectId = Number(req.params.projectId);
   try {
     const meetings = await db.select().from(meetingMinutesTable)
-      .where(eq(meetingMinutesTable.projectId, projectId))
+      .where(and(eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt)))
       .orderBy(desc(meetingMinutesTable.meetingDate));
     const result = await Promise.all(meetings.map(async m => {
       const attendees = await db.select({ id: meetingAttendeesTable.id }).from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, m.id));
@@ -520,6 +521,54 @@ ${chunk}`
       res.json({ imported: 1, meetingId: meeting.id, title: meeting.title, message: "Meeting imported successfully" });
     } catch (err) {
       console.error("[meeting-import]", err);
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── DELETE meeting (soft delete) ──────────────────────────────────────────────
+router.delete("/projects/:projectId/meetings/:meetingId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [existing] = await db.select().from(meetingMinutesTable)
+        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(meetingMinutesTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
+
+      await db.delete(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "meeting"), eq(linkedItemsTable.fromId, meetingId)),
+          and(eq(linkedItemsTable.toType, "meeting"), eq(linkedItemsTable.toId, meetingId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "meeting", entityId: meetingId,
+        details: JSON.stringify({ reason, title: existing.title, meetingDate: existing.meetingDate }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "meeting", entityType: "meeting", entityId: meetingId,
+        insightType: "delete_pattern",
+        message: `Meeting "${existing.title}" deleted: ${reason ?? "no reason"}`,
+        recommendation: "Review meeting delete reasons to detect scheduling churn.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
+    } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

@@ -3,8 +3,9 @@ import { db } from "@workspace/db";
 import {
   changeOrdersTable, changeOrderDocumentsTable, activityLogTable,
   projectsTable, rfisTable, submittalsTable,
+  linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import Anthropic from "@anthropic-ai/sdk";
@@ -30,7 +31,7 @@ router.get("/projects/:projectId/change-orders", authMiddleware, requireProjectM
   const projectId = Number(req.params.projectId);
   try {
     const rows = await db.select().from(changeOrdersTable)
-      .where(eq(changeOrdersTable.projectId, projectId))
+      .where(and(eq(changeOrdersTable.projectId, projectId), isNull(changeOrdersTable.deletedAt)))
       .orderBy(desc(changeOrdersTable.createdAt));
     res.json(rows);
   } catch (err) {
@@ -317,6 +318,54 @@ ${chunk}`
         details: `Imported ${imported} change orders from ${req.file.originalname}`,
       });
       res.json({ imported, message: `${imported} change orders imported`, renamed: renamedCo, renameCount: renamedCo.length });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── DELETE change order (soft delete) ─────────────────────────────────────────
+router.delete("/projects/:projectId/change-orders/:changeOrderId",
+  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const changeOrderId = Number(req.params.changeOrderId);
+    const reason = (req.body?.reason as string | undefined) ?? null;
+    try {
+      const [existing] = await db.select().from(changeOrdersTable)
+        .where(and(eq(changeOrdersTable.id, changeOrderId), eq(changeOrdersTable.projectId, projectId)));
+      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+
+      await db.update(changeOrdersTable)
+        .set({ deletedAt: new Date(), deleteReason: reason })
+        .where(and(eq(changeOrdersTable.id, changeOrderId), eq(changeOrdersTable.projectId, projectId)));
+
+      await db.delete(changeOrderDocumentsTable).where(eq(changeOrderDocumentsTable.changeOrderId, changeOrderId));
+
+      await db.delete(linkedItemsTable).where(and(
+        eq(linkedItemsTable.projectId, projectId),
+        or(
+          and(eq(linkedItemsTable.fromType, "change_order"), eq(linkedItemsTable.fromId, changeOrderId)),
+          and(eq(linkedItemsTable.toType, "change_order"), eq(linkedItemsTable.toId, changeOrderId)),
+        ),
+      ));
+
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "delete", entityType: "change_order", entityId: changeOrderId,
+        details: JSON.stringify({ reason, number: existing.number, title: existing.title }),
+      });
+
+      await db.insert(agentInsightsTable).values({
+        projectId, agentType: "change_order", entityType: "change_order", entityId: changeOrderId,
+        insightType: "delete_pattern",
+        message: `Change order ${existing.number} deleted: ${reason ?? "no reason"}`,
+        recommendation: "Track change-order deletes to detect scope-creep churn.",
+        severity: "info",
+      });
+
+      res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
