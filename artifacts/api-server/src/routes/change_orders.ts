@@ -280,12 +280,24 @@ ${chunk}`
         }
       }
 
+      const existingCo = await db.select({ number: changeOrdersTable.number })
+        .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
+      const usedCoNums = new Set(existingCo.map(r => r.number));
+      const getDrfCo = (num: string): string => {
+        if (!usedCoNums.has(num)) return num;
+        let i = 1;
+        while (usedCoNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
       let imported = 0;
       for (const r of records) {
         if (!r.title && !r.number) continue;
+        const proposed = r.number || `CO-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfCo(proposed);
+        usedCoNums.add(finalNum);
         await db.insert(changeOrdersTable).values({
           projectId,
-          number: r.number || `CO-${String(imported + 1).padStart(3, "0")}`,
+          number: finalNum,
           title: r.title || "Imported Change Order",
           description: r.description || null,
           status: r.status || "draft",

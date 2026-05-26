@@ -1,0 +1,160 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+PART 1 — Add DRF renaming to ALL backend import endpoints.
+
+FILE: artifacts/api-server/src/routes/transmittals.ts
+
+Find the insert loop in the import endpoint:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(transmittalsTable).values({
+          projectId,
+          number: r.number || `T-${String(imported + 1).padStart(3, "0")}`,
+
+Replace with:
+      const existingTx = await db.select({ number: transmittalsTable.number })
+        .from(transmittalsTable).where(eq(transmittalsTable.projectId, projectId));
+      const usedTxNums = new Set(existingTx.map(r => r.number));
+      const getDrfTx = (num: string): string => {
+        if (!usedTxNums.has(num)) return num;
+        let i = 1;
+        while (usedTxNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `T-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfTx(proposed);
+        usedTxNums.add(finalNum);
+        await db.insert(transmittalsTable).values({
+          projectId,
+          number: finalNum,
+
+FILE: artifacts/api-server/src/routes/change_orders.ts
+
+Find:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(changeOrdersTable).values({
+          projectId,
+          number: r.number || `CO-${String(imported + 1).padStart(3, "0")}`,
+
+Replace with:
+      const existingCo = await db.select({ number: changeOrdersTable.number })
+        .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
+      const usedCoNums = new Set(existingCo.map(r => r.number));
+      const getDrfCo = (num: string): string => {
+        if (!usedCoNums.has(num)) return num;
+        let i = 1;
+        while (usedCoNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `CO-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfCo(proposed);
+        usedCoNums.add(finalNum);
+        await db.insert(changeOrdersTable).values({
+          projectId,
+          number: finalNum,
+
+FILE: artifacts/api-server/src/routes/submittals.ts
+
+Find in import endpoint:
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        await db.insert(submittalsTable).values({
+          projectId,
+          number: r.number || `SUB-${String(imported + 1).padStart(3, "0")}`,
+
+Replace with:
+      const existingSub = await db.select({ number: submittalsTable.number })
+        .from(submittalsTable).where(eq(submittalsTable.projectId, projectId));
+      const usedSubNums = new Set(existingSub.map(r => r.number));
+      const getDrfSub = (num: string): string => {
+        if (!usedSubNums.has(num)) return num;
+        let i = 1;
+        while (usedSubNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
+      let imported = 0;
+      for (const r of records) {
+        if (!r.title && !r.number) continue;
+        const proposed = r.number || `SUB-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfSub(proposed);
+        usedSubNums.add(finalNum);
+        await db.insert(submittalsTable).values({
+          projectId,
+          number: finalNum,
+
+PART 2 — Add page refresh after import on ALL frontend modules.
+
+FILE: artifacts/bimlog/src/pages/project/TransmittalsTab.tsx
+Find:
+        setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
+        setTimeout(() => window.location.reload(), 1500);
+
+FILE: artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx
+Find:
+        setImportMsg(`${data.imported ?? 0} change orders imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`${data.imported ?? 0} change orders imported successfully`);
+        setTimeout(() => window.location.reload(), 1500);
+
+FILE: artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
+Find:
+        setImportMsg(`${data.imported ?? 0} submittals imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`${data.imported ?? 0} submittals imported successfully`);
+        setTimeout(() => window.location.reload(), 1500);
+
+FILE: artifacts/bimlog/src/pages/project/MeetingsTab.tsx
+Find:
+        setImportMsg(`Meeting imported successfully — ${data.title || "untitled"}`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`Meeting imported successfully — ${data.title || "untitled"}`);
+        setTimeout(() => window.location.reload(), 1500);
+
+FILE: artifacts/bimlog/src/pages/project/ScheduleTab.tsx
+Find:
+        setImportMsg(`${data.imported ?? 0} milestones imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`${data.imported ?? 0} milestones imported successfully`);
+        setTimeout(() => window.location.reload(), 1500);
+
+FILE: artifacts/bimlog/src/pages/project/DirectoryTab.tsx
+Find:
+        setImportMsg(`${data.imported ?? 0} contacts imported successfully`);
+        setTimeout(() => setImportMsg(""), 5000);
+Replace with:
+        setImportMsg(`${data.imported ?? 0} contacts imported successfully`);
+        setTimeout(() => window.location.reload(), 1500);
+
+Check 1 — DRF in all backend routes:
+grep -rn "getDrfTx\|getDrfCo\|getDrfSub\|getDrfNumber\|DRF" artifacts/api-server/src/routes/ | grep -v "//\|test" | head -15
+
+Check 2 — page reload in all frontend tabs:
+grep -rn "location.reload" artifacts/bimlog/src/pages/project/ | head -10
+
+Check 3 — tsc:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH frontend and backend. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

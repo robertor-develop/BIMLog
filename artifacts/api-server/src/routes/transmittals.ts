@@ -321,12 +321,24 @@ ${chunk}`
         }
       }
 
+      const existingTx = await db.select({ number: transmittalsTable.number })
+        .from(transmittalsTable).where(eq(transmittalsTable.projectId, projectId));
+      const usedTxNums = new Set(existingTx.map(r => r.number));
+      const getDrfTx = (num: string): string => {
+        if (!usedTxNums.has(num)) return num;
+        let i = 1;
+        while (usedTxNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
       let imported = 0;
       for (const r of records) {
         if (!r.title && !r.number) continue;
+        const proposed = r.number || `T-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfTx(proposed);
+        usedTxNums.add(finalNum);
         await db.insert(transmittalsTable).values({
           projectId,
-          number: r.number || `T-${String(imported + 1).padStart(3, "0")}`,
+          number: finalNum,
           title: r.title || "Imported Transmittal",
           purpose: r.purpose || null,
           sentById: req.user!.userId,

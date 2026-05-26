@@ -39,7 +39,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
       if (res.ok) {
         const data = await res.json();
         setImportMsg(`${data.imported ?? 0} transmittals imported successfully`);
-        setTimeout(() => setImportMsg(""), 5000);
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         setImportMsg("Import failed — please try again");
       }

@@ -124,8 +124,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       }
       const data = await res.json();
       setImportMsg(`Meeting imported successfully — ${data.title || "untitled"}`);
-      await loadMeetings();
-      setTimeout(() => setImportMsg(""), 5000);
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       setImportMsg("Import failed — please try again");
     } finally {

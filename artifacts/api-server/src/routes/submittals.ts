@@ -1236,12 +1236,24 @@ ${chunk}`
         }
       }
 
+      const existingSub = await db.select({ number: submittalsTable.number })
+        .from(submittalsTable).where(eq(submittalsTable.projectId, projectId));
+      const usedSubNums = new Set(existingSub.map(r => r.number));
+      const getDrfSub = (num: string): string => {
+        if (!usedSubNums.has(num)) return num;
+        let i = 1;
+        while (usedSubNums.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
       let imported = 0;
       for (const r of records) {
         if (!r.title && !r.number) continue;
+        const proposed = r.number || `SUB-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfSub(proposed);
+        usedSubNums.add(finalNum);
         await db.insert(submittalsTable).values({
           projectId,
-          number: r.number || `SUB-${String(imported + 1).padStart(3, "0")}`,
+          number: finalNum,
           title: r.title || "Imported Submittal",
           description: r.description || null,
           status: r.status || "pending",
