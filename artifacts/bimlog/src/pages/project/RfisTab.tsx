@@ -608,6 +608,8 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
 
   // Fix 2 — add external person to submitted to
   const [showAddExtPerson, setShowAddExtPerson] = useState(false);
+  const [showAddCompany, setShowAddCompany] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
   const [extPersonName, setExtPersonName] = useState("");
   const [extPersonEmail, setExtPersonEmail] = useState("");
   const [extPersonPhone, setExtPersonPhone] = useState("");
@@ -839,6 +841,42 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
                 <option value="">{w("— Select company —", "— Seleccionar empresa —", lang)}</option>
                 {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+              <button type="button" onClick={() => setShowAddCompany(!showAddCompany)}
+                style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddCompany ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content", marginTop: 4 }}>
+                <Plus style={{ width: 12, height: 12 }} />
+                {w("Add company not in list", "Agregar empresa fuera de lista", lang)}
+              </button>
+              {showAddCompany && (
+                <div style={{ display: "flex", gap: 8, marginTop: 6, padding: "8px 10px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                  <input
+                    value={newCompanyName}
+                    onChange={e => setNewCompanyName(e.target.value)}
+                    placeholder={w("Company name", "Nombre de empresa", lang)}
+                    style={{ flex: 1, fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "4px 8px" }}
+                  />
+                  <button type="button"
+                    onClick={async () => {
+                      if (!newCompanyName.trim()) return;
+                      const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+                      await fetch(`/api/v1/projects/${projectId}/directory`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          full_name: newCompanyName.trim(),
+                          email: `contact@${newCompanyName.trim().toLowerCase().replace(/\s+/g, "")}@bimlog.io`,
+                          company_name: newCompanyName.trim(),
+                          role: "External Company",
+                        }),
+                      });
+                      setsToCompany(newCompanyName.trim());
+                      setNewCompanyName("");
+                      setShowAddCompany(false);
+                    }}
+                    style={{ padding: "4px 12px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                    {w("Add", "Agregar", lang)}
+                  </button>
+                </div>
+              )}
             </FormField>
             <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
