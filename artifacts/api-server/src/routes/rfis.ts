@@ -1661,12 +1661,26 @@ ${chunk}`
         }
       }
 
+      const existingRfisForDrf = await db.select({ number: rfisTable.number })
+        .from(rfisTable).where(eq(rfisTable.projectId, projectId));
+      const usedNumbers = new Set(existingRfisForDrf.map(r => r.number));
+
+      const getDrfNumber = (num: string): string => {
+        if (!usedNumbers.has(num)) return num;
+        let i = 1;
+        while (usedNumbers.has(`${num}-DRF-${String(i).padStart(3,"0")}`)) i++;
+        return `${num}-DRF-${String(i).padStart(3,"0")}`;
+      };
+
       let imported = 0;
       for (const r of records) {
         if (!r.subject && !r.number) continue;
+        const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
+        const finalNum = getDrfNumber(proposed);
+        usedNumbers.add(finalNum);
         await db.insert(rfisTable).values({
           projectId,
-          number: r.number || `RFI-${String(imported + 1).padStart(3, "0")}`,
+          number: finalNum,
           subject: r.subject || "Imported RFI",
           description: r.description || null,
           status: r.status || "open",
