@@ -244,7 +244,7 @@ Return ONLY this JSON shape (no markdown, no code block):
       }
 
       let parsed: Record<string, unknown>;
-      try { parsed = JSON.parse(block.text.trim()); }
+      try { parsed = JSON.parse(block.text.replace(/```json\n?|```/g, "").trim()); }
       catch {
         res.status(422).json({ error: "AI returned non-JSON response", raw: block.text.slice(0, 500) });
         return;
