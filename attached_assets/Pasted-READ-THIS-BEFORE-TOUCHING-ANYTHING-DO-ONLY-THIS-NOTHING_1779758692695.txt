@@ -1,0 +1,65 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/bimlog/src/pages/project/RfisTab.tsx
+
+CHANGE 1 — Add state for new company input.
+Find:
+  const [showAddExtPerson, setShowAddExtPerson] = useState(false);
+
+Add after:
+  const [showAddCompany, setShowAddCompany] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
+
+CHANGE 2 — Add "+ Add company" button and inline form after the company select.
+Find:
+              </select>
+            </FormField>
+            <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
+
+Replace with:
+              </select>
+              <button type="button" onClick={() => setShowAddCompany(!showAddCompany)}
+                style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddCompany ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content", marginTop: 4 }}>
+                <Plus style={{ width: 12, height: 12 }} />
+                {w("Add company not in list", "Agregar empresa fuera de lista", lang)}
+              </button>
+              {showAddCompany && (
+                <div style={{ display: "flex", gap: 8, marginTop: 6, padding: "8px 10px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                  <input
+                    value={newCompanyName}
+                    onChange={e => setNewCompanyName(e.target.value)}
+                    placeholder={w("Company name", "Nombre de empresa", lang)}
+                    style={{ flex: 1, fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "4px 8px" }}
+                  />
+                  <button type="button"
+                    onClick={async () => {
+                      if (!newCompanyName.trim()) return;
+                      // Add to project directory
+                      await fetch(`${API}/projects/${projectId}/directory`, {
+                        method: "POST",
+                        headers: { ...getHeaders(), "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          fullName: newCompanyName.trim(),
+                          email: `contact@${newCompanyName.trim().toLowerCase().replace(/\s+/g, "")}.com`,
+                          companyName: newCompanyName.trim(),
+                          role: "External Company",
+                        }),
+                      });
+                      setsToCompany(newCompanyName.trim());
+                      setNewCompanyName("");
+                      setShowAddCompany(false);
+                    }}
+                    style={{ padding: "4px 12px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                    {w("Add", "Agregar", lang)}
+                  </button>
+                </div>
+              )}
+            </FormField>
+            <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
+
+Check if getHeaders exists:
+grep -n "getHeaders\|headers.*token\|Authorization.*token" artifacts/bimlog/src/pages/project/RfisTab.tsx | head -5
+
+Print raw output first. Nothing else.
