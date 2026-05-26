@@ -1,0 +1,104 @@
+READ THIS BEFORE TOUCHING ANYTHING.
+DO ONLY THIS. NOTHING ELSE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+FILE: artifacts/api-server/src/routes/clash_reports.ts
+
+Remove xml2js imports — no longer needed:
+Find and delete these 3 lines:
+import { parseString } from "xml2js";
+import { promisify } from "util";
+const parseXml = promisify(parseString);
+
+Replace the entire isXml block with AI-native extraction:
+Find the entire block starting with:
+      if (isXml) {
+and ending with the closing:
+      }
+
+      if (!isSpreadsheet && parsed.length === 0) {
+
+Replace ONLY the isXml block (not the line after) with:
+
+      if (isXml) {
+        try {
+          const xmlContent = req.file.buffer.toString("utf-8");
+          console.log("[clash-upload] XML file size:", xmlContent.length, "chars");
+
+          // Send full XML to Claude — Claude reads it natively, no parsing library needed
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 16000,
+            system: `You are a Navisworks XML coordination report analyzer. 
+You extract ALL clash viewpoints from Navisworks XML export files.
+You understand the Autodesk Navisworks Exchange XML format.
+You never skip viewpoints — extract every single one.
+You infer trade/discipline and floor/level from the viewpoint name and ID.
+You always return valid JSON.`,
+            messages: [{
+              role: "user",
+              content: `Analyze this Navisworks XML export and extract ALL coordination viewpoints.
+
+EXTRACTION RULES:
+- Extract every <view name="..."> element inside viewfolder elements
+- Viewpoint ID = the prefix before first space (C.123, 12.001, UG.000, B.001 etc)
+- Description = everything after the ID in the name attribute
+- Discipline inference: FP/fire protection, PB/plumbing/sanitary/CW pipe, HVAC/duct/mechanical, ELEC/conduit/electrical, STRUCT/structural/foundation, COORD=default
+- Level inference from ID prefix: C.=CELLAR, UG.=UNDERGROUND, B.=BASEMENT, G.=GROUND, R.=ROOF, numeric prefix (12.)=floor number (12TH FLOOR)
+- Status: default to "open" unless folder name contains COMPLETE or RESOLVED
+- Extract ALL viewpoints — do not skip any
+
+Return ONLY a valid JSON array with NO markdown, NO explanation:
+[{
+  "viewpoint": "C.123",
+  "description": "6 SAN IN CONFLICT WITH DUCT",
+  "holdUps": "",
+  "discipline": "PB",
+  "level": "CELLAR",
+  "assignedToName": "",
+  "resolutionNotes": null,
+  "status": "open",
+  "dueDate": null
+}]
+
+NAVISWORKS XML:
+${xmlContent}`
+            }]
+          });
+
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const cleanText = extractText.replace(/```json\n?|```/g, "").trim();
+          const aiRecords = JSON.parse(cleanText) as any[];
+
+          parsed = aiRecords
+            .filter((r: any) => r.description || r.viewpoint)
+            .map((r: any) => ({
+              clashIdOriginal: String(r.viewpoint || ""),
+              description: String(r.description || ""),
+              holdUps: String(r.holdUps || ""),
+              discipline1: String(r.discipline || "COORD"),
+              level: String(r.level || ""),
+              assignedToName: String(r.assignedToName || ""),
+              resolutionNotes: r.resolutionNotes ? String(r.resolutionNotes) : null,
+              status: r.status === "complete" || r.status === "resolved" ? "resolved" : "open",
+              dueDate: r.dueDate ? new Date(r.dueDate) : null,
+            }));
+
+          console.log("[clash-upload] XML via Claude extracted:", parsed.length, "viewpoints from", aiRecords.length, "raw records");
+        } catch (xmlErr) {
+          console.error("[clash-upload] XML Claude extraction failed:", xmlErr);
+          parsed = [];
+        }
+      }
+
+Check 1:
+grep -n "isXml\|XML via Claude\|xml2js\|parseXml\|max_tokens.*16000" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 2 — no xml2js imports remaining:
+grep -n "xml2js\|parseXml\|promisify.*parse" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

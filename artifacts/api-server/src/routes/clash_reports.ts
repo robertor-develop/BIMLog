@@ -7,9 +7,6 @@ import { projectsTable, usersTable, companiesTable, activityLogTable } from "@wo
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
-import { parseString } from "xml2js";
-import { promisify } from "util";
-const parseXml = promisify(parseString);
 import Anthropic from "@anthropic-ai/sdk";
 
 const router: Router = Router();
@@ -86,58 +83,73 @@ router.post("/projects/:projectId/clash-reports/upload",
       let parsed: { clashIdOriginal: string; description: string; holdUps: string; discipline1: string; level: string; assignedToName: string; resolutionNotes: string | null; status: string; dueDate: Date | null }[] = [];
 
       if (isXml) {
-        // Navisworks XML — parse directly, extract ALL view elements
         try {
           const xmlContent = req.file.buffer.toString("utf-8");
-          const result = await parseXml(xmlContent) as any;
-          // xml2js confirmed structure: result.exchange.viewpoints[0].viewfolder[]
-          const exchange = result?.exchange ?? {};
-          const viewfolders: any[] = exchange?.viewpoints?.[0]?.viewfolder ?? [];
-          console.log("[clash-upload] XML viewfolders found:", viewfolders.length);
-          const allViews: any[] = [];
-          for (const folder of viewfolders) {
-            const folderName = folder?.$?.name ?? "";
-            const views: any[] = Array.isArray(folder?.view) ? folder.view : [];
-            for (const view of views) {
-              const viewName = view?.$?.name ?? "";
-              const match = viewName.match(/^([A-Z0-9]+\.[0-9]+)\s+(.+)$/);
-              const viewpointId = match ? match[1] : viewName.substring(0, 10);
-              const description = match ? match[2] : viewName;
-              const tradeLower = description.toLowerCase();
-              const discipline =
-                tradeLower.includes(" fp ") || tradeLower.startsWith("fp ") || tradeLower.includes("fire pump") || tradeLower.includes("fire prot") ? "FP"
-                : tradeLower.includes(" pb ") || tradeLower.startsWith("pb ") || tradeLower.includes("plumb") || tradeLower.includes(" san ") || tradeLower.includes("sanitary") || tradeLower.includes("cw pipe") || tradeLower.includes("bath tub") || tradeLower.includes("trench drain") || tradeLower.includes("ref pip") ? "PB"
-                : tradeLower.includes("duct") || tradeLower.includes(" hvac") || tradeLower.includes("hvac ") || tradeLower.includes(" tx ") || tradeLower.includes(" kx ") || tradeLower.includes("grille") || (tradeLower.includes("riser") && tradeLower.includes("hvac")) ? "HVAC"
-                : tradeLower.includes("conduit") || tradeLower.includes(" elec") || tradeLower.includes("electrical") || tradeLower.includes(" poe") ? "ELEC"
-                : tradeLower.includes("struct") || tradeLower.includes("foundation") || tradeLower.includes("slab") || tradeLower.includes("beam") ? "STRUCT"
-                : "COORD";
+          console.log("[clash-upload] XML file size:", xmlContent.length, "chars");
 
-              const level =
-                viewpointId.startsWith("UG.") ? "UNDERGROUND"
-                : viewpointId.startsWith("C.") ? "CELLAR"
-                : viewpointId.startsWith("B.") ? "BASEMENT"
-                : viewpointId.startsWith("G.") ? "GROUND"
-                : viewpointId.startsWith("R.") ? "ROOF"
-                : viewpointId.match(/^(\d+)\./) ? `${viewpointId.match(/^(\d+)\./)?.[1]}TH FLOOR`
-                : folderName;
+          // Send full XML to Claude — Claude reads it natively, no parsing library needed
+          const extractMsg = await anthropic.messages.create({
+            model: "claude-sonnet-4-5",
+            max_tokens: 16000,
+            system: `You are a Navisworks XML coordination report analyzer. 
+You extract ALL clash viewpoints from Navisworks XML export files.
+You understand the Autodesk Navisworks Exchange XML format.
+You never skip viewpoints — extract every single one.
+You infer trade/discipline and floor/level from the viewpoint name and ID.
+You always return valid JSON.`,
+            messages: [{
+              role: "user",
+              content: `Analyze this Navisworks XML export and extract ALL coordination viewpoints.
 
-              allViews.push({
-                clashIdOriginal: viewpointId,
-                description: description,
-                holdUps: "",
-                discipline1: discipline,
-                level: level,
-                assignedToName: "",
-                resolutionNotes: null,
-                status: "open",
-                dueDate: null,
-              });
-            }
-          }
-          parsed = allViews;
-          console.log("[clash-upload] XML parsed directly:", parsed.length, "viewpoints");
+EXTRACTION RULES:
+- Extract every <view name="..."> element inside viewfolder elements
+- Viewpoint ID = the prefix before first space (C.123, 12.001, UG.000, B.001 etc)
+- Description = everything after the ID in the name attribute
+- Discipline inference: FP/fire protection, PB/plumbing/sanitary/CW pipe, HVAC/duct/mechanical, ELEC/conduit/electrical, STRUCT/structural/foundation, COORD=default
+- Level inference from ID prefix: C.=CELLAR, UG.=UNDERGROUND, B.=BASEMENT, G.=GROUND, R.=ROOF, numeric prefix (12.)=floor number (12TH FLOOR)
+- Status: default to "open" unless folder name contains COMPLETE or RESOLVED
+- Extract ALL viewpoints — do not skip any
+
+Return ONLY a valid JSON array with NO markdown, NO explanation:
+[{
+  "viewpoint": "C.123",
+  "description": "6 SAN IN CONFLICT WITH DUCT",
+  "holdUps": "",
+  "discipline": "PB",
+  "level": "CELLAR",
+  "assignedToName": "",
+  "resolutionNotes": null,
+  "status": "open",
+  "dueDate": null
+}]
+
+NAVISWORKS XML:
+${xmlContent}`
+            }]
+          });
+
+          const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
+          const cleanText = extractText.replace(/```json\n?|```/g, "").trim();
+          const aiRecords = JSON.parse(cleanText) as any[];
+
+          parsed = aiRecords
+            .filter((r: any) => r.description || r.viewpoint)
+            .map((r: any) => ({
+              clashIdOriginal: String(r.viewpoint || ""),
+              description: String(r.description || ""),
+              holdUps: String(r.holdUps || ""),
+              discipline1: String(r.discipline || "COORD"),
+              level: String(r.level || ""),
+              assignedToName: String(r.assignedToName || ""),
+              resolutionNotes: r.resolutionNotes ? String(r.resolutionNotes) : null,
+              status: r.status === "complete" || r.status === "resolved" ? "resolved" : "open",
+              dueDate: r.dueDate ? new Date(r.dueDate) : null,
+            }));
+
+          console.log("[clash-upload] XML via Claude extracted:", parsed.length, "viewpoints from", aiRecords.length, "raw records");
         } catch (xmlErr) {
-          console.error("[clash-upload] XML parse failed, falling back to AI:", xmlErr);
+          console.error("[clash-upload] XML Claude extraction failed:", xmlErr);
+          parsed = [];
         }
       }
 
