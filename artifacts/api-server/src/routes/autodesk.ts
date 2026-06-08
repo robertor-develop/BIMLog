@@ -14,7 +14,7 @@ router.get("/autodesk/token", async (_req, res) => {
   try {
     const body = new URLSearchParams({
       grant_type: "client_credentials",
-      scope: "bucket:create bucket:read data:read data:write data:create account:read",
+      scope: "data:read data:write data:create bucket:create bucket:read",
     });
 
     const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
