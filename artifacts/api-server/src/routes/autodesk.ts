@@ -1,6 +1,15 @@
 import { Router } from "express";
 
+declare module "express-session" {
+  interface SessionData {
+    apsToken?: string;
+    apsRefreshToken?: string;
+  }
+}
+
 const router: Router = Router();
+
+const REDIRECT_URI = "https://bim-log-ignite.replit.app/api/v1/autodesk/callback";
 
 router.get("/autodesk/token", async (_req, res) => {
   const clientId = process.env.APS_CLIENT_ID;
@@ -27,6 +36,119 @@ router.get("/autodesk/token", async (_req, res) => {
       },
       body: body.toString(),
     });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+router.get("/autodesk/login", (_req, res) => {
+  const clientId = process.env.APS_CLIENT_ID;
+
+  if (!clientId) {
+    res.status(500).json({ error: "APS_CLIENT_ID must be set" });
+    return;
+  }
+
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    redirect_uri: REDIRECT_URI,
+    scope: "data:read data:write account:read",
+    state: "bimlog",
+  });
+
+  res.redirect(`https://developer.api.autodesk.com/authentication/v2/authorize?${params.toString()}`);
+});
+
+router.get("/autodesk/callback", async (req, res) => {
+  const clientId = process.env.APS_CLIENT_ID;
+  const clientSecret = process.env.APS_CLIENT_SECRET;
+  const code = req.query.code as string | undefined;
+
+  if (!clientId || !clientSecret) {
+    res.status(500).json({ error: "APS_CLIENT_ID and APS_CLIENT_SECRET must be set" });
+    return;
+  }
+
+  if (!code) {
+    res.status(400).json({ error: "Missing code parameter" });
+    return;
+  }
+
+  try {
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: REDIRECT_URI,
+    });
+
+    const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+    const response = await fetch("https://developer.api.autodesk.com/authentication/v2/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${basic}`,
+      },
+      body: body.toString(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      res.status(response.status).json(data);
+      return;
+    }
+
+    req.session.apsToken = data.access_token;
+    req.session.apsRefreshToken = data.refresh_token;
+
+    res.redirect("/dashboard");
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+router.get("/autodesk/hubs", async (req, res) => {
+  const token = req.session.apsToken;
+
+  if (!token) {
+    res.redirect("/api/v1/autodesk/login");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://developer.api.autodesk.com/project/v1/hubs", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+router.get("/autodesk/projects/:hubId", async (req, res) => {
+  const token = req.session.apsToken;
+
+  if (!token) {
+    res.redirect("/api/v1/autodesk/login");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `https://developer.api.autodesk.com/project/v1/hubs/${req.params.hubId}/projects`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     const data = await response.json();
     res.status(response.status).json(data);

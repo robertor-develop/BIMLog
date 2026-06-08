@@ -1,0 +1,1 @@
+- [api-server router mount prefix](api-server-routing.md) — res.redirect in route files must include `/api/v1` prefix or it 404s

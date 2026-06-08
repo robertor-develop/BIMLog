@@ -1,0 +1,32 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add 3-legged OAuth flow to artifacts/api-server/src/routes/autodesk.ts.
+
+Add a GET /autodesk/login endpoint. It builds the Autodesk authorization URL and redirects the user there. The URL is https://developer.api.autodesk.com/authentication/v2/authorize with these query params: response_type=code, client_id from APS_CLIENT_ID, redirect_uri=https://bim-log-ignite.replit.app/api/v1/autodesk/callback, scope=data:read data:write account:read, state=bimlog.
+
+Add a GET /autodesk/callback endpoint. It receives the code param from Autodesk. It POSTs to https://developer.api.autodesk.com/authentication/v2/token with grant_type=authorization_code, code=the received code, client_id, client_secret, redirect_uri — using Basic auth header same as the 2-legged token call. It stores the returned access_token and refresh_token in the session under req.session.apsToken and req.session.apsRefreshToken. Then redirects to /dashboard.
+
+Add a GET /autodesk/hubs endpoint. It reads the token from req.session.apsToken. If no token redirect to /autodesk/login. It calls https://developer.api.autodesk.com/project/v1/hubs with Bearer token and returns the hub list as JSON.
+
+Add a GET /autodesk/projects/:hubId endpoint. It reads token from session. Calls https://developer.api.autodesk.com/project/v1/hubs/:hubId/projects and returns the project list as JSON.
+
+Check if express-session is already in the project dependencies:
+grep -n "express-session\|session" artifacts/api-server/package.json | head -5
+
+If express-session is not present add it: cd artifacts/api-server && pnpm add express-session @types/express-session
+
+Check 1:
+grep -n "login\|callback\|hubs\|projects" artifacts/api-server/src/routes/autodesk.ts | head -20
+
+Check 2:
+grep -n "express-session\|session" artifacts/api-server/package.json | head -5
+
+Check 3:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

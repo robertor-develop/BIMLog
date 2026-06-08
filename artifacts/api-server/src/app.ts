@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import session from "express-session";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { pool } from "@workspace/db";
@@ -18,9 +19,24 @@ console.log("========================================");
 const app: Express = express();
 
 app.disable("etag");
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "bimlog-aps-session-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: ENV_MODE === "PRODUCTION",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
 
 app.use("/api/v1", (_req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
