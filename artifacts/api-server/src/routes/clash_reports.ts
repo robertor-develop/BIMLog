@@ -982,7 +982,9 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         details: `Plugin sync (${reportName}): ${created} created, ${updated} updated, ${fingerprinted} fingerprinted`,
       });
 
-      res.json({ created, updated, fingerprinted, message: "Sync complete" });
+      const response = { created, updated, fingerprinted, message: "Sync complete" };
+      console.log("[plugin-sync] sending response:", JSON.stringify(response));
+      res.json(response);
     } catch (err) {
       res.status(500).json({ error: "plugin_sync_failed", message: err instanceof Error ? err.message : String(err) });
     }
