@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, doublePrecision } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -41,6 +41,18 @@ export const clashesTable = pgTable("clashes", {
   linkedRfiId: integer("linked_rfi_id"),
   resolutionNotes: text("resolution_notes"),
   dueDate: timestamp("due_date"),
+  name: text("name"),
+  testName: text("test_name"),
+  fingerprint: text("fingerprint"),
+  element1Layer: text("element_1_layer"),
+  element2Layer: text("element_2_layer"),
+  element1Id: text("element_1_id"),
+  element2Id: text("element_2_id"),
+  distance: doublePrecision("distance"),
+  positionX: doublePrecision("position_x"),
+  positionY: doublePrecision("position_y"),
+  positionZ: doublePrecision("position_z"),
+  lastPluginSyncAt: timestamp("last_plugin_sync_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"),

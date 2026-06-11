@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable } from "@workspace/db/schema";
-import { eq, desc, and, isNull, or } from "drizzle-orm";
+import { eq, desc, and, isNull, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -870,6 +870,147 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+router.post("/projects/:projectId/clash-reports/plugin-sync",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const clashes: any[] = Array.isArray(req.body?.clashes) ? req.body.clashes : [];
+      if (clashes.length === 0) {
+        res.status(400).json({ error: "no_clashes", message: "Request body must include a non-empty clashes array" });
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const reportName = `Plugin Sync - ${today}`;
+
+      let [report] = await db.select().from(clashReportsTable)
+        .where(and(eq(clashReportsTable.projectId, projectId), eq(clashReportsTable.fileName, reportName)));
+
+      if (!report) {
+        const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+        const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+        const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
+        let seqNum = existingReports.length + 1;
+        let autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
+        while (usedNums.has(autoNum)) {
+          seqNum++;
+          autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
+        }
+        [report] = await db.insert(clashReportsTable).values({
+          projectId,
+          uploadedById: req.user!.userId,
+          fileName: reportName,
+          format: "plugin",
+          totalClashes: 0,
+          status: "complete",
+          reportNumber: autoNum,
+        }).returning();
+      }
+
+      let created = 0;
+      let updated = 0;
+      let fingerprinted = 0;
+      const now = new Date();
+
+      for (const c of clashes) {
+        const fingerprint = c.fingerprint ? String(c.fingerprint) : null;
+        if (fingerprint) fingerprinted++;
+
+        const toNum = (v: any) => (v === undefined || v === null || v === "" || isNaN(Number(v)) ? null : Number(v));
+
+        let existing: typeof clashesTable.$inferSelect | undefined;
+        if (fingerprint) {
+          [existing] = await db.select().from(clashesTable)
+            .where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.fingerprint, fingerprint)));
+        }
+
+        if (existing) {
+          await db.update(clashesTable)
+            .set({ status: c.status ?? existing.status, lastPluginSyncAt: now, updatedAt: now, deletedAt: null, deleteReason: null })
+            .where(eq(clashesTable.id, existing.id));
+          updated++;
+        } else {
+          await db.insert(clashesTable).values({
+            clashReportId: report.id,
+            projectId,
+            clashIdOriginal: c.clashId != null ? String(c.clashId) : null,
+            name: c.name ?? null,
+            description: c.description ?? null,
+            status: c.status ?? "open",
+            testName: c.testName ?? null,
+            element1Layer: c.element1Layer ?? null,
+            element2Layer: c.element2Layer ?? null,
+            element1Id: c.element1Id != null ? String(c.element1Id) : null,
+            element2Id: c.element2Id != null ? String(c.element2Id) : null,
+            gridLocation: c.gridLocation ?? null,
+            distance: toNum(c.distance),
+            positionX: toNum(c.positionX),
+            positionY: toNum(c.positionY),
+            positionZ: toNum(c.positionZ),
+            priority: c.priority ?? null,
+            fingerprint,
+            discipline1: c.trade1 ?? null,
+            discipline2: c.trade2 ?? null,
+            lastPluginSyncAt: now,
+          });
+          created++;
+        }
+      }
+
+      const [{ count: total }] = await db.select({ count: sql<number>`count(*)::int` }).from(clashesTable)
+        .where(and(eq(clashesTable.clashReportId, report.id), isNull(clashesTable.deletedAt)));
+      await db.update(clashReportsTable).set({ totalClashes: total, updatedAt: now }).where(eq(clashReportsTable.id, report.id));
+
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "plugin_sync",
+        entityType: "clash_report",
+        entityId: report.id,
+        details: `Plugin sync (${reportName}): ${created} created, ${updated} updated, ${fingerprinted} fingerprinted`,
+      });
+
+      res.json({ created, updated, fingerprinted, message: "Sync complete" });
+    } catch (err) {
+      res.status(500).json({ error: "plugin_sync_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+router.get("/projects/:projectId/clash-reports/plugin-pull",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const rows = await db.select().from(clashesTable)
+        .where(and(
+          eq(clashesTable.projectId, projectId),
+          isNull(clashesTable.deletedAt),
+          sql`${clashesTable.fingerprint} IS NOT NULL`,
+          sql`${clashesTable.lastPluginSyncAt} IS NOT NULL`,
+          sql`${clashesTable.updatedAt} > ${clashesTable.lastPluginSyncAt}`,
+        ));
+
+      const clashes = rows.map(r => ({
+        clashId: r.clashIdOriginal,
+        fingerprint: r.fingerprint,
+        newStatus: r.status,
+        resolvedBy: r.assignedToName,
+        notes: r.resolutionNotes,
+      }));
+
+      res.json(clashes);
+    } catch (err) {
+      res.status(500).json({ error: "plugin_pull_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );

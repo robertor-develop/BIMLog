@@ -69,4 +69,25 @@ startOverdueNotifier();
   }
 })();
 
+(async () => {
+  try {
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS name text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS test_name text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS fingerprint text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_layer text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_layer text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_id text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_id text`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS distance double precision`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_x double precision`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_y double precision`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_z double precision`);
+    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS last_plugin_sync_at timestamp`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS clashes_project_fingerprint_idx ON clashes (project_id, fingerprint)`);
+    console.log("[migration] clashes plugin-sync columns ensured");
+  } catch (e) {
+    console.error("[migration] clashes plugin-sync migration failed:", e);
+  }
+})();
+
 export default app;
