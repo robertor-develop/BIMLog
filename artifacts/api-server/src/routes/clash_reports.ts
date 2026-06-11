@@ -875,6 +875,10 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
 );
 
 router.post("/projects/:projectId/clash-reports/plugin-sync",
+  (req, _res, next) => {
+    console.log("[plugin-sync] authorization header:", req.headers.authorization, "clashes length:", req.body?.clashes?.length);
+    next();
+  },
   authMiddleware,
   requirePermission("admin", "write"),
   async (req, res) => {
