@@ -13,6 +13,14 @@ Two endpoints in `clash_reports.ts` move clash state between the Navisworks plug
 
 **Why the soft-delete revive matters:** fingerprint dedup must clear `deletedAt`/`deleteReason` on match. A soft-deleted clash whose fingerprint is re-sent must be revived, otherwise it stays filtered out everywhere (`isNull(deletedAt)` guards reads + the totalClashes count) and the plugin can never reintroduce it.
 
+**Server-side deletes never stick:** the Navisworks model is the source of truth and the plugin re-pushes the WHOLE set on every "Push to BIMLog". Deleting clashes in the DB just makes the next sync recreate them. To remove a clash permanently it must leave the model (or be resolved); DB deletes are futile against an active pusher.
+
+**"Clashes read" can exceed unique clashes:** plugin reported 2202 read but only 1404 unique ClashIds (project 26) — ~798 are genuine duplicate ClashIds (same clash listed across multiple clash tests / both elements). High `updated` counts on a sync are these duplicates folding onto their originals, NOT data loss. Verified: total rows == distinct fingerprints == distinct clash_id_original == 1404 (zero fingerprint collisions; the plugin's 8-char ClashId truncation does not collide in practice).
+
+**Null/empty fingerprint = duplicate-on-every-sync footgun.** Dedup only runs when `c.fingerprint` is present (route looks up existing only `if (fingerprint)`, else always inserts). Any clash pushed with null/empty fingerprint creates a fresh row every sync. The plugin's GenerateFingerprint always returns a value (ClashId-truncated or Name+TestName hash), so this is latent, not active. Diagnostic: a clash row with `last_plugin_sync_at IS NULL` did NOT come from plugin sync (both insert and update stamp it) — it's a manual-add / AI-parse row, not a sync duplicate.
+
+**Stable round-trip requires (user goal):** (1) never change GenerateFingerprint again — a changed algorithm orphans existing rows (old fp != new fp) and forces a full duplicate set on next push, recoverable only by clearing the project's clashes once to rebaseline; (2) don't delete server-side between syncs; (3) every pushed clash must carry a fingerprint.
+
 **How to apply:** any future change to sync dedup must keep matching across soft-deleted rows AND undelete them on re-sync. Keep the equal-timestamps invariant on sync, or pull detection breaks.
 
 ## Status mapping (BIMLog -> Navisworks) in plugin-pull
