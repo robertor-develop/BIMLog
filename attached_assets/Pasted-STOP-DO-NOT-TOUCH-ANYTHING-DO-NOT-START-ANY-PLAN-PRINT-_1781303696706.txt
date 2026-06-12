@@ -1,0 +1,37 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Fix four things in BIMLog. Do not break anything existing.
+
+FIX 1 — Clash delete refresh bug in artifacts/bimlog/src/pages/project/ClashReports.tsx
+After a successful delete the page hangs and requires manual refresh. Fix it so after delete succeeds the deleted report is immediately removed from local state without a full page reload. Use the existing DeleteConfirmModal pattern. Do not change the soft delete backend behavior.
+
+FIX 2 — Clash grouped view in artifacts/bimlog/src/pages/project/ClashReports.tsx
+Add a view toggle with two modes: normal (existing table) and grouped. When grouped mode is active group clashes by: Building > Floor > Status. If no building show "Unassigned Building". If no floor show "Unassigned Floor". If no status show "Active". Each group header shows name and count. Inside each group render real clash rows with priority, name, status, trade, last updated. Use existing BIMLog status colors: open=red, approved=green, resolved=dark green, follow_up=yellow, waiting_design=purple. Use existing priority colors P1=red P2=orange P3=yellow P4=gray P5=purple. Do not break existing filters, PDF export, delete modal, or linked items.
+
+FIX 3 — Add Company to Meetings attendees in artifacts/bimlog/src/pages/project/MeetingMinutes.tsx
+Make Add Company work the same way it already works in RFIs, Transmittals, Change Orders, Submittals. Allow selecting existing companies from the real API, adding a new company inline, saving to backend, refreshing dropdown without page reload, selecting newly added company immediately. Do not use static arrays. Do not hardcode any company names.
+
+FIX 4 — Linked Items on RFI and Submittal panels in artifacts/bimlog/src/pages/project/RFIs.tsx and artifacts/bimlog/src/pages/project/Submittals.tsx
+Add or repair Linked Items panel so every RFI and Submittal can link to existing clashes, submittals, transmittals, change orders, meeting minutes. Use the existing linked_items table and existing linked items routes. Allow viewing current linked items, adding from real dropdowns, removing a link. When a link is added or removed log activity. Do not create a second linking system.
+
+Check 1:
+grep -n "grouped\|viewToggle\|groupedView" artifacts/bimlog/src/pages/project/ClashReports.tsx | head -10
+
+Check 2:
+grep -n "Add Company" artifacts/bimlog/src/pages/project/MeetingMinutes.tsx | head -5
+
+Check 3:
+grep -n "linked\|LinkedItems" artifacts/bimlog/src/pages/project/RFIs.tsx | head -10
+
+Check 4:
+grep -n "linked\|LinkedItems" artifacts/bimlog/src/pages/project/Submittals.tsx | head -10
+
+Check 5:
+cd artifacts/bimlog && npx tsc --noEmit 2>&1 | wc -l
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

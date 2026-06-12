@@ -75,8 +75,22 @@ router.delete("/projects/:projectId/links/:linkId", authMiddleware, requirePermi
   const projectId = Number(req.params.projectId);
   const linkId = Number(req.params.linkId);
   try {
+    const [existing] = await db.select().from(linkedItemsTable)
+      .where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId)));
     await db.delete(linkedItemsTable)
       .where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId)));
+    if (existing) {
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "",
+        userCompanyName: req.user!.companyName ?? "",
+        actionType: "unlink",
+        entityType: existing.fromType,
+        entityId: existing.fromId,
+        details: `Unlinked ${existing.fromType} #${existing.fromId} from ${existing.toType} #${existing.toId} (${existing.linkType})`,
+      });
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });

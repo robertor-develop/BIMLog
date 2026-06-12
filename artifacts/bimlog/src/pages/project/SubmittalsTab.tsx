@@ -14,6 +14,7 @@ import {
   BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList, Trash2,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { format, differenceInDays, isValid } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1687,6 +1688,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           </div>
         </div>
       )}
+
+      {/* Linked Items */}
+      <LinkedItemsPanel projectId={projectId} entityType="submittal" entityId={submittal.id} canWrite={canWrite} />
 
       {/* Submittal details */}
       <PanelSection title={w("Submittal Information", "Información del Entregable", lang)} />

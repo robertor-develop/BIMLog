@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { useListMembers } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { isDebug } from "@/lib/debug";
 import {
   ClipboardList, CheckCircle2, Calendar, MapPin, Users,
   Sparkles, AlertTriangle, Plus, Download, ChevronDown,
-  ChevronUp
+  ChevronUp, UserPlus
 } from "lucide-react";
 
 const API = "/api/v1";
@@ -68,6 +70,60 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   const { token } = useAuthStore();
   const t = (en: string, es: string) => lang === "es" ? es : en;
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+  const queryClient = useQueryClient();
+  const { data: members } = useListMembers(projectId);
+  const memberList = members ?? [];
+  const uniqueCompanies = [...new Set(memberList.map(m => m.userCompanyName).filter(Boolean) as string[])];
+  const companyPeople = (company: string) => memberList.filter(m => m.userCompanyName === company);
+
+  const [addCompanyIndex, setAddCompanyIndex] = useState<number | null>(null);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanyEmail, setNewCompanyEmail] = useState("");
+  const [newCompanyPhone, setNewCompanyPhone] = useState("");
+  const [newCompanyAddress, setNewCompanyAddress] = useState("");
+  const [newContactPerson, setNewContactPerson] = useState("");
+  const [freeTextPersons, setFreeTextPersons] = useState<number[]>([]);
+
+  const resetAddCompanyForm = () => {
+    setNewCompanyName(""); setNewCompanyEmail(""); setNewCompanyPhone("");
+    setNewCompanyAddress(""); setNewContactPerson(""); setAddCompanyIndex(null);
+  };
+
+  const handleAddCompany = async (index: number) => {
+    if (!newCompanyName.trim()) return;
+    const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    const companyName = newCompanyName.trim();
+    let res: Response;
+    try {
+      res = await fetch(`/api/v1/projects/${projectId}/directory`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: newContactPerson.trim() || companyName,
+          email: newCompanyEmail.trim() || "contact@bimlog.io",
+          company_name: companyName,
+          role: "External Company",
+          notes: `Phone: ${newCompanyPhone} | Address: ${newCompanyAddress}`,
+        }),
+      });
+    } catch (err) {
+      setError(t("Failed to add company. Check your connection and try again.", "No se pudo agregar la empresa. Verifique su conexión e intente de nuevo."));
+      return;
+    }
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      setError(t(`Failed to add company (${res.status}). ${body}`, `No se pudo agregar la empresa (${res.status}). ${body}`));
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/members`] });
+    setAttendees(prev => {
+      const arr = [...prev];
+      arr[index] = { ...arr[index], company: companyName };
+      return arr;
+    });
+    resetAddCompanyForm();
+  };
 
   const [view, setView] = useState<"list" | "new" | "detail" | "actions">("list");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -558,19 +614,132 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                 </tr>
               </thead>
               <tbody>
-                {attendees.map((a, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                    {(["trade","company","fullName","role","email","phone"] as (keyof Attendee)[]).map(field => (
-                      <td key={field} style={CELL_STYLE}>
-                        <input value={a[field]} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], [field]: e.target.value }; setAttendees(arr); }}
-                          style={{ border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" }} />
-                      </td>
-                    ))}
-                    <td style={CELL_STYLE}>
-                      <button onClick={() => setAttendees(attendees.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}><Trash2 size={12} /></button>
-                    </td>
-                  </tr>
-                ))}
+                {attendees.map((a, i) => {
+                  const people = companyPeople(a.company);
+                  const isFreeTextPerson = freeTextPersons.includes(i) || (a.company !== "" && people.length === 0);
+                  const selectStyle = { border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 12, padding: "2px 4px", width: "100%", background: "white" } as const;
+                  const inputStyle = { border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" } as const;
+                  return (
+                    <Fragment key={i}>
+                      <tr style={{ borderBottom: "1px solid #F3F4F6" }}>
+                        <td style={CELL_STYLE}>
+                          <input value={a.trade} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], trade: e.target.value }; setAttendees(arr); }}
+                            style={inputStyle} />
+                        </td>
+                        <td style={CELL_STYLE}>
+                          <select value={a.company} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], company: e.target.value, fullName: "", email: "" }; setAttendees(arr); }}
+                            style={selectStyle}>
+                            <option value="">{t("— Select —", "— Seleccionar —")}</option>
+                            {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
+                            {a.company && !uniqueCompanies.includes(a.company) && <option value={a.company}>{a.company}</option>}
+                          </select>
+                          <button type="button"
+                            onClick={() => { setAddCompanyIndex(addCompanyIndex === i ? null : i); }}
+                            style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4, padding: "2px 6px", fontSize: 10, borderRadius: 4, border: "1px dashed #2563EB", background: addCompanyIndex === i ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB" }}>
+                            <Plus size={11} />{t("Add company not in list", "Agregar empresa fuera de lista")}
+                          </button>
+                        </td>
+                        <td style={CELL_STYLE}>
+                          {isFreeTextPerson ? (
+                            <input value={a.fullName} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], fullName: e.target.value }; setAttendees(arr); }}
+                              placeholder={t("Name", "Nombre")} style={inputStyle} />
+                          ) : (
+                            <select value={a.fullName} onChange={e => {
+                              const sel = people.find(m => m.userFullName === e.target.value);
+                              const arr = [...attendees];
+                              arr[i] = { ...arr[i], fullName: e.target.value, email: sel ? sel.userEmail : arr[i].email };
+                              setAttendees(arr);
+                            }} style={selectStyle}>
+                              <option value="">{t("— Select —", "— Seleccionar —")}</option>
+                              {people.map(m => <option key={m.userEmail} value={m.userFullName}>{m.userFullName}</option>)}
+                              {a.fullName && !people.some(m => m.userFullName === a.fullName) && <option value={a.fullName}>{a.fullName}</option>}
+                            </select>
+                          )}
+                          {a.company && people.length > 0 && (
+                            <button type="button"
+                              onClick={() => setFreeTextPersons(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
+                              style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4, padding: "2px 6px", fontSize: 10, borderRadius: 4, border: "1px dashed #2563EB", background: freeTextPersons.includes(i) ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB" }}>
+                              <UserPlus size={11} />{freeTextPersons.includes(i) ? t("Select from list", "Seleccionar de lista") : t("Add person not in list", "Agregar persona fuera de lista")}
+                            </button>
+                          )}
+                        </td>
+                        <td style={CELL_STYLE}>
+                          <input value={a.role} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], role: e.target.value }; setAttendees(arr); }}
+                            style={inputStyle} />
+                        </td>
+                        <td style={CELL_STYLE}>
+                          <input value={a.email} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], email: e.target.value }; setAttendees(arr); }}
+                            style={inputStyle} />
+                        </td>
+                        <td style={CELL_STYLE}>
+                          <input value={a.phone} onChange={e => { const arr = [...attendees]; arr[i] = { ...arr[i], phone: e.target.value }; setAttendees(arr); }}
+                            style={inputStyle} />
+                        </td>
+                        <td style={CELL_STYLE}>
+                          <button onClick={() => {
+                            setAttendees(attendees.filter((_, j) => j !== i));
+                            if (addCompanyIndex === i) resetAddCompanyForm();
+                            else if (addCompanyIndex !== null && addCompanyIndex > i) setAddCompanyIndex(addCompanyIndex - 1);
+                            setFreeTextPersons(prev => prev.filter(j => j !== i).map(j => j > i ? j - 1 : j));
+                          }} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}><Trash2 size={12} /></button>
+                        </td>
+                      </tr>
+                      {addCompanyIndex === i && (
+                        <tr>
+                          <td colSpan={7} style={{ ...CELL_STYLE, padding: 0 }}>
+                            <div style={{ margin: 10, padding: "12px 14px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>
+                                {t("New Company Details", "Detalles de Nueva Empresa")}
+                              </div>
+                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                                <div>
+                                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Company Name *", "Nombre *")}</div>
+                                  <input value={newCompanyName} onChange={e => setNewCompanyName(e.target.value)}
+                                    placeholder={t("e.g. VOREA Group", "ej. VOREA Group")}
+                                    style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Contact Person", "Persona de Contacto")}</div>
+                                  <input value={newContactPerson} onChange={e => setNewContactPerson(e.target.value)}
+                                    placeholder={t("e.g. John Smith", "ej. Juan García")}
+                                    style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Email", "Correo")}</div>
+                                  <input value={newCompanyEmail} onChange={e => setNewCompanyEmail(e.target.value)}
+                                    placeholder="email@company.com"
+                                    style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Phone", "Teléfono")}</div>
+                                  <input value={newCompanyPhone} onChange={e => setNewCompanyPhone(e.target.value)}
+                                    placeholder="+1 (555) 000-0000"
+                                    style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                                </div>
+                                <div style={{ gridColumn: "1 / -1" }}>
+                                  <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{t("Address", "Dirección")}</div>
+                                  <input value={newCompanyAddress} onChange={e => setNewCompanyAddress(e.target.value)}
+                                    placeholder={t("Street address, City, State", "Calle, Ciudad, Estado")}
+                                    style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                                <button type="button" onClick={resetAddCompanyForm}
+                                  style={{ padding: "5px 12px", fontSize: 11, borderRadius: 6, border: "1px solid #D1D5DB", background: "white", cursor: "pointer" }}>
+                                  {t("Cancel", "Cancelar")}
+                                </button>
+                                <button type="button" onClick={() => handleAddCompany(i)}
+                                  style={{ padding: "5px 14px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
+                                  {t("Add Company", "Agregar Empresa")}
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
             <div style={{ padding: 10 }}>

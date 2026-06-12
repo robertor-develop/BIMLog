@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
+import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -1712,6 +1713,11 @@ ${hasResp ? `
               </div>
             </div>
           )}
+
+          {/* Linked Items */}
+          <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
+          </div>
 
           {/* Question */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>

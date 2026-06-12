@@ -42,6 +42,32 @@ function PBadge({ p }: { p?: string }) {
   );
 }
 
+const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+  open: { bg: "#FEE2E2", text: "#DC2626", label: "Active" },
+  follow_up: { bg: "#FEF3C7", text: "#D97706", label: "Follow Up" },
+  waiting_design: { bg: "#EDE9FE", text: "#7C3AED", label: "Waiting Design" },
+  in_progress: { bg: "#DBEAFE", text: "#1D4ED8", label: "In Progress" },
+  approved: { bg: "#D1FAE5", text: "#059669", label: "Approved" },
+  resolved: { bg: "#DCFCE7", text: "#16A34A", label: "Resolved" },
+  wont_fix: { bg: "#F3F4F6", text: "#6B7280", label: "Won't Fix" },
+};
+
+function StatusBadge({ status }: { status?: string }) {
+  const s = STATUS_STYLE[status || "open"] ?? STATUS_STYLE.open;
+  return (
+    <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: s.bg, color: s.text }}>
+      {s.label}
+    </span>
+  );
+}
+
+function fmtUpdated(v: any): string {
+  if (!v) return "—";
+  const d = new Date(v);
+  if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "—";
+  return d.toLocaleDateString();
+}
+
 export function ClashReportsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { token } = useAuthStore();
   const { lang } = useI18n();
@@ -64,6 +90,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({});
   const [clashLinks, setClashLinks] = useState<Record<number, any[]>>({});
   const [linkableItems, setLinkableItems] = useState<{ submittalItems: any[]; rfis: any[]; meetings: any[] }>({ submittalItems: [], rfis: [], meetings: [] });
+  const [viewMode, setViewMode] = useState<"normal" | "grouped">("normal");
+  const [deleteReport, setDeleteReport] = useState<{ id: number; label: string } | null>(null);
 
   const loadLinkableItems = async () => {
     try {
@@ -195,7 +223,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       <DeleteConfirmModal
         open
         onClose={() => setDeleteClash(null)}
-        onDeleted={() => { loadClashes(selectedReport); setDeleteClash(null); }}
+        onDeleted={() => { setClashes(prev => prev.filter(x => x.id !== deleteClash.id)); setDeleteClash(null); }}
         endpoint={`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${deleteClash.id}`}
         entityLabel={`Clash ${deleteClash.label}`}
         warning={t("Linked items (RFIs, submittals) will be detached.", "Los elementos enlazados serán desvinculados.")}
@@ -299,6 +327,18 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, flex: 1, minWidth: 200 }} />
       </div>
 
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {(["normal", "grouped"] as const).map(m => (
+          <button key={m} onClick={() => setViewMode(m)}
+            style={{ fontSize: 12, fontWeight: 600, padding: "5px 14px", borderRadius: 6,
+              border: "1px solid " + (viewMode === m ? "#1E3A5F" : "#D1D5DB"),
+              background: viewMode === m ? "#1E3A5F" : "white",
+              color: viewMode === m ? "white" : "#374151", cursor: "pointer" }}>
+            {m === "normal" ? t("Normal", "Normal") : t("Grouped", "Agrupado")}
+          </button>
+        ))}
+      </div>
+
       {canWrite && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
           <button className="btn btn-sm btn-primary" onClick={async () => {
@@ -317,6 +357,71 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
       {clashLoading
         ? <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading clashes...","Cargando choques...")}</div>
+        : viewMode === "grouped"
+        ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {(() => {
+              const buildings: Record<string, Record<string, Record<string, Clash[]>>> = {};
+              for (const c of filteredClashes) {
+                const b = ((c as any).building?.toString().trim()) || "Unassigned Building";
+                const f = ((c.floor || c.level)?.toString().trim()) || "Unassigned Floor";
+                const s = (c.status?.toString().trim()) || "open";
+                if (!buildings[b]) buildings[b] = {};
+                if (!buildings[b][f]) buildings[b][f] = {};
+                if (!buildings[b][f][s]) buildings[b][f][s] = [];
+                buildings[b][f][s].push(c);
+              }
+              const buildingNames = Object.keys(buildings).sort();
+              if (buildingNames.length === 0) return (
+                <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
+                  {t("No clashes match your filters","Ningún choque coincide con los filtros")}
+                </div>
+              );
+              return buildingNames.map(b => {
+                const floors = buildings[b];
+                const bCount = Object.values(floors).reduce((n, st) => n + Object.values(st).reduce((m, arr) => m + arr.length, 0), 0);
+                return (
+                  <div key={b} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+                    <div style={{ background: "#1E3A5F", color: "white", padding: "10px 14px", fontWeight: 800, fontSize: 14, display: "flex", justifyContent: "space-between" }}>
+                      <span>{b}</span><span style={{ opacity: 0.85 }}>{bCount}</span>
+                    </div>
+                    {Object.keys(floors).sort().map(f => {
+                      const statuses = floors[f];
+                      const fCount = Object.values(statuses).reduce((m, arr) => m + arr.length, 0);
+                      return (
+                        <div key={f}>
+                          <div style={{ background: "#EFF3F8", padding: "8px 16px", fontWeight: 700, fontSize: 13, color: "#1E3A5F", display: "flex", justifyContent: "space-between", borderTop: "1px solid #E5E7EB" }}>
+                            <span>{f}</span><span style={{ color: "#6B7280" }}>{fCount}</span>
+                          </div>
+                          {Object.keys(statuses).sort().map(s => {
+                            const rows = statuses[s];
+                            return (
+                              <div key={s}>
+                                <div style={{ padding: "6px 20px", display: "flex", alignItems: "center", gap: 8, background: "#FAFAFA", borderTop: "1px solid #F3F4F6" }}>
+                                  <StatusBadge status={s} />
+                                  <span style={{ fontSize: 11, color: "#6B7280", fontWeight: 600 }}>{rows.length}</span>
+                                </div>
+                                {rows.map(c => (
+                                  <div key={c.id} style={{ display: "grid", gridTemplateColumns: "70px 1fr 130px 120px 110px", gap: 10, alignItems: "center", padding: "8px 20px", borderTop: "1px solid #F3F4F6", fontSize: 12 }}>
+                                    <PBadge p={c.priority} />
+                                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.description || c.clashIdOriginal || `Clash #${c.id}`}>{c.description || c.clashIdOriginal || `Clash #${c.id}`}</span>
+                                    <StatusBadge status={c.status} />
+                                    <span style={{ color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.discipline1 || "—"}</span>
+                                    <span style={{ color: "#9CA3AF" }}>{fmtUpdated((c as any).updatedAt)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        )
         : (
           <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
             <table style={{ width: "max-content", minWidth: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
@@ -546,6 +651,17 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   );
 
   return (
+    <>
+    {deleteReport && (
+      <DeleteConfirmModal
+        open
+        onClose={() => setDeleteReport(null)}
+        onDeleted={() => { setReports(prev => prev.filter(x => x.id !== deleteReport.id)); setDeleteReport(null); }}
+        endpoint={`${API}/projects/${projectId}/clash-reports/${deleteReport.id}`}
+        entityLabel={`Report ${deleteReport.label}`}
+        warning={t("Linked items will be detached.", "Los elementos enlazados serán desvinculados.")}
+      />
+    )}
     <div className="tab-content-wrapper">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
@@ -658,7 +774,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 16 }}>
                     <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)} style={{ fontSize: 12, padding: "4px 12px" }}>View Clashes</button>
                     <button className="btn btn-sm btn-outline" onClick={async () => { const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`, { method: "POST", headers }); if (res.ok) { setTimeout(() => loadReports(), 3000); setTimeout(() => loadReports(), 8000); } }} style={{ fontSize: 12, padding: "4px 12px" }}>Re-rank AI</button>
-                    <button onClick={async () => { if (!confirm(`Delete "${r.fileName}"? This cannot be undone.`)) return; const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}`, { method: "DELETE", headers }); if (res.ok) loadReports(); else { const d = await res.json().catch(() => ({})); alert(d.message || "Delete failed"); } }} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                    <button onClick={() => setDeleteReport({ id: r.id, label: r.fileName })} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -666,5 +782,6 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
           )
       }
     </div>
+    </>
   );
 }
