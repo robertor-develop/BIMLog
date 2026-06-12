@@ -9,6 +9,37 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import Anthropic from "@anthropic-ai/sdk";
 
+// String-aware repair for the Navisworks plugin's occasionally malformed JSON.
+// It only strips structural comma noise that JSON forbids — trailing commas
+// before } or ] and double commas — and never touches characters inside string
+// literals, so clash data values are preserved exactly. Returns the repaired
+// text plus the number of fixes applied (0 means nothing was changed).
+function repairPluginJson(text: string): { repaired: string; fixes: number } {
+  let out = "";
+  let fixes = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inStr) {
+      out += ch;
+      if (esc) esc = false;
+      else if (ch === "\\") esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === ",") {
+      let j = i + 1;
+      while (j < text.length && /\s/.test(text[j])) j++;
+      const nxt = text[j];
+      if (nxt === "}" || nxt === "]" || nxt === ",") { fixes++; continue; }
+    }
+    out += ch;
+  }
+  return { repaired: out, fixes };
+}
+
 const router: Router = Router();
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
@@ -888,8 +919,26 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
       if (req.body?.clashes === undefined && raw && raw.length) {
         const text = raw.toString("utf8").replace(/^\uFEFF/, "").trim();
         if (text.startsWith("{") || text.startsWith("[")) {
-          req.body = JSON.parse(text);
-          console.log("[plugin-sync] recovered body from raw bytes");
+          try {
+            req.body = JSON.parse(text);
+            console.log("[plugin-sync] recovered body from raw bytes");
+          } catch (parseErr) {
+            const pos = (() => {
+              const m = /position (\d+)/.exec(parseErr instanceof Error ? parseErr.message : "");
+              return m ? Number(m[1]) : -1;
+            })();
+            if (pos >= 0) {
+              console.error("[plugin-sync] malformed JSON near position", pos, "snippet:",
+                JSON.stringify(text.slice(Math.max(0, pos - 40), pos + 40)));
+            }
+            const { repaired, fixes } = repairPluginJson(text);
+            if (fixes > 0) {
+              req.body = JSON.parse(repaired);
+              console.warn("[plugin-sync] repaired", fixes, "JSON syntax defect(s) (trailing/double commas) from plugin payload");
+            } else {
+              throw parseErr;
+            }
+          }
         }
       }
     } catch (e) {

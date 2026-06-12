@@ -33,6 +33,25 @@ const jsonTypeMatcher = (req: Request): boolean => {
   return ct.includes("json") || ct.includes("text/plain");
 };
 
+// The Navisworks plugin posts to plugin-sync with occasionally malformed JSON
+// (trailing/double commas from its serializer). express.json would throw a 400
+// before the route runs, so for this path we buffer the raw bytes ourselves and
+// mark _body=true so express.json/urlencoded skip it. The route then parses the
+// raw bytes with a string-aware repair.
+const PLUGIN_SYNC_RE = /\/clash-reports\/plugin-sync$/;
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  if (req.method !== "POST" || !PLUGIN_SYNC_RE.test(req.path)) return next();
+  const chunks: Buffer[] = [];
+  req.on("data", (c: Buffer) => chunks.push(Buffer.from(c)));
+  req.on("end", () => {
+    const buf = Buffer.concat(chunks);
+    if (buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
+    (req as unknown as { _body?: boolean })._body = true;
+    next();
+  });
+  req.on("error", () => next());
+});
+
 app.use(express.json({ limit: "50mb", type: jsonTypeMatcher, verify: captureRawBody }));
 app.use(express.urlencoded({ extended: true, limit: "50mb", verify: captureRawBody }));
 
