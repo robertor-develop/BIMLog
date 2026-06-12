@@ -39,7 +39,7 @@ const jsonTypeMatcher = (req: Request): boolean => {
 // mark _body=true so express.json/urlencoded skip it. The route then parses the
 // raw bytes with a string-aware repair.
 const PLUGIN_SYNC_RE = /\/clash-reports\/plugin-sync$/;
-const PLUGIN_SYNC_MAX_BYTES = 50 * 1024 * 1024; // mirror express.json's 50mb cap
+const PLUGIN_SYNC_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method !== "POST" || !PLUGIN_SYNC_RE.test(req.path)) return next();
   const chunks: Buffer[] = [];
@@ -52,7 +52,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     if (total > PLUGIN_SYNC_MAX_BYTES) {
       finish(() => {
         chunks.length = 0; // free what we buffered; further chunks are ignored via the done guard
-        res.status(413).json({ error: "payload_too_large", message: "Request body exceeds 50mb limit" });
+        res.status(413).json({ error: "payload_too_large", message: "Request body exceeds 500mb limit" });
       });
       return;
     }
@@ -68,8 +68,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.on("error", () => finish(() => next()));
 });
 
-app.use(express.json({ limit: "50mb", type: jsonTypeMatcher, verify: captureRawBody }));
-app.use(express.urlencoded({ extended: true, limit: "50mb", verify: captureRawBody }));
+app.use(express.json({ limit: "500mb", type: jsonTypeMatcher, verify: captureRawBody }));
+app.use(express.urlencoded({ extended: true, limit: "500mb", verify: captureRawBody }));
 
 app.use(
   session({
