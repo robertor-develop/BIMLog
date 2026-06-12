@@ -14,3 +14,15 @@ Two endpoints in `clash_reports.ts` move clash state between the Navisworks plug
 **Why the soft-delete revive matters:** fingerprint dedup must clear `deletedAt`/`deleteReason` on match. A soft-deleted clash whose fingerprint is re-sent must be revived, otherwise it stays filtered out everywhere (`isNull(deletedAt)` guards reads + the totalClashes count) and the plugin can never reintroduce it.
 
 **How to apply:** any future change to sync dedup must keep matching across soft-deleted rows AND undelete them on re-sync. Keep the equal-timestamps invariant on sync, or pull detection breaks.
+
+## Status mapping (BIMLog -> Navisworks) in plugin-pull
+
+BIMLog clash `status` values are: `open` (UI label "Active"), `follow_up`, `waiting_design`, `in_progress`, `approved`, `resolved`, `wont_fix`. There is NO `active` or `new` status in real data. The Navisworks target set is New/Active/Approved/Resolved.
+
+Mapping rule: `resolved`->Resolved, `approved`->Approved, `new`->New, everything else (including `open`, `follow_up`, `waiting_design`, `in_progress`, `wont_fix`, null) -> **Active**.
+
+**Why:** only resolved/approved mean "done" — those are the statuses that should make a clash stop reappearing in future Navisworks clash runs. Every still-open BIMLog state must map to Active so Navisworks keeps surfacing it. `open` is BIMLog's Active state (verified in ClashReportsTab status dropdown), so do NOT capitalize-passthrough raw statuses — that would emit "Open"/"Follow_up" which Navisworks doesn't understand.
+
+## syncToken
+
+plugin-sync POST response includes `syncToken: now.toISOString()` (same `now` used to stamp `lastPluginSyncAt` on every processed clash). The plugin stores it. The current pull windowing is per-row (`updatedAt > lastPluginSyncAt`), self-healing because the plugin re-sends fingerprints on each sync which re-baselines `lastPluginSyncAt`. No server-side global `lastSyncAt` query param is implemented — pull can re-return an unacked change until the next sync re-baselines that row (idempotent for the plugin).

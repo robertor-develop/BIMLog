@@ -1007,7 +1007,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         details: `Plugin sync (${reportName}): ${created} created, ${updated} updated, ${fingerprinted} fingerprinted`,
       });
 
-      const response = { created, updated, fingerprinted, message: "Sync complete" };
+      const response = { created, updated, fingerprinted, syncToken: now.toISOString(), message: "Sync complete" };
       console.log("[plugin-sync] sending response:", JSON.stringify(response));
       res.json(response);
     } catch (err) {
@@ -1031,10 +1031,22 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
           sql`${clashesTable.updatedAt} > ${clashesTable.lastPluginSyncAt}`,
         ));
 
+      // BIMLog clash statuses: open, follow_up, waiting_design, in_progress, approved, resolved, wont_fix.
+      // Only resolved/approved are "done" in Navisworks; every still-open state maps to Active so it
+      // keeps appearing in future Navisworks clash runs. "open" is BIMLog's Active state.
+      const toNavisworksStatus = (s: string | null): string => {
+        switch (s) {
+          case "resolved": return "Resolved";
+          case "approved": return "Approved";
+          case "new": return "New";
+          default: return "Active";
+        }
+      };
+
       const clashes = rows.map(r => ({
         clashId: r.clashIdOriginal,
         fingerprint: r.fingerprint,
-        newStatus: r.status,
+        newStatus: toNavisworksStatus(r.status),
         resolvedBy: r.assignedToName,
         notes: r.resolutionNotes,
       }));
