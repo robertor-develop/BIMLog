@@ -39,17 +39,33 @@ const jsonTypeMatcher = (req: Request): boolean => {
 // mark _body=true so express.json/urlencoded skip it. The route then parses the
 // raw bytes with a string-aware repair.
 const PLUGIN_SYNC_RE = /\/clash-reports\/plugin-sync$/;
-app.use((req: Request, _res: Response, next: NextFunction) => {
+const PLUGIN_SYNC_MAX_BYTES = 50 * 1024 * 1024; // mirror express.json's 50mb cap
+app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method !== "POST" || !PLUGIN_SYNC_RE.test(req.path)) return next();
   const chunks: Buffer[] = [];
-  req.on("data", (c: Buffer) => chunks.push(Buffer.from(c)));
-  req.on("end", () => {
+  let total = 0;
+  let done = false;
+  const finish = (fn: () => void) => { if (done) return; done = true; fn(); };
+  req.on("data", (c: Buffer) => {
+    if (done) return;
+    total += c.length;
+    if (total > PLUGIN_SYNC_MAX_BYTES) {
+      finish(() => {
+        chunks.length = 0; // free what we buffered; further chunks are ignored via the done guard
+        res.status(413).json({ error: "payload_too_large", message: "Request body exceeds 50mb limit" });
+      });
+      return;
+    }
+    chunks.push(Buffer.from(c));
+  });
+  req.on("end", () => finish(() => {
     const buf = Buffer.concat(chunks);
     if (buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
     (req as unknown as { _body?: boolean })._body = true;
     next();
-  });
-  req.on("error", () => next());
+  }));
+  req.on("aborted", () => finish(() => next()));
+  req.on("error", () => finish(() => next()));
 });
 
 app.use(express.json({ limit: "50mb", type: jsonTypeMatcher, verify: captureRawBody }));
