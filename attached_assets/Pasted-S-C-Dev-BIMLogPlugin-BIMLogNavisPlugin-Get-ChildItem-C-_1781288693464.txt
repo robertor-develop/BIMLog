@@ -1,0 +1,117 @@
+S C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> Get-ChildItem "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\bin\Debug\net48\" | Select-Object Name, LastWriteTime
+>> Get-Content "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\ClashTriage.cs" | Select-String "GenerateFingerprint|ClashId|Replace" | Select-Object -First 10
+
+Name                  LastWriteTime
+----                  -------------
+BIMLogNavisPlugin.dll 12/06/2026 13:06:54
+BIMLogNavisPlugin.pdb 12/06/2026 13:06:54
+
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> @"
+>>         public static string GenerateFingerprint(ClashData clash)
+>>         {
+>>             if (!string.IsNullOrEmpty(clash.ClashId))
+>>                 return clash.ClashId.Replace("-", "").Substring(0, 8).ToUpper();
+>>             int hash = 0;
+>>             string raw = clash.Name + clash.TestName;
+>>             foreach (char c in raw) hash = (hash * 31 + c) & 0x7FFFFFFF;
+>>             return hash.ToString("X8");
+>>         }
+>> "@
+>>
+>> Get-Content "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\ClashTriage.cs" | Select-String "GenerateFingerprint" | Select-Object -First 5
+        public static string GenerateFingerprint(ClashData clash)
+        {
+            if (!string.IsNullOrEmpty(clash.ClashId))
+                return clash.ClashId.Replace("-", "").Substring(0, 8).ToUpper();
+            int hash = 0;
+            string raw = clash.Name + clash.TestName;
+            foreach (char c in raw) hash = (hash * 31 + c) & 0x7FFFFFFF;
+            return hash.ToString("X8");
+        }
+
+        public static string GenerateFingerprint(ClashData clash)
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> cd "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin"
+>>
+>> (Get-Content "BIMLogSyncForm.cs") -replace '_api\.OnBatchProgress = \(batch, total, processed\) => \{', '_api.OnBatchProgress = (batch, total, processed) => {
+>>                     var elapsedSoFar = (DateTime.Now - pushStart).TotalSeconds;
+>>                     var rate = processed / elapsedSoFar;
+>>                     var remaining = rate > 0 ? (int)((clashes.Count - processed) / rate) : 0;
+>>                     var etaMin = remaining / 60;
+>>                     var etaSec = remaining % 60;' | Set-Content "BIMLogSyncForm.cs"
+>>
+>> (Get-Content "BIMLogSyncForm.cs") -replace 'lblSummary\.Text = \$"  Pushing batch \{batch\} of \{total\}\.\.\. \(\{processed\}/\{clashes\.Count\} clashes\)  \|  \{el\.Minutes\}m \{el\.Seconds\}s";', 'lblSummary.Text = $"  Batch {batch}/{total} - {processed}/{clashes.Count} clashes  |  {el.Minutes}m {el.Seconds}s elapsed  |  ~{etaMin}m {etaSec}s remaining";' | Set-Content "BIMLogSyncForm.cs"
+>>
+>> dotnet build 2>&1 | Select-Object -Last 3
+    0 Errores
+
+Tiempo transcurrido 00:00:01.97
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> Stop-Process -Name "Navisworks*" -Force -ErrorAction SilentlyContinue
+>> Start-Sleep -Seconds 5
+>> Copy-Item "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\bin\Debug\net48\*" -Destination "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" -Force
+>> Write-Host "Done. Open Navisworks."
+Done. Open Navisworks.
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> Get-ChildItem "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" | Select-Object Name, LastWriteTime
+
+Name                      LastWriteTime
+----                      -------------
+BIMLogNavisPlugin.dll     12/06/2026 13:14:31
+BIMLogNavisPlugin.dll.old 11/06/2026 20:30:09
+BIMLogNavisPlugin.pdb     12/06/2026 13:14:31
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> Copy-Item "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\bin\Debug\net48\*" -Destination "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" -Force
+>> Get-ChildItem "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" | Select-Object Name, LastWriteTime
+>> Write-Host "DLL copied. Now open Navisworks."
+
+DLL copied. Now open Navisworks.
+Name                      LastWriteTime
+----                      -------------
+BIMLogNavisPlugin.dll     12/06/2026 13:14:31
+BIMLogNavisPlugin.dll.old 11/06/2026 20:30:09
+BIMLogNavisPlugin.pdb     12/06/2026 13:14:31
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> dotnet clean
+>> dotnet build
+>> Get-ChildItem "bin\Debug\net48\" | Select-Object Name, LastWriteTime
+
+Compilación realizado correctamente en 0,7s
+Restauración completada (0,4s)
+  BIMLogNavisPlugin correcto con 1 advertencias (1,4s) → bin\Debug\net48\BIMLogNavisPlugin.dll
+    C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\ClashReader.cs(83,21): warning CS0219: La variable 'idx' está asignada pero su valor nunca se usa
+
+Compilación correcto con 1 advertencias en 2,6s
+
+Name                  LastWriteTime
+----                  -------------
+BIMLogNavisPlugin.dll 12/06/2026 14:14:14
+BIMLogNavisPlugin.pdb 12/06/2026 14:14:14
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin> Copy-Item "C:\Dev\BIMLogPlugin\BIMLogNavisPlugin\bin\Debug\net48\*" -Destination "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" -Force
+>> Get-ChildItem "C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\" | Select-Object Name, LastWriteTime
+>> Write-Host "Done. Open Navisworks NOW."
+
+Done. Open Navisworks NOW.
+Name                      LastWriteTime
+----                      -------------
+BIMLogNavisPlugin.dll     12/06/2026 14:14:14
+BIMLogNavisPlugin.dll.old 11/06/2026 20:30:09
+BIMLogNavisPlugin.pdb     12/06/2026 14:14:14
+
+
+PS C:\Dev\BIMLogPlugin\BIMLogNavisPlugin>
+
+
+
+
+
+
+
+
+
+
