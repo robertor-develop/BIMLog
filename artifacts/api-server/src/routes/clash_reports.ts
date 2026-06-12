@@ -9,16 +9,24 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import Anthropic from "@anthropic-ai/sdk";
 
-// String-aware repair for the Navisworks plugin's occasionally malformed JSON.
-// It only strips structural comma noise that JSON forbids — trailing commas
-// before } or ] and double commas — and never touches characters inside string
-// literals, so clash data values are preserved exactly. Returns the repaired
-// text plus the number of fixes applied (0 means nothing was changed).
+// String-aware repair for the Navisworks plugin's malformed JSON. The plugin
+// runs under a non-invariant locale (e.g. es-*) so .NET formats decimal numbers
+// with a comma separator (0,0000 / 2112,4409) which is invalid JSON. It also
+// emits trailing/double commas when it omits null fields. This repair:
+//   1) converts a comma between two digits inside an OBJECT into a "." (decimal
+//      separator), while leaving commas inside arrays alone so numeric arrays
+//      like [1,2,3] are never corrupted;
+//   2) drops structural comma noise (a comma immediately followed by } ] or ,).
+// It never touches characters inside string literals, so clash data values are
+// preserved exactly. Returns the repaired text and the number of fixes applied
+// (0 means nothing was changed).
 function repairPluginJson(text: string): { repaired: string; fixes: number } {
   let out = "";
   let fixes = 0;
   let inStr = false;
   let esc = false;
+  const stack: string[] = [];
+  const isDigit = (c: string) => c >= "0" && c <= "9";
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
     if (inStr) {
@@ -29,10 +37,17 @@ function repairPluginJson(text: string): { repaired: string; fixes: number } {
       continue;
     }
     if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === "{" || ch === "[") { stack.push(ch); out += ch; continue; }
+    if (ch === "}" || ch === "]") { stack.pop(); out += ch; continue; }
     if (ch === ",") {
+      let p = out.length - 1;
+      while (p >= 0 && /\s/.test(out[p])) p--;
+      const prev = p >= 0 ? out[p] : "";
       let j = i + 1;
       while (j < text.length && /\s/.test(text[j])) j++;
-      const nxt = text[j];
+      const nxt = j < text.length ? text[j] : "";
+      const top = stack[stack.length - 1];
+      if (top === "{" && isDigit(prev) && isDigit(nxt)) { out += "."; fixes++; continue; }
       if (nxt === "}" || nxt === "]" || nxt === ",") { fixes++; continue; }
     }
     out += ch;
@@ -934,7 +949,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
             const { repaired, fixes } = repairPluginJson(text);
             if (fixes > 0) {
               req.body = JSON.parse(repaired);
-              console.warn("[plugin-sync] repaired", fixes, "JSON syntax defect(s) (trailing/double commas) from plugin payload");
+              console.warn("[plugin-sync] repaired", fixes, "JSON syntax defect(s) (locale decimal commas / trailing / double commas) from plugin payload");
             } else {
               throw parseErr;
             }

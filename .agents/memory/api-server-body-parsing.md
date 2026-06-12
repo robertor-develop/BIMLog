@@ -15,11 +15,16 @@ The plugin-sync route has a pre-auth middleware that, when `req.body.clashes` is
 
 **Key diagnostic distinction:** if the `[plugin-sync] hit` log shows `rawBody bytes: 0`, the body never reached the server — that is a CLIENT/proxy problem (e.g. `Expect: 100-continue` dropped behind the edge proxy, or a system proxy stripping the body), NOT something the server can parse. Client fix in .NET: `ServicePointManager.Expect100Continue = false` and/or `request.Proxy = null`. If `rawBody bytes > 0`, the server now parses it regardless of content-type charset/encoding.
 
-# plugin-sync malformed JSON (trailing/double commas) -> was 400
+# plugin-sync malformed JSON -> was 400
 
-The plugin hand-builds JSON and conditionally omits null fields, leaving trailing commas before `}`/`]` or double commas `,,`. JSON forbids these, so app-level `express.json` (runs before the route) threw `SyntaxError: Expected double-quoted property name` and returned 400 — the route's raw-body recovery never ran because the app-level parser fails first.
+Two distinct defects, both producing `SyntaxError: Expected double-quoted property name` and a 400. App-level `express.json` runs before the route and throws first, so the route's raw-body recovery never ran.
 
-**Fix shape:** a middleware registered BEFORE `express.json` matches `POST` to `/clash-reports/plugin-sync$`, manually buffers the stream into `req.rawBody`, and sets `req._body = true` so `express.json`/`urlencoded` skip it (they early-return when `_body` is truthy). The route then parses `rawBody`; on parse failure it runs `repairPluginJson()` — a string-aware scanner that drops only commas immediately followed (after whitespace) by `}`, `]`, or `,`, never touching chars inside string literals — and re-parses. Logs the failing snippet + a warning when a repair is applied (not silent).
+1. **Locale decimal commas (the real production cause).** The plugin runs under a non-invariant .NET culture (es-* — UI showed "Aprobado"), so doubles serialize with a comma decimal separator: `"distance":0,0000`, `"positionX":2112,4409`. That is invalid JSON. This is the dominant failure — NOT trailing commas. Diagnose by the log snippet showing `<digit>,<digit>` in a numeric value.
+2. **Trailing/double commas** from the plugin omitting null fields (`,}` / `,,`).
+
+**Fix shape:** a middleware registered BEFORE `express.json` matches `POST` to `/clash-reports/plugin-sync$`, manually buffers the stream into `req.rawBody`, and sets `req._body = true` so `express.json`/`urlencoded` skip it (they early-return when `_body` is truthy). The route then parses `rawBody`; on parse failure it runs `repairPluginJson()` and re-parses, logging the failing snippet + a warning when a repair is applied (not silent).
+
+**`repairPluginJson` rules (string-aware, tracks a `{`/`[` bracket stack):** (a) a comma between two digits whose nearest enclosing bracket is `{` (object value) -> `.` (decimal fix); the `{`-only guard means numeric arrays `[1,2,3]` are left intact; (b) a comma immediately followed (after whitespace) by `}`, `]`, or `,` -> dropped (structural noise). Never touches chars inside string literals, so data values are preserved.
 
 **Why the manual buffer needs its own size cap:** bypassing `express.json` for this path also bypasses its `limit: 50mb`, creating a pre-auth memory-exhaustion DoS. The custom reader MUST enforce its own byte cap (mirror 50mb), respond 413 on overflow, and free buffered chunks. Do NOT `req.destroy()` to reject — that resets the connection and the edge proxy returns 502 instead of 413; instead use a `done` guard, clear chunks, send 413, and let further chunks be discarded by the guard.
 
