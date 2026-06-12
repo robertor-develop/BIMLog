@@ -1,0 +1,46 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We have a problem with the POST /projects/:projectId/clash-reports/plugin-sync endpoint. Here is the full situation:
+
+WHAT WORKS:
+PowerShell HttpWebRequest call works perfectly and returns created=1:
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+$request = [System.Net.HttpWebRequest]::Create("https://bim-log-ignite.replit.app/api/v1/projects/26/clash-reports/plugin-sync")
+$request.Method = "POST"
+$request.ContentType = "application/json; charset=utf-8"
+$request.ContentLength = $bytes.Length
+$request.Headers["Authorization"] = "Bearer $token"
+$stream = $request.GetRequestStream()
+$stream.Write($bytes, 0, $bytes.Length)
+$stream.Close()
+
+WHAT FAILS:
+The exact same HttpWebRequest code running inside a Navisworks Manage 2021 process (.NET Framework 4.8, AnyCPU) returns 400 Bad Request. The server log shows req.body.clashes is undefined when the request comes from the plugin but populated when it comes from PowerShell.
+
+The plugin C# code is identical:
+var bytes = Encoding.UTF8.GetBytes(json);
+var request = (HttpWebRequest)WebRequest.Create(url);
+request.Method = "POST";
+request.ContentType = "application/json; charset=utf-8";
+request.ContentLength = bytes.Length;
+request.Headers["Authorization"] = "Bearer " + _token;
+using (var stream = request.GetRequestStream())
+    stream.Write(bytes, 0, bytes.Length);
+using (var response = (HttpWebResponse)request.GetResponse())
+using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+    return reader.ReadToEnd();
+
+THE ONLY DIFFERENCE:
+PowerShell runs as a standalone process. The plugin runs inside Navisworks which is a host process that may set its own default proxy, security settings, or TLS configuration that affects outgoing HTTP requests.
+
+YOUR JOB:
+Look at the plugin-sync route and the express middleware configuration. The body parser may be rejecting the request due to Content-Type mismatch, charset handling, or Transfer-Encoding. Find the root cause and fix it on the server side so the endpoint accepts the request regardless of how the Content-Type charset is specified or how the body is encoded. Make it robust.
+
+You have full access to the codebase. Fix it.
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild backend only. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

@@ -1,3 +1,4 @@
 - [api-server router mount prefix](api-server-routing.md) — res.redirect in route files must include `/api/v1` prefix or it 404s
 - [Navisworks clash plugin sync round-trip](clash-plugin-sync.md) — pull uses updatedAt>lastPluginSyncAt; fingerprint dedup must revive soft-deleted rows
 - [api-server schema migrations](db-migrations.md) — add columns to BOTH the drizzle schema and the app.ts startup ALTER TABLE IF NOT EXISTS block
+- [api-server body parsing](api-server-body-parsing.md) — express.json accepts json+text/plain (not multipart); plugin-sync recovers from req.rawBody; rawBody=0 means client/proxy dropped the body

@@ -876,7 +876,32 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
 
 router.post("/projects/:projectId/clash-reports/plugin-sync",
   (req, _res, next) => {
-    console.log("[plugin-sync] hit - auth:", req.headers.authorization ? "PRESENT" : "MISSING", "clashes:", req.body?.clashes?.length, "first clash name:", req.body?.clashes?.[0]?.name, "first fingerprint:", req.body?.clashes?.[0]?.fingerprint, "body error:", req.body === undefined ? "BODY UNDEFINED" : "OK");
+    const raw = (req as unknown as { rawBody?: Buffer }).rawBody;
+    try {
+      if (req.body && typeof req.body === "object" && !Array.isArray(req.body) && req.body.clashes === undefined) {
+        const keys = Object.keys(req.body);
+        if (keys.length === 1 && (req.body as Record<string, unknown>)[keys[0]] === "" && keys[0].trim().startsWith("{")) {
+          req.body = JSON.parse(keys[0]);
+          console.log("[plugin-sync] recovered body from urlencoded key");
+        }
+      }
+      if (req.body?.clashes === undefined && raw && raw.length) {
+        const text = raw.toString("utf8").replace(/^\uFEFF/, "").trim();
+        if (text.startsWith("{") || text.startsWith("[")) {
+          req.body = JSON.parse(text);
+          console.log("[plugin-sync] recovered body from raw bytes");
+        }
+      }
+    } catch (e) {
+      console.error("[plugin-sync] body recovery failed:", e instanceof Error ? e.message : String(e));
+    }
+    console.log("[plugin-sync] hit - auth:", req.headers.authorization ? "PRESENT" : "MISSING",
+      "content-type:", req.headers["content-type"] ?? "(none)",
+      "content-length:", req.headers["content-length"] ?? "(none)",
+      "rawBody bytes:", raw?.length ?? 0,
+      "body keys:", req.body && typeof req.body === "object" ? Object.keys(req.body).slice(0, 10) : typeof req.body,
+      "clashes:", Array.isArray(req.body?.clashes) ? req.body.clashes.length : "undefined",
+      "first fingerprint:", req.body?.clashes?.[0]?.fingerprint);
     next();
   },
   authMiddleware,

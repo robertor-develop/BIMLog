@@ -21,8 +21,20 @@ const app: Express = express();
 app.disable("etag");
 app.set("trust proxy", 1);
 app.use(cors());
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+const captureRawBody = (req: Request, _res: Response, buf: Buffer) => {
+  if (buf && buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
+};
+
+const jsonTypeMatcher = (req: Request): boolean => {
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (!ct) return false;
+  if (ct.includes("multipart/form-data")) return false;
+  if (ct.includes("application/x-www-form-urlencoded")) return false;
+  return ct.includes("json") || ct.includes("text/plain");
+};
+
+app.use(express.json({ limit: "50mb", type: jsonTypeMatcher, verify: captureRawBody }));
+app.use(express.urlencoded({ extended: true, limit: "50mb", verify: captureRawBody }));
 
 app.use(
   session({
