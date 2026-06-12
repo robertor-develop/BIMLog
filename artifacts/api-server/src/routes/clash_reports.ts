@@ -876,7 +876,7 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
 
 router.post("/projects/:projectId/clash-reports/plugin-sync",
   (req, _res, next) => {
-    console.log("[plugin-sync] authorization header:", req.headers.authorization, "clashes length:", req.body?.clashes?.length);
+    console.log("[plugin-sync] hit - auth:", req.headers.authorization ? "PRESENT" : "MISSING", "clashes:", req.body?.clashes?.length, "first clash name:", req.body?.clashes?.[0]?.name, "first fingerprint:", req.body?.clashes?.[0]?.fingerprint, "body error:", req.body === undefined ? "BODY UNDEFINED" : "OK");
     next();
   },
   authMiddleware,
