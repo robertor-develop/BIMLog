@@ -104,6 +104,28 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   useEffect(() => { loadViewpoints(); }, [projectId]);
 
+  // Silently refetch the viewpoint list (no loading spinner) so the table can
+  // be refreshed by polling without flicker.
+  const refreshViewpoints = async () => {
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
+      if (r.ok) {
+        const d = await r.json();
+        setViewpoints(d.viewpoints ?? []);
+      }
+    } catch {
+      /* transient network error — keep the current list, next poll retries */
+    }
+  };
+
+  // Auto-refresh: poll the lens-pull endpoint every 10s so viewpoints synced
+  // from the Navisworks plugin appear without a manual refresh. Stop polling on
+  // unmount / project change.
+  useEffect(() => {
+    const id = setInterval(refreshViewpoints, 10000);
+    return () => clearInterval(id);
+  }, [projectId]);
+
   // Probe the local Navisworks plugin once on load. The platform runs on HTTPS
   // while the plugin is a plain HTTP server on localhost, so a regular (CORS)
   // fetch is rejected by the browser before we can read it (the plugin does not
@@ -329,7 +351,15 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           </div>
         </div>
       ) : (
-        <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "scroll", maxHeight: "70vh" }}>
+        <div className="lens-table-scroll" style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "scroll", maxHeight: "70vh" }}>
+          <style>{`
+            .lens-table-scroll::-webkit-scrollbar { width: 12px; height: 12px; }
+            .lens-table-scroll::-webkit-scrollbar-track { background: #F1F1F1; border-radius: 8px; }
+            .lens-table-scroll::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 8px; border: 2px solid #F1F1F1; }
+            .lens-table-scroll::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+            .lens-table-scroll::-webkit-scrollbar-corner { background: #F1F1F1; }
+            .lens-table-scroll { scrollbar-color: #9CA3AF #F1F1F1; scrollbar-width: thin; }
+          `}</style>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F" }}>

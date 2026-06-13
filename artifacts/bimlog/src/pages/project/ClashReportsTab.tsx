@@ -93,7 +93,33 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [linkableItems, setLinkableItems] = useState<{ submittalItems: any[]; rfis: any[]; meetings: any[] }>({ submittalItems: [], rfis: [], meetings: [] });
   const [viewMode, setViewMode] = useState<"normal" | "grouped">("normal");
   const [deleteReport, setDeleteReport] = useState<{ id: number; label: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"clash" | "lens">("clash");
+  // Persist the active sub-tab so a page refresh keeps the user on the tab they
+  // were viewing (Clash Hits vs Lens Viewpoints), scoped per project.
+  const tabStorageKey = `clashReportsTab:${projectId}`;
+  const readSavedTab = (key: string): "clash" | "lens" => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved === "lens" || saved === "clash" ? saved : "clash";
+    } catch {
+      return "clash";
+    }
+  };
+  const [activeTab, setActiveTab] = useState<"clash" | "lens">(() => readSavedTab(tabStorageKey));
+  // Rehydrate when the project changes (the component instance can be reused
+  // across projects, so the lazy initializer alone is not enough).
+  useEffect(() => {
+    setActiveTab(readSavedTab(tabStorageKey));
+  }, [tabStorageKey]);
+  // Persist on explicit user selection (not via an effect) to avoid writing a
+  // stale tab into the new project's key during a project switch.
+  const selectTab = (k: "clash" | "lens") => {
+    setActiveTab(k);
+    try {
+      localStorage.setItem(tabStorageKey, k);
+    } catch {
+      /* storage unavailable — selection still applies for this session */
+    }
+  };
 
   const loadLinkableItems = async () => {
     try {
@@ -667,7 +693,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
     <div className="tab-content-wrapper">
       <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
         {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
-          <button key={k} onClick={() => setActiveTab(k)}
+          <button key={k} onClick={() => selectTab(k)}
             style={{ background: "none", border: "none", padding: "0 0 10px", fontSize: 14, fontWeight: 700,
               cursor: "pointer", marginBottom: -1,
               color: activeTab === k ? "#1D4ED8" : "#6B7280",
