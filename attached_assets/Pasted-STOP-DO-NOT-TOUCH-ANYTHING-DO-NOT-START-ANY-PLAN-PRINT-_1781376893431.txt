@@ -1,0 +1,30 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Two changes for BIMLog Lens Jump to Viewpoint feature. Do not break anything existing.
+
+FIX 1 — Jump to Viewpoint button in LensViewpointsView.tsx
+Replace the current Jump to Viewpoint modal with smart detection:
+- When user clicks Jump to Viewpoint, first try calling http://localhost:8765/jump/{navisworksGuid} with a 2 second timeout
+- If the call succeeds (200 OK) — show a small green toast: "Navigated to viewpoint in Navisworks"
+- If the call fails or times out (plugin not running) — show the existing modal with the display_id and viewpoint name so user can search manually
+- The fetch to localhost must use no-cors mode and handle network errors gracefully — never crash the page
+- Add a small indicator on the Lens Viewpoints page header: a green dot "Plugin connected" if localhost:8765/ping returns 200, grey dot "Plugin not connected" otherwise. Check this on page load with a 1 second timeout.
+
+FIX 2 — Update lens-next-id endpoint
+Change the lens-next-id endpoint in artifacts/api-server/src/routes/clash_reports.ts to return the current max sequence for this project so new plugin installs can initialize their local counter:
+- Query: SELECT COUNT(*) as total FROM lens_viewpoints WHERE project_id = $1 AND display_id IS NOT NULL AND display_id != ''
+- Return: { success: true, currentSequence: total, projectCode: "ELA01" }
+- The plugin now generates IDs locally using GUID-based naming — this endpoint is only used for initialization on new installs
+
+Check 1:
+grep -n "localhost:8765\|ping\|jump" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 2:
+grep -n "currentSequence\|lens-next-id" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

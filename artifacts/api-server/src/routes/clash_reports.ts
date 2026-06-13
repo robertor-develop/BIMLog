@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable, lensViewpointsTable } from "@workspace/db/schema";
-import { eq, desc, and, isNull, or, sql } from "drizzle-orm";
+import { eq, desc, and, isNull, isNotNull, ne, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -606,8 +606,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
   }
 );
 
-// Next sequential Lens viewpoint display ID for this project, e.g. ELA01-VP-004.
-// Registered BEFORE the "/:reportId" routes so "lens-next-id" is not captured.
+// Current Lens display-ID sequence for this project. The plugin now generates
+// IDs locally (GUID-based naming); this endpoint is only used to initialize a
+// new install's local counter from the count of viewpoints that already have a
+// display_id. Registered BEFORE "/:reportId" so "lens-next-id" is not captured.
 router.get("/projects/:projectId/clash-reports/lens-next-id",
   authMiddleware,
   requireProjectMember(),
@@ -620,12 +622,13 @@ router.get("/projects/:projectId/clash-reports/lens-next-id",
         res.status(404).json({ error: "not_found", message: "Project not found" });
         return;
       }
-      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(lensViewpointsTable)
-        .where(eq(lensViewpointsTable.projectId, projectId));
-      const sequence = (count ?? 0) + 1;
-      const projectCode = project.code;
-      const displayId = `${projectCode}-VP-${String(sequence).padStart(3, "0")}`;
-      res.json({ success: true, displayId, projectCode, sequence });
+      const [{ total }] = await db.select({ total: sql<number>`count(*)::int` }).from(lensViewpointsTable)
+        .where(and(
+          eq(lensViewpointsTable.projectId, projectId),
+          isNotNull(lensViewpointsTable.displayId),
+          ne(lensViewpointsTable.displayId, ""),
+        ));
+      res.json({ success: true, currentSequence: total ?? 0, projectCode: project.code });
     } catch (err) {
       res.status(500).json({ error: "lens_next_id_failed", message: err instanceof Error ? err.message : String(err) });
     }

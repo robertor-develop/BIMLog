@@ -2,11 +2,12 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2 } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
 const API = "/api/v1";
+const PLUGIN_BASE = "http://localhost:8765";
 
 interface LensViewpoint {
   id: number;
@@ -78,6 +79,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
+  // null = still checking, true = plugin reachable, false = not reachable.
+  const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const loadViewpoints = async () => {
     setLoading(true);
@@ -100,6 +104,31 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   useEffect(() => { loadViewpoints(); }, [projectId]);
 
+  // Probe the local Navisworks plugin once on load. no-cors means we can never
+  // read the status — a resolved fetch (within the timeout) is our only signal
+  // that something is listening; an abort or network error means not connected.
+  useEffect(() => {
+    let cancelled = false;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 1000);
+    (async () => {
+      try {
+        await fetch(`${PLUGIN_BASE}/ping`, { mode: "no-cors", signal: ctrl.signal });
+        if (!cancelled) setPluginConnected(true);
+      } catch {
+        if (!cancelled) setPluginConnected(false);
+      } finally {
+        clearTimeout(timer);
+      }
+    })();
+    return () => { cancelled = true; clearTimeout(timer); ctrl.abort(); };
+  }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(c => (c === msg ? null : c)), 2800);
+  };
+
   const updateStatus = async (id: number, status: string) => {
     const prev = viewpoints;
     setViewpoints(p => p.map(v => (v.id === id ? { ...v, status } : v)));
@@ -120,7 +149,26 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     setLoc(`/projects/${projectId}/rfis?${params.toString()}`);
   };
 
-  const jumpToViewpoint = (v: LensViewpoint) => setJumpTarget(v);
+  // Try to drive Navisworks directly via the local plugin; if it does not
+  // respond (not running / times out), fall back to the manual-search modal.
+  const jumpToViewpoint = async (v: LensViewpoint) => {
+    if (v.navisworksGuid) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 2000);
+      try {
+        await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { mode: "no-cors", signal: ctrl.signal });
+        clearTimeout(timer);
+        setPluginConnected(true);
+        showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
+        return;
+      } catch {
+        clearTimeout(timer);
+        setPluginConnected(false);
+        /* plugin not running — fall through to the manual-search modal */
+      }
+    }
+    setJumpTarget(v);
+  };
 
   const copyJumpId = async (v: LensViewpoint) => {
     const id = v.displayId || v.viewpointId;
@@ -189,6 +237,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
             {t("Last synced", "Última sincronización")}: {fmtCaptured(lastSynced)}
           </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: "#6B7280" }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+              background: pluginConnected === null ? "#D1D5DB" : pluginConnected ? "#16A34A" : "#9CA3AF",
+            }} />
+            {pluginConnected === null
+              ? t("Checking plugin...", "Comprobando plugin...")
+              : pluginConnected
+                ? t("Plugin connected", "Plugin conectado")
+                : t("Plugin not connected", "Plugin no conectado")}
+          </div>
         </div>
         <button className="btn btn-sm btn-outline" onClick={exportExcel}
           style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -310,6 +369,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               {t("No viewpoints match your filters", "Ninguna vista coincide con los filtros")}
             </div>
           )}
+        </div>
+      )}
+
+      {toast && (
+        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 1100, display: "flex", alignItems: "center", gap: 8, background: "#16A34A", color: "white", fontSize: 13, fontWeight: 600, padding: "10px 16px", borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}>
+          <CheckCircle2 size={16} /> {toast}
         </div>
       )}
 
