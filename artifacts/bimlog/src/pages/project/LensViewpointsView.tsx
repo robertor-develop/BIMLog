@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -77,6 +77,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fStatus, setFStatus] = useState("all");
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
 
   const loadViewpoints = async () => {
     setLoading(true);
@@ -119,12 +120,14 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     setLoc(`/projects/${projectId}/rfis?${params.toString()}`);
   };
 
-  const jumpToViewpoint = async (v: LensViewpoint) => {
+  const jumpToViewpoint = (v: LensViewpoint) => setJumpTarget(v);
+
+  const copyJumpId = async (v: LensViewpoint) => {
     const id = v.displayId || v.viewpointId;
     try {
       await navigator.clipboard.writeText(id);
     } catch {
-      /* clipboard unavailable — tooltip still shows the ID to search for */
+      /* clipboard unavailable — the ID is still shown in the modal to search for */
     }
     setCopiedId(v.id);
     setTimeout(() => setCopiedId(c => (c === v.id ? null : c)), 2500);
@@ -231,7 +234,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           </div>
         </div>
       ) : (
-        <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto" }}>
+        <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto", overflowY: "scroll", maxHeight: "70vh" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F" }}>
@@ -279,16 +282,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     <td style={{ padding: "8px 10px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{fmtCaptured(v.capturedAt)}</td>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                        <div style={{ position: "relative" }}>
-                          <button className="btn btn-sm btn-outline" onClick={() => jumpToViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
-                            <Crosshair size={12} /> {t("Jump to Viewpoint", "Ir a Vista")}
-                          </button>
-                          {copiedId === v.id && (
-                            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: 4, zIndex: 10, background: "#111827", color: "white", fontSize: 11, padding: "6px 10px", borderRadius: 6, whiteSpace: "normal", width: 220, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
-                              {t("Copied! Search for this ID in Navisworks Saved Viewpoints", "¡Copiado! Busca este ID en las Vistas Guardadas de Navisworks")}
-                            </div>
-                          )}
-                        </div>
+                        <button className="btn btn-sm btn-outline" onClick={() => jumpToViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                          <Crosshair size={12} /> {t("Jump to Viewpoint", "Ir a Vista")}
+                        </button>
                         <button className="btn btn-sm btn-primary" onClick={() => createRfi(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                           <FileText size={12} /> {t("Create RFI", "Crear RFI")}
                         </button>
@@ -314,6 +310,62 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               {t("No viewpoints match your filters", "Ninguna vista coincide con los filtros")}
             </div>
           )}
+        </div>
+      )}
+
+      {jumpTarget && (
+        <div
+          onClick={() => setJumpTarget(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 460, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>
+                {t("Jump to Viewpoint in Navisworks", "Ir a la Vista en Navisworks")}
+              </h3>
+              <button
+                onClick={() => setJumpTarget(null)}
+                aria-label={t("Close", "Cerrar")}
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280", lineHeight: 0, padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p style={{ margin: "12px 0 14px", fontSize: 13, color: "#4B5563" }}>
+              {t(
+                "Open your Saved Viewpoints panel in Navisworks and search for:",
+                "Abre el panel de Vistas Guardadas en Navisworks y busca:"
+              )}
+            </p>
+            <div style={{ background: "#DBEAFE", border: "1px solid #BFDBFE", borderRadius: 10, padding: "16px 18px", textAlign: "center" }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#1D4ED8", letterSpacing: 0.5, wordBreak: "break-all" }}>
+                {jumpTarget.displayId || jumpTarget.viewpointId}
+              </div>
+              <div style={{ fontSize: 12, color: "#6B7280", marginTop: 6, wordBreak: "break-all" }}>
+                {jumpTarget.viewpointId}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setJumpTarget(null)}
+                style={{ fontSize: 13, padding: "6px 14px" }}
+              >
+                {t("Close", "Cerrar")}
+              </button>
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => copyJumpId(jumpTarget)}
+                style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}
+              >
+                <Copy size={14} />
+                {copiedId === jumpTarget.id ? t("Copied!", "¡Copiado!") : t("Copy", "Copiar")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

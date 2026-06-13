@@ -1,0 +1,46 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Fix three issues in BIMLog Lens. Do not break anything existing.
+
+FIX 1 — Check if server is blocking syncs
+Look at the lens-sync POST endpoint in artifacts/api-server/src/routes/clash_reports.ts.
+The plugin is sending viewpoints but only 1 of 3 is showing on the platform. Check if the server is rejecting or silently dropping viewpoints due to unique constraint conflicts on navisworks_guid or viewpoint_id. Fix it so:
+- If navisworksGuid is provided and not empty — use ON CONFLICT ON navisworks_guid DO NOTHING then fallback select
+- If navisworksGuid is empty or null — fall back to ON CONFLICT ON viewpoint_id DO NOTHING
+- Never let a null navisworksGuid cause a constraint violation or silent failure
+- Add console.log for each viewpoint received and whether it was created or already existed so we can see what the server is doing
+- Make sure lens-pull returns ALL viewpoints regardless of whether they have a navisworksGuid
+
+FIX 2 — Table scrollbar always visible
+In artifacts/bimlog/src/pages/project/LensViewpointsView.tsx:
+Change the table container scrollbar from overflow-y: auto to overflow-y: scroll so it is always visible — never appears and disappears on hover.
+
+FIX 3 — Jump to Viewpoint modal
+In artifacts/bimlog/src/pages/project/LensViewpointsView.tsx:
+Replace the Jump to Viewpoint tooltip with a proper modal. When clicked the modal shows:
+- Title: "Jump to Viewpoint in Navisworks"
+- Instruction: "Open your Saved Viewpoints panel in Navisworks and search for:"
+- The display_id shown large and bold in a highlighted box
+- The full viewpoint name (viewpointId) shown below in grey
+- A Copy button that copies the display_id to clipboard
+- A close button
+The modal must never be clipped or hidden. It must appear centered on screen above everything else.
+
+FIX 4 — Last synced timestamp
+Make sure the Last synced timestamp shows the most recent captured_at from the viewpoints list — not a hardcoded date.
+
+Check 1:
+grep -n "ON CONFLICT\|navisworks_guid\|viewpoint_id" artifacts/api-server/src/routes/clash_reports.ts | head -20
+
+Check 2:
+grep -n "overflow\|Jump to Viewpoint\|modal" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 3:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | tail -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

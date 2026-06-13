@@ -1,0 +1,35 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Fix three issues in BIMLog Lens. Do not break anything existing.
+
+FIX 1 — lens-sync dedup broken
+The lens-sync POST endpoint is failing to insert viewpoints that have a navisworksGuid. Fix the upsert logic in artifacts/api-server/src/routes/clash_reports.ts:
+- If navisworksGuid is provided and not empty — use ON CONFLICT ON navisworks_guid DO NOTHING, then fallback select
+- If navisworksGuid is empty or not provided — fall back to ON CONFLICT ON viewpoint_id DO NOTHING
+- Never let a null navisworksGuid trigger a unique constraint violation
+- Make sure lens-pull returns ALL viewpoints for the project regardless of whether they have a navisworksGuid or not
+
+FIX 2 — Jump to Viewpoint UI
+In artifacts/bimlog/src/pages/project/LensViewpointsView.tsx:
+- Fix the table scrollbar so it is ALWAYS visible — use overflow-y: scroll not overflow-y: auto on the table container so it never appears and disappears on hover
+- Fix the Jump to Viewpoint button tooltip — it is being clipped behind the table. Replace the tooltip entirely with a proper modal that appears when clicked. The modal shows: "To view this in Navisworks, open your Saved Viewpoints panel and find: [display_id]" with the full viewpoint name below it and a Copy button that copies the viewpoint name to clipboard. The modal has a close button. It must never be clipped or hidden behind anything.
+- The display_id must be shown prominently in the modal so the user knows exactly what to search for
+
+FIX 3 — Sync counter accuracy
+After FIX 1 is applied, the sync should push all viewpoints correctly. Also make sure the "Last synced" timestamp on the Lens Viewpoints page updates to today's date after a successful sync — not staying on 6/12/2026.
+
+Check 1:
+grep -n "ON CONFLICT\|navisworks_guid\|viewpoint_id" artifacts/api-server/src/routes/clash_reports.ts | head -20
+
+Check 2:
+grep -n "Jump to Viewpoint\|modal\|overflow" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 3:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | tail -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

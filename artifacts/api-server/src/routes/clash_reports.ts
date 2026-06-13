@@ -458,6 +458,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
       const results: Array<{ viewpointId: string; id: number; status: string; created: boolean }> = [];
       const now = new Date();
       const seen = new Set<string>();
+      console.log(`[lens-sync] project=${projectId} received ${viewpoints.length} viewpoint(s)`);
       // Trim to a non-empty string or null so blank GUIDs ("") do not collapse
       // distinct viewpoints into one dedup key or diverge from the conflict target.
       const norm = (x: unknown): string | null => {
@@ -469,6 +470,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         if (!viewpointId) continue;
         const navisworksGuid = norm(v?.navisworksGuid);
         const displayId = norm(v?.displayId);
+        console.log(`[lens-sync] viewpoint received: viewpointId="${viewpointId}" guid=${navisworksGuid ?? "(none)"} displayId=${displayId ?? "(none)"}`);
         // Dedup key prefers the Navisworks GUID (stable across re-captures);
         // falls back to the viewpoint name for legacy callers without a GUID.
         const dedupKey = navisworksGuid ?? viewpointId;
@@ -509,12 +511,16 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           }).onConflictDoNothing({ target: conflictTarget }).returning();
           if (insertedRows.length > 0) {
             const inserted = insertedRows[0];
+            console.log(`[lens-sync] CREATED viewpointId="${viewpointId}" id=${inserted.id}`);
             results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true });
             continue;
           }
           const existing = await fetchExisting();
           if (existing) {
+            console.log(`[lens-sync] ALREADY EXISTS viewpointId="${viewpointId}" id=${existing.id}`);
             results.push({ viewpointId, id: existing.id, status: existing.status, created: false });
+          } else {
+            console.log(`[lens-sync] WARNING no row inserted or found for viewpointId="${viewpointId}"`);
           }
         } catch (err) {
           // Only a unique-violation (23505) is an expected transitional collision:
@@ -524,6 +530,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           const [legacy] = await db.select().from(lensViewpointsTable)
             .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
           if (legacy) {
+            console.log(`[lens-sync] ALREADY EXISTS (legacy viewpoint_id) viewpointId="${viewpointId}" id=${legacy.id}`);
             results.push({ viewpointId, id: legacy.id, status: legacy.status, created: false });
           } else {
             throw err;
