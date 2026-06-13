@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2 } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -105,7 +105,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   useEffect(() => { loadViewpoints(); }, [projectId]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
-  // be refreshed by polling without flicker.
+  // be refreshed on demand (manual refresh banner) without a loading flicker.
   const refreshViewpoints = async () => {
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
@@ -114,17 +114,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         setViewpoints(d.viewpoints ?? []);
       }
     } catch {
-      /* transient network error — keep the current list, next poll retries */
+      /* transient network error — keep the current list, the user can retry */
     }
   };
-
-  // Auto-refresh: poll the lens-pull endpoint every 10s so viewpoints synced
-  // from the Navisworks plugin appear without a manual refresh. Stop polling on
-  // unmount / project change.
-  useEffect(() => {
-    const id = setInterval(refreshViewpoints, 10000);
-    return () => clearInterval(id);
-  }, [projectId]);
 
   // Probe the local Navisworks plugin once on load. The platform runs on HTTPS
   // while the plugin is a plain HTTP server on localhost, so a regular (CORS)
@@ -330,6 +322,18 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <option value="all">{t("All Statuses", "Todos los Estados")}</option>
           {LENS_STATUS_ORDER.map(x => <option key={x} value={x}>{lensStatusLabel(x)}</option>)}
         </select>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+        background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 14px", marginBottom: 14 }}>
+        <span style={{ fontSize: 13, color: "#92400E" }}>
+          {t("New viewpoints may be available — Click to refresh", "Puede haber nuevas vistas disponibles — Haga clic para actualizar")}
+        </span>
+        <button onClick={refreshViewpoints}
+          style={{ display: "flex", alignItems: "center", gap: 6, background: "#F59E0B", border: "none", borderRadius: 6,
+            padding: "6px 12px", fontSize: 12, fontWeight: 700, color: "white", cursor: "pointer", flexShrink: 0 }}>
+          <RefreshCw size={14} /> {t("Refresh", "Actualizar")}
+        </button>
       </div>
 
       {error && (
