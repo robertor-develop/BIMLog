@@ -1,0 +1,43 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Fix four things in artifacts/bimlog/src/pages/project/LensViewpointsView.tsx. Do not break anything existing.
+
+FIX 1 — Jump to Viewpoint fetch mode
+The current implementation uses no-cors mode which makes responses opaque — we can never read the status so it always falls back to the modal.
+Fix the jumpToViewpoint function:
+- Remove no-cors mode — use regular fetch with credentials: omit
+- The plugin server at localhost:8765 already sends Access-Control-Allow-Origin header
+- Try fetch to http://localhost:8765/jump/{navisworksGuid} with a 2 second timeout using AbortController
+- If fetch resolves with ok:true — show green toast "Navigated to viewpoint in Navisworks" — do NOT show modal
+- If fetch fails or times out — show the modal as fallback
+- Also fix the ping check — remove no-cors from ping too so we can actually read the response status
+
+FIX 2 — Delete button on each viewpoint row
+Add a Delete button to the Actions column of each viewpoint row.
+When clicked show a confirmation dialog "Delete this viewpoint? This cannot be undone."
+If confirmed call DELETE /api/v1/projects/:projectId/clash-reports/lens-viewpoints/:id
+On success remove the row from local state immediately without page reload.
+Add the DELETE endpoint to artifacts/api-server/src/routes/clash_reports.ts — soft delete by setting deleted_at timestamp, or hard delete, your choice — but the row must disappear from lens-pull results.
+Requires auth. Register before :reportId route.
+
+FIX 3 — Scrollbar always visible
+Change the table container from overflow-y: auto to overflow-y: scroll so the scrollbar is always visible and never appears/disappears on hover.
+
+FIX 4 — Last synced timestamp
+Show today's date as last synced after a successful sync — not the hardcoded 6/12/2026. Derive it from the most recent captured_at in the viewpoints array.
+
+Check 1:
+grep -n "no-cors\|jump\|ping" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 2:
+grep -n "DELETE\|lens-viewpoints" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 3:
+grep -n "overflow" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

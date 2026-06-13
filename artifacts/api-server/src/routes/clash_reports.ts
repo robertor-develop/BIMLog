@@ -613,6 +613,31 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
   }
 );
 
+// DELETE a lens viewpoint (hard delete — row disappears from lens-pull).
+// Registered BEFORE the "/:reportId" routes so the literal "lens-viewpoints"
+// segment is not captured by the :reportId path parameter.
+router.delete("/projects/:projectId/clash-reports/lens-viewpoints/:id",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    try {
+      const [deleted] = await db.delete(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+        .returning();
+      if (!deleted) {
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
+      }
+      console.log(`[lens-delete] project=${projectId} removed viewpoint id=${id}`);
+      res.json({ success: true, id });
+    } catch (err) {
+      res.status(500).json({ error: "lens_delete_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // Current Lens display-ID sequence for this project. The plugin now generates
 // IDs locally (GUID-based naming); this endpoint is only used to initialize a
 // new install's local counter from the count of viewpoints that already have a

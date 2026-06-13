@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2 } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2 } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -104,17 +104,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   useEffect(() => { loadViewpoints(); }, [projectId]);
 
-  // Probe the local Navisworks plugin once on load. no-cors means we can never
-  // read the status — a resolved fetch (within the timeout) is our only signal
-  // that something is listening; an abort or network error means not connected.
+  // Probe the local Navisworks plugin once on load. The plugin server sends an
+  // Access-Control-Allow-Origin header, so a regular (CORS) fetch lets us read
+  // the real response status; an abort or network error means not connected.
   useEffect(() => {
     let cancelled = false;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 1000);
     (async () => {
       try {
-        await fetch(`${PLUGIN_BASE}/ping`, { mode: "no-cors", signal: ctrl.signal });
-        if (!cancelled) setPluginConnected(true);
+        const r = await fetch(`${PLUGIN_BASE}/ping`, { credentials: "omit", signal: ctrl.signal });
+        if (!cancelled) setPluginConnected(r.ok);
       } catch {
         if (!cancelled) setPluginConnected(false);
       } finally {
@@ -140,6 +140,26 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     if (!r.ok) setViewpoints(prev);
   };
 
+  const deleteViewpoint = async (id: number) => {
+    if (!window.confirm(t("Delete this viewpoint? This cannot be undone.", "¿Eliminar esta vista? Esto no se puede deshacer."))) return;
+    const prev = viewpoints;
+    setViewpoints(p => p.filter(v => v.id !== id));
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      if (!r.ok) {
+        setViewpoints(prev);
+        const d = await r.json().catch(() => ({}));
+        setError(d.message || d.error || "Failed to delete viewpoint");
+      }
+    } catch (e) {
+      setViewpoints(prev);
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const createRfi = (v: LensViewpoint) => {
     const params = new URLSearchParams();
     if (v.note) params.set("note", v.note);
@@ -156,15 +176,19 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 2000);
       try {
-        await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { mode: "no-cors", signal: ctrl.signal });
+        const r = await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { credentials: "omit", signal: ctrl.signal });
         clearTimeout(timer);
+        if (r.ok) {
+          setPluginConnected(true);
+          showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
+          return;
+        }
+        // Plugin responded but could not navigate — fall through to the modal.
         setPluginConnected(true);
-        showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
-        return;
       } catch {
         clearTimeout(timer);
         setPluginConnected(false);
-        /* plugin not running — fall through to the manual-search modal */
+        /* plugin not running / timed out — fall through to the manual-search modal */
       }
     }
     setJumpTarget(v);
@@ -349,6 +373,11 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                         <button className="btn btn-sm btn-outline" onClick={() => setLinksOpen(p => ({ ...p, [v.id]: !p[v.id] }))} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                           <Link2 size={12} /> {t("Linked Items", "Vinculados")}
                         </button>
+                        {canWrite && (
+                          <button className="btn btn-sm btn-outline" onClick={() => deleteViewpoint(v.id)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4, color: "#DC2626", borderColor: "#FECACA" }}>
+                            <Trash2 size={12} /> {t("Delete", "Eliminar")}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
