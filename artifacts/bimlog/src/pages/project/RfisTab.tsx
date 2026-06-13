@@ -135,10 +135,28 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [revising, setRevising] = useState<Rfi | null>(null);
+  const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
   const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
   const rfisQueryClient = useQueryClient();
+
+  // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const note = sp.get("note");
+    const trade = sp.get("trade");
+    const floor = sp.get("floor");
+    if (note || trade || floor) {
+      const subject = trade
+        ? `${trade}${floor ? ` — ${floor}` : ""}`
+        : (note || "").slice(0, 80);
+      setCreatePreload({ subject, question: note || "", location: floor || "" });
+      setShowCreate(true);
+      window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -569,11 +587,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         <RfiCreatePanel
           projectId={projectId}
           preload={revising ?? undefined}
+          prefill={createPreload}
           existingRfis={rfis || []}
           members={members || []}
           user={user}
           lang={lang}
-          onClose={() => { setShowCreate(false); setRevising(null); }}
+          onClose={() => { setShowCreate(false); setRevising(null); setCreatePreload(undefined); }}
         />
       )}
 
@@ -597,9 +616,10 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 }
 
 // ─── RFI Create Panel ─────────────────────────────────────────────────────────
-function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang, onClose }: {
+function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, user, lang, onClose }: {
   projectId: number;
   preload?: Rfi;
+  prefill?: { subject?: string; question?: string; location?: string };
   existingRfis: Rfi[];
   members: { userFullName: string; userCompanyName?: string; userEmail: string }[];
   user: { fullName: string; companyName: string; email: string } | null;
@@ -621,7 +641,7 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
     return withAddr?.projectAddress || "";
   }, [existingRfis, preload]);
 
-  const [subject, setSubject] = useState(preload?.subject || "");
+  const [subject, setSubject] = useState(preload?.subject || prefill?.subject || "");
   const [priority, setPriority] = useState(preload?.priority || priorityOptions[0]?.value || "medium");
   const [dateRequested, setDateRequested] = useState(format(new Date(), "yyyy-MM-dd"));
   const [dateRequired, setDateRequired] = useState(preload?.dateRequired ? format(parseISO(preload.dateRequired), "yyyy-MM-dd") : "");
@@ -654,12 +674,12 @@ function RfiCreatePanel({ projectId, preload, existingRfis, members, user, lang,
   const [specSection, setSpecSection] = useState(preload?.specSection || "");
   const [detailNum, setDetailNum] = useState(preload?.detailNumber || "");
   const [noteNum, setNoteNum] = useState(preload?.noteNumber || "");
-  const [location, setLocation] = useState(preload?.locationDescription || "");
+  const [location, setLocation] = useState(preload?.locationDescription || prefill?.location || "");
 
   // Fix 3 — file search state per reference field
   const [fileSearch, setFileSearch] = useState<string | null>(null);
 
-  const [question, setQuestion] = useState(preload?.question || "");
+  const [question, setQuestion] = useState(preload?.question || prefill?.question || "");
   const [attachments, setAttachments] = useState<string[]>(preload?.attachmentsJson || []);
   const [attachInput, setAttachInput] = useState("");
 

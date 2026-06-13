@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { Upload, ChevronLeft, AlertTriangle, Download, Trash2 } from "lucide-react";
 import { isDebug } from "@/lib/debug";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { LensViewpointsView } from "./LensViewpointsView";
 
 const API = "/api/v1";
 
@@ -92,6 +93,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [linkableItems, setLinkableItems] = useState<{ submittalItems: any[]; rfis: any[]; meetings: any[] }>({ submittalItems: [], rfis: [], meetings: [] });
   const [viewMode, setViewMode] = useState<"normal" | "grouped">("normal");
   const [deleteReport, setDeleteReport] = useState<{ id: number; label: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<"clash" | "lens">("clash");
 
   const loadLinkableItems = async () => {
     try {
@@ -663,6 +665,19 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div className="tab-content-wrapper">
+      <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
+        {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
+          <button key={k} onClick={() => setActiveTab(k)}
+            style={{ background: "none", border: "none", padding: "0 0 10px", fontSize: 14, fontWeight: 700,
+              cursor: "pointer", marginBottom: -1,
+              color: activeTab === k ? "#1D4ED8" : "#6B7280",
+              borderBottom: activeTab === k ? "2px solid #1D4ED8" : "2px solid transparent" }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "clash" && (<>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Clash Reports","Reportes de Choques")}</h2>
@@ -781,6 +796,11 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             </div>
           )
       }
+      </>)}
+
+      {activeTab === "lens" && (
+        <LensViewpointsView projectId={projectId} canWrite={canWrite} />
+      )}
     </div>
     </>
   );

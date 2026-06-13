@@ -1,0 +1,50 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add a Lens Viewpoints tab to the Clash Reports page in artifacts/bimlog/src/pages/project/ClashReportsTab.tsx. Do not break anything existing.
+
+WHAT TO BUILD:
+Add a tab toggle at the top of the Clash Reports page with two tabs: "Clash Hits" and "Lens Viewpoints". The existing clash reports content goes under "Clash Hits". The new "Lens Viewpoints" tab shows viewpoints from the lens_viewpoints table.
+
+FIX 1 — Tab toggle
+Add two tab buttons at the top of the page below the page header: "Clash Hits" and "Lens Viewpoints". Active tab has blue underline. Clicking switches the view. Default active tab is "Clash Hits". Do not break existing clash hits view.
+
+FIX 2 — Lens Viewpoints tab content
+When "Lens Viewpoints" tab is active show:
+- A header bar with: "Lens Viewpoints" title, last synced timestamp (from most recent captured_at in the list), and a filter row with dropdowns for Trade, Floor, Report Type, Status — all populated from actual data in the list.
+- A table/list of viewpoints fetched from GET /api/v1/projects/:projectId/clash-reports/lens-pull
+- Each row shows: Priority badge (P1=red P2=orange P3=yellow P4=gray P5=purple), Trade, Report Type, Floor, Note (full text), Status badge, Captured date, Navisworks viewpoint name (the full viewpointId field shown in small grey text below the note)
+- Status badge is a clickable dropdown — clicking it shows: Open, Follow Up, Waiting Design, Approved, Resolved. Selecting one calls PATCH /api/v1/projects/:projectId/clash-reports/lens-viewpoints/:id with body { status }
+- Each row has a "Create RFI" button that navigates to the RFIs page with query params prefilled: ?note=...&trade=...&floor=... so the RFI form opens pre-filled
+- Each row has a Linked Items button using the existing LinkedItemsPanel component
+- Empty state: "No Lens Viewpoints synced yet. Use BIMLog Lens plugin in Navisworks to capture and sync viewpoints."
+
+FIX 3 — PATCH endpoint for status update
+Add to artifacts/api-server/src/routes/clash_reports.ts:
+PATCH /api/v1/projects/:projectId/clash-reports/lens-viewpoints/:id
+Body: { status }
+Updates status and updated_at on the lens_viewpoints row.
+Valid statuses: open, follow_up, waiting_design, approved, resolved
+Returns: { success: true, viewpoint: { id, status, updatedAt } }
+Requires auth. Register before the :reportId route.
+
+FIX 4 — Export to Excel
+Add an "Export" button to the Lens Viewpoints header bar. When clicked exports all viewpoints as XLSX with columns matching Ruben's exact format: Date, FileName (viewpointId), Floor, Trade, ReportType, Priority, Note, OpenItems, Status. Use the existing xlsx export pattern in the codebase.
+
+FIX 5 — Morning Briefing agent integration
+In the existing briefing-agent or clash-agent, also read from lens_viewpoints table for this project. Include in the briefing: count of open Lens viewpoints by floor and trade, any P1 or P2 viewpoints with no linked RFI. Use the existing agent pattern — do not create a new agent.
+
+Check 1:
+grep -n "Lens Viewpoints\|lens-pull\|lensViewpoints" artifacts/bimlog/src/pages/project/ClashReportsTab.tsx | head -10
+
+Check 2:
+grep -n "lens-viewpoints" artifacts/api-server/src/routes/clash_reports.ts | head -5
+
+Check 3:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | tail -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

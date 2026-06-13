@@ -530,6 +530,34 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+// PATCH lens viewpoint status. Registered BEFORE the "/:reportId" routes so the
+// literal "lens-viewpoints" segment is not captured by the :reportId param.
+router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    const { status } = req.body ?? {};
+    const VALID = ["open", "follow_up", "waiting_design", "approved", "resolved"];
+    if (!status || !VALID.includes(status)) {
+      return res.status(400).json({ error: "invalid_status", message: `status must be one of: ${VALID.join(", ")}` });
+    }
+    try {
+      const [updated] = await db.update(lensViewpointsTable)
+        .set({ status, updatedAt: new Date() })
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+        .returning();
+      if (!updated) {
+        return res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+      }
+      res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
+    } catch (err) {
+      res.status(500).json({ error: "lens_update_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);

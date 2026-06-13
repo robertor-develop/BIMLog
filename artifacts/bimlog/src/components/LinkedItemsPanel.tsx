@@ -21,7 +21,7 @@ interface LinkRow {
 
 interface Props {
   projectId: number;
-  entityType: "rfi" | "submittal";
+  entityType: "rfi" | "submittal" | "lens_viewpoint";
   entityId: number;
   canWrite?: boolean;
 }
