@@ -180,12 +180,20 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   // the GET still reaches the plugin and drives Navisworks; the opaque response
   // cannot be read, so a fetch that resolves means the plugin received it (jump
   // succeeded) and a thrown error means the plugin is not reachable.
+  //
+  // Viewpoints are matched by their display code (e.g. "1185RI-37D77A"), not the
+  // Navisworks GUID: the plugin sends an all-zeros placeholder GUID for saved
+  // viewpoints (normalized to null on sync), so a GUID jump can never resolve.
+  // The display code is the stable unique key that prefixes every saved
+  // viewpoint's name in Navisworks. The plugin's /jump handler must locate the
+  // saved viewpoint whose name contains this code and apply it.
   const jumpToViewpoint = async (v: LensViewpoint) => {
-    if (v.navisworksGuid) {
+    const code = v.displayId || v.viewpointId;
+    if (code) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 2000);
       try {
-        await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { mode: "no-cors", signal: ctrl.signal });
+        await fetch(`${PLUGIN_BASE}/jump?code=${encodeURIComponent(code)}`, { mode: "no-cors", signal: ctrl.signal });
         clearTimeout(timer);
         setPluginConnected(true);
         showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
