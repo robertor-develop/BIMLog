@@ -465,10 +465,17 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const s = x != null ? String(x).trim() : "";
         return s.length > 0 ? s : null;
       };
+      // The plugin sends an all-zeros GUID as a placeholder for viewpoints saved
+      // in earlier sessions. It is NOT a real key — treating it as one would make
+      // every such viewpoint collide on the (project_id, navisworks_guid) unique
+      // constraint. Normalize it (and null/empty) to null so these route to the
+      // viewpoint_id arbiter instead and never raise a unique-violation.
+      const ZERO_GUID = "00000000-0000-0000-0000-000000000000";
       for (const v of viewpoints) {
         const viewpointId = norm(v?.viewpointId);
         if (!viewpointId) continue;
-        const navisworksGuid = norm(v?.navisworksGuid);
+        const rawGuid = norm(v?.navisworksGuid);
+        const navisworksGuid = rawGuid && rawGuid.toLowerCase() !== ZERO_GUID ? rawGuid : null;
         const displayId = norm(v?.displayId);
         console.log(`[lens-sync] viewpoint received: viewpointId="${viewpointId}" guid=${navisworksGuid ?? "(none)"} displayId=${displayId ?? "(none)"}`);
         // Dedup key prefers the Navisworks GUID (stable across re-captures);

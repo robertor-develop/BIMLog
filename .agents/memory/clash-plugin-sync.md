@@ -31,6 +31,16 @@ Mapping rule: `resolved`->Resolved, `approved`->Approved, `new`->New, everything
 
 **Why:** only resolved/approved mean "done" — those are the statuses that should make a clash stop reappearing in future Navisworks clash runs. Every still-open BIMLog state must map to Active so Navisworks keeps surfacing it. `open` is BIMLog's Active state (verified in ClashReportsTab status dropdown), so do NOT capitalize-passthrough raw statuses — that would emit "Open"/"Follow_up" which Navisworks doesn't understand.
 
+## lens-sync zero-GUID dedup footgun
+
+Lens viewpoints (`lens_viewpoints`, separate feature from clashes) have TWO unique constraints: `(project_id, viewpoint_id)` and `(project_id, navisworks_guid)`. The Navisworks plugin sends an all-zeros placeholder GUID `00000000-0000-0000-0000-000000000000` for viewpoints saved in earlier sessions — it is NOT a real key.
+
+**Rule:** in lens-sync, normalize the all-zeros GUID (and null/empty) to `null` BEFORE choosing the `ON CONFLICT` arbiter. A real non-zero GUID -> conflict on `(project_id, navisworks_guid)`; zero/null GUID -> conflict on `(project_id, viewpoint_id)` and store null.
+
+**Why:** the zero GUID is a non-empty (truthy) string, so naive truthiness branching routes it to the navisworks_guid arbiter and stores it verbatim — then two+ zero-GUID viewpoints in one batch collide on `lens_viewpoints_project_guid_unique`, merging distinct viewpoints / raising 23505. Storing null instead is safe because Postgres treats NULLs as distinct in unique indexes.
+
+**How to apply:** any GUID-keyed dedup fed by this plugin must guard against the all-zeros placeholder, not just null/empty.
+
 ## syncToken
 
 plugin-sync POST response includes `syncToken: now.toISOString()` (same `now` used to stamp `lastPluginSyncAt` on every processed clash). The plugin stores it. The current pull windowing is per-row (`updatedAt > lastPluginSyncAt`), self-healing because the plugin re-sends fingerprints on each sync which re-baselines `lastPluginSyncAt`. No server-side global `lastSyncAt` query param is implemented — pull can re-return an unacked change until the next sync re-baselines that row (idempotent for the plugin).
