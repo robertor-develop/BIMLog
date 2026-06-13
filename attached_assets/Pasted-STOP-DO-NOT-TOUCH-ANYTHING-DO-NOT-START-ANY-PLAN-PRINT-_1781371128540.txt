@@ -1,0 +1,56 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Four changes to BIMLog for Lens Viewpoint IDs, images, and jump-to-viewpoint. Do not break anything existing.
+
+FIX 1 — Add next-id endpoint
+Add to artifacts/api-server/src/routes/clash_reports.ts before the :reportId route:
+GET /api/v1/projects/:projectId/clash-reports/lens-next-id
+- Gets the project code from the projects table for this projectId
+- Counts existing lens_viewpoints for this project to get next sequence number
+- Returns: { success: true, displayId: "ELA01-VP-004", projectCode: "ELA01", sequence: 4 }
+- Format: {projectCode}-VP-{sequence padded to 3 digits}
+- Requires auth
+
+FIX 2 — Add columns to lens_viewpoints table
+Add these columns via the startup migration block in app.ts:
+- display_id TEXT — e.g. ELA01-VP-001
+- navisworks_guid TEXT — the Navisworks GUID for this viewpoint
+- screenshot_url TEXT — reserved for future use, nullable for now
+
+Also add UNIQUE constraint on navisworks_guid per project:
+ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS display_id TEXT;
+ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS navisworks_guid TEXT;
+ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT;
+
+Update the lens-sync POST endpoint to:
+- Accept navisworksGuid and displayId in each viewpoint object
+- Use navisworks_guid as the dedup key (ON CONFLICT on navisworks_guid) instead of viewpoint_id
+- Store display_id and navisworks_guid on insert
+
+Update the lens-pull GET endpoint to return display_id and navisworks_guid in each viewpoint.
+
+FIX 3 — Update Lens Viewpoints UI in LensViewpointsView.tsx
+- Show display_id (e.g. ELA01-VP-003) as the primary ID badge on each row — blue badge
+- Show the full viewpoint name (viewpointId field) in small grey text below the note
+- Add "Jump to Viewpoint" button on each row — copies the display_id to clipboard and shows tooltip "Copied! Search for this ID in Navisworks Saved Viewpoints"
+- For users with BIMLog plugin — the button will eventually trigger the plugin directly, for now clipboard copy is sufficient
+- Update the Create RFI prefill to include the display_id as the RFI reference
+
+FIX 4 — Update Drizzle schema
+Add display_id, navisworks_guid, screenshot_url to the lensViewpoints table definition in lib/db/src/schema/lens-viewpoints.ts
+
+Check 1:
+grep -n "lens-next-id\|navisworks_guid\|display_id" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 2:
+grep -n "display_id\|navisworksGuid\|displayId" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 3:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | tail -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

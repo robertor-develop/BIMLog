@@ -13,8 +13,12 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   capturedAt: timestamp("captured_at", { withTimezone: true }),
   status: text("status").notNull().default("open"),
   syncedAt: timestamp("synced_at", { withTimezone: true }),
+  displayId: text("display_id"),
+  navisworksGuid: text("navisworks_guid"),
+  screenshotUrl: text("screenshot_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (t) => ({
   projectViewpointUnique: unique("lens_viewpoints_project_viewpoint_unique").on(t.projectId, t.viewpointId),
+  projectGuidUnique: unique("lens_viewpoints_project_guid_unique").on(t.projectId, t.navisworksGuid),
 }));

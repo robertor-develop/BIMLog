@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2 } from "lucide-react";
+import { Download, FileText, Link2, Crosshair } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -11,6 +11,8 @@ const API = "/api/v1";
 interface LensViewpoint {
   id: number;
   viewpointId: string;
+  displayId?: string | null;
+  navisworksGuid?: string | null;
   note?: string | null;
   trade?: string | null;
   reportType?: string | null;
@@ -74,6 +76,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fReportType, setFReportType] = useState("all");
   const [fStatus, setFStatus] = useState("all");
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const loadViewpoints = async () => {
     setLoading(true);
@@ -112,7 +115,19 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     if (v.note) params.set("note", v.note);
     if (v.trade) params.set("trade", v.trade);
     if (v.floor) params.set("floor", v.floor);
+    if (v.displayId) params.set("ref", v.displayId);
     setLoc(`/projects/${projectId}/rfis?${params.toString()}`);
+  };
+
+  const jumpToViewpoint = async (v: LensViewpoint) => {
+    const id = v.displayId || v.viewpointId;
+    try {
+      await navigator.clipboard.writeText(id);
+    } catch {
+      /* clipboard unavailable — tooltip still shows the ID to search for */
+    }
+    setCopiedId(v.id);
+    setTimeout(() => setCopiedId(c => (c === v.id ? null : c)), 2500);
   };
 
   const uniq = (vals: (string | null | undefined)[]) =>
@@ -220,7 +235,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F" }}>
-                {["Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions"].map(h => (
+                {["ID", "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions"].map(h => (
                   <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -229,6 +244,15 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               {filtered.map(v => (
                 <Fragment key={v.id}>
                   <tr style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
+                    <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                      {v.displayId ? (
+                        <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
+                          {v.displayId}
+                        </span>
+                      ) : (
+                        <span style={{ color: "#9CA3AF", fontSize: 12 }}>—</span>
+                      )}
+                    </td>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><LensPBadge p={v.priority} /></td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.trade || "—"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.reportType || "—"}</td>
@@ -254,7 +278,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     </td>
                     <td style={{ padding: "8px 10px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{fmtCaptured(v.capturedAt)}</td>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <div style={{ position: "relative" }}>
+                          <button className="btn btn-sm btn-outline" onClick={() => jumpToViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                            <Crosshair size={12} /> {t("Jump to Viewpoint", "Ir a Vista")}
+                          </button>
+                          {copiedId === v.id && (
+                            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: 4, zIndex: 10, background: "#111827", color: "white", fontSize: 11, padding: "6px 10px", borderRadius: 6, whiteSpace: "normal", width: 220, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
+                              {t("Copied! Search for this ID in Navisworks Saved Viewpoints", "¡Copiado! Busca este ID en las Vistas Guardadas de Navisworks")}
+                            </div>
+                          )}
+                        </div>
                         <button className="btn btn-sm btn-primary" onClick={() => createRfi(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                           <FileText size={12} /> {t("Create RFI", "Crear RFI")}
                         </button>
@@ -266,7 +300,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   </tr>
                   {linksOpen[v.id] && (
                     <tr style={{ background: "#FAFAFA", borderTop: "1px solid #F3F4F6" }}>
-                      <td colSpan={8} style={{ padding: "4px 16px 14px" }}>
+                      <td colSpan={9} style={{ padding: "4px 16px 14px" }}>
                         <LinkedItemsPanel projectId={projectId} entityType="lens_viewpoint" entityId={v.id} canWrite={canWrite} />
                       </td>
                     </tr>

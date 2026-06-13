@@ -147,10 +147,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const note = sp.get("note");
     const trade = sp.get("trade");
     const floor = sp.get("floor");
-    if (note || trade || floor) {
-      const subject = trade
+    const ref = sp.get("ref");
+    if (note || trade || floor || ref) {
+      const base = trade
         ? `${trade}${floor ? ` — ${floor}` : ""}`
         : (note || "").slice(0, 80);
+      const subject = ref ? `${ref}${base ? ` — ${base}` : ""}` : base;
       setCreatePreload({ subject, question: note || "", location: floor || "" });
       setShowCreate(true);
       window.history.replaceState({}, "", `/projects/${projectId}/rfis`);

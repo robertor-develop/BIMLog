@@ -156,6 +156,10 @@ startOverdueNotifier();
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(project_id, viewpoint_id)
     )`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS display_id TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS navisworks_guid TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`);
     console.log("[migration] lens_viewpoints table ensured");
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);

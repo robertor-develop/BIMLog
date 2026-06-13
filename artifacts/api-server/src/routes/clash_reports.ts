@@ -458,39 +458,76 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
       const results: Array<{ viewpointId: string; id: number; status: string; created: boolean }> = [];
       const now = new Date();
       const seen = new Set<string>();
+      // Trim to a non-empty string or null so blank GUIDs ("") do not collapse
+      // distinct viewpoints into one dedup key or diverge from the conflict target.
+      const norm = (x: unknown): string | null => {
+        const s = x != null ? String(x).trim() : "";
+        return s.length > 0 ? s : null;
+      };
       for (const v of viewpoints) {
-        const viewpointId = v?.viewpointId != null ? String(v.viewpointId) : null;
-        if (!viewpointId || seen.has(viewpointId)) continue;
-        seen.add(viewpointId);
+        const viewpointId = norm(v?.viewpointId);
+        if (!viewpointId) continue;
+        const navisworksGuid = norm(v?.navisworksGuid);
+        const displayId = norm(v?.displayId);
+        // Dedup key prefers the Navisworks GUID (stable across re-captures);
+        // falls back to the viewpoint name for legacy callers without a GUID.
+        const dedupKey = navisworksGuid ?? viewpointId;
+        if (seen.has(dedupKey)) continue;
+        seen.add(dedupKey);
         const priorityNum = v?.priority != null && !Number.isNaN(Number(v.priority)) ? Number(v.priority) : 3;
         const capturedAt = v?.capturedAt ? new Date(v.capturedAt) : null;
-        // Atomic dedup: INSERT ... ON CONFLICT (project_id, viewpoint_id) DO NOTHING.
-        // A returned row means we created it; an empty result means it already
-        // existed (incl. a concurrent insert racing this one), so we fetch it and
-        // report created:false. This avoids a select-then-insert race that would
-        // otherwise 500 the whole batch on the unique constraint.
-        const insertedRows = await db.insert(lensViewpointsTable).values({
-          projectId,
-          viewpointId,
-          note: v?.note != null ? String(v.note) : null,
-          trade: v?.trade != null ? String(v.trade) : null,
-          reportType: v?.reportType != null ? String(v.reportType) : null,
-          priority: priorityNum,
-          floor: v?.floor != null ? String(v.floor) : null,
-          openItems: v?.openItems != null ? String(v.openItems) : null,
-          capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
-          status: "open",
-          syncedAt: now,
-        }).onConflictDoNothing({ target: [lensViewpointsTable.projectId, lensViewpointsTable.viewpointId] }).returning();
-        if (insertedRows.length > 0) {
-          const inserted = insertedRows[0];
-          results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true });
-          continue;
-        }
-        const [existing] = await db.select().from(lensViewpointsTable)
-          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
-        if (existing) {
-          results.push({ viewpointId, id: existing.id, status: existing.status, created: false });
+        // Atomic dedup: INSERT ... ON CONFLICT DO NOTHING on navisworks_guid when
+        // provided (else viewpoint_id). A returned row means we created it; an empty
+        // result means it already existed (incl. a concurrent insert), so we fetch
+        // it and report created:false.
+        const conflictTarget = navisworksGuid
+          ? [lensViewpointsTable.projectId, lensViewpointsTable.navisworksGuid]
+          : [lensViewpointsTable.projectId, lensViewpointsTable.viewpointId];
+        const fetchExisting = async () => {
+          const [row] = navisworksGuid
+            ? await db.select().from(lensViewpointsTable)
+                .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.navisworksGuid, navisworksGuid)))
+            : await db.select().from(lensViewpointsTable)
+                .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
+          return row;
+        };
+        try {
+          const insertedRows = await db.insert(lensViewpointsTable).values({
+            projectId,
+            viewpointId,
+            navisworksGuid,
+            displayId,
+            note: v?.note != null ? String(v.note) : null,
+            trade: v?.trade != null ? String(v.trade) : null,
+            reportType: v?.reportType != null ? String(v.reportType) : null,
+            priority: priorityNum,
+            floor: v?.floor != null ? String(v.floor) : null,
+            openItems: v?.openItems != null ? String(v.openItems) : null,
+            capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
+            status: "open",
+            syncedAt: now,
+          }).onConflictDoNothing({ target: conflictTarget }).returning();
+          if (insertedRows.length > 0) {
+            const inserted = insertedRows[0];
+            results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true });
+            continue;
+          }
+          const existing = await fetchExisting();
+          if (existing) {
+            results.push({ viewpointId, id: existing.id, status: existing.status, created: false });
+          }
+        } catch (err) {
+          // Only a unique-violation (23505) is an expected transitional collision:
+          // a legacy row shares this viewpoint_id but has a null GUID, so the GUID
+          // arbiter does not catch it. Treat that as existing; surface anything else.
+          if ((err as { code?: string })?.code !== "23505") throw err;
+          const [legacy] = await db.select().from(lensViewpointsTable)
+            .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
+          if (legacy) {
+            results.push({ viewpointId, id: legacy.id, status: legacy.status, created: false });
+          } else {
+            throw err;
+          }
         }
       }
       res.json({ success: true, results });
@@ -513,6 +550,8 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const viewpoints = rows.map(r => ({
         id: r.id,
         viewpointId: r.viewpointId,
+        displayId: r.displayId,
+        navisworksGuid: r.navisworksGuid,
         note: r.note,
         trade: r.trade,
         reportType: r.reportType,
@@ -541,7 +580,8 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
     const { status } = req.body ?? {};
     const VALID = ["open", "follow_up", "waiting_design", "approved", "resolved"];
     if (!status || !VALID.includes(status)) {
-      return res.status(400).json({ error: "invalid_status", message: `status must be one of: ${VALID.join(", ")}` });
+      res.status(400).json({ error: "invalid_status", message: `status must be one of: ${VALID.join(", ")}` });
+      return;
     }
     try {
       const [updated] = await db.update(lensViewpointsTable)
@@ -549,11 +589,38 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
         .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
         .returning();
       if (!updated) {
-        return res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
       }
       res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
     } catch (err) {
       res.status(500).json({ error: "lens_update_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// Next sequential Lens viewpoint display ID for this project, e.g. ELA01-VP-004.
+// Registered BEFORE the "/:reportId" routes so "lens-next-id" is not captured.
+router.get("/projects/:projectId/clash-reports/lens-next-id",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const [project] = await db.select({ code: projectsTable.code }).from(projectsTable)
+        .where(eq(projectsTable.id, projectId));
+      if (!project) {
+        res.status(404).json({ error: "not_found", message: "Project not found" });
+        return;
+      }
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(lensViewpointsTable)
+        .where(eq(lensViewpointsTable.projectId, projectId));
+      const sequence = (count ?? 0) + 1;
+      const projectCode = project.code;
+      const displayId = `${projectCode}-VP-${String(sequence).padStart(3, "0")}`;
+      res.json({ success: true, displayId, projectCode, sequence });
+    } catch (err) {
+      res.status(500).json({ error: "lens_next_id_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );
