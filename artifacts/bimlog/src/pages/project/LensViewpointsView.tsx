@@ -186,7 +186,6 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const trades = uniq(viewpoints.map(v => v.trade));
   const floors = uniq(viewpoints.map(v => v.floor));
   const reportTypes = uniq(viewpoints.map(v => v.reportType));
-  const statuses = uniq(viewpoints.map(v => v.status));
 
   const filtered = viewpoints
     .filter(v => fTrade === "all" || v.trade === fTrade)
@@ -270,7 +269,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </select>
         <select value={fStatus} onChange={e => setFStatus(e.target.value)} style={selStyle}>
           <option value="all">{t("All Statuses", "Todos los Estados")}</option>
-          {statuses.map(x => <option key={x} value={x}>{lensStatusLabel(x)}</option>)}
+          {LENS_STATUS_ORDER.map(x => <option key={x} value={x}>{lensStatusLabel(x)}</option>)}
         </select>
       </div>
 
