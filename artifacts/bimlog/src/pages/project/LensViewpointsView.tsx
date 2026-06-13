@@ -104,17 +104,20 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   useEffect(() => { loadViewpoints(); }, [projectId]);
 
-  // Probe the local Navisworks plugin once on load. The plugin server sends an
-  // Access-Control-Allow-Origin header, so a regular (CORS) fetch lets us read
-  // the real response status; an abort or network error means not connected.
+  // Probe the local Navisworks plugin once on load. The platform runs on HTTPS
+  // while the plugin is a plain HTTP server on localhost, so a regular (CORS)
+  // fetch is rejected by the browser before we can read it (the plugin does not
+  // emit CORS / Private Network Access headers). Use no-cors: the request still
+  // reaches the plugin and an opaque response means it is reachable; an abort or
+  // network error (connection refused / timeout) means not connected.
   useEffect(() => {
     let cancelled = false;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 1000);
     (async () => {
       try {
-        const r = await fetch(`${PLUGIN_BASE}/ping`, { credentials: "omit", signal: ctrl.signal });
-        if (!cancelled) setPluginConnected(r.ok);
+        await fetch(`${PLUGIN_BASE}/ping`, { mode: "no-cors", signal: ctrl.signal });
+        if (!cancelled) setPluginConnected(true);
       } catch {
         if (!cancelled) setPluginConnected(false);
       } finally {
@@ -171,20 +174,22 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   // Try to drive Navisworks directly via the local plugin; if it does not
   // respond (not running / times out), fall back to the manual-search modal.
+  // The platform is HTTPS and the plugin is a plain HTTP server on localhost
+  // without CORS / Private Network Access headers, so a regular (CORS) fetch is
+  // rejected by the browser before the request is even acted on. Use no-cors:
+  // the GET still reaches the plugin and drives Navisworks; the opaque response
+  // cannot be read, so a fetch that resolves means the plugin received it (jump
+  // succeeded) and a thrown error means the plugin is not reachable.
   const jumpToViewpoint = async (v: LensViewpoint) => {
     if (v.navisworksGuid) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 2000);
       try {
-        const r = await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { credentials: "omit", signal: ctrl.signal });
+        await fetch(`${PLUGIN_BASE}/jump/${encodeURIComponent(v.navisworksGuid)}`, { mode: "no-cors", signal: ctrl.signal });
         clearTimeout(timer);
-        if (r.ok) {
-          setPluginConnected(true);
-          showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
-          return;
-        }
-        // Plugin responded but could not navigate — fall through to the modal.
         setPluginConnected(true);
+        showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
+        return;
       } catch {
         clearTimeout(timer);
         setPluginConnected(false);
