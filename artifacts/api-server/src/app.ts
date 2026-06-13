@@ -137,4 +137,29 @@ startOverdueNotifier();
   }
 })();
 
+(async () => {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL,
+      viewpoint_id TEXT NOT NULL,
+      note TEXT,
+      trade TEXT,
+      report_type TEXT,
+      priority INTEGER DEFAULT 3,
+      floor TEXT,
+      open_items TEXT,
+      captured_at TIMESTAMPTZ,
+      status TEXT NOT NULL DEFAULT 'open',
+      synced_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(project_id, viewpoint_id)
+    )`);
+    console.log("[migration] lens_viewpoints table ensured");
+  } catch (e) {
+    console.error("[migration] lens_viewpoints migration failed:", e);
+  }
+})();
+
 export default app;

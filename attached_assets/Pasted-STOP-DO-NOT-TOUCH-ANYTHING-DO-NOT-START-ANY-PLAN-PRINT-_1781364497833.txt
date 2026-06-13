@@ -1,0 +1,50 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add two endpoints and one new table to BIMLog for BIMLog Lens viewpoint sync. Do not break anything existing.
+
+STEP 1 — Run this SQL directly against the Neon production database to create the lens_viewpoints table:
+
+CREATE TABLE IF NOT EXISTS lens_viewpoints (
+  id SERIAL PRIMARY KEY,
+  project_id INTEGER NOT NULL,
+  viewpoint_id TEXT NOT NULL,
+  note TEXT,
+  trade TEXT,
+  report_type TEXT,
+  priority INTEGER DEFAULT 3,
+  floor TEXT,
+  open_items TEXT,
+  captured_at TIMESTAMPTZ,
+  status TEXT NOT NULL DEFAULT 'open',
+  synced_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(project_id, viewpoint_id)
+);
+
+STEP 2 — Add two endpoints to artifacts/api-server/src/routes/clashReports.ts
+
+ENDPOINT 1 — POST /api/v1/projects/:projectId/clash-reports/lens-sync
+Receives one or more viewpoints from the Navisworks plugin.
+Request body: { viewpoints: [ { viewpointId, note, trade, reportType, priority, floor, openItems, capturedAt } ] }
+For each viewpoint: if a record with this viewpointId already exists for this project do NOT create a duplicate — return existing record with created:false. If it does not exist create it with status 'open' and return created:true.
+Response: { success: true, results: [ { viewpointId, id, status, created: true/false } ] }
+
+ENDPOINT 2 — GET /api/v1/projects/:projectId/clash-reports/lens-pull
+Returns all viewpoints for this project from lens_viewpoints table ordered by captured_at DESC.
+Response: { success: true, viewpoints: [ { id, viewpointId, note, trade, reportType, priority, floor, openItems, capturedAt, status, syncedAt } ] }
+
+Both endpoints require authentication. Use the same auth middleware pattern as all other routes in this file.
+
+Check 1:
+grep -n "lens-sync\|lens-pull\|lens_viewpoints" artifacts/api-server/src/routes/clashReports.ts | head -10
+
+Check 2:
+cd artifacts/api-server && npx tsc --noEmit 2>&1 | tail -5
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.

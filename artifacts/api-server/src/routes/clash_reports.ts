@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { clashReportsTable, clashesTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
@@ -440,6 +440,95 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
     await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
   }
 }
+
+// BIMLog Lens viewpoint sync — receive viewpoints from the Navisworks plugin.
+// Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not
+// captured by the :reportId path parameter.
+router.post("/projects/:projectId/clash-reports/lens-sync",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const viewpoints: any[] = Array.isArray(req.body?.viewpoints) ? req.body.viewpoints : [];
+      if (viewpoints.length === 0) {
+        res.status(400).json({ error: "no_viewpoints", message: "Request body must include a non-empty viewpoints array" });
+        return;
+      }
+      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean }> = [];
+      const now = new Date();
+      const seen = new Set<string>();
+      for (const v of viewpoints) {
+        const viewpointId = v?.viewpointId != null ? String(v.viewpointId) : null;
+        if (!viewpointId || seen.has(viewpointId)) continue;
+        seen.add(viewpointId);
+        const priorityNum = v?.priority != null && !Number.isNaN(Number(v.priority)) ? Number(v.priority) : 3;
+        const capturedAt = v?.capturedAt ? new Date(v.capturedAt) : null;
+        // Atomic dedup: INSERT ... ON CONFLICT (project_id, viewpoint_id) DO NOTHING.
+        // A returned row means we created it; an empty result means it already
+        // existed (incl. a concurrent insert racing this one), so we fetch it and
+        // report created:false. This avoids a select-then-insert race that would
+        // otherwise 500 the whole batch on the unique constraint.
+        const insertedRows = await db.insert(lensViewpointsTable).values({
+          projectId,
+          viewpointId,
+          note: v?.note != null ? String(v.note) : null,
+          trade: v?.trade != null ? String(v.trade) : null,
+          reportType: v?.reportType != null ? String(v.reportType) : null,
+          priority: priorityNum,
+          floor: v?.floor != null ? String(v.floor) : null,
+          openItems: v?.openItems != null ? String(v.openItems) : null,
+          capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
+          status: "open",
+          syncedAt: now,
+        }).onConflictDoNothing({ target: [lensViewpointsTable.projectId, lensViewpointsTable.viewpointId] }).returning();
+        if (insertedRows.length > 0) {
+          const inserted = insertedRows[0];
+          results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true });
+          continue;
+        }
+        const [existing] = await db.select().from(lensViewpointsTable)
+          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
+        if (existing) {
+          results.push({ viewpointId, id: existing.id, status: existing.status, created: false });
+        }
+      }
+      res.json({ success: true, results });
+    } catch (err) {
+      res.status(500).json({ error: "lens_sync_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// BIMLog Lens viewpoint pull — all viewpoints for a project, newest capture first.
+router.get("/projects/:projectId/clash-reports/lens-pull",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const rows = await db.select().from(lensViewpointsTable)
+        .where(eq(lensViewpointsTable.projectId, projectId))
+        .orderBy(desc(lensViewpointsTable.capturedAt));
+      const viewpoints = rows.map(r => ({
+        id: r.id,
+        viewpointId: r.viewpointId,
+        note: r.note,
+        trade: r.trade,
+        reportType: r.reportType,
+        priority: r.priority,
+        floor: r.floor,
+        openItems: r.openItems,
+        capturedAt: r.capturedAt,
+        status: r.status,
+        syncedAt: r.syncedAt,
+      }));
+      res.json({ success: true, viewpoints });
+    } catch (err) {
+      res.status(500).json({ error: "lens_pull_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
 
 router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);

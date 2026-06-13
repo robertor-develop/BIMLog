@@ -3,3 +3,5 @@
 - [api-server schema migrations](db-migrations.md) — add columns to BOTH the drizzle schema and the app.ts startup ALTER TABLE IF NOT EXISTS block
 - [api-server body parsing](api-server-body-parsing.md) — express.json accepts json+text/plain (not multipart); plugin-sync recovers from req.rawBody; rawBody=0 means client/proxy dropped the body
 - [bimlog vite build needs PORT](bimlog-vite-build.md) — `pnpm build` fails loading vite.config.ts unless PORT env is set (use `PORT=3000 pnpm build`)
+- [api-server tsc stale cache](api-server-tsc-cache.md) — tsc errors re missing @workspace/db/schema exports/columns are stale lib/db tsconfig.tsbuildinfo; clear it + `tsc -b`; esbuild build is the real gate
+- [clash_reports route ordering](clash-reports-route-order.md) — GET .../:reportId has no NaN guard, so any literal sub-path (lens-pull, plugin-pull) MUST be registered before it
