@@ -193,6 +193,46 @@ startOverdueNotifier();
   } catch (e) {
     console.error("[migration] living_brief migration failed:", e);
   }
+
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoint_reports (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL,
+      report_number TEXT NOT NULL,
+      generated_by_id INTEGER,
+      generated_by_name TEXT,
+      generated_by_title TEXT,
+      generated_at TIMESTAMPTZ DEFAULT NOW(),
+      report_date TIMESTAMPTZ,
+      viewpoint_count INTEGER,
+      health_score INTEGER,
+      health_breakdown JSONB,
+      filters_applied JSONB,
+      watermark_type TEXT,
+      submitted_to TEXT,
+      is_executive_one_pager BOOLEAN DEFAULT false,
+      snapshot JSONB NOT NULL,
+      content_hash TEXT,
+      superseded_by_report_id INTEGER,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS lens_viewpoint_reports_project_idx ON lens_viewpoint_reports (project_id)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoint_reports_project_number_unique ON lens_viewpoint_reports (project_id, report_number)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoint_events (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL,
+      viewpoint_id INTEGER NOT NULL,
+      event_type TEXT NOT NULL,
+      from_status TEXT,
+      to_status TEXT,
+      changed_by_id INTEGER,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS lens_viewpoint_events_viewpoint_idx ON lens_viewpoint_events (viewpoint_id)`);
+    console.log("[migration] lens_viewpoint_reports + lens_viewpoint_events tables ensured");
+  } catch (e) {
+    console.error("[migration] lens_viewpoint reports/events migration failed:", e);
+  }
 })();
 
 export default app;

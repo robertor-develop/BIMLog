@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -24,6 +24,25 @@ interface LensViewpoint {
   status: string;
   syncedAt?: string | null;
 }
+
+interface LensReport {
+  id: number;
+  reportNumber: string;
+  generatedByName?: string | null;
+  generatedAt?: string | null;
+  reportDate?: string | null;
+  viewpointCount?: number | null;
+  healthScore?: number | null;
+  watermarkType?: string | null;
+  isExecutiveOnePager?: boolean | null;
+  contentHash?: string | null;
+}
+
+const WATERMARK_LABEL: Record<string, string> = {
+  draft: "Draft",
+  issued: "Issued for Coordination",
+  superseded: "Superseded",
+};
 
 const LENS_P_COLORS: Record<number, { bg: string; text: string }> = {
   1: { bg: "#FEE2E2", text: "#DC2626" },
@@ -82,6 +101,25 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  const [history, setHistory] = useState<LensReport[]>([]);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const [form, setForm] = useState({
+    companyName: "",
+    logoDataUrl: "",
+    preparedByName: "",
+    preparedByTitle: "",
+    reportDate: todayIso,
+    submittedTo: "",
+    watermarkType: "draft",
+    isExecutiveOnePager: false,
+    fPriority: "all",
+    fStatus: "all",
+    fFloor: "all",
+    fTrade: "all",
+  });
 
   const loadViewpoints = async () => {
     setLoading(true);
@@ -277,6 +315,71 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     XLSX.writeFile(wb, `Lens-Viewpoints-${projectId}.xlsx`);
   };
 
+  const loadHistory = async () => {
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports`, { headers });
+      if (r.ok) {
+        const d = await r.json();
+        setHistory(d.reports ?? []);
+      }
+    } catch {
+      /* transient — the history list simply stays as-is */
+    }
+  };
+  useEffect(() => { loadHistory(); }, [projectId]);
+
+  const onLogoFile = (file?: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm(f => ({ ...f, logoDataUrl: String(reader.result) }));
+    reader.readAsDataURL(file);
+  };
+
+  const exportPdf = async () => {
+    setGenerating(true);
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/report`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: form.companyName,
+          logoDataUrl: form.logoDataUrl || undefined,
+          preparedByName: form.preparedByName,
+          preparedByTitle: form.preparedByTitle,
+          reportDate: form.reportDate,
+          submittedTo: form.submittedTo,
+          watermarkType: form.watermarkType,
+          isExecutiveOnePager: form.isExecutiveOnePager,
+          filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade },
+        }),
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        showToast(d.message || d.error || t("Failed to generate report", "No se pudo generar el reporte"));
+        return;
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get("Content-Disposition") || "";
+      const m = cd.match(/filename="([^"]+)"/);
+      const fname = m ? m[1] : `Lens-Report-${projectId}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setReportModalOpen(false);
+      showToast(t("Report generated", "Reporte generado"));
+      loadHistory();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const selStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 } as const;
 
   return (
@@ -299,10 +402,18 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 : t("Plugin not connected", "Plugin no conectado")}
           </div>
         </div>
-        <button className="btn btn-sm btn-outline" onClick={exportExcel}
-          style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Download size={14} /> {t("Export", "Exportar")}
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-sm btn-outline" onClick={exportExcel}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Download size={14} /> {t("Export", "Exportar")}
+          </button>
+          <button className="btn btn-sm btn-primary" onClick={() => {
+            setForm(f => ({ ...f, fTrade: fTrade, fStatus: fStatus, fFloor: fFloor }));
+            setReportModalOpen(true);
+          }} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <FileDown size={14} /> {t("Export PDF", "Exportar PDF")}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
@@ -447,6 +558,53 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </div>
       )}
 
+      {history.length > 0 && (
+        <div style={{ marginTop: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <History size={16} color="#1E3A5F" />
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827" }}>
+              {t("Report History", "Historial de Reportes")}
+            </h3>
+          </div>
+          <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "#F3F4F6" }}>
+                  {[
+                    t("Report No.", "No. de Reporte"),
+                    t("Generated", "Generado"),
+                    t("By", "Por"),
+                    t("Viewpoints", "Vistas"),
+                    t("Health", "Salud"),
+                    t("Watermark", "Marca de Agua"),
+                    t("Type", "Tipo"),
+                  ].map(h => (
+                    <th key={h} style={{ padding: "8px 12px", fontSize: 10, fontWeight: 700, color: "#374151", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {history.map(rp => {
+                  const hs = rp.healthScore ?? null;
+                  const hc = hs === null ? "#6B7280" : hs >= 80 ? "#16A34A" : hs >= 50 ? "#CA8A04" : "#DC2626";
+                  return (
+                    <tr key={rp.id} style={{ borderTop: "1px solid #F3F4F6" }}>
+                      <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: "#1D4ED8", whiteSpace: "nowrap" }}>{rp.reportNumber}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{fmtCaptured(rp.generatedAt)}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.generatedByName || "—"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.viewpointCount ?? "—"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: hc }}>{hs === null ? "—" : hs}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "—"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{rp.isExecutiveOnePager ? t("Executive", "Ejecutivo") : t("Full", "Completo")}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {toast && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 1100, display: "flex", alignItems: "center", gap: 8, background: "#16A34A", color: "white", fontSize: 13, fontWeight: 600, padding: "10px 16px", borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}>
           <CheckCircle2 size={16} /> {toast}
@@ -508,6 +666,135 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           </div>
         </div>
       )}
+
+      {reportModalOpen && (
+        <div
+          onClick={() => !generating && setReportModalOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16, overflowY: "auto" }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24, margin: "24px 0" }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>
+                {t("Generate Lens Viewpoints Report", "Generar Reporte de Vistas Lens")}
+              </h3>
+              <button
+                onClick={() => !generating && setReportModalOpen(false)}
+                aria-label={t("Close", "Cerrar")}
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6B7280", lineHeight: 0, padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <label style={lblStyle}>
+                {t("Company Name", "Nombre de Empresa")}
+                <input value={form.companyName} onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))}
+                  placeholder={t("Defaults to your company", "Usa tu empresa por defecto")} style={inpStyle} />
+              </label>
+              <label style={lblStyle}>
+                {t("Report Date", "Fecha del Reporte")}
+                <input type="date" value={form.reportDate} onChange={e => setForm(f => ({ ...f, reportDate: e.target.value }))} style={inpStyle} />
+              </label>
+              <label style={lblStyle}>
+                {t("Prepared By (Name)", "Preparado Por (Nombre)")}
+                <input value={form.preparedByName} onChange={e => setForm(f => ({ ...f, preparedByName: e.target.value }))}
+                  placeholder={t("Defaults to your name", "Usa tu nombre por defecto")} style={inpStyle} />
+              </label>
+              <label style={lblStyle}>
+                {t("Prepared By (Title)", "Preparado Por (Cargo)")}
+                <input value={form.preparedByTitle} onChange={e => setForm(f => ({ ...f, preparedByTitle: e.target.value }))}
+                  placeholder={t("e.g. BIM Coordinator", "ej. Coordinador BIM")} style={inpStyle} />
+              </label>
+              <label style={lblStyle}>
+                {t("Submitted To", "Enviado A")}
+                <input value={form.submittedTo} onChange={e => setForm(f => ({ ...f, submittedTo: e.target.value }))}
+                  placeholder={t("e.g. General Contractor", "ej. Contratista General")} style={inpStyle} />
+              </label>
+              <label style={lblStyle}>
+                {t("Watermark", "Marca de Agua")}
+                <select value={form.watermarkType} onChange={e => setForm(f => ({ ...f, watermarkType: e.target.value }))} style={inpStyle}>
+                  <option value="draft">{t("Draft", "Borrador")}</option>
+                  <option value="issued">{t("Issued for Coordination", "Emitido para Coordinación")}</option>
+                  <option value="superseded">{t("Superseded", "Reemplazado")}</option>
+                </select>
+              </label>
+            </div>
+
+            <label style={{ ...lblStyle, marginTop: 12 }}>
+              {t("Company Logo (optional)", "Logo de Empresa (opcional)")}
+              <input type="file" accept="image/png,image/jpeg" onChange={e => onLogoFile(e.target.files?.[0])} style={{ ...inpStyle, padding: 6 }} />
+              {form.logoDataUrl && (
+                <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                  <img src={form.logoDataUrl} alt="logo" style={{ height: 28, border: "1px solid #E5E7EB", borderRadius: 4 }} />
+                  <button type="button" onClick={() => setForm(f => ({ ...f, logoDataUrl: "" }))}
+                    style={{ background: "transparent", border: "none", color: "#DC2626", fontSize: 12, cursor: "pointer" }}>
+                    {t("Remove", "Quitar")}
+                  </button>
+                </span>
+              )}
+            </label>
+
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #E5E7EB" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8 }}>{t("Filters", "Filtros")}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+                <label style={lblStyle}>
+                  {t("Priority", "Prioridad")}
+                  <select value={form.fPriority} onChange={e => setForm(f => ({ ...f, fPriority: e.target.value }))} style={inpStyle}>
+                    <option value="all">{t("All", "Todas")}</option>
+                    {[1, 2, 3, 4, 5].map(p => <option key={p} value={String(p)}>P{p}</option>)}
+                  </select>
+                </label>
+                <label style={lblStyle}>
+                  {t("Status", "Estado")}
+                  <select value={form.fStatus} onChange={e => setForm(f => ({ ...f, fStatus: e.target.value }))} style={inpStyle}>
+                    <option value="all">{t("All", "Todos")}</option>
+                    {LENS_STATUS_ORDER.map(s => <option key={s} value={s}>{lensStatusLabel(s)}</option>)}
+                  </select>
+                </label>
+                <label style={lblStyle}>
+                  {t("Floor", "Piso")}
+                  <select value={form.fFloor} onChange={e => setForm(f => ({ ...f, fFloor: e.target.value }))} style={inpStyle}>
+                    <option value="all">{t("All", "Todos")}</option>
+                    {floors.map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                </label>
+                <label style={lblStyle}>
+                  {t("Trade", "Disciplina")}
+                  <select value={form.fTrade} onChange={e => setForm(f => ({ ...f, fTrade: e.target.value }))} style={inpStyle}>
+                    <option value="all">{t("All", "Todas")}</option>
+                    {trades.map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.isExecutiveOnePager}
+                onChange={e => setForm(f => ({ ...f, isExecutiveOnePager: e.target.checked }))} />
+              {t("Executive one-pager (summary only, no full register)", "Resumen ejecutivo (solo resumen, sin registro completo)")}
+            </label>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 20 }}>
+              <button className="btn btn-sm btn-outline" disabled={generating} onClick={() => setReportModalOpen(false)}
+                style={{ fontSize: 13, padding: "8px 16px" }}>
+                {t("Cancel", "Cancelar")}
+              </button>
+              <button className="btn btn-sm btn-primary" disabled={generating} onClick={exportPdf}
+                style={{ fontSize: 13, padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}>
+                <FileDown size={14} />
+                {generating ? t("Generating...", "Generando...") : t("Generate PDF", "Generar PDF")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+const lblStyle = { display: "flex", flexDirection: "column", gap: 4, fontSize: 12, fontWeight: 600, color: "#374151" } as const;
+const inpStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "8px 10px", fontSize: 13, fontWeight: 400 } as const;

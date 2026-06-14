@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { clashReportsTable, clashesTable, lensViewpointsTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable } from "@workspace/db/schema";
+import { createHash } from "crypto";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
@@ -598,6 +599,9 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
       return;
     }
     try {
+      const [existing] = await db.select({ status: lensViewpointsTable.status })
+        .from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)));
       const [updated] = await db.update(lensViewpointsTable)
         .set({ status, updatedAt: new Date() })
         .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
@@ -605,6 +609,22 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
       if (!updated) {
         res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
         return;
+      }
+      // Log a status_changed event whenever the status actually changes, so
+      // Round 2/3 (health score, timeline, velocity) have real history.
+      if (existing && existing.status !== updated.status) {
+        try {
+          await db.insert(lensViewpointEventsTable).values({
+            projectId,
+            viewpointId: id,
+            eventType: "status_changed",
+            fromStatus: existing.status,
+            toStatus: updated.status,
+            changedById: req.user?.userId ?? null,
+          });
+        } catch (evErr) {
+          console.error("[lens-event] failed to log status change:", evErr);
+        }
       }
       res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
     } catch (err) {
@@ -663,6 +683,464 @@ router.get("/projects/:projectId/clash-reports/lens-next-id",
       res.json({ success: true, currentSequence: total ?? 0, projectCode: project.code });
     } catch (err) {
       res.status(500).json({ error: "lens_next_id_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── LENS VIEWPOINTS — report history list ─────────────────────────────────────
+// Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
+// captured by the :reportId path parameter.
+router.get("/projects/:projectId/clash-reports/lens-viewpoints/reports",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const rows = await db.select({
+        id: lensViewpointReportsTable.id,
+        reportNumber: lensViewpointReportsTable.reportNumber,
+        generatedByName: lensViewpointReportsTable.generatedByName,
+        generatedAt: lensViewpointReportsTable.generatedAt,
+        reportDate: lensViewpointReportsTable.reportDate,
+        viewpointCount: lensViewpointReportsTable.viewpointCount,
+        healthScore: lensViewpointReportsTable.healthScore,
+        watermarkType: lensViewpointReportsTable.watermarkType,
+        isExecutiveOnePager: lensViewpointReportsTable.isExecutiveOnePager,
+        contentHash: lensViewpointReportsTable.contentHash,
+      }).from(lensViewpointReportsTable)
+        .where(eq(lensViewpointReportsTable.projectId, projectId))
+        .orderBy(desc(lensViewpointReportsTable.generatedAt));
+      res.json({ reports: rows });
+    } catch (err) {
+      res.status(500).json({ error: "lens_reports_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── LENS VIEWPOINTS — generate professional PDF report ─────────────────────────
+// Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
+// captured by the :reportId path parameter. Accepts modal data as JSON, writes a
+// history row with a snapshot, then streams the PDF back as an attachment.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const userId = req.user!.userId;
+    try {
+      const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
+      if (!project) { res.status(404).json({ error: "not_found", message: "Project not found" }); return; }
+
+      const [user] = await db.select({
+        fullName: usersTable.fullName,
+        email: usersTable.email,
+        companyName: companiesTable.name,
+      }).from(usersTable)
+        .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(eq(usersTable.id, userId));
+
+      const body = req.body ?? {};
+      const filters = {
+        priority: typeof body.filters?.priority === "string" ? body.filters.priority : "all",
+        status: typeof body.filters?.status === "string" ? body.filters.status : "all",
+        floor: typeof body.filters?.floor === "string" ? body.filters.floor : "all",
+        trade: typeof body.filters?.trade === "string" ? body.filters.trade : "all",
+      };
+      const watermarkType: string = ["draft", "issued", "superseded"].includes(body.watermarkType) ? body.watermarkType : "draft";
+      const isOnePager = body.isExecutiveOnePager === true;
+      const companyName: string = (body.companyName?.trim?.() || user?.companyName || "Company");
+      const preparedByName: string = (body.preparedByName?.trim?.() || user?.fullName || "");
+      const preparedByTitle: string = (body.preparedByTitle?.trim?.() || "");
+      const submittedTo: string = (body.submittedTo?.trim?.() || "");
+      let reportDate = body.reportDate ? new Date(body.reportDate) : new Date();
+      if (isNaN(reportDate.getTime())) reportDate = new Date();
+
+      // Logo: prefer a per-report upload (data URL), else the saved company logo.
+      let logoBase64: Buffer | null = null;
+      let logoType: "png" | "jpeg" | null = null;
+      if (typeof body.logoDataUrl === "string") {
+        const m = body.logoDataUrl.match(/^data:image\/(png|jpe?g);base64,(.+)$/);
+        if (m) { logoBase64 = Buffer.from(m[2], "base64"); logoType = m[1] === "png" ? "png" : "jpeg"; }
+      }
+      if (!logoBase64) { const cl = await getCompanyLogo(userId); logoBase64 = cl.logoBase64; logoType = cl.logoType; }
+
+      // Pull all viewpoints, then apply the modal filters.
+      let vps = await db.select().from(lensViewpointsTable)
+        .where(eq(lensViewpointsTable.projectId, projectId));
+      if (filters.trade !== "all") vps = vps.filter(v => v.trade === filters.trade);
+      if (filters.floor !== "all") vps = vps.filter(v => v.floor === filters.floor);
+      if (filters.status !== "all") vps = vps.filter(v => v.status === filters.status);
+      if (filters.priority !== "all") vps = vps.filter(v => String(v.priority ?? "") === String(filters.priority));
+
+      const pOrder = (p: number | null | undefined) => p ?? 99;
+      vps.sort((a, b) => pOrder(a.priority) - pOrder(b.priority));
+
+      if (vps.length === 0) {
+        res.status(400).json({ error: "no_viewpoints", message: "No viewpoints match the selected filters." });
+        return;
+      }
+
+      // ── Coordination Health Score (Round 1 — three simplified metrics) ──
+      const ids = vps.map(v => v.id);
+      const linkedRfiVpIds = new Set<number>();
+      if (ids.length) {
+        const links = await db.select().from(linkedItemsTable)
+          .where(and(
+            eq(linkedItemsTable.projectId, projectId),
+            or(
+              and(eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.toType, "rfi")),
+              and(eq(linkedItemsTable.toType, "lens_viewpoint"), eq(linkedItemsTable.fromType, "rfi")),
+            ),
+          ));
+        for (const l of links) {
+          if (l.fromType === "lens_viewpoint" && ids.includes(l.fromId)) linkedRfiVpIds.add(l.fromId);
+          if (l.toType === "lens_viewpoint" && ids.includes(l.toId)) linkedRfiVpIds.add(l.toId);
+        }
+      }
+      const total = vps.length;
+      const p1Total = vps.filter(v => v.priority === 1).length;
+      const p1Resolved = vps.filter(v => v.priority === 1 && v.status === "resolved").length;
+      const allResolved = vps.filter(v => v.status === "resolved").length;
+      const withLinkedRfis = linkedRfiVpIds.size;
+      const pctP1Resolved = p1Total ? (p1Resolved / p1Total) * 100 : 100;
+      const pctAllResolved = total ? (allResolved / total) * 100 : 0;
+      const pctWithLinkedRfis = total ? (withLinkedRfis / total) * 100 : 0;
+      const healthScore = Math.round((pctP1Resolved + pctAllResolved + pctWithLinkedRfis) / 3);
+      const healthBreakdown = {
+        pctP1Resolved: Math.round(pctP1Resolved),
+        pctAllResolved: Math.round(pctAllResolved),
+        pctWithLinkedRfis: Math.round(pctWithLinkedRfis),
+        p1Total, p1Resolved, total, allResolved, withLinkedRfis,
+      };
+
+      // ── Snapshot (basis for the SHA-256 fingerprint) ──
+      const snapshot = vps.map(v => ({
+        id: v.id, viewpointId: v.viewpointId, displayId: v.displayId,
+        note: v.note, trade: v.trade, reportType: v.reportType, priority: v.priority,
+        floor: v.floor, openItems: v.openItems, status: v.status,
+        capturedAt: v.capturedAt, syncedAt: v.syncedAt,
+        hasLinkedRfi: linkedRfiVpIds.has(v.id),
+      }));
+
+      // ── Sequential report number (<CODE>-LV-001) + persist, made
+      // concurrency-safe by a UNIQUE(project_id, report_number) constraint and a
+      // retry-on-unique-violation loop. The contentHash embeds the final number,
+      // so both are computed inside the loop.
+      const existingReports = await db.select({ reportNumber: lensViewpointReportsTable.reportNumber })
+        .from(lensViewpointReportsTable).where(eq(lensViewpointReportsTable.projectId, projectId));
+      const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
+      const code = project.code ?? "PRJ";
+      let seq = existingReports.length + 1;
+      let reportNumber = "";
+      let contentHash = "";
+      let inserted = false;
+      for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
+        reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
+        if (usedNums.has(reportNumber)) { seq++; continue; }
+        const hashPayload = JSON.stringify({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, healthScore, snapshot });
+        contentHash = createHash("sha256").update(hashPayload).digest("hex");
+        try {
+          await db.insert(lensViewpointReportsTable).values({
+            projectId,
+            reportNumber,
+            generatedById: userId,
+            generatedByName: preparedByName || user?.fullName || "",
+            generatedByTitle: preparedByTitle,
+            reportDate,
+            viewpointCount: total,
+            healthScore,
+            healthBreakdown,
+            filtersApplied: filters,
+            watermarkType,
+            submittedTo,
+            isExecutiveOnePager: isOnePager,
+            snapshot,
+            contentHash,
+          });
+          inserted = true;
+        } catch (insErr) {
+          const codeStr = (insErr as any)?.code ?? (insErr as any)?.cause?.code;
+          if (codeStr === "23505") { seq++; continue; }
+          throw insErr;
+        }
+      }
+      if (!inserted) {
+        res.status(409).json({ error: "report_number_conflict", message: "Could not allocate a unique report number, please retry." });
+        return;
+      }
+
+      // ── Build the PDF ──
+      const PDFDocument = (await import("pdfkit")).default;
+      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${reportNumber}.pdf"`);
+      doc.pipe(res);
+
+      const W = doc.page.width;
+      const H = doc.page.height;
+      const M = 40;
+      const CW = W - M * 2;
+
+      const LP_COLORS: Record<number, { bg: string; text: string }> = {
+        1: { bg: "#FEE2E2", text: "#DC2626" },
+        2: { bg: "#FFEDD5", text: "#EA580C" },
+        3: { bg: "#FEF9C3", text: "#CA8A04" },
+        4: { bg: "#F3F4F6", text: "#6B7280" },
+        5: { bg: "#EDE9FE", text: "#7C3AED" },
+      };
+      const STATUS_LABEL: Record<string, string> = {
+        open: "Open", follow_up: "Follow Up", waiting_design: "Waiting Design", approved: "Approved", resolved: "Resolved",
+      };
+      const statusLabel = (s: string) => STATUS_LABEL[s] ?? s;
+      const healthColor = healthScore >= 80 ? "#16A34A" : healthScore >= 50 ? "#CA8A04" : "#DC2626";
+      const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
+      const reportTitle = filters.trade !== "all" ? "LENS VIEWPOINTS REPORT" : "LENS VIEWPOINTS REPORT";
+      const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const fmtShort = (v: Date | string | null | undefined) => {
+        if (!v) return "—";
+        const d = new Date(v);
+        if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "—";
+        return d.toLocaleDateString();
+      };
+
+      // ── COVER PAGE ──
+      doc.rect(0, 0, W, 135).fill("#1E3A5F");
+      if (logoBase64 && logoType) {
+        try {
+          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
+          doc.fontSize(18).font("Helvetica-Bold").fillColor("white").text(companyName, M + 130, 22);
+        } catch {
+          doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
+        }
+      } else {
+        doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
+      }
+      doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(reportTitle, M, 20, { align: "right", width: CW });
+      // ISO 19650 compliance stamp — small corner
+      doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#4B7EC8");
+      doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
+      doc.fontSize(7).font("Helvetica").fillColor("#BFDBFE").text("COMPLIANT", W - M - 92, 57, { width: 92, align: "center" });
+      doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("white").text(`Report No: ${reportNumber}`, M, 88);
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Date: ${fmtDate(reportDate)}`, M, 104);
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${preparedByName}${preparedByTitle ? ", " + preparedByTitle : ""}`, M, 118);
+      if (submittedTo) doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Submitted to: ${submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "right" });
+      if (filters.trade !== "all") doc.fontSize(9).font("Helvetica-Bold").fillColor("#FBBF24").text(`Issued to: ${filters.trade}`, M + CW / 2, 118, { width: CW / 2, align: "right" });
+
+      // Project info band
+      doc.rect(0, 135, W, 48).fill("#F0F4F8");
+      doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 143);
+      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
+        .text(`Project Code: ${project.code}  |  Total Viewpoints: ${total}`, M, 165);
+
+      // Health score block
+      const hsY = 198;
+      doc.rect(M, hsY, 200, 80).fillAndStroke("#FFFFFF", "#E5E7EB");
+      doc.fontSize(40).font("Helvetica-Bold").fillColor(healthColor).text(String(healthScore), M, hsY + 12, { width: 200, align: "center" });
+      doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0–100)", M, hsY + 60, { width: 200, align: "center" });
+      // health sub-metrics
+      const hbX = M + 220;
+      doc.fontSize(9).font("Helvetica").fillColor("#374151");
+      doc.text(`P1s resolved: ${healthBreakdown.pctP1Resolved}%  (${p1Resolved}/${p1Total})`, hbX, hsY + 8);
+      doc.text(`All viewpoints resolved: ${healthBreakdown.pctAllResolved}%  (${allResolved}/${total})`, hbX, hsY + 28);
+      doc.text(`Viewpoints with linked RFIs: ${healthBreakdown.pctWithLinkedRfis}%  (${withLinkedRfis}/${total})`, hbX, hsY + 48);
+      doc.y = hsY + 95;
+
+      // Priority breakdown cards
+      const pCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      vps.forEach(v => { const p = v.priority ?? 0; if (pCounts[p] !== undefined) pCounts[p]++; });
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
+      doc.moveDown(0.4);
+      const cardY = doc.y;
+      const pCards = [
+        { label: "P1 CRITICAL", value: pCounts[1], c: LP_COLORS[1] },
+        { label: "P2 HIGH", value: pCounts[2], c: LP_COLORS[2] },
+        { label: "P3 MONITOR", value: pCounts[3], c: LP_COLORS[3] },
+        { label: "P4 LOW", value: pCounts[4], c: LP_COLORS[4] },
+        { label: "P5 INFO", value: pCounts[5], c: LP_COLORS[5] },
+      ];
+      const pcW = (CW - 40) / 5;
+      pCards.forEach((card, i) => {
+        const x = M + i * (pcW + 10);
+        doc.rect(x, cardY, pcW, 56).fillAndStroke(card.c.bg, card.c.bg);
+        doc.fontSize(24).font("Helvetica-Bold").fillColor(card.c.text).text(String(card.value), x, cardY + 8, { width: pcW, align: "center" });
+        doc.fontSize(7).font("Helvetica-Bold").fillColor(card.c.text).text(card.label, x, cardY + 40, { width: pcW, align: "center" });
+      });
+      doc.y = cardY + 70;
+
+      // Breakdown columns: by trade / floor / status
+      const tally = (key: "trade" | "floor" | "status") => {
+        const m = new Map<string, number>();
+        vps.forEach(v => {
+          const raw = (v as any)[key];
+          const k = key === "status" ? statusLabel(raw ?? "open") : (raw || "—");
+          m.set(k, (m.get(k) ?? 0) + 1);
+        });
+        return Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
+      };
+      const breakdowns: { title: string; rows: [string, number][] }[] = [
+        { title: "By Trade", rows: tally("trade") },
+        { title: "By Floor", rows: tally("floor") },
+        { title: "By Status", rows: tally("status") },
+      ];
+      const bx0 = doc.y;
+      const colW = (CW - 20) / 3;
+      breakdowns.forEach((bd, i) => {
+        const x = M + i * (colW + 10);
+        doc.fontSize(10).font("Helvetica-Bold").fillColor("#1E3A5F").text(bd.title, x, bx0, { width: colW });
+        let yy = bx0 + 16;
+        bd.rows.slice(0, isOnePager ? 5 : 12).forEach(([k, n]) => {
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(k, x, yy, { width: colW - 30, ellipsis: true, lineBreak: false });
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(String(n), x + colW - 28, yy, { width: 26, align: "right" });
+          yy += 13;
+        });
+      });
+      doc.y = bx0 + 16 + (isOnePager ? 5 : 12) * 13 + 6;
+
+      if (isOnePager) {
+        // Executive one-pager: top 5 most critical unresolved issues, then stop.
+        const critical = vps.filter(v => v.status !== "resolved").sort((a, b) => pOrder(a.priority) - pOrder(b.priority)).slice(0, 5);
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Top Critical Unresolved Issues", M, doc.y);
+        doc.moveDown(0.3);
+        critical.forEach(v => {
+          const c = LP_COLORS[v.priority ?? 0] ?? LP_COLORS[4];
+          const yy = doc.y;
+          doc.rect(M, yy + 2, 34, 13).fill(c.bg);
+          doc.fontSize(8).font("Helvetica-Bold").fillColor(c.text).text(v.priority ? `P${v.priority}` : "—", M, yy + 4, { width: 34, align: "center" });
+          doc.fontSize(8).font("Helvetica").fillColor("#111827")
+            .text(`${v.displayId ? "[" + v.displayId + "] " : ""}${v.note ?? "—"}  (${v.trade || "—"} · ${v.floor || "—"} · ${statusLabel(v.status)})`, M + 40, yy + 3, { width: CW - 40, height: 12, ellipsis: true, lineBreak: false });
+          doc.y = yy + 16;
+        });
+
+        // Compact sign-off so even the one-pager ends with an approval block.
+        if (doc.y + 70 > 535) { doc.addPage(); doc.y = 45; }
+        const oY = doc.y + 14;
+        doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, oY);
+        const oSigW = (CW - 60) / 2;
+        ["BIM Coordinator", "GC Representative"].forEach((role, i) => {
+          const x = M + i * (oSigW + 60);
+          doc.moveTo(x, oY + 40).lineTo(x + oSigW, oY + 40).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Signature / Name / Date", x, oY + 44);
+          doc.fontSize(9).font("Helvetica-Bold").fillColor("#1E3A5F").text(role, x, oY + 20);
+        });
+        doc.y = oY + 58;
+      } else {
+        // ── MAIN VIEWPOINTS TABLE ──
+        const cols = [
+          { label: "ID", w: 55 },
+          { label: "P", w: 32 },
+          { label: "Trade", w: 70 },
+          { label: "Report Type", w: 80 },
+          { label: "Floor", w: 55 },
+          { label: "Note", w: 230 },
+          { label: "Status", w: 70 },
+          { label: "Captured", w: 70 },
+        ];
+        const tableW = cols.reduce((s, c) => s + c.w, 0);
+        const drawTableHeader = () => {
+          const hY = doc.y;
+          doc.rect(M, hY, tableW, 18).fill("#1E3A5F");
+          let x = M;
+          cols.forEach(col => {
+            doc.fontSize(7).font("Helvetica-Bold").fillColor("white").text(col.label.toUpperCase(), x + 3, hY + 5, { width: col.w - 6 });
+            x += col.w;
+          });
+          doc.y = hY + 20;
+        };
+        if (doc.y + 60 > 530) { doc.addPage(); doc.y = 40; }
+        doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
+        doc.moveDown(0.4);
+        drawTableHeader();
+
+        const noteW = cols[5].w - 6;
+        vps.forEach((v, idx) => {
+          doc.fontSize(7).font("Helvetica");
+          const noteH = doc.heightOfString(v.note || "—", { width: noteW });
+          const rowH = Math.max(24, noteH + 8);
+          if (doc.y + rowH > 535) {
+            doc.addPage();
+            doc.rect(0, 0, W, 25).fill("#1E3A5F");
+            doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) — Lens Viewpoints Report`, M, 8, { width: CW });
+            doc.y = 35;
+            drawTableHeader();
+          }
+          const rY = doc.y;
+          doc.rect(M, rY, tableW, rowH).fill(idx % 2 === 0 ? "white" : "#F9FAFB");
+          let x = M;
+          // ID
+          doc.fontSize(7).font("Helvetica-Bold").fillColor("#1D4ED8").text(v.displayId || v.viewpointId || "—", x + 3, rY + 5, { width: cols[0].w - 6, height: rowH - 6, ellipsis: true, lineBreak: false });
+          x += cols[0].w;
+          // Priority badge
+          const pc = LP_COLORS[v.priority ?? 0] ?? LP_COLORS[4];
+          doc.rect(x + 2, rY + 4, cols[1].w - 6, 13).fill(pc.bg);
+          doc.fontSize(7).font("Helvetica-Bold").fillColor(pc.text).text(v.priority ? `P${v.priority}` : "—", x + 2, rY + 6, { width: cols[1].w - 6, align: "center" });
+          x += cols[1].w;
+          // Trade, Report Type, Floor
+          [v.trade || "—", v.reportType || "—", v.floor || "—"].forEach((val, i) => {
+            doc.fontSize(7).font("Helvetica").fillColor("#111827").text(String(val), x + 2, rY + 5, { width: cols[2 + i].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
+            x += cols[2 + i].w;
+          });
+          // Note (full text, wrapped)
+          doc.fontSize(7).font("Helvetica").fillColor("#111827").text(v.note || "—", x + 3, rY + 5, { width: noteW });
+          x += cols[5].w;
+          // Status
+          doc.fontSize(7).font("Helvetica").fillColor("#111827").text(statusLabel(v.status), x + 2, rY + 5, { width: cols[6].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
+          x += cols[6].w;
+          // Captured
+          doc.fontSize(7).font("Helvetica").fillColor("#6B7280").text(fmtShort(v.capturedAt), x + 2, rY + 5, { width: cols[7].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
+          doc.rect(M, rY, tableW, rowH).stroke("#E5E7EB");
+          doc.y = rY + rowH;
+        });
+
+        // ── SIGNATURE BLOCK (last page) ──
+        if (doc.y + 110 > 535) { doc.addPage(); doc.y = 45; }
+        doc.moveDown(1);
+        const sgY = doc.y + 10;
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, sgY);
+        const blockY = sgY + 26;
+        const sigW = (CW - 60) / 2;
+        const sigBlocks = [
+          { role: "BIM Coordinator" },
+          { role: "GC Representative" },
+        ];
+        sigBlocks.forEach((b, i) => {
+          const x = M + i * (sigW + 60);
+          doc.moveTo(x, blockY + 34).lineTo(x + sigW, blockY + 34).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Signature", x, blockY + 38);
+          doc.moveTo(x, blockY + 70).lineTo(x + sigW * 0.6, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Name", x, blockY + 74);
+          doc.moveTo(x + sigW * 0.65, blockY + 70).lineTo(x + sigW, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Date", x + sigW * 0.65, blockY + 74);
+          doc.fontSize(9).font("Helvetica-Bold").fillColor("#1E3A5F").text(b.role, x, blockY + 12);
+        });
+      }
+
+      // ── WATERMARK + SHA + FOOTER on every page ──
+      const range = doc.bufferedPageRange();
+      const footerDate = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+      for (let i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        // Diagonal watermark
+        doc.save();
+        doc.rotate(-30, { origin: [W / 2, H / 2] });
+        doc.fontSize(72).font("Helvetica-Bold").fillColor("#1E3A5F").fillOpacity(0.07)
+          .text(watermarkText, 0, H / 2 - 50, { width: W, align: "center" });
+        doc.restore();
+        doc.fillOpacity(1);
+        // SHA-256 fingerprint above footer on last page
+        if (i === range.count - 1) {
+          doc.fontSize(6.5).font("Helvetica").fillColor("#9CA3AF")
+            .text(`Document SHA-256: ${contentHash}`, M, 548, { width: CW, align: "center", lineBreak: false });
+        }
+        // Footer
+        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
+          .text(`${companyName} | ${project.name} | ${reportNumber} | ${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`, M, 560, { align: "center", width: CW, lineBreak: false });
+      }
+
+      doc.end();
+    } catch (err) {
+      console.error("[lens-pdf] FAILED:", err);
+      if (!res.headersSent) res.status(500).json({ error: "lens_pdf_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );

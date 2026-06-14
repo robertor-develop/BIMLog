@@ -1,0 +1,47 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Agreed on everything. Go ahead with Round 1 exactly as you proposed. Here are the two decisions:
+
+Decision 1 — Yes add the lens_viewpoint_events table now. We want to start collecting status change data immediately so Round 2 and Round 3 have real data to work with. Add it in both the drizzle schema file and the app.ts startup migration block per the codebase convention.
+
+Decision 2 — Yes use the simplified health score for Round 1. Calculate from three metrics only: percentage of P1s resolved, percentage of viewpoints with linked RFIs, percentage of all viewpoints resolved. Simple, honest, and improvable in Round 2.
+
+Round 1 scope confirmed — build all of this:
+- New lens_viewpoint_reports table with the exact structure you proposed
+- New lens_viewpoint_events table for status change tracking
+- Sequential report numbering ELA01-LV-001 format
+- Export PDF button on Lens Viewpoints page next to existing Excel button — do not remove Excel
+- Pre-generation modal with company name, logo upload, prepared by name and title, report date, submitted to, watermark choice DRAFT or ISSUED FOR COORDINATION or SUPERSEDED, filter by priority status floor trade, full report vs executive one-pager toggle
+- PDF with dark navy cover page matching clash_reports.ts pattern — BIMLog branding, company logo, project name and code, report number, report date, prepared by, submitted to, health score 0-100 color coded, ISO 19650 compliance stamp small corner
+- Executive summary section with current snapshot breakdowns by priority trade floor status
+- Main viewpoints table with ID badge priority color trade report type floor full note status captured date
+- Watermark diagonal across every page
+- Subcontractor filtered version when trade filter is applied — cover page says Issued to that trade
+- Signature block on last page
+- SHA-256 hash of the snapshot JSON printed on last page
+- Report history log on the Lens Viewpoints page showing all previous exports
+- Wire the lens_viewpoint_events table to log a status_changed event every time a viewpoint status is updated via PATCH lens-viewpoints/:id
+
+Follow the established PDF patterns exactly: pdfkit server-side, footer at y=555-560, no flushPages before footer loop, landscape Letter, company logo base64, reuse pdfHeader pdfFooter row helpers from reports.ts, model the cover page on clash_reports.ts.
+
+Both schema changes go in the drizzle schema file AND the app.ts startup migration block.
+
+New backend route: POST /api/v1/projects/:projectId/clash-reports/lens-viewpoints/report — requires auth, accepts modal data as JSON body, generates PDF, streams back as attachment, writes history row with snapshot.
+
+Register the new route before the parameterized :reportId catch-all in clash_reports.ts.
+
+Check 1:
+grep -n "lens_viewpoint_reports\|lens_viewpoint_events\|LV-" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 2:
+grep -n "Export PDF\|exportPdf\|lens-viewpoints/report" artifacts/bimlog/src/pages/project/LensViewpointsView.tsx | head -10
+
+Check 3:
+ls lib/db/src/schema/ | grep lens
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL output as plain text. No collapsed boxes.
