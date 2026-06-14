@@ -155,7 +155,12 @@ export function LivingBrief() {
 
   const copyFullBrief = async () => {
     if (!docs.length) return;
-    const full = docs
+    const now = new Date();
+    const day = now.toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    const time = now.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const stamp = `${day.replace(",", "")} at ${time}`;
+    const header = `BIMLog Living Brief — Copied ${stamp}`;
+    const full = header + "\n\n" + docs
       .map((d) => `===== ${d.name} =====\n\n${d.content.trim()}`)
       .join(`\n\n${"=".repeat(60)}\n\n`);
     try {
