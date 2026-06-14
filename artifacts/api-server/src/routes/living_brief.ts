@@ -130,6 +130,28 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
   res.json({ docs });
 });
 
+// Overwrite an editable document on disk (super admin only). Only CLAUDE.md and
+// VISION.md are editable here: PLATFORM.md auto-regenerates from the build and
+// STATUS.md is maintained by Replit after features ship.
+const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md"]);
+router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
+  const name = req.params.name;
+  if (!EDITABLE_DOCS.has(name)) {
+    res.status(400).json({ error: "This document is not editable" });
+    return;
+  }
+  const content = typeof req.body?.content === "string" ? req.body.content : null;
+  if (content === null || content.trim().length === 0) {
+    res.status(400).json({ error: "Content required" });
+    return;
+  }
+  const dir = findLivingBriefDir();
+  const full = path.join(dir, name);
+  fs.writeFileSync(full, content, "utf-8");
+  const stat = fs.statSync(full);
+  res.json({ ok: true, updatedAt: stat.mtime.toISOString() });
+});
+
 // Change the gate password (super admin only).
 router.post("/living-brief/password", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
   const newPassword = typeof req.body?.newPassword === "string" ? req.body.newPassword : "";

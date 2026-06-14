@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Lock, RefreshCw, KeyRound, Users, ShieldCheck } from "lucide-react";
+import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, FilePen } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const BRIEF_TOKEN_KEY = "bimlog-brief-token";
+// Only these docs are hand-editable from the UI: PLATFORM.md auto-regenerates
+// from the build and STATUS.md is maintained by Replit after features ship.
+const EDITABLE = ["CLAUDE.md", "VISION.md"];
 
 type Doc = { name: string; content: string; updatedAt: string };
 type AccessUser = {
@@ -86,6 +89,12 @@ export function LivingBrief() {
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
   const [adminMsg, setAdminMsg] = useState("");
 
+  const [toast, setToast] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+
+  const showToast = (m: string) => { setToast(m); window.setTimeout(() => setToast(""), 1800); };
+
   const briefToken = () => sessionStorage.getItem(BRIEF_TOKEN_KEY) || "";
 
   const loadDocs = useCallback(async () => {
@@ -142,6 +151,40 @@ export function LivingBrief() {
     if (!token) return;
     const r = await apiFetch("/living-brief/access", token, { method: "POST", body: JSON.stringify({ userId, grant }) });
     if (r.ok) loadAccess();
+  };
+
+  const copyFullBrief = async () => {
+    if (!docs.length) return;
+    const full = docs
+      .map((d) => `===== ${d.name} =====\n\n${d.content.trim()}`)
+      .join(`\n\n${"=".repeat(60)}\n\n`);
+    try {
+      await navigator.clipboard.writeText(full);
+      showToast("Copied");
+    } catch {
+      showToast("Copy failed");
+    }
+  };
+
+  const startEdit = () => { setEditContent(docs[activeDoc]?.content ?? ""); setEditing(true); };
+  const cancelEdit = () => { setEditing(false); setEditContent(""); };
+  const saveEdit = async () => {
+    if (!token) return;
+    const name = docs[activeDoc]?.name;
+    if (!name) return;
+    const r = await apiFetch(`/living-brief/docs/${encodeURIComponent(name)}`, token, {
+      method: "POST",
+      body: JSON.stringify({ content: editContent }),
+    });
+    if (r.ok) {
+      setEditing(false);
+      setEditContent("");
+      await loadDocs();
+      showToast("Saved");
+    } else {
+      const d = await r.json().catch(() => ({}));
+      showToast(d.error || "Save failed");
+    }
   };
 
   const changePassword = async () => {
@@ -206,6 +249,9 @@ export function LivingBrief() {
           <button onClick={loadDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
             <RefreshCw size={14} /> Reload
           </button>
+          <button onClick={copyFullBrief} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            <Copy size={14} /> Copy Full Brief
+          </button>
           {isSuperAdmin && (
             <button onClick={() => { setShowAdmin((s) => !s); if (!showAdmin) loadAccess(); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               <ShieldCheck size={14} /> Admin
@@ -250,7 +296,7 @@ export function LivingBrief() {
 
       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {docs.map((d, i) => (
-          <button key={d.name} onClick={() => setActiveDoc(i)} style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+          <button key={d.name} onClick={() => { setActiveDoc(i); setEditing(false); setEditContent(""); }} style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
             {d.name.replace(".md", "")}
           </button>
         ))}
@@ -258,10 +304,40 @@ export function LivingBrief() {
 
       {docs[activeDoc] && (
         <div style={card}>
-          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 12 }}>
-            Updated {new Date(docs[activeDoc].updatedAt).toLocaleString()}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+              Updated {new Date(docs[activeDoc].updatedAt).toLocaleString()}
+            </div>
+            {isSuperAdmin && EDITABLE.includes(docs[activeDoc].name) && !editing && (
+              <button onClick={startEdit} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 11px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12.5, fontWeight: 600, cursor: "pointer" }}>
+                <FilePen size={14} /> Paste to Update
+              </button>
+            )}
           </div>
-          <div>{renderMarkdown(docs[activeDoc].content)}</div>
+          {editing ? (
+            <div style={{ display: "grid", gap: 10 }}>
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="Paste new content here"
+                autoFocus
+                spellCheck
+                style={{ width: "100%", minHeight: 380, padding: 12, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13, fontFamily: "monospace", lineHeight: 1.5, resize: "vertical" }}
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={saveEdit} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
+                <button onClick={cancelEdit} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div>{renderMarkdown(docs[activeDoc].content)}</div>
+          )}
+        </div>
+      )}
+
+      {toast && (
+        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "hsl(var(--foreground))", color: "hsl(var(--background))", padding: "10px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, zIndex: 1000, boxShadow: "0 4px 14px rgba(0,0,0,0.25)" }}>
+          {toast}
         </div>
       )}
     </div>
