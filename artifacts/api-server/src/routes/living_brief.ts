@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { db } from "@workspace/db";
 import { usersTable, platformSettingsTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import {
   authMiddleware,
   isSuperAdminMiddleware,
@@ -15,12 +15,18 @@ import {
 const router = Router();
 
 const PASSWORD_KEY = "living_brief_password_hash";
+// Editable docs (CLAUDE.md, VISION.md) are stored in platform_settings under this
+// key prefix so edits survive every deploy; the on-disk git file is only the
+// initial seed/fallback used until the first save.
+const DOC_KEY_PREFIX = "living_brief_doc:";
+const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md"]);
 
 const DOCS = [
   { name: "CLAUDE.md", file: "CLAUDE.md" },
   { name: "PLATFORM.md", file: "PLATFORM.md" },
   { name: "STATUS.md", file: "STATUS.md" },
   { name: "VISION.md", file: "VISION.md" },
+  { name: "AUDIT.md", file: "AUDIT.md" },
 ];
 
 // Resolve the repo-root living-brief folder by walking up from both the current
@@ -119,10 +125,19 @@ router.post("/living-brief/unlock", authMiddleware, async (req: Request, res: Re
   res.json({ briefToken: signBriefAccessToken(req.user!.userId) });
 });
 
-// Return the four documents (requires unlock).
+// Return the documents (requires unlock). Editable docs (CLAUDE.md, VISION.md)
+// are served from platform_settings when a saved version exists, otherwise from
+// the on-disk seed file. PLATFORM.md, STATUS.md and AUDIT.md always read disk.
 router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_req: Request, res: Response) => {
   const dir = findLivingBriefDir();
+  const overrides = await db
+    .select({ key: platformSettingsTable.key, value: platformSettingsTable.value, updatedAt: platformSettingsTable.updatedAt })
+    .from(platformSettingsTable)
+    .where(inArray(platformSettingsTable.key, [...EDITABLE_DOCS].map((n) => DOC_KEY_PREFIX + n)));
+  const overrideMap = new Map(overrides.map((o) => [o.key, o]));
   const docs = DOCS.map(({ name, file }) => {
+    const ov = EDITABLE_DOCS.has(name) ? overrideMap.get(DOC_KEY_PREFIX + name) : undefined;
+    if (ov) return { name, content: ov.value, updatedAt: ov.updatedAt.toISOString() };
     const full = path.join(dir, file);
     const stat = fs.statSync(full);
     return { name, content: fs.readFileSync(full, "utf-8"), updatedAt: stat.mtime.toISOString() };
@@ -130,10 +145,10 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
   res.json({ docs });
 });
 
-// Overwrite an editable document on disk (super admin only). Only CLAUDE.md and
-// VISION.md are editable here: PLATFORM.md auto-regenerates from the build and
-// STATUS.md is maintained by Replit after features ship.
-const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md"]);
+// Save an editable document to the platform_settings DB (super admin only). Only
+// CLAUDE.md and VISION.md are editable: PLATFORM.md auto-regenerates from the
+// build and STATUS.md/AUDIT.md are maintained in the repo. Writing to the DB (not
+// disk) makes edits permanent across every future deploy on every instance.
 router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
   const name = req.params.name;
   if (!EDITABLE_DOCS.has(name)) {
@@ -145,11 +160,12 @@ router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, 
     res.status(400).json({ error: "Content required" });
     return;
   }
-  const dir = findLivingBriefDir();
-  const full = path.join(dir, name);
-  fs.writeFileSync(full, content, "utf-8");
-  const stat = fs.statSync(full);
-  res.json({ ok: true, updatedAt: stat.mtime.toISOString() });
+  const now = new Date();
+  await db
+    .insert(platformSettingsTable)
+    .values({ key: DOC_KEY_PREFIX + name, value: content })
+    .onConflictDoUpdate({ target: platformSettingsTable.key, set: { value: content, updatedAt: now } });
+  res.json({ ok: true, updatedAt: now.toISOString() });
 });
 
 // Change the gate password (super admin only).

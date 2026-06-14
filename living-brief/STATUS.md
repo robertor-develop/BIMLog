@@ -51,6 +51,10 @@ Updated manually after each feature ships. Reflects the real state of the platfo
 - Reports module partially broken.
 - Unknown/Unknown trades in some clash hits — ComAPI needed to read element properties.
 - linked_items table has 0 rows — cross-linking exists but is not being populated yet.
+- rfi_ball_in_court_history is never written — no writer exists anywhere in the codebase despite
+  4 active RFIs.
+- change_orders imports createNotification but never calls it — change order events produce no
+  notifications.
 
 ## Founding partner context
 Ruben Crespo (rubenc@bimcorpgroup.com) is BIMLog's first Founding Partner. ELARA EAST is the

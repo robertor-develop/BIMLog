@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, FilePen } from "lucide-react";
+import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, FilePen, Download } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -166,6 +166,38 @@ export function LivingBrief() {
     }
   };
 
+  // Export the latest CLAUDE.md + VISION.md as one text file so the edits can be
+  // pasted back into the repo during a dev session. Fetches fresh from the
+  // DB-backed endpoint on click so a concurrent edit by another admin is
+  // reflected rather than stale local state.
+  const exportDocs = async () => {
+    if (!token) return;
+    const r = await apiFetch("/living-brief/docs", token, { headers: { "X-Brief-Token": briefToken() } });
+    if (!r.ok) { showToast("Export failed"); return; }
+    const data = await r.json();
+    const fresh: Doc[] = data.docs ?? [];
+    setDocs(fresh);
+    const wanted = ["CLAUDE.md", "VISION.md"];
+    const present = wanted.filter((n) => fresh.some((d) => d.name === n));
+    if (!present.length) { showToast("Nothing to export"); return; }
+    const body = present
+      .map((n) => {
+        const d = fresh.find((x) => x.name === n)!;
+        return `===== ${n} =====\n\n${d.content.trim()}`;
+      })
+      .join(`\n\n${"=".repeat(60)}\n\n`);
+    const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `living-brief-docs-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Exported");
+  };
+
   const startEdit = () => { setEditContent(docs[activeDoc]?.content ?? ""); setEditing(true); };
   const cancelEdit = () => { setEditing(false); setEditContent(""); };
   const saveEdit = async () => {
@@ -253,6 +285,11 @@ export function LivingBrief() {
             <Copy size={14} /> Copy Full Brief
           </button>
           {isSuperAdmin && (
+            <button onClick={exportDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              <Download size={14} /> Export current docs
+            </button>
+          )}
+          {isSuperAdmin && (
             <button onClick={() => { setShowAdmin((s) => !s); if (!showAdmin) loadAccess(); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               <ShieldCheck size={14} /> Admin
             </button>
@@ -294,6 +331,9 @@ export function LivingBrief() {
         </div>
       )}
 
+      {/* Tabs render from the docs[] returned by GET /docs, which now includes
+          AUDIT.md. AUDIT is read-only: it is not in EDITABLE, so no Paste to
+          Update button appears for it. */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {docs.map((d, i) => (
           <button key={d.name} onClick={() => { setActiveDoc(i); setEditing(false); setEditContent(""); }} style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
