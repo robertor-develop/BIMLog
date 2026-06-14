@@ -33,6 +33,7 @@ export const usersTable = pgTable("users", {
   passwordResetToken: text("password_reset_token"),
   passwordResetExpires: timestamp("password_reset_expires"),
   isSuperAdmin: boolean("is_super_admin").default(false).notNull(),
+  canAccessLivingBrief: boolean("can_access_living_brief").default(false).notNull(),
   openaiApiKey: text("openai_api_key"),
 });
 

@@ -164,6 +164,35 @@ startOverdueNotifier();
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);
   }
+
+  try {
+    const bcrypt = (await import("bcryptjs")).default;
+    await pool.query(`CREATE TABLE IF NOT EXISTS platform_settings (
+      id serial PRIMARY KEY,
+      key text NOT NULL UNIQUE,
+      value text NOT NULL,
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS can_access_living_brief boolean NOT NULL DEFAULT false`);
+    const defaultHash = bcrypt.hashSync("BIMAI360", 10);
+    await pool.query(
+      `INSERT INTO platform_settings (key, value) VALUES ('living_brief_password_hash', $1) ON CONFLICT (key) DO NOTHING`,
+      [defaultHash],
+    );
+    // One-time bootstrap only: if the platform has NO super admin yet, elevate the
+    // owner account so the Living Brief can be managed. Guarded so it never
+    // re-asserts privilege on subsequent boots (no identity-by-email escalation).
+    const { rows: saRows } = await pool.query<{ n: number }>(
+      `SELECT COUNT(*)::int AS n FROM users WHERE is_super_admin = true`,
+    );
+    if (saRows[0]?.n === 0) {
+      const r = await pool.query(`UPDATE users SET is_super_admin = true WHERE email = 'robertor@rryasociados.com'`);
+      if (r.rowCount) console.log("[migration] bootstrapped initial super admin");
+    }
+    console.log("[migration] living_brief settings ensured");
+  } catch (e) {
+    console.error("[migration] living_brief migration failed:", e);
+  }
 })();
 
 export default app;

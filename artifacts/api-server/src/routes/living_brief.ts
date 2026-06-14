@@ -1,0 +1,175 @@
+import { Router, type Request, type Response, type NextFunction } from "express";
+import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import { db } from "@workspace/db";
+import { usersTable, platformSettingsTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
+import {
+  authMiddleware,
+  isSuperAdminMiddleware,
+  signBriefAccessToken,
+  verifyBriefAccessToken,
+} from "../middlewares/auth";
+
+const router = Router();
+
+const PASSWORD_KEY = "living_brief_password_hash";
+
+const DOCS = [
+  { name: "CLAUDE.md", file: "CLAUDE.md" },
+  { name: "PLATFORM.md", file: "PLATFORM.md" },
+  { name: "STATUS.md", file: "STATUS.md" },
+  { name: "VISION.md", file: "VISION.md" },
+];
+
+// Resolve the repo-root living-brief folder by walking up from both the current
+// working directory and this module's directory until a "living-brief" folder is
+// found. Works in dev (tsx, cwd = package dir) and in the bundled prod build.
+function findLivingBriefDir(): string {
+  const starts: string[] = [process.cwd(), __dirname];
+  for (const start of starts) {
+    let dir = start;
+    for (let i = 0; i < 8; i++) {
+      const candidate = path.join(dir, "living-brief");
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) return candidate;
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+  throw new Error("living-brief directory not found on disk");
+}
+
+async function getPasswordHash(): Promise<string | null> {
+  const [row] = await db
+    .select({ value: platformSettingsTable.value })
+    .from(platformSettingsTable)
+    .where(eq(platformSettingsTable.key, PASSWORD_KEY))
+    .limit(1);
+  return row?.value ?? null;
+}
+
+async function isEligible(userId: number): Promise<boolean> {
+  const [u] = await db
+    .select({ isSuperAdmin: usersTable.isSuperAdmin, canAccess: usersTable.canAccessLivingBrief })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  return !!(u?.isSuperAdmin || u?.canAccess);
+}
+
+// Require a valid, in-scope brief-access token (issued by /unlock) AND eligibility.
+async function briefAccessMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const header = req.headers["x-brief-token"];
+  const token = Array.isArray(header) ? header[0] : header;
+  if (!token) {
+    res.status(401).json({ error: "Brief access token required" });
+    return;
+  }
+  try {
+    const payload = verifyBriefAccessToken(token);
+    if (payload.scope !== "living_brief" || payload.userId !== req.user!.userId) {
+      res.status(401).json({ error: "Invalid brief access token" });
+      return;
+    }
+  } catch {
+    res.status(401).json({ error: "Invalid or expired brief access token" });
+    return;
+  }
+  if (!(await isEligible(req.user!.userId))) {
+    res.status(403).json({ error: "Living Brief access not granted" });
+    return;
+  }
+  next();
+}
+
+// Eligibility check for the F5 intercept and page bootstrap.
+router.get("/living-brief/eligibility", authMiddleware, async (req: Request, res: Response) => {
+  const eligible = await isEligible(req.user!.userId);
+  const [u] = await db
+    .select({ isSuperAdmin: usersTable.isSuperAdmin })
+    .from(usersTable)
+    .where(eq(usersTable.id, req.user!.userId))
+    .limit(1);
+  res.json({ eligible, isSuperAdmin: !!u?.isSuperAdmin });
+});
+
+// Verify the gate password and issue a short-lived brief-access token.
+router.post("/living-brief/unlock", authMiddleware, async (req: Request, res: Response) => {
+  if (!(await isEligible(req.user!.userId))) {
+    res.status(403).json({ error: "Living Brief access not granted" });
+    return;
+  }
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!password) {
+    res.status(400).json({ error: "Password required" });
+    return;
+  }
+  const hash = await getPasswordHash();
+  if (!hash) {
+    res.status(500).json({ error: "Living Brief password is not configured" });
+    return;
+  }
+  const ok = await bcrypt.compare(password, hash);
+  if (!ok) {
+    res.status(401).json({ error: "Incorrect password" });
+    return;
+  }
+  res.json({ briefToken: signBriefAccessToken(req.user!.userId) });
+});
+
+// Return the four documents (requires unlock).
+router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_req: Request, res: Response) => {
+  const dir = findLivingBriefDir();
+  const docs = DOCS.map(({ name, file }) => {
+    const full = path.join(dir, file);
+    const stat = fs.statSync(full);
+    return { name, content: fs.readFileSync(full, "utf-8"), updatedAt: stat.mtime.toISOString() };
+  });
+  res.json({ docs });
+});
+
+// Change the gate password (super admin only).
+router.post("/living-brief/password", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
+  const newPassword = typeof req.body?.newPassword === "string" ? req.body.newPassword : "";
+  if (newPassword.length < 4) {
+    res.status(400).json({ error: "Password must be at least 4 characters" });
+    return;
+  }
+  const hash = bcrypt.hashSync(newPassword, 10);
+  await db
+    .insert(platformSettingsTable)
+    .values({ key: PASSWORD_KEY, value: hash })
+    .onConflictDoUpdate({ target: platformSettingsTable.key, set: { value: hash, updatedAt: new Date() } });
+  res.json({ ok: true });
+});
+
+// List users and their Living Brief access (super admin only).
+router.get("/living-brief/access", authMiddleware, isSuperAdminMiddleware, async (_req: Request, res: Response) => {
+  const users = await db
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      fullName: usersTable.fullName,
+      isSuperAdmin: usersTable.isSuperAdmin,
+      canAccessLivingBrief: usersTable.canAccessLivingBrief,
+    })
+    .from(usersTable)
+    .orderBy(usersTable.email);
+  res.json({ users });
+});
+
+// Grant or revoke a user's Living Brief access (super admin only).
+router.post("/living-brief/access", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
+  const userId = Number(req.body?.userId);
+  const grant = req.body?.grant === true;
+  if (!Number.isInteger(userId)) {
+    res.status(400).json({ error: "Valid userId required" });
+    return;
+  }
+  await db.update(usersTable).set({ canAccessLivingBrief: grant }).where(eq(usersTable.id, userId));
+  res.json({ ok: true });
+});
+
+export default router;

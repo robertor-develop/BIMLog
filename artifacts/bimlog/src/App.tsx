@@ -1,4 +1,5 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import { DataRetention } from "@/pages/DataRetention";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { TotalControl } from "@/pages/TotalControl";
+import { LivingBrief } from "@/pages/LivingBrief";
 import { Pricing } from "@/pages/Pricing";
 import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
@@ -33,6 +35,8 @@ import { DebugBanner } from "@/components/DebugBanner";
 import { LangToggle } from "@/components/layout/LangToggle";
 
 const queryClient = new QueryClient();
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 // Protected Route Wrapper
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -45,6 +49,38 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   }
 
   return <Component />;
+}
+
+// F5 intercept: eligible admins (super admin or granted access) are sent to the
+// Living Brief instead of a browser refresh. Everyone else gets a normal F5 refresh.
+// Ctrl+R / Cmd+R are intentionally NOT intercepted.
+function LivingBriefHotkey() {
+  const { token } = useAuthStore();
+  const [, setLocation] = useLocation();
+  const eligibleRef = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!token) { eligibleRef.current = false; return; }
+    fetch(`${API_BASE}/api/v1/living-brief/eligibility`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : { eligible: false }))
+      .then((d) => { if (active) eligibleRef.current = !!d.eligible; })
+      .catch(() => { if (active) eligibleRef.current = false; });
+    return () => { active = false; };
+  }, [token]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "F5" && !e.ctrlKey && !e.metaKey && eligibleRef.current) {
+        e.preventDefault();
+        setLocation("/living-brief");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setLocation]);
+
+  return null;
 }
 
 function Router() {
@@ -84,6 +120,9 @@ function Router() {
       <Route path="/total-control">
         {() => <ProtectedRoute component={TotalControl} />}
       </Route>
+      <Route path="/living-brief">
+        {() => <ProtectedRoute component={LivingBrief} />}
+      </Route>
       <Route path="/pricing" component={Pricing} />
       <Route path="/features" component={Features} />
       <Route path="/about" component={About} />
@@ -102,6 +141,7 @@ function App() {
         <ConfigProvider>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <LivingBriefHotkey />
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
               <Navbar />
               <main className="flex-1">

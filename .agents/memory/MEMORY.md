@@ -5,3 +5,4 @@
 - [bimlog vite build needs PORT](bimlog-vite-build.md) — `pnpm build` fails loading vite.config.ts unless PORT env is set (use `PORT=3000 pnpm build`)
 - [api-server tsc stale cache](api-server-tsc-cache.md) — tsc errors re missing @workspace/db/schema exports/columns are stale lib/db tsconfig.tsbuildinfo; clear it + `tsc -b`; esbuild build is the real gate
 - [clash_reports route ordering](clash-reports-route-order.md) — GET .../:reportId has no NaN guard, so any literal sub-path (lens-pull, plugin-pull) MUST be registered before it
+- [Super-admin bootstrap guard](super-admin-bootstrap.md) — never re-assert is_super_admin by email every boot; only elevate when zero super admins exist

@@ -103,6 +103,14 @@ export function requireProjectMember(...allowedRoles: string[]) {
   };
 }
 
+export function signBriefAccessToken(userId: number): string {
+  return jwt.sign({ userId, scope: "living_brief" }, JWT_SECRET, { expiresIn: "1h" });
+}
+
+export function verifyBriefAccessToken(token: string): { userId: number; scope: string } {
+  return jwt.verify(token, JWT_SECRET) as { userId: number; scope: string };
+}
+
 export async function isSuperAdminMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   if (!req.user) { res.status(401).json({ error: "Authentication required" }); return; }
   const [u] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user.userId)).limit(1);

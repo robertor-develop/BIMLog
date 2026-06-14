@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { build as esbuild } from "esbuild";
 import { rm, readFile } from "fs/promises";
+import { generatePlatformMd } from "./scripts/generate-platform-md";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,11 @@ const allowlist = [
 async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
+
+  // Regenerate the auto-generated Living Brief PLATFORM.md from the live codebase
+  // so it never goes stale. Runs as a pre-build step on every api-server build.
+  console.log("regenerating PLATFORM.md...");
+  generatePlatformMd();
 
   console.log("building server...");
   const pkgPath = path.resolve(__dirname, "package.json");
