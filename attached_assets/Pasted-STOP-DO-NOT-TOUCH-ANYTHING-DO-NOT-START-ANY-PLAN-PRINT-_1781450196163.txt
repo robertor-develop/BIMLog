@@ -1,0 +1,40 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We want to build something important for this platform. Read this fully before doing anything.
+
+WHAT WE ARE BUILDING AND WHY:
+BIMLog is being built by Roberto Rodriguez, CEO of BIMCapital Partners INC / IgniteSmart. Claude is Roberto's AI development partner across multi-session builds. The biggest problem we face is that Claude loses context between sessions — it forgets what was built, how it was built, why decisions were made, and where we are going. This causes wasted time re-explaining everything at the start of every session.
+
+We want to build a Living Brief system — a set of four permanent documents stored in this codebase that capture everything Claude needs to know to continue working intelligently from any session. These documents must always be current, always accessible, and always reflect the real state of the platform.
+
+THE FOUR DOCUMENTS:
+- CLAUDE.md — how Claude must behave, architecture rules, Navisworks API lessons, known patterns, what never to do
+- PLATFORM.md — the complete platform map: every module, every route, every table, every interconnection, every file path — written by Replit based on what it actually knows about the codebase
+- STATUS.md — current build state: what works, what is broken, what is next, what Ruben needs, active bugs
+- VISION.md — the full product vision, the agent architecture, the BIMCapital ecosystem, where we are going, the 5-layer agent system, the future connections to RR-AI, UrbanInvest, IoT, GeoTwin, smart contracts
+
+THE AGENT VISION (important context for VISION.md):
+BIMLog needs to run itself like a company. Agents at 5 layers: Layer 0 sensors that watch everything, Layer 1 analysts that interpret, Layer 2 department heads that own domains, Layer 3 Project CEO per project, Layer 4 Platform CEO across all projects, Layer 5 BIMCapital CEO across the full ecosystem. Three audiences get three different briefings: Ruben sees project coordination intelligence, IgniteSmart team sees platform product intelligence, Roberto sees the full BIMCapital executive intelligence. One data layer, role-filtered views, agents run continuously not triggered by users.
+
+HOW IT SHOULD BE ACCESSED:
+When an admin presses F5 anywhere on the platform, instead of browser refresh, they are taken to the Living Brief page. But not all admins should see it — only Roberto (robertor@rryasociados.com as super admin) and anyone he grants access to. There is a password gate: BIMAI360. Only Roberto as super admin can change this password. Regular admins without the password get normal browser refresh even if they press F5.
+
+HOW IT SHOULD UPDATE:
+The PLATFORM.md document should reflect what Replit actually knows about the codebase — not what Claude assumes. Every time Replit completes a feature, it should update STATUS.md to reflect the new state. The documents should be readable by Claude at the start of every session so no context is lost.
+
+WHAT WE NEED FROM YOU:
+You know this codebase better than anyone. You know where files should live, how auth works, how the admin pattern is implemented, how routes are structured, how the frontend handles protected pages. We do not want to tell you how to build this — we want you to decide based on what you know.
+
+Please tell us:
+1. Where you would store the four markdown files
+2. How you would serve them via the backend given the existing admin route pattern
+3. How you would implement the password gate — separate from the existing admin auth, only changeable by super admin robertor@rryasociados.com
+4. How you would implement the F5 intercept given how App.tsx is currently structured with wouter
+5. How you would build the frontend page — what pattern fits best with existing pages
+6. How you would keep PLATFORM.md accurate — would you auto-generate it from the actual codebase or write it manually
+7. What PLATFORM.md should contain based on what you actually know about this codebase right now
+
+Answer all seven questions in plain text. Then tell us if you are ready to build and what your plan is. Do not build anything yet — answer first.
+
+Print ALL output as plain text. No collapsed boxes.
