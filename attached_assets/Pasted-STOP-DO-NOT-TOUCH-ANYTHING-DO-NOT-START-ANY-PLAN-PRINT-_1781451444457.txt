@@ -1,0 +1,232 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+The Living Brief documents you built need to be populated with complete content. 
+This is a collaboration between you and Claude. You know the codebase — Claude 
+knows the product vision, the rules, and the history. Together we need to build 
+4 complete documents.
+
+Here is what Claude contributes — content you do not have access to. Add this 
+to what you already know and generate the complete final versions of all 4 files.
+
+CLAUDE CONTRIBUTES TO CLAUDE.md — add these sections:
+
+NAVISWORKS API LESSONS — NEVER REPEAT THESE:
+- SavedItemCollection uses .Add() not .AddCopy()
+- GroupItem has no public constructor — use existingGroupItem.CreateCopyWithoutChildren()
+- doc.SavedViewpoints.AddCopy(folder, vp) to add viewpoint to folder
+- doc.SavedViewpoints.AddComment(vp, comment) to add comment
+- Comment constructor: new Comment(body, CommentStatus.Active/Approved/Resolved)
+- Application.Idle fires on main thread — safe for UI/navigation — ALWAYS queue UI calls here
+- set_CurrentSavedViewpoint navigates to saved viewpoint
+- NEVER call UI operations from background threads — crashes Navisworks
+- vp.Guid returns all-zeros for viewpoints saved in previous sessions — ALWAYS jump by displayId not GUID
+- HttpListener works for local HTTP server on localhost:8765
+- DockPanePlugin not DockableWindowPlugin
+- PlaceholderText not available in .NET Framework 4.8 TextBox
+- Always reflect DLL before assuming method names: $dll.GetTypes() | GetMethods()
+- Navisworks Color conflicts with System.Drawing.Color — use Drawing alias
+- Do NOT change GenerateFingerprint — orphans existing rows
+- Do NOT delete clashes server-side between syncs — plugin re-pushes everything
+- Plugin uses no-cors from HTTPS platform to localhost:8765 — this is correct not a bug
+- Jump to Viewpoint uses /jump?code=displayId — NOT /jump/guid — GUIDs are null in DB
+- NEVER use regex replace on method-level C# code — rewrite entire file cleanly
+- ALWAYS use AnyCPU not x64 — Navisworks is 32-bit host
+- ALWAYS use HttpWebRequest — never HttpClient or WebClient inside plugin
+- ALWAYS use InvariantCulture for decimals — Spanish locale uses comma separator
+
+REPLIT INSTRUCTION FORMAT — MANDATORY EVERY TIME:
+- Single code block so Roberto can click the copy icon
+- Opens with: STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+- Plain English file by file — no numbered steps — no markdown headers inside the block
+- Checks using grep/find at the end
+- MANDATORY rebuild: rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+- Rebuild BOTH when frontend and backend changed
+- Restart API server after every backend rebuild
+- Publish after all checks pass
+- Print ALL check outputs as plain text. No collapsed boxes.
+- ALWAYS ask Replit what it has built before writing any instruction
+- NEVER direct Replit on implementation — give context and goals, let Replit decide
+
+KNOWN PATTERNS:
+- AI model: claude-sonnet-4-5 (NOT claude-sonnet-4-20250514 or any other variant)
+- AI proxy: http://localhost:1106/modelfarm/anthropic
+- Dev DB = helium (empty) — ALWAYS query Neon production DB directly via shell
+- Replit dual-database: shell connects to helium, app connects to Neon — never confuse them
+- Plugin config: %APPDATA%\BIMLog\config.json
+- Viewpoint ID format: {6 chars NWF filename}{6 chars GUID fragment} e.g. 1185RI-F70F14
+- Viewpoint name format: {displayId} | {tradeShort} | {reportType} | {floor} | {priority} | {note}
+- NWF comment format: JSON with source:BIMLogLens marker
+- lens_viewpoints dedup: by viewpoint_id — navisworks_guid normalized to null if zeros
+- Route prefix is /api/v1/ for all endpoints
+- Admin routes pattern: router.get("/admin/...", authMiddleware, ...)
+- Frontend uses wouter Router with ProtectedRoute wrapper
+- bcryptjs already installed — use it for all password hashing
+- Every schema change goes in BOTH drizzle schema file AND app.ts startup migration block
+
+PLUGIN FILES — COMPLETE LIST:
+- BIMLogPlugin.cs — Entry point, DisplayName=BIMLog Pulse
+- ClashReader.cs — Reads clashes, ClashData class
+- ClashTriage.cs — P1-P5, GUID fingerprint, trade detection
+- BIMLogApiClient.cs — HttpWebRequest, batch push, lens sync
+- BIMLogSyncForm.cs — Push/Pull/Open/Settings, F2 debug
+- SettingsForm.cs — URL, Email, Password, Project ID
+- PluginConfig.cs — config.json, sequence.json, synced_viewpoints.json
+- BIMLogLensPlugin.cs — DockPanePlugin
+- BIMLogLensButton.cs — AddInPlugin button launches Lens panel
+- BIMLogLensPanel.cs — Full panel, SaveViewpoint, SyncWithBIMLog, RefreshCounter
+- BIMLogLocalServer.cs — HTTP server localhost:8765, ping/jump?code=displayId, jump-by-name
+
+THREE SYNC TOOLS:
+- BIMLog Pulse — WORKING — clash hits sync — DisplayName=BIMLog Pulse
+- BIMLog Lens — WORKING — viewpoint sync, Jump to Viewpoint via localhost:8765/jump?code=displayId
+- BIMLog Mirror — PLANNED — full bidirectional clash detect sync using Navisworks Clash API (ClashTest, ClashResult, ClashResultStatus, DocumentClash, DocumentExtensions all available)
+
+CLAUDE CONTRIBUTES TO VISION.md — add these sections:
+
+THE ECOSYSTEM — BIMCAPITAL PARTNERS INC:
+BIMCapital Partners INC (USA) is the holding company that receives all revenue.
+IgniteSmart is the commercial brand — sells BIMLog and ACCA software in Bolivia.
+BIMInvest IBC (Panama) owns UrbanInvest — real estate tokenization platform — 51 active transactions — 20+ investors.
+RR and Asociados is the legal arm — future connection: RR-AI legal document factory powered by Claude API.
+BIMTechCorp provides BIM services delivery.
+BIGDOTS is Roberto's proprietary framework: BIM 4D through 10D+, IoT, GIS, DLT, smart contracts, AI — the architectural DNA of the entire ecosystem.
+
+REFERENCE PROJECTS:
+IBQ — $450M lithium plant Bolivia — 18 ECEC disciplines — sample/reference project for complex convention and AI testing. NOT a live client — used to stress-test the platform in a complex environment.
+ELARA EAST — 1185 River Ave Bronx NY — Ruben's live project — Project 26 — ELA01 — drives every feature we build today. Ruben is a Founding Partner.
+
+THE FULL 5-LAYER AGENT ARCHITECTURE:
+BIMLog runs itself like a company. Agents operate at 5 layers continuously — not triggered by users.
+
+Layer 0 — Sensors (always on, no interpretation, just facts):
+Clash Sensor, Document Sensor, RFI Sensor, Submittal Sensor, Schedule Sensor, Compliance Sensor, Financial Sensor, Lens Sensor, Platform Health Sensor, Growth Sensor, Revenue Sensor, Legal Sensor, Investment Sensor
+
+Layer 1 — Analysts (interpret sensor data, find patterns, make recommendations):
+Coordination Analyst, Risk Analyst, Performance Analyst, Financial Analyst, Legal Analyst, Product Analyst, Growth Analyst, BizDev Analyst, Investment Intelligence Analyst
+
+Layer 2 — Department Heads (synthesize analysts, own their domain):
+Chief Coordination Officer, Chief Risk Officer, Chief Legal Officer, Chief Financial Officer, Chief Product Officer, Chief Growth Officer
+
+Layer 3 — Project CEO (one per project):
+Synthesizes all department heads. Generates the project-level morning briefing. Ruben sees this.
+
+Layer 4 — Platform CEO (across all projects):
+Synthesizes all Project CEOs. Generates the IgniteSmart product intelligence briefing.
+
+Layer 5 — BIMCapital CEO (across entire ecosystem):
+Synthesizes Platform CEO plus external signals. Generates Roberto's master briefing.
+
+THREE AUDIENCES — ONE DATA LAYER — ROLE-FILTERED BRIEFINGS:
+Ruben's briefing: coordination status, P1/P2 clashes, overdue RFIs, submittal risks
+IgniteSmart briefing: active projects, feature usage, churn signals, founding partner opportunities
+Roberto's briefing: full ecosystem — platform health + legal exposure + investment opportunities + business development
+
+NEW DB TABLES NEEDED FOR AGENT ARCHITECTURE:
+- agent_sensors — raw events from all sensors
+- agent_reports — department head synthesis outputs
+- agent_briefings — CEO-level briefings per audience per user
+- agent_heartbeats — tracks when each agent last ran and its health
+- agent_escalations — urgent items that bypass the hierarchy for immediate alert
+
+FUTURE INTERCONNECTIONS (vision — not built yet):
+- RR-AI: Legal Analyst Agent feeds verified clash/delay evidence to legal document factory
+- UrbanInvest: Investment Intelligence Agent flags projects ready for tokenization
+- IoT: Sensors layer gets real-time physical data from site devices
+- Smart contracts: Financial Intelligence Agent triggers payment verification on milestone completion
+- GeoTwin / BIM 10D: Risk Analyst gets real-world site conditions — living digital twin of every built asset
+- ACTA-SC: Governance layer for public sector projects — anti-corruption transparency
+
+THE 25 PLANNED NAVISWORKS PLUGIN FEATURES:
+1. Bulk AI Triage — 7000 clashes sorted P1-P5 in minutes
+2. Clash Fingerprinting — detects NEW vs REOPENED on reruns
+3. Trade Responsibility Auto-Assignment
+4. Coordination Meeting Agenda Button
+5. Resolution Verification — no clash closes without linked RFI or submittal
+6. Clash Aging Warnings
+7. Clash Relationships — groups related hits into parent/child
+8. What-If Mode — AI predicts which clashes a proposed fix resolves
+9. Clash History Timeline — full life of every clash
+10. Clash Heatmap — visual floor plan overlay
+11. Clash to RFI One Click — pre-fills RFI from clash data
+12. Natural Language Search across all clashes
+13. Clash Prediction — AI predicts before detection runs
+14. Clash Cost Impact — estimates field rerouting cost
+15. Contractor Scorecards — response time, clashes caused vs resolved
+16. Model Progress Score — coordination completion per floor per trade
+17. Clash Camera Fly-Through — auto MP4 for coordination meetings
+18. Voice Notes — speak a note, AI transcribes and attaches
+19. Offline Mode — queues locally, syncs on reconnect
+20. Subcontractor Portal — each trade sees only their clashes
+21. Clash Report Watermarking — branded timestamped PDFs
+22. ISO 19650 Compliance Agent — continuous monitoring
+23. Digital Twins Integration — coordination decisions become project DNA
+24. BIMLog Mobile — field access, photo attach, mark resolved on site
+25. Auto-Update — plugin checks for updates on startup
+
+COMPETITIVE POSITIONING:
+BIMLog beats BIMcollab because it works with Navisworks locally with no ACC subscription needed, has true bidirectional sync via plugin, links clash to RFI to Submittal to Change Order, has AI agents watching everything continuously, works for small GC through large ACC shop, and costs a fraction of ACC with 10x the features.
+
+BUSINESS MODEL:
+Freemium: 1 project free 3 months — data never lost on expiry
+Premium: all modules, unlimited projects, PDF exports, AI agents
+Enterprise: white-label, dedicated onboarding, SLA, full API, PowerBI connector
+Founding Partner Program: locked pricing 36 months, co-branded, roadmap input, minimum 3 projects in 6 months
+BIMLog Performance Score and Compliance Badge: verified reputation system for subs and GCs
+
+CLAUDE CONTRIBUTES TO STATUS.md — add these sections:
+
+WHAT IS WORKING RIGHT NOW (June 14 2026):
+- BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, Tab persistence, Amber refresh banner — all working
+- BIMLog Pulse: Clash hit sync working — DisplayName=BIMLog Pulse confirmed
+- All 6 modules have soft delete with DeleteConfirmModal and cascade warning
+- All modules have import (any file format), PDF export, activity logging
+- Lens Viewpoints: 5 viewpoints synced on ELARA EAST with 1185RI-* IDs
+- Jump to Viewpoint: navigates Navisworks directly via localhost:8765/jump?code=displayId — no-cors approach confirmed working
+- Plugin connected green dot on platform
+- Scrollbar always visible grey on Lens Viewpoints table
+- Tab persistence on Clash Hits vs Lens Viewpoints using localStorage
+- Living Brief F5 system — just built this session
+
+WHAT RUBEN NEEDS NEXT:
+- BIMLog Mirror — bidirectional clash sync — Clash API ready in plugin, not built yet
+- Spell check on Issue Note field in BIMLog Lens panel (RichTextBox) and platform textareas (spellCheck=true)
+- Package plugin for Ruben — install.bat, ZIP, README with installation instructions
+- Fix Unknown/Unknown trades via ComAPI — element properties not being read correctly
+
+ACTIVE BUILD PRIORITIES:
+1. Session Brief endpoint — 300-word summary for Claude session start
+2. Full agent heartbeat architecture — 5-layer system with new DB tables
+3. BIMLog Mirror — build it using Navisworks Clash API
+4. Spell check — plugin RichTextBox + platform spellCheck=true
+5. Wire existing agents to save endpoints so they fire automatically
+
+KNOWN BUGS:
+- Agents not wired to save endpoints — clash-agent, rfi-agent, briefing-agent exist but dont fire automatically on save
+- APS 3-legged OAuth paused — 2-legged confirmed insufficient for ACC hub data — needs user authorization flow
+- IBQ Convention Builder session paused mid-build — needs resuming when IBQ becomes active
+- Reports module partially broken
+- Unknown/Unknown trades in some clash hits — ComAPI needed to read element properties
+- linked_items table has 0 rows — cross-linking exists but not being populated yet
+
+FOUNDING PARTNER CONTEXT:
+Ruben Crespo (rubenc@bimcorpgroup.com) is BIMLog's first Founding Partner. ELARA EAST is the live reference project driving every feature. Eventually BIMLog will scale beyond Ruben — but every decision today is validated against his real workflow.
+
+Now take everything you know about the codebase PLUS everything Claude has contributed above and rewrite all four files completely. Merge your knowledge with Claude's knowledge. Do not leave gaps. Do not leave placeholders. Write the complete final versions.
+
+After writing all four files run the build so PLATFORM.md auto-regenerates with the latest codebase state.
+
+Check 1:
+wc -l living-brief/CLAUDE.md living-brief/PLATFORM.md living-brief/STATUS.md living-brief/VISION.md
+
+Check 2:
+head -20 living-brief/VISION.md
+
+Check 3:
+head -20 living-brief/CLAUDE.md
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL check outputs as plain text. No collapsed boxes.
