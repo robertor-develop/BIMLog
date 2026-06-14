@@ -1,0 +1,30 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+The Lens Viewpoints PDF report needs significant improvements. Read all of this before doing anything then tell us your approach.
+
+DESIGN — the report should look like a clean professional statement report. Dark navy headers, white content areas, clean alternating light grey table rows, minimal color, no colored badges or color explosions. Think formal financial statement or engineering report. The reference style is: dark navy header bar for section titles, clean white rows, subtle alternating grey on table rows, black text, professional typography. No rainbow colors anywhere.
+
+FIXES NEEDED:
+
+FIX 1 — Modal pre-population
+The modal currently asks the user for everything. It should auto-populate from the user profile that already exists in the system. Pull from the authenticated user: full name for Prepared By Name, job title for Prepared By Title, company name for Company Name, company logo from the company profile. The user can edit any of these fields but should not have to fill them in from scratch. Also the Submitted To field should show a dropdown populated from the project directory — companies already in the project. User can select from existing or type a new one.
+
+FIX 2 — Health Score optional
+Add a toggle in the modal — Show Health Score yes or no. Default to yes but let the user turn it off. The health score calculation also needs fixing — 100% P1s resolved when there are zero P1s is misleading. If there are zero P1s that metric should be excluded from the calculation not counted as 100%.
+
+FIX 3 — Table column widths
+The ID column is too narrow — IDs like 1185RI-37D77A are being split across two lines. The FLOOR column text like UNDERGROUND is being split. Increase column widths so content fits on one line. The table should use the full landscape page width.
+
+FIX 4 — Report design overhaul
+Remove all colored priority badges and colored boxes. Replace with the clean professional style shown in the reference: dark navy section header bars, clean white rows, subtle alternating light grey rows in the table, black text throughout. Priority shown as plain text P1 P2 P3 etc not colored badges. Status shown as plain text. Keep it looking like a formal engineering deliverable not a dashboard screenshot.
+
+FIX 5 — Notes column
+Show the full note text. Do not truncate. If the note is long wrap it within the cell — do not cut it off.
+
+FIX 6 — Lens viewpoints data loss on rebuild
+Every time Replit builds and publishes the lens_viewpoints table data disappears. This is critical. Investigate why and fix it. The data is in Neon PostgreSQL production DB and should never be touched by a build or restart. Check if any migration is dropping and recreating the lens_viewpoints table instead of using CREATE TABLE IF NOT EXISTS.
+
+Tell us your approach for each fix before building anything.
+
+Print ALL output as plain text. No collapsed boxes.
