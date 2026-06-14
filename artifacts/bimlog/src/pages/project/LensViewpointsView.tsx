@@ -105,6 +105,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [history, setHistory] = useState<LensReport[]>([]);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [members, setMembers] = useState<{ userFullName: string; userCompanyName: string }[]>([]);
   const todayIso = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
     companyName: "",
@@ -114,12 +115,44 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     reportDate: todayIso,
     submittedTo: "",
     watermarkType: "draft",
+    showHealthScore: true,
     isExecutiveOnePager: false,
     fPriority: "all",
     fStatus: "all",
     fFloor: "all",
     fTrade: "all",
   });
+
+  // Pre-populate the report modal from the authenticated user's profile and load
+  // the project directory for the "Submitted To" dropdown. Only fills fields the
+  // user has not already typed into, so manual edits are never clobbered.
+  const openReportModal = async () => {
+    setForm(f => ({ ...f, fTrade, fStatus, fFloor }));
+    setReportModalOpen(true);
+    try {
+      const [meRes, memRes] = await Promise.all([
+        fetch(`${API}/auth/me`, { headers }),
+        fetch(`${API}/projects/${projectId}/members`, { headers }),
+      ]);
+      if (meRes.ok) {
+        const me = await meRes.json();
+        const companyLogo: string = me?.company?.companyLogoUrl || "";
+        setForm(f => ({
+          ...f,
+          companyName: f.companyName || me?.companyName || "",
+          preparedByName: f.preparedByName || me?.fullName || "",
+          preparedByTitle: f.preparedByTitle || me?.jobTitle || "",
+          logoDataUrl: f.logoDataUrl || (companyLogo.startsWith("data:image") ? companyLogo : ""),
+        }));
+      }
+      if (memRes.ok) {
+        const list = await memRes.json();
+        if (Array.isArray(list)) setMembers(list);
+      }
+    } catch {
+      /* prefill is best-effort — the user can still type everything manually */
+    }
+  };
 
   const loadViewpoints = async () => {
     setLoading(true);
@@ -349,6 +382,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           reportDate: form.reportDate,
           submittedTo: form.submittedTo,
           watermarkType: form.watermarkType,
+          showHealthScore: form.showHealthScore,
           isExecutiveOnePager: form.isExecutiveOnePager,
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade },
         }),
@@ -407,10 +441,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Download size={14} /> {t("Export", "Exportar")}
           </button>
-          <button className="btn btn-sm btn-primary" onClick={() => {
-            setForm(f => ({ ...f, fTrade: fTrade, fStatus: fStatus, fFloor: fFloor }));
-            setReportModalOpen(true);
-          }} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button className="btn btn-sm btn-primary" onClick={openReportModal} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <FileDown size={14} /> {t("Export PDF", "Exportar PDF")}
           </button>
         </div>
@@ -712,7 +743,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               <label style={lblStyle}>
                 {t("Submitted To", "Enviado A")}
                 <input value={form.submittedTo} onChange={e => setForm(f => ({ ...f, submittedTo: e.target.value }))}
-                  placeholder={t("e.g. General Contractor", "ej. Contratista General")} style={inpStyle} />
+                  list="lens-submitted-to" placeholder={t("Select or type a recipient", "Selecciona o escribe un destinatario")} style={inpStyle} />
+                <datalist id="lens-submitted-to">
+                  {members.map((m, i) => {
+                    const v = m.userCompanyName ? `${m.userFullName} — ${m.userCompanyName}` : m.userFullName;
+                    return v ? <option key={i} value={v} /> : null;
+                  })}
+                </datalist>
               </label>
               <label style={lblStyle}>
                 {t("Watermark", "Marca de Agua")}
@@ -773,6 +810,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             </div>
 
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.showHealthScore}
+                onChange={e => setForm(f => ({ ...f, showHealthScore: e.target.checked }))} />
+              {t("Show Coordination Health Score on the report", "Mostrar Puntaje de Salud de Coordinación en el reporte")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
               <input type="checkbox" checked={form.isExecutiveOnePager}
                 onChange={e => setForm(f => ({ ...f, isExecutiveOnePager: e.target.checked }))} />
               {t("Executive one-pager (summary only, no full register)", "Resumen ejecutivo (solo resumen, sin registro completo)")}

@@ -748,6 +748,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       };
       const watermarkType: string = ["draft", "issued", "superseded"].includes(body.watermarkType) ? body.watermarkType : "draft";
       const isOnePager = body.isExecutiveOnePager === true;
+      const showHealthScore = body.showHealthScore !== false;
       const companyName: string = (body.companyName?.trim?.() || user?.companyName || "Company");
       const preparedByName: string = (body.preparedByName?.trim?.() || user?.fullName || "");
       const preparedByTitle: string = (body.preparedByTitle?.trim?.() || "");
@@ -802,14 +803,20 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const p1Resolved = vps.filter(v => v.priority === 1 && v.status === "resolved").length;
       const allResolved = vps.filter(v => v.status === "resolved").length;
       const withLinkedRfis = linkedRfiVpIds.size;
-      const pctP1Resolved = p1Total ? (p1Resolved / p1Total) * 100 : 100;
-      const pctAllResolved = total ? (allResolved / total) * 100 : 0;
-      const pctWithLinkedRfis = total ? (withLinkedRfis / total) * 100 : 0;
-      const healthScore = Math.round((pctP1Resolved + pctAllResolved + pctWithLinkedRfis) / 3);
+      // Each metric is only included when its denominator is non-zero. A metric
+      // with no applicable items (e.g. zero P1s) is EXCLUDED from the average
+      // rather than counted as 100%, which would otherwise inflate the score.
+      const pctP1Resolved = p1Total ? (p1Resolved / p1Total) * 100 : null;
+      const pctAllResolved = total ? (allResolved / total) * 100 : null;
+      const pctWithLinkedRfis = total ? (withLinkedRfis / total) * 100 : null;
+      const healthMetrics = [pctP1Resolved, pctAllResolved, pctWithLinkedRfis].filter((m): m is number => m !== null);
+      const healthScore = healthMetrics.length
+        ? Math.round(healthMetrics.reduce((s, m) => s + m, 0) / healthMetrics.length)
+        : 0;
       const healthBreakdown = {
-        pctP1Resolved: Math.round(pctP1Resolved),
-        pctAllResolved: Math.round(pctAllResolved),
-        pctWithLinkedRfis: Math.round(pctWithLinkedRfis),
+        pctP1Resolved: pctP1Resolved === null ? null : Math.round(pctP1Resolved),
+        pctAllResolved: pctAllResolved === null ? null : Math.round(pctAllResolved),
+        pctWithLinkedRfis: pctWithLinkedRfis === null ? null : Math.round(pctWithLinkedRfis),
         p1Total, p1Resolved, total, allResolved, withLinkedRfis,
       };
 
@@ -881,18 +888,19 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const M = 40;
       const CW = W - M * 2;
 
-      const LP_COLORS: Record<number, { bg: string; text: string }> = {
-        1: { bg: "#FEE2E2", text: "#DC2626" },
-        2: { bg: "#FFEDD5", text: "#EA580C" },
-        3: { bg: "#FEF9C3", text: "#CA8A04" },
-        4: { bg: "#F3F4F6", text: "#6B7280" },
-        5: { bg: "#EDE9FE", text: "#7C3AED" },
-      };
+      // Formal engineering-deliverable palette: navy header bars, white content,
+      // light-grey alternating rows, black text. No priority/status colors.
+      const NAVY = "#1E3A5F";
       const STATUS_LABEL: Record<string, string> = {
         open: "Open", follow_up: "Follow Up", waiting_design: "Waiting Design", approved: "Approved", resolved: "Resolved",
       };
       const statusLabel = (s: string) => STATUS_LABEL[s] ?? s;
-      const healthColor = healthScore >= 80 ? "#16A34A" : healthScore >= 50 ? "#CA8A04" : "#DC2626";
+      // Navy section-header bar — the only fill color in the body of the report.
+      const sectionBar = (label: string, y: number) => {
+        doc.rect(M, y, CW, 20).fill(NAVY);
+        doc.fontSize(11).font("Helvetica-Bold").fillColor("white").text(label, M + 8, y + 5.5, { width: CW - 16 });
+        return y + 26;
+      };
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
       const reportTitle = filters.trade !== "all" ? "LENS VIEWPOINTS REPORT" : "LENS VIEWPOINTS REPORT";
       const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -916,55 +924,58 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
       }
       doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(reportTitle, M, 20, { align: "right", width: CW });
-      // ISO 19650 compliance stamp — small corner
-      doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#4B7EC8");
-      doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
-      doc.fontSize(7).font("Helvetica").fillColor("#BFDBFE").text("COMPLIANT", W - M - 92, 57, { width: 92, align: "center" });
-      doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
+      // ISO 19650 compliance stamp — small corner (monochrome on the navy band)
+      doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#FFFFFF");
+      doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
+      doc.fontSize(7).font("Helvetica").fillColor("white").text("COMPLIANT", W - M - 92, 57, { width: 92, align: "center" });
+      doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
       doc.fontSize(10).font("Helvetica-Bold").fillColor("white").text(`Report No: ${reportNumber}`, M, 88);
-      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Date: ${fmtDate(reportDate)}`, M, 104);
-      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${preparedByName}${preparedByTitle ? ", " + preparedByTitle : ""}`, M, 118);
-      if (submittedTo) doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Submitted to: ${submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "right" });
-      if (filters.trade !== "all") doc.fontSize(9).font("Helvetica-Bold").fillColor("#FBBF24").text(`Issued to: ${filters.trade}`, M + CW / 2, 118, { width: CW / 2, align: "right" });
+      doc.fontSize(9).font("Helvetica").fillColor("white").text(`Date: ${fmtDate(reportDate)}`, M, 104);
+      doc.fontSize(9).font("Helvetica").fillColor("white").text(`Prepared by: ${preparedByName}${preparedByTitle ? ", " + preparedByTitle : ""}`, M, 118);
+      if (submittedTo) doc.fontSize(9).font("Helvetica").fillColor("white").text(`Submitted to: ${submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "right" });
+      if (filters.trade !== "all") doc.fontSize(9).font("Helvetica-Bold").fillColor("white").text(`Issued to: ${filters.trade}`, M + CW / 2, 118, { width: CW / 2, align: "right" });
 
-      // Project info band
-      doc.rect(0, 135, W, 48).fill("#F0F4F8");
+      // Project info band (neutral light grey)
+      doc.rect(0, 135, W, 48).fill("#F4F6F8");
       doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 143);
       doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
         .text(`Project Code: ${project.code}  |  Total Viewpoints: ${total}`, M, 165);
 
-      // Health score block
-      const hsY = 198;
-      doc.rect(M, hsY, 200, 80).fillAndStroke("#FFFFFF", "#E5E7EB");
-      doc.fontSize(40).font("Helvetica-Bold").fillColor(healthColor).text(String(healthScore), M, hsY + 12, { width: 200, align: "center" });
-      doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0–100)", M, hsY + 60, { width: 200, align: "center" });
-      // health sub-metrics
-      const hbX = M + 220;
-      doc.fontSize(9).font("Helvetica").fillColor("#374151");
-      doc.text(`P1s resolved: ${healthBreakdown.pctP1Resolved}%  (${p1Resolved}/${p1Total})`, hbX, hsY + 8);
-      doc.text(`All viewpoints resolved: ${healthBreakdown.pctAllResolved}%  (${allResolved}/${total})`, hbX, hsY + 28);
-      doc.text(`Viewpoints with linked RFIs: ${healthBreakdown.pctWithLinkedRfis}%  (${withLinkedRfis}/${total})`, hbX, hsY + 48);
-      doc.y = hsY + 95;
+      // Health score block (monochrome; optional via the modal toggle)
+      let cursorY = 198;
+      if (showHealthScore) {
+        const hsY = cursorY;
+        doc.rect(M, hsY, 200, 80).fillAndStroke("#FFFFFF", "#D1D5DB");
+        doc.fontSize(40).font("Helvetica-Bold").fillColor(NAVY).text(String(healthScore), M, hsY + 12, { width: 200, align: "center" });
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0–100)", M, hsY + 60, { width: 200, align: "center" });
+        // health sub-metrics (a metric reads "n/a" when it has no applicable items)
+        const hbX = M + 220;
+        const pct = (v: number | null) => v === null ? "n/a" : `${v}%`;
+        doc.fontSize(9).font("Helvetica").fillColor("#374151");
+        doc.text(`P1s resolved: ${pct(healthBreakdown.pctP1Resolved)}  (${p1Resolved}/${p1Total})`, hbX, hsY + 8);
+        doc.text(`All viewpoints resolved: ${pct(healthBreakdown.pctAllResolved)}  (${allResolved}/${total})`, hbX, hsY + 28);
+        doc.text(`Viewpoints with linked RFIs: ${pct(healthBreakdown.pctWithLinkedRfis)}  (${withLinkedRfis}/${total})`, hbX, hsY + 48);
+        cursorY = hsY + 95;
+      }
+      doc.y = cursorY;
 
       // Priority breakdown cards
       const pCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
       vps.forEach(v => { const p = v.priority ?? 0; if (pCounts[p] !== undefined) pCounts[p]++; });
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
-      doc.moveDown(0.4);
-      const cardY = doc.y;
+      const cardY = sectionBar("Executive Summary", doc.y);
       const pCards = [
-        { label: "P1 CRITICAL", value: pCounts[1], c: LP_COLORS[1] },
-        { label: "P2 HIGH", value: pCounts[2], c: LP_COLORS[2] },
-        { label: "P3 MONITOR", value: pCounts[3], c: LP_COLORS[3] },
-        { label: "P4 LOW", value: pCounts[4], c: LP_COLORS[4] },
-        { label: "P5 INFO", value: pCounts[5], c: LP_COLORS[5] },
+        { label: "P1 CRITICAL", value: pCounts[1] },
+        { label: "P2 HIGH", value: pCounts[2] },
+        { label: "P3 MONITOR", value: pCounts[3] },
+        { label: "P4 LOW", value: pCounts[4] },
+        { label: "P5 INFO", value: pCounts[5] },
       ];
       const pcW = (CW - 40) / 5;
       pCards.forEach((card, i) => {
         const x = M + i * (pcW + 10);
-        doc.rect(x, cardY, pcW, 56).fillAndStroke(card.c.bg, card.c.bg);
-        doc.fontSize(24).font("Helvetica-Bold").fillColor(card.c.text).text(String(card.value), x, cardY + 8, { width: pcW, align: "center" });
-        doc.fontSize(7).font("Helvetica-Bold").fillColor(card.c.text).text(card.label, x, cardY + 40, { width: pcW, align: "center" });
+        doc.rect(x, cardY, pcW, 56).fillAndStroke("#FFFFFF", "#D1D5DB");
+        doc.fontSize(24).font("Helvetica-Bold").fillColor("#111827").text(String(card.value), x, cardY + 8, { width: pcW, align: "center" });
+        doc.fontSize(7).font("Helvetica-Bold").fillColor("#6B7280").text(card.label, x, cardY + 40, { width: pcW, align: "center" });
       });
       doc.y = cardY + 70;
 
@@ -985,30 +996,31 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       ];
       const bx0 = doc.y;
       const colW = (CW - 20) / 3;
+      const maxRows = isOnePager ? 5 : 12;
       breakdowns.forEach((bd, i) => {
         const x = M + i * (colW + 10);
-        doc.fontSize(10).font("Helvetica-Bold").fillColor("#1E3A5F").text(bd.title, x, bx0, { width: colW });
-        let yy = bx0 + 16;
-        bd.rows.slice(0, isOnePager ? 5 : 12).forEach(([k, n]) => {
-          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(k, x, yy, { width: colW - 30, ellipsis: true, lineBreak: false });
-          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(String(n), x + colW - 28, yy, { width: 26, align: "right" });
-          yy += 13;
+        doc.rect(x, bx0, colW, 18).fill(NAVY);
+        doc.fontSize(9).font("Helvetica-Bold").fillColor("white").text(bd.title, x + 6, bx0 + 5, { width: colW - 12 });
+        let yy = bx0 + 22;
+        bd.rows.slice(0, maxRows).forEach(([k, n], ri) => {
+          doc.rect(x, yy - 2, colW, 14).fill(ri % 2 === 0 ? "#FFFFFF" : "#F4F6F8");
+          doc.fontSize(8).font("Helvetica").fillColor("#111827").text(k, x + 5, yy + 1, { width: colW - 34, ellipsis: true, lineBreak: false });
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(String(n), x + colW - 28, yy + 1, { width: 24, align: "right" });
+          yy += 14;
         });
       });
-      doc.y = bx0 + 16 + (isOnePager ? 5 : 12) * 13 + 6;
+      doc.y = bx0 + 22 + maxRows * 14 + 8;
 
       if (isOnePager) {
         // Executive one-pager: top 5 most critical unresolved issues, then stop.
         const critical = vps.filter(v => v.status !== "resolved").sort((a, b) => pOrder(a.priority) - pOrder(b.priority)).slice(0, 5);
-        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Top Critical Unresolved Issues", M, doc.y);
-        doc.moveDown(0.3);
-        critical.forEach(v => {
-          const c = LP_COLORS[v.priority ?? 0] ?? LP_COLORS[4];
+        doc.y = sectionBar("Top Critical Unresolved Issues", doc.y);
+        critical.forEach((v, ci) => {
           const yy = doc.y;
-          doc.rect(M, yy + 2, 34, 13).fill(c.bg);
-          doc.fontSize(8).font("Helvetica-Bold").fillColor(c.text).text(v.priority ? `P${v.priority}` : "—", M, yy + 4, { width: 34, align: "center" });
+          doc.rect(M, yy, CW, 16).fill(ci % 2 === 0 ? "#FFFFFF" : "#F4F6F8");
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(v.priority ? `P${v.priority}` : "—", M + 5, yy + 4, { width: 28 });
           doc.fontSize(8).font("Helvetica").fillColor("#111827")
-            .text(`${v.displayId ? "[" + v.displayId + "] " : ""}${v.note ?? "—"}  (${v.trade || "—"} · ${v.floor || "—"} · ${statusLabel(v.status)})`, M + 40, yy + 3, { width: CW - 40, height: 12, ellipsis: true, lineBreak: false });
+            .text(`${v.displayId ? "[" + v.displayId + "] " : ""}${v.note ?? "—"}  (${v.trade || "—"} · ${v.floor || "—"} · ${statusLabel(v.status)})`, M + 36, yy + 4, { width: CW - 42, height: 12, ellipsis: true, lineBreak: false });
           doc.y = yy + 16;
         });
 
@@ -1027,14 +1039,14 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       } else {
         // ── MAIN VIEWPOINTS TABLE ──
         const cols = [
-          { label: "ID", w: 55 },
-          { label: "P", w: 32 },
-          { label: "Trade", w: 70 },
-          { label: "Report Type", w: 80 },
-          { label: "Floor", w: 55 },
-          { label: "Note", w: 230 },
-          { label: "Status", w: 70 },
-          { label: "Captured", w: 70 },
+          { label: "ID", w: 88 },
+          { label: "P", w: 26 },
+          { label: "Trade", w: 78 },
+          { label: "Report Type", w: 84 },
+          { label: "Floor", w: 78 },
+          { label: "Note", w: 226 },
+          { label: "Status", w: 74 },
+          { label: "Captured", w: 58 },
         ];
         const tableW = cols.reduce((s, c) => s + c.w, 0);
         const drawTableHeader = () => {
@@ -1068,12 +1080,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           doc.rect(M, rY, tableW, rowH).fill(idx % 2 === 0 ? "white" : "#F9FAFB");
           let x = M;
           // ID
-          doc.fontSize(7).font("Helvetica-Bold").fillColor("#1D4ED8").text(v.displayId || v.viewpointId || "—", x + 3, rY + 5, { width: cols[0].w - 6, height: rowH - 6, ellipsis: true, lineBreak: false });
+          doc.fontSize(7).font("Helvetica-Bold").fillColor("#111827").text(v.displayId || v.viewpointId || "—", x + 3, rY + 5, { width: cols[0].w - 6, height: rowH - 6, ellipsis: true, lineBreak: false });
           x += cols[0].w;
-          // Priority badge
-          const pc = LP_COLORS[v.priority ?? 0] ?? LP_COLORS[4];
-          doc.rect(x + 2, rY + 4, cols[1].w - 6, 13).fill(pc.bg);
-          doc.fontSize(7).font("Helvetica-Bold").fillColor(pc.text).text(v.priority ? `P${v.priority}` : "—", x + 2, rY + 6, { width: cols[1].w - 6, align: "center" });
+          // Priority (plain text, no colored badge)
+          doc.fontSize(7).font("Helvetica-Bold").fillColor("#111827").text(v.priority ? `P${v.priority}` : "—", x + 2, rY + 5, { width: cols[1].w - 4, align: "center" });
           x += cols[1].w;
           // Trade, Report Type, Floor
           [v.trade || "—", v.reportType || "—", v.floor || "—"].forEach((val, i) => {
