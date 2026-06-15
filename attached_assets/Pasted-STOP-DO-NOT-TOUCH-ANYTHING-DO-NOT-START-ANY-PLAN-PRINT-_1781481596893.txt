@@ -1,0 +1,38 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Four fixes to the Lens Viewpoints PDF report and one critical data fix.
+
+FIX 1 — Report title
+Change the main report title on the cover page from LENS VIEWPOINTS REPORT to BIM COORDINATION REPORT in the same large bold white text. Directly underneath add a subtitle in smaller lighter non-caps text: BIMLog Lens Viewpoints. Same navy header area.
+
+FIX 2 — Priority labels
+Fix the executive summary cards to match the BIMLog P1-P5 system exactly:
+P1 — Critical
+P2 — High
+P3 — Medium
+P4 — Low
+P5 — Monitor
+
+FIX 3 — Project address on cover page
+Add the project address below the project name on the cover page. The address is already stored in the projects table. Pull it and display it in smaller text below the project name.
+
+FIX 4 — Data loss on rebuild
+Every time Replit builds and publishes the lens_viewpoints data disappears. You identified the root cause earlier — the silent database fallback in lib/db/src/index.ts using PROD_DATABASE_URL ?? DATABASE_URL. When the published deployment does not carry PROD_DATABASE_URL it silently falls back to a different empty database and all lens_viewpoints data appears lost.
+
+Fix this now. Make the database selection explicit and fail-loud. Use PROD_DATABASE_URL as the canonical variable for the Neon production database. If PROD_DATABASE_URL is missing throw a clear startup error instead of silently falling back. Then verify that the published deployment secret scope has PROD_DATABASE_URL set so dev and production both hit the same Neon database. The data is intact in Neon — the app just sometimes points to the wrong database.
+
+Check 1:
+grep -n "PROD_DATABASE_URL\|DATABASE_URL" lib/db/src/index.ts | head -10
+
+Check 2:
+grep -n "LENS VIEWPOINTS\|BIM COORDINATION\|P3 MONITOR\|P4 LOW" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 3:
+grep -n "address\|project_address" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL output as plain text. No collapsed boxes.

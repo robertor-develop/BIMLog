@@ -902,7 +902,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return y + 26;
       };
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
-      const reportTitle = filters.trade !== "all" ? "LENS VIEWPOINTS REPORT" : "LENS VIEWPOINTS REPORT";
+      const reportTitle = "BIM COORDINATION REPORT";
       const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       const fmtShort = (v: Date | string | null | undefined) => {
         if (!v) return "—";
@@ -923,7 +923,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       } else {
         doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
       }
-      doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(reportTitle, M, 20, { align: "right", width: CW });
+      doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(reportTitle, M, 16, { align: "right", width: CW });
+      doc.fontSize(8).font("Helvetica").fillColor("#D1D5DB").text("BIMLog Lens Viewpoints", M, 31, { align: "right", width: CW - 105 });
       // ISO 19650 compliance stamp — small corner (monochrome on the navy band)
       doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#FFFFFF");
       doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
@@ -936,10 +937,17 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       if (filters.trade !== "all") doc.fontSize(9).font("Helvetica-Bold").fillColor("white").text(`Issued to: ${filters.trade}`, M + CW / 2, 118, { width: CW / 2, align: "right" });
 
       // Project info band (neutral light grey)
-      doc.rect(0, 135, W, 48).fill("#F4F6F8");
+      const projectAddress = typeof project.location === "string" ? project.location.trim() : "";
+      const bandH = projectAddress ? 58 : 48;
+      doc.rect(0, 135, W, bandH).fill("#F4F6F8");
       doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 143);
+      let infoY = 165;
+      if (projectAddress) {
+        doc.fontSize(9).font("Helvetica").fillColor("#6B7280").text(projectAddress, M, infoY, { width: CW });
+        infoY += 14;
+      }
       doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
-        .text(`Project Code: ${project.code}  |  Total Viewpoints: ${total}`, M, 165);
+        .text(`Project Code: ${project.code}  |  Total Viewpoints: ${total}`, M, infoY);
 
       // Health score block (monochrome; optional via the modal toggle)
       let cursorY = 198;
@@ -966,9 +974,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const pCards = [
         { label: "P1 CRITICAL", value: pCounts[1] },
         { label: "P2 HIGH", value: pCounts[2] },
-        { label: "P3 MONITOR", value: pCounts[3] },
+        { label: "P3 MEDIUM", value: pCounts[3] },
         { label: "P4 LOW", value: pCounts[4] },
-        { label: "P5 INFO", value: pCounts[5] },
+        { label: "P5 MONITOR", value: pCounts[5] },
       ];
       const pcW = (CW - 40) / 5;
       pCards.forEach((card, i) => {
