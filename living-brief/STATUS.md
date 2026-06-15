@@ -3,9 +3,9 @@
 Updated manually after each feature ships. Reflects the real state of the platform.
 
 ## Last updated
-- 2026-06-14
+- 2026-06-15
 
-## What is working right now (June 14, 2026)
+## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
   banner — all working.
 - BIMLog Pulse: clash hit sync working — DisplayName = BIMLog Pulse confirmed.
@@ -21,6 +21,19 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   `/api/v1/living-brief/*`, password gate (default BIMAI360, stored hashed), eligibility (super
   admin or granted), F5 intercept to open the brief for eligible admins, super-admin
   password/access controls. PLATFORM.md auto-regenerates on every api-server build.
+- Living Brief F5 system — 5 tabs CLAUDE PLATFORM STATUS VISION AUDIT — password gated BIMAI360 —
+  DB-backed editable docs — Copy Full Brief button — Paste to Update on CLAUDE and VISION tabs —
+  Export current docs button — auto-regenerating PLATFORM.md on every build.
+- AUDIT tab — full wiring audit permanent and accumulating in living-brief/AUDIT.md.
+- BIM Coordination Report PDF — professional PDF export for Lens Viewpoints — cover page, health
+  score, executive summary, main table, watermark, signature block, SHA-256 fingerprint, report
+  number tracking, report history log, pre-generation modal with company info.
+- Shared pdf-kit.ts module — foundation for all future PDF standardization — Round 0 complete.
+- BIMLog Quality Standard — documented in CLAUDE.md — applies to all PDFs platform wide.
+- Database fix — PROD_DATABASE_URL is now canonical and fail-loud — ENV banner now shows real Neon
+  connection — lens_viewpoints data now persists on Neon across all rebuilds.
+- lens_viewpoint_reports table — sequential report numbering ELA01-LV-001 format.
+- lens_viewpoint_events table — status change tracking for future health score calculation.
 
 ## Core platform
 - Auth (JWT), projects, project members/roles, admin panel, super admin.
@@ -36,11 +49,12 @@ Updated manually after each feature ships. Reflects the real state of the platfo
 - Fix Unknown/Unknown trades via ComAPI — element properties are not being read correctly.
 
 ## Active build priorities
-1. Session Brief endpoint — a 300-word summary for Claude session start.
-2. Full agent heartbeat architecture — the 5-layer system with new DB tables.
-3. BIMLog Mirror — build it using the Navisworks Clash API.
-4. Spell check — plugin RichTextBox + platform `spellCheck=true`.
-5. Wire existing agents to save endpoints so they fire automatically.
+1. Navisworks 2025 plugin compatibility — build and package for Ruben.
+2. BIMLog Mirror — bidirectional clash sync.
+3. Full agent heartbeat architecture — 5-layer system.
+4. Wire agents to save endpoints.
+5. PDF standardization Round 1 — remaining reports.
+6. Spell check — plugin RichTextBox and platform `spellCheck=true`.
 
 ## Known bugs
 - Agents not wired to save endpoints — clash-agent, rfi-agent, briefing-agent exist but do not

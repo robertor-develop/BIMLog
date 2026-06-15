@@ -1,0 +1,27 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Read living-brief/PLATFORM.md Critical Database Facts section before touching anything.
+
+Update living-brief/STATUS.md to reflect everything built since June 14 2026. The current STATUS.md is outdated. Add all of the following to the What is working right now section and update Last updated to June 15 2026:
+
+- Living Brief F5 system — 5 tabs CLAUDE PLATFORM STATUS VISION AUDIT — password gated BIMAI360 — DB-backed editable docs — Copy Full Brief button — Paste to Update on CLAUDE and VISION tabs — Export current docs button — auto-regenerating PLATFORM.md on every build
+- AUDIT tab — full wiring audit permanent and accumulating in living-brief/AUDIT.md
+- BIM Coordination Report PDF — professional PDF export for Lens Viewpoints — cover page, health score, executive summary, main table, watermark, signature block, SHA-256 fingerprint, report number tracking, report history log, pre-generation modal with company info
+- Shared pdf-kit.ts module — foundation for all future PDF standardization — Round 0 complete
+- BIMLog Quality Standard — documented in CLAUDE.md — applies to all PDFs platform wide
+- Database fix — PROD_DATABASE_URL is now canonical and fail-loud — ENV banner now shows real Neon connection — lens_viewpoints data now persists on Neon across all rebuilds
+- lens_viewpoint_reports table — sequential report numbering ELA01-LV-001 format
+- lens_viewpoint_events table — status change tracking for future health score calculation
+
+Also update Active build priorities to:
+1. Navisworks 2025 plugin compatibility — build and package for Ruben
+2. BIMLog Mirror — bidirectional clash sync
+3. Full agent heartbeat architecture — 5-layer system
+4. Wire agents to save endpoints
+5. PDF standardization Round 1 — remaining reports
+6. Spell check — plugin RichTextBox and platform spellCheck=true
+
+Do not change anything else in STATUS.md. Just update it accurately.
+
+Print ALL output as plain text. No collapsed boxes.
