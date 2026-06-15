@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable } from "@workspace/db/schema";
-import { createHash } from "crypto";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
+import {
+  PALETTE, statusText, priorityText, computeContentHash,
+  drawCoverPage, sectionBar, drawTable, addPageNumbers,
+} from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
@@ -844,8 +847,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        const hashPayload = JSON.stringify({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, healthScore, snapshot });
-        contentHash = createHash("sha256").update(hashPayload).digest("hex");
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -884,26 +886,15 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       doc.pipe(res);
 
       const W = doc.page.width;
-      const H = doc.page.height;
       const M = 40;
       const CW = W - M * 2;
 
-      // Formal engineering-deliverable palette: navy header bars, white content,
-      // light-grey alternating rows, black text. No priority/status colors.
-      const NAVY = "#1E3A5F";
-      const STATUS_LABEL: Record<string, string> = {
-        open: "Open", follow_up: "Follow Up", waiting_design: "Waiting Design", approved: "Approved", resolved: "Resolved",
-      };
-      const statusLabel = (s: string) => STATUS_LABEL[s] ?? s;
-      // Navy section-header bar — the only fill color in the body of the report.
-      const sectionBar = (label: string, y: number) => {
-        doc.rect(M, y, CW, 20).fill(NAVY);
-        doc.fontSize(11).font("Helvetica-Bold").fillColor("white").text(label, M + 8, y + 5.5, { width: CW - 16 });
-        return y + 26;
-      };
+      // Formal engineering-deliverable palette comes from the shared pdf-kit
+      // module. Navy header bars, white content, light-grey alternating rows,
+      // black text. No priority/status colors.
+      const NAVY = PALETTE.NAVY;
+      const statusLabel = (s: string) => statusText(s);
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
-      const reportTitle = "BIM COORDINATION REPORT";
-      const fmtDate = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       const fmtShort = (v: Date | string | null | undefined) => {
         if (!v) return "—";
         const d = new Date(v);
@@ -911,43 +902,24 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return d.toLocaleDateString();
       };
 
-      // ── COVER PAGE ──
-      doc.rect(0, 0, W, 135).fill("#1E3A5F");
-      if (logoBase64 && logoType) {
-        try {
-          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
-          doc.fontSize(18).font("Helvetica-Bold").fillColor("white").text(companyName, M + 130, 22);
-        } catch {
-          doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
-        }
-      } else {
-        doc.fontSize(26).font("Helvetica-Bold").fillColor("white").text(companyName, M, 20);
-      }
-      doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(reportTitle, M, 16, { align: "right", width: CW });
-      doc.fontSize(8).font("Helvetica").fillColor("#D1D5DB").text("BIMLog Lens Viewpoints", M, 31, { align: "right", width: CW - 105 });
-      // ISO 19650 compliance stamp — small corner (monochrome on the navy band)
-      doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#FFFFFF");
-      doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
-      doc.fontSize(7).font("Helvetica").fillColor("white").text("COMPLIANT", W - M - 92, 57, { width: 92, align: "center" });
-      doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
-      doc.fontSize(10).font("Helvetica-Bold").fillColor("white").text(`Report No: ${reportNumber}`, M, 88);
-      doc.fontSize(9).font("Helvetica").fillColor("white").text(`Date: ${fmtDate(reportDate)}`, M, 104);
-      doc.fontSize(9).font("Helvetica").fillColor("white").text(`Prepared by: ${preparedByName}${preparedByTitle ? ", " + preparedByTitle : ""}`, M, 118);
-      if (submittedTo) doc.fontSize(9).font("Helvetica").fillColor("white").text(`Submitted to: ${submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "right" });
-      if (filters.trade !== "all") doc.fontSize(9).font("Helvetica-Bold").fillColor("white").text(`Issued to: ${filters.trade}`, M + CW / 2, 118, { width: CW / 2, align: "right" });
-
-      // Project info band (neutral light grey)
+      // ── COVER PAGE (shared helper) ──
       const projectAddress = typeof project.location === "string" ? project.location.trim() : "";
-      const bandH = projectAddress ? 58 : 48;
-      doc.rect(0, 135, W, bandH).fill("#F4F6F8");
-      doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 143);
-      let infoY = 165;
-      if (projectAddress) {
-        doc.fontSize(9).font("Helvetica").fillColor("#6B7280").text(projectAddress, M, infoY, { width: CW });
-        infoY += 14;
-      }
-      doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
-        .text(`Project Code: ${project.code}  |  Total Viewpoints: ${total}`, M, infoY);
+      drawCoverPage(doc, {
+        margin: M,
+        logoBase64, logoType,
+        companyName,
+        reportTitle: "BIM COORDINATION REPORT",
+        reportSubtitle: "BIMLog Lens Viewpoints",
+        reportNumber,
+        reportDate,
+        preparedBy: `${preparedByName}${preparedByTitle ? ", " + preparedByTitle : ""}`,
+        submittedTo: submittedTo || undefined,
+        issuedTo: filters.trade !== "all" ? `Issued to: ${filters.trade}` : undefined,
+        isoStamp: true,
+        projectName: project.name,
+        projectAddress,
+        projectMeta: `Project Code: ${project.code}  |  Total Viewpoints: ${total}`,
+      });
 
       // Health score block (monochrome; optional via the modal toggle)
       let cursorY = 198;
@@ -970,14 +942,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // Priority breakdown cards
       const pCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
       vps.forEach(v => { const p = v.priority ?? 0; if (pCounts[p] !== undefined) pCounts[p]++; });
-      const cardY = sectionBar("Executive Summary", doc.y);
-      const pCards = [
-        { label: "P1 CRITICAL", value: pCounts[1] },
-        { label: "P2 HIGH", value: pCounts[2] },
-        { label: "P3 MEDIUM", value: pCounts[3] },
-        { label: "P4 LOW", value: pCounts[4] },
-        { label: "P5 MONITOR", value: pCounts[5] },
-      ];
+      const cardY = sectionBar(doc, "Executive Summary", doc.y, { margin: M });
+      const pCards = [1, 2, 3, 4, 5].map((p) => ({ label: priorityText(p).toUpperCase(), value: pCounts[p] }));
       const pcW = (CW - 40) / 5;
       pCards.forEach((card, i) => {
         const x = M + i * (pcW + 10);
@@ -1022,7 +988,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       if (isOnePager) {
         // Executive one-pager: top 5 most critical unresolved issues, then stop.
         const critical = vps.filter(v => v.status !== "resolved").sort((a, b) => pOrder(a.priority) - pOrder(b.priority)).slice(0, 5);
-        doc.y = sectionBar("Top Critical Unresolved Issues", doc.y);
+        doc.y = sectionBar(doc, "Top Critical Unresolved Issues", doc.y, { margin: M });
         critical.forEach((v, ci) => {
           const yy = doc.y;
           doc.rect(M, yy, CW, 16).fill(ci % 2 === 0 ? "#FFFFFF" : "#F4F6F8");
@@ -1045,70 +1011,34 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
         doc.y = oY + 58;
       } else {
-        // ── MAIN VIEWPOINTS TABLE ──
-        const cols = [
-          { label: "ID", w: 88 },
-          { label: "P", w: 26 },
-          { label: "Trade", w: 78 },
-          { label: "Report Type", w: 84 },
-          { label: "Floor", w: 78 },
-          { label: "Note", w: 226 },
-          { label: "Status", w: 74 },
-          { label: "Captured", w: 58 },
-        ];
-        const tableW = cols.reduce((s, c) => s + c.w, 0);
-        const drawTableHeader = () => {
-          const hY = doc.y;
-          doc.rect(M, hY, tableW, 18).fill("#1E3A5F");
-          let x = M;
-          cols.forEach(col => {
-            doc.fontSize(7).font("Helvetica-Bold").fillColor("white").text(col.label.toUpperCase(), x + 3, hY + 5, { width: col.w - 6 });
-            x += col.w;
-          });
-          doc.y = hY + 20;
-        };
+        // ── MAIN VIEWPOINTS TABLE (shared drawTable helper) ──
         if (doc.y + 60 > 530) { doc.addPage(); doc.y = 40; }
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
-        drawTableHeader();
 
-        const noteW = cols[5].w - 6;
-        vps.forEach((v, idx) => {
-          doc.fontSize(7).font("Helvetica");
-          const noteH = doc.heightOfString(v.note || "—", { width: noteW });
-          const rowH = Math.max(24, noteH + 8);
-          if (doc.y + rowH > 535) {
+        const endY = drawTable(doc, {
+          x: M,
+          startY: doc.y,
+          rows: vps,
+          pageBottom: 535,
+          columns: [
+            { label: "ID", width: 88, bold: true, format: (v) => v.displayId || v.viewpointId || "—" },
+            { label: "P", width: 26, align: "center", bold: true, format: (v) => (v.priority ? `P${v.priority}` : "—") },
+            { label: "Trade", width: 78, format: (v) => v.trade || "—" },
+            { label: "Report Type", width: 84, format: (v) => v.reportType || "—" },
+            { label: "Floor", width: 78, format: (v) => v.floor || "—" },
+            { label: "Note", width: 226, wrap: true, format: (v) => v.note || "—" },
+            { label: "Status", width: 74, format: (v) => statusLabel(v.status) },
+            { label: "Captured", width: 58, color: PALETTE.MUTED, format: (v) => fmtShort(v.capturedAt) },
+          ],
+          onPageBreak: () => {
             doc.addPage();
-            doc.rect(0, 0, W, 25).fill("#1E3A5F");
+            doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
             doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) — Lens Viewpoints Report`, M, 8, { width: CW });
-            doc.y = 35;
-            drawTableHeader();
-          }
-          const rY = doc.y;
-          doc.rect(M, rY, tableW, rowH).fill(idx % 2 === 0 ? "white" : "#F9FAFB");
-          let x = M;
-          // ID
-          doc.fontSize(7).font("Helvetica-Bold").fillColor("#111827").text(v.displayId || v.viewpointId || "—", x + 3, rY + 5, { width: cols[0].w - 6, height: rowH - 6, ellipsis: true, lineBreak: false });
-          x += cols[0].w;
-          // Priority (plain text, no colored badge)
-          doc.fontSize(7).font("Helvetica-Bold").fillColor("#111827").text(v.priority ? `P${v.priority}` : "—", x + 2, rY + 5, { width: cols[1].w - 4, align: "center" });
-          x += cols[1].w;
-          // Trade, Report Type, Floor
-          [v.trade || "—", v.reportType || "—", v.floor || "—"].forEach((val, i) => {
-            doc.fontSize(7).font("Helvetica").fillColor("#111827").text(String(val), x + 2, rY + 5, { width: cols[2 + i].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
-            x += cols[2 + i].w;
-          });
-          // Note (full text, wrapped)
-          doc.fontSize(7).font("Helvetica").fillColor("#111827").text(v.note || "—", x + 3, rY + 5, { width: noteW });
-          x += cols[5].w;
-          // Status
-          doc.fontSize(7).font("Helvetica").fillColor("#111827").text(statusLabel(v.status), x + 2, rY + 5, { width: cols[6].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
-          x += cols[6].w;
-          // Captured
-          doc.fontSize(7).font("Helvetica").fillColor("#6B7280").text(fmtShort(v.capturedAt), x + 2, rY + 5, { width: cols[7].w - 4, height: rowH - 6, ellipsis: true, lineBreak: false });
-          doc.rect(M, rY, tableW, rowH).stroke("#E5E7EB");
-          doc.y = rY + rowH;
+            return 35;
+          },
         });
+        doc.y = endY;
 
         // ── SIGNATURE BLOCK (last page) ──
         if (doc.y + 110 > 535) { doc.addPage(); doc.y = 45; }
@@ -1133,27 +1063,17 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
       }
 
-      // ── WATERMARK + SHA + FOOTER on every page ──
-      const range = doc.bufferedPageRange();
+      // ── WATERMARK + SHA + FOOTER on every page (shared helper) ──
       const footerDate = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-      for (let i = 0; i < range.count; i++) {
-        doc.switchToPage(range.start + i);
-        // Diagonal watermark
-        doc.save();
-        doc.rotate(-30, { origin: [W / 2, H / 2] });
-        doc.fontSize(72).font("Helvetica-Bold").fillColor("#1E3A5F").fillOpacity(0.07)
-          .text(watermarkText, 0, H / 2 - 50, { width: W, align: "center" });
-        doc.restore();
-        doc.fillOpacity(1);
-        // SHA-256 fingerprint above footer on last page
-        if (i === range.count - 1) {
-          doc.fontSize(6.5).font("Helvetica").fillColor("#9CA3AF")
-            .text(`Document SHA-256: ${contentHash}`, M, 548, { width: CW, align: "center", lineBreak: false });
-        }
-        // Footer
-        doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF")
-          .text(`${companyName} | ${project.name} | ${reportNumber} | ${footerDate} | Page ${i + 1} of ${range.count} | Powered by BIMLog | IgniteSmart.ai`, M, 560, { align: "center", width: CW, lineBreak: false });
-      }
+      addPageNumbers(doc, {
+        margin: M,
+        watermarkText,
+        contentHash,
+        companyName,
+        projectName: project.name,
+        reportNumber,
+        timestamp: footerDate,
+      });
 
       doc.end();
     } catch (err) {

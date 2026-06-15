@@ -1,0 +1,76 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Two things. Do them in order.
+
+FIRST — Update living-brief/CLAUDE.md. Add a new section called BIMLog Quality Standard at the end. This section must be read and followed in every future build session. Add this exact content:
+
+## BIMLog Quality Standard — mandatory on every build
+
+### PDF Reports — every single report must follow this standard
+- Every PDF has a cover page (for documents) or branded running header (for logs)
+- Every PDF has company logo via getCompanyLogo
+- Every PDF has page numbers Page X of Y using bufferedPageRange and switchToPage
+- Every PDF has a consistent footer — BIMLog by IgniteSmart, timestamp, report number
+- Every PDF has SHA-256 fingerprint of the data snapshot on the last page
+- Monochrome design only — navy section header bars (#1E3A5F), white content, alternating light grey rows (#F8FAFC), black text throughout
+- No color badges anywhere — priority and status always plain text
+- Consistent column widths — no text wrapping mid-word — use the shared drawTable helper
+- All reports use the shared pdf-kit.ts helpers — never bespoke inline implementations
+- Cover for formal documents — Coordination Report, Audit Certificate, Dispute Report, Tracking Reports
+- Branded running header for logs — RFI Log, Submittal Log, Change Order Log, Transmittal Log
+
+### Platform UI — consistency rules
+- Consistent column widths in all tables — no text wrapping mid-word
+- Consistent header style across all modules
+- Consistent action button placement — always in the same position per row
+- Consistent status labels platform wide — same words for same things everywhere
+- Consistent empty states — every table has a proper empty state message
+- Consistent error messages — never raw database errors shown to users
+
+### Excel exports — every export must follow this standard
+- Branded header row with BIMLog by IgniteSmart and project name
+- Consistent column structure per module
+- No raw database field names as column headers — always human readable labels
+- Auto-sized columns — no truncated content
+
+### Terminology — platform wide
+- Priority labels: P1 Critical, P2 High, P3 Medium, P4 Low, P5 Monitor
+- Status labels: Open, Follow Up, Waiting Design, Approved, Resolved
+- Never use database field names in the UI or in reports
+
+SECOND — Start Round 0 of the PDF standardization. Build the shared pdf-kit module at artifacts/api-server/src/lib/pdf-kit.ts with these shared helpers:
+- drawCoverPage(doc, opts) — navy cover page with logo, project name, report title, subtitle, report number, date, prepared by, ISO 19650 stamp
+- drawBrandedHeader(doc, opts) — running header for log-style reports with logo, title, project, report number
+- drawFooter(doc, opts) — canonical footer: BIMLog by IgniteSmart, timestamp, report number
+- addPageNumbers(doc, opts) — bufferedPageRange + switchToPage Page X of Y loop
+- drawWatermark(doc, text) — diagonal watermark DRAFT / ISSUED FOR COORDINATION / SUPERSEDED
+- appendFingerprint(doc, contentHash) — SHA-256 line on last page
+- computeContentHash(payload) — SHA-256 of data snapshot not rendered bytes
+- sectionBar(doc, label, y) — navy section header bar promoted from clash_reports.ts
+- drawTable(doc, opts) — the workhorse: fixed column widths, navy header, alternating grey rows, black text, no mid-word wrapping, ellipsis on overflow
+- PALETTE constant — NAVY #1E3A5F, ROW_ALT #F8FAFC, TEXT #000000, margins, fonts
+- statusText(status) — canonical status label map
+- priorityText(priority) — canonical priority label map
+
+After building the shared module refactor the Lens Viewpoints BIM Coordination Report in clash_reports.ts to consume the new shared helpers. This proves the helpers work correctly using the report we already know looks right as the reference. Generate a sample PDF and confirm it matches the existing output before moving on.
+
+Do not touch any other report yet. Round 1 comes after we confirm Round 0 works.
+
+Check 1:
+ls artifacts/api-server/src/lib/
+
+Check 2:
+grep -n "drawCoverPage\|drawBrandedHeader\|drawFooter\|drawTable\|sectionBar\|appendFingerprint\|computeContentHash\|addPageNumbers\|drawWatermark\|PALETTE\|statusText\|priorityText" artifacts/api-server/src/lib/pdf-kit.ts | head -20
+
+Check 3:
+grep -n "pdf-kit\|pdfKit\|from.*pdf" artifacts/api-server/src/routes/clash_reports.ts | head -10
+
+Check 4:
+wc -l living-brief/CLAUDE.md
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL output as plain text. No collapsed boxes.

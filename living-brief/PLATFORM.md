@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-06-15T00:02:05.519Z
+> Last generated: 2026-06-15T00:24:21.210Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -91,6 +91,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts/api-server/src/lib/extract-file-text.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
+- artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
 - artifacts/api-server/src/lib/project-intelligence.ts
 

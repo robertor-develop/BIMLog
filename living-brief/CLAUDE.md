@@ -134,3 +134,37 @@ When writing an instruction for Roberto to paste into Replit:
 - Never hand-edit PLATFORM.md (it is regenerated on every build).
 - Never change GenerateFingerprint or delete clashes server-side between syncs.
 - Never call Navisworks UI operations from a background thread.
+
+## BIMLog Quality Standard — mandatory on every build
+
+### PDF Reports — every single report must follow this standard
+- Every PDF has a cover page (for documents) or branded running header (for logs)
+- Every PDF has company logo via getCompanyLogo
+- Every PDF has page numbers Page X of Y using bufferedPageRange and switchToPage
+- Every PDF has a consistent footer — BIMLog by IgniteSmart, timestamp, report number
+- Every PDF has SHA-256 fingerprint of the data snapshot on the last page
+- Monochrome design only — navy section header bars (#1E3A5F), white content, alternating light grey rows (#F8FAFC), black text throughout
+- No color badges anywhere — priority and status always plain text
+- Consistent column widths — no text wrapping mid-word — use the shared drawTable helper
+- All reports use the shared pdf-kit.ts helpers — never bespoke inline implementations
+- Cover for formal documents — Coordination Report, Audit Certificate, Dispute Report, Tracking Reports
+- Branded running header for logs — RFI Log, Submittal Log, Change Order Log, Transmittal Log
+
+### Platform UI — consistency rules
+- Consistent column widths in all tables — no text wrapping mid-word
+- Consistent header style across all modules
+- Consistent action button placement — always in the same position per row
+- Consistent status labels platform wide — same words for same things everywhere
+- Consistent empty states — every table has a proper empty state message
+- Consistent error messages — never raw database errors shown to users
+
+### Excel exports — every export must follow this standard
+- Branded header row with BIMLog by IgniteSmart and project name
+- Consistent column structure per module
+- No raw database field names as column headers — always human readable labels
+- Auto-sized columns — no truncated content
+
+### Terminology — platform wide
+- Priority labels: P1 Critical, P2 High, P3 Medium, P4 Low, P5 Monitor
+- Status labels: Open, Follow Up, Waiting Design, Approved, Resolved
+- Never use database field names in the UI or in reports
