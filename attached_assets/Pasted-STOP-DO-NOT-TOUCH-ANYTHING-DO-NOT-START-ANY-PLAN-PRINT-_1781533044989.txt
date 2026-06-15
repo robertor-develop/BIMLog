@@ -1,0 +1,28 @@
+STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Two things. Do them in order.
+
+FIRST — Fix the misleading startup banner in artifacts/api-server/src/app.ts. The banner currently prints DB_HOST: helium and DB_NAME: heliumdb even though the app connects to Neon via PROD_DATABASE_URL. Fix it to show the actual connection target by parsing the hostname and database name from PROD_DATABASE_URL.
+
+SECOND — Update living-brief/PLATFORM.md. Add a new section called Critical Database Facts — Read Before Every Session with this exact content:
+
+PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
+DATABASE_URL = Replit built-in heliumdb. Used ONLY by drizzle-kit CLI for schema migrations. Never used at runtime. Data here is ephemeral and resets on rebuild.
+The ENV startup banner historically showed DB_HOST: helium and DB_NAME: heliumdb — this was MISLEADING. It was reading PGHOST and PGDATABASE which point to heliumdb not the actual runtime connection. This has now been fixed.
+NEVER diagnose data loss by querying heliumdb. Always query Neon via PROD_DATABASE_URL.
+NEVER trust PGHOST or PGDATABASE for runtime database diagnostics.
+lens_viewpoints data that appeared to disappear on rebuild was never on Neon — it was on heliumdb which resets. All writes now go to Neon and survive all rebuilds.
+Any future database diagnostics must confirm PROD_DATABASE_URL is the connection target before drawing any conclusions.
+
+Check 1:
+grep -n "PGHOST\|PGDATABASE\|helium\|DB_HOST\|DB_NAME" artifacts/api-server/src/app.ts | head -10
+
+Check 2:
+grep -n "Critical Database\|PROD_DATABASE_URL\|heliumdb" living-brief/PLATFORM.md | head -10
+
+MANDATORY BEFORE PUBLISH:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild BOTH apps. Restart API server. Publish.
+Print ALL output as plain text. No collapsed boxes.

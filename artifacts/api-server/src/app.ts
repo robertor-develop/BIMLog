@@ -6,8 +6,19 @@ import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
-const DB_HOST = process.env.PGHOST || "unknown";
-const DB_NAME = process.env.PGDATABASE || "unknown";
+// The banner MUST reflect the ACTUAL runtime connection, which is always
+// PROD_DATABASE_URL (Neon). Do NOT use PGHOST/PGDATABASE — those point at the
+// unused Replit built-in heliumdb and previously made this banner lie about the
+// real database, causing false "data loss" diagnoses.
+let DB_HOST = "unknown";
+let DB_NAME = "unknown";
+try {
+  const dbUrl = new URL(process.env.PROD_DATABASE_URL ?? "");
+  DB_HOST = dbUrl.hostname || "unknown";
+  DB_NAME = dbUrl.pathname.replace(/^\//, "") || "unknown";
+} catch {
+  // PROD_DATABASE_URL missing/unparseable — lib/db already fails loud on boot.
+}
 
 console.log("========================================");
 console.log(`[ENV] MODE: ${ENV_MODE}`);

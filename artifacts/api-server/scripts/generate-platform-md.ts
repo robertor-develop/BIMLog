@@ -59,6 +59,15 @@ export function generatePlatformMd(): void {
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
+## Critical Database Facts — Read Before Every Session
+- PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
+- DATABASE_URL = Replit built-in heliumdb. Used ONLY by drizzle-kit CLI for schema migrations. Never used at runtime. Data here is ephemeral and resets on rebuild.
+- The ENV startup banner historically showed DB_HOST: helium and DB_NAME: heliumdb — this was MISLEADING. It was reading PGHOST and PGDATABASE which point to heliumdb not the actual runtime connection. This has now been fixed.
+- NEVER diagnose data loss by querying heliumdb. Always query Neon via PROD_DATABASE_URL.
+- NEVER trust PGHOST or PGDATABASE for runtime database diagnostics.
+- lens_viewpoints data that appeared to disappear on rebuild was never on Neon — it was on heliumdb which resets. All writes now go to Neon and survive all rebuilds.
+- Any future database diagnostics must confirm PROD_DATABASE_URL is the connection target before drawing any conclusions.
+
 ## Monorepo shape
 - pnpm workspaces.
 - artifacts/bimlog — React + Vite + wouter web app (the BIMLog UI).
