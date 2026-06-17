@@ -59,6 +59,44 @@ function repairPluginJson(text: string): { repaired: string; fixes: number } {
   return { repaired: out, fixes };
 }
 
+// The Navisworks plugin serializes Issue Notes without escaping control
+// characters, so a multi-line note injects raw line breaks (and tabs) INSIDE a
+// JSON string literal. JSON forbids unescaped control chars (charCode < 0x20)
+// inside strings, so JSON.parse throws "Bad control character in string literal"
+// and the whole request is rejected. This walks the text string-aware and
+// escapes only control chars that fall inside a string literal (whitespace
+// between tokens stays untouched). Returns the repaired text and fix count.
+function escapeJsonStringControlChars(text: string): { repaired: string; fixes: number } {
+  let out = "";
+  let fixes = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inStr) {
+      if (esc) { out += ch; esc = false; continue; }
+      if (ch === "\\") { out += ch; esc = true; continue; }
+      if (ch === '"') { out += ch; inStr = false; continue; }
+      const code = text.charCodeAt(i);
+      if (code < 0x20) {
+        if (ch === "\n") out += "\\n";
+        else if (ch === "\r") out += "\\r";
+        else if (ch === "\t") out += "\\t";
+        else if (ch === "\b") out += "\\b";
+        else if (ch === "\f") out += "\\f";
+        else out += "\\u" + code.toString(16).padStart(4, "0");
+        fixes++;
+        continue;
+      }
+      out += ch;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    out += ch;
+  }
+  return { repaired: out, fixes };
+}
+
 const router: Router = Router();
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
@@ -449,6 +487,42 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
 // Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not
 // captured by the :reportId path parameter.
 router.post("/projects/:projectId/clash-reports/lens-sync",
+  // The raw-body bypass in app.ts buffered the bytes and skipped express.json for
+  // this path, so we parse here. Long Issue Notes arrive with raw line breaks /
+  // tabs left unescaped inside string literals, which plain JSON.parse rejects;
+  // escape those control chars (then fall back to the structural/decimal repair)
+  // so a viewpoint with a long multi-line note still syncs.
+  (req, _res, next) => {
+    const raw = (req as unknown as { rawBody?: Buffer }).rawBody;
+    try {
+      const hasViewpoints = req.body && typeof req.body === "object" && Array.isArray((req.body as { viewpoints?: unknown }).viewpoints);
+      if (!hasViewpoints && raw && raw.length) {
+        const text = raw.toString("utf8").replace(/^\uFEFF/, "").trim();
+        if (text.startsWith("{") || text.startsWith("[")) {
+          try {
+            req.body = JSON.parse(text);
+          } catch (parseErr) {
+            const { repaired: ctrlFixed, fixes: ctrlFixes } = escapeJsonStringControlChars(text);
+            try {
+              req.body = JSON.parse(ctrlFixed);
+              if (ctrlFixes > 0) console.warn("[lens-sync] escaped", ctrlFixes, "raw control char(s) inside string literal(s) from plugin payload");
+            } catch {
+              const { repaired, fixes } = repairPluginJson(ctrlFixed);
+              if (fixes > 0 || ctrlFixes > 0) {
+                req.body = JSON.parse(repaired);
+                console.warn("[lens-sync] repaired", fixes, "structural defect(s) +", ctrlFixes, "control char(s) from plugin payload");
+              } else {
+                throw parseErr;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[lens-sync] body recovery failed:", e instanceof Error ? e.message : String(e));
+    }
+    next();
+  },
   authMiddleware,
   requirePermission("admin", "write"),
   async (req, res) => {

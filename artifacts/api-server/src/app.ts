@@ -44,15 +44,17 @@ const jsonTypeMatcher = (req: Request): boolean => {
   return ct.includes("json") || ct.includes("text/plain");
 };
 
-// The Navisworks plugin posts to plugin-sync with occasionally malformed JSON
-// (trailing/double commas from its serializer). express.json would throw a 400
-// before the route runs, so for this path we buffer the raw bytes ourselves and
-// mark _body=true so express.json/urlencoded skip it. The route then parses the
-// raw bytes with a string-aware repair.
-const PLUGIN_SYNC_RE = /\/clash-reports\/plugin-sync$/;
-const PLUGIN_SYNC_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
+// The Navisworks plugin posts to plugin-sync and lens-sync with occasionally
+// malformed JSON: trailing/double commas and locale decimal commas from its
+// serializer, and — for long Issue Notes — raw control characters (line breaks /
+// tabs) left unescaped inside string literals. express.json would throw before
+// the route runs, so for these paths we buffer the raw bytes ourselves and mark
+// _body=true so express.json/urlencoded skip them. The route then parses the raw
+// bytes with a string-aware repair.
+const RAW_BODY_BYPASS_RE = /\/clash-reports\/(plugin-sync|lens-sync)$/;
+const RAW_BODY_BYPASS_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.method !== "POST" || !PLUGIN_SYNC_RE.test(req.path)) return next();
+  if (req.method !== "POST" || !RAW_BODY_BYPASS_RE.test(req.path)) return next();
   const chunks: Buffer[] = [];
   let total = 0;
   let done = false;
@@ -60,7 +62,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.on("data", (c: Buffer) => {
     if (done) return;
     total += c.length;
-    if (total > PLUGIN_SYNC_MAX_BYTES) {
+    if (total > RAW_BODY_BYPASS_MAX_BYTES) {
       finish(() => {
         chunks.length = 0; // free what we buffered; further chunks are ignored via the done guard
         res.status(413).json({ error: "payload_too_large", message: "Request body exceeds 500mb limit" });

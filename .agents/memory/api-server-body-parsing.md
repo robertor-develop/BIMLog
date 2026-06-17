@@ -29,3 +29,11 @@ Two distinct defects, both producing `SyntaxError: Expected double-quoted proper
 **Why the manual buffer needs its own size cap:** bypassing `express.json` for this path also bypasses its `limit: 50mb`, creating a pre-auth memory-exhaustion DoS. The custom reader MUST enforce its own byte cap (mirror 50mb), respond 413 on overflow, and free buffered chunks. Do NOT `req.destroy()` to reject — that resets the connection and the edge proxy returns 502 instead of 413; instead use a `done` guard, clear chunks, send 413, and let further chunks be discarded by the guard.
 
 **Root cause is client-side:** the proper fix is the plugin serializing via a real JSON serializer (Newtonsoft / System.Text.Json) instead of string concatenation. The server repair is a kept belt-and-suspenders guard (user chose "both").
+
+# lens-sync raw control chars in Issue Notes -> was 500
+
+The Navisworks plugin does NOT escape control characters when serializing the free-text Issue Note, so a multi-line/tabbed note injects raw `\n`/`\t` (charCode < 0x20) INSIDE a JSON string literal. JSON forbids that, so `JSON.parse`/`express.json` throws `Bad control character in string literal in JSON at position N` and the whole request 500s — short single-line notes sync fine, long ones fail. Symptom: plugin shows "Synced: 5 | Waiting: 1" / "Sync errors".
+
+**Fix shape (mirrors plugin-sync):** the app.ts raw-body bypass regex covers BOTH paths (`/clash-reports/(plugin-sync|lens-sync)$`) so `express.json` is skipped and `req.rawBody` is buffered. The lens-sync route's own pre-auth middleware parses rawBody; on failure it runs `escapeJsonStringControlChars()` (string-aware: escapes control chars only while `inStr`, leaves inter-token whitespace alone) then re-parses, finally falling back to `repairPluginJson()`. Any NEW plugin POST path that carries free text must be added to the bypass regex AND given this recovery, or it will hard-fail the same way.
+
+**Note column is already TEXT (unlimited)** — no length limit ever blocked storage; the only blocker was JSON parsing of control chars.
