@@ -467,13 +467,15 @@ export const UpsertConventionBody = zod.object({
   applyCharLimits: zod.boolean().optional(),
   companyCode: zod.string().optional(),
   userGuidance: zod.string().optional(),
-  fields: zod.array(
-    zod.object({
-      label: zod.string(),
-      fieldOrder: zod.number(),
-      allowedValues: zod.array(zod.string()),
-    }),
-  ),
+  fields: zod
+    .array(
+      zod.object({
+        label: zod.string(),
+        fieldOrder: zod.number(),
+        allowedValues: zod.array(zod.string()),
+      }),
+    )
+    .optional(),
 });
 
 export const UpsertConventionResponse = zod.object({

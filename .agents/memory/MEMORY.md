@@ -5,6 +5,7 @@
 - [bimlog vite build needs PORT](bimlog-vite-build.md) — `pnpm build` fails loading vite.config.ts unless PORT env is set (use `PORT=3000 pnpm build`)
 - [api-server tsc stale cache](api-server-tsc-cache.md) — tsc errors re missing @workspace/db/schema exports/columns are stale lib/db tsconfig.tsbuildinfo; clear it + `tsc -b`; esbuild build is the real gate
 - [clash_reports route ordering](clash-reports-route-order.md) — GET .../:reportId has no NaN guard, so any literal sub-path (lens-pull, plugin-pull) MUST be registered before it
+- [Foundational Settings scalar save](convention-scalar-save.md) — UpsertConventionBody.fields MUST stay .optional() (spec+generated) or scalar-only Foundational save 400s for everyone; hasFields guard treats undefined==[]==no-op
 - [DB verification target mismatch](db-verification-target.md) — executeSql hits DATABASE_URL (local PG); api-server uses a separate Neon DB, so app tables look empty. Verify via migration logs/API, not executeSql.
 - [Super-admin bootstrap guard](super-admin-bootstrap.md) — never re-assert is_super_admin by email every boot; only elevate when zero super admins exist
 - [Lens Viewpoints report design](lens-report-design.md) — monochrome navy-header-only PDF; clash-detection PDF (~1338+) is a separate, still-colored report

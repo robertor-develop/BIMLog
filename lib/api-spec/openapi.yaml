@@ -1169,7 +1169,6 @@ components:
       required:
         - separator
         - isActive
-        - fields
 
     ProjectMember:
       type: object
