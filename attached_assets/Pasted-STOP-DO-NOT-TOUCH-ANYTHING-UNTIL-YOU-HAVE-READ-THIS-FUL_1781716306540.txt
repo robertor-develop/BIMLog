@@ -1,0 +1,58 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Read living-brief/PLATFORM.md Critical Database Facts section before touching anything.
+
+We are adding a SIXTH Living Brief document called PLUGIN.md, covering the Navisworks
+C# plugin — a completely separate codebase you do not own, do not touch, and will never
+be asked to modify. This document is written and updated manually by Roberto and Claude
+directly (in PowerShell, outside this platform), then pasted into this new tab the exact
+same way CLAUDE.md and VISION.md are pasted today via "Paste to Update." You are only
+building the TAB and its storage/editing mechanism — never its content.
+
+STEP 1 — READ ONLY, BEFORE CHANGING ANYTHING. Show us:
+
+1. The full schema/table structure that stores the five existing Living Brief documents —
+   show the actual schema in lib/db/src/schema/ (or wherever it lives) that backs
+   living_brief.ts.
+2. The exact route(s) in artifacts/api-server/src/routes/living_brief.ts that handle
+   "Paste to Update" for CLAUDE.md and VISION.md specifically — show the real GET and
+   PUT/POST handlers and their payload shape, since PLUGIN.md needs to behave exactly
+   like those two (manually pasted, fully editable), NOT like PLATFORM.md (auto-generated,
+   read-only) and NOT like AUDIT.md (append-only).
+3. The tab list/array in artifacts/bimlog/src/pages/LivingBrief.tsx that renders the five
+   tabs (CLAUDE / PLATFORM / STATUS / VISION / AUDIT) — show exactly where and how a sixth
+   tab gets added.
+4. Confirm whether the password-gate or eligibility logic (BIMAI360, is_super_admin /
+   can_access_living_brief) hardcodes the document count or names anywhere, which would
+   need updating to recognize a sixth doc.
+5. Confirm whether "Export current docs" and "Copy Full Brief" iterate over a fixed list
+   of documents that would need PLUGIN.md added to it.
+
+Print all of this first. Do not write or change a single line of code yet.
+
+STEP 2 — ONLY AFTER STEP 1 IS SHOWN AND WE CONFIRM, implement:
+
+- Add PLUGIN.md as a sixth tab, positioned after VISION and before AUDIT in the tab order.
+- It must support "Paste to Update" exactly like CLAUDE.md and VISION.md — full manual
+  replace on paste, DB-backed, survives deploys, no auto-generation, no auto-append.
+- It must be included in "Copy Full Brief" and "Export current docs."
+- It must respect the existing password gate and eligibility check — no new permission
+  model, reuse exactly what already gates the other five tabs.
+- Seed it initially with placeholder content: "PLUGIN.md — not yet populated. Paste content
+  via Paste to Update." Do not invent or guess plugin content — Roberto and Claude will
+  paste the real content separately, in full, once the tab exists.
+
+After implementing, show:
+1. The exact diff for the schema change (if any).
+2. The exact diff for the living_brief.ts route changes.
+3. The exact diff for the LivingBrief.tsx tab addition.
+4. Confirm via direct query against PROD_DATABASE_URL (Neon) that the five existing
+   documents (CLAUDE.md, PLATFORM.md, STATUS.md, VISION.md, AUDIT.md) are completely
+   unchanged — same content, same length — proving this addition did not touch or
+   truncate any existing document.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.
