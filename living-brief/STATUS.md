@@ -3,7 +3,7 @@
 Updated manually after each feature ships. Reflects the real state of the platform.
 
 ## Last updated
-- 2026-06-15
+- 2026-06-17
 
 ## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
@@ -34,6 +34,23 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   connection — lens_viewpoints data now persists on Neon across all rebuilds.
 - lens_viewpoint_reports table — sequential report numbering ELA01-LV-001 format.
 - lens_viewpoint_events table — status change tracking for future health score calculation.
+- Navisworks 2025 plugin — built and confirmed working on Ruben's machine using his real Navisworks
+  2025 DLLs. Build directory is H:\BIMLogPlugin2025 on Roberto's machine, separate from the 2021
+  production build at C:\Dev\BIMLogPlugin\BIMLogNavisPlugin. Packaged with a bat file installer and
+  sent to Ruben directly. Platform-based download delivery not yet built.
+
+## Active Investigations
+- Building Levels data location — Roberto is looking at a live Building Levels section in Convention
+  Builder for project 26 showing real configured values (B1, G0, L1-L10, RF, ZZ). A prior
+  investigation incorrectly concluded no structured floor data exists anywhere. Needs a corrected
+  investigation into where this data actually lives and how the plugin and Lens Viewpoints page
+  should read it.
+- Redline interception architecture — Ruben relies heavily on Navisworks native Text and Draw/Eraser
+  tools in the Review tab. These tools auto-create untracked Navisworks viewpoints that BIMLog Lens
+  never sees, separate from Tag, Measure, and View Comments which work fine. Needs investigation into
+  Navisworks Comment/Redline API events to determine if BIMLog Lens can intercept the Text tool's OK
+  click before Navisworks creates its own viewpoint, and capture pen/Draw markups into the
+  BIMLog-saved viewpoint instead of relying on Navisworks auto-save.
 
 ## Core platform
 - Auth (JWT), projects, project members/roles, admin panel, super admin.
