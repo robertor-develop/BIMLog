@@ -58,3 +58,31 @@ GENUINE WIRING GAPS TO FIX (priority order)
 PRODUCTION DB TABLE COUNTS AT TIME OF AUDIT
 
 action_items: 0, activity_log: 108, admin_actions_log: 2, agent_insights: 2, change_order_documents: 0, change_orders: 0, clash_reports: 4, clashes: 1483, companies: 3, company_profiles: 0, config_options: 90, contact_submissions: 0, coordination_intake_events: 7, email_log: 6, feature_flags: 11, files: 4, lens_viewpoints: 5, linked_items: 0, meeting_attendees: 14, meeting_minutes: 1, naming_convention_versions: 20, naming_conventions: 5, naming_fields: 40, notifications: 0, project_directory: 0, project_invitations: 0, project_members: 7, project_milestones: 1, projects: 6, rfi_ball_in_court_history: 0, rfi_responses: 1, rfi_view_events: 1, rfis: 4, submittal_items: 0, submittal_register: 0, submittal_reports: 1, submittal_view_events: 0, submittals: 1, transmittal_items: 0, transmittals: 0, users: 4.
+
+Naming Field Data Integrity Audit — 2026-06-17
+
+Context: a confirmed data-integrity bug let the "Foundational Settings" editor send a fields
+array that wiped naming-field dictionaries on already-completed conventions. Fixes deployed:
+EditFoundationScreen now sends scalar settings only (no fields); the PUT conventions route
+only rebuilds naming_fields when a complete, valid fields array is present and rejects any
+field-carrying save that would empty a required dictionary on a completed convention; the
+Convention Builder hydrates the real saved Level list and shows a repair banner instead of
+masking missing data with defaults.
+
+Audit query: every completed convention whose required fields (Level, Sequence, Status,
+Revision, Discipline, Type) have an empty allowedValues array.
+
+Findings (PROD / Neon):
+- project_id=23  field=Level      values=0
+- project_id=23  field=Revision   values=0
+- project_id=23  field=Sequence   values=0
+- project_id=23  field=Status     values=0
+
+No other completed convention has any empty required field. Projects 24, 26, 28, 29, 30 are
+intact. Verified unchanged by this work: project 26 Level = [B1,G0,L1-L10,RF,ZZ];
+project 24 Level = 23 values; project 28 Level = 22 values.
+
+REMEDIATION REQUIRED (not auto-fixed): project 23's Level, Sequence, Status, and Revision
+values are confirmed unrecoverable from version history. A human must re-enter the correct
+values through the full convention wizard (the safe path). Per decision, project 23 was NOT
+modified by this work.

@@ -126,9 +126,23 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       return null;
     }
 
+    // Decision 2: a non-empty fields array is the signal that this save came from the real full
+    // convention wizard. A scalar-only edit (Foundational Settings) sends no fields and must
+    // leave naming_fields completely untouched.
+    const hasFields = Array.isArray(body.fields) && body.fields.length > 0;
+
     let newSetupStatus: string;
     if (currentStatus === "completed") {
       newSetupStatus = "completed";
+      // Never allow an already-completed convention's required dictionaries to be wiped. This
+      // runs on EVERY field-carrying save, not only when markCompleted is sent.
+      if (hasFields) {
+        const integrityError = verifyCompletionPayload();
+        if (integrityError) {
+          res.status(400).json({ error: `Rejected: ${integrityError}` });
+          return;
+        }
+      }
     } else if (explicitComplete) {
       const completionError = verifyCompletionPayload();
       if (completionError) {
@@ -159,7 +173,11 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
 
       conventionId = updated.id;
 
-      await db.delete(namingFieldsTable).where(eq(namingFieldsTable.conventionId, conventionId));
+      // Decision 2: only rebuild fields when the request actually carries a complete fields
+      // array. If fields is missing/empty, leave existing naming_fields rows untouched.
+      if (hasFields) {
+        await db.delete(namingFieldsTable).where(eq(namingFieldsTable.conventionId, conventionId));
+      }
     } else {
       const [created] = await db
         .insert(namingConventionsTable)
@@ -178,40 +196,44 @@ router.put("/projects/:projectId/conventions", authMiddleware, requirePermission
       conventionId = created.id;
     }
 
-    // Ensure "Project Code" field is always first with the project's code as allowed value
-    const projectRow = await db
-      .select({ code: projectsTable.code })
-      .from(projectsTable)
-      .where(eq(projectsTable.id, projectId))
-      .limit(1);
-    const projectCode = projectRow[0]?.code ?? "";
+    // Decision 2: only (re)build naming_fields when the request carries a complete fields array.
+    // A scalar-only save (no fields) leaves the existing field rows exactly as they were.
+    if (hasFields) {
+      // Ensure "Project Code" field is always first with the project's code as allowed value
+      const projectRow = await db
+        .select({ code: projectsTable.code })
+        .from(projectsTable)
+        .where(eq(projectsTable.id, projectId))
+        .limit(1);
+      const projectCode = projectRow[0]?.code ?? "";
 
-    interface ConventionField {
-      label: string;
-      fieldOrder: number;
-      allowedValues: string[];
-    }
-    const incoming: ConventionField[] = (body.fields ?? []) as ConventionField[];
-    const existingPC = incoming.find(f => f.label === "Project Code");
-    const otherFields = incoming.filter(f => f.label !== "Project Code");
-    const pcAllowed = existingPC?.allowedValues && existingPC.allowedValues.length > 0
-      ? (existingPC.allowedValues.includes(projectCode) || !projectCode
-          ? existingPC.allowedValues
-          : [projectCode, ...existingPC.allowedValues])
-      : (projectCode ? [projectCode] : []);
+      interface ConventionField {
+        label: string;
+        fieldOrder: number;
+        allowedValues: string[];
+      }
+      const incoming: ConventionField[] = (body.fields ?? []) as ConventionField[];
+      const existingPC = incoming.find(f => f.label === "Project Code");
+      const otherFields = incoming.filter(f => f.label !== "Project Code");
+      const pcAllowed = existingPC?.allowedValues && existingPC.allowedValues.length > 0
+        ? (existingPC.allowedValues.includes(projectCode) || !projectCode
+            ? existingPC.allowedValues
+            : [projectCode, ...existingPC.allowedValues])
+        : (projectCode ? [projectCode] : []);
 
-    const fieldsToInsert = [
-      { conventionId, label: "Project Code", fieldOrder: 0, allowedValues: pcAllowed },
-      ...otherFields.map((f, i) => ({
-        conventionId,
-        label: f.label,
-        fieldOrder: i + 1,
-        allowedValues: f.allowedValues ?? [],
-      })),
-    ];
+      const fieldsToInsert = [
+        { conventionId, label: "Project Code", fieldOrder: 0, allowedValues: pcAllowed },
+        ...otherFields.map((f, i) => ({
+          conventionId,
+          label: f.label,
+          fieldOrder: i + 1,
+          allowedValues: f.allowedValues ?? [],
+        })),
+      ];
 
-    if (fieldsToInsert.length > 0) {
-      await db.insert(namingFieldsTable).values(fieldsToInsert);
+      if (fieldsToInsert.length > 0) {
+        await db.insert(namingFieldsTable).values(fieldsToInsert);
+      }
     }
 
     const convention = await db

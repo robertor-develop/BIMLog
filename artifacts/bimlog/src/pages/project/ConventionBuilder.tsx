@@ -2363,7 +2363,7 @@ function deriveDocTypesGuidance(state: WizardState, lang: string): {
 }
 
 // ─── step 2 ───────────────────────────────────────────────────────────────────
-function Step2({ state, setState, lang }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string }) {
+function Step2({ state, setState, lang, needsRepair }: { state: WizardState; setState: React.Dispatch<React.SetStateAction<WizardState>>; lang: string; needsRepair?: boolean }) {
   const [customDName, setCustomDName] = useState("");
   const [customDCode, setCustomDCode] = useState("");
   const [editDiscId, setEditDiscId] = useState<string | null>(null);
@@ -2523,6 +2523,15 @@ function Step2({ state, setState, lang }: { state: WizardState; setState: React.
         <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 14 }}>
           {w("Use the generator to auto-fill, then delete, reorder, rename, or insert levels anywhere you need.", "Usa el generador para rellenar automáticamente, luego elimina, reordena o inserta niveles donde necesites.", lang)}
         </div>
+
+        {needsRepair && (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 7, marginBottom: 14 }}>
+            <AlertTriangle style={{ width: 16, height: 16, color: "#DC2626", flexShrink: 0, marginTop: 1 }} />
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#991B1B" }}>
+              {w("This field is missing required values and needs repair before this convention can be used safely.", "Este campo no tiene los valores requeridos y necesita reparación antes de poder usar esta convención de forma segura.", lang)}
+            </div>
+          </div>
+        )}
 
         {/* Generator inputs */}
         <div style={{ padding: "12px 14px", background: "hsl(var(--secondary))", borderRadius: 7, marginBottom: 14 }}>
@@ -3495,15 +3504,9 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
     try {
       const discs = latestVersion?.acceptedDisciplines || [];
       const docs = latestVersion?.acceptedDocTypes || [];
-      const fieldOrder = latestVersion?.acceptedFieldOrder?.length
-        ? latestVersion.acceptedFieldOrder
-        : ["Project Code", "Originator", "Discipline", "Level", "Type", "Sequence", "Status", "Revision"];
-      const buildAllowedValues = (label: string): string[] => {
-        if (label === "Project Code" || label === "Originator") return ws.companies.map(c => c.code);
-        if (label === "Discipline") return discs.map(d => d.code);
-        if (label === "Type") return docs.map(d => d.code);
-        return [];
-      };
+      // Decision 1: the Foundational Settings editor is a SCALAR-ONLY editor. It must never send
+      // a naming-field dictionary (Level/Sequence/Status/Revision/Discipline/Type) — it has no
+      // real values for those and sending them would wipe the saved dictionaries. Scalars only.
       const convRes = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/conventions`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -3514,11 +3517,6 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
           applyCharLimits: ws.applyCharLimits,
           companyCode: ws.companies.map(c => c.code).join(","),
           userGuidance: ws.userGuidance || "",
-          fields: fieldOrder.map((label, i) => ({
-            label,
-            fieldOrder: i,
-            allowedValues: buildAllowedValues(label),
-          })),
         }),
       });
       if (!convRes.ok) throw new Error("Failed to update convention");
@@ -4458,10 +4456,31 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
     }));
   }, [convention]);
 
+  // Decision 3: hydrate the editable Level list from the saved convention's "Level" field on
+  // load. Never substitute the hardcoded default for an already-saved convention — an empty saved
+  // list is a data-integrity issue to surface (see the repair banner), not to paper over.
+  const hasHydratedLevels = useRef(false);
+  useEffect(() => {
+    if (hasHydratedLevels.current || !convention) return;
+    const conv = convention as any;
+    const fields = Array.isArray(conv.fields) ? conv.fields : [];
+    const levelField = fields.find((f: any) => f.label === "Level");
+    if (!levelField) return; // genuinely new convention with no saved fields — keep the default
+    hasHydratedLevels.current = true;
+    const codes: string[] = Array.isArray(levelField.allowedValues) ? levelField.allowedValues : [];
+    setWs(s => ({ ...s, levelList: codes.map((code: string) => ({ id: uid(), code })) }));
+  }, [convention]);
+
   const setupStatus: "not_started" | "in_progress" | "completed" =
     (convention as any)?.setupStatus === "completed" ? "completed"
     : (convention as any)?.setupStatus === "in_progress" ? "in_progress"
     : "not_started";
+
+  // Decision 3: a completed convention whose saved "Level" field is empty must be flagged for
+  // repair, not silently defaulted.
+  const savedLevelField = (convention as any)?.fields?.find((f: any) => f.label === "Level");
+  const levelsNeedRepair = setupStatus === "completed" && !!savedLevelField
+    && (!Array.isArray(savedLevelField.allowedValues) || savedLevelField.allowedValues.length === 0);
 
   const hasAutoLoaded = useRef(false);
   useEffect(() => {
@@ -4896,7 +4915,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
         </div>
       )}
       {step === 0 && <Step1 state={ws} setState={setWs} lang={lang} readOnly={!!hasExisting && !foundationalUnlocked} onUnlock={() => setFoundationalUnlocked(true)} />}
-      {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} />}
+      {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} needsRepair={levelsNeedRepair} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
       {step === 3 && <Step4 state={ws} setState={setWs} lang={lang} />}
       {step === 4 && <ReviewScreen state={ws} onEdit={s => setWs(prev => ({ ...prev, step: s }))} onSave={handleSave} isSaving={isSaving} saved={saved} savedMessage={savedMessage} lang={lang} projectId={projectId} />}

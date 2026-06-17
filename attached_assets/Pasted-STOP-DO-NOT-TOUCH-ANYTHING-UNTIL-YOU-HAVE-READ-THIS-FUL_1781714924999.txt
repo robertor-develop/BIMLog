@@ -1,0 +1,75 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Read living-brief/PLATFORM.md Critical Database Facts and CLAUDE.md What Never To Do
+sections before touching anything.
+
+This is a confirmed data-integrity bug, not a UI bug. Your last investigation proved it
+has already silently destroyed data on project 23 (Level, Sequence, Status, Revision all
+wiped to empty, unrecoverable from version history) and fired on projects 24 and 28 (saved
+by luck — a later wizard save overwrote the damage). This is the architecture decision,
+not a question — implement exactly this:
+
+DECISION 1 — The "Foundational Settings" editor (EditFoundationScreen, ~line 3493-3522 in
+ConventionBuilder.tsx) is NOT ALLOWED to edit any naming-field dictionary. Not Level, not
+Sequence, not Status, not Revision, not Discipline, not Type. It is allowed to edit ONLY
+true scalar settings: project/company codes, separator, uppercase enforcement, character
+limits, and guidance text. This is a permanent product boundary, not a temporary patch.
+
+Implement: remove the fields array entirely from the PUT body sent by EditFoundationScreen's
+handleSave. Remove the now-unused buildAllowedValues function and fieldOrder mapping from
+that screen's save path. The screen should send only: separator, isActive, enforceUppercase,
+applyCharLimits, companyCode, userGuidance. Nothing else.
+
+DECISION 2 — Backend protection is mandatory regardless of what any frontend sends, now or
+in the future. In the PUT /api/v1/projects/:projectId/conventions route:
+- Only delete and rebuild naming_fields when the request includes a valid, non-empty,
+  complete fields array — this is the signal that the request came from the real full
+  convention wizard, not a scalar-only edit.
+- If fields is missing entirely from the request body, leave existing naming_fields rows
+  completely untouched — no delete, no rebuild.
+- If fields IS present but would result in any required field (Level, Sequence, Status,
+  Revision, Discipline, Type, Project Code, Originator) having an empty allowedValues
+  array on an already-completed convention, REJECT the request with a clear error message
+  instead of writing it. Do not silently accept it. This check must run on every save,
+  not only when markCompleted is sent — remove that conditional skip.
+
+DECISION 3 — Convention Builder must hydrate real saved data, and must never mask missing
+data with defaults. In ConventionBuilder.tsx:
+- Add a one-time hydration effect that reads levelList (and the other naming-field lists)
+  from the saved convention's fields on load, the same pattern already used for
+  userGuidance and the foundational fields hydration.
+- If a field's saved allowedValues is empty AND the convention's setupStatus is "completed",
+  do NOT fall back to the hardcoded default. Instead show a visible warning banner on that
+  field's section: "This field is missing required values and needs repair before this
+  convention can be used safely." Do not auto-fill, do not auto-save, do not silently use
+  defaults to paper over missing data.
+- Only use the hardcoded default for genuinely new conventions that have never been saved.
+
+DECISION 4 — After 1-3 are deployed and rebuilt, run a one-time audit query across ALL
+conventions in production for any with empty allowedValues on Level, Sequence, Status,
+Revision, Discipline, or Type where setupStatus is "completed". Print every project_id and
+field found. Append these findings as a new dated entry in living-brief/AUDIT.md under a
+heading "Naming Field Data Integrity Audit — [today's date]" — do not overwrite existing
+AUDIT.md content, append only.
+
+DECISION 5 — Do NOT attempt to auto-repair project 23. Its original Level/Sequence/Status/
+Revision values are confirmed unrecoverable. After decisions 1-3 are deployed, project 23
+needs a human to manually re-enter the correct values through the safe full wizard path.
+Flag this clearly in your response as remediation required, not something you fixed.
+
+After implementing all of this, show:
+1. The exact diff for EditFoundationScreen's handleSave (Decision 1).
+2. The exact diff for the PUT conventions route (Decision 2).
+3. The exact diff for the new hydration effect and warning banner (Decision 3).
+4. The full audit query results and confirmation that AUDIT.md was appended, not overwritten
+   (Decision 4).
+5. Explicit confirmation that project 23 was NOT modified (Decision 5).
+6. Confirmation via direct query against PROD_DATABASE_URL (Neon) that project 26's Level
+   field still shows B1,G0,L1-L10,RF,ZZ unchanged, and project 24/28's Level fields are
+   still populated as before — proving this fix did not touch any currently-healthy data.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.
