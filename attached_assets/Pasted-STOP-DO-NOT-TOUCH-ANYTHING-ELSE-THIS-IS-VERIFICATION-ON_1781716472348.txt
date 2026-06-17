@@ -1,0 +1,33 @@
+STOP. DO NOT TOUCH ANYTHING ELSE. THIS IS VERIFICATION ONLY, NOT NEW WORK.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+The implementation direction from your last response is approved. Before we move to Lens
+floor wiring or plugin floor dropdown work, run this final verification pass. Do not modify
+project 23 data. Do not auto-fill missing values. Do not start any new feature work.
+
+1. Query naming_fields for project 26's convention directly against PROD_DATABASE_URL
+   (Neon) and confirm Level = B1,G0,L1-L10,RF,ZZ exactly, unchanged.
+
+2. Query naming_fields for project 23's convention and confirm Level/Sequence/Status/
+   Revision are still empty (proving nothing auto-filled them), and confirm setupStatus
+   is still "completed" (the condition that triggers the repair banner).
+
+3. Walk through the actual JSX/logic path for the repair banner on project 23 with its
+   real current data, step by step, and confirm definitively whether levelsNeedRepair
+   evaluates to true for project 23 right now — show the actual values feeding that
+   condition, not just the formula.
+
+4. On project 26, simulate a scalar-only save (the same payload EditFoundationScreen now
+   sends — separator, isActive, enforceUppercase, applyCharLimits, companyCode,
+   userGuidance, with NO fields array) against the PUT endpoint, then immediately query
+   naming_fields for project 26 again and confirm Level/Sequence/Status/Revision are
+   STILL populated and unchanged after that save. This is the actual regression test for
+   Decision 2 — prove the guard works, don't just describe it.
+
+5. Get one clean frontend PRODUCTION build (not dev server HMR) — run it with whatever
+   timeout is needed, or run it through the actual publish/build pipeline. If it genuinely
+   cannot complete in this environment, say so explicitly and explain the exact limitation
+   — do not substitute dev-server-HMR-passed as equivalent evidence again.
+
+Print exact query results and exact build output for all five. No summaries standing in
+for raw evidence.
