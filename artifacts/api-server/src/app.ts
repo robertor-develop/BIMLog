@@ -152,6 +152,25 @@ startOverdueNotifier();
 
 (async () => {
   try {
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_status text DEFAULT 'draft'`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_at timestamp`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_by_id integer`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_method text`);
+    await pool.query(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_sent_by_id_users_id_fk') THEN
+        ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);
+      END IF;
+    END $$;`);
+    // Invariant: at most one OPEN custody row (to_date IS NULL) per RFI.
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL`);
+    console.log("[migration] rfis send-accountability columns ensured");
+  } catch (e) {
+    console.error("[migration] rfis send-accountability migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL,

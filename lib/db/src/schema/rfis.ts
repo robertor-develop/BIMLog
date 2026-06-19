@@ -60,6 +60,13 @@ export const rfisTable = pgTable("rfis", {
 
   projectAddress: text("project_address"),
 
+  // RFI send accountability: status is self-reported by the author (manual
+  // mark-as-sent via copy/paste). There is no platform email delivery.
+  sendStatus: text("send_status").default("draft"),
+  sentAt: timestamp("sent_at"),
+  sentById: integer("sent_by_id").references(() => usersTable.id),
+  sendMethod: text("send_method"),
+
   ballInCourt: text("ball_in_court"),
   lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
   deletedAt: timestamp("deleted_at"),

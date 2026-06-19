@@ -18,6 +18,7 @@ import {
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
+  Send, Copy, Check, PenLine,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
@@ -1285,6 +1286,61 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [showFileSearch, setShowFileSearch] = useState(false);
   const [showAddResponse, setShowAddResponse] = useState(false);
 
+  // ── RFI sending (manual, self-reported — no platform delivery) ───────────
+  const [marking, setMarking] = useState(false);
+  const [showSendPreview, setShowSendPreview] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const sendPreviewText = [
+    `To: ${rfi.submittedToEmail || rfi.submittedToPerson || rfi.submittedToCompany || ""}`,
+    `Subject: ${rfi.number} — ${rfi.subject}`,
+    ``,
+    `${rfi.submittedToPerson || rfi.submittedToCompany || "Hello"},`,
+    ``,
+    `Please find RFI ${rfi.number} below for your review and response.`,
+    rfi.dateRequired ? `Response required by: ${fmt(rfi.dateRequired)}.` : null,
+    ``,
+    `Subject: ${rfi.subject}`,
+    `Question:`,
+    `${rfi.question || rfi.description || ""}`,
+    ``,
+    `Submitted by ${rfi.submittedByContact || rfi.createdByName || ""}${rfi.submittedByCompany ? `, ${rfi.submittedByCompany}` : ""}.`,
+  ].filter((l) => l !== null).join("\n");
+
+  const handleMarkSent = async () => {
+    setMarking(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/mark-sent`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error || "Failed to mark as sent");
+      }
+      const data = await resp.json() as Rfi;
+      onUpdate(data);
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+      toast({ title: w("RFI marked as sent — ball is now with the recipient", "RFI marcado como enviado — la pelota está con el destinatario", lang) });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : w("Failed to mark as sent", "Error al marcar como enviado", lang), variant: "destructive" });
+    } finally {
+      setMarking(false);
+    }
+  };
+
+  const handleCopyPreview = async () => {
+    try {
+      await navigator.clipboard.writeText(sendPreviewText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: w("Copied to clipboard", "Copiado al portapapeles", lang) });
+    } catch {
+      toast({ title: w("Copy failed", "Error al copiar", lang), variant: "destructive" });
+    }
+  };
+
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
     try {
@@ -1719,6 +1775,53 @@ ${hasResp ? `
               {rfi.submittedToEmail && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Mail style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToEmail}</span></div>}
               {!rfi.submittedToCompany && !rfi.submittedToPerson && <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>—</span>}
             </div>
+          </div>
+
+          {/* Sending & accountability */}
+          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <Send style={{ width: 12, height: 12 }} />{w("Sending", "Envío", lang)}
+            </div>
+
+            {rfi.sendStatus === "sent" ? (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+                <PenLine style={{ width: 14, height: 14, color: "#B45309", flexShrink: 0, marginTop: 1 }} />
+                <div style={{ fontSize: 12, color: "#92400E" }}>
+                  <span style={{ fontWeight: 700 }}>{w("Manually marked as sent", "Marcado manualmente como enviado", lang)}</span>
+                  {rfi.sentAt && <span> · {fmt(rfi.sentAt)}</span>}
+                  <div style={{ fontSize: 11, color: "#B45309", marginTop: 2 }}>{w("Self-reported by the author. BIMLog did not send this email.", "Auto-reportado por el autor. BIMLog no envió este correo.", lang)}</div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
+                  {w("Not sent yet. Copy the message below into your own email client, send it, then mark it as sent to start the response clock.", "Aún no enviado. Copie el mensaje a su propio correo, envíelo y luego márquelo como enviado para iniciar el reloj de respuesta.", lang)}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
+                  <Button variant="outline" size="sm" onClick={() => setShowSendPreview(!showSendPreview)} style={{ gap: 5, fontSize: 11 }}>
+                    <Mail style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Preview email", "Vista previa", lang)}
+                  </Button>
+                  {canWrite && rfi.status !== "closed" && (
+                    <Button size="sm" onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
+                      {marking ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
+                      {w("Mark as Sent", "Marcar como Enviado", lang)}
+                    </Button>
+                  )}
+                </div>
+                {showSendPreview && (
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>{w("Copy-paste into your email client", "Copie en su cliente de correo", lang)}</span>
+                      <Button variant="outline" size="sm" onClick={handleCopyPreview} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                        {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+                        {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
+                      </Button>
+                    </div>
+                    <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{sendPreviewText}</pre>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Reference info */}

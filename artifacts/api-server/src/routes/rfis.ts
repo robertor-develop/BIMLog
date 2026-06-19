@@ -1,9 +1,8 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
-import { sendEmail, makeRfiAssignedEmail, getUserLang, notifEnabled } from "../lib/email";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
-import { eq, and, count, max, isNull, or } from "drizzle-orm";
+import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
@@ -45,6 +44,7 @@ function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unkn
     dateRequested: r.dateRequested?.toISOString(),
     dateRequired: r.dateRequired?.toISOString(),
     dateAnswered: r.dateAnswered?.toISOString(),
+    sentAt: r.sentAt?.toISOString(),
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
@@ -679,36 +679,9 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     });
 
     res.status(201).json(rfiToJson(rfi, { createdByName: req.user!.fullName }));
-
-    // ── T2: RFI Assigned email ──────────────────────────────────────────────
-    if (rfi.submittedToEmail) {
-      setImmediate(async () => {
-        try {
-          const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-          const recipientUser = await db.select().from(usersTable).where(eq(usersTable.email, rfi.submittedToEmail!)).limit(1);
-          const prefs = recipientUser[0]?.notificationPreferences;
-          if (!notifEnabled(prefs, "rfi_assigned")) return;
-          const lang = getUserLang(prefs);
-          const dueStr = rfi.dateRequired ? new Date(rfi.dateRequired).toLocaleDateString("en-US") : null;
-          await sendEmail({
-            to: rfi.submittedToEmail!,
-            subject: lang === "es"
-              ? `Nuevo RFI Asignado: ${rfi.number} — ${rfi.subject}`
-              : `New RFI Assigned: ${rfi.number} — ${rfi.subject}`,
-            html: makeRfiAssignedEmail({
-              lang,
-              rfiNumber: rfi.number,
-              subject: rfi.subject,
-              projectName: project[0]?.name || "Unknown Project",
-              submittedByName: req.user!.fullName,
-              dateRequired: dueStr,
-              projectId,
-              rfiId: rfi.id,
-            }),
-          });
-        } catch (_) {}
-      });
-    }
+    // No automatic delivery. RFIs are sent manually by the author (copy/paste into
+    // their own email client) and then recorded via POST .../mark-sent. Creating an
+    // RFI never moves the ball-in-court — that flip happens only at mark-sent time.
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
@@ -1209,6 +1182,85 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-response", authMiddleware
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to generate response";
     res.status(500).json({ error: message });
+  }
+});
+
+// ─── POST /projects/:projectId/rfis/:rfiId/mark-sent ─────────────────────────
+// Author self-reports that they manually delivered the RFI (copy/paste into their
+// own email client). This is the ONLY place the ball-in-court flips to the
+// recipient — it writes the first rfi_ball_in_court_history row. No platform send.
+router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+
+    // The transition (flip send status + flip ball-in-court + write the first
+    // custody row) must be all-or-nothing, and exactly one caller may win the
+    // flip. We do it in a transaction with a guarded conditional UPDATE: the
+    // `send_status != 'sent'` predicate makes concurrent callers serialize on
+    // the row lock — the loser updates 0 rows and gets a 409. No silent fallback.
+    const outcome = await db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(rfisTable)
+        .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!existing) return { status: 404 as const, error: "RFI not found" };
+      if (existing.sendStatus === "sent") return { status: 409 as const, error: "This RFI has already been marked as sent." };
+
+      const recipientCompany = existing.submittedToCompany;
+      const recipientPerson = existing.submittedToPerson || existing.submittedToCompany;
+      if (!recipientCompany || !recipientPerson) {
+        return { status: 422 as const, error: "Set the Submitted To company before marking this RFI as sent." };
+      }
+
+      const sentAt = new Date();
+      const updatedRows = await tx.update(rfisTable).set({
+        sendStatus: "sent",
+        sentAt,
+        sentById: req.user!.userId,
+        sendMethod: "copy_paste",
+        ballInCourt: recipientCompany,
+        updatedAt: sentAt,
+      }).where(and(
+        eq(rfisTable.id, rfiId),
+        or(ne(rfisTable.sendStatus, "sent"), isNull(rfisTable.sendStatus)),
+      )).returning();
+
+      // Lost the race: another request flipped it first.
+      if (updatedRows.length === 0) return { status: 409 as const, error: "This RFI has already been marked as sent." };
+      const updated = updatedRows[0];
+
+      // First ball-in-court entry: the recipient now holds the ball as of send time.
+      await tx.insert(rfiBallInCourtHistoryTable).values({
+        rfiId,
+        heldBy: recipientPerson,
+        heldByCompany: recipientCompany,
+        fromDate: sentAt,
+        toDate: null,
+        daysHeld: null,
+      });
+
+      await tx.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "update",
+        entityType: "rfi",
+        entityId: rfiId,
+        details: `Manually marked RFI ${existing.number} as sent to ${recipientCompany}`,
+      });
+
+      const [creator] = await tx.select({ fullName: usersTable.fullName }).from(usersTable)
+        .where(eq(usersTable.id, existing.createdById)).limit(1);
+      return { status: 200 as const, body: rfiToJson(updated, { createdByName: creator?.fullName }) };
+    });
+
+    if (outcome.status !== 200) {
+      res.status(outcome.status).json({ error: outcome.error });
+      return;
+    }
+    res.json(outcome.body);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
   }
 });
 

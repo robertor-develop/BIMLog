@@ -1,0 +1,74 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We are fixing a real accountability problem in RFIs. Today, RFI creation silently sends an
+email via platform SendGrid, swallows any send error, and rfi_ball_in_court_history has zero
+writers anywhere. This means the system can imply an RFI was assigned and the recipient holds
+the ball, with no defensible record that they were actually notified. This build is the
+accountability foundation only.
+
+SCOPE FOR THIS BUILD, EXPLICITLY:
+- Do NOT build domain-triggered company capture.
+- Do NOT build per-user SendGrid key storage.
+- Do NOT build full AI drafting of RFI body text.
+- Do NOT build platform SendGrid sending in this build at all — sendEmail() currently swallows
+  send errors (confirmed: on SDK failure it logs status "failed" but never throws to the
+  caller), so an automated send path cannot be trusted to flip ball-in-court accurately until
+  that's fixed separately. Manual confirmation only, this build.
+- Do NOT mix send/email workflow state into rfi_ball_in_court_history. That table stays a pure
+  custody timeline only — who holds the ball, since when. Nothing about email or delivery.
+- Do NOT touch naming_fields. Do NOT modify project 23.
+
+WHAT TO BUILD:
+
+1. Stop the silent automatic email send currently in the RFI create handler (rfis.ts, the
+   setImmediate block that sends "RFI Assigned" via sendEmail when submittedToEmail is set).
+   RFI creation must no longer trigger any email automatically.
+
+2. Add new columns to the rfis table, in BOTH the drizzle schema file AND the idempotent
+   startup migration block in app.ts (existing project convention — both places, every time):
+   send_status text, default "draft" (allowed values: draft, ready, sent, failed)
+   sent_at timestamp, nullable
+   sent_by_id integer, nullable, references users.id
+   send_method text, nullable (for this build, the only value ever written is "copy_paste" —
+   "platform_sendgrid" is reserved for a later, separate build, not implemented now)
+
+3. On RFI create: send_status defaults to "draft". Do NOT write to rfi_ball_in_court_history at
+   this point. The recipient does not hold the ball yet — nothing has actually been sent.
+
+4. Add a copy-paste email preview shown to the user at RFI creation or from the RFI detail
+   view: subject and body generated from the existing "RFI Assigned" template content in
+   email.ts, displayed for the user to copy, NOT auto-sent. Alongside it, a clear "Mark as
+   Sent" action.
+
+5. Add a Mark as Sent endpoint. When called:
+   - set send_status = "sent"
+   - set sent_at = now
+   - set sent_by_id = the confirming user's id
+   - set send_method = "copy_paste"
+   - ONLY at this point, write the FIRST rfi_ball_in_court_history row: held_by/held_by_company
+     = the RFI's recipient (person/email/company as currently stored on the RFI), from_date =
+     sent_at, to_date = null, days_held = null.
+   This is the actual ball-in-court flip — it happens here, on manual confirmation, never at
+   creation.
+
+6. In the UI, make the self-reported nature of this explicit and visually distinct from a
+   system-verified send — something like "Manually marked as sent — confirms the sender
+   reports this was sent outside BIMLog," not styled or worded like a delivery confirmation.
+
+7. Show us the exact current code before changing it, then the exact diff after, for: the RFI
+   create handler, the new Mark as Sent endpoint, the rfi_ball_in_court_history writer, and the
+   UI section where the email preview and Mark as Sent action are added.
+
+8. Before testing, state explicitly which project you will use — use a dedicated test project
+   or get our confirmation first, NOT project 26 (Ruben's live ELARA EAST), unless we
+   explicitly approve it. Then confirm via a live test: create a test RFI, confirm send_status
+   starts as "draft" and zero rfi_ball_in_court_history rows exist. Call Mark as Sent, confirm
+   send_status flips to "sent", send_method = "copy_paste", sent_at and sent_by_id are
+   populated, and exactly one rfi_ball_in_court_history row now exists with the correct
+   recipient and timestamp.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.

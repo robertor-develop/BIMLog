@@ -186,6 +186,10 @@ export interface Rfi {
   parentRfiId?: number;
   revisionNumber?: number;
   projectAddress?: string;
+  sendStatus?: string;
+  sentAt?: string;
+  sentById?: number;
+  sendMethod?: string;
 }
 
 export interface CreateRfiRequest {

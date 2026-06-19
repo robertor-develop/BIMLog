@@ -916,6 +916,15 @@ components:
           format: date-time
         response:
           type: string
+        sendStatus:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        sentById:
+          type: integer
+        sendMethod:
+          type: string
         createdAt:
           type: string
           format: date-time
