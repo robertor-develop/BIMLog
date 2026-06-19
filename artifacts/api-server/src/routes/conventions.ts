@@ -94,6 +94,44 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
   }
 });
 
+// Minimal, read-only endpoint for the external Navisworks plugin (a lightweight
+// C# client with no JSON library — manual string parsing only). It returns ONLY
+// the project's Level allowed_values as a flat array: { "levels": [...] }.
+// CONTRACT: the shape MUST stay exactly { "levels": [string,...] } and MUST NOT
+// change without explicit advance notice — the plugin depends on it being stable.
+// No-data cases (no convention / no Level field / empty list) return 200 with an
+// empty array so the plugin can safely fall back to a default; genuine errors
+// still surface as 500 (no silent fallback). Does NOT touch /conventions.
+router.get("/projects/:projectId/levels", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+
+    const conventions = await db
+      .select()
+      .from(namingConventionsTable)
+      .where(eq(namingConventionsTable.projectId, projectId))
+      .limit(1);
+
+    if (conventions.length === 0) {
+      res.json({ levels: [] });
+      return;
+    }
+
+    const fields = await db
+      .select()
+      .from(namingFieldsTable)
+      .where(eq(namingFieldsTable.conventionId, conventions[0].id));
+
+    const levelField = fields.find((f) => String(f.label).toLowerCase() === "level");
+    const levels = Array.isArray(levelField?.allowedValues) ? levelField.allowedValues : [];
+
+    res.json({ levels });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 router.put("/projects/:projectId/conventions", authMiddleware, requirePermission("admin"), async (req, res) => {
   try {
     const { projectId } = UpsertConventionParams.parse({ projectId: req.params.projectId });

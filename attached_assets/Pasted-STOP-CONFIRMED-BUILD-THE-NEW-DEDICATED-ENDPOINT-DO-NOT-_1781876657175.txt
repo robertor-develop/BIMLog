@@ -1,0 +1,31 @@
+STOP. CONFIRMED — BUILD THE NEW DEDICATED ENDPOINT. DO NOT MODIFY THE EXISTING /conventions ROUTE.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Add a new, minimal, read-only GET endpoint that returns ONLY a project's Level field allowed_values,
+nothing else. This is specifically for the external Navisworks plugin (a lightweight C# client with
+no JSON library — manual string parsing only), so the response must stay small and the shape must
+never change without explicit advance notice, since the plugin code depends on it staying stable.
+
+1. New route: GET /api/v1/projects/:projectId/levels
+   - Use the SAME auth as the existing conventions route: authMiddleware + requireProjectMember()
+     (no special new auth, plugin's existing bearer token already works on this pattern).
+   - Find the project's active naming_convention, find the naming_field where label === "Level",
+     return ONLY: { "levels": ["B1", "G0", "L1", ..., "RF", "ZZ"] } — a flat array, nothing else.
+   - If no convention exists yet, or no Level field exists, return { "levels": [] } (200, not 404 or
+     500) so the plugin can safely fall back to a default list without crashing.
+
+2. Do NOT touch, modify, or refactor the existing GET /api/v1/projects/:projectId/conventions route
+   in any way. This is a pure addition — zero risk to existing functionality.
+
+3. Test it live against project 26 (id=26) using a real project-member token, and show the actual
+   response body — confirm it returns exactly B1,G0,L1...L15,RF,ZZ as plain strings in that flat
+   array shape.
+
+4. Confirm via the OpenAPI spec / route registration that this new route doesn't collide with any
+   existing path pattern (e.g. make sure :projectId/levels doesn't accidentally match something else
+   already registered).
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes. Restart the stopped workflows after.
