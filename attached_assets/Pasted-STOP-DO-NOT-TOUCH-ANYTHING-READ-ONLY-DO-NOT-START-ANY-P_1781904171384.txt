@@ -1,0 +1,36 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Read CLAUDE.md, STATUS.md, and AUDIT.md in full via the Living Brief first, so your answers are
+grounded in the existing documented state, not assumptions.
+
+PART 1 — Status check on previously confirmed gaps. For EACH of these, confirm whether it is
+STILL true today, or has been fixed since the audit that found it. Show real evidence (a query,
+a code read) for each, not a guess:
+
+1. Agents (clash-agent, rfi-agent, briefing-agent) — do they fire automatically on save, or still
+   not wired?
+2. change_orders — does it now call createNotification, or still imports but never calls it?
+3. rfi_ball_in_court_history — does it have a writer now, or still none despite active RFIs?
+4. linked_items — still 0 rows / admin-write gated, or has this changed?
+5. Unknown/Unknown trades in clash hits — still happening, or fixed?
+
+PART 2 — New finding, investigate fresh:
+The Lens Viewpoints page Floor filter dropdown (project 26, clash-reports page) appears to show a
+hardcoded, stale list (1ST, 2ND-10TH, 3RD-10TH, 4TH, ALL FLOORS, CELLAR, UNDERGROUND) that does
+NOT match Convention Builder's real Building Levels (B1, G0, L1-L15, RF, ZZ). Find the exact
+component rendering this dropdown, confirm if it's hardcoded, and separately search the ENTIRE
+platform for every other place a Floor/Level dropdown or filter appears — report each one's real
+data source (hardcoded vs. pulling from naming_fields.allowed_values) so we have a full map
+before fixing anything.
+
+PART 3 — Scoping question, no code yet:
+We are planning a major next phase: properly wiring RFIs, Submittals, and Change Orders (writes,
+notifications, ball-in-court tracking, agent triggers) and beginning to connect the platform's
+modules into a more interconnected, agent-driven system rather than isolated silos. Before we
+design that properly in a dedicated session, give us your honest read: based on the current
+codebase, which of these three modules (RFIs, Submittals, Change Orders) is in the BEST current
+shape to build on, and which has the most foundational gaps that would block proper wiring? This
+is just your assessment to help us plan — do not propose a build plan yet.
+
+Print everything. Do not write or change any code.
