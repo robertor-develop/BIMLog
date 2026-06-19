@@ -1,0 +1,38 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We are designing a real feature for RFIs: domain-triggered company capture, AI-assisted RFI
+drafting, an email-sending flow that defaults to copy-paste with an optional user-connected
+SendGrid account for automation, and a manual-send confirmation step that gates whether
+ball-in-court actually flips to the recipient. Before any build instruction, we need the real
+current state of everything this touches.
+
+1. Show the full current contents of artifacts/api-server/src/lib/email.ts. What does it
+   actually send today, with what provider/credentials, and is there any existing SendGrid
+   integration code anywhere in the repo (even unused/scaffolded)?
+
+2. Show the project_directory schema (lib/db/src/schema/project-directory.ts) and the exact
+   current routes in project_directory.ts. Does it have a concept of "company" with an email
+   domain, or is it just flat contact rows? Confirm whether anything currently looks up a
+   company by matching an email's domain, or if that would be entirely new logic.
+
+3. Show the exact current RFI create handler and response handler in rfis.ts (full code, not
+   summarized) — we need the real current shape before deciding where ball-in-court writes,
+   AI-draft calls, and a "confirmed sent" flag would actually hook in.
+
+4. Show the rfi_ball_in_court_history schema again in full (lib/db/src/schema/rfi-ball-in-
+   court-history.ts) — confirm its exact columns, so we know if it already has room for a
+   "confirmed sent" boolean/timestamp or if that would need a new column.
+
+5. Confirm: does ANY existing AI/Claude-API call pattern already exist in this codebase we
+   could follow for "take brief user input, return drafted text" (e.g. anything in
+   intelligence.ts, dashboard_briefing.ts, or the agents folder that calls the AI proxy at
+   localhost:1106/modelfarm/anthropic) — show a real example of that call pattern if one
+   exists, so any new AI-drafting feature follows the same proven pattern rather than
+   inventing a new one.
+
+6. Confirm whether users.is_super_admin or any per-user settings table already has a place
+   where a user's own SendGrid API key could be stored, or whether that would need a new
+   column/table entirely.
+
+Print all of this first. Do not write or change any code yet.
