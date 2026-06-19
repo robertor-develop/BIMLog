@@ -1,0 +1,38 @@
+STOP. DO NOT TOUCH ANYTHING ELSE. APPEND ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Append a new dated section to AUDIT.md (do not overwrite existing content) summarizing your
+own read-only investigation from this session. Capture these exact findings:
+
+1. Status of previously confirmed gaps, all re-verified against current code, all still true:
+   agents never fire on save (no caller in rfis.ts/submittals.ts/clash_reports.ts/
+   change_orders.ts create/update handlers); change_orders imports createNotification but
+   has zero call sites; rfi_ball_in_court_history has zero writers anywhere in the repo
+   (its own schema file is the only reference); linked_items creation still gated to
+   requirePermission("admin","write"); Unknown/Unknown trades confirmed as a plugin-side
+   issue only, server stores trade values as-received with no enrichment logic in this repo.
+
+2. NEW finding: the Lens Viewpoints Floor filter is NOT hardcoded — it's built dynamically
+   from distinct floor strings already present in synced lens_viewpoints rows
+   (LensViewpointsView.tsx:309, uniq(viewpoints.map(v => v.floor))). The stale-looking list
+   is old DATA from before the plugin's Floor source was fixed, not a code bug. Full map of
+   every Floor/Level dropdown across the platform and its real data source: Convention
+   Builder (defines naming_fields.allowed_values), Name Generator/Files Tab/Coordination Hub
+   (all read the canonical allowedValues correctly), Lens Viewpoints filter and Clash Hits
+   floor grouping (both derive from plugin-synced data, never from conventions — this is the
+   root of any visual mismatch), Meeting Minutes (hardcoded free-text template rows, not a
+   bound dropdown). Also note: GET /api/v1/projects/:projectId/levels exists but is not yet
+   consumed by any frontend page.
+
+3. Module readiness assessment for the next wiring phase: RFIs has the richest existing
+   surface to connect (rfi_responses, rfi_view_events, conflict-of-interest detection, email
+   notification path, activity logging, an existing rfi-agent not yet auto-triggered) — its
+   real gap is the dead rfi_ball_in_court_history table. Change Orders is thinnest — own-table
+   CRUD plus activity log only, notification hook exists in name only, no agent, no BIC.
+   Submittals is in the middle — has a WORKING ball-in-court mechanism (JSON column, written
+   and read in two places) but submittal_items/submittal_register are unused and it has no
+   agent, no notifications. Cross-cutting flag: ball-in-court is implemented two
+   inconsistent ways across two modules already (working JSON column on submittals, dead
+   dedicated table for RFIs) — needs a unification decision before wiring the third module.
+
+This is documentation only. No code changes, no rebuild needed for this append.
