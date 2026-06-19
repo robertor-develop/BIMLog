@@ -62,6 +62,43 @@ router.get("/projects", authMiddleware, async (req, res) => {
   }
 });
 
+// Minimal, read-only endpoint for the external Navisworks plugin (a lightweight
+// C# client with manual JSON parsing). Populates a project-selection dropdown so
+// the user picks a real project NAME instead of typing a raw numeric Project ID.
+// Returns ONLY { "projects": [ { id, name, code }, ... ] } — no other fields and
+// none of the heavy per-project count queries the full GET /projects does.
+// Scoped internally to the caller's own memberships (project_members WHERE
+// user_id = caller), exactly like GET /projects, so it never exposes projects the
+// user does not belong to. MUST be registered before GET /projects/:projectId so
+// the literal "list-for-plugin" path is not captured as an :projectId param.
+// Does NOT touch the existing GET /projects route.
+router.get("/projects/list-for-plugin", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+
+    const memberRows = await db
+      .select({ projectId: projectMembersTable.projectId })
+      .from(projectMembersTable)
+      .where(eq(projectMembersTable.userId, userId));
+
+    const projectIds = memberRows.map((m) => m.projectId);
+    if (projectIds.length === 0) {
+      res.json({ projects: [] });
+      return;
+    }
+
+    const projects = await db
+      .select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code })
+      .from(projectsTable)
+      .where(inArray(projectsTable.id, projectIds));
+
+    res.json({ projects });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
 router.post("/projects", authMiddleware, async (req, res) => {
   try {
     const body = CreateProjectBody.parse(req.body);
