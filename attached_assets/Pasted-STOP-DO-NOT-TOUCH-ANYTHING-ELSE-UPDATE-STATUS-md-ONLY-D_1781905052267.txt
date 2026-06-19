@@ -1,0 +1,46 @@
+STOP. DO NOT TOUCH ANYTHING ELSE. UPDATE STATUS.md ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+STATUS.md is stale in several specific ways. Update it now, following your own existing
+format/style in that file. Do not touch CLAUDE.md, VISION.md, PLATFORM.md, or AUDIT.md.
+
+1. Update "Last updated" to today's date.
+
+2. REMOVE the "Building Levels data location" item from Active Investigations — this is
+   resolved. The data lives in naming_fields.allowed_values where label = "Level", scoped per
+   project's active naming convention. Confirmed live for project 26: B1, G0, L1 through L15,
+   RF, ZZ. A new endpoint, GET /api/v1/projects/:projectId/levels, now exposes this to the
+   plugin. Move this resolution into "What is working right now" instead.
+
+3. REMOVE the "Redline interception architecture" item from Active Investigations — this is
+   resolved. Confirmed via direct reflection: there is no public API hook to intercept native
+   Redline Text/Draw tools before Navisworks creates its own viewpoint. The adopted approach
+   instead: let users draw native Redline directly, then the plugin copies the real
+   auto-created SavedViewpoint object (via CreateUniqueCopy, which preserves the Redline,
+   confirmed working via Navisworks' own native Copy/Duplicate behavior) into a BIMLog-
+   formatted viewpoint, tagged with a simple "includes Redline markup" flag, with the
+   original leftover removed afterward. Move this resolution into "What is working right now".
+
+4. ADD to "What is working right now": the plugin's Floor dropdown in BIMLog Lens now pulls
+   real Building Levels via the new /levels endpoint, with a user-triggered Sync button and a
+   local offline cache, replacing the previous hardcoded floor list. Also add: multi-trade
+   viewpoints (one camera position, multiple independent Trade+Note entries, each becoming
+   its own real Navisworks viewpoint with its own per-Trade+Floor sequence number) are now
+   supported in BIMLog Lens.
+
+5. ADD to "What is working right now": the Convention Builder Foundational Settings
+   data-integrity fix — EditFoundationScreen now sends a scalar-only payload, the backend
+   guards naming_fields rebuilds behind a hasFields check, and a repair-needed warning banner
+   shows on any completed convention with missing required field values. Note that project 23
+   remains the one known affected project, flagged for manual remediation, not yet repaired.
+
+6. ADD a note under Known bugs or a new small section: the new GET /api/v1/projects/:projectId/
+   levels endpoint exists but is not yet consumed by any frontend page — confirmed via code
+   search, no frontend reference found. This is open, not broken.
+
+7. Confirm the existing Known bugs list still matches reality by spot-checking against
+   current code before leaving it as-is (agents not wired, change_orders notification gap,
+   rfi_ball_in_court_history orphaned, linked_items admin-gated, Unknown/Unknown trades) — if
+   any of these are now fixed, remove them; if all still true, leave them.
+
+This is documentation only. No code changes, no rebuild needed.

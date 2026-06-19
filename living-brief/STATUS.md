@@ -3,7 +3,7 @@
 Updated manually after each feature ships. Reflects the real state of the platform.
 
 ## Last updated
-- 2026-06-17
+- 2026-06-19
 
 ## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
@@ -38,19 +38,30 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   2025 DLLs. Build directory is H:\BIMLogPlugin2025 on Roberto's machine, separate from the 2021
   production build at C:\Dev\BIMLogPlugin\BIMLogNavisPlugin. Packaged with a bat file installer and
   sent to Ruben directly. Platform-based download delivery not yet built.
+- Building Levels data location — RESOLVED (2026-06-19). The data lives in
+  naming_fields.allowed_values where label = "Level", scoped per project's active naming convention.
+  Confirmed live for project 26: B1, G0, L1 through L15, RF, ZZ. A new endpoint,
+  GET /api/v1/projects/:projectId/levels, now exposes this list to the plugin.
+- Redline interception architecture — RESOLVED (2026-06-19). Confirmed via direct reflection: there
+  is no public API hook to intercept the native Redline Text/Draw tools before Navisworks creates its
+  own viewpoint. Adopted approach instead: users draw native Redline directly, then the plugin copies
+  the real auto-created SavedViewpoint object (via CreateUniqueCopy, which preserves the Redline —
+  confirmed working via Navisworks' own native Copy/Duplicate behavior) into a BIMLog-formatted
+  viewpoint, tagged with a simple "includes Redline markup" flag, with the original leftover removed
+  afterward.
+- BIMLog Lens Floor dropdown — now pulls real Building Levels via the new /levels endpoint, with a
+  user-triggered Sync button and a local offline cache, replacing the previous hardcoded floor list.
+- Multi-trade viewpoints — one camera position can now hold multiple independent Trade+Note entries,
+  each becoming its own real Navisworks viewpoint with its own per-Trade+Floor sequence number —
+  supported in BIMLog Lens.
+- Convention Builder Foundational Settings data-integrity fix — EditFoundationScreen now sends a
+  scalar-only payload, the backend guards naming_fields rebuilds behind a hasFields check, and a
+  repair-needed warning banner shows on any completed convention with missing required field values.
+  Project 23 remains the one known affected project, flagged for manual remediation, not yet repaired.
 
 ## Active Investigations
-- Building Levels data location — Roberto is looking at a live Building Levels section in Convention
-  Builder for project 26 showing real configured values (B1, G0, L1-L10, RF, ZZ). A prior
-  investigation incorrectly concluded no structured floor data exists anywhere. Needs a corrected
-  investigation into where this data actually lives and how the plugin and Lens Viewpoints page
-  should read it.
-- Redline interception architecture — Ruben relies heavily on Navisworks native Text and Draw/Eraser
-  tools in the Review tab. These tools auto-create untracked Navisworks viewpoints that BIMLog Lens
-  never sees, separate from Tag, Measure, and View Comments which work fine. Needs investigation into
-  Navisworks Comment/Redline API events to determine if BIMLog Lens can intercept the Text tool's OK
-  click before Navisworks creates its own viewpoint, and capture pen/Draw markups into the
-  BIMLog-saved viewpoint instead of relying on Navisworks auto-save.
+- None open. (Building Levels data location and Redline interception architecture were both resolved
+  on 2026-06-19 — see "What is working right now".)
 
 ## Core platform
 - Auth (JWT), projects, project members/roles, admin panel, super admin.
@@ -86,6 +97,8 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   4 active RFIs.
 - change_orders imports createNotification but never calls it — change order events produce no
   notifications.
+- GET /api/v1/projects/:projectId/levels endpoint exists but is not yet consumed by any frontend
+  page — confirmed via code search, no frontend reference found. Open, not broken.
 
 ## Founding partner context
 Ruben Crespo (rubenc@bimcorpgroup.com) is BIMLog's first Founding Partner. ELARA EAST is the
