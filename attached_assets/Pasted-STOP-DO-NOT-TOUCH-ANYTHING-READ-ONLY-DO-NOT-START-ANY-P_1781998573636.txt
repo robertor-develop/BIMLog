@@ -1,0 +1,35 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We're designing a new feature: creating a draft RFI directly from a Navisworks BIMLog Lens
+viewpoint. The plugin will call a new endpoint to create a draft RFI pre-filled with viewpoint
+context, then open the platform's RFI page in the user's browser at that specific RFI so they
+can complete it fully (attach files, write the description, pick recipients, use the existing
+AI-draft/email/Mark-as-Sent flow).
+
+1. Show the exact current RFI create handler (POST /projects/:projectId/rfis) in full — what
+   fields does it require vs. accept optionally? Could it accept a minimal payload (just
+   floor, trade, a short note, and a reference string) and create a valid draft RFI, or does
+   it require fields that wouldn't be available from a Navisworks viewpoint alone (e.g.
+   submittedToEmail, a computed RFI number)?
+
+2. Confirm: does the rfis table or its type have ANY existing field suited to storing a
+   reference back to a source viewpoint (e.g. something like "sourceViewpointId" or similar),
+   or would tying an RFI back to the Navisworks viewpoint it came from need a new column?
+
+3. Show the exact current frontend route/URL pattern for viewing a single RFI (e.g.
+   /projects/:id/rfis/:rfiId or however RfisTab actually opens a specific RFI) — we need to
+   know the real URL shape so the plugin can open a browser deep-link directly to a newly
+   created draft RFI.
+
+4. Confirm: is there an existing auth pattern anywhere that lets an EXTERNAL, non-browser
+   client (like the plugin, which already authenticates via the existing login endpoint and a
+   bearer token) create a record, and would that same plugin auth already work for a new
+   "create draft RFI from plugin" endpoint, or does this need something different?
+
+5. Show the existing getAppUrl() helper (referenced in email.ts) — confirm what base URL it
+   resolves to, since this is the same kind of "build a real working link to something on the
+   platform" logic the plugin would need to construct the deep-link URL to open in the user's
+   browser.
+
+Print all of this first. Do not write or change any code yet.
