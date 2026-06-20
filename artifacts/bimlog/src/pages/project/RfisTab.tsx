@@ -1290,6 +1290,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [marking, setMarking] = useState(false);
   const [showSendPreview, setShowSendPreview] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [aiPreview, setAiPreview] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
 
   const sendPreviewText = [
     `To: ${rfi.submittedToEmail || rfi.submittedToPerson || rfi.submittedToCompany || ""}`,
@@ -1306,6 +1309,30 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     ``,
     `Submitted by ${rfi.submittedByContact || rfi.createdByName || ""}${rfi.submittedByCompany ? `, ${rfi.submittedByCompany}` : ""}.`,
   ].filter((l) => l !== null).join("\n");
+
+  // AI-drafted email body; falls back to the static template above on failure.
+  const previewText = aiPreview ?? sendPreviewText;
+
+  const generatePreview = async () => {
+    setPreviewLoading(true);
+    setPreviewFailed(false);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/generate-email-preview`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!resp.ok) throw new Error("generate failed");
+      const data = await resp.json() as { email?: string };
+      if (!data.email || !data.email.trim()) throw new Error("empty draft");
+      setAiPreview(data.email);
+    } catch {
+      setAiPreview(null);
+      setPreviewFailed(true);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleMarkSent = async () => {
     setMarking(true);
@@ -1332,7 +1359,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   const handleCopyPreview = async () => {
     try {
-      await navigator.clipboard.writeText(sendPreviewText);
+      await navigator.clipboard.writeText(previewText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({ title: w("Copied to clipboard", "Copiado al portapapeles", lang) });
@@ -1798,7 +1825,7 @@ ${hasResp ? `
                   {w("Not sent yet. Copy the message below into your own email client, send it, then mark it as sent to start the response clock.", "Aún no enviado. Copie el mensaje a su propio correo, envíelo y luego márquelo como enviado para iniciar el reloj de respuesta.", lang)}
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
-                  <Button variant="outline" size="sm" onClick={() => setShowSendPreview(!showSendPreview)} style={{ gap: 5, fontSize: 11 }}>
+                  <Button variant="outline" size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next && aiPreview === null && !previewLoading) { void generatePreview(); } }} style={{ gap: 5, fontSize: 11 }}>
                     <Mail style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Preview email", "Vista previa", lang)}
                   </Button>
                   {canWrite && rfi.status !== "closed" && (
@@ -1810,14 +1837,33 @@ ${hasResp ? `
                 </div>
                 {showSendPreview && (
                   <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>{w("Copy-paste into your email client", "Copie en su cliente de correo", lang)}</span>
-                      <Button variant="outline" size="sm" onClick={handleCopyPreview} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                        {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-                        {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
-                      </Button>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: 5 }}>
+                        <Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}
+                      </span>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <Button variant="outline" size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <RefreshCw style={{ width: 12, height: 12 }} />}
+                          {w("Regenerate", "Regenerar", lang)}
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleCopyPreview} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+                          {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
+                        </Button>
+                      </div>
                     </div>
-                    <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{sendPreviewText}</pre>
+                    {previewFailed && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 11, color: "#B45309", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
+                        <AlertTriangle style={{ width: 12, height: 12, flexShrink: 0 }} />{w("AI draft unavailable — using basic template.", "Borrador de IA no disponible — usando plantilla básica.", lang)}
+                      </div>
+                    )}
+                    {previewLoading ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 12px", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                        <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />{w("Drafting email…", "Redactando correo…", lang)}
+                      </div>
+                    ) : (
+                      <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{previewText}</pre>
+                    )}
                   </div>
                 )}
               </div>

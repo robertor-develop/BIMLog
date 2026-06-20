@@ -1,0 +1,57 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We're adding AI-assisted email drafting for the RFI send preview (the copy-paste text shown
+alongside Mark as Sent). Today this text is 100% static client-side template, assembled from
+already-stored RFI fields with no generation. We want a new, full AI-generated version, built
+on the same proven pattern as the existing POST /rfis/generate-question endpoint (same
+Anthropic client construction, same claude-haiku-4-5 model, same env vars), but with its own
+distinct prompt suited to a real email rather than a formal RFI question fragment.
+
+WHAT TO BUILD:
+
+1. New endpoint: POST /api/v1/projects/:projectId/rfis/:rfiId/generate-email-preview
+   (or similar path — match existing route-naming conventions in rfis.ts). Auth: same pattern
+   as other RFI routes (requireProjectMember or whatever the file's existing convention is for
+   read/generate-style actions — confirm and match, don't invent new auth).
+
+2. Input: pull directly from the RFI's already-stored fields (number, subject, question/
+   description, submittedToPerson, submittedToCompany, submittedByContact, submittedByCompany,
+   dateRequired) — same fields the current static template already uses. No new brief-input
+   field is needed for THIS endpoint specifically, since the formal RFI text already exists by
+   this point in the flow; the AI's job is to turn that already-drafted formal content into a
+   natural, professional EMAIL — not to invent new technical content.
+
+3. Prompt should instruct the model to: write a complete, natural-sounding professional email
+   (greeting, brief plain-English framing of the issue, the formal RFI question/request,
+   mention of response-due-date if present, professional closing) addressed to the named
+   recipient, from the named sender, referencing the RFI number and subject — while preserving
+   every technical/factual detail from the original RFI question text exactly, not summarizing
+   away any technical specifics. Output should be the full email body text only, nothing else
+   (mirror the existing "write only the X, nothing else" discipline from generate-question).
+
+4. Frontend: in the RFI detail panel's existing "Preview email" section, replace the static
+   sendPreviewText construction with a call to this new endpoint, showing a loading state
+   while generating, and falling back to the existing static template ONLY if the AI call
+   fails (so the feature degrades gracefully, never blocks Mark as Sent from working) — note
+   the existing generate-question endpoint's API key fallback is "dummy" and does not fail
+   loud; confirm whether this new endpoint should behave the same way or should surface a
+   clear "AI draft unavailable, using basic template" message instead, given this is shown to
+   the end user, not just used as a hidden input. Recommend the latter for user-facing
+   transparency, but confirm with us before deciding finally if this changes other patterns
+   in the file.
+
+5. Keep the existing "Copy to clipboard" behavior working on whatever text is currently shown,
+   AI-generated or fallback.
+
+6. Show us the exact current code before changing it, then the exact diff after, for: the new
+   endpoint, and the RfiDetailPanel section being modified.
+
+7. Confirm via a live test on a safe test RFI (not project 26) that calling the new endpoint
+   produces a real, complete email body referencing the correct RFI number/subject/recipient,
+   and that the existing Mark as Sent flow still works unaffected.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.

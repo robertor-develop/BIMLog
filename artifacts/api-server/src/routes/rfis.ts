@@ -1185,6 +1185,73 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-response", authMiddleware
   }
 });
 
+// ─── POST /projects/:projectId/rfis/:rfiId/generate-email-preview  (AI) ──────
+// Turns the already-drafted formal RFI content into a natural cover email for the
+// manual copy-paste send flow. Pulls only from stored RFI fields — invents no new
+// technical content, preserves every factual detail. Output is the email body only.
+router.post("/projects/:projectId/rfis/:rfiId/generate-email-preview", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) {
+      res.status(404).json({ error: "RFI not found" });
+      return;
+    }
+
+    const questionText = stripMarkdown(rfi.question || rfi.description || "");
+    const recipient = rfi.submittedToPerson || rfi.submittedToCompany || "the recipient";
+    const recipientCompany = rfi.submittedToCompany || "";
+    const sender = rfi.submittedByContact || "";
+    const senderCompany = rfi.submittedByCompany || "";
+    const dueDate = rfi.dateRequired ? new Date(rfi.dateRequired).toISOString().slice(0, 10) : "";
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+
+    const prompt = `You are a construction project manager writing the cover email that accompanies a formal RFI (Request for Information) being sent to a project stakeholder.
+
+Write a complete, natural-sounding professional email that:
+- Opens with an appropriate greeting addressed to the named recipient
+- Briefly frames the issue in plain, professional English (1-2 sentences)
+- Presents the formal RFI question/request in full
+- States the response due date, if one is provided
+- Closes professionally with the sender's name and company
+
+CRITICAL: preserve EVERY technical and factual detail from the original RFI question text exactly. Do not summarize, omit, soften, or alter any technical specifics, dimensions, locations, drawing or spec references, or quantities. Reference the RFI number and subject naturally within the email.
+
+RFI Number: ${rfi.number}
+RFI Subject: ${rfi.subject}
+Recipient: ${recipient}${recipientCompany ? `, ${recipientCompany}` : ""}
+Sender: ${sender || "the project team"}${senderCompany ? `, ${senderCompany}` : ""}
+${dueDate ? `Response Required By: ${dueDate}` : ""}
+Original RFI Question Text:
+${questionText}
+
+Write only the full email body text, starting from the greeting and ending with the closing. Do not include "To:" or "Subject:" header lines, and no preamble or commentary.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const block = message.content[0];
+    const email = block.type === "text" ? block.text : "";
+    if (!email.trim()) {
+      res.status(502).json({ error: "AI returned an empty email draft" });
+      return;
+    }
+
+    res.json({ email });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to generate email preview";
+    res.status(500).json({ error: message });
+  }
+});
+
 // ─── POST /projects/:projectId/rfis/:rfiId/mark-sent ─────────────────────────
 // Author self-reports that they manually delivered the RFI (copy/paste into their
 // own email client). This is the ONLY place the ball-in-court flips to the
