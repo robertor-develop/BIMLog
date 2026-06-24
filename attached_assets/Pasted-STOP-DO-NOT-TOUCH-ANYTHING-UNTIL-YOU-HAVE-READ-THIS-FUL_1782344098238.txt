@@ -1,0 +1,70 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We are building "Create RFI from Navisworks viewpoint" — the plugin will jump to a viewpoint,
+capture a screenshot, and send everything to a new endpoint that creates a draft RFI with that
+image as a real attachment, traceable back to the source viewpoint, with a deep-link the
+plugin opens in the user's browser. This follows directly from the storage-adapter refactor
+just completed — the screenshot must go through storage.upload() and land as a real
+filesTable row with linkedRfiId set, NOT into the fake attachmentsJson text field.
+
+WHAT TO BUILD:
+
+1. New endpoint: POST /api/v1/projects/:projectId/rfis/from-viewpoint
+   - Auth: authMiddleware + requirePermission("admin","write") — same as the existing RFI
+     create route.
+   - Body: { subject, priority, sourceViewpointId, imageBase64 } — subject and priority come
+     pre-built from the plugin (subject from the viewpoint's trade/floor/note; priority must
+     be a valid configured value per validateConfigValue("rfi_priority", priority), exactly
+     as the existing create route already requires).
+   - Creates the RFI via the SAME logic the existing create route uses (auto-generated number,
+     server-set status, sendStatus defaults to "draft", createdById from req.user) — do not
+     duplicate that logic, factor it into a shared function if needed so both routes use one
+     real implementation.
+   - Sets the new sourceViewpointId column (see #2) on the created RFI.
+   - Decodes imageBase64 via Buffer.from(data, "base64"), calls storage.upload(buffer,
+     projectId, a generated filename like "viewpoint-<sourceViewpointId>.png"), inserts a
+     filesTable row (fileName, fileSize, fileType="png", uploadedById = req.user.userId,
+     status, source = "lens-viewpoint", linkedRfiId = the new RFI's id).
+   - Returns the created RFI's id (and ideally its full rfiToJson shape, matching the existing
+     create route's response).
+
+2. Add sourceViewpointId column to rfis: text("source_viewpoint_id"), nullable. Add in BOTH
+   the drizzle schema file AND the idempotent app.ts startup migration block (ALTER TABLE rfis
+   ADD COLUMN IF NOT EXISTS source_viewpoint_id TEXT), per the existing project convention.
+
+3. New endpoint: GET /api/v1/projects/:projectId/rfis/:rfiId (does not exist today). Auth:
+   authMiddleware + requireProjectMember(). Returns rfiToJson(...) for that single RFI, 404 if
+   not found. Register it carefully relative to existing routes with longer literal sub-paths
+   under .../rfis/:rfiId/... (those are unaffected since they're more specific; just confirm
+   no route ordering issue).
+
+4. Frontend (RfisTab.tsx): in the existing mount effect that already reads note/trade/floor/
+   ref from window.location.search, add a read for sp.get("rfi"). If present, fetch that RFI
+   via the new GET-by-id endpoint (NOT relying on the list, since a brand-new draft may not be
+   in the filtered/loaded list yet), then setSelectedRfi(it) to open its detail panel. Clear
+   the query string afterward the same way the existing prefill logic already does.
+
+5. In the RFI detail panel, if the RFI has a non-null sourceViewpointId, show a "Jump to
+   Viewpoint" link/button that opens ${pluginLocalServerBaseUrl}/jump?code=<sourceViewpointId>
+   (confirm the exact local server URL/port convention already documented — localhost:8765 per
+   existing plugin docs) in a new tab/window. This only does anything useful if the user has
+   Navisworks + the plugin running locally; render it plainly, no special handling needed if
+   it fails to connect (that's expected for anyone without the plugin).
+
+6. Show us the exact current code before changing it, then the exact diff after, for: the new
+   from-viewpoint endpoint, the new GET-by-id endpoint, the schema addition, and both frontend
+   changes (deep-link read, Jump to Viewpoint link).
+
+7. Confirm via a live test on a safe test project (use project 31 or another fresh test
+   project from this session, not 26): call the new from-viewpoint endpoint with a real base64
+   test image, confirm the RFI is created with sourceViewpointId set, confirm a real filesTable
+   row exists with linkedRfiId pointing to it, confirm the file is downloadable and is a valid
+   image, confirm GET-by-id returns the RFI correctly.
+
+8. Run the mandatory code review.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.

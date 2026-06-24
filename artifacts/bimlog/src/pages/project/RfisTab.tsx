@@ -18,7 +18,7 @@ import {
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
-  Send, Copy, Check, PenLine,
+  Send, Copy, Check, PenLine, Navigation,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
@@ -149,6 +149,29 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const trade = sp.get("trade");
     const floor = sp.get("floor");
     const ref = sp.get("ref");
+    const rfiParam = sp.get("rfi");
+
+    // Deep-link straight to an existing RFI's detail panel (the plugin opens the
+    // browser after creating an RFI from a viewpoint). Fetch by id rather than
+    // relying on the list, since a brand-new draft may not be loaded/filtered in yet.
+    if (rfiParam) {
+      const rfiId = Number(rfiParam);
+      window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
+      if (Number.isFinite(rfiId)) {
+        (async () => {
+          const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfiId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (r.ok) {
+            setSelectedRfi(await r.json() as Rfi);
+          } else {
+            toast({ title: w("Could not open that RFI.", "No se pudo abrir ese RFI.", lang), variant: "destructive" });
+          }
+        })();
+      }
+      return;
+    }
+
     if (note || trade || floor || ref) {
       const base = trade
         ? `${trade}${floor ? ` — ${floor}` : ""}`
@@ -1695,6 +1718,16 @@ ${hasResp ? `
             {rfi.status === "closed" && canWrite && (
               <Button variant="outline" size="sm" onClick={() => reviseRfi({ projectId, rfiId: rfi.id, data: {} })} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
+              </Button>
+            )}
+            {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId!)}`, "_blank")}
+                style={{ gap: 5, fontSize: 11, color: "#0F766E", borderColor: "#5EEAD4", background: "#F0FDFA" }}
+              >
+                <Navigation style={{ width: 12, height: 12 }} />{w("Jump to Viewpoint", "Ir al Punto de Vista", lang)}
               </Button>
             )}
             <button onClick={onClose} style={{ padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 6 }}>

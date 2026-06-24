@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
+import { storage } from "../lib/storage-adapter";
 import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -48,6 +49,129 @@ function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unkn
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
+}
+
+// ─── Shared RFI creation ─────────────────────────────────────────────────────
+// Single real implementation used by both POST .../rfis and POST .../rfis/from-viewpoint.
+// Validates priority, generates/deduplicates the RFI number, inserts the row, and
+// writes the activity-log entry. Returns a discriminated result the route maps to HTTP.
+type CreateRfiInput = {
+  subject: string;
+  priority: string;
+  description?: string | null;
+  assignedToId?: number | null;
+  dueDate?: string | null;
+  dateRequested?: string | null;
+  dateRequired?: string | null;
+  submittedByCompany?: string | null;
+  submittedByContact?: string | null;
+  submittedByAddress?: string | null;
+  submittedByPhone?: string | null;
+  submittedByEmail?: string | null;
+  submittedToCompany?: string | null;
+  submittedToPerson?: string | null;
+  submittedToEmail?: string | null;
+  drawingNumber?: string | null;
+  drawingTitle?: string | null;
+  specSection?: string | null;
+  detailNumber?: string | null;
+  noteNumber?: string | null;
+  locationDescription?: string | null;
+  question?: string | null;
+  costImpact?: string | null;
+  costImpactAmount?: string | null;
+  scheduleImpact?: string | null;
+  scheduleImpactDays?: number | null;
+  distributionList?: string[] | null;
+  attachmentsJson?: string[] | null;
+  projectAddress?: string | null;
+  number?: string;
+  forceNumber?: boolean;
+  sourceViewpointId?: string | null;
+};
+
+type CreateRfiResult =
+  | { ok: true; rfi: typeof rfisTable.$inferSelect }
+  | { ok: false; status: number; payload: Record<string, unknown> };
+
+async function createRfiForProject(
+  projectId: number,
+  input: CreateRfiInput,
+  user: { userId: number; fullName: string; companyName: string },
+  dbx: Pick<typeof db, "insert"> = db,
+): Promise<CreateRfiResult> {
+  if (input.priority && !(await validateConfigValue("rfi_priority", input.priority))) {
+    return { ok: false, status: 422, payload: { error: `Invalid priority value: ${input.priority}` } };
+  }
+
+  const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
+  const proposedNumber = input.number || `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
+  const { isDuplicate, suggestedNumber } = await getNextAvailableNumber(projectId, "rfi", proposedNumber);
+  if (isDuplicate && !input.forceNumber) {
+    return {
+      ok: false,
+      status: 409,
+      payload: {
+        error: "duplicate_number",
+        message: `An RFI with number ${proposedNumber} already exists.`,
+        suggestedNumber,
+        canForce: true,
+      },
+    };
+  }
+  const number = isDuplicate ? suggestedNumber : proposedNumber;
+
+  const defaultRfiStatus = await getDefaultValue("rfi_status");
+  const [rfi] = await dbx.insert(rfisTable).values({
+    projectId,
+    number,
+    subject: input.subject,
+    description: input.description || null,
+    status: defaultRfiStatus,
+    priority: input.priority,
+    assignedToId: input.assignedToId || null,
+    createdById: user.userId,
+    dueDate: input.dueDate ? new Date(input.dueDate) : null,
+    dateRequested: input.dateRequested ? new Date(input.dateRequested) : new Date(),
+    dateRequired: input.dateRequired ? new Date(input.dateRequired) : null,
+    submittedByCompany: input.submittedByCompany || null,
+    submittedByContact: input.submittedByContact || null,
+    submittedByAddress: input.submittedByAddress || null,
+    submittedByPhone: input.submittedByPhone || null,
+    submittedByEmail: input.submittedByEmail || null,
+    submittedToCompany: input.submittedToCompany || null,
+    submittedToPerson: input.submittedToPerson || null,
+    submittedToEmail: input.submittedToEmail || null,
+    drawingNumber: input.drawingNumber || null,
+    drawingTitle: input.drawingTitle || null,
+    specSection: input.specSection || null,
+    detailNumber: input.detailNumber || null,
+    noteNumber: input.noteNumber || null,
+    locationDescription: input.locationDescription || null,
+    question: input.question || null,
+    costImpact: input.costImpact || null,
+    costImpactAmount: input.costImpactAmount || null,
+    scheduleImpact: input.scheduleImpact || null,
+    scheduleImpactDays: input.scheduleImpactDays || null,
+    distributionList: input.distributionList || [],
+    attachmentsJson: input.attachmentsJson || [],
+    projectAddress: input.projectAddress || null,
+    sourceViewpointId: input.sourceViewpointId || null,
+    revisionNumber: 0,
+  }).returning();
+
+  await dbx.insert(activityLogTable).values({
+    projectId,
+    userId: user.userId,
+    userFullName: user.fullName,
+    userCompanyName: user.companyName,
+    actionType: "create",
+    entityType: "rfi",
+    entityId: rfi.id,
+    details: `Created RFI ${number}: ${input.subject}`,
+  });
+
+  return { ok: true, rfi };
 }
 
 // ─── PDF helpers ─────────────────────────────────────────────────────────────
@@ -610,81 +734,133 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
     const body = CreateRfiBody.parse(req.body);
 
-    if (body.priority && !(await validateConfigValue("rfi_priority", body.priority))) {
-      res.status(422).json({ error: `Invalid priority value: ${body.priority}` });
+    const result = await createRfiForProject(projectId, {
+      ...body,
+      number: req.body.number as string | undefined,
+      forceNumber: req.body.forceNumber as boolean | undefined,
+    }, req.user!);
+
+    if (!result.ok) {
+      res.status(result.status).json(result.payload);
       return;
     }
 
-    const [rfiCount] = await db.select({ count: count() }).from(rfisTable).where(eq(rfisTable.projectId, projectId));
-    const proposedNumber = (req.body.number as string | undefined) || `RFI-${String((rfiCount.count as number) + 1).padStart(4, "0")}`;
-    const { isDuplicate, suggestedNumber } = await getNextAvailableNumber(projectId, "rfi", proposedNumber);
-    if (isDuplicate && !(req.body.forceNumber as boolean | undefined)) {
-      res.status(409).json({
-        error: "duplicate_number",
-        message: `An RFI with number ${proposedNumber} already exists.`,
-        suggestedNumber,
-        canForce: true,
-      });
-      return;
-    }
-    const number = isDuplicate ? suggestedNumber : proposedNumber;
-
-    const defaultRfiStatus = await getDefaultValue("rfi_status");
-    const [rfi] = await db.insert(rfisTable).values({
-      projectId,
-      number,
-      subject: body.subject,
-      description: body.description || null,
-      status: defaultRfiStatus,
-      priority: body.priority,
-      assignedToId: body.assignedToId || null,
-      createdById: req.user!.userId,
-      dueDate: body.dueDate ? new Date(body.dueDate) : null,
-      dateRequested: body.dateRequested ? new Date(body.dateRequested) : new Date(),
-      dateRequired: body.dateRequired ? new Date(body.dateRequired) : null,
-      submittedByCompany: body.submittedByCompany || null,
-      submittedByContact: body.submittedByContact || null,
-      submittedByAddress: body.submittedByAddress || null,
-      submittedByPhone: body.submittedByPhone || null,
-      submittedByEmail: body.submittedByEmail || null,
-      submittedToCompany: body.submittedToCompany || null,
-      submittedToPerson: body.submittedToPerson || null,
-      submittedToEmail: body.submittedToEmail || null,
-      drawingNumber: body.drawingNumber || null,
-      drawingTitle: body.drawingTitle || null,
-      specSection: body.specSection || null,
-      detailNumber: body.detailNumber || null,
-      noteNumber: body.noteNumber || null,
-      locationDescription: body.locationDescription || null,
-      question: body.question || null,
-      costImpact: body.costImpact || null,
-      costImpactAmount: body.costImpactAmount || null,
-      scheduleImpact: body.scheduleImpact || null,
-      scheduleImpactDays: body.scheduleImpactDays || null,
-      distributionList: body.distributionList || [],
-      attachmentsJson: body.attachmentsJson || [],
-      projectAddress: body.projectAddress || null,
-      revisionNumber: 0,
-    }).returning();
-
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "create",
-      entityType: "rfi",
-      entityId: rfi.id,
-      details: `Created RFI ${number}: ${body.subject}`,
-    });
-
-    res.status(201).json(rfiToJson(rfi, { createdByName: req.user!.fullName }));
+    res.status(201).json(rfiToJson(result.rfi, { createdByName: req.user!.fullName }));
     // No automatic delivery. RFIs are sent manually by the author (copy/paste into
     // their own email client) and then recorded via POST .../mark-sent. Creating an
     // RFI never moves the ball-in-court — that flip happens only at mark-sent time.
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
+  }
+});
+
+// ─── POST /projects/:projectId/rfis/from-viewpoint ──────────────────────────
+// Creates a draft RFI from a Navisworks viewpoint (plugin flow). The screenshot is
+// decoded and stored through the storage adapter as a real filesTable row linked to
+// the new RFI (source = "lens-viewpoint"), NOT into attachmentsJson. The RFI is
+// created via the shared createRfiForProject helper so number/status/draft behavior
+// is identical to the normal create route.
+router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
+    const { subject, priority, sourceViewpointId, imageBase64 } = req.body as {
+      subject?: unknown; priority?: unknown; sourceViewpointId?: unknown; imageBase64?: unknown;
+    };
+    if (typeof subject !== "string" || !subject.trim()) {
+      res.status(400).json({ error: "subject is required" });
+      return;
+    }
+    if (typeof priority !== "string" || !priority.trim()) {
+      res.status(400).json({ error: "priority is required" });
+      return;
+    }
+    if (typeof sourceViewpointId !== "string" || !sourceViewpointId.trim()) {
+      res.status(400).json({ error: "sourceViewpointId is required" });
+      return;
+    }
+    if (typeof imageBase64 !== "string" || !imageBase64.trim()) {
+      res.status(400).json({ error: "imageBase64 is required" });
+      return;
+    }
+
+    // Validate the image bytes BEFORE any persistence so a bad payload can never
+    // leave behind an orphan RFI.
+    const buffer = Buffer.from(imageBase64, "base64");
+    if (buffer.length === 0) {
+      res.status(400).json({ error: "imageBase64 decoded to zero bytes" });
+      return;
+    }
+
+    // Side effects past this point: upload the screenshot to storage (disk), then
+    // create the RFI + linked filesTable row inside a single transaction so the two
+    // rows commit together or not at all. If the transaction rolls back, the one
+    // non-transactional artifact (the uploaded file) is compensated via storage.delete.
+    const fileName = `viewpoint-${sourceViewpointId}.png`;
+    let storagePath: string | undefined;
+    try {
+      storagePath = await storage.upload(buffer, projectId, fileName);
+      const defaultFileStatus = await getDefaultValue("file_status");
+
+      const result = await db.transaction(async (tx) => {
+        const created = await createRfiForProject(projectId, { subject, priority, sourceViewpointId }, req.user!, tx);
+        if (!created.ok) return created;
+        await tx.insert(filesTable).values({
+          projectId,
+          fileName,
+          fileSize: buffer.length,
+          fileType: "png",
+          status: defaultFileStatus,
+          uploadedById: req.user!.userId,
+          source: "lens-viewpoint",
+          linkedRfiId: created.rfi.id,
+        });
+        return created;
+      });
+
+      if (!result.ok) {
+        await storage.delete(storagePath);
+        res.status(result.status).json(result.payload);
+        return;
+      }
+
+      res.status(201).json(rfiToJson(result.rfi, { createdByName: req.user!.fullName }));
+    } catch (error) {
+      if (storagePath) await storage.delete(storagePath);
+      const message = error instanceof Error ? error.message : "Internal server error";
+      res.status(500).json({ error: message });
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bad request";
+    res.status(400).json({ error: message });
+  }
+});
+
+// ─── GET /projects/:projectId/rfis/:rfiId ───────────────────────────────────
+// Single-RFI fetch. Used by the deep-link prefill to open a brand-new draft that
+// may not yet be present in the filtered/loaded list. `:rfiId` matches a single
+// path segment, so the longer .../:rfiId/<subpath> routes (export, responses, etc.)
+// are unaffected — they carry an extra segment and never collide with this one.
+router.get("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const [rfi] = await db.select().from(rfisTable)
+      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)))
+      .limit(1);
+    if (!rfi) {
+      res.status(404).json({ error: "RFI not found" });
+      return;
+    }
+    const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
+    let assignedToName: string | undefined;
+    if (rfi.assignedToId) {
+      const assignee = await db.select().from(usersTable).where(eq(usersTable.id, rfi.assignedToId)).limit(1);
+      assignedToName = assignee[0]?.fullName;
+    }
+    res.json(rfiToJson(rfi, { createdByName: creator[0]?.fullName || "", assignedToName }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
   }
 });
 

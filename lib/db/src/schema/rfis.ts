@@ -71,6 +71,10 @@ export const rfisTable = pgTable("rfis", {
   lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
   deletedAt: timestamp("deleted_at"),
   deleteReason: text("delete_reason"),
+
+  // Set when an RFI is created from a Navisworks viewpoint via the plugin. Holds
+  // the source viewpoint's code so the detail panel can deep-link back to it.
+  sourceViewpointId: text("source_viewpoint_id"),
 });
 
 export type Rfi = typeof rfisTable.$inferSelect;

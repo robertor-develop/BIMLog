@@ -9,5 +9,6 @@
 - [DB verification target mismatch](db-verification-target.md) — executeSql hits DATABASE_URL (local PG); api-server uses a separate Neon DB, so app tables look empty. Verify via migration logs/API, not executeSql.
 - [Super-admin bootstrap guard](super-admin-bootstrap.md) — never re-assert is_super_admin by email every boot; only elevate when zero super admins exist
 - [Lens Viewpoints report design](lens-report-design.md) — monochrome navy-header-only PDF; clash-detection PDF (~1338+) is a separate, still-colored report
+- [RFI-from-viewpoint atomicity](rfi-from-viewpoint-atomicity.md) — validate image before writes; RFI+file inserts in one tx; storage.delete compensation on rollback; 400 vs 500 mapping
 - [Files storage lifecycle](files-storage-lifecycle.md) — uploads hit disk only transiently (hash+pdf-parse); disk path never persisted; all I/O via lib/storage-adapter.ts (buffer-based seam for future OneDrive)
 - [api-client-react project refs](api-client-react-project-refs.md) — bimlog reads dist .d.ts via TS refs; after hand-editing generated client run `tsc -b lib/api-client-react --force`
