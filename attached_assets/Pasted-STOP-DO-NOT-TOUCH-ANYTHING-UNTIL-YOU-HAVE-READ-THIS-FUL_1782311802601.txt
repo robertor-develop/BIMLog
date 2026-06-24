@@ -1,0 +1,48 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Today, file storage is hardcoded directly into artifacts/api-server/src/routes/files.ts — raw
+fs calls and multer.diskStorage scattered throughout the route handlers, with no abstraction
+layer. We are about to add a second storage backend (OneDrive, in a future build) and need a
+clean seam first so adding that backend later doesn't require touching every call site again.
+
+This build introduces a storage-adapter abstraction ONLY. It must NOT change any current
+behavior, route signature, or response shape — this is a pure internal refactor. Local disk
+remains the only real backend after this build; we are just restructuring how files.ts talks
+to storage, not changing what it does.
+
+WHAT TO BUILD:
+
+1. Create a new module (e.g. artifacts/api-server/src/lib/storage-adapter.ts) defining a clean
+   interface with, at minimum: upload(fileBuffer, projectId, filename) -> returns a storage
+   path/key, download(storagePath) -> returns the file buffer/stream, delete(storagePath) ->
+   removes the file. Design the interface generically enough that a future OneDrive
+   implementation could satisfy it without changing the interface shape — but do NOT build
+   that implementation now, just design the interface to accommodate it later.
+
+2. Implement a LocalDiskStorageAdapter that does EXACTLY what files.ts already does today:
+   same upload path (uploads/projects/<projectId>/files/<unique><ext>), same read/delete
+   behavior. This must be byte-for-byte equivalent behavior to today, just moved behind the
+   interface.
+
+3. Refactor every direct fs / multer.diskStorage / path.resolve("uploads") call site in
+   files.ts to go through this adapter instead. Show us the exact list of call sites you find
+   and confirm each one is covered.
+
+4. Show us the exact diff: before and after, for every changed section of files.ts, plus the
+   new storage-adapter.ts file in full.
+
+5. Confirm via a live test: upload a real test file through the existing upload route on a
+   safe test project (not 26), confirm it lands on disk exactly where it did before, confirm
+   download and delete still work correctly through the refactored code path.
+
+6. Run the mandatory code review before finishing.
+
+This build does NOT include: any OneDrive code, any new database schema/tables, any new
+routes, any change to the Files UI. Pure backend refactor only, zero behavior change, fully
+tested against current behavior.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.

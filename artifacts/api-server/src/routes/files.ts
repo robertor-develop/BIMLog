@@ -1,7 +1,5 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
-import fs from "fs";
-import path from "path";
 import multer from "multer";
 import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
@@ -10,6 +8,7 @@ import { eq, and, or, gte, lte, isNull, count, inArray } from "drizzle-orm";
 import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
+import { storage } from "../lib/storage-adapter";
 import { PDFParse as PDFParseClass } from "pdf-parse";
 import PDFDocument from "pdfkit";
 import Anthropic from "@anthropic-ai/sdk";
@@ -23,22 +22,7 @@ async function pdfParse(buffer: Buffer) {
 
 const router: IRouter = Router();
 
-const uploadsRoot = path.resolve("uploads");
-const uploadMiddleware = multer({
-  storage: multer.diskStorage({
-    destination: (req, _file, cb) => {
-      const projectId = (req.params as { projectId: string }).projectId;
-      const dir = path.join(uploadsRoot, "projects", projectId, "files");
-      fs.mkdirSync(dir, { recursive: true });
-      cb(null, dir);
-    },
-    filename: (_req, file, cb) => {
-      const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      const ext = path.extname(file.originalname) || "";
-      cb(null, `${unique}${ext}`);
-    },
-  }),
-});
+const uploadMiddleware = multer({ storage: multer.memoryStorage() });
 
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
 
@@ -241,7 +225,7 @@ async function processFileFromDisk(fileId: number, filePath: string, fileName: s
   const ext = (fileName.split(".").pop() || "").toLowerCase();
   try {
     if (ext === "pdf") {
-      const buffer = fs.readFileSync(filePath);
+      const buffer = await storage.download(filePath);
       let extractedText: string | null = null;
       try {
         const result = await pdfParse(buffer);
@@ -801,23 +785,30 @@ router.post(
         res.status(400).json({ error: "No file uploaded. Send a multipart/form-data request with a 'file' field." });
         return;
       }
+
+      let filePath: string;
+      try {
+        filePath = await storage.upload(req.file.buffer, projectId, req.file.originalname);
+      } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : "Storage write failed" });
+        return;
+      }
+
       if (!documentRelationship) {
-        fs.unlink(req.file.path, () => {});
+        await storage.delete(filePath);
         res.status(400).json({
           error: "document_relationship is required. Declare whether this document is 'created', 'modified', 'reference', or 'supporting'.",
         });
         return;
       }
 
-      const filePath = req.file.path;
       const actualFileSize = req.file.size;
       const fileType = req.file.mimetype || "application/octet-stream";
       const ext = (fileName.split(".").pop() || "").toLowerCase();
       const isBimFile = BIM_EXTENSIONS.has(ext);
 
-      // Compute real SHA-256 from the actual file bytes on disk
-      const fileBytes = fs.readFileSync(filePath);
-      const fileHash = createHash("sha256").update(fileBytes).digest("hex");
+      // Compute real SHA-256 from the uploaded file bytes
+      const fileHash = createHash("sha256").update(req.file.buffer).digest("hex");
 
       const validation = await validateFileName(projectId, fileName);
 
@@ -909,7 +900,7 @@ router.post(
         .where(and(eq(filesTable.projectId, projectId), eq(filesTable.fileHash, fileHash)))
         .limit(1);
       if (duplicates.length > 0) {
-        fs.unlink(filePath, () => {});
+        await storage.delete(filePath);
         res.status(409).json({
           error: "Duplicate file detected",
           details: `An identical file already exists in this project: "${duplicates[0].fileName}" (file ID ${duplicates[0].id}). The uploaded content matches an existing document.`,
