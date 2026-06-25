@@ -1,0 +1,40 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Real bugs found testing the from-viewpoint RFI flow end-to-end for the first time. Investigate
+each, show real code/data, do not propose fixes yet.
+
+1. Ball-in-court: the from-viewpoint create endpoint (or the RFI create logic it shares) - does
+   it write any rfi_ball_in_court_history row or set any "ball in court" value at create time?
+   Per last session's explicit design, ball-in-court must ONLY flip on confirmed Mark-as-Sent,
+   never at creation. Show the exact code path and confirm whether this rule is being violated.
+
+2. RFI detail panel (RfisTab.tsx or wherever the single-RFI view renders): for an RFI created
+   via from-viewpoint, are Submitted To, Description of Question, Cost Impact, and Schedule
+   Impact rendered as editable inputs or static/read-only text? If read-only, show the exact
+   condition controlling that (a status check, a missing-field check, an ownership check).
+
+3. Linked Items dropdown: query what's actually in clash_reports/clashes for project 26 that's
+   producing dozens of identical "Plugin Sync - 2026-06-12 — Hard" entries in the Linked Items
+   picker. Is this duplicate data, a bad label-generation function, or both?
+
+4. "Attach Response Documents" - the Add button next to the paste-a-URL field. Show its exact
+   onClick handler. Does it call anything, or is it unwired?
+
+5. Cost Impact / Schedule Impact radio buttons in the Response section - show their exact
+   onChange handlers. Do they update any state, or are they decorative?
+
+6. The floating EN language toggle and Guide button - show their exact CSS positioning
+   relative to the Submit Response button and the panel's scroll container. Confirm whether
+   they overlap/block it at smaller viewport heights.
+
+7. The AI-generated email preview (built last session) - confirm whether there's any way to
+   add user-supplied context/text and regenerate, or whether it only ever reads from the RFI's
+   already-stored fields with no user input path.
+
+8. Compare the manual "New RFI" creation form's fields/validation/submit path against the
+   from-viewpoint creation endpoint's fields/validation. Are they hitting the same underlying
+   RFI create logic, or has from-viewpoint diverged into a separate, less complete path? Show
+   both code paths side by side.
+
+Print all findings. No code changes.
