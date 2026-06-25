@@ -274,6 +274,17 @@ export function LivingBrief() {
           <button onClick={unlock} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
             Unlock
           </button>
+          {isSuperAdmin && (
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid hsl(var(--border))" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700, fontSize: 13 }}><KeyRound size={14} /> Forgot it? Reset the gate password</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") changePassword(); }} placeholder="New password (min 4 chars)" style={{ flex: 1, minWidth: 180, padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+                <button onClick={changePassword} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Set</button>
+              </div>
+              {adminMsg && <div style={{ fontSize: 12.5, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
+              <div style={{ fontSize: 12, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>Then enter the new password above to unlock.</div>
+            </div>
+          )}
         </div>
       </div>
     );

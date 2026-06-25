@@ -16,3 +16,8 @@ A doc only appears (and only becomes editable) when ALL of these agree:
 4. Frontend `EDITABLE` array + the Export `wanted` list in artifacts/bimlog/src/pages/LivingBrief.tsx.
 
 **Editable-without-DB-row is safe:** GET /docs falls back to the disk seed when no `living_brief_doc:<NAME>` override row exists, so a doc can be in EDITABLE_DOCS with no platform_settings row until the first save. Editable doc content lives in platform_settings (Neon, key prefix `living_brief_doc:`); PLATFORM/STATUS/AUDIT always read disk.
+
+## Gate password: super-admin reset must stay reachable from the LOCKED screen
+The Living Brief gate password (`living_brief_password_hash` in platform_settings, bcryptjs `$2b$`) is verified by POST /living-brief/unlock. The reset route POST /living-brief/password is super-admin-only (isSuperAdminMiddleware) and deliberately does NOT require the brief unlock token. The frontend MUST therefore expose the reset control on the `!unlocked` gate screen for super-admins (isSuperAdmin comes from /eligibility on mount, before unlock).
+**Why:** if reset lives only inside the post-unlock admin panel, a super-admin who forgets/mistypes the password is permanently locked out — a catch-22 (must unlock to reset, can't unlock). Reported as "password not working" (it was a 401, not a bug).
+**How to apply:** never move the gate-password reset back behind the unlock gate. A super-admin's authenticated prod session writing via /password also sidesteps any dev-vs-prod DB/secret uncertainty.
