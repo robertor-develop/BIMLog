@@ -1,0 +1,44 @@
+STOP. DO NOT TOUCH ANYTHING ELSE. UPDATE STATUS.md AND AUDIT.md ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+This session is closing out. Update STATUS.md and AUDIT.md to reflect everything actually
+shipped this session, verified against real current code — do not rely on this summary alone,
+confirm each item against the codebase before writing it down.
+
+STATUS.md — update "Last updated" to today. Add to "What is working right now":
+1. Storage-adapter abstraction (lib/storage-adapter.ts) — files.ts fully refactored to route
+   through it (multer.memoryStorage, buffer-based upload/download/delete), LocalDiskStorage
+   Adapter byte-for-byte equivalent to prior behavior, live e2e verified.
+2. RFI accountability foundation — silent auto-email on RFI create removed; new send_status/
+   sent_at/sent_by_id/send_method columns on rfis; copy-paste email preview (AI-generated via
+   new generate-email-preview endpoint, with graceful fallback to a static template); Mark as
+   Sent endpoint is the ONLY place ball-in-court flips to the recipient, transaction-guarded
+   against concurrent double-writes (verified live under an actual race — exactly one history
+   row, not two), with a FK constraint and partial-unique index enforcing one open custody row
+   per RFI.
+3. Create RFI from Navisworks viewpoint — new POST .../rfis/from-viewpoint (atomic, validates
+   before any writes, compensates storage on rollback, no orphan RFIs on failure — verified via
+   e2e on zero-byte and invalid-priority failure paths), new nullable source_viewpoint_id
+   column on rfis, new GET .../rfis/:rfiId for deep-link prefill, RfisTab.tsx ?rfi= deep-link
+   handling, "Jump to Viewpoint" button in the RFI detail panel.
+4. New GET .../projects/:projectId/levels and GET .../projects/list-for-plugin endpoints for
+   the plugin (narrow, stable response shapes, scoped to the caller's real project
+   memberships).
+
+Add to Known bugs / open items:
+- The screenshot file uploaded via from-viewpoint lands as a real filesTable row with
+  linkedRfiId set, but is NOT yet retrievable through the existing generic download route
+  (which only serves system-generated PDFs and returns 501 for binary uploads — disk path was
+  never persisted to the DB, a pre-existing limitation affecting every user upload today, not
+  introduced by this feature). Needs a small follow-up to extend the download route.
+- Cloud storage backend (OneDrive or similar) is designed but not started — the storage-
+  adapter refactor is the prerequisite groundwork, now complete.
+
+AUDIT.md — append a new dated section summarizing: the storage-adapter refactor (what changed,
+what didn't, verification method), the RFI accountability foundation's concurrency-guard proof
+(the actual race-condition test result from earlier this session, if not already recorded),
+and the create-RFI-from-viewpoint feature's atomicity fix (the architect-flagged orphan-RFI
+bug and its resolution). Do not overwrite existing AUDIT.md content — append only.
+
+This is documentation only. No code changes, no rebuild needed unless you find something that
+needs one to verify — if so, stop and report back before proceeding.

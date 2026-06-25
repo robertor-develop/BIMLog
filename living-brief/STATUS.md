@@ -3,7 +3,7 @@
 Updated manually after each feature ships. Reflects the real state of the platform.
 
 ## Last updated
-- 2026-06-19
+- 2026-06-24
 
 ## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
@@ -58,6 +58,32 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   scalar-only payload, the backend guards naming_fields rebuilds behind a hasFields check, and a
   repair-needed warning banner shows on any completed convention with missing required field values.
   Project 23 remains the one known affected project, flagged for manual remediation, not yet repaired.
+- Storage-adapter abstraction (artifacts/api-server/src/lib/storage-adapter.ts) — files.ts fully
+  refactored to route through it: multer now uses memoryStorage and all file I/O goes through a
+  buffer-based upload/download/delete interface. The current LocalDiskStorageAdapter is byte-for-byte
+  equivalent to the prior on-disk behavior (live e2e verified). This is the groundwork seam for a
+  future cloud backend.
+- RFI accountability foundation — the silent auto-email on RFI create has been removed (creating an
+  RFI never sends mail and never moves ball-in-court). New send_status / sent_at / sent_by_id /
+  send_method columns on rfis. A copy-paste email preview is generated via the new
+  POST .../rfis/:rfiId/generate-email-preview endpoint (AI-generated, with a graceful fallback to a
+  static template on AI failure). The POST .../rfis/:rfiId/mark-sent endpoint is the ONLY place
+  ball-in-court flips to the recipient — it writes the first rfi_ball_in_court_history row inside a
+  transaction with a guarded conditional UPDATE (send_status != 'sent'), so concurrent callers
+  serialize and the loser gets a 409 (verified live under an actual race — exactly one history row,
+  not two). A FK (rfi_id -> rfis.id) plus a partial-unique index (rfi_ball_in_court_open_unique on
+  rfi_id WHERE to_date IS NULL) enforce one open custody row per RFI at the DB level.
+- Create RFI from Navisworks viewpoint — new POST .../rfis/from-viewpoint. It validates all inputs
+  (including decoding and zero-byte-checking the screenshot) BEFORE any write, then creates the RFI +
+  linked filesTable row inside a single transaction and compensates the uploaded file via
+  storage.delete on rollback, so a failure never leaves an orphan RFI (verified via e2e on the
+  zero-byte and invalid-priority failure paths — no orphan RFI, no leftover file). Validation returns
+  400, helper rejections 422/409, server/storage/DB failures 500. New nullable source_viewpoint_id
+  column on rfis, new GET .../rfis/:rfiId for deep-link prefill of brand-new drafts, RfisTab.tsx
+  ?rfi= deep-link handling, and a "Jump to Viewpoint" button in the RFI detail panel.
+- Plugin endpoints — new GET .../projects/:projectId/levels (Building Levels from
+  naming_fields.allowed_values, scoped via requireProjectMember) and GET .../projects/list-for-plugin
+  (narrow {id,name,code} shape scoped to the caller's real project memberships) for the desktop plugin.
 
 ## Active Investigations
 - None open. (Building Levels data location and Redline interception architecture were both resolved
@@ -93,12 +119,20 @@ Updated manually after each feature ships. Reflects the real state of the platfo
 - Reports module partially broken.
 - Unknown/Unknown trades in some clash hits — ComAPI needed to read element properties.
 - linked_items table has 0 rows — cross-linking exists but is not being populated yet.
-- rfi_ball_in_court_history is never written — no writer exists anywhere in the codebase despite
-  4 active RFIs.
+- rfi_ball_in_court_history — NO LONGER orphaned as of this session: the new
+  POST .../rfis/:rfiId/mark-sent endpoint is its first and only writer. Existing RFIs created before
+  this work still have no history rows until they are marked as sent.
 - change_orders imports createNotification but never calls it — change order events produce no
   notifications.
 - GET /api/v1/projects/:projectId/levels endpoint exists but is not yet consumed by any frontend
   page — confirmed via code search, no frontend reference found. Open, not broken.
+- The screenshot file uploaded via POST .../rfis/from-viewpoint lands as a real filesTable row with
+  linkedRfiId set, but is NOT yet retrievable through the existing generic download route, which only
+  serves system-generated PDFs and returns 501 for binary uploads (the disk path was never persisted
+  to the DB — a pre-existing limitation affecting every user upload today, NOT introduced by this
+  feature). Needs a small follow-up to extend the download route.
+- Cloud storage backend (OneDrive or similar) is designed but not started — the storage-adapter
+  refactor is the prerequisite groundwork, now complete.
 
 ## Founding partner context
 Ruben Crespo (rubenc@bimcorpgroup.com) is BIMLog's first Founding Partner. ELARA EAST is the

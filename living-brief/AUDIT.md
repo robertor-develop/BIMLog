@@ -156,3 +156,71 @@ PART 3 — Module readiness assessment for the next wiring phase:
 - Cross-cutting flag: ball-in-court is already implemented two inconsistent ways across two
   modules (working JSON column on submittals, dead dedicated table for RFIs). A unification
   decision is needed before wiring the third module.
+
+Session Close-Out Audit — 2026-06-24
+
+Method: every item below confirmed by reading the current route, schema, and frontend code this
+session. No production row counts re-queried; live e2e results cited are from this session's testing
+against the running api-server. Append-only — nothing above this line was changed.
+
+1. STORAGE-ADAPTER REFACTOR (artifacts/api-server/src/lib/storage-adapter.ts)
+
+What changed: all file persistence in routes/files.ts now routes through a single StorageAdapter
+interface (upload(buffer, projectId, filename) -> storagePath, download(path) -> buffer,
+delete(path) -> void). Multer was switched to memoryStorage so the route handler receives the file
+as an in-memory buffer (req.file.buffer) and hands it to storage.upload — confirmed at files.ts:25
+(memoryStorage), :791 (upload), :228 (download), :798 and :903 (delete on failure/replace).
+What did NOT change: behavior is byte-for-byte identical. The shipped implementation,
+LocalDiskStorageAdapter, writes the same bytes to the same on-disk layout as before. There is no
+cloud backend yet; this is the seam that makes one possible.
+Verification: live e2e earlier this session confirmed upload/download/delete round-trips and
+byte-for-byte equality with the prior disk behavior.
+
+2. RFI ACCOUNTABILITY FOUNDATION — CONCURRENCY-GUARD PROOF
+
+Design: creating an RFI no longer sends any email and no longer moves ball-in-court (confirmed: no
+sendEmail/sendMail call path remains in routes/rfis.ts; the create path comment at ~750-751 states
+the flip happens only at mark-sent). Four new columns on rfis: send_status (default 'draft'),
+sent_at, sent_by_id (FK -> users), send_method (schema rfis.ts:65-68). A copy-paste email preview is
+produced by POST .../rfis/:rfiId/generate-email-preview (rfis.ts:1368), AI-generated with a graceful
+fallback to a static template on AI failure (catch -> fallback at rfis.ts:996).
+Single custody writer: POST .../rfis/:rfiId/mark-sent (rfis.ts:1435) is the ONLY writer of
+rfi_ball_in_court_history. It runs inside db.transaction (rfis.ts:1444) and performs a guarded
+conditional UPDATE — the WHERE includes ne(send_status,'sent') OR send_status IS NULL
+(rfis.ts:1466) — so two concurrent callers serialize on the row: the winner updates one row and
+inserts the first history row (rfis.ts:1474); the loser updates zero rows and receives a 409
+("already marked as sent", rfis.ts:1448). DB-level enforcement: FK rfi_id -> rfis.id NOT NULL
+(schema rfi-ball-in-court-history.ts:6) plus a partial-unique index
+rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL
+(app.ts:166), guaranteeing at most one open custody row per RFI.
+Concurrency proof (live, earlier this session): two mark-sent calls fired against the same RFI under
+an actual race produced exactly ONE rfi_ball_in_court_history row — not two — with the second call
+returning 409. The guard holds.
+
+3. CREATE RFI FROM NAVISWORKS VIEWPOINT — ATOMICITY FIX
+
+Feature: POST .../rfis/from-viewpoint (rfis.ts:764), new nullable rfis.source_viewpoint_id
+(schema rfis.ts:77, plus idempotent startup ALTER in app.ts), GET .../rfis/:rfiId (rfis.ts:844) for
+deep-link prefill, RfisTab.tsx ?rfi= handling (line 152) and a "Jump to Viewpoint" button
+(lines 1723-1730) opening localhost:8765/jump?code=<encoded sourceViewpointId>.
+Architect-flagged bug: the original implementation created the RFI FIRST, then decoded/uploaded the
+image and inserted the file row. A zero-byte payload, storage failure, or file-insert failure after
+the RFI insert left an orphan RFI with no linked file; the catch-all also returned 400 for what were
+really server errors.
+Resolution: image bytes are now decoded and zero-byte-checked BEFORE any persistence (400 on bad
+input). The RFI insert + activity-log insert + filesTable insert run inside one db.transaction
+(rfis.ts:805) via a transaction-aware shared helper createRfiForProject(..., dbx=tx); the one
+non-transactional side effect (the uploaded file on disk) is compensated with storage.delete on
+rollback or on a helper rejection. Status mapping corrected: 400 validation, 422/409 helper
+rejections, 500 for storage/DB/unexpected failures.
+Verification (live e2e this session): happy path created the RFI and the linked filesTable row with
+the disk bytes matching the source PNG exactly; GET-by-id returned it and 404'd for a missing id; the
+zero-byte path returned 400 and the invalid-priority path returned 422, and in BOTH failure paths the
+RFI count and file count were unchanged and no leftover viewpoint file remained on disk — confirming
+the transaction rollback and storage compensation work.
+
+KNOWN LIMITATION CARRIED FORWARD: the from-viewpoint screenshot is a real filesTable row
+(linkedRfiId set) but is not retrievable via the generic download route, which serves only
+system-generated PDFs and returns 501 for binary uploads because the disk path was never persisted to
+the DB. This is pre-existing and affects every user upload today; it was not introduced by this
+feature and needs a small follow-up to extend the download route.
