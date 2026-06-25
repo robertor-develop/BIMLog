@@ -1316,6 +1316,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [aiPreview, setAiPreview] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [userContext, setUserContext] = useState("");
+  const [showContextInput, setShowContextInput] = useState(false);
 
   const sendPreviewText = [
     `To: ${rfi.submittedToEmail || rfi.submittedToPerson || rfi.submittedToCompany || ""}`,
@@ -1344,6 +1346,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/generate-email-preview`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ userContext: userContext.trim() || undefined }),
       });
       if (!resp.ok) throw new Error("generate failed");
       const data = await resp.json() as { email?: string };
@@ -1720,6 +1723,11 @@ ${hasResp ? `
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
               </Button>
             )}
+            {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && (
+              <Button variant="outline" size="sm" onClick={() => onRevise(rfi)} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
+                <RefreshCw style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
+              </Button>
+            )}
             {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
               <Button
                 variant="outline"
@@ -1875,6 +1883,9 @@ ${hasResp ? `
                         <Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}
                       </span>
                       <div style={{ display: "flex", gap: 6 }}>
+                        <Button variant="outline" size="sm" onClick={() => setShowContextInput(v => !v)} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide context", "Ocultar contexto", lang) : w("Add context", "Agregar contexto", lang)}
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
                           {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <RefreshCw style={{ width: 12, height: 12 }} />}
                           {w("Regenerate", "Regenerar", lang)}
@@ -1885,6 +1896,16 @@ ${hasResp ? `
                         </Button>
                       </div>
                     </div>
+                    {showContextInput && (
+                      <div style={{ padding: "8px 10px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.2)" }}>
+                        <textarea
+                          value={userContext}
+                          onChange={e => setUserContext(e.target.value)}
+                          placeholder={w("Add extra context for the AI (optional), then Regenerate…", "Agregue contexto adicional para la IA (opcional), luego Regenere…", lang)}
+                          style={{ width: "100%", minHeight: 56, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                        />
+                      </div>
+                    )}
                     {previewFailed && (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 11, color: "#B45309", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
                         <AlertTriangle style={{ width: 12, height: 12, flexShrink: 0 }} />{w("AI draft unavailable — using basic template.", "Borrador de IA no disponible — usando plantilla básica.", lang)}

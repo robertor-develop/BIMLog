@@ -1,0 +1,49 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Four real, confirmed bugs from your own read-only investigation. Fix all four, scoped exactly
+as described, nothing else.
+
+1. LINKED ITEMS LABEL (LinkedItemsPanel.tsx ~line 71-80): the label uses
+   rep.fileName + clash.description, both non-unique within a sync batch (every clash shows
+   "Plugin Sync - 2026-06-12 — Hard"). Change the clash-side label to use clash.name (the
+   actually-unique field, e.g. "Clash213") instead of clash.description. Keep the report-side
+   prefix as-is. The underlying value (clash.id) used on selection is already correct/unique —
+   only the displayed text needs fixing.
+
+2. RFI DETAIL PANEL EDIT PATH (RfisTab.tsx): Submitted To, Description of Question, Cost
+   Impact, and Schedule Impact are static read-only text in the detail body for EVERY RFI, not
+   just from-viewpoint ones. The only edit path today is the "Revise RFI" button, gated to
+   status === "closed". Change that gate so the same button (reuse the existing RfiCreatePanel
+   form) ALSO shows whenever the RFI's sendStatus !== "sent" (i.e. still draft/ready/failed —
+   never sent yet), in addition to the existing closed-status case. Label it "Edit RFI" in that
+   pre-send state and keep "Revise RFI" wording for the closed-status case. Do not change
+   anything about Mark-as-Sent or ball-in-court logic — this is purely about which RFIs can
+   open the existing edit form.
+
+3. FLOATING EN TOGGLE / GUIDE BUTTON OVERLAP (LangToggle.tsx, SmartGuide.tsx): both are fixed
+   bottom-right (right: 24) and currently sit directly over the RFI detail drawer's
+   Submit Response / Cancel buttons, which also anchor bottom-right inside the drawer.
+   Change both LangToggle's floating variant and SmartGuide's pill button (and its open
+   dialog) from right-anchored to LEFT-anchored (left: 24 instead of right: 24), keeping their
+   existing bottom offsets. This avoids the overlap structurally without needing to detect
+   whether any drawer/modal is open. Confirm no other part of the UI already has a
+   left-anchored fixed element these would now collide with.
+
+4. AI EMAIL PREVIEW HAS NO USER-CONTEXT PATH (rfis.ts generate-email-preview ~1368-1429,
+   RfisTab.tsx ~1339-1358 and the Regenerate button ~1878-1881): the endpoint only reads
+   req.params, never req.body, so Regenerate always re-runs on identical stored fields. Add an
+   optional userContext string to the request body, read it in the route, and if present,
+   include it in the prompt as additional context the AI should incorporate (e.g. "Additional
+   context from the user: {userContext}") alongside the existing stored-field-based prompt.
+   On the frontend, add a small textarea (collapsed/optional, not required) near the
+   Regenerate button where the user can type extra context before regenerating; pass it as
+   userContext in the POST body. Follow the EXACT same pattern already used by the separate
+   generate-response endpoint, which already accepts a userDraft body field — mirror that,
+   don't invent a new pattern.
+
+For each of the four, show the exact diff (before/after). Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild the frontend too since all four touch frontend code. Print ALL output as plain text.
+No collapsed boxes.

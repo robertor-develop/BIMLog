@@ -103,7 +103,7 @@ export function SmartGuide({ activeTab }: { activeTab: string }) {
           aria-label={`Smart Guide — ${tip.title}`}
           style={{
             position: "fixed",
-            right: 24,
+            left: 24,
             bottom: 80,
             zIndex: 1000,
             width: 320,
@@ -183,7 +183,7 @@ export function SmartGuide({ activeTab }: { activeTab: string }) {
         aria-pressed={isOpen}
         style={{
           position: "fixed",
-          right: 24,
+          left: 24,
           bottom: 24,
           zIndex: 1000,
           display: "inline-flex",

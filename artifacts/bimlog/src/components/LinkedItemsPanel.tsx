@@ -74,7 +74,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
         const data = await cr.json();
         return (data.clashes ?? []).map((c: any) => ({
           id: c.id,
-          label: `${rep.fileName || rep.reportNumber || `Report ${rep.id}`} — ${c.description || c.clashIdOriginal || `Clash #${c.id}`}`,
+          label: `${rep.fileName || rep.reportNumber || `Report ${rep.id}`} — ${c.name || c.clashIdOriginal || `Clash #${c.id}`}`,
         }));
       }));
       const clashes = clashArrays.flat();

@@ -1375,6 +1375,7 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-email-preview", authMiddl
       return;
     }
 
+    const userContext: string = (req.body?.userContext ?? "").toString().trim();
     const questionText = stripMarkdown(rfi.question || rfi.description || "");
     const recipient = rfi.submittedToPerson || rfi.submittedToCompany || "the recipient";
     const recipientCompany = rfi.submittedToCompany || "";
@@ -1405,7 +1406,7 @@ Sender: ${sender || "the project team"}${senderCompany ? `, ${senderCompany}` : 
 ${dueDate ? `Response Required By: ${dueDate}` : ""}
 Original RFI Question Text:
 ${questionText}
-
+${userContext ? `\nAdditional context from the user (incorporate this naturally into the email): ${userContext}\n` : ""}
 Write only the full email body text, starting from the greeting and ending with the closing. Do not include "To:" or "Subject:" header lines, and no preamble or commentary.`;
 
     const message = await anthropic.messages.create({
