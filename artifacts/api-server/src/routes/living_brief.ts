@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { db } from "@workspace/db";
 import { usersTable, platformSettingsTable } from "@workspace/db/schema";
 import { eq, inArray } from "drizzle-orm";
@@ -15,17 +16,18 @@ import {
 const router = Router();
 
 const PASSWORD_KEY = "living_brief_password_hash";
-// Editable docs (CLAUDE.md, VISION.md) are stored in platform_settings under this
-// key prefix so edits survive every deploy; the on-disk git file is only the
-// initial seed/fallback used until the first save.
+// Editable docs (CLAUDE.md, VISION.md, PLUGIN.md) are stored in platform_settings
+// under this key prefix so edits survive every deploy; the on-disk git file is only
+// the initial seed/fallback used until the first save.
 const DOC_KEY_PREFIX = "living_brief_doc:";
-const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md"]);
+const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md", "PLUGIN.md"]);
 
 const DOCS = [
   { name: "CLAUDE.md", file: "CLAUDE.md" },
   { name: "PLATFORM.md", file: "PLATFORM.md" },
   { name: "STATUS.md", file: "STATUS.md" },
   { name: "VISION.md", file: "VISION.md" },
+  { name: "PLUGIN.md", file: "PLUGIN.md" },
   { name: "AUDIT.md", file: "AUDIT.md" },
 ];
 
@@ -33,7 +35,8 @@ const DOCS = [
 // working directory and this module's directory until a "living-brief" folder is
 // found. Works in dev (tsx, cwd = package dir) and in the bundled prod build.
 function findLivingBriefDir(): string {
-  const starts: string[] = [process.cwd(), __dirname];
+  const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+  const starts: string[] = [process.cwd(), moduleDir];
   for (const start of starts) {
     let dir = start;
     for (let i = 0; i < 8; i++) {
@@ -146,9 +149,9 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
 });
 
 // Save an editable document to the platform_settings DB (super admin only). Only
-// CLAUDE.md and VISION.md are editable: PLATFORM.md auto-regenerates from the
-// build and STATUS.md/AUDIT.md are maintained in the repo. Writing to the DB (not
-// disk) makes edits permanent across every future deploy on every instance.
+// CLAUDE.md, VISION.md and PLUGIN.md are editable: PLATFORM.md auto-regenerates
+// from the build and STATUS.md/AUDIT.md are maintained in the repo. Writing to the
+// DB (not disk) makes edits permanent across every future deploy on every instance.
 router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
   const name = req.params.name;
   if (!EDITABLE_DOCS.has(name)) {

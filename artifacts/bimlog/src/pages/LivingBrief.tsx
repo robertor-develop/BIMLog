@@ -5,9 +5,10 @@ import { useAuthStore } from "@/store/auth";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const BRIEF_TOKEN_KEY = "bimlog-brief-token";
-// Only these docs are hand-editable from the UI: PLATFORM.md auto-regenerates
-// from the build and STATUS.md is maintained by Replit after features ship.
-const EDITABLE = ["CLAUDE.md", "VISION.md"];
+// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md):
+// PLATFORM.md auto-regenerates from the build and STATUS.md/AUDIT.md are maintained
+// in the repo after features ship.
+const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md"];
 
 type Doc = { name: string; content: string; updatedAt: string };
 type AccessUser = {
@@ -182,7 +183,7 @@ export function LivingBrief() {
     const data = await r.json();
     const fresh: Doc[] = data.docs ?? [];
     setDocs(fresh);
-    const wanted = ["CLAUDE.md", "VISION.md"];
+    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md"];
     const present = wanted.filter((n) => fresh.some((d) => d.name === n));
     if (!present.length) { showToast("Nothing to export"); return; }
     const body = present

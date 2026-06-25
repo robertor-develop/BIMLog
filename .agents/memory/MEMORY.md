@@ -10,5 +10,6 @@
 - [Super-admin bootstrap guard](super-admin-bootstrap.md) — never re-assert is_super_admin by email every boot; only elevate when zero super admins exist
 - [Lens Viewpoints report design](lens-report-design.md) — monochrome navy-header-only PDF; clash-detection PDF (~1338+) is a separate, still-colored report
 - [RFI-from-viewpoint atomicity](rfi-from-viewpoint-atomicity.md) — validate image before writes; RFI+file inserts in one tx; storage.delete compensation on rollback; 400 vs 500 mapping
+- [Living Brief docs system](living-brief-docs.md) — api-server dev runs tsx/ESM (no __dirname, use import.meta.url); adding a brief tab needs seed file + DOCS + EDITABLE_DOCS + frontend EDITABLE/Export all in sync
 - [Files storage lifecycle](files-storage-lifecycle.md) — uploads hit disk only transiently (hash+pdf-parse); disk path never persisted; all I/O via lib/storage-adapter.ts (buffer-based seam for future OneDrive)
 - [api-client-react project refs](api-client-react-project-refs.md) — bimlog reads dist .d.ts via TS refs; after hand-editing generated client run `tsc -b lib/api-client-react --force`

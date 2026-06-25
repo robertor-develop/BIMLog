@@ -1,0 +1,34 @@
+STOP. FIX BOTH OF THESE NOW IN ONE PASS. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+TWO confirmed real bugs, fix both:
+
+1. CRITICAL, fix first: GET /api/v1/living-brief/docs throws a 500 right now —
+   "ReferenceError: __dirname is not defined" in findLivingBriefDir (living_brief.ts:36),
+   because the dev runtime uses tsx/ESM where __dirname doesn't exist. This breaks ALL Living
+   Brief docs loading, not just PLUGIN.md. Fix it the standard ESM-safe way: derive the
+   directory from import.meta.url instead of __dirname (e.g. using
+   fileURLToPath(import.meta.url) and path.dirname() on that), consistent with how this
+   codebase already needs to run under ESM. Confirm GET /living-brief/eligibility and GET
+   /living-brief/docs both return 200 with real content after the fix, live, with a real
+   token.
+
+2. THEN, add PLUGIN.md as a sixth Living Brief tab, confirmed genuinely missing (no DB row, not
+   in DOCS/EDITABLE_DOCS, no seed file on disk, not in the frontend EDITABLE/Export lists) —
+   this needs to be built from scratch, not just refreshed:
+   - Create living-brief/PLUGIN.md on disk with placeholder content: "PLUGIN.md — not yet
+     populated. Paste content via Paste to Update." This must exist BEFORE the DOCS array
+     change so GET /docs never throws on a missing file.
+   - Add { name: "PLUGIN.md" } to the DOCS array in living_brief.ts, positioned between
+     VISION.md and AUDIT.md. Add "PLUGIN.md" to EDITABLE_DOCS.
+   - Add "PLUGIN.md" to the EDITABLE array in LivingBrief.tsx and to the Export "wanted" list.
+   - Do NOT touch the existing CLAUDE.md/VISION.md rows in platform_settings.
+
+After both fixes, confirm via a live query against Neon that living_brief_doc:CLAUDE.md and
+living_brief_doc:VISION.md are byte-identical to before (untouched), and confirm GET
+/api/v1/living-brief/docs now returns 6 docs including PLUGIN.md with placeholder content.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Print ALL output as plain text. No collapsed boxes.
