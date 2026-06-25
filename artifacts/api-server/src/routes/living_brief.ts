@@ -31,12 +31,30 @@ const DOCS = [
   { name: "AUDIT.md", file: "AUDIT.md" },
 ];
 
+// Resolve this module's directory in a way that works in BOTH module formats:
+//  - tsx/ESM dev runtime: __dirname is undefined, import.meta.url is defined.
+//  - esbuild CJS prod bundle: __dirname is defined, import.meta.url is undefined
+//    (esbuild leaves it undefined, so fileURLToPath(import.meta.url) would throw).
+// `typeof` guards are safe in both formats (no ReferenceError), and each branch is
+// wrapped so a missing/empty value never reaches fileURLToPath.
+function resolveModuleDir(): string | null {
+  try {
+    // @ts-ignore __dirname only exists in the CJS output
+    if (typeof __dirname !== "undefined") return __dirname as string;
+  } catch { /* not running as CJS */ }
+  try {
+    const url = import.meta?.url;
+    if (url) return path.dirname(fileURLToPath(url));
+  } catch { /* not running as ESM */ }
+  return null;
+}
+
 // Resolve the repo-root living-brief folder by walking up from both the current
 // working directory and this module's directory until a "living-brief" folder is
 // found. Works in dev (tsx, cwd = package dir) and in the bundled prod build.
 function findLivingBriefDir(): string {
-  const moduleDir = path.dirname(fileURLToPath(import.meta.url));
-  const starts: string[] = [process.cwd(), moduleDir];
+  const moduleDir = resolveModuleDir();
+  const starts: string[] = moduleDir ? [process.cwd(), moduleDir] : [process.cwd()];
   for (const start of starts) {
     let dir = start;
     for (let i = 0; i < 8; i++) {

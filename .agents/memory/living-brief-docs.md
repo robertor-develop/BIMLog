@@ -3,10 +3,14 @@ name: Living Brief docs system
 description: ESM runtime constraint + the multi-place sync needed to add a Living Brief tab
 ---
 
-## ESM: no __dirname in the api-server dev runtime
-The api-server dev workflow runs via tsx in ESM mode, where `__dirname` is undefined and throws at runtime (the esbuild prod bundle is CJS and would have it — so this fails ONLY in dev, and only on the code path that touches it). In routes/living_brief.ts, `findLivingBriefDir()` resolves the seed folder from `path.dirname(fileURLToPath(import.meta.url))`, NOT `__dirname`.
-**Why:** GET /living-brief/docs threw a 500 ("__dirname is not defined") in dev, breaking ALL brief docs loading. esbuild rewrites `import.meta.url` correctly for the CJS build, so the fix works in both runtimes.
-**How to apply:** never reintroduce `__dirname`/`require` in api-server source; use `import.meta.url` + `fileURLToPath`.
+## Module dir resolution must support BOTH runtimes (dev tsx/ESM AND prod esbuild/CJS)
+The api-server has two runtimes with OPPOSITE globals:
+- dev = tsx/ESM: `__dirname` is undefined (throws), `import.meta.url` is defined.
+- prod = esbuild CJS bundle (dist/index.cjs): `__dirname` is defined, but `import.meta.url` is left as `undefined` by esbuild (it does NOT shim it). So `fileURLToPath(import.meta.url)` throws `ERR_INVALID_ARG_TYPE` at runtime in prod.
+
+Using EITHER alone breaks the other runtime, and both compile/build fine — the failure only shows at runtime, per-runtime. routes/living_brief.ts `resolveModuleDir()` prefers `__dirname` when `typeof __dirname !== "undefined"` (CJS), else `import.meta?.url` guarded before `fileURLToPath` (ESM), each in try/catch, returning null so callers fall back to `process.cwd()` walking.
+**Why:** `__dirname` alone → 500 in dev; `import.meta.url` alone → 500 in prod (took down the live /api healthcheck). `typeof`/optional-chaining guards are safe in both module formats (no ReferenceError).
+**How to apply:** for any path-from-module-location in api-server, use the dual-guarded helper. NEVER trust a build that only succeeded — verify the actual prod CJS bundle at runtime (`node dist/index.cjs`), not just the dev tsx server.
 
 ## Adding a Living Brief tab/doc requires syncing several places
 A doc only appears (and only becomes editable) when ALL of these agree:
