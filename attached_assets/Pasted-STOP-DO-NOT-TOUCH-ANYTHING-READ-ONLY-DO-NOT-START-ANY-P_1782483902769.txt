@@ -1,0 +1,34 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We are designing a viewpoint lifecycle feature: Edit (same trade, instruction changed),
+Reassign (wrong trade, old record superseded, new one created under the correct trade's own
+sequence), and Void (no longer needed, no replacement). Before any build, we need the real
+current facts on three things.
+
+1. SEQUENCE NUMBER AUTHORITY. Per last session's PLUGIN.md: "Sequence-number authority:
+   currently PLUGIN-assigned, immediately, optimistically, offline-safe... A plugin-to-platform
+   reconciliation protocol (platform as eventual authority, correcting any collision on sync)
+   is DESIGNED ONLY, NOT BUILT." Confirm whether this is still true: does the platform have ANY
+   mechanism today to generate or assign a real Trade+Floor sequence number on its own (server-
+   side), independent of what the plugin sends during sync? Show the actual lens-sync/
+   lens-pull route code and the lens_viewpoints schema - does tradeFloorSeq get written from
+   whatever the plugin sent, or does the server ever compute/validate/assign it itself?
+
+2. CURRENT LENS_VIEWPOINTS SCHEMA. Show the full current lens_viewpoints table schema. Does
+   it have any concept of: a shared group identifier across viewpoints from the same save
+   action, a lifecycle/status field distinct from the existing open/closed status, or a
+   self-referencing link field (something pointing to another viewpoint's id)? Confirm none of
+   these exist if that's the case - we want ground truth, not assumptions.
+
+3. ACTIVITY_LOG REUSE FEASIBILITY. Show the activity_log schema and one real example of how
+   another module (e.g. RFI status changes) writes a structured before/after change into it.
+   Confirm whether it can cleanly store: old value, new value, a free-text reason, the action
+   type (edit/reassign/void), and a reference back to the specific lens_viewpoint row - using
+   its existing columns, or whether new columns would be needed.
+
+4. LENS VIEWPOINTS PAGE ROW ACTIONS. Show the current row-action buttons (Jump to Viewpoint,
+   Create RFI, Delete, etc.) on the Lens Viewpoints table - confirm the real component and
+   exact current action list, so any new actions get added consistently with what's there.
+
+Print all four findings plainly. Do not write or change any code yet.
