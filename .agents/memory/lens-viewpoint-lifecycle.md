@@ -1,38 +1,37 @@
 ---
 name: Lens viewpoint lifecycle + Trade/Floor sequence authority
-description: How active/superseded/voided lifecycle, partial unique indexes, the atomic sequence counter, and Reassign atomicity fit together for lens_viewpoints.
+description: Durable design decisions behind active/superseded/voided lifecycle, active-only uniqueness, the sequence-counter authority, and write-path atomicity for lens_viewpoints.
 ---
 
 # Lens viewpoint lifecycle + sequence authority
 
 `lens_viewpoints` carry a `lifecycle_status` (active | superseded | voided) that is
-DISTINCT from the workflow `status`. Uniqueness of `(project_id, viewpoint_id)` and
-`(project_id, navisworks_guid)` is enforced by **partial unique indexes scoped
-`WHERE lifecycle_status='active'`** — superseded/voided rows are intentionally
-allowed to share the same guid/viewpoint_id as the live row.
+deliberately DISTINCT from the workflow `status`.
 
-**Why partial:** Reassign creates a NEW active row that reuses the old row's guid and
-viewpoint_id. A plain unique constraint would block it. The dedup path
-(`onConflictDoNothing`) MUST carry the same `where: sql\`lifecycle_status = 'active'\``
-predicate or Postgres throws 42P10 (no matching arbiter index).
+**Uniqueness is active-only.** `(project_id, viewpoint_id)` and
+`(project_id, navisworks_guid)` are unique only among ACTIVE rows (partial unique
+indexes), because Reassign keeps the old row around (superseded) while creating a new
+active row that reuses the same guid/viewpoint_id.
+**Why it matters:** any dedup/upsert against these keys must repeat the active-only
+predicate, or Postgres rejects it (no matching arbiter index). A plain unique
+constraint here is wrong and will block Reassign.
 
-**Sequence authority:** `lens_viewpoint_sequence_counters (project_id, trade, floor
-UNIQUE, current_seq)` is the source of truth for the per-Trade+Floor running number,
-NOT a count of rows. Assign with one atomic round-trip:
-`INSERT ... VALUES(...,1) ON CONFLICT (project_id,trade,floor) DO UPDATE SET
-current_seq = current_seq + 1 RETURNING current_seq`. trade/floor are coalesced to
-`''` so rows with no trade/floor still key deterministically. Only the newly-INSERTED
-viewpoint path consumes a number — the dedup-skip path must NOT.
+**The counter table is the sequence source of truth — not a row count.** The
+per-(project, trade, floor) running number is owned by a dedicated counter table and
+assigned with one atomic increment-and-return. trade/floor are coalesced so rows with
+neither still key deterministically. Only the create path consumes a number; the
+dedup-skip path must not. A backfill that seeds counters from existing row counts is a
+prod write — show seeds and get user confirmation, and make it idempotent so a re-run
+can't clobber a counter that already advanced.
 
-**How to apply (Reassign):** supersede the old row FIRST (frees the partial-unique
-slot), then insert the new active row. ALL of {counter increment, supersede UPDATE,
-new-row INSERT, activity_log INSERT} must run in ONE `db.transaction` so a
-mid-sequence failure can't leave a superseded row with no replacement or burn a
-number. Guard the supersede UPDATE with `... AND lifecycle_status='active'` and abort
-(409) when `rowCount===0` so a concurrent double-submit can't supersede twice. Edit
-and Void are also wrapped in transactions (row update + activity_log together).
+**Write paths must be all-or-nothing.** Reassign (counter increment + supersede old +
+insert new + activity log) and the create path (insert + sequence assign + back-fill)
+each run in ONE transaction.
+**Why:** a partial write leaves durable inconsistency — a superseded row with no
+replacement, or a persisted viewpoint with a null sequence that the retry path (which
+returns the existing row) never repairs. Guard the Reassign supersede on
+`lifecycle_status='active'` and abort (409) when nothing was updated, so a concurrent
+double-submit can't supersede twice.
 
-**Backfill:** seed each existing `(project, COALESCE(trade,''), COALESCE(floor,''))`
-counter to its current row count via `INSERT ... SELECT ... GROUP BY ... ON CONFLICT
-DO NOTHING` so a re-run can't clobber a counter that already advanced. This is a prod
-write — show the computed seeds and get user confirmation before running it.
+**Auth:** every lifecycle mutation (edit/reassign/void) is a write — gate with the
+project write permission, never membership-only. Hiding UI buttons is not enough.

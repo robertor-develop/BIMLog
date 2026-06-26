@@ -624,40 +624,44 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           return row;
         };
         try {
-          const insertedRows = await db.insert(lensViewpointsTable).values({
-            projectId,
-            viewpointId,
-            navisworksGuid,
-            displayId,
-            note: v?.note != null ? String(v.note) : null,
-            trade: tradeVal,
-            reportType: v?.reportType != null ? String(v.reportType) : null,
-            priority: priorityNum,
-            floor: floorVal,
-            openItems: v?.openItems != null ? String(v.openItems) : null,
-            capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
-            status: "open",
-            issueGroupId,
-            syncedAt: now,
-            // Part 3: the partial unique indexes only cover active rows, so the
-            // ON CONFLICT arbiter must carry the matching predicate or Postgres
-            // raises 42P10 and the dedup safety net breaks.
-          }).onConflictDoNothing({ target: conflictTarget, where: sql`lifecycle_status = 'active'` }).returning();
-          if (insertedRows.length > 0) {
+          // All-or-nothing per viewpoint: the insert, the atomic sequence
+          // increment, and the back-fill of the assigned sequence onto the new
+          // row must commit together. Otherwise a failure after the insert would
+          // leave a persisted row with a null sequence that the retry path (which
+          // returns the existing row) could never repair.
+          const txResult = await db.transaction(async (tx) => {
+            const insertedRows = await tx.insert(lensViewpointsTable).values({
+              projectId,
+              viewpointId,
+              navisworksGuid,
+              displayId,
+              note: v?.note != null ? String(v.note) : null,
+              trade: tradeVal,
+              reportType: v?.reportType != null ? String(v.reportType) : null,
+              priority: priorityNum,
+              floor: floorVal,
+              openItems: v?.openItems != null ? String(v.openItems) : null,
+              capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
+              status: "open",
+              issueGroupId,
+              syncedAt: now,
+              // Part 3: the partial unique indexes only cover active rows, so the
+              // ON CONFLICT arbiter must carry the matching predicate or Postgres
+              // raises 42P10 and the dedup safety net breaks.
+            }).onConflictDoNothing({ target: conflictTarget, where: sql`lifecycle_status = 'active'` }).returning();
+            if (insertedRows.length === 0) return null;
             const inserted = insertedRows[0];
             // Part 2: real Trade+Floor sequence authority. A single atomic
             // statement creates the counter row on first use and increments it
-            // under concurrency — no read-then-write race. Wrap the insert's
-            // sequence assignment + back-fill in one transaction so a failure
-            // here cannot leave a persisted row with a null sequence (the retry
-            // path returns the existing row and would never repair it).
-            const { assignedSeq, correction } = await db.transaction(async (tx) => {
-              const r = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq, tx);
-              await tx.update(lensViewpointsTable)
-                .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
-                .where(eq(lensViewpointsTable.id, inserted.id));
-              return { assignedSeq: r.seq, correction: r.correction };
-            });
+            // under concurrency — no read-then-write race.
+            const r = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq, tx);
+            await tx.update(lensViewpointsTable)
+              .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
+              .where(eq(lensViewpointsTable.id, inserted.id));
+            return { inserted, assignedSeq: r.seq, correction: r.correction };
+          });
+          if (txResult) {
+            const { inserted, assignedSeq, correction } = txResult;
             console.log(`[lens-sync] CREATED viewpointId="${viewpointId}" id=${inserted.id} seq=${assignedSeq}${correction != null ? ` R${correction}` : ""}`);
             results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true, tradeFloorSeq: assignedSeq, tradeFloorSeqCorrection: correction });
             continue;
