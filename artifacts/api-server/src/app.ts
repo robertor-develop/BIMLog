@@ -194,6 +194,38 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`);
     console.log("[migration] lens_viewpoints table ensured");
+
+    // ── Trade+Floor sequence authority + viewpoint lifecycle ──────────────────
+    // New lifecycle/sequence columns on lens_viewpoints (idempotent).
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq_correction INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS issue_group_id TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS supersedes_id INTEGER`);
+    await pool.query(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'lens_viewpoints_supersedes_id_fk') THEN
+        ALTER TABLE lens_viewpoints ADD CONSTRAINT lens_viewpoints_supersedes_id_fk FOREIGN KEY (supersedes_id) REFERENCES lens_viewpoints(id);
+      END IF;
+    END $$;`);
+
+    // Dedicated atomic counter table (no atomic counter existed anywhere before).
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoint_sequence_counters (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL,
+      trade TEXT NOT NULL,
+      floor TEXT NOT NULL,
+      current_seq INTEGER NOT NULL DEFAULT 0,
+      CONSTRAINT lens_viewpoint_sequence_counters_ptf_unique UNIQUE (project_id, trade, floor)
+    )`);
+
+    // Convert the two unique constraints to PARTIAL unique indexes scoped to
+    // active rows, so a superseded row and a new active row can coexist for the
+    // same underlying viewpoint/GUID. Drop the old (non-partial) ones first.
+    await pool.query(`ALTER TABLE lens_viewpoints DROP CONSTRAINT IF EXISTS lens_viewpoints_project_id_viewpoint_id_key`);
+    await pool.query(`DROP INDEX IF EXISTS lens_viewpoints_project_guid_unique`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_viewpoint_active_unique ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active'`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_active_unique ON lens_viewpoints (project_id, navisworks_guid) WHERE lifecycle_status = 'active'`);
+    console.log("[migration] lens_viewpoints lifecycle + sequence-counter migration ensured");
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);
   }

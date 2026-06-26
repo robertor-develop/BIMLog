@@ -1,0 +1,159 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+This builds real server-side Trade+Floor sequence authority for lens_viewpoints, plus a
+viewpoint lifecycle feature (Edit / Reassign / Void). Confirmed by investigation: no atomic
+counter mechanism exists anywhere in this codebase today (every existing "next number" is
+non-atomic count/max/scan), display_id values in production do not follow any parseable
+trade/floor/sequence pattern (two incompatible formats exist, with duplicates), and the
+plugin's sync payload carries no group identifier today. Build in this exact order.
+
+PART 1 — SCHEMA (drizzle schema file AND the idempotent app.ts migration block, both places,
+per existing project convention):
+
+New dedicated counter table, since no atomic counter mechanism exists anywhere in this
+codebase to reuse:
+  lens_viewpoint_sequence_counters
+  - id serial PK
+  - project_id integer NOT NULL
+  - trade text NOT NULL
+  - floor text NOT NULL
+  - current_seq integer NOT NULL DEFAULT 0
+  - UNIQUE (project_id, trade, floor)
+
+Add to lens_viewpoints:
+  - trade_floor_seq integer, nullable
+  - trade_floor_seq_correction integer, nullable (the "R" number — null normally, 1/2/3... when
+    the platform had to correct what the plugin submitted; display logic shows "-R{n}" suffix
+    on the platform only when this is non-null)
+  - issue_group_id text, nullable
+  - lifecycle_status text NOT NULL DEFAULT 'active' (allowed values: active, superseded, voided)
+  - supersedes_id integer, nullable, self-referencing FK to lens_viewpoints.id
+
+PART 2 — ATOMIC SEQUENCE ASSIGNMENT (the real fix to the confirmed gap)
+
+Implement the counter as a single atomic round trip per viewpoint, the standard race-safe
+pattern (no existing precedent in this codebase to copy — this IS the new precedent):
+  INSERT INTO lens_viewpoint_sequence_counters (project_id, trade, floor, current_seq)
+    VALUES ($1, $2, $3, 1)
+    ON CONFLICT (project_id, trade, floor)
+    DO UPDATE SET current_seq = lens_viewpoint_sequence_counters.current_seq + 1
+    RETURNING current_seq;
+This single statement both creates the counter row on first use AND atomically increments it
+on every subsequent call - no separate read-then-write, no race window, works correctly under
+concurrent sync requests for the same project+trade+floor.
+
+In the lens-sync route (clash_reports.ts ~489-630), for each viewpoint being newly inserted
+(not the existing dedup-skip path): call the above atomic increment for (project_id, trade,
+floor) to get the real next number, store it in trade_floor_seq.
+- If the plugin's submitted display_id implies a sequence number matching what was just
+  atomically assigned: no correction needed, trade_floor_seq_correction stays null.
+- If it does NOT match (collision - two machines, offline gap, etc.): trade_floor_seq is the
+  REAL assigned number; set trade_floor_seq_correction to the next correction number for this
+  specific row (1 the first time, 2 if corrected again, etc.) so the platform can display
+  "{trade}-{floor}-{trade_floor_seq}-R{trade_floor_seq_correction}". The sync response back to
+  the plugin must include the real assigned number so its local cache can be updated. The
+  ALREADY-SAVED Navisworks viewpoint object and its visible name/comment are NEVER rewritten by
+  this process - Navisworks remains a frozen historical record of what was shown at save time.
+
+PART 3 — PARTIAL UNIQUE INDEXES + REQUIRED onConflict FIX (confirmed compatible, with one
+required code change to avoid breaking existing sync)
+
+Convert the two existing unique constraints to partial unique indexes:
+  DROP the existing UNIQUE (project_id, viewpoint_id) and UNIQUE (project_id, navisworks_guid).
+  CREATE UNIQUE INDEX ... ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active';
+  CREATE UNIQUE INDEX ... ON lens_viewpoints (project_id, navisworks_guid) WHERE lifecycle_status = 'active';
+
+REQUIRED at the same time, confirmed necessary by investigation (Drizzle 0.45.1 supports this):
+in the existing dedup insert call (clash_reports.ts ~596), add the matching where predicate so
+ON CONFLICT correctly targets the now-partial index:
+  .onConflictDoNothing({
+    target: conflictTarget,
+    where: sql`${lensViewpointsTable.lifecycleStatus} = 'active'`,
+  })
+Confirm this exact change is made BEFORE or IN THE SAME deploy as the index conversion - if the
+indexes convert without this code change, every sync request will start throwing error 42P10
+and the existing working dedup safety net breaks. Test this specifically: run a normal sync
+after this change and confirm dedup still works correctly (re-syncing an already-synced
+viewpoint should still skip, not error, not duplicate).
+
+PART 4 — BACKFILL (read-only first, confirm with us before acting)
+
+Given Finding 2's real data - production display_id values do NOT follow any parseable
+trade/floor/sequence pattern (Format A is a random hex GUID fragment, Format B is free-text
+issue notes, and duplicates already exist) - a text-parsing backfill is NOT viable as
+originally envisioned. Instead: for every existing (project_id, trade, floor) combination
+currently in lens_viewpoints, initialize that combination's counter row in the new
+lens_viewpoint_sequence_counters table to current_seq = (count of existing rows with that
+exact project_id, trade, floor). Do NOT attempt to parse or backfill trade_floor_seq onto the
+100 existing rows individually - leave their trade_floor_seq NULL (they predate this system;
+the platform display logic should fall back to showing the existing display_id for any row
+where trade_floor_seq is null). Going forward, every NEW viewpoint synced for a given
+project+trade+floor combination gets a real number starting from a correct, non-colliding
+point. Show us the actual counter-seed values you computed per project/trade/floor before
+running this, so we can sanity-check them.
+
+PART 5 — ISSUE GROUP (plugin work required first - confirmed no group field exists today)
+
+This is NOT buildable on the platform alone. The plugin's sync payload carries no group
+identifier today (confirmed by investigation) and none can be derived from existing fields.
+Add a new field to lens_viewpoints: issue_group_id text, nullable (already listed in Part 1).
+On the SYNC route side: if and only if the incoming viewpoint payload includes an
+issueGroupId field, store it as-is in issue_group_id. Do NOT generate or infer a group id
+server-side under any circumstances. This column will remain null for all viewpoints until
+the plugin is updated separately to generate and send a real shared id at multi-trade save
+time - that plugin change is explicitly OUT OF SCOPE for this instruction and will be done
+directly by Roberto and Claude afterward, not by Replit.
+
+Add a small expand/lookup on the Lens Viewpoints page: given one row with a non-null
+issue_group_id, show every other row sharing that same issue_group_id, with each one's current
+lifecycle_status, trade, and note. If issue_group_id is null for a row, simply don't show the
+group-expand option for it (since grouping doesn't apply to existing/legacy data or until the
+plugin sends one).
+
+PART 6 — LIFECYCLE ACTIONS (Edit / Reassign / Void)
+
+New endpoints, mirroring the existing PATCH status route's auth pattern (requireProjectMember
++ canWrite gate, same as existing per-row actions):
+
+- EDIT: updates note (and/or other non-trade fields) on the SAME row. Write one activity_log
+  row: actionType="edit", entityType="lens_viewpoint", entityId=<id>, fileNameBefore=<old
+  note>, fileNameAfter=<new note>, details=<reason, free text, optional>.
+
+- REASSIGN: takes a target trade. Sets the OLD row's lifecycle_status='superseded' (this is
+  what makes Part 3's partial-unique conversion necessary - without it, this insert would be
+  rejected by the existing non-partial unique constraints, confirmed by investigation). Creates
+  a NEW row: same project/floor/viewpoint reference, new trade, gets a real trade_floor_seq via
+  Part 2's atomic counter for (project, new_trade, floor), inherits the old row's
+  issue_group_id (whatever it is, including null), sets supersedes_id = old row's id. Write
+  activity_log on the OLD row: actionType="reassign", fileNameBefore=<old trade>,
+  fileNameAfter=<new trade>, details=<reason>.
+
+- VOID: sets lifecycle_status='voided' on the row. No new row created. Write activity_log:
+  actionType="voided", details=<reason>. Row stays visible everywhere, simply marked.
+
+PART 7 — ROW ACTIONS (frontend)
+
+Add Edit / Reassign / Void buttons to the existing per-row action cell in
+LensViewpointsView.tsx (alongside the existing Jump to Viewpoint / Create RFI / Linked Items /
+Delete buttons, same btn btn-sm pattern, same canWrite gating Delete already uses). Reassign
+needs a simple trade-picker (reuse whatever trade list/dropdown already exists elsewhere on
+this page or in the create-RFI flow - do not invent a new one). All three actions should
+prompt for an optional reason before submitting. The platform display of any viewpoint's code
+should show "{trade}-{floor}-{trade_floor_seq}" normally, or
+"{trade}-{floor}-{trade_floor_seq}-R{trade_floor_seq_correction}" when a correction occurred,
+or fall back to showing the existing display_id when trade_floor_seq is null (legacy rows).
+
+For each part, show the exact diff (before/after). Run a real concurrency test on Part 2's
+atomic counter (fire two simultaneous syncs for the same project+trade+floor, confirm the two
+calls return sequential, non-duplicate numbers - e.g. 1 and 2, never two callers both getting
+1). Run a real test on Part 3 confirming normal sync/dedup still works after the index
+conversion (re-sync an already-synced viewpoint, confirm it's skipped, not errored, not
+duplicated). Use a safe test project, not Ruben's real one or the test project with existing
+data unless you state clearly which project and confirm with us first if it's not a fresh one.
+
+Then run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+
+Rebuild the frontend too since Part 7 touches frontend code. Print ALL output as plain text.
+No collapsed boxes.

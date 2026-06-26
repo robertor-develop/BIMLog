@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
@@ -98,6 +98,44 @@ function escapeJsonStringControlChars(text: string): { repaired: string; fixes: 
 }
 
 const router: Router = Router();
+
+// Thrown inside the reassign transaction when the old row is no longer active by
+// the time we go to supersede it (concurrent double-submit). Maps to HTTP 409.
+class ReassignConflict extends Error {
+  constructor() {
+    super("Viewpoint is no longer active");
+    this.name = "ReassignConflict";
+  }
+}
+
+// Atomic Trade+Floor sequence assignment (Part 2). One round-trip: creates the
+// counter row on first use and atomically increments it under concurrency — no
+// read-then-write race. trade/floor are coalesced to "" so a row with no trade or
+// floor still gets a stable, deterministic counter key.
+async function assignTradeFloorSeq(
+  projectId: number,
+  trade: string | null,
+  floor: string | null,
+  claimedSeq: number | null,
+  exec: { execute: (q: ReturnType<typeof sql>) => Promise<unknown> } = db,
+): Promise<{ seq: number; correction: number | null }> {
+  const tradeKey = trade ?? "";
+  const floorKey = floor ?? "";
+  const result = await exec.execute(sql`
+    INSERT INTO lens_viewpoint_sequence_counters (project_id, trade, floor, current_seq)
+    VALUES (${projectId}, ${tradeKey}, ${floorKey}, 1)
+    ON CONFLICT (project_id, trade, floor)
+    DO UPDATE SET current_seq = lens_viewpoint_sequence_counters.current_seq + 1
+    RETURNING current_seq
+  `);
+  const rows = (result as unknown as { rows: Array<{ current_seq: number }> }).rows;
+  const seq = Number(rows?.[0]?.current_seq);
+  // Correction ("R" number): only when the plugin optimistically claimed a number
+  // that does not match the real assigned one. Absent today (plugin sends none).
+  const correction = claimedSeq != null && claimedSeq !== seq ? 1 : null;
+  return { seq, correction };
+}
+
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
   baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
@@ -533,7 +571,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         res.status(400).json({ error: "no_viewpoints", message: "Request body must include a non-empty viewpoints array" });
         return;
       }
-      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean }> = [];
+      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean; tradeFloorSeq?: number | null; tradeFloorSeqCorrection?: number | null }> = [];
       const now = new Date();
       const seen = new Set<string>();
       console.log(`[lens-sync] project=${projectId} received ${viewpoints.length} viewpoint(s)`);
@@ -563,6 +601,13 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         seen.add(dedupKey);
         const priorityNum = v?.priority != null && !Number.isNaN(Number(v.priority)) ? Number(v.priority) : 3;
         const capturedAt = v?.capturedAt ? new Date(v.capturedAt) : null;
+        const tradeVal = v?.trade != null ? String(v.trade) : null;
+        const floorVal = v?.floor != null ? String(v.floor) : null;
+        // Part 5: only stored if the plugin sends it; never generated server-side.
+        const issueGroupId = norm(v?.issueGroupId);
+        // Optional sequence number the plugin optimistically assigned. Used only to
+        // decide whether a correction ("R" number) is needed; absent today.
+        const claimedSeq = v?.tradeFloorSeq != null && !Number.isNaN(Number(v.tradeFloorSeq)) ? Number(v.tradeFloorSeq) : null;
         // Atomic dedup: INSERT ... ON CONFLICT DO NOTHING on navisworks_guid when
         // provided (else viewpoint_id). A returned row means we created it; an empty
         // result means it already existed (incl. a concurrent insert), so we fetch
@@ -585,19 +630,30 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             navisworksGuid,
             displayId,
             note: v?.note != null ? String(v.note) : null,
-            trade: v?.trade != null ? String(v.trade) : null,
+            trade: tradeVal,
             reportType: v?.reportType != null ? String(v.reportType) : null,
             priority: priorityNum,
-            floor: v?.floor != null ? String(v.floor) : null,
+            floor: floorVal,
             openItems: v?.openItems != null ? String(v.openItems) : null,
             capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
             status: "open",
+            issueGroupId,
             syncedAt: now,
-          }).onConflictDoNothing({ target: conflictTarget }).returning();
+            // Part 3: the partial unique indexes only cover active rows, so the
+            // ON CONFLICT arbiter must carry the matching predicate or Postgres
+            // raises 42P10 and the dedup safety net breaks.
+          }).onConflictDoNothing({ target: conflictTarget, where: sql`lifecycle_status = 'active'` }).returning();
           if (insertedRows.length > 0) {
             const inserted = insertedRows[0];
-            console.log(`[lens-sync] CREATED viewpointId="${viewpointId}" id=${inserted.id}`);
-            results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true });
+            // Part 2: real Trade+Floor sequence authority. A single atomic
+            // statement creates the counter row on first use and increments it
+            // under concurrency — no read-then-write race.
+            const { seq: assignedSeq, correction } = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq);
+            await db.update(lensViewpointsTable)
+              .set({ tradeFloorSeq: assignedSeq, tradeFloorSeqCorrection: correction })
+              .where(eq(lensViewpointsTable.id, inserted.id));
+            console.log(`[lens-sync] CREATED viewpointId="${viewpointId}" id=${inserted.id} seq=${assignedSeq}${correction != null ? ` R${correction}` : ""}`);
+            results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true, tradeFloorSeq: assignedSeq, tradeFloorSeqCorrection: correction });
             continue;
           }
           const existing = await fetchExisting();
@@ -653,6 +709,11 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         capturedAt: r.capturedAt,
         status: r.status,
         syncedAt: r.syncedAt,
+        tradeFloorSeq: r.tradeFloorSeq,
+        tradeFloorSeqCorrection: r.tradeFloorSeqCorrection,
+        issueGroupId: r.issueGroupId,
+        lifecycleStatus: r.lifecycleStatus,
+        supersedesId: r.supersedesId,
       }));
       res.json({ success: true, viewpoints });
     } catch (err) {
@@ -706,6 +767,185 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
       res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
     } catch (err) {
       res.status(500).json({ error: "lens_update_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// ── Lifecycle actions (Part 6): Edit / Reassign / Void ──────────────────────
+// All mirror the PATCH status route's auth pattern (authMiddleware +
+// requireProjectMember()). Registered BEFORE the "/:reportId" routes so the
+// literal "lens-viewpoints" segment is not captured by the :reportId param.
+
+// EDIT — update note (and optionally other non-trade fields) on the SAME row.
+router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    const { note, reason } = req.body ?? {};
+    if (note == null || String(note).trim() === "") {
+      res.status(400).json({ error: "invalid_note", message: "note is required" });
+      return;
+    }
+    try {
+      const [existing] = await db.select().from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)));
+      if (!existing) {
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
+      }
+      const newNote = String(note);
+      const updated = await db.transaction(async (tx) => {
+        const [row] = await tx.update(lensViewpointsTable)
+          .set({ note: newNote, updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+          .returning();
+        await tx.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "edit",
+          entityType: "lens_viewpoint",
+          entityId: id,
+          fileNameBefore: existing.note ?? null,
+          fileNameAfter: newNote,
+          details: reason != null && String(reason).trim() !== "" ? String(reason) : null,
+        });
+        return row;
+      });
+      res.json({ success: true, viewpoint: updated });
+    } catch (err) {
+      res.status(500).json({ error: "lens_edit_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// REASSIGN — supersede the OLD row and create a NEW active row under a new trade,
+// with a real atomic Trade+Floor sequence and inherited issue_group_id.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    const { trade, reason } = req.body ?? {};
+    if (trade == null || String(trade).trim() === "") {
+      res.status(400).json({ error: "invalid_trade", message: "target trade is required" });
+      return;
+    }
+    const newTrade = String(trade);
+    try {
+      const [old] = await db.select().from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)));
+      if (!old) {
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
+      }
+      if (old.lifecycleStatus !== "active") {
+        res.status(409).json({ error: "not_active", message: `Cannot reassign a ${old.lifecycleStatus} viewpoint` });
+        return;
+      }
+      // All-or-nothing: counter increment, supersede of the old row, creation of
+      // the new active row, and the activity log entry must commit together or not
+      // at all — otherwise a mid-sequence failure could leave the old row
+      // superseded with no replacement, or burn a sequence number.
+      const result = await db.transaction(async (tx) => {
+        // The atomic counter for (project, NEW trade, floor) is the real authority.
+        const { seq, correction } = await assignTradeFloorSeq(projectId, newTrade, old.floor, null, tx);
+        // Supersede the old row FIRST so the partial unique index frees the
+        // (project, viewpoint_id) / (project, guid) slot for the new active row.
+        // Guard on lifecycle_status='active' so a concurrent double-submit cannot
+        // supersede the same row twice (rowCount 0 -> abort).
+        const sup = await tx.update(lensViewpointsTable)
+          .set({ lifecycleStatus: "superseded", updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.id, old.id), eq(lensViewpointsTable.lifecycleStatus, "active")))
+          .returning({ id: lensViewpointsTable.id });
+        if (sup.length === 0) {
+          throw new ReassignConflict();
+        }
+        const [created] = await tx.insert(lensViewpointsTable).values({
+          projectId,
+          viewpointId: old.viewpointId,
+          navisworksGuid: old.navisworksGuid,
+          displayId: old.displayId,
+          note: old.note,
+          trade: newTrade,
+          reportType: old.reportType,
+          priority: old.priority,
+          floor: old.floor,
+          openItems: old.openItems,
+          capturedAt: old.capturedAt,
+          status: old.status,
+          screenshotUrl: old.screenshotUrl,
+          issueGroupId: old.issueGroupId,
+          tradeFloorSeq: seq,
+          tradeFloorSeqCorrection: correction,
+          lifecycleStatus: "active",
+          supersedesId: old.id,
+          syncedAt: new Date(),
+        }).returning();
+        await tx.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "reassign",
+          entityType: "lens_viewpoint",
+          entityId: old.id,
+          fileNameBefore: old.trade ?? null,
+          fileNameAfter: newTrade,
+          details: reason != null && String(reason).trim() !== "" ? String(reason) : null,
+        });
+        return created;
+      });
+      res.json({ success: true, supersededId: old.id, viewpoint: result });
+    } catch (err) {
+      if (err instanceof ReassignConflict) {
+        res.status(409).json({ error: "not_active", message: err.message });
+        return;
+      }
+      res.status(500).json({ error: "lens_reassign_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// VOID — mark the row voided. No new row created; it stays visible everywhere.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    const { reason } = req.body ?? {};
+    try {
+      const [existing] = await db.select().from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)));
+      if (!existing) {
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
+      }
+      const updated = await db.transaction(async (tx) => {
+        const [row] = await tx.update(lensViewpointsTable)
+          .set({ lifecycleStatus: "voided", updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+          .returning();
+        await tx.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "voided",
+          entityType: "lens_viewpoint",
+          entityId: id,
+          details: reason != null && String(reason).trim() !== "" ? String(reason) : null,
+        });
+        return row;
+      });
+      res.json({ success: true, viewpoint: updated });
+    } catch (err) {
+      res.status(500).json({ error: "lens_void_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );

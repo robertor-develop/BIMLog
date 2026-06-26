@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -23,7 +23,25 @@ interface LensViewpoint {
   capturedAt?: string | null;
   status: string;
   syncedAt?: string | null;
+  tradeFloorSeq?: number | null;
+  tradeFloorSeqCorrection?: number | null;
+  issueGroupId?: string | null;
+  lifecycleStatus?: string | null;
+  supersedesId?: number | null;
 }
+
+// Platform display code: "{trade}-{floor}-{seq}" normally, with "-R{n}" when a
+// correction occurred, falling back to the legacy display_id when no seq exists.
+function viewpointCode(v: LensViewpoint): string {
+  if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "—";
+  const base = `${v.trade || "—"}-${v.floor || "—"}-${v.tradeFloorSeq}`;
+  return v.tradeFloorSeqCorrection != null ? `${base}-R${v.tradeFloorSeqCorrection}` : base;
+}
+
+const LIFECYCLE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
+  superseded: { bg: "#FEF3C7", text: "#92400E", label: "Superseded" },
+  voided: { bg: "#F3F4F6", text: "#6B7280", label: "Voided" },
+};
 
 interface LensReport {
   id: number;
@@ -96,6 +114,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fReportType, setFReportType] = useState("all");
   const [fStatus, setFStatus] = useState("all");
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
+  const [groupOpen, setGroupOpen] = useState<Record<number, boolean>>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
   // null = still checking, true = plugin reachable, false = not reachable.
@@ -244,6 +263,59 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       }
     } catch (e) {
       setViewpoints(prev);
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const editViewpoint = async (v: LensViewpoint) => {
+    const note = window.prompt(t("Edit note:", "Editar nota:"), v.note || "");
+    if (note == null || note.trim() === "") return;
+    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/edit`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ note, reason }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to edit viewpoint"); return; }
+      await loadViewpoints();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const reassignViewpoint = async (v: LensViewpoint) => {
+    const list = trades.filter(x => x !== v.trade);
+    if (list.length === 0) { setError(t("No other trade available to reassign to.", "No hay otra disciplina disponible para reasignar.")); return; }
+    const target = window.prompt(t(`Reassign to which trade? Options: ${list.join(", ")}`, `¿Reasignar a qué disciplina? Opciones: ${list.join(", ")}`), list[0]);
+    if (target == null || target.trim() === "") return;
+    if (!trades.includes(target)) { setError(t(`Unknown trade: ${target}`, `Disciplina desconocida: ${target}`)); return; }
+    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/reassign`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ trade: target, reason }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to reassign viewpoint"); return; }
+      await loadViewpoints();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const voidViewpoint = async (v: LensViewpoint) => {
+    if (!window.confirm(t("Void this viewpoint? It stays visible but is marked voided.", "¿Anular esta vista? Permanece visible pero marcada como anulada."))) return;
+    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/void`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to void viewpoint"); return; }
+      await loadViewpoints();
+    } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
@@ -519,12 +591,23 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 <Fragment key={v.id}>
                   <tr style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
-                      {v.displayId ? (
-                        <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
-                          {v.displayId}
+                      <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
+                        {viewpointCode(v)}
+                      </span>
+                      {v.lifecycleStatus && LIFECYCLE_BADGE[v.lifecycleStatus] && (
+                        <span style={{ marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: LIFECYCLE_BADGE[v.lifecycleStatus].bg, color: LIFECYCLE_BADGE[v.lifecycleStatus].text }}>
+                          {LIFECYCLE_BADGE[v.lifecycleStatus].label}
                         </span>
-                      ) : (
-                        <span style={{ color: "#9CA3AF", fontSize: 12 }}>—</span>
+                      )}
+                      {v.issueGroupId && (
+                        <button
+                          className="btn btn-sm btn-outline"
+                          onClick={() => setGroupOpen(p => ({ ...p, [v.id]: !p[v.id] }))}
+                          title={t("Show related viewpoints in this issue group", "Mostrar vistas relacionadas de este grupo")}
+                          style={{ marginLeft: 6, fontSize: 10, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                        >
+                          <Layers size={11} /> {t("Group", "Grupo")}
+                        </button>
                       )}
                     </td>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><LensPBadge p={v.priority} /></td>
@@ -563,13 +646,59 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                           <Link2 size={12} /> {t("Linked Items", "Vinculados")}
                         </button>
                         {canWrite && (
-                          <button className="btn btn-sm btn-outline" onClick={() => deleteViewpoint(v.id)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4, color: "#DC2626", borderColor: "#FECACA" }}>
-                            <Trash2 size={12} /> {t("Delete", "Eliminar")}
-                          </button>
+                          <>
+                            <button className="btn btn-sm btn-outline" onClick={() => editViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                              <Pencil size={12} /> {t("Edit", "Editar")}
+                            </button>
+                            <button className="btn btn-sm btn-outline" onClick={() => reassignViewpoint(v)} disabled={v.lifecycleStatus != null && v.lifecycleStatus !== "active"} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                              <ArrowLeftRight size={12} /> {t("Reassign", "Reasignar")}
+                            </button>
+                            <button className="btn btn-sm btn-outline" onClick={() => voidViewpoint(v)} disabled={v.lifecycleStatus === "voided"} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4, color: "#92400E", borderColor: "#FDE68A" }}>
+                              <Ban size={12} /> {t("Void", "Anular")}
+                            </button>
+                            <button className="btn btn-sm btn-outline" onClick={() => deleteViewpoint(v.id)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4, color: "#DC2626", borderColor: "#FECACA" }}>
+                              <Trash2 size={12} /> {t("Delete", "Eliminar")}
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
                   </tr>
+                  {groupOpen[v.id] && v.issueGroupId && (
+                    <tr style={{ background: "#F8FAFC", borderTop: "1px solid #F3F4F6" }}>
+                      <td colSpan={9} style={{ padding: "8px 16px 14px" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F", marginBottom: 6 }}>
+                          {t("Issue group", "Grupo de incidencia")}: {v.issueGroupId}
+                        </div>
+                        {(() => {
+                          const peers = viewpoints.filter(o => o.issueGroupId === v.issueGroupId && o.id !== v.id);
+                          if (peers.length === 0) return <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("No other viewpoints in this group.", "No hay otras vistas en este grupo.")}</div>;
+                          return (
+                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                              <thead>
+                                <tr style={{ color: "#6B7280", textAlign: "left" }}>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Code", "Código")}</th>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Lifecycle", "Ciclo")}</th>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Trade", "Disciplina")}</th>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Note", "Nota")}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {peers.map(o => (
+                                  <tr key={o.id} style={{ borderTop: "1px solid #EEF2F7" }}>
+                                    <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{viewpointCode(o)}</td>
+                                    <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{o.lifecycleStatus || "active"}</td>
+                                    <td style={{ padding: "4px 8px" }}>{o.trade || "—"}</td>
+                                    <td style={{ padding: "4px 8px" }}>{o.note || "—"}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          );
+                        })()}
+                      </td>
+                    </tr>
+                  )}
                   {linksOpen[v.id] && (
                     <tr style={{ background: "#FAFAFA", borderTop: "1px solid #F3F4F6" }}>
                       <td colSpan={9} style={{ padding: "4px 16px 14px" }}>
