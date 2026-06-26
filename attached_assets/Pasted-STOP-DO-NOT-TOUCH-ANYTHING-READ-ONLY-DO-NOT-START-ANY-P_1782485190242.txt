@@ -1,0 +1,31 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Before we build the lens_viewpoints sequence-authority/lifecycle feature, confirm three real
+risks so the build doesn't hit a wall mid-way.
+
+1. TRANSACTION STRUCTURE OF lens-sync. Show the actual current code for the lens-sync route
+   (clash_reports.ts ~489-630) - specifically: does it already wrap its inserts/updates in a
+   db.transaction, or does it loop over multiple incoming viewpoints with separate, unguarded
+   queries? If we add a per-(project,trade,floor) atomic increment INSIDE this route, would it
+   need to lock/serialize per-row within a single batch sync (multiple viewpoints in one
+   request), and could that cause a deadlock or serious slowdown if a single sync batch
+   contains many viewpoints for the same trade+floor combination? Show us realistic batch
+   sizes if you can find any (e.g. how many viewpoints does a typical sync call send at once).
+
+2. DISPLAY_ID FORMAT CONSISTENCY. Query ALL distinct display_id values currently in
+   lens_viewpoints across every project in production. Show us the raw list. Confirm: do they
+   ALL match the expected pattern (something like "{TRADE}-{FLOOR}-{SEQ}" or similar with a
+   parseable numeric suffix), or are there malformed/inconsistent/legacy-format values that a
+   simple parser would fail on or misparse? Flag every value that does NOT cleanly match a
+   predictable pattern.
+
+3. UNIQUE CONSTRAINTS ON lens_viewpoints. Show the exact current unique constraints/indexes on
+   the lens_viewpoints table. If we create a NEW row for a Reassign action that shares the same
+   project_id, viewpoint_id, and navisworks_guid as an existing (now-superseded) row, but has
+   a different trade - would this be REJECTED by any existing unique constraint? If so, what
+   would need to change for two rows to coexist (one superseded, one active) referencing the
+   same underlying Navisworks viewpoint?
+
+Print all three findings plainly, with real data and real code shown. Do not propose fixes or
+write any code. We will design the actual fix language together once we see what's real.
