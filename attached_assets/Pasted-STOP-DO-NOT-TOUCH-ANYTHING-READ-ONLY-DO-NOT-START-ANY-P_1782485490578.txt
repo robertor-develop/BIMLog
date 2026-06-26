@@ -1,0 +1,32 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Two follow-ups from the last investigation before we finalize the build.
+
+1. ISSUE GROUP SOURCE (this was asked last round and not answered): does the plugin's current
+   lens-sync request body carry ANY field today that could serve as a group identifier shared
+   across viewpoints from one multi-trade save? Show the actual current sync payload shape
+   (the toSync dictionary fields lens-sync reads, per viewpoint) - confirm plainly whether such
+   a field exists or not. If not, this confirms the group ID must be added to the PLUGIN's
+   metadata/sync payload first, not invented server-side.
+
+2. PARTIAL UNIQUE INDEX + ON CONFLICT COMPATIBILITY. We need to change the two unique
+   constraints on lens_viewpoints - (project_id, viewpoint_id) and (project_id,
+   navisworks_guid) - to PARTIAL unique indexes that only apply WHERE lifecycle_status =
+   'active' (same pattern already used for rfi_ball_in_court_open_unique last session), so a
+   superseded row and a new active row can coexist for the same underlying viewpoint. The
+   EXISTING lens-sync dedup logic uses db.insert(...).onConflictDoNothing({ target:
+   conflictTarget }) against these exact constraints (clash_reports.ts ~580-600). Confirm: does
+   Drizzle's onConflictDoNothing support specifying a matching WHERE predicate so it correctly
+   targets a partial unique index, or would converting to partial indexes silently break the
+   EXISTING working dedup-on-sync safety net (causing either insert errors or undetected
+   duplicates)? Show the real Drizzle API/syntax needed if a WHERE predicate must be added to
+   conflictTarget, or confirm an alternative approach is needed.
+
+3. EXISTING ATOMIC NUMBERING PRECEDENT. The lens-next-id route (742-765) already generates a
+   number from a simple count(*) - confirm whether ANY other part of the codebase already
+   implements a real atomic, race-safe counter (single-statement UPDATE...RETURNING on a
+   dedicated counter row, or similar) that we could copy the exact mechanism from, rather than
+   inventing a new pattern for the trade+floor sequence counter.
+
+Print all three findings plainly. Do not propose fixes or write code yet.
