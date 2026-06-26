@@ -647,11 +647,17 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             const inserted = insertedRows[0];
             // Part 2: real Trade+Floor sequence authority. A single atomic
             // statement creates the counter row on first use and increments it
-            // under concurrency — no read-then-write race.
-            const { seq: assignedSeq, correction } = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq);
-            await db.update(lensViewpointsTable)
-              .set({ tradeFloorSeq: assignedSeq, tradeFloorSeqCorrection: correction })
-              .where(eq(lensViewpointsTable.id, inserted.id));
+            // under concurrency — no read-then-write race. Wrap the insert's
+            // sequence assignment + back-fill in one transaction so a failure
+            // here cannot leave a persisted row with a null sequence (the retry
+            // path returns the existing row and would never repair it).
+            const { assignedSeq, correction } = await db.transaction(async (tx) => {
+              const r = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq, tx);
+              await tx.update(lensViewpointsTable)
+                .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
+                .where(eq(lensViewpointsTable.id, inserted.id));
+              return { assignedSeq: r.seq, correction: r.correction };
+            });
             console.log(`[lens-sync] CREATED viewpointId="${viewpointId}" id=${inserted.id} seq=${assignedSeq}${correction != null ? ` R${correction}` : ""}`);
             results.push({ viewpointId, id: inserted.id, status: inserted.status, created: true, tradeFloorSeq: assignedSeq, tradeFloorSeqCorrection: correction });
             continue;
@@ -772,14 +778,15 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
 );
 
 // ── Lifecycle actions (Part 6): Edit / Reassign / Void ──────────────────────
-// All mirror the PATCH status route's auth pattern (authMiddleware +
-// requireProjectMember()). Registered BEFORE the "/:reportId" routes so the
-// literal "lens-viewpoints" segment is not captured by the :reportId param.
+// All mutate viewpoint state, so they require write permission (authMiddleware +
+// requirePermission("admin","write")) like the other write routes — membership
+// alone is not enough. Registered BEFORE the "/:reportId" routes so the literal
+// "lens-viewpoints" segment is not captured by the :reportId param.
 
 // EDIT — update note (and optionally other non-trade fields) on the SAME row.
 router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const id = Number(req.params.id);
@@ -826,7 +833,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
 // with a real atomic Trade+Floor sequence and inherited issue_group_id.
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const id = Number(req.params.id);
@@ -914,7 +921,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
 // VOID — mark the row voided. No new row created; it stays visible everywhere.
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const id = Number(req.params.id);
