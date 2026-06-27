@@ -1,0 +1,46 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We are redesigning lens_viewpoints lifecycle visibility from scratch. Before any code, we
+need the real current facts on six things.
+
+1. BROKEN EDIT POPUP - CONFIRMED BUG. On the Lens Viewpoints page, clicking "Edit" opens a
+   prompt() for note text, then a second prompt() for reason, then nothing happens - no
+   network call, no row update, no error, no console log. Show the EXACT current onClick
+   handler for the Edit button in LensViewpointsView.tsx. Is it actually calling the edit
+   endpoint at all, or does it stop after collecting the two prompts? Show the real code, not
+   a description.
+
+2. SAME QUESTION for the Reassign and Void buttons - do their click handlers actually fire the
+   network request, or do they also stop short? Show all three handlers exactly as they exist
+   right now.
+
+3. CURRENT REVISION/LIFECYCLE DATA MODEL. Show the current lens_viewpoints schema again as it
+   stands AFTER tonight's build (trade_floor_seq, trade_floor_seq_correction, lifecycle_status,
+   supersedes_id, issue_group_id). We are likely replacing trade_floor_seq_correction and the
+   separate "superseded" lifecycle_status value with a single visible revision_number integer
+   that increments on EVERY edit or reassign (starting at 1), where old revisions stay queryable
+   by following supersedes_id backwards. Confirm: is supersedes_id already capable of forming a
+   full backward chain (each revision pointing to the exact previous one), or does the current
+   Reassign logic only support ONE supersede hop, not a chain of multiple revisions over time?
+
+4. EDIT'S CURRENT BEHAVIOR ON REVISION. Right now does the Edit endpoint create any new row at
+   all, or does it just update the existing row's note in place with no revision trail? Show
+   the exact route code. We want to know whether Edit needs to start creating a new revision
+   row too (matching Reassign's behavior), or whether it's intentionally lightweight.
+
+5. GROUP-MEMBERSHIP DETECTION SURFACE. Show the exact current frontend code path that knows
+   whether a given viewpoint has a non-null issueGroupId and how it currently looks up siblings
+   (if it does this at all today, since group-expand was part of tonight's build). We want to
+   add a confirmation step that fires BEFORE any Edit/Reassign/Void network call proceeds, if
+   and only if the viewpoint has group siblings - show us where that check would need to live
+   given the current component structure.
+
+6. REPORT GENERATION CODE. Show the exact current PDF generation route/function for the Lens
+   Viewpoints Coordination Report (the one driven by the "Generate Lens Viewpoints Report"
+   modal) - specifically how the ID column is currently rendered (raw displayId vs the human
+   trade-floor-seq code), and confirm whether revision_number/lifecycle data is available to
+   this function at all today or would need to be added to its query.
+
+Print all six findings plainly, with real code shown for each. Do not propose fixes or write
+any code yet.
