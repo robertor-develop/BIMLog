@@ -571,7 +571,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         res.status(400).json({ error: "no_viewpoints", message: "Request body must include a non-empty viewpoints array" });
         return;
       }
-      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean; tradeFloorSeq?: number | null; tradeFloorSeqCorrection?: number | null; skipped?: boolean; reason?: string }> = [];
+      const results: Array<{ viewpointId: string; id: number | null; status: string; created: boolean; tradeFloorSeq?: number | null; tradeFloorSeqCorrection?: number | null; skipped?: boolean; reason?: string }> = [];
       const now = new Date();
       const seen = new Set<string>();
       console.log(`[lens-sync] project=${projectId} received ${viewpoints.length} viewpoint(s)`);
@@ -638,7 +638,11 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             ));
           if (displayClash && displayClash.viewpointId !== viewpointId) {
             console.warn(`[lens-sync] SKIPPED display_id collision: displayId="${displayId}" already active on id=${displayClash.id} (viewpointId="${displayClash.viewpointId}"), incoming viewpointId="${viewpointId}"`);
-            results.push({ viewpointId, id: displayClash.id, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
+            // id:null deliberately — the colliding row belongs to a DIFFERENT viewpoint
+            // (matched by display_id, not the incoming viewpoint_id). Returning its real
+            // id in an "already exists"-shaped body would let an unaware plugin mis-bind
+            // its sync receipt to a row it never touched. skipped/reason carry the signal.
+            results.push({ viewpointId, id: null, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
             continue;
           }
         }
@@ -709,7 +713,8 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.displayId, displayId), eq(lensViewpointsTable.lifecycleStatus, "active")));
             if (displayClash && displayClash.viewpointId !== viewpointId) {
               console.warn(`[lens-sync] SKIPPED display_id collision (race): displayId="${displayId}" active on id=${displayClash.id}, incoming viewpointId="${viewpointId}"`);
-              results.push({ viewpointId, id: displayClash.id, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
+              // id:null deliberately — see the pre-insert guard above for the rationale.
+              results.push({ viewpointId, id: null, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
             } else {
               throw err;
             }
@@ -1011,11 +1016,24 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
         res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
         return;
       }
+      // Active-only guard, mirroring Edit/Reassign. Voiding a superseded row would
+      // silently leave the real active head of the chain untouched (e.g. a queued
+      // plugin void firing on an id the platform already reassigned); voiding an
+      // already-voided row would duplicate the activity_log entry. Reject both.
+      if (existing.lifecycleStatus !== "active") {
+        res.status(409).json({ error: "not_active", message: `Cannot void a ${existing.lifecycleStatus} viewpoint` });
+        return;
+      }
       const updated = await db.transaction(async (tx) => {
+        // Guard the UPDATE on active too, so a concurrent supersede/void that lands
+        // between the SELECT above and here cannot double-void (rowCount 0 -> abort).
         const [row] = await tx.update(lensViewpointsTable)
           .set({ lifecycleStatus: "voided", updatedAt: new Date() })
-          .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+          .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active")))
           .returning();
+        if (!row) {
+          throw new ReassignConflict();
+        }
         await tx.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
@@ -1030,6 +1048,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
       });
       res.json({ success: true, viewpoint: updated });
     } catch (err) {
+      if (err instanceof ReassignConflict) {
+        res.status(409).json({ error: "not_active", message: "Cannot void a viewpoint that is no longer active" });
+        return;
+      }
       res.status(500).json({ error: "lens_void_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
