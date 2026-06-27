@@ -13,4 +13,5 @@
 - [Living Brief docs system](living-brief-docs.md) — api-server dev runs tsx/ESM (no __dirname, use import.meta.url); adding a brief tab needs seed file + DOCS + EDITABLE_DOCS + frontend EDITABLE/Export all in sync
 - [Files storage lifecycle](files-storage-lifecycle.md) — uploads hit disk only transiently (hash+pdf-parse); disk path never persisted; all I/O via lib/storage-adapter.ts (buffer-based seam for future OneDrive)
 - [api-client-react project refs](api-client-react-project-refs.md) — bimlog reads dist .d.ts via TS refs; after hand-editing generated client run `tsc -b lib/api-client-react --force`
+- [Lens viewpoint revisions](lens-viewpoint-revisions.md) — Edit/Reassign supersede+insert with revisionNumber=old+1 (never UPDATE in place); report appendix must be chain-scoped, full-report-only
 - [Lens viewpoint lifecycle + seq authority](lens-viewpoint-lifecycle.md) — partial active-only unique indexes; atomic counter table is the seq source; Reassign = supersede-then-insert in one tx

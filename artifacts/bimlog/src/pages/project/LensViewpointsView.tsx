@@ -28,6 +28,7 @@ interface LensViewpoint {
   issueGroupId?: string | null;
   lifecycleStatus?: string | null;
   supersedesId?: number | null;
+  revisionNumber?: number | null;
 }
 
 // Platform display code: "{trade}-{floor}-{seq}" normally, with "-R{n}" when a
@@ -115,6 +116,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fStatus, setFStatus] = useState("all");
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [groupOpen, setGroupOpen] = useState<Record<number, boolean>>({});
+  const [historyOpen, setHistoryOpen] = useState<Record<number, boolean>>({});
+  const [historyData, setHistoryData] = useState<Record<number, { chain: any[]; events: any[] } | "loading" | "error">>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
   // null = still checking, true = plugin reachable, false = not reachable.
@@ -140,6 +143,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     fStatus: "all",
     fFloor: "all",
     fTrade: "all",
+    idFormat: "displayId",
+    includeNonActive: false,
   });
 
   // Pre-populate the report modal from the authenticated user's profile and load
@@ -375,6 +380,27 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     setTimeout(() => setCopiedId(c => (c === v.id ? null : c)), 2500);
   };
 
+  // Lazily fetch the revision chain + activity events the first time a row's
+  // history panel is opened; cached thereafter for the life of the view.
+  const toggleHistory = async (id: number) => {
+    const willOpen = !historyOpen[id];
+    setHistoryOpen(p => ({ ...p, [id]: willOpen }));
+    if (willOpen && !historyData[id]) {
+      setHistoryData(p => ({ ...p, [id]: "loading" }));
+      try {
+        const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${id}/history`, { headers });
+        if (r.ok) {
+          const d = await r.json();
+          setHistoryData(p => ({ ...p, [id]: { chain: d.chain ?? [], events: d.events ?? [] } }));
+        } else {
+          setHistoryData(p => ({ ...p, [id]: "error" }));
+        }
+      } catch {
+        setHistoryData(p => ({ ...p, [id]: "error" }));
+      }
+    }
+  };
+
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((x): x is string => !!x))).sort();
   const trades = uniq(viewpoints.map(v => v.trade));
@@ -456,6 +482,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           watermarkType: form.watermarkType,
           showHealthScore: form.showHealthScore,
           isExecutiveOnePager: form.isExecutiveOnePager,
+          idFormat: form.idFormat,
+          includeNonActive: form.includeNonActive,
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade },
         }),
       });
@@ -594,6 +622,11 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                       <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
                         {viewpointCode(v)}
                       </span>
+                      {(v.revisionNumber ?? 1) > 1 && (
+                        <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, color: "#1E3A5F" }}>
+                          {t("Rev", "Rev")} {v.revisionNumber}
+                        </span>
+                      )}
                       {v.lifecycleStatus && LIFECYCLE_BADGE[v.lifecycleStatus] && (
                         <span style={{ marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: LIFECYCLE_BADGE[v.lifecycleStatus].bg, color: LIFECYCLE_BADGE[v.lifecycleStatus].text }}>
                           {LIFECYCLE_BADGE[v.lifecycleStatus].label}
@@ -644,6 +677,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                         </button>
                         <button className="btn btn-sm btn-outline" onClick={() => setLinksOpen(p => ({ ...p, [v.id]: !p[v.id] }))} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
                           <Link2 size={12} /> {t("Linked Items", "Vinculados")}
+                        </button>
+                        <button className="btn btn-sm btn-outline" onClick={() => toggleHistory(v.id)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
+                          <History size={12} /> {t("History", "Historial")}
                         </button>
                         {canWrite && (
                           <>
@@ -703,6 +739,86 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     <tr style={{ background: "#FAFAFA", borderTop: "1px solid #F3F4F6" }}>
                       <td colSpan={9} style={{ padding: "4px 16px 14px" }}>
                         <LinkedItemsPanel projectId={projectId} entityType="lens_viewpoint" entityId={v.id} canWrite={canWrite} />
+                      </td>
+                    </tr>
+                  )}
+                  {historyOpen[v.id] && (
+                    <tr style={{ background: "#F8FAFC", borderTop: "1px solid #F3F4F6" }}>
+                      <td colSpan={9} style={{ padding: "8px 16px 14px" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F", marginBottom: 6 }}>
+                          {t("Revision history", "Historial de revisiones")}
+                        </div>
+                        {historyData[v.id] === "loading" && (
+                          <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("Loading…", "Cargando…")}</div>
+                        )}
+                        {historyData[v.id] === "error" && (
+                          <div style={{ fontSize: 12, color: "#DC2626" }}>{t("Failed to load history.", "No se pudo cargar el historial.")}</div>
+                        )}
+                        {historyData[v.id] && historyData[v.id] !== "loading" && historyData[v.id] !== "error" && (() => {
+                          const h = historyData[v.id] as { chain: any[]; events: any[] };
+                          const ACTION_LABEL: Record<string, string> = { edit: t("Edited", "Editado"), reassign: t("Reassigned", "Reasignado"), voided: t("Voided", "Anulado") };
+                          return (
+                            <>
+                              {h.chain.length > 1 && (
+                                <div style={{ marginBottom: 12 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 4 }}>{t("Revisions", "Revisiones")}</div>
+                                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                                    <thead>
+                                      <tr style={{ color: "#6B7280", textAlign: "left" }}>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Rev", "Rev")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Note", "Nota")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Trade", "Disciplina")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Floor", "Piso")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Lifecycle", "Ciclo")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Updated", "Actualizado")}</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {h.chain.map((c: any) => (
+                                        <tr key={c.id} style={{ borderTop: "1px solid #EEF2F7" }}>
+                                          <td style={{ padding: "4px 8px", whiteSpace: "nowrap", fontWeight: 700, color: "#1E3A5F" }}>{c.revisionNumber ?? 1}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.note || "—"}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.trade || "—"}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.floor || "—"}</td>
+                                          <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{c.lifecycleStatus || "active"}</td>
+                                          <td style={{ padding: "4px 8px", whiteSpace: "nowrap", color: "#6B7280" }}>{fmtCaptured(c.updatedAt || c.createdAt)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                              {h.events.length === 0 ? (
+                                <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("No revisions yet — this is the original version.", "Sin revisiones — esta es la versión original.")}</div>
+                              ) : (
+                                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                                  <thead>
+                                    <tr style={{ color: "#6B7280", textAlign: "left" }}>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("When", "Cuándo")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Action", "Acción")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("From", "De")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("To", "A")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Reason", "Motivo")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("By", "Por")}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {h.events.map((e: any) => (
+                                      <tr key={e.id} style={{ borderTop: "1px solid #EEF2F7" }}>
+                                        <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{fmtCaptured(e.createdAt)}</td>
+                                        <td style={{ padding: "4px 8px", whiteSpace: "nowrap", fontWeight: 700 }}>{ACTION_LABEL[e.actionType] || e.actionType}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.fileNameBefore || "—"}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.fileNameAfter || "—"}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.details || "—"}</td>
+                                        <td style={{ padding: "4px 8px", color: "#6B7280" }}>{e.userCompanyName ? `${e.userFullName} (${e.userCompanyName})` : e.userFullName}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              )}
+                            </>
+                          );
+                        })()}
                       </td>
                     </tr>
                   )}
@@ -948,6 +1064,24 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               <input type="checkbox" checked={form.isExecutiveOnePager}
                 onChange={e => setForm(f => ({ ...f, isExecutiveOnePager: e.target.checked }))} />
               {t("Executive one-pager (summary only, no full register)", "Resumen ejecutivo (solo resumen, sin registro completo)")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.includeNonActive}
+                onChange={e => setForm(f => ({ ...f, includeNonActive: e.target.checked }))} />
+              {t("Include superseded and voided revisions", "Incluir revisiones reemplazadas y anuladas")}
+            </label>
+
+            <label style={{ display: "block", marginTop: 14, fontSize: 13, color: "#374151" }}>
+              <div style={{ marginBottom: 4, fontWeight: 600 }}>{t("ID column format", "Formato de columna ID")}</div>
+              <select
+                value={form.idFormat}
+                onChange={e => setForm(f => ({ ...f, idFormat: e.target.value }))}
+                style={{ border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13, padding: "6px 10px", minWidth: 240 }}
+              >
+                <option value="displayId">{t("Display ID (plugin code)", "ID de visualización (código del plugin)")}</option>
+                <option value="code">{t("Viewpoint code (Trade-Floor-Seq)", "Código de vista (Disciplina-Piso-Sec)")}</option>
+              </select>
             </label>
 
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 20 }}>

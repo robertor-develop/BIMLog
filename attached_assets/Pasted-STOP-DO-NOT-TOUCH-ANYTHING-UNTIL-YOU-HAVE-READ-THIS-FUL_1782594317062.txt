@@ -1,0 +1,49 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Build the unified revision system for lens_viewpoints, replacing the scattered
+trade_floor_seq_correction/lifecycle_status-only signals with one visible revision_number.
+
+PART 1 - SCHEMA
+Add revision_number integer NOT NULL DEFAULT 1 to lens_viewpoints (schema file + app.ts
+migration block, both places). Backfill existing rows to revision_number = 1.
+
+PART 2 - EDIT NOW CREATES A REVISION (matching how Reassign already works)
+Change the Edit route (PATCH .../lens-viewpoints/:id/edit) to NOT update in place. Instead:
+mark the existing row lifecycle_status='superseded', create a NEW row with the updated note,
+revision_number = old.revision_number + 1, supersedes_id = old.id, and copy every other field
+(trade, floor, reportType, priority, openItems, displayId, viewpointId, navisworksGuid,
+issueGroupId) unchanged from the old row. Same transactional pattern already used for
+Reassign. Response shape stays { success: true, viewpoint: <new row> } - add supersededId
+(the old row's id) to the response too, matching Reassign's existing response shape.
+
+PART 3 - REASSIGN ALSO INCREMENTS REVISION
+Reassign already creates a new row with a fresh trade_floor_seq. Add revision_number =
+old.revision_number + 1 to that new row too, so Edit and Reassign both extend the same single
+revision counter consistently.
+
+PART 4 - FRONTEND DISPLAY
+On LensViewpointsView.tsx, show "(Rev N)" next to the trade-floor-seq code for every active
+row where revision_number > 1. Add a small clickable history icon/link next to it that opens
+a panel showing the full chain: walk supersedes_id backward through all prior revisions,
+showing each one's note/trade/floor at that revision, who changed it, when, and the reason
+(from activity_log, matching the entityId).
+
+PART 5 - REPORT
+On the Lens Viewpoints PDF report (the "Generate Lens Viewpoints Report" modal/route):
+- Add a real ID-format toggle to the modal: "Show ID as: [raw displayId] [Trade-Floor-Seq
+  code]" - the trade-floor-seq code format is {tradeShort}-{floorOrSeqDisplay} as already
+  used on-screen (find and reuse the existing viewpointCode() frontend helper's logic
+  server-side, or expose it for the PDF to call).
+- Whichever format is chosen, append "(Rev N)" when revision_number > 1.
+- The register table defaults to active rows only (lifecycle_status='active'); add a
+  "Include superseded/voided" checkbox to the modal for anyone who wants the full history in
+  one report.
+- Add a "Revision History" appendix section listing every row where revision_number > 1 (or
+  lifecycle_status != 'active'), showing old value -> new value, reason, who, when - pulled
+  from activity_log the same way the on-screen history panel does.
+
+For each part, show the exact diff. Run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+Rebuild the frontend too since Parts 4-5 touch frontend code. Print ALL output as plain text.
+No collapsed boxes.

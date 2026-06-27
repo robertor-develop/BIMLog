@@ -30,6 +30,10 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   lifecycleStatus: text("lifecycle_status").notNull().default("active"),
   // Self-reference: a Reassign creates a new row pointing back at the row it supersedes.
   supersedesId: integer("supersedes_id").references((): AnyPgColumn => lensViewpointsTable.id),
+  // Single visible revision counter. Starts at 1; every Edit or Reassign creates a
+  // new row with revision_number = old.revision_number + 1. Walk supersedes_id
+  // backward to recover prior revisions.
+  revisionNumber: integer("revision_number").notNull().default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (t) => ({

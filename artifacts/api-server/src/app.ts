@@ -202,6 +202,10 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS issue_group_id TEXT`);
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'`);
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS supersedes_id INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS revision_number INTEGER NOT NULL DEFAULT 1`);
+    // Backfill: every pre-existing row is revision 1 (the ADD COLUMN default already
+    // applies, but make it explicit and null-safe in case the column predates this).
+    await pool.query(`UPDATE lens_viewpoints SET revision_number = 1 WHERE revision_number IS NULL`);
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'lens_viewpoints_supersedes_id_fk') THEN
         ALTER TABLE lens_viewpoints ADD CONSTRAINT lens_viewpoints_supersedes_id_fk FOREIGN KEY (supersedes_id) REFERENCES lens_viewpoints(id);
