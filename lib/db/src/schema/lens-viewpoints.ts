@@ -43,4 +43,12 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
     .on(t.projectId, t.viewpointId).where(sql`lifecycle_status = 'active'`),
   projectGuidActiveUnique: uniqueIndex("lens_viewpoints_project_guid_active_unique")
     .on(t.projectId, t.navisworksGuid).where(sql`lifecycle_status = 'active'`),
+  // One active row per display_id within a project. The supersede chain keeps the
+  // same display_id across revisions but only ever has ONE active row at a time, so
+  // this never fires for a legitimate chain. It blocks the stray-duplicate case
+  // where a retried/mis-tagged sync carries a NEW viewpoint_id but a display_id that
+  // already belongs to a different active chain (the dedup keys on viewpoint_id/guid
+  // and would otherwise miss it). NULL display_ids stay distinct.
+  projectDisplayActiveUnique: uniqueIndex("lens_viewpoints_project_display_active_unique")
+    .on(t.projectId, t.displayId).where(sql`lifecycle_status = 'active' AND display_id IS NOT NULL`),
 }));

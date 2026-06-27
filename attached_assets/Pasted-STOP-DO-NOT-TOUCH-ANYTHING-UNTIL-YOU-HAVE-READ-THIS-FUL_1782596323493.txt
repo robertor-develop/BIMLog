@@ -1,0 +1,47 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Three real, separate items. Read all three before doing anything.
+
+ITEM 1 — DISTINGUISH PLUGIN-ORIGIN VOIDS FROM PLATFORM-UI-ORIGIN VOIDS (read-only check, no
+build yet)
+The plugin authenticates as the SAME user (logs in with email/password to get a JWT, same as
+the platform UI) and its void call hits the IDENTICAL POST .../void endpoint directly - NOT
+through lens-sync. So activity_log attribution to "Roberto" cannot by itself distinguish
+plugin-origin from platform-button-origin - both look identical in that table. Check: is
+there ANY way to actually tell them apart - request user-agent string in deployment logs, IP
+address, timestamp correlation against any other plugin-only signal (e.g. a request to
+lens-sync or lens-pull happening in the same few minutes, which only the plugin ever calls)?
+If there is truly no way to distinguish them with what's logged today, say so plainly. Do NOT
+re-assert "no plugin path exists" without this specific check - the plugin does have a direct
+path to that exact endpoint, confirmed by the code that was written for it tonight.
+
+ITEM 2 — FIX THE ALWAYS-ON REFRESH BANNER (this one can be fixed now, it's small and
+well-understood)
+The "New viewpoints may be available - Click to refresh" banner on the Lens Viewpoints page
+renders unconditionally with no real state check behind it - it shows on every visit
+regardless of whether anything is actually pending. Either: (a) remove the banner entirely if
+there's no reliable signal available to drive it honestly, or (b) if there IS a reliable
+signal (e.g. comparing the plugin's last-sync timestamp against current time, or some other
+real indicator), wire the banner to that signal so it only shows when there's an actual
+reason to. Use your own judgment on which approach fits this codebase better - we are not
+dictating the implementation, just the goal: don't show a "you might be missing something"
+message when there's no real basis for it. Show the diff either way.
+
+ITEM 3 — DURABLE FIX FOR THE DISPLAY_ID COLLISION RISK (the thing flagged as a recurrence
+risk, not yet fixed)
+Confirmed: row id=24 was a stray duplicate caused by a retried pending-action sync emitting a
+display_id that collided with an already-existing chain, because lens-sync's dedup logic keys
+on viewpoint_id, not display_id - so a retry with a different viewpoint_id but the same
+display_id was never caught. This can happen again. In your own judgment, what's the right
+fix here - a uniqueness guard on display_id within active rows, a different dedup key
+strategy, or something else entirely given how this table and the plugin's retry behavior
+actually work? Propose what you'd build and why, then build it. We are giving you the goal
+(stop this collision from recurring) and the constraint (must not break the existing
+supersede-chain/partial-unique-index behavior already in place), not a specific
+implementation to follow.
+
+For items 2 and 3, show the exact diff and run the mandatory rebuild:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+Rebuild the frontend too since item 2 touches frontend code. Print ALL output as plain text.
+No collapsed boxes.

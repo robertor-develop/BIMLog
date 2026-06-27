@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -110,6 +110,10 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [viewpoints, setViewpoints] = useState<LensViewpoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Drives the refresh banner. Only true when a background poll detects the
+  // server's viewpoint set differs from what is currently displayed — never shown
+  // speculatively. Reset to false whenever we (re)load the displayed list.
+  const [updatesAvailable, setUpdatesAvailable] = useState(false);
   const [fTrade, setFTrade] = useState("all");
   const [fFloor, setFFloor] = useState("all");
   const [fReportType, setFReportType] = useState("all");
@@ -186,6 +190,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       if (r.ok) {
         const d = await r.json();
         setViewpoints(d.viewpoints ?? []);
+        setUpdatesAvailable(false);
       } else {
         const d = await r.json().catch(() => ({}));
         setError(d.message || d.error || "Failed to load viewpoints");
@@ -207,11 +212,40 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       if (r.ok) {
         const d = await r.json();
         setViewpoints(d.viewpoints ?? []);
+        setUpdatesAvailable(false);
       }
     } catch {
       /* transient network error — keep the current list, the user can retry */
     }
   };
+
+  // Mirror the currently displayed viewpoint ids so the background poll can compare
+  // server state against them without re-running on every render.
+  const viewpointIdsRef = useRef<Set<number>>(new Set());
+  useEffect(() => { viewpointIdsRef.current = new Set(viewpoints.map(v => v.id)); }, [viewpoints]);
+
+  // Honest signal for the refresh banner: poll lens-pull in the background and flag
+  // updates only when the server's id set actually differs from what is displayed
+  // (new viewpoints, new revision rows, or removals). No difference => no banner.
+  useEffect(() => {
+    let cancelled = false;
+    const checkForUpdates = async () => {
+      try {
+        const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
+        if (!r.ok) return;
+        const d = await r.json();
+        const serverIds: number[] = (d.viewpoints ?? []).map((v: LensViewpoint) => v.id);
+        const local = viewpointIdsRef.current;
+        const changed = serverIds.length !== local.size || serverIds.some(id => !local.has(id));
+        if (!cancelled && changed) setUpdatesAvailable(true);
+      } catch {
+        /* transient — try again on the next tick */
+      }
+    };
+    const iv = setInterval(checkForUpdates, 60000);
+    return () => { cancelled = true; clearInterval(iv); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
   // Probe the local Navisworks plugin once on load. The platform runs on HTTPS
   // while the plugin is a plain HTTP server on localhost, so a regular (CORS)
@@ -566,17 +600,19 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </select>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
-        background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 14px", marginBottom: 14 }}>
-        <span style={{ fontSize: 13, color: "#92400E" }}>
-          {t("New viewpoints may be available — Click to refresh", "Puede haber nuevas vistas disponibles — Haga clic para actualizar")}
-        </span>
-        <button onClick={refreshViewpoints}
-          style={{ display: "flex", alignItems: "center", gap: 6, background: "#F59E0B", border: "none", borderRadius: 6,
-            padding: "6px 12px", fontSize: 12, fontWeight: 700, color: "white", cursor: "pointer", flexShrink: 0 }}>
-          <RefreshCw size={14} /> {t("Refresh", "Actualizar")}
-        </button>
-      </div>
+      {updatesAvailable && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+          background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 14px", marginBottom: 14 }}>
+          <span style={{ fontSize: 13, color: "#92400E" }}>
+            {t("New viewpoints are available — Click to refresh", "Hay nuevas vistas disponibles — Haga clic para actualizar")}
+          </span>
+          <button onClick={refreshViewpoints}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "#F59E0B", border: "none", borderRadius: 6,
+              padding: "6px 12px", fontSize: 12, fontWeight: 700, color: "white", cursor: "pointer", flexShrink: 0 }}>
+            <RefreshCw size={14} /> {t("Refresh", "Actualizar")}
+          </button>
+        </div>
+      )}
 
       {error && (
         <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>

@@ -571,7 +571,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         res.status(400).json({ error: "no_viewpoints", message: "Request body must include a non-empty viewpoints array" });
         return;
       }
-      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean; tradeFloorSeq?: number | null; tradeFloorSeqCorrection?: number | null }> = [];
+      const results: Array<{ viewpointId: string; id: number; status: string; created: boolean; tradeFloorSeq?: number | null; tradeFloorSeqCorrection?: number | null; skipped?: boolean; reason?: string }> = [];
       const now = new Date();
       const seen = new Set<string>();
       console.log(`[lens-sync] project=${projectId} received ${viewpoints.length} viewpoint(s)`);
@@ -623,6 +623,25 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
                 .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
           return row;
         };
+        // display_id collision guard: dedup keys on guid/viewpoint_id, so a retried
+        // or mis-tagged sync carrying a NEW viewpoint_id but a display_id that already
+        // belongs to a DIFFERENT active chain slips past dedup and opens a stray
+        // duplicate row (the id=24 pending-action incident). Refuse to create a second
+        // active row for an existing display_id; the partial unique index
+        // lens_viewpoints_project_display_active_unique is the DB-level backstop.
+        if (displayId) {
+          const [displayClash] = await db.select().from(lensViewpointsTable)
+            .where(and(
+              eq(lensViewpointsTable.projectId, projectId),
+              eq(lensViewpointsTable.displayId, displayId),
+              eq(lensViewpointsTable.lifecycleStatus, "active"),
+            ));
+          if (displayClash && displayClash.viewpointId !== viewpointId) {
+            console.warn(`[lens-sync] SKIPPED display_id collision: displayId="${displayId}" already active on id=${displayClash.id} (viewpointId="${displayClash.viewpointId}"), incoming viewpointId="${viewpointId}"`);
+            results.push({ viewpointId, id: displayClash.id, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
+            continue;
+          }
+        }
         try {
           // All-or-nothing per viewpoint: the insert, the atomic sequence
           // increment, and the back-fill of the assigned sequence onto the new
@@ -683,6 +702,17 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           if (legacy) {
             console.log(`[lens-sync] ALREADY EXISTS (legacy viewpoint_id) viewpointId="${viewpointId}" id=${legacy.id}`);
             results.push({ viewpointId, id: legacy.id, status: legacy.status, created: false });
+          } else if (displayId) {
+            // Race: another request opened the same display_id between our guard and
+            // this insert, so the partial unique index rejected us. Treat as a skip.
+            const [displayClash] = await db.select().from(lensViewpointsTable)
+              .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.displayId, displayId), eq(lensViewpointsTable.lifecycleStatus, "active")));
+            if (displayClash && displayClash.viewpointId !== viewpointId) {
+              console.warn(`[lens-sync] SKIPPED display_id collision (race): displayId="${displayId}" active on id=${displayClash.id}, incoming viewpointId="${viewpointId}"`);
+              results.push({ viewpointId, id: displayClash.id, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
+            } else {
+              throw err;
+            }
           } else {
             throw err;
           }

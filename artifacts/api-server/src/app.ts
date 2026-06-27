@@ -229,6 +229,9 @@ startOverdueNotifier();
     await pool.query(`DROP INDEX IF EXISTS lens_viewpoints_project_guid_unique`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_viewpoint_active_unique ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active'`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_active_unique ON lens_viewpoints (project_id, navisworks_guid) WHERE lifecycle_status = 'active'`);
+    // One active row per display_id within a project — DB backstop for the lens-sync
+    // display_id collision guard. Excludes NULL display_ids so they stay distinct.
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_display_active_unique ON lens_viewpoints (project_id, display_id) WHERE lifecycle_status = 'active' AND display_id IS NOT NULL`);
     console.log("[migration] lens_viewpoints lifecycle + sequence-counter migration ensured");
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);
