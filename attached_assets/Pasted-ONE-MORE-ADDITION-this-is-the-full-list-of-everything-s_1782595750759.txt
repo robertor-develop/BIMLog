@@ -1,0 +1,48 @@
+ONE MORE ADDITION - this is the full list of everything still open or unverified from
+tonight's build. Please give real, checked answers to every item below, not a summary.
+
+REVISION SYSTEM / PDF - NEVER ACTUALLY VERIFIED (this check was written earlier but never
+sent - it needs real answers now):
+1. Query real production lens_viewpoints for project 26 right now. Show every row's id,
+   display_id, trade, revision_number, lifecycle_status, supersedes_id. Confirm
+   revision_number is a real column with real backfilled values on EVERY row, old and new.
+2. Perform one real live test: call Edit on a real active row with a real note change, then
+   re-query both rows. Confirm: old row lifecycle_status=superseded, new row revision_number
+   = old+1, supersedes_id=old.id, and the new row's trade_floor_seq is IDENTICAL to the old
+   row's (not a fresh number - explicit requirement).
+3. Show the exact Edit route response body - confirm it returns supersededId alongside
+   viewpoint, matching Reassign's shape.
+4. Try calling Edit again using the now-stale id from the row just superseded in test #2 -
+   show the actual HTTP response. Does it 404, error, or silently succeed on a dead row?
+5. Confirm with real evidence: does "(Rev N)" actually render on screen next to that test
+   row? Does the history icon show real chain data, or is it present but non-functional?
+6. Generate a real PDF report right now. Confirm: does the ID-format toggle actually change
+   the printed output, does "(Rev N)" actually appear in print for the test row, does the
+   Revision History appendix contain real entries - or is the UI present but PDF unchanged?
+
+VOID/EDIT/REASSIGN RELIABILITY - confirmed inconsistent tonight, never resolved:
+7. Earlier tonight, a Void was queued on the plugin and confirmed via the plugin's own status
+   message, but never appeared on the platform after Sync. Separately, voided rows (id 24, 27)
+   DO exist in production - so void works SOMETIMES. With real evidence (logs, a fresh live
+   test), figure out what differs between the times it works and the time it didn't. Don't
+   guess - check.
+8. The platform's native Edit/Reassign/Void buttons (window.prompt-based) were confirmed to
+   correctly call their endpoints in code, but Roberto reported clicking through both prompts
+   and seeing absolutely nothing happen. Was this ever conclusively explained (stale browser
+   cache vs something else)? If not, say so plainly - don't let this stay unresolved.
+
+DUPLICATE DATA - identified, never cleaned up:
+9. Row id=24 (project 26) is a confirmed stray duplicate - same display_id as the legitimate
+   chain (id=22/id=25) but a different viewpoint_id, not part of the supersede chain. Should
+   this be deleted/marked, and is there a real risk of this happening again given how it was
+   created (described earlier as a retried pending-action row)? Propose what you'd actually
+   do about it, in your own judgment.
+
+PLATFORM REFRESH BUTTON - reported broken, never actually investigated:
+10. Roberto reports the Lens Viewpoints page Refresh button no longer pulls in current state
+    the way it used to. We redirected this to a plugin-delivery theory but never actually
+    checked the Refresh button's own code or behavior directly. Check it for real now.
+
+Answer all ten with real, checked evidence. If something cannot be verified live, say so
+plainly rather than reporting it as working. This is on top of the honest-assessment request
+already sent (process violation + broader wiring gaps) - we need both.
