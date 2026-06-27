@@ -1732,7 +1732,19 @@ ${hasResp ? `
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId!)}`, "_blank")}
+                onClick={async () => {
+                  const code = (rfi as { sourceViewpointId?: string | null }).sourceViewpointId!;
+                  const ctrl = new AbortController();
+                  const timer = setTimeout(() => ctrl.abort(), 2000);
+                  try {
+                    await fetch(`http://localhost:8765/jump?code=${encodeURIComponent(code)}`, { mode: "no-cors", signal: ctrl.signal });
+                    clearTimeout(timer);
+                    toast({ title: w("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks", lang) });
+                  } catch {
+                    clearTimeout(timer);
+                    toast({ title: w("Navisworks plugin not reachable — open the model in Navisworks and try again.", "Plugin de Navisworks no disponible — abra el modelo en Navisworks e intente de nuevo.", lang), variant: "destructive" });
+                  }
+                }}
                 style={{ gap: 5, fontSize: 11, color: "#0F766E", borderColor: "#5EEAD4", background: "#F0FDFA" }}
               >
                 <Navigation style={{ width: 12, height: 12 }} />{w("Jump to Viewpoint", "Ir al Punto de Vista", lang)}

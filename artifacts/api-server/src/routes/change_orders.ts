@@ -132,8 +132,10 @@ for (const action of ["submit", "approve", "reject"] as const) {
     try {
       const updates: Record<string, unknown> = { status: statusMap[action], updatedAt: new Date() };
       if (action === "approve") { updates.approvedById = req.user!.userId; updates.approvedAt = new Date(); }
-      await db.update(changeOrdersTable).set(updates as any)
-        .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)));
+      const [updatedCo] = await db.update(changeOrdersTable).set(updates as any)
+        .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)))
+        .returning();
+      if (!updatedCo) { res.status(404).json({ error: "Not found" }); return; }
       await db.insert(activityLogTable).values({
         projectId, userId: req.user!.userId,
         userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
@@ -141,6 +143,20 @@ for (const action of ["submit", "approve", "reject"] as const) {
         fileNameBefore: null, fileNameAfter: null,
         details: `Change order ${action}ed`,
       });
+      // Notify the change order's initiator of the status change (the import was
+      // previously dead — no CO event ever produced a notification). Skip when the
+      // actor is the initiator, since self-notifications are noise.
+      if (updatedCo.initiatedById && updatedCo.initiatedById !== req.user!.userId) {
+        const verb = action === "submit" ? "submitted for approval" : action === "approve" ? "approved" : "rejected";
+        await createNotification(
+          updatedCo.initiatedById,
+          projectId,
+          "change_order_status",
+          `Change order ${updatedCo.number} ${verb}`,
+          `${req.user!.fullName} ${verb} change order ${updatedCo.number}.`,
+          null,
+        );
+      }
       res.json({ ok: true, status: statusMap[action] });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });

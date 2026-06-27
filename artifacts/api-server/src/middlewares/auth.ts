@@ -145,7 +145,9 @@ export function requirePermission(...permissionLevels: string[]) {
     if (permissionLevels.length > 0) {
       const allowedRoles = await getRolesByPermission(...permissionLevels);
       if (!allowedRoles.includes(memberRole)) {
-        res.status(403).json({ error: "Insufficient permissions for this action" });
+        // Stable machine-readable signal so an external client (e.g. the plugin) can
+        // surface "you don't have write permission" instead of a generic 403 string.
+        res.status(403).json({ error: "Insufficient permissions for this action", code: "insufficient_permissions", required: permissionLevels });
         return;
       }
     }

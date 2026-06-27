@@ -13,7 +13,8 @@
 - [Living Brief docs system](living-brief-docs.md) — api-server dev runs tsx/ESM (no __dirname, use import.meta.url); adding a brief tab needs seed file + DOCS + EDITABLE_DOCS + frontend EDITABLE/Export all in sync
 - [Files storage lifecycle](files-storage-lifecycle.md) — uploads hit disk only transiently (hash+pdf-parse); disk path never persisted; all I/O via lib/storage-adapter.ts (buffer-based seam for future OneDrive)
 - [api-client-react project refs](api-client-react-project-refs.md) — bimlog reads dist .d.ts via TS refs; after hand-editing generated client run `tsc -b lib/api-client-react --force`
-- [Plugin deferred follow-ups](plugin-deferred-followups.md) — 4 known-but-unbuilt lens-sync/plugin gaps (stuck pending id, optimistic-seq divergence, re-sync no seq, read-only sync 403)
+- [createNotification is non-throwing](notification-helper-convention.md) — swallows its own errors; never wrap call sites in extra try/catch, a notif failure can't 500 the parent
+- [Plugin deferred follow-ups](plugin-deferred-followups.md) — lens active-head resolver + existing-row seq + perm error code now server-side; plugin still owns its half (items 1/2/4)
 - [lens-sync collision-skip contract](plugin-deferred-followups.md) — display_id-collision skip returns id:null + skipped/reason (NOT the foreign row id) so plugins can't mis-bind; Void now has active-only 409 guard like Edit/Reassign
 - [Lens viewpoint revisions](lens-viewpoint-revisions.md) — Edit/Reassign supersede+insert with revisionNumber=old+1 (never UPDATE in place); report appendix must be chain-scoped, full-report-only
 - [Lens viewpoint lifecycle + seq authority](lens-viewpoint-lifecycle.md) — partial active-only unique indexes; atomic counter table is the seq source; Reassign = supersede-then-insert in one tx

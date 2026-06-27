@@ -124,6 +124,14 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [historyData, setHistoryData] = useState<Record<number, { chain: any[]; events: any[] } | "loading" | "error">>({});
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [jumpTarget, setJumpTarget] = useState<LensViewpoint | null>(null);
+  const [actionModal, setActionModal] = useState<
+    | { type: "edit"; v: LensViewpoint; note: string; reason: string }
+    | { type: "reassign"; v: LensViewpoint; trade: string; reason: string }
+    | { type: "void"; v: LensViewpoint; reason: string }
+    | null
+  >(null);
+  const [actionPhase, setActionPhase] = useState<"input" | "submitting">("input");
+  const [actionError, setActionError] = useState("");
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -306,56 +314,67 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     }
   };
 
-  const editViewpoint = async (v: LensViewpoint) => {
-    const note = window.prompt(t("Edit note:", "Editar nota:"), v.note || "");
-    if (note == null || note.trim() === "") return;
-    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/edit`, {
-        method: "PATCH",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ note, reason }),
-      });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to edit viewpoint"); return; }
-      await loadViewpoints();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
+  // Edit/Reassign/Void open a real modal (no native prompt/confirm). The modal
+  // collects input, then submitAction drives a visible submitting -> success/error
+  // state so a click never silently no-ops the way window.prompt could.
+  const editViewpoint = (v: LensViewpoint) => {
+    setActionError("");
+    setActionPhase("input");
+    setActionModal({ type: "edit", v, note: v.note || "", reason: "" });
   };
 
-  const reassignViewpoint = async (v: LensViewpoint) => {
+  const reassignViewpoint = (v: LensViewpoint) => {
     const list = trades.filter(x => x !== v.trade);
     if (list.length === 0) { setError(t("No other trade available to reassign to.", "No hay otra disciplina disponible para reasignar.")); return; }
-    const target = window.prompt(t(`Reassign to which trade? Options: ${list.join(", ")}`, `¿Reasignar a qué disciplina? Opciones: ${list.join(", ")}`), list[0]);
-    if (target == null || target.trim() === "") return;
-    if (!trades.includes(target)) { setError(t(`Unknown trade: ${target}`, `Disciplina desconocida: ${target}`)); return; }
-    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/reassign`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ trade: target, reason }),
-      });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to reassign viewpoint"); return; }
-      await loadViewpoints();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
+    setActionError("");
+    setActionPhase("input");
+    setActionModal({ type: "reassign", v, trade: list[0], reason: "" });
   };
 
-  const voidViewpoint = async (v: LensViewpoint) => {
-    if (!window.confirm(t("Void this viewpoint? It stays visible but is marked voided.", "¿Anular esta vista? Permanece visible pero marcada como anulada."))) return;
-    const reason = window.prompt(t("Reason (optional):", "Motivo (opcional):"), "") || "";
+  const voidViewpoint = (v: LensViewpoint) => {
+    setActionError("");
+    setActionPhase("input");
+    setActionModal({ type: "void", v, reason: "" });
+  };
+
+  // Single submit path for Edit/Reassign/Void: always shows a submitting state,
+  // then either a success toast + reload or an inline error inside the modal.
+  // No native dialogs and no silent success — every click ends in a visible result.
+  const submitAction = async () => {
+    if (!actionModal) return;
+    const m = actionModal;
+    if (m.type === "edit" && m.note.trim() === "") { setActionError(t("A note is required.", "La nota es requerida.")); return; }
+    if (m.type === "reassign" && !trades.includes(m.trade)) { setActionError(t("Select a valid trade.", "Seleccione una disciplina válida.")); return; }
+    setActionError("");
+    setActionPhase("submitting");
     try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${v.id}/void`, {
-        method: "POST",
+      const base = `${API}/projects/${projectId}/clash-reports/lens-viewpoints/${m.v.id}`;
+      const call =
+        m.type === "edit" ? { url: `${base}/edit`, method: "PATCH", body: { note: m.note, reason: m.reason } as Record<string, unknown> }
+        : m.type === "reassign" ? { url: `${base}/reassign`, method: "POST", body: { trade: m.trade, reason: m.reason } as Record<string, unknown> }
+        : { url: `${base}/void`, method: "POST", body: { reason: m.reason } as Record<string, unknown> };
+      const r = await fetch(call.url, {
+        method: call.method,
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify(call.body),
       });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Failed to void viewpoint"); return; }
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setActionPhase("input");
+        setActionError(d.message || d.error || t("The action failed. Please try again.", "La acción falló. Inténtelo de nuevo."));
+        return;
+      }
+      setActionModal(null);
+      setActionPhase("input");
+      showToast(
+        m.type === "edit" ? t("Viewpoint updated", "Vista actualizada")
+        : m.type === "reassign" ? t("Viewpoint reassigned", "Vista reasignada")
+        : t("Viewpoint voided", "Vista anulada")
+      );
       await loadViewpoints();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setActionPhase("input");
+      setActionError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -920,6 +939,104 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       {toast && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 1100, display: "flex", alignItems: "center", gap: 8, background: "#16A34A", color: "white", fontSize: 13, fontWeight: 600, padding: "10px 16px", borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}>
           <CheckCircle2 size={16} /> {toast}
+        </div>
+      )}
+
+      {actionModal && (
+        <div
+          onClick={() => actionPhase !== "submitting" && setActionModal(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 460, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 8 }}>
+                {actionModal.type === "edit" ? <><Pencil size={16} /> {t("Edit Viewpoint", "Editar Vista")}</>
+                  : actionModal.type === "reassign" ? <><ArrowLeftRight size={16} /> {t("Reassign Viewpoint", "Reasignar Vista")}</>
+                  : <><Ban size={16} /> {t("Void Viewpoint", "Anular Vista")}</>}
+              </h3>
+              <button
+                onClick={() => actionPhase !== "submitting" && setActionModal(null)}
+                aria-label={t("Close", "Cerrar")}
+                disabled={actionPhase === "submitting"}
+                style={{ background: "transparent", border: "none", cursor: actionPhase === "submitting" ? "not-allowed" : "pointer", color: "#6B7280", lineHeight: 0, padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+              {actionModal.type === "edit" && (
+                <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                  {t("Note", "Nota")}
+                  <textarea
+                    value={actionModal.note}
+                    onChange={e => setActionModal({ ...actionModal, note: e.target.value })}
+                    rows={3}
+                    style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, resize: "vertical", fontWeight: 400 }}
+                  />
+                </label>
+              )}
+              {actionModal.type === "reassign" && (
+                <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                  {t("Reassign to trade", "Reasignar a disciplina")}
+                  <select
+                    value={actionModal.trade}
+                    onChange={e => setActionModal({ ...actionModal, trade: e.target.value })}
+                    style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, fontWeight: 400, background: "white" }}
+                  >
+                    {trades.filter(x => x !== actionModal.v.trade).map(tr => (
+                      <option key={tr} value={tr}>{tr}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {actionModal.type === "void" && (
+                <p style={{ margin: 0, fontSize: 13, color: "#4B5563" }}>
+                  {t("This viewpoint will stay visible but be marked voided. You can review this in its history.", "Esta vista permanecerá visible pero se marcará como anulada. Puede revisarlo en su historial.")}
+                </p>
+              )}
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Reason (optional)", "Motivo (opcional)")}
+                <input
+                  value={actionModal.reason}
+                  onChange={e => setActionModal({ ...actionModal, reason: e.target.value })}
+                  style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, fontWeight: 400 }}
+                />
+              </label>
+            </div>
+
+            {actionError && (
+              <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12.5, fontWeight: 600, padding: "8px 12px", borderRadius: 8 }}>
+                {actionError}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setActionModal(null)}
+                disabled={actionPhase === "submitting"}
+                style={{ fontSize: 13, padding: "6px 14px" }}
+              >
+                {t("Cancel", "Cancelar")}
+              </button>
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={submitAction}
+                disabled={actionPhase === "submitting"}
+                style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}
+              >
+                {actionPhase === "submitting"
+                  ? <><RefreshCw size={14} /> {t("Saving…", "Guardando…")}</>
+                  : actionModal.type === "void"
+                    ? <><Ban size={14} /> {t("Void", "Anular")}</>
+                    : <><CheckCircle2 size={14} /> {t("Save", "Guardar")}</>}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

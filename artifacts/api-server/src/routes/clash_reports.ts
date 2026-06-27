@@ -692,7 +692,10 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           const existing = await fetchExisting();
           if (existing) {
             console.log(`[lens-sync] ALREADY EXISTS viewpointId="${viewpointId}" id=${existing.id}`);
-            results.push({ viewpointId, id: existing.id, status: existing.status, created: false });
+            // Return the stored seq on the existing-row path too (not just created),
+            // so a client that lost its local counter can recover it from a re-sync
+            // instead of being forced to lens-pull.
+            results.push({ viewpointId, id: existing.id, status: existing.status, created: false, tradeFloorSeq: existing.tradeFloorSeq ?? null, tradeFloorSeqCorrection: existing.tradeFloorSeqCorrection ?? null });
           } else {
             console.log(`[lens-sync] WARNING no row inserted or found for viewpointId="${viewpointId}"`);
           }
@@ -705,7 +708,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId)));
           if (legacy) {
             console.log(`[lens-sync] ALREADY EXISTS (legacy viewpoint_id) viewpointId="${viewpointId}" id=${legacy.id}`);
-            results.push({ viewpointId, id: legacy.id, status: legacy.status, created: false });
+            results.push({ viewpointId, id: legacy.id, status: legacy.status, created: false, tradeFloorSeq: legacy.tradeFloorSeq ?? null, tradeFloorSeqCorrection: legacy.tradeFloorSeqCorrection ?? null });
           } else if (displayId) {
             // Race: another request opened the same display_id between our guard and
             // this insert, so the partial unique index rejected us. Treat as a skip.
@@ -1121,6 +1124,59 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
       });
     } catch (err) {
       res.status(500).json({ error: "lens_history_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// RESOLVE ACTIVE HEAD — given any row id in a supersede chain (typically an old,
+// now-superseded id an external client still holds), walk supersedes_id FORWARD to
+// the current tip of the same physical viewpoint. Lets a plugin re-target a queued
+// action that would otherwise retry forever against a superseded id. Registered
+// BEFORE the "/:reportId" routes so "lens-viewpoints" is not captured by :reportId.
+router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/active",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    try {
+      const [start] = await db.select().from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)));
+      if (!start) {
+        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
+        return;
+      }
+      // Each supersede creates exactly one child whose supersedes_id points back to
+      // its parent, so the forward walk is deterministic. Cap against cycles.
+      let cursor = start;
+      for (let guard = 0; guard < 200; guard++) {
+        const [child] = await db.select().from(lensViewpointsTable)
+          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.supersedesId, cursor.id)));
+        if (!child) break;
+        cursor = child;
+      }
+      // cursor is the chain tip — the active head unless the whole chain was
+      // voided/deleted. Report lifecycleStatus so the client decides what to do.
+      res.json({
+        success: true,
+        requestedId: id,
+        activeId: cursor.id,
+        superseded: cursor.id !== id,
+        lifecycleStatus: cursor.lifecycleStatus,
+        viewpoint: {
+          id: cursor.id,
+          viewpointId: cursor.viewpointId,
+          displayId: cursor.displayId,
+          trade: cursor.trade,
+          floor: cursor.floor,
+          revisionNumber: cursor.revisionNumber,
+          lifecycleStatus: cursor.lifecycleStatus,
+          tradeFloorSeq: cursor.tradeFloorSeq,
+          tradeFloorSeqCorrection: cursor.tradeFloorSeqCorrection,
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ error: "lens_active_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );

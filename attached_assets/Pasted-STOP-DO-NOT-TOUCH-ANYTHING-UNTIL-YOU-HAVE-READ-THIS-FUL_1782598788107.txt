@@ -1,0 +1,61 @@
+STOP. DO NOT TOUCH ANYTHING UNTIL YOU HAVE READ THIS FULLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+This is the full remaining list. Some items need an honest current-state check first since we
+may have lost track of what's actually done vs assumed done. Read everything before acting.
+
+PART A - HONEST STATUS CHECK (read-only, answer before any fixing)
+
+A1. Earlier tonight, a 9-item RFI fix instruction was sent. The completion summary only
+    confirmed 4 of them (Linked Items label, RFI edit path, floating toggle overlap, AI email
+    context). Item 9 - the "Jump to Viewpoint" button on an RFI opening a new browser tab to a
+    raw JSON response that sits open forever - was included in that instruction but never
+    confirmed in the summary. Check the real current code: was it actually built, or dropped?
+
+A2. Check honestly, with real code, whether these wiring gaps (flagged across multiple past
+    sessions) are still real today:
+    - Agents (clash-agent, rfi-agent, briefing-agent) built but never fired on save endpoints
+    - change_orders imports createNotification but never calls it
+    - rfi_ball_in_court_history has no writer besides the original Mark-as-Sent path
+    - linked_items creation is admin-write gated and barely surfaced
+    Confirm each is still accurate, or say plainly if any have since been addressed.
+
+A3. Does tonight's own lens_viewpoint/revision work have this same "built but not wired"
+    pattern anywhere? Your own honest read, not a defense of the work.
+
+PART B - ITEM 8: NATIVE PROMPT BUTTONS "DO NOTHING" - STILL UNRESOLVED
+Roberto reported clicking through both native prompt()/confirm() dialogs on Edit/Reassign/
+Void with real typed text and seeing no visible result. This was never conclusively explained
+(only theories: stale cache, silent prompt-cancel). The goal: make it IMPOSSIBLE for this
+class of "looks broken, might secretly be working" experience to happen again - whatever that
+takes given your judgment of this codebase (real modals instead of native dialogs, visible
+loading/success/error states, whatever you think is right). We are not specifying the
+implementation, just the requirement: any click on Edit/Reassign/Void must produce an
+unambiguous, visible result every time, with no silent paths.
+
+PART C - FOUR DEFERRED PLUGIN-ADJACENT ITEMS - decide what's server-fixable
+For each, in your own judgment: is there a server-side change that would help, even if the
+full fix needs plugin-side work we'll do separately afterward?
+1. A queued plugin action stuck retrying against a permanently-superseded row id forever,
+   with no way to find the current active head of that chain. Is there already a way for an
+   external client to resolve "given this old id, what's the current active row for this
+   same physical viewpoint" - or should one exist?
+2. Existing-row re-sync never returns trade_floor_seq, even though lens-pull's payload
+   already includes it elsewhere. Confirm whether that's true, and if a client could already
+   recover the value from lens-pull today.
+3. Read-only plugin users get silent sync failures (401/403) with no clear signal of why. Is
+   there a clearer way the server could signal "you don't have write permission" that an
+   external client could surface properly?
+4. Navisworks-side optimistic numbers diverging visually from corrected platform numbers -
+   this is likely an accepted, documented limitation rather than something to fix. Confirm
+   your own view on whether anything server-side would meaningfully help here, or if it's
+   genuinely a plugin-display limitation only.
+
+PART D - RFI WORK, FOLDED BACK IN
+Given Part A1/A2 results, fix whatever is confirmed still broken from the original RFI
+findings list and the wiring gaps - using your own judgment on implementation, not ours.
+
+For every actual fix in Parts B/C/D, show the exact diff. Run the mandatory rebuild after:
+rm -rf artifacts/api-server/dist && cd artifacts/api-server && pnpm build 2>&1 | tail -3
+Rebuild the frontend too if anything touches frontend code. Print ALL output as plain text.
+No collapsed boxes.
