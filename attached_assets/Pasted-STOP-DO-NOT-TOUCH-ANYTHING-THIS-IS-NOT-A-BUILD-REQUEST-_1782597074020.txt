@@ -1,0 +1,72 @@
+STOP. DO NOT TOUCH ANYTHING. THIS IS NOT A BUILD REQUEST. READ ONLY.
+PRINT YOUR HONEST ASSESSMENT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+We want your independent review of how the platform and the Navisworks plugin fit together
+right now, since you can see the real platform code and we can only see the plugin through
+fragments pasted into chat. Below is the actual current plugin logic (C#, not in this repo).
+Read it fully, then tell us honestly where it does and doesn't line up with what the platform
+actually does, and what you'd fix.
+
+WHAT THE PLUGIN ACTUALLY DOES TODAY:
+
+1. SaveViewpoint(): saves locally to Navisworks, assigns a LOCAL trade+floor sequence number
+   optimistically (PluginConfig.GetNextTradeFloorSequence - a local JSON file counter, no
+   server contact), stamps an issueGroupId (random GUID) ONLY when more than one trade entry
+   is saved in the same action, builds a viewpoint name like
+   "{displayId} | {tradeShort}-{seq} | {reportType} | {floor} | {priority} | {note}", and
+   writes all metadata into a Navisworks Comment as JSON (note, trade, reportType, floor,
+   priority, openItems, tradeFloorSeq, hasRedline, issueGroupId, source:"BIMLogLens"). This
+   happens fully offline - no server contact at all during Save.
+
+2. SyncWithBIMLog(): logs in, pulls existing viewpointIds via lens-pull, finds all local
+   viewpoints not yet known to the server, and POSTs each one individually to lens-sync
+   (one HTTP call per viewpoint, sequentially, not batched server-side). For each, it parses
+   the server's response for tradeFloorSeq and tradeFloorSeqCorrection, and if returned,
+   calls PluginConfig.SeedTradeFloorSequence to align its local counter to the server's real
+   value. After all pushes, it appends a "receipt" Comment to each synced viewpoint
+   (syncedAt, status:"synced", serverId if matched). It ALSO calls a second pass,
+   ResolvePendingActionsAsync, after every sync (see #4).
+
+3. "Manage Existing Viewpoint" panel: lets the user select any already-saved viewpoint from
+   the Navisworks tree, see ALL its metadata by scanning EVERY Comment on it in chronological
+   order and merging known fields (later comments override earlier ones for the same key) -
+   this is how the plugin tracks note edits, lifecycle changes, etc. without ever editing a
+   Comment in place, since Navisworks only allows appending Comments, never editing them. It
+   detects group siblings by issueGroupId and shows them together. Before any Edit/Reassign/
+   Void, it checks for group siblings and shows a Yes/No confirm dialog if any exist.
+
+4. Edit/Reassign/Void actions: if the viewpoint already has a serverId (parsed from its
+   merged Comments) AND the plugin can log in right now, it calls the matching endpoint
+   directly (PATCH .../edit, POST .../reassign, POST .../void) and on success appends a new
+   merge-Comment recording the result. If there's no serverId yet, or login/the request
+   fails, it instead appends a merge-Comment setting pendingAction (edit/reassign/void) plus
+   whatever data is needed to resolve it later, and - for Reassign specifically - immediately
+   creates a NEW local placeholder viewpoint copy under the target trade with a temporary
+   "PEND001"-style sequence marker (since it can't get a real number without the server),
+   tagged with a localPlaceholderId. ResolvePendingActionsAsync (called after every Sync)
+   scans all viewpoints for any with a pendingAction set and a real serverId, retries the
+   matching endpoint, and on success for Reassign specifically, finds the placeholder by its
+   localPlaceholderId and renames it ONCE to its real server-assigned code.
+
+5. The plugin just got instrumented tonight with a local error log
+   (%APPDATA%\BIMLog\pending_action_error.log) that records every immediate-attempt failure,
+   every silently-skipped viewpoint during BuildEntryFromVp parsing, and a scan summary every
+   time ResolvePendingActionsAsync runs (scanned/pendingFound/resolved/failed counts).
+
+GIVEN THE REAL PLATFORM CODE YOU CAN SEE: where does this plugin logic NOT line up with what
+the server actually expects or does? Specifically:
+- Does lens-sync's response actually include tradeFloorSeq/tradeFloorSeqCorrection in the
+  shape the plugin expects, for every code path (including the NEW display_id-collision skip
+  response from tonight's item 3 fix)? Would the plugin's parsing handle a
+  {skipped:true, reason:"display_id_collision"} response correctly, or would it silently
+  treat that as a normal failure given how it currently parses responses?
+- The plugin's Edit/Reassign/Void calls the regular Edit/Reassign/Void endpoints exactly like
+  the platform UI does - any concern about the plugin's "immediate attempt, fall back to
+  local queue" pattern racing against a platform user doing something to the same row at the
+  same time?
+- Anything about the plugin's offline-placeholder pattern for Reassign that could conflict
+  with the new active-scoped partial unique index added tonight?
+- Anything else you'd flag, in your own judgment, now that you can see both sides together.
+
+This is a request for your honest review, not a build. Tell us what's actually wrong or at
+risk, even if it means saying "this is fine" for some of it.
