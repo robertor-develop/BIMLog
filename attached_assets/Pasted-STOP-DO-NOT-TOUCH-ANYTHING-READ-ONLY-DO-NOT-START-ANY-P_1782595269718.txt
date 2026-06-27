@@ -1,0 +1,40 @@
+STOP. DO NOT TOUCH ANYTHING. READ ONLY. DO NOT START ANY PLAN.
+PRINT ALL OUTPUT AS PLAIN TEXT. NO COLLAPSED BOXES.
+
+Before any further building, independently verify the revision_number system just merged.
+Real evidence only, not a restatement of what was claimed.
+
+1. Query the REAL production lens_viewpoints table for project 26 right now. Show every row's
+   id, display_id, trade, revision_number, lifecycle_status, supersedes_id. Confirm
+   revision_number actually exists as a real column with real values on every row (not just in
+   the schema file) - including the pre-existing rows from before this build (did the backfill
+   to 1 actually run against production, or only in theory).
+
+2. Perform one REAL live test against the running server, end to end: call the Edit route on
+   one real existing active row with a real note change, then immediately re-query that row's
+   id and the new row's id from the database. Confirm: old row now lifecycle_status=superseded,
+   new row exists with revision_number = old+1, supersedes_id = old.id, and the new row's
+   trade_floor_seq is IDENTICAL to the old row's (not a fresh number - this was an explicit
+   requirement). Show the actual before/after rows, not a description.
+
+3. Show the EXACT current Edit route response body shape (real code) - confirm it returns
+   supersededId alongside viewpoint, matching Reassign's response shape.
+
+4. Does the Edit or Reassign route have any guard preventing action on a row that is already
+   lifecycle_status='superseded' or 'voided'? Test it for real: try calling Edit on the row
+   that the test in #2 just superseded (using its now-stale id) and show the actual HTTP
+   response - does it 404, error, or silently succeed?
+
+5. Open the actual Lens Viewpoints page in a real browser session and confirm with a real
+   screenshot-equivalent description: does the "(Rev N)" text actually render next to the
+   row from test #2? Does clicking the history icon actually show the chain with real data,
+   or is the button present but non-functional?
+
+6. Generate a real PDF report right now (not a description of the feature) and confirm: does
+   the ID-format toggle actually change what's printed, does "(Rev N)" actually appear in the
+   printed PDF for the test row, and does the Revision History appendix actually contain real
+   entries - or is the modal UI present but the PDF output unchanged?
+
+Print only real, verified evidence for each of the six items. If something cannot be verified
+live, say so plainly rather than reporting it as working.
+</document>
