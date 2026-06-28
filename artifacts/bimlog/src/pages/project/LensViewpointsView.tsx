@@ -763,7 +763,11 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     {showLifecycleCol && (
                       <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                         {(() => {
+                          // Shared field-set contract: "active" is the unmarked default
+                          // state — only superseded/voided get a visible marker, matching
+                          // how the plugin should surface lifecycle in its own UI.
                           const ls = v.lifecycleStatus || "active";
+                          if (ls === "active") return <span style={{ color: "#9CA3AF" }}>—</span>;
                           const b = LIFECYCLE_BADGE[ls];
                           return b
                             ? <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: b.bg, color: b.text }}>{b.label}</span>
