@@ -177,6 +177,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     fReportType: "all",
     idFormat: "displayId",
     includeNonActive: false,
+    includeRevisionHistory: true,
   });
 
   // Pre-populate the report modal from the authenticated user's profile and load
@@ -571,6 +572,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           isExecutiveOnePager: form.isExecutiveOnePager,
           idFormat: form.idFormat,
           includeNonActive: form.includeNonActive,
+          includeRevisionHistory: form.includeRevisionHistory,
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
       });
@@ -1314,6 +1316,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               <input type="checkbox" checked={form.includeNonActive}
                 onChange={e => setForm(f => ({ ...f, includeNonActive: e.target.checked }))} />
               {t("Include superseded and voided revisions", "Incluir revisiones reemplazadas y anuladas")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.includeRevisionHistory}
+                onChange={e => setForm(f => ({ ...f, includeRevisionHistory: e.target.checked }))} />
+              {t("Include revision history appendix", "Incluir anexo de historial de revisiones")}
             </label>
 
             <label style={{ display: "block", marginTop: 14, fontSize: 13, color: "#374151" }}>

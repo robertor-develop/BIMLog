@@ -1304,6 +1304,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // By default the register shows only ACTIVE revisions; this opt-in includes
       // superseded and voided rows for a full audit trail.
       const includeNonActive = body.includeNonActive === true;
+      // The Revision History appendix can be omitted entirely (default: included).
+      const includeRevisionHistory = body.includeRevisionHistory !== false;
       const companyName: string = (body.companyName?.trim?.() || user?.companyName || "Company");
       const preparedByName: string = (body.preparedByName?.trim?.() || user?.fullName || "");
       const preparedByTitle: string = (body.preparedByTitle?.trim?.() || "");
@@ -1404,7 +1406,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeRevisionHistory, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -1647,7 +1649,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             cur = supMap.get(cur) ?? null;
           }
         }
-        const revEvents = scopeIds.size === 0 ? [] : await db.select().from(activityLogTable)
+        const revEvents = (!includeRevisionHistory || scopeIds.size === 0) ? [] : await db.select().from(activityLogTable)
           .where(and(
             eq(activityLogTable.projectId, projectId),
             eq(activityLogTable.entityType, "lens_viewpoint"),
