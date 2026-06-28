@@ -1,0 +1,41 @@
+This message is a goals-and-context request, not an implementation spec. Please read fully,
+assess honestly, and propose your own approach before building anything.
+
+CONTEXT: Tonight's earlier work already added real, dedicated database columns to
+lens_viewpoints for lifecycle tracking - revisionNumber, supersedesId, lifecycleStatus,
+issueGroupId. That data model is sound and is NOT being rebuilt. The problem is entirely in
+how it's DISPLAYED and CONTROLLED on the Lens Viewpoints page and in PDF/export - not in the
+data itself.
+
+THE REAL GOALS:
+
+1. Every lifecycle/chain attribute (Group membership, lifecycle status -
+   active/superseded/voided, Revision number, ID format) needs its OWN real column in the
+   on-screen table - not text badges squeezed inline next to the ID. The current inline-badge
+   approach (e.g. "Fire Protection-B1-4-R1  [Superseded]  Group") is hard to scan and was
+   never asked for in this form.
+
+2. The user needs independent control over what's visible - separate toggles for: show/hide
+   Group indicator, show/hide lifecycle status, show/hide Revision number, choice of ID format
+   (raw displayId vs trade-floor-seq code). Each toggle independent of the others - a person
+   should be able to see ONLY active items with NO group/revision noise if that's what they
+   want, or see everything, their choice.
+
+3. PDF/export should respect the same filtering logic as the on-screen view by default. A
+   voided viewpoint cluttering a clean coordination report makes no sense as a default - the
+   report a person prints should reflect what they're actually choosing to see, the same way
+   the live table does.
+
+BEFORE BUILDING ANYTHING - please honestly check and report back:
+- Does the PDF/export generator currently respect ANY include/exclude-voided-or-superseded
+  toggle, or does it currently print everything regardless of on-screen filters? Check the
+  real current code, don't assume either answer.
+- Is there already partial column/toggle infrastructure in LensViewpointsView.tsx we should
+  extend, or does this need new UI structure from scratch?
+- Given what you find, propose your own approach for how to restructure the table into real
+  columns and add the toggles - we are not specifying the implementation, just the goals
+  above. Use your own judgment on the cleanest way to do this given the existing component
+  structure.
+
+Please report your honest findings on the two bullet points above FIRST, before writing any
+code, so we can confirm the plan together before you build.
