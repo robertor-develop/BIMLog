@@ -1265,6 +1265,26 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/reports",
   }
 );
 
+// Delete a single Lens report-history record (admin-write). Literal sub-path; the extra
+// "/reports/" segment keeps it clear of the "lens-viewpoints/:id" delete route.
+router.delete("/projects/:projectId/clash-reports/lens-viewpoints/reports/:reportRecordId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportRecordId = Number(req.params.reportRecordId);
+    try {
+      const [deleted] = await db.delete(lensViewpointReportsTable)
+        .where(and(eq(lensViewpointReportsTable.id, reportRecordId), eq(lensViewpointReportsTable.projectId, projectId)))
+        .returning({ id: lensViewpointReportsTable.id });
+      if (!deleted) { res.status(404).json({ error: "not_found", message: "Report not found" }); return; }
+      res.json({ success: true, id: deleted.id });
+    } catch (err) {
+      res.status(500).json({ error: "lens_report_delete_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // ── LENS VIEWPOINTS — generate professional PDF report ─────────────────────────
 // Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
 // captured by the :reportId path parameter. Accepts modal data as JSON, writes a

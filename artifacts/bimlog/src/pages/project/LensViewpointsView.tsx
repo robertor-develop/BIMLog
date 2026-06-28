@@ -41,6 +41,23 @@ function viewpointCode(v: LensViewpoint): string {
   return `${abbr}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
 }
 
+// Short group token matching the plugin's GroupToken (first 4 hex chars of the group id),
+// so the same group reads identically on the plugin name and this column.
+function groupToken(id?: string | null): string {
+  if (!id) return "";
+  const clean = id.replace(/-/g, "");
+  return (clean.length >= 4 ? clean.slice(0, 4) : clean).toUpperCase();
+}
+
+// Plain-language tooltips so the column headers explain themselves on hover.
+const HEADER_TIPS: Record<string, string> = {
+  "ID": "Viewpoint identifier. Toggle the format in the View bar (Display ID or Trade-Floor-Seq).",
+  "Group": "Viewpoints sharing one physical location/issue across trades. Same token = same group.",
+  "Lifecycle": "Position in the revision chain: Active (current), Superseded (replaced by an edit/reassign), or Voided (cancelled).",
+  "Rev": "Revision number — increments each time the viewpoint is edited or reassigned.",
+  "Status": "Workflow status: Open, Follow Up, Waiting Design, Approved, Resolved.",
+};
+
 const LIFECYCLE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
   active: { bg: "#D1FAE5", text: "#059669", label: "Active" },
   superseded: { bg: "#FEF3C7", text: "#92400E", label: "Superseded" },
@@ -334,6 +351,26 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       }
     } catch (e) {
       setViewpoints(prev);
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const deleteReport = async (id: number) => {
+    if (!window.confirm(t("Delete this report record? This cannot be undone.", "¿Eliminar este reporte del historial? Esto no se puede deshacer."))) return;
+    const prev = history;
+    setHistory(p => p.filter(rp => rp.id !== id));
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      if (!r.ok) {
+        setHistory(prev);
+        const d = await r.json().catch(() => ({}));
+        setError(d.message || d.error || "Failed to delete report");
+      }
+    } catch (e) {
+      setHistory(prev);
       setError(e instanceof Error ? e.message : String(e));
     }
   };
@@ -737,7 +774,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   ...(showRevisionCol ? ["Rev"] : []),
                   "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
                 ].map(h => (
-                  <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} title={HEADER_TIPS[h] || undefined} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", cursor: HEADER_TIPS[h] ? "help" : undefined }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -759,7 +796,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                             title={t("Show related viewpoints in this issue group", "Mostrar vistas relacionadas de este grupo")}
                             style={{ fontSize: 10, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
                           >
-                            <Layers size={11} /> {t("Group", "Grupo")}
+                            <Layers size={11} /> G:{groupToken(v.issueGroupId)}
                           </button>
                         ) : <span style={{ color: "#9CA3AF" }}>—</span>}
                       </td>
@@ -998,6 +1035,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   ].map(h => (
                     <th key={h} style={{ padding: "8px 12px", fontSize: 10, fontWeight: 700, color: "#374151", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
+                  <th style={{ padding: "8px 12px" }} />
                 </tr>
               </thead>
               <tbody>
@@ -1013,6 +1051,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                       <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: hc }}>{hs === null ? "—" : hs}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "—"}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{rp.isExecutiveOnePager ? t("Executive", "Ejecutivo") : t("Full", "Completo")}</td>
+                      <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
+                        <button className="btn btn-sm btn-outline" onClick={() => deleteReport(rp.id)}
+                          title={t("Delete this report record", "Eliminar este reporte")}
+                          style={{ fontSize: 11, padding: "4px 8px", color: "#DC2626", borderColor: "#FECACA", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                          <Trash2 size={12} /> {t("Delete", "Eliminar")}
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
