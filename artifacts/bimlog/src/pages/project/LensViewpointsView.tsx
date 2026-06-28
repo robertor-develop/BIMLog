@@ -31,12 +31,14 @@ interface LensViewpoint {
   revisionNumber?: number | null;
 }
 
-// Platform display code: "{trade}-{floor}-{seq}" normally, with "-R{n}" when a
-// correction occurred, falling back to the legacy display_id when no seq exists.
+// Platform display code matches the plugin's short code exactly: "{2-letter trade}-{seq:000}"
+// e.g. "FI-001". Floor and revision have their own columns, so they are not crammed into this
+// code. Falls back to the legacy display_id when no seq exists.
 function viewpointCode(v: LensViewpoint): string {
   if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "—";
-  const base = `${v.trade || "—"}-${v.floor || "—"}-${v.tradeFloorSeq}`;
-  return v.tradeFloorSeqCorrection != null ? `${base}-R${v.tradeFloorSeqCorrection}` : base;
+  const t = v.trade || "";
+  const abbr = ((t.length > 2 ? t.slice(0, 2) : t).toUpperCase()) || "??";
+  return `${abbr}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
 }
 
 const LIFECYCLE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
