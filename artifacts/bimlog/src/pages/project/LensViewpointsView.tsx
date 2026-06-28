@@ -40,6 +40,7 @@ function viewpointCode(v: LensViewpoint): string {
 }
 
 const LIFECYCLE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
+  active: { bg: "#D1FAE5", text: "#059669", label: "Active" },
   superseded: { bg: "#FEF3C7", text: "#92400E", label: "Superseded" },
   voided: { bg: "#F3F4F6", text: "#6B7280", label: "Voided" },
 };
@@ -118,6 +119,22 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fFloor, setFFloor] = useState("all");
   const [fReportType, setFReportType] = useState("all");
   const [fStatus, setFStatus] = useState("all");
+  // Per-user, per-project view options: which lifecycle/chain columns are shown,
+  // how the ID renders, and which lifecycle states are listed. Persisted to
+  // localStorage so the chosen view sticks between visits.
+  const VIEW_OPTS_KEY = `bimlog.lensViewOpts.${projectId}`;
+  const VIEW_OPTS_DEFAULTS = { showGroupCol: true, showLifecycleCol: true, showRevisionCol: true, idFormatView: "displayId", lifecycleScope: "active" };
+  const [viewOpts, setViewOpts] = useState<{ showGroupCol: boolean; showLifecycleCol: boolean; showRevisionCol: boolean; idFormatView: string; lifecycleScope: string }>(() => {
+    try {
+      const raw = localStorage.getItem(VIEW_OPTS_KEY);
+      if (raw) return { ...VIEW_OPTS_DEFAULTS, ...JSON.parse(raw) };
+    } catch { /* malformed/blocked storage — fall back to defaults */ }
+    return VIEW_OPTS_DEFAULTS;
+  });
+  useEffect(() => {
+    try { localStorage.setItem(VIEW_OPTS_KEY, JSON.stringify(viewOpts)); } catch { /* storage blocked — view simply won't persist */ }
+  }, [VIEW_OPTS_KEY, viewOpts]);
+  const { showGroupCol, showLifecycleCol, showRevisionCol, idFormatView, lifecycleScope } = viewOpts;
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [groupOpen, setGroupOpen] = useState<Record<number, boolean>>({});
   const [historyOpen, setHistoryOpen] = useState<Record<number, boolean>>({});
@@ -155,6 +172,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     fStatus: "all",
     fFloor: "all",
     fTrade: "all",
+    fReportType: "all",
     idFormat: "displayId",
     includeNonActive: false,
   });
@@ -163,7 +181,10 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   // the project directory for the "Submitted To" dropdown. Only fills fields the
   // user has not already typed into, so manual edits are never clobbered.
   const openReportModal = async () => {
-    setForm(f => ({ ...f, fTrade, fStatus, fFloor }));
+    // Seed the export from the live on-screen view so the PDF defaults to exactly
+    // what the user is currently looking at (row filters + ID format + lifecycle
+    // scope). The PDF keeps its fixed register columns by design.
+    setForm(f => ({ ...f, fTrade, fStatus, fFloor, fReportType, idFormat: idFormatView, includeNonActive: lifecycleScope !== "active" }));
     setReportModalOpen(true);
     try {
       const [meRes, memRes] = await Promise.all([
@@ -464,7 +485,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     .filter(v => fTrade === "all" || v.trade === fTrade)
     .filter(v => fFloor === "all" || v.floor === fFloor)
     .filter(v => fReportType === "all" || v.reportType === fReportType)
-    .filter(v => fStatus === "all" || v.status === fStatus);
+    .filter(v => fStatus === "all" || v.status === fStatus)
+    .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
+
+  // Column count for the full-width expansion rows — keep in lockstep with the
+  // dynamic columns rendered in the table header/body below (9 base + toggles).
+  const colCount = 9 + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
 
   const lastSynced = viewpoints.reduce<string | null>((max, v) => {
     if (!v.capturedAt) return max;
@@ -473,14 +499,20 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   }, null);
 
   const exportExcel = () => {
-    const header = ["Date", "FileName", "Floor", "Trade", "ReportType", "Priority", "Note", "OpenItems", "Status"];
-    const data = viewpoints.map(v => [
+    // Mirror the live on-screen view: `filtered` already applies the trade/floor/
+    // report-type/status filters AND the lifecycle scope, so the export reflects
+    // exactly what the user is looking at rather than dumping every row.
+    const header = ["Date", "Code", "FileName", "Floor", "Trade", "ReportType", "Priority", "Lifecycle", "Rev", "Note", "OpenItems", "Status"];
+    const data = filtered.map(v => [
       fmtCaptured(v.capturedAt),
+      viewpointCode(v),
       v.viewpointId,
       v.floor || "",
       v.trade || "",
       v.reportType || "",
       v.priority ? `P${v.priority}` : "",
+      LIFECYCLE_BADGE[v.lifecycleStatus || "active"]?.label || v.lifecycleStatus || "Active",
+      (v.revisionNumber ?? 1) > 1 ? `R${v.revisionNumber}` : "",
       v.note || "",
       v.openItems || "",
       lensStatusLabel(v.status),
@@ -493,7 +525,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       ...data,
     ]);
     ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
-    ws["!cols"] = header.map((_, i) => ({ wch: i === 6 ? 40 : i === 1 ? 24 : 14 }));
+    ws["!cols"] = header.map((_, i) => ({ wch: i === 9 ? 40 : i === 2 ? 24 : 14 }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Lens Viewpoints");
     XLSX.writeFile(wb, `Lens-Viewpoints-${projectId}.xlsx`);
@@ -537,7 +569,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           isExecutiveOnePager: form.isExecutiveOnePager,
           idFormat: form.idFormat,
           includeNonActive: form.includeNonActive,
-          filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade },
+          filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
       });
       if (!r.ok) {
@@ -619,6 +651,36 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </select>
       </div>
 
+      <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap", alignItems: "center", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 12px" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase" }}>{t("View", "Vista")}</span>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151" }}>
+          {t("Show", "Mostrar")}
+          <select value={lifecycleScope} onChange={e => setViewOpts(o => ({ ...o, lifecycleScope: e.target.value }))} style={selStyle}>
+            <option value="active">{t("Active only", "Solo activas")}</option>
+            <option value="all">{t("All revisions", "Todas las revisiones")}</option>
+          </select>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151" }}>
+          {t("ID", "ID")}
+          <select value={idFormatView} onChange={e => setViewOpts(o => ({ ...o, idFormatView: e.target.value }))} style={selStyle}>
+            <option value="displayId">{t("Display ID", "ID de visualización")}</option>
+            <option value="code">{t("Trade-Floor-Seq", "Disciplina-Piso-Sec")}</option>
+          </select>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
+          <input type="checkbox" checked={showGroupCol} onChange={e => setViewOpts(o => ({ ...o, showGroupCol: e.target.checked }))} />
+          {t("Group", "Grupo")}
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
+          <input type="checkbox" checked={showLifecycleCol} onChange={e => setViewOpts(o => ({ ...o, showLifecycleCol: e.target.checked }))} />
+          {t("Lifecycle", "Ciclo de vida")}
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
+          <input type="checkbox" checked={showRevisionCol} onChange={e => setViewOpts(o => ({ ...o, showRevisionCol: e.target.checked }))} />
+          {t("Revision", "Revisión")}
+        </label>
+      </div>
+
       {updatesAvailable && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
           background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 14px", marginBottom: 14 }}>
@@ -664,7 +726,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F" }}>
-                {["ID", "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions"].map(h => (
+                {[
+                  "ID",
+                  ...(showGroupCol ? ["Group"] : []),
+                  ...(showLifecycleCol ? ["Lifecycle"] : []),
+                  ...(showRevisionCol ? ["Rev"] : []),
+                  "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
+                ].map(h => (
                   <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -675,29 +743,39 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   <tr style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                       <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
-                        {viewpointCode(v)}
+                        {idFormatView === "code" ? viewpointCode(v) : (v.displayId || v.viewpointId || "—")}
                       </span>
-                      {(v.revisionNumber ?? 1) > 1 && (
-                        <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, color: "#1E3A5F" }}>
-                          {t("Rev", "Rev")} {v.revisionNumber}
-                        </span>
-                      )}
-                      {v.lifecycleStatus && LIFECYCLE_BADGE[v.lifecycleStatus] && (
-                        <span style={{ marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: LIFECYCLE_BADGE[v.lifecycleStatus].bg, color: LIFECYCLE_BADGE[v.lifecycleStatus].text }}>
-                          {LIFECYCLE_BADGE[v.lifecycleStatus].label}
-                        </span>
-                      )}
-                      {v.issueGroupId && (
-                        <button
-                          className="btn btn-sm btn-outline"
-                          onClick={() => setGroupOpen(p => ({ ...p, [v.id]: !p[v.id] }))}
-                          title={t("Show related viewpoints in this issue group", "Mostrar vistas relacionadas de este grupo")}
-                          style={{ marginLeft: 6, fontSize: 10, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
-                        >
-                          <Layers size={11} /> {t("Group", "Grupo")}
-                        </button>
-                      )}
                     </td>
+                    {showGroupCol && (
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                        {v.issueGroupId ? (
+                          <button
+                            className="btn btn-sm btn-outline"
+                            onClick={() => setGroupOpen(p => ({ ...p, [v.id]: !p[v.id] }))}
+                            title={t("Show related viewpoints in this issue group", "Mostrar vistas relacionadas de este grupo")}
+                            style={{ fontSize: 10, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}
+                          >
+                            <Layers size={11} /> {t("Group", "Grupo")}
+                          </button>
+                        ) : <span style={{ color: "#9CA3AF" }}>—</span>}
+                      </td>
+                    )}
+                    {showLifecycleCol && (
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                        {(() => {
+                          const ls = v.lifecycleStatus || "active";
+                          const b = LIFECYCLE_BADGE[ls];
+                          return b
+                            ? <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: b.bg, color: b.text }}>{b.label}</span>
+                            : <span style={{ fontSize: 12, color: "#6B7280" }}>{ls}</span>;
+                        })()}
+                      </td>
+                    )}
+                    {showRevisionCol && (
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap", fontSize: 12, fontWeight: 700, color: "#1E3A5F" }}>
+                        {(v.revisionNumber ?? 1) > 1 ? `${t("Rev", "Rev")} ${v.revisionNumber}` : <span style={{ fontWeight: 400, color: "#9CA3AF" }}>—</span>}
+                      </td>
+                    )}
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><LensPBadge p={v.priority} /></td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.trade || "—"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.reportType || "—"}</td>
@@ -757,7 +835,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   </tr>
                   {groupOpen[v.id] && v.issueGroupId && (
                     <tr style={{ background: "#F8FAFC", borderTop: "1px solid #F3F4F6" }}>
-                      <td colSpan={9} style={{ padding: "8px 16px 14px" }}>
+                      <td colSpan={colCount} style={{ padding: "8px 16px 14px" }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F", marginBottom: 6 }}>
                           {t("Issue group", "Grupo de incidencia")}: {v.issueGroupId}
                         </div>
@@ -792,14 +870,14 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   )}
                   {linksOpen[v.id] && (
                     <tr style={{ background: "#FAFAFA", borderTop: "1px solid #F3F4F6" }}>
-                      <td colSpan={9} style={{ padding: "4px 16px 14px" }}>
+                      <td colSpan={colCount} style={{ padding: "4px 16px 14px" }}>
                         <LinkedItemsPanel projectId={projectId} entityType="lens_viewpoint" entityId={v.id} canWrite={canWrite} />
                       </td>
                     </tr>
                   )}
                   {historyOpen[v.id] && (
                     <tr style={{ background: "#F8FAFC", borderTop: "1px solid #F3F4F6" }}>
-                      <td colSpan={9} style={{ padding: "8px 16px 14px" }}>
+                      <td colSpan={colCount} style={{ padding: "8px 16px 14px" }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F", marginBottom: 6 }}>
                           {t("Revision history", "Historial de revisiones")}
                         </div>
@@ -1202,6 +1280,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   <select value={form.fTrade} onChange={e => setForm(f => ({ ...f, fTrade: e.target.value }))} style={inpStyle}>
                     <option value="all">{t("All", "Todas")}</option>
                     {trades.map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                </label>
+                <label style={lblStyle}>
+                  {t("Report Type", "Tipo de Reporte")}
+                  <select value={form.fReportType} onChange={e => setForm(f => ({ ...f, fReportType: e.target.value }))} style={inpStyle}>
+                    <option value="all">{t("All", "Todos")}</option>
+                    {reportTypes.map(x => <option key={x} value={x}>{x}</option>)}
                   </select>
                 </label>
               </div>

@@ -1293,6 +1293,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         status: typeof body.filters?.status === "string" ? body.filters.status : "all",
         floor: typeof body.filters?.floor === "string" ? body.filters.floor : "all",
         trade: typeof body.filters?.trade === "string" ? body.filters.trade : "all",
+        reportType: typeof body.filters?.reportType === "string" ? body.filters.reportType : "all",
       };
       const watermarkType: string = ["draft", "issued", "superseded"].includes(body.watermarkType) ? body.watermarkType : "draft";
       const isOnePager = body.isExecutiveOnePager === true;
@@ -1325,6 +1326,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       if (filters.trade !== "all") vps = vps.filter(v => v.trade === filters.trade);
       if (filters.floor !== "all") vps = vps.filter(v => v.floor === filters.floor);
       if (filters.status !== "all") vps = vps.filter(v => v.status === filters.status);
+      if (filters.reportType !== "all") vps = vps.filter(v => v.reportType === filters.reportType);
       if (filters.priority !== "all") vps = vps.filter(v => String(v.priority ?? "") === String(filters.priority));
       // Lifecycle scope: active-only unless the user opted to include the full
       // superseded/voided history.

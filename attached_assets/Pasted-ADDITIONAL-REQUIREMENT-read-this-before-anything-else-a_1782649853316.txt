@@ -1,0 +1,34 @@
+ADDITIONAL REQUIREMENT - read this before anything else, and before responding to the
+earlier message in this thread.
+
+The platform's display and the Navisworks plugin's display must show the SAME underlying
+data, structured the SAME way - not different layouts inventing their own conventions. This
+is one shared naming/data contract, not two separate designs that happen to cover similar
+ground. The plugin and the platform are two views onto the exact same lifecycle/chain data
+(revisionNumber, supersedesId, lifecycleStatus, issueGroupId) and must present that data
+using the same field set and the same meaning, even though the plugin renders inside
+Navisworks viewpoint names/panels and the platform renders in a web table.
+
+THE SHARED FIELD SET (both sides must expose exactly these, no more, no fewer):
+- ID (in whichever format the user has chosen - raw displayId or trade-floor-seq code)
+- Trade
+- Revision (Rev N, only shown when > 1)
+- Lifecycle status (only shown when NOT active - active is the unmarked default state)
+- Floor
+- Group membership (only shown when actually part of a group)
+- Full detail (who/why/when/what-it-superseded) - available on demand, not crammed into the
+  headline/title on either side
+
+The plugin currently writes long run-on sentences into Navisworks viewpoint names for
+Edit/Void/Reassign results (e.g. "Reassigned from FI-007 (R2), BIMLog 2026-06-28, by
+[email], reason: [long text]"). That is also wrong, for the same reason the platform's
+inline-badge-cramming is wrong - it's not respecting the same clean field separation. Both
+sides need fixing to the same standard, not just the platform.
+
+The user controls visibility independently on the platform (toggles), and on the plugin side
+gets the same clean structure within its own UI constraints (the Manage panel already does
+this correctly with separate Trade/Reason/Reassign controls - that panel is the right model;
+the Navisworks tree NAME text and the platform's inline badges are both the wrong model).
+
+Please factor this into your proposed approach - we want one consistent design language
+across both surfaces, not two different inventions that happen to show similar information.
