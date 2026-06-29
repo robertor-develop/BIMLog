@@ -28,6 +28,7 @@ interface LensViewpoint {
   issueGroupId?: string | null;
   lifecycleStatus?: string | null;
   supersedesId?: number | null;
+  supersedesCode?: string | null;
   revisionNumber?: number | null;
 }
 
@@ -786,6 +787,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                       <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
                         {idFormatView === "code" ? viewpointCode(v) : (v.displayId || v.viewpointId || "—")}
                       </span>
+                      {v.supersedesCode && (
+                        <div style={{ marginTop: 3, fontSize: 10, color: "#6B7280", whiteSpace: "nowrap" }}
+                          title={t("This viewpoint supersedes (replaced) an earlier one", "Esta vista reemplaza a una anterior")}>
+                          ← {t("supersedes", "reemplaza a")} {v.supersedesCode}
+                        </div>
+                      )}
                     </td>
                     {showGroupCol && (
                       <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>

@@ -743,6 +743,15 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const rows = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId))
         .orderBy(desc(lensViewpointsTable.capturedAt));
+      // Resolve each row's predecessor (supersedesId) to its short code so the table can
+      // show "supersedes FI-001" without a second round-trip.
+      const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null }): string | null => {
+        if (row.tradeFloorSeq == null) return null;
+        const tr = row.trade || "";
+        const abbr = (tr.length > 2 ? tr.slice(0, 2) : tr).toUpperCase() || "??";
+        return `${abbr}-${String(row.tradeFloorSeq).padStart(3, "0")}`;
+      };
+      const byId = new Map(rows.map(r => [r.id, r]));
       const viewpoints = rows.map(r => ({
         id: r.id,
         viewpointId: r.viewpointId,
@@ -762,6 +771,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         issueGroupId: r.issueGroupId,
         lifecycleStatus: r.lifecycleStatus,
         supersedesId: r.supersedesId,
+        supersedesCode: r.supersedesId != null && byId.has(r.supersedesId) ? codeOf(byId.get(r.supersedesId)!) : null,
         revisionNumber: r.revisionNumber,
       }));
       res.json({ success: true, viewpoints });
