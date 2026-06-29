@@ -1208,6 +1208,13 @@ router.delete("/projects/:projectId/clash-reports/lens-viewpoints/:id",
         res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
         return;
       }
+      // Clear this viewpoint's history so a deleted viewpoint leaves no orphaned revision
+      // events behind (they would otherwise resurface in future reports / via id reuse).
+      await db.delete(activityLogTable).where(and(
+        eq(activityLogTable.projectId, projectId),
+        eq(activityLogTable.entityType, "lens_viewpoint"),
+        eq(activityLogTable.entityId, id),
+      ));
       console.log(`[lens-delete] project=${projectId} removed viewpoint id=${id}`);
       res.json({ success: true, id });
     } catch (err) {
@@ -1494,8 +1501,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // "(Rev N)" suffix once a viewpoint has been revised beyond its first version.
       const codeOf = (v: typeof vps[number]) => {
         if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "—";
-        const base = `${v.trade || "—"}-${v.floor || "—"}-${v.tradeFloorSeq}`;
-        return v.tradeFloorSeqCorrection != null ? `${base}-R${v.tradeFloorSeqCorrection}` : base;
+        const tr = v.trade || "";
+        const abbr = (tr.length > 2 ? tr.slice(0, 2) : tr).toUpperCase() || "??";
+        return `${abbr}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
       };
       const idText = (v: typeof vps[number]) => {
         const base = idFormat === "code" ? codeOf(v) : (v.displayId || v.viewpointId || "—");
