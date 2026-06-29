@@ -1551,7 +1551,12 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.fontSize(24).font("Helvetica-Bold").fillColor("#111827").text(String(card.value), x, cardY + 8, { width: pcW, align: "center" });
         doc.fontSize(7).font("Helvetica-Bold").fillColor("#6B7280").text(card.label, x, cardY + 40, { width: pcW, align: "center" });
       });
-      doc.y = cardY + 70;
+      // Lifecycle breakdown line — counts the rows actually included in this report.
+      const lcCounts: Record<string, number> = { active: 0, superseded: 0, voided: 0 };
+      vps.forEach(v => { const s = v.lifecycleStatus ?? "active"; if (lcCounts[s] !== undefined) lcCounts[s]++; });
+      doc.fontSize(8).font("Helvetica").fillColor("#6B7280")
+        .text(`Lifecycle:  Active ${lcCounts.active}   |   Superseded ${lcCounts.superseded}   |   Voided ${lcCounts.voided}`, M, cardY + 60, { width: CW });
+      doc.y = cardY + 78;
 
       // Breakdown columns: by trade / floor / status
       const tally = (key: "trade" | "floor" | "status") => {
