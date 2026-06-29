@@ -193,7 +193,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     fFloor: "all",
     fTrade: "all",
     fReportType: "all",
-    idFormat: "displayId",
+    idFormat: "code",
     includeNonActive: false,
     includeRevisionHistory: true,
   });

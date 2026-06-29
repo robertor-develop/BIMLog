@@ -1362,6 +1362,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // Pull all viewpoints, then apply the modal filters.
       let vps = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId));
+      // Void-records are plugin-side historical artifacts; the void itself is already
+      // represented by the original viewpoint's "voided" lifecycle, so a VOID-RECORD is never
+      // an open coordination item and must not appear in the report register or its tallies.
+      vps = vps.filter(v => v.reportType !== "VOID-RECORD");
       if (filters.trade !== "all") vps = vps.filter(v => v.trade === filters.trade);
       if (filters.floor !== "all") vps = vps.filter(v => v.floor === filters.floor);
       if (filters.status !== "all") vps = vps.filter(v => v.status === filters.status);
