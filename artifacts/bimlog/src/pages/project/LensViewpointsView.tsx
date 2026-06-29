@@ -529,6 +529,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     .filter(v => fStatus === "all" || v.status === fStatus)
     .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
 
+  // Summary counts respect the trade/floor/report-type filters but ignore the lifecycle
+  // scope so the strip can show the full Active/Superseded/Voided breakdown at once.
+  const statsBase = viewpoints
+    .filter(v => fTrade === "all" || v.trade === fTrade)
+    .filter(v => fFloor === "all" || v.floor === fFloor)
+    .filter(v => fReportType === "all" || v.reportType === fReportType);
+  const lc = (s: string) => statsBase.filter(v => (v.lifecycleStatus ?? "active") === s).length;
+  const activeStats = statsBase.filter(v => (v.lifecycleStatus ?? "active") === "active");
+  const st = (s: string) => activeStats.filter(v => v.status === s).length;
+
   // Column count for the full-width expansion rows — keep in lockstep with the
   // dynamic columns rendered in the table header/body below (9 base + toggles).
   const colCount = 9 + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
@@ -740,6 +750,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       {error && (
         <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
           {error}
+        </div>
+      )}
+
+      {!loading && viewpoints.length > 0 && (
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center", marginBottom: 14, padding: "8px 14px", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12, color: "#374151" }}>
+          <span style={{ fontWeight: 700, color: "#1E3A5F" }}>{activeStats.length} {t("active", "activas")}</span>
+          <span style={{ color: "#6B7280" }}>
+            {t("Open", "Abiertas")} {st("open")} · {t("Follow Up", "Seguimiento")} {st("follow_up")} · {t("Waiting", "Esperando")} {st("waiting_design")} · {t("Approved", "Aprobadas")} {st("approved")} · {t("Resolved", "Resueltas")} {st("resolved")}
+          </span>
+          <span style={{ marginLeft: "auto", color: "#92400E" }}>{t("Superseded", "Reemplazadas")} {lc("superseded")}</span>
+          <span style={{ color: "#6B7280" }}>{t("Voided", "Anuladas")} {lc("voided")}</span>
         </div>
       )}
 
