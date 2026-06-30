@@ -608,6 +608,13 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         // Optional sequence number the plugin optimistically assigned. Used only to
         // decide whether a correction ("R" number) is needed; absent today.
         const claimedSeq = v?.tradeFloorSeq != null && !Number.isNaN(Number(v.tradeFloorSeq)) ? Number(v.tradeFloorSeq) : null;
+        // Test-reset rehydration: if the platform was wiped but Navisworks still has
+        // BIMLog metadata, replay the local lifecycle/revision facts instead of
+        // flattening those rows back to ordinary active R1 viewpoints.
+        const localLifecycleRaw = norm(v?.localLifecycle);
+        const replayLifecycle = localLifecycleRaw === "superseded" || localLifecycleRaw === "voided" ? localLifecycleRaw : "active";
+        const replayRevision = v?.revisionNumber != null && !Number.isNaN(Number(v.revisionNumber)) ? Math.max(1, Number(v.revisionNumber)) : 1;
+        const localSupersedesDisplayId = norm(v?.localSupersedesId);
         // Atomic dedup: INSERT ... ON CONFLICT DO NOTHING on navisworks_guid when
         // provided (else viewpoint_id). A returned row means we created it; an empty
         // result means it already existed (incl. a concurrent insert), so we fetch
@@ -629,7 +636,9 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         // duplicate row (the id=24 pending-action incident). Refuse to create a second
         // active row for an existing display_id; the partial unique index
         // lens_viewpoints_project_display_active_unique is the DB-level backstop.
-        if (displayId) {
+        // Superseded/voided replay rows are allowed through because the partial
+        // uniqueness contract only protects active rows.
+        if (displayId && replayLifecycle === "active") {
           const [displayClash] = await db.select().from(lensViewpointsTable)
             .where(and(
               eq(lensViewpointsTable.projectId, projectId),
@@ -653,6 +662,14 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           // leave a persisted row with a null sequence that the retry path (which
           // returns the existing row) could never repair.
           const txResult = await db.transaction(async (tx) => {
+            let replaySupersedesId: number | null = null;
+            if (localSupersedesDisplayId) {
+              const [superseded] = await tx.select({ id: lensViewpointsTable.id })
+                .from(lensViewpointsTable)
+                .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.displayId, localSupersedesDisplayId)))
+                .limit(1);
+              replaySupersedesId = superseded?.id ?? null;
+            }
             const insertedRows = await tx.insert(lensViewpointsTable).values({
               projectId,
               viewpointId,
@@ -667,6 +684,9 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
               status: "open",
               issueGroupId,
+              lifecycleStatus: replayLifecycle,
+              supersedesId: replaySupersedesId,
+              revisionNumber: replayRevision,
               syncedAt: now,
               // Part 3: the partial unique indexes only cover active rows, so the
               // ON CONFLICT arbiter must carry the matching predicate or Postgres
