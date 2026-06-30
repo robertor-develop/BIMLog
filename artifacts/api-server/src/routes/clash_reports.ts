@@ -1302,6 +1302,40 @@ router.delete("/projects/:projectId/clash-reports/lens-viewpoints/reports/:repor
   }
 );
 
+// TESTING/ADMIN - DESTRUCTIVE: wipe ALL Lens data for a project (viewpoints, sequence
+// counters, report history, status events, and lens activity-log) for a true clean baseline.
+// Literal sub-path; registered before the report route and before the /:reportId catch-all.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    if (req.body?.confirm !== "RESET") {
+      res.status(400).json({ error: "confirmation_required", message: "Type RESET to confirm Lens test data reset." });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        const vpDel = await tx.delete(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId))
+          .returning({ id: lensViewpointsTable.id });
+        await tx.delete(lensViewpointSequenceCountersTable).where(eq(lensViewpointSequenceCountersTable.projectId, projectId));
+        await tx.delete(lensViewpointReportsTable).where(eq(lensViewpointReportsTable.projectId, projectId));
+        await tx.delete(lensViewpointEventsTable).where(eq(lensViewpointEventsTable.projectId, projectId));
+        await tx.delete(activityLogTable).where(and(
+          eq(activityLogTable.projectId, projectId),
+          eq(activityLogTable.entityType, "lens_viewpoint"),
+        ));
+        return { viewpointsDeleted: vpDel.length };
+      });
+      console.log(`[lens-reset] project=${projectId} wiped ${result.viewpointsDeleted} viewpoint(s) + counters + reports + events + lens activity`);
+      res.json({ success: true, ...result });
+    } catch (err) {
+      res.status(500).json({ error: "lens_reset_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // ── LENS VIEWPOINTS — generate professional PDF report ─────────────────────────
 // Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
 // captured by the :reportId path parameter. Accepts modal data as JSON, writes a

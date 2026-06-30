@@ -376,6 +376,31 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     }
   };
 
+  const resetTestData = async () => {
+    const c = window.prompt(t(
+      "DANGER - permanently delete ALL Lens viewpoints, sequence counters, report history and revision history for THIS project (testing reset). Type RESET to confirm.",
+      "PELIGRO - eliminar permanentemente TODAS las vistas Lens, contadores, historial de reportes e historial de revisiones de ESTE proyecto (reinicio de prueba). Escriba RESET para confirmar."
+    ));
+    if (c !== "RESET") return;
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reset-test-data`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "RESET" }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Reset failed"); return; }
+      setViewpoints([]);
+      setHistory([]);
+      await loadViewpoints();
+      await loadHistory();
+      const msg = t("Lens test data reset", "Datos de prueba Lens reiniciados");
+      setToast(msg);
+      setTimeout(() => setToast(cur => (cur === msg ? null : cur)), 2800);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   // Edit/Reassign/Void open a real modal (no native prompt/confirm). The modal
   // collects input, then submitAction drives a visible submitting -> success/error
   // state so a click never silently no-ops the way window.prompt could.
@@ -681,6 +706,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <button className="btn btn-sm btn-primary" onClick={openReportModal} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <FileDown size={14} /> {t("Export PDF", "Exportar PDF")}
           </button>
+          {canWrite && (
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={resetTestData}
+              title={t("Testing only: clears Lens viewpoints, counters, reports, and revision history for this project", "Solo pruebas: borra vistas Lens, contadores, reportes e historial de revisiones de este proyecto")}
+              style={{ display: "flex", alignItems: "center", gap: 6, color: "#B45309", borderColor: "#F59E0B" }}
+            >
+              <RefreshCw size={14} /> {t("Reset Test Data", "Reiniciar Pruebas")}
+            </button>
+          )}
         </div>
       </div>
 
