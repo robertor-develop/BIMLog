@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { LangToggle } from "@/components/layout/LangToggle";
+import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
 import { getMe } from "@workspace/api-client-react";
 import { Bell, Search, X, Building2 } from "lucide-react";
 
@@ -161,6 +163,11 @@ export function MasterSidebar() {
           <div className="sidebar-logo-name">BIMLog</div>
           <div className="sidebar-logo-by">by IgniteSmart</div>
         </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 10px 10px" }}>
+        <LangToggle />
+        <SmartGuideSidebarButton activeTab="dashboard" />
       </div>
 
       <div ref={searchRef} style={{ position: "relative", padding: "0 10px 10px" }}>

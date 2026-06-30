@@ -2,18 +2,20 @@ import { Globe } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 /**
- * Small EN/ES language toggle. Rendered globally so it is visible on
- * every page (including layouts that hide the marketing Navbar, such
- * as the Dashboard and project pages).
+ * Small EN/ES language toggle. In the sidebar it uses the same footprint
+ * as the Guide button; the floating style remains available for standalone pages.
  */
 export function LangToggle({ floating = false }: { floating?: boolean }) {
   const { language, setLanguage } = useI18n();
 
   const baseStyle: React.CSSProperties = {
+    width: floating ? undefined : "100%",
+    height: 30,
     display: "inline-flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: 5,
-    padding: "5px 10px",
+    padding: "0 10px",
     borderRadius: 6,
     fontSize: 11,
     fontWeight: 700,

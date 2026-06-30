@@ -25,7 +25,6 @@ import { ClashReportsTab } from "./project/ClashReportsTab";
 import { CoordinationHub } from "./project/CoordinationHub";
 import { ChevronLeft, HelpCircle, Link2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SmartGuide } from "@/components/layout/SmartGuide";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 
 export function ProjectDetail() {
@@ -208,8 +207,6 @@ export function ProjectDetail() {
           {tab === "clash-reports"  && <ClashReportsTab    projectId={projectId} canWrite={canWrite} />}
         </div>
       </div>
-
-      <SmartGuide activeTab={tab} />
     </div>
   );
 }

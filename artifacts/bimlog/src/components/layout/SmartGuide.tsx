@@ -207,3 +207,72 @@ export function SmartGuide({ activeTab }: { activeTab: string }) {
     </>
   );
 }
+
+
+export function SmartGuideSidebarButton({ activeTab }: { activeTab: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const tip = TIPS[activeTab] ?? DEFAULT_TIP;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open guide"
+        style={{
+          width: "100%",
+          height: 30,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          padding: "0 10px",
+          borderRadius: 7,
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: "pointer",
+          background: "rgba(255,255,255,0.06)",
+          color: "white",
+          border: "1px solid rgba(255,255,255,0.12)",
+        }}
+      >
+        <HelpCircle style={{ width: 13, height: 13 }} />
+        Guide
+      </button>
+
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-label={`Smart Guide - ${tip.title}`}
+          style={{
+            position: "fixed",
+            left: 228,
+            top: 88,
+            zIndex: 1000,
+            width: 320,
+            maxWidth: "calc(100vw - 260px)",
+            background: "white",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: 10,
+            boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.25)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ padding: "12px 14px", background: "#EFF6FF", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", gap: 8 }}>
+            <HelpCircle style={{ width: 16, height: 16, color: "#1D4ED8", flexShrink: 0 }} />
+            <div style={{ flex: 1, fontSize: 13, fontWeight: 800, color: "#1E3A8A" }}>{tip.title}</div>
+            <button type="button" onClick={() => setIsOpen(false)} aria-label="Close guide" style={{ padding: 4, border: "none", background: "transparent", cursor: "pointer", color: "#1E40AF", display: "flex", alignItems: "center", borderRadius: 4 }}>
+              <X style={{ width: 14, height: 14 }} />
+            </button>
+          </div>
+          <div style={{ padding: "12px 14px", fontSize: 12, color: "#374151", lineHeight: 1.55 }}>{tip.body}</div>
+          {tip.nextStep && (
+            <div style={{ padding: "10px 14px", fontSize: 11, color: "#1D4ED8", borderTop: "1px solid hsl(var(--border))", background: "#F8FAFC", lineHeight: 1.5 }}>
+              <span style={{ fontWeight: 700 }}>Next step:</span> {tip.nextStep}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

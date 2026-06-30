@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { LangToggle } from "@/components/layout/LangToggle";
+import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
 import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
@@ -148,6 +150,11 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             <div className="sidebar-logo-name">BIMLog</div>
             <div className="sidebar-logo-by">by IgniteSmart</div>
           </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 10px 10px" }}>
+          <LangToggle />
+          <SmartGuideSidebarButton activeTab={activeTab} />
         </div>
 
         <div style={{ padding: "10px 10px 0" }}>
