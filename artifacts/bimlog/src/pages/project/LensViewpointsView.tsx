@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -54,13 +54,13 @@ function groupToken(id?: string | null): string {
 const HEADER_TIPS: Record<string, string> = {
   "ID": "Viewpoint identifier. Toggle the format in the View bar (Display ID or Trade-Floor-Seq).",
   "Group": "Viewpoints sharing one physical location/issue across trades. Same token = same group.",
-  "Lifecycle": "Position in the revision chain: Active (current), Superseded (replaced by an edit/reassign), or Voided (cancelled).",
+  "State": "Record state in the revision chain: Current, Superseded (replaced by an edit/reassign), or Voided (cancelled).",
   "Rev": "Revision number — increments each time the viewpoint is edited or reassigned.",
   "Status": "Workflow status: Open, Follow Up, Waiting Design, Approved, Resolved.",
 };
 
 const LIFECYCLE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-  active: { bg: "#D1FAE5", text: "#059669", label: "Active" },
+  active: { bg: "#D1FAE5", text: "#059669", label: "Current" },
   superseded: { bg: "#FEF3C7", text: "#92400E", label: "Superseded" },
   voided: { bg: "#F3F4F6", text: "#6B7280", label: "Voided" },
 };
@@ -139,10 +139,11 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [fFloor, setFFloor] = useState("all");
   const [fReportType, setFReportType] = useState("all");
   const [fStatus, setFStatus] = useState("all");
-  // Per-user, per-project view options: which lifecycle/chain columns are shown,
-  // how the ID renders, and which lifecycle states are listed. Persisted to
+  // Per-user, per-project view options: which state/chain columns are shown,
+  // how the ID renders, and which record states are listed. Persisted to
   // localStorage so the chosen view sticks between visits.
   const VIEW_OPTS_KEY = `bimlog.lensViewOpts.${projectId}`;
+  const GUIDANCE_KEY = `bimlog.lensGuidance.${projectId}`;
   const VIEW_OPTS_DEFAULTS = { showGroupCol: true, showLifecycleCol: true, showRevisionCol: true, idFormatView: "displayId", lifecycleScope: "active" };
   const [viewOpts, setViewOpts] = useState<{ showGroupCol: boolean; showLifecycleCol: boolean; showRevisionCol: boolean; idFormatView: string; lifecycleScope: string }>(() => {
     try {
@@ -155,6 +156,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     try { localStorage.setItem(VIEW_OPTS_KEY, JSON.stringify(viewOpts)); } catch { /* storage blocked — view simply won't persist */ }
   }, [VIEW_OPTS_KEY, viewOpts]);
   const { showGroupCol, showLifecycleCol, showRevisionCol, idFormatView, lifecycleScope } = viewOpts;
+  const [showGuidance, setShowGuidance] = useState(() => {
+    try { return localStorage.getItem(GUIDANCE_KEY) !== "off"; } catch { return true; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(GUIDANCE_KEY, showGuidance ? "on" : "off"); } catch { /* storage blocked - guidance simply will not persist */ }
+  }, [GUIDANCE_KEY, showGuidance]);
   const [linksOpen, setLinksOpen] = useState<Record<number, boolean>>({});
   const [groupOpen, setGroupOpen] = useState<Record<number, boolean>>({});
   const [historyOpen, setHistoryOpen] = useState<Record<number, boolean>>({});
@@ -207,7 +214,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   // user has not already typed into, so manual edits are never clobbered.
   const openReportModal = async () => {
     // Seed the export from the live on-screen view so the PDF defaults to exactly
-    // what the user is currently looking at (row filters + ID format + lifecycle
+    // what the user is currently looking at (row filters + ID format + state
     // scope). The PDF keeps its fixed register columns by design.
     setForm(f => ({ ...f, fTrade, fStatus, fFloor, fReportType, idFormat: idFormatView, includeNonActive: lifecycleScope !== "active" }));
     setReportModalOpen(true);
@@ -580,9 +587,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   const exportExcel = () => {
     // Mirror the live on-screen view: `filtered` already applies the trade/floor/
-    // report-type/status filters AND the lifecycle scope, so the export reflects
+    // report-type/status filters AND the state scope, so the export reflects
     // exactly what the user is looking at rather than dumping every row.
-    const header = ["Date", "Code", "FileName", "Floor", "Trade", "ReportType", "Priority", "Lifecycle", "Rev", "Note", "OpenItems", "Status"];
+    const header = ["Date", "Code", "FileName", "Floor", "Trade", "ReportType", "Priority", "State", "Rev", "Note", "OpenItems", "Status"];
     const data = filtered.map(v => [
       fmtCaptured(v.capturedAt),
       viewpointCode(v),
@@ -591,7 +598,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       v.trade || "",
       v.reportType || "",
       v.priority ? `P${v.priority}` : "",
-      LIFECYCLE_BADGE[v.lifecycleStatus || "active"]?.label || v.lifecycleStatus || "Active",
+      LIFECYCLE_BADGE[v.lifecycleStatus || "active"]?.label || v.lifecycleStatus || "Current",
       (v.revisionNumber ?? 1) > 1 ? `R${v.revisionNumber}` : "",
       v.note || "",
       v.openItems || "",
@@ -725,7 +732,21 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             </button>
           )}
         </div>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, padding: "6px 10px" }} title={t("Turn workflow guidance on or off for this project", "Activar o desactivar la guia de uso para este proyecto")}>
+          <HelpCircle size={14} />
+          <input type="checkbox" checked={showGuidance} onChange={e => setShowGuidance(e.target.checked)} />
+          {t("Guidance", "Guia")}: {showGuidance ? t("On", "Activa") : t("Off", "Inactiva")}
+        </label>
       </div>
+
+
+      {showGuidance && (
+        <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 12px", marginBottom: 14, color: "#1E3A5F", fontSize: 12, lineHeight: 1.45 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>{t("Lens workflow guidance", "Guia de flujo Lens")}</div>
+          <div>{t("Sync new Navisworks viewpoints first. Then Edit, Reassign, or Void from the platform or plugin. Current rows stay in Active only; superseded and voided records appear when Show is set to All revisions.", "Sincroniza primero las vistas nuevas de Navisworks. Luego edita, reasigna o anula desde la plataforma o el plugin. Las filas vigentes aparecen en Solo activas; los registros reemplazados y anulados aparecen al cambiar Mostrar a Todas las revisiones.")}</div>
+          <div style={{ marginTop: 4 }}>{t("Use the Guidance checkbox in the header to turn these instructions on or off.", "Usa la casilla Guia en el encabezado para activar o desactivar estas instrucciones.")}</div>
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
         <select value={fTrade} onChange={e => setFTrade(e.target.value)} style={selStyle}>
@@ -768,7 +789,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
           <input type="checkbox" checked={showLifecycleCol} onChange={e => setViewOpts(o => ({ ...o, showLifecycleCol: e.target.checked }))} />
-          {t("Lifecycle", "Ciclo de vida")}
+          {t("State", "Estado")}
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
           <input type="checkbox" checked={showRevisionCol} onChange={e => setViewOpts(o => ({ ...o, showRevisionCol: e.target.checked }))} />
@@ -835,7 +856,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 {[
                   "ID",
                   ...(showGroupCol ? ["Group"] : []),
-                  ...(showLifecycleCol ? ["Lifecycle"] : []),
+                  ...(showLifecycleCol ? ["State"] : []),
                   ...(showRevisionCol ? ["Rev"] : []),
                   "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
                 ].map(h => (
@@ -877,7 +898,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                         {(() => {
                           // Shared field-set contract: "active" is the unmarked default
                           // state — only superseded/voided get a visible marker, matching
-                          // how the plugin should surface lifecycle in its own UI.
+                          // how the plugin should surface state in its own UI.
                           const ls = v.lifecycleStatus || "active";
                           if (ls === "active") return <span style={{ color: "#9CA3AF" }}>—</span>;
                           const b = LIFECYCLE_BADGE[ls];
@@ -963,7 +984,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                               <thead>
                                 <tr style={{ color: "#6B7280", textAlign: "left" }}>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Code", "Código")}</th>
-                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Lifecycle", "Ciclo")}</th>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("State", "Estado")}</th>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Trade", "Disciplina")}</th>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Note", "Nota")}</th>
                                 </tr>
@@ -972,7 +993,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                 {peers.map(o => (
                                   <tr key={o.id} style={{ borderTop: "1px solid #EEF2F7" }}>
                                     <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{viewpointCode(o)}</td>
-                                    <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{o.lifecycleStatus || "active"}</td>
+                                    <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{o.lifecycleStatus === "active" || !o.lifecycleStatus ? "Current" : o.lifecycleStatus}</td>
                                     <td style={{ padding: "4px 8px" }}>{o.trade || "—"}</td>
                                     <td style={{ padding: "4px 8px" }}>{o.note || "—"}</td>
                                   </tr>
@@ -1018,7 +1039,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                         <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Note", "Nota")}</th>
                                         <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Trade", "Disciplina")}</th>
                                         <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Floor", "Piso")}</th>
-                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Lifecycle", "Ciclo")}</th>
+                                        <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("State", "Estado")}</th>
                                         <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Updated", "Actualizado")}</th>
                                       </tr>
                                     </thead>
@@ -1029,7 +1050,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                           <td style={{ padding: "4px 8px" }}>{c.note || "—"}</td>
                                           <td style={{ padding: "4px 8px" }}>{c.trade || "—"}</td>
                                           <td style={{ padding: "4px 8px" }}>{c.floor || "—"}</td>
-                                          <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{c.lifecycleStatus || "active"}</td>
+                                          <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{c.lifecycleStatus === "active" || !c.lifecycleStatus ? "Current" : c.lifecycleStatus}</td>
                                           <td style={{ padding: "4px 8px", whiteSpace: "nowrap", color: "#6B7280" }}>{fmtCaptured(c.updatedAt || c.createdAt)}</td>
                                         </tr>
                                       ))}

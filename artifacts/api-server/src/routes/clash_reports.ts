@@ -1570,7 +1570,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // black text. No priority/status colors.
       const NAVY = PALETTE.NAVY;
       const statusLabel = (s: string) => statusText(s);
-      const lifecycleLabel = (s: string) => s === "superseded" ? "Superseded" : s === "voided" ? "Voided" : "Active";
+      const lifecycleLabel = (s: string) => s === "superseded" ? "Superseded" : s === "voided" ? "Voided" : "Current";
       const watermarkLabel = (s: string) => s === "issued" ? "Issued for Coordination" : s === "superseded" ? "Superseded" : s === "draft" ? "Draft" : "-";
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
       const fmtShort = (v: Date | string | null | undefined) => {
@@ -1651,7 +1651,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const lcCounts: Record<string, number> = { active: 0, superseded: 0, voided: 0 };
       vps.forEach(v => { const s = v.lifecycleStatus ?? "active"; if (lcCounts[s] !== undefined) lcCounts[s]++; });
       doc.fontSize(8).font("Helvetica").fillColor("#6B7280")
-        .text(`Lifecycle:  Active ${lcCounts.active}   |   Superseded ${lcCounts.superseded}   |   Voided ${lcCounts.voided}`, M, cardY + 60, { width: CW });
+        .text(`State:  Current ${lcCounts.active}   |   Superseded ${lcCounts.superseded}   |   Voided ${lcCounts.voided}`, M, cardY + 60, { width: CW });
       doc.y = cardY + 78;
 
       // Breakdown columns: by trade / floor / status
