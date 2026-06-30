@@ -115,33 +115,34 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   } else {
     doc.fontSize(26).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 20);
   }
-  const rightBlockW = 140;
+  const rightBlockW = 170;
   const rightBlockX = W - M - rightBlockW;
-  doc.fontSize(12).font(PALETTE.FONT_BOLD).fillColor("white")
+  const rightTextInset = 10;
+  doc.fontSize(11).font(PALETTE.FONT_BOLD).fillColor("white")
     .text(o.reportTitle, rightBlockX, 16, { align: "left", width: rightBlockW, lineBreak: false });
   if (o.reportSubtitle) {
     doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB")
-      .text(o.reportSubtitle, rightBlockX, 31, { align: "left", width: rightBlockW, lineBreak: false });
+      .text(o.reportSubtitle, rightBlockX, 32, { align: "left", width: rightBlockW, lineBreak: false });
   }
 
-  // ISO 19650 compliance stamp (monochrome corner)
+  // ISO 19650 compliance stamp shares the same left and right edge as the report title block.
   if (isoStamp) {
-    const isoY = 48;
+    const isoY = 54;
     doc.rect(rightBlockX, isoY, rightBlockW, 30).lineWidth(1).stroke("#FFFFFF");
     doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white")
-      .text("ISO 19650", rightBlockX + 10, isoY + 7, { width: rightBlockW - 20, align: "left", lineBreak: false });
+      .text("ISO 19650", rightBlockX + rightTextInset, isoY + 7, { width: rightBlockW - rightTextInset * 2, align: "left", lineBreak: false });
     doc.fontSize(7).font(PALETTE.FONT).fillColor("white")
-      .text("COMPLIANT", rightBlockX + 10, isoY + 18, { width: rightBlockW - 20, align: "left", lineBreak: false });
+      .text("COMPLIANT", rightBlockX + rightTextInset, isoY + 18, { width: rightBlockW - rightTextInset * 2, align: "left", lineBreak: false });
   }
-  doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
-  doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 88);
-  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 104);
-  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 118);
+  doc.moveTo(M, 92).lineTo(W - M, 92).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
+  doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 100);
+  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 114);
+  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 127);
   if (o.submittedTo) {
-    doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "left" });
+    doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 114, { width: CW / 2, align: "left" });
   }
   if (o.issuedTo) {
-    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 118, { width: CW / 2, align: "left" });
+    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 127, { width: CW / 2, align: "left" });
   }
 
   // Project info band (neutral light grey)
