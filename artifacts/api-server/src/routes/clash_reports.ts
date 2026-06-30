@@ -1375,6 +1375,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // By default the register shows only ACTIVE revisions; this opt-in includes
       // superseded and voided rows for a full audit trail.
       const includeNonActive = body.includeNonActive === true;
+      const includeResolved = body.includeResolved !== false;
+      const showGroupIds = body.showGroupIds !== false;
       // The Revision History appendix can be omitted entirely (default: included).
       const includeRevisionHistory = body.includeRevisionHistory !== false;
       const companyName: string = (body.companyName?.trim?.() || user?.companyName || "Company");
@@ -1393,9 +1395,13 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }
       if (!logoBase64) { const cl = await getCompanyLogo(userId); logoBase64 = cl.logoBase64; logoType = cl.logoType; }
 
-      // Pull all viewpoints, then apply the modal filters.
-      let vps = await db.select().from(lensViewpointsTable)
+      // Pull all viewpoints, then apply the modal filters. Keep an all-row map so
+      // successor rows can state which prior viewpoint they supersede, even when
+      // the prior row is hidden by active-only filters.
+      const allLensRows = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId));
+      const allLensById = new Map(allLensRows.map(v => [v.id, v]));
+      let vps = allLensRows;
       // Void-records are plugin-side historical artifacts; the void itself is already
       // represented by the original viewpoint's "voided" lifecycle, so a VOID-RECORD is never
       // an open coordination item and must not appear in the report register or its tallies.
@@ -1403,6 +1409,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       if (filters.trade !== "all") vps = vps.filter(v => v.trade === filters.trade);
       if (filters.floor !== "all") vps = vps.filter(v => v.floor === filters.floor);
       if (filters.status !== "all") vps = vps.filter(v => v.status === filters.status);
+      if (!includeResolved) vps = vps.filter(v => v.status !== "resolved");
       if (filters.reportType !== "all") vps = vps.filter(v => v.reportType === filters.reportType);
       if (filters.priority !== "all") vps = vps.filter(v => String(v.priority ?? "") === String(filters.priority));
       // Lifecycle scope: active-only unless the user opted to include the full
@@ -1481,7 +1488,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, includeRevisionHistory, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -1547,6 +1554,12 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         const base = idFormat === "code" ? codeOf(v) : (v.displayId || v.viewpointId || "—");
         return (v.revisionNumber ?? 1) > 1 ? `${base} (Rev ${v.revisionNumber})` : base;
       };
+      const predecessorCodeOf = (v: typeof vps[number]) => {
+        if (v.supersedesId == null) return "-";
+        const predecessor = allLensById.get(v.supersedesId);
+        return predecessor ? codeOf(predecessor) : "-";
+      };
+      const groupTokenOf = (v: typeof vps[number]) => v.issueGroupId ? `G:${String(v.issueGroupId).replace(/-/g, "").slice(0, 4).toUpperCase()}` : "-";
 
       // ── COVER PAGE (shared helper) ──
       const projectAddress = typeof project.location === "string" ? project.location.trim() : "";
@@ -1667,21 +1680,25 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
 
+        const registerColumns = [
+          { label: "ID", width: 58, bold: true, format: (v: any) => idText(v) },
+          { label: "From", width: 50, format: (v: any) => predecessorCodeOf(v) },
+          ...(showGroupIds ? [{ label: "Group", width: 44, format: (v: any) => groupTokenOf(v) }] : []),
+          { label: "P", width: 24, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
+          { label: "Trade", width: 68, format: (v: any) => v.trade || "-" },
+          { label: "Report Type", width: 72, format: (v: any) => v.reportType || "-" },
+          { label: "Floor", width: 42, format: (v: any) => v.floor || "-" },
+          { label: "Note", width: showGroupIds ? 230 : 274, wrap: true, format: (v: any) => v.note || "-" },
+          { label: "Status", width: 62, format: (v: any) => statusLabel(v.status) },
+          { label: "Captured", width: 62, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
+        ];
+
         const endY = drawTable(doc, {
           x: M,
           startY: doc.y,
           rows: vps,
           pageBottom: 535,
-          columns: [
-            { label: "ID", width: 88, bold: true, format: (v) => idText(v) },
-            { label: "P", width: 26, align: "center", bold: true, format: (v) => (v.priority ? `P${v.priority}` : "—") },
-            { label: "Trade", width: 78, format: (v) => v.trade || "—" },
-            { label: "Report Type", width: 84, format: (v) => v.reportType || "—" },
-            { label: "Floor", width: 78, format: (v) => v.floor || "—" },
-            { label: "Note", width: 226, wrap: true, format: (v) => v.note || "—" },
-            { label: "Status", width: 74, format: (v) => statusLabel(v.status) },
-            { label: "Captured", width: 58, color: PALETTE.MUTED, format: (v) => fmtShort(v.capturedAt) },
-          ],
+          columns: registerColumns,
           onPageBreak: () => {
             doc.addPage();
             doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);

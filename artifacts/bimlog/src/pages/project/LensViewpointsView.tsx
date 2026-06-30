@@ -195,6 +195,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     fReportType: "all",
     idFormat: "code",
     includeNonActive: false,
+    includeResolved: true,
+    showGroupIds: true,
     includeRevisionHistory: true,
   });
 
@@ -645,6 +647,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           isExecutiveOnePager: form.isExecutiveOnePager,
           idFormat: form.idFormat,
           includeNonActive: form.includeNonActive,
+          includeResolved: form.includeResolved,
+          showGroupIds: form.showGroupIds,
           includeRevisionHistory: form.includeRevisionHistory,
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
@@ -1425,6 +1429,20 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 onChange={e => setForm(f => ({ ...f, includeNonActive: e.target.checked }))} />
               {t("Include superseded and voided revisions", "Incluir revisiones reemplazadas y anuladas")}
             </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.includeResolved}
+                onChange={e => setForm(f => ({ ...f, includeResolved: e.target.checked }))} />
+              {t("Include resolved viewpoints", "Incluir vistas resueltas")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.showGroupIds}
+                onChange={e => setForm(f => ({ ...f, showGroupIds: e.target.checked }))} />
+              {t("Show group IDs in register", "Mostrar IDs de grupo en el registro")}
+            </label>
+
+
 
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
               <input type="checkbox" checked={form.includeRevisionHistory}
