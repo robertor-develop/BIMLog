@@ -197,6 +197,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     includeNonActive: false,
     includeResolved: true,
     showGroupIds: true,
+    includeAuditRecords: false,
+    includeReportHistory: false,
     includeRevisionHistory: true,
   });
 
@@ -649,6 +651,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           includeNonActive: form.includeNonActive,
           includeResolved: form.includeResolved,
           showGroupIds: form.showGroupIds,
+          includeAuditRecords: form.includeAuditRecords,
+          includeReportHistory: form.includeReportHistory,
           includeRevisionHistory: form.includeRevisionHistory,
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
@@ -1095,7 +1099,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     t("Report No.", "No. de Reporte"),
                     t("Generated", "Generado"),
                     t("By", "Por"),
-                    t("Viewpoints", "Vistas"),
+                    t("Report Rows", "Filas del reporte"),
                     t("Health", "Salud"),
                     t("Watermark", "Marca de Agua"),
                     t("Type", "Tipo"),
@@ -1441,6 +1445,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 onChange={e => setForm(f => ({ ...f, showGroupIds: e.target.checked }))} />
               {t("Show group IDs in register", "Mostrar IDs de grupo en el registro")}
             </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.includeAuditRecords}
+                onChange={e => setForm(f => ({ ...f, includeAuditRecords: e.target.checked }))} />
+              {t("Include void audit records", "Incluir registros de auditoria anulados")}
+            </label>
+
 
 
 
@@ -1448,6 +1458,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               <input type="checkbox" checked={form.includeRevisionHistory}
                 onChange={e => setForm(f => ({ ...f, includeRevisionHistory: e.target.checked }))} />
               {t("Include revision history appendix", "Incluir anexo de historial de revisiones")}
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
+              <input type="checkbox" checked={form.includeReportHistory}
+                onChange={e => setForm(f => ({ ...f, includeReportHistory: e.target.checked }))} />
+              {t("Include report history log", "Incluir historial de reportes")}
             </label>
 
             <label style={{ display: "block", marginTop: 14, fontSize: 13, color: "#374151" }}>

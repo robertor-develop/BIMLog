@@ -115,27 +115,33 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   } else {
     doc.fontSize(26).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 20);
   }
-  doc.fontSize(12).font(PALETTE.FONT_BOLD).fillColor("white").text(o.reportTitle, M, 16, { align: "right", width: CW });
+  const rightBlockW = 140;
+  const rightBlockX = W - M - rightBlockW;
+  doc.fontSize(12).font(PALETTE.FONT_BOLD).fillColor("white")
+    .text(o.reportTitle, rightBlockX, 16, { align: "left", width: rightBlockW, lineBreak: false });
   if (o.reportSubtitle) {
-    doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB").text(o.reportSubtitle, M, 31, { align: "right", width: CW - 105 });
+    doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB")
+      .text(o.reportSubtitle, rightBlockX, 31, { align: "left", width: rightBlockW, lineBreak: false });
   }
 
   // ISO 19650 compliance stamp (monochrome corner)
   if (isoStamp) {
-    doc.rect(W - M - 92, 40, 92, 30).lineWidth(1).stroke("#FFFFFF");
-    doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white").text("ISO 19650", W - M - 92, 46, { width: 92, align: "center" });
-    doc.fontSize(7).font(PALETTE.FONT).fillColor("white").text("COMPLIANT", W - M - 92, 57, { width: 92, align: "center" });
+    const isoY = 48;
+    doc.rect(rightBlockX, isoY, rightBlockW, 30).lineWidth(1).stroke("#FFFFFF");
+    doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white")
+      .text("ISO 19650", rightBlockX + 10, isoY + 7, { width: rightBlockW - 20, align: "left", lineBreak: false });
+    doc.fontSize(7).font(PALETTE.FONT).fillColor("white")
+      .text("COMPLIANT", rightBlockX + 10, isoY + 18, { width: rightBlockW - 20, align: "left", lineBreak: false });
   }
-
   doc.moveTo(M, 80).lineTo(W - M, 80).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
   doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 88);
   doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 104);
   doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 118);
   if (o.submittedTo) {
-    doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "right" });
+    doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 104, { width: CW / 2, align: "left" });
   }
   if (o.issuedTo) {
-    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 118, { width: CW / 2, align: "right" });
+    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 118, { width: CW / 2, align: "left" });
   }
 
   // Project info band (neutral light grey)

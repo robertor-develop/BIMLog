@@ -1397,6 +1397,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const includeNonActive = body.includeNonActive === true;
       const includeResolved = body.includeResolved !== false;
       const showGroupIds = body.showGroupIds !== false;
+      const includeAuditRecords = body.includeAuditRecords === true;
+      const includeReportHistory = body.includeReportHistory === true;
       // The Revision History appendix can be omitted entirely (default: included).
       const includeRevisionHistory = body.includeRevisionHistory !== false;
       const companyName: string = (body.companyName?.trim?.() || user?.companyName || "Company");
@@ -1422,10 +1424,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         .where(eq(lensViewpointsTable.projectId, projectId));
       const allLensById = new Map(allLensRows.map(v => [v.id, v]));
       let vps = allLensRows;
-      // Void-records are plugin-side historical artifacts; the void itself is already
-      // represented by the original viewpoint's "voided" lifecycle, so a VOID-RECORD is never
-      // an open coordination item and must not appear in the report register or its tallies.
-      vps = vps.filter(v => v.reportType !== "VOID-RECORD");
+      // Void-records are plugin-side audit artifacts; the void itself is already
+      // represented by the original viewpoint's "voided" lifecycle. Keep them out
+      // of the main register by default, but allow an explicit audit toggle.
+      if (!includeAuditRecords) vps = vps.filter(v => v.reportType !== "VOID-RECORD");
       if (filters.trade !== "all") vps = vps.filter(v => v.trade === filters.trade);
       if (filters.floor !== "all") vps = vps.filter(v => v.floor === filters.floor);
       if (filters.status !== "all") vps = vps.filter(v => v.status === filters.status);
@@ -1434,7 +1436,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       if (filters.priority !== "all") vps = vps.filter(v => String(v.priority ?? "") === String(filters.priority));
       // Lifecycle scope: active-only unless the user opted to include the full
       // superseded/voided history.
-      if (!includeNonActive) vps = vps.filter(v => (v.lifecycleStatus ?? "active") === "active");
+      if (!includeNonActive) vps = vps.filter(v => (v.lifecycleStatus ?? "active") === "active" || (includeAuditRecords && v.reportType === "VOID-RECORD"));
 
       const pOrder = (p: number | null | undefined) => p ?? 99;
       vps.sort((a, b) => pOrder(a.priority) - pOrder(b.priority));
@@ -1490,6 +1492,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         floor: v.floor, openItems: v.openItems, status: v.status,
         capturedAt: v.capturedAt, syncedAt: v.syncedAt,
         revisionNumber: v.revisionNumber, lifecycleStatus: v.lifecycleStatus,
+        supersedesId: v.supersedesId, issueGroupId: v.issueGroupId,
         hasLinkedRfi: linkedRfiVpIds.has(v.id),
       }));
 
@@ -1508,7 +1511,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -1540,6 +1543,18 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }
 
       // ── Build the PDF ──
+      const reportHistoryRows = includeReportHistory ? await db.select({
+        reportNumber: lensViewpointReportsTable.reportNumber,
+        generatedByName: lensViewpointReportsTable.generatedByName,
+        generatedAt: lensViewpointReportsTable.generatedAt,
+        viewpointCount: lensViewpointReportsTable.viewpointCount,
+        healthScore: lensViewpointReportsTable.healthScore,
+        watermarkType: lensViewpointReportsTable.watermarkType,
+        isExecutiveOnePager: lensViewpointReportsTable.isExecutiveOnePager,
+      }).from(lensViewpointReportsTable)
+        .where(eq(lensViewpointReportsTable.projectId, projectId))
+        .orderBy(desc(lensViewpointReportsTable.generatedAt)) : [];
+
       const PDFDocument = (await import("pdfkit")).default;
       const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       res.setHeader("Content-Type", "application/pdf");
@@ -1555,6 +1570,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // black text. No priority/status colors.
       const NAVY = PALETTE.NAVY;
       const statusLabel = (s: string) => statusText(s);
+      const lifecycleLabel = (s: string) => s === "superseded" ? "Superseded" : s === "voided" ? "Voided" : "Active";
+      const watermarkLabel = (s: string) => s === "issued" ? "Issued for Coordination" : s === "superseded" ? "Superseded" : s === "draft" ? "Draft" : "-";
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
       const fmtShort = (v: Date | string | null | undefined) => {
         if (!v) return "—";
@@ -1597,7 +1614,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         isoStamp: true,
         projectName: project.name,
         projectAddress,
-        projectMeta: `Project Code: ${project.code}  |  Total Viewpoints: ${total}`,
+        projectMeta: `Project Code: ${project.code}  |  Report Rows: ${total}`,
       });
 
       // Health score block (monochrome; optional via the modal toggle)
@@ -1755,10 +1772,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         // this report: each in-scope row plus its superseded ancestors. Without
         // this, a filtered or active-only report would surface unrelated
         // project-wide revisions in the appendix.
-        const supRows = await db.select({ id: lensViewpointsTable.id, supersedesId: lensViewpointsTable.supersedesId })
-          .from(lensViewpointsTable)
-          .where(eq(lensViewpointsTable.projectId, projectId));
-        const supMap = new Map<number, number | null>(supRows.map(r => [r.id, r.supersedesId ?? null]));
+        const supMap = new Map<number, number | null>(allLensRows.map(r => [r.id, r.supersedesId ?? null]));
         const scopeIds = new Set<number>();
         for (const v of vps) {
           let cur: number | null = v.id;
@@ -1767,43 +1781,67 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             cur = supMap.get(cur) ?? null;
           }
         }
-        const revEvents = (!includeRevisionHistory || scopeIds.size === 0) ? [] : await db.select().from(activityLogTable)
-          .where(and(
-            eq(activityLogTable.projectId, projectId),
-            eq(activityLogTable.entityType, "lens_viewpoint"),
-            inArray(activityLogTable.actionType, ["edit", "reassign", "voided"]),
-            inArray(activityLogTable.entityId, Array.from(scopeIds)),
-          ))
-          .orderBy(desc(activityLogTable.createdAt));
-        if (revEvents.length) {
+        const revisionRows = includeRevisionHistory ? Array.from(scopeIds)
+          .map(id => allLensById.get(id))
+          .filter((r): r is typeof allLensRows[number] => !!r)
+          .filter(r => (r.revisionNumber ?? 1) > 1 || (r.lifecycleStatus ?? "active") !== "active" || r.supersedesId != null)
+          .sort((a, b) => codeOf(a).localeCompare(codeOf(b)) || ((a.revisionNumber ?? 1) - (b.revisionNumber ?? 1))) : [];
+        if (revisionRows.length) {
           doc.addPage();
           doc.y = 45;
           doc.y = sectionBar(doc, "Revision History", doc.y, { margin: M });
-          const actionLabel: Record<string, string> = { edit: "Edited", reassign: "Reassigned", voided: "Voided" };
           drawTable(doc, {
             x: M,
             startY: doc.y,
-            rows: revEvents,
+            rows: revisionRows,
             pageBottom: 535,
             columns: [
-              { label: "Date", width: 66, format: (e) => fmtShort(e.createdAt) },
-              { label: "Action", width: 64, bold: true, format: (e) => actionLabel[e.actionType] || e.actionType },
-              { label: "From", width: 120, wrap: true, format: (e) => e.fileNameBefore || "—" },
-              { label: "To", width: 120, wrap: true, format: (e) => e.fileNameAfter || "—" },
-              { label: "Reason", width: 170, wrap: true, format: (e) => e.details || "—" },
-              { label: "By", width: 122, wrap: true, color: PALETTE.MUTED, format: (e) => e.userCompanyName ? `${e.userFullName} (${e.userCompanyName})` : e.userFullName },
+              { label: "ID", width: 70, bold: true, format: (r) => idText(r) },
+              { label: "State", width: 70, format: (r) => lifecycleLabel(r.lifecycleStatus ?? "active") },
+              { label: "From", width: 62, format: (r) => predecessorCodeOf(r) },
+              { label: "Trade", width: 72, format: (r) => r.trade || "-" },
+              { label: "Report Type", width: 78, format: (r) => r.reportType || "-" },
+              { label: "Note", width: 288, wrap: true, format: (r) => r.note || "-" },
+              { label: "Captured", width: 72, color: PALETTE.MUTED, format: (r) => fmtShort(r.capturedAt) },
             ],
             onPageBreak: () => {
               doc.addPage();
               doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
-              doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) — Revision History`, M, 8, { width: CW });
+              doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Revision History`, M, 8, { width: CW });
+              return 35;
+            },
+          });
+        }
+
+        if (includeReportHistory && reportHistoryRows.length) {
+          doc.addPage();
+          doc.y = 45;
+          doc.y = sectionBar(doc, "Report History", doc.y, { margin: M });
+          drawTable(doc, {
+            x: M,
+            startY: doc.y,
+            rows: reportHistoryRows,
+            pageBottom: 535,
+            columns: [
+              { label: "Report No.", width: 88, bold: true, format: (r) => r.reportNumber || "-" },
+              { label: "Generated", width: 72, format: (r) => fmtShort(r.generatedAt) },
+              { label: "By", width: 150, wrap: true, format: (r) => r.generatedByName || "-" },
+              { label: "Report Rows", width: 72, align: "center" as const, format: (r) => String(r.viewpointCount ?? "-") },
+              { label: "Health", width: 56, align: "center" as const, format: (r) => r.healthScore == null ? "-" : String(r.healthScore) },
+              { label: "Watermark", width: 122, format: (r) => watermarkLabel(String(r.watermarkType ?? "")) },
+              { label: "Type", width: 70, format: (r) => r.isExecutiveOnePager ? "Executive" : "Full" },
+            ],
+            onPageBreak: () => {
+              doc.addPage();
+              doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
+              doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Report History`, M, 8, { width: CW });
               return 35;
             },
           });
         }
       }
 
-      // ── WATERMARK + SHA + FOOTER on every page (shared helper) ──
+      // Footer/page numbering
       const footerDate = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
       addPageNumbers(doc, {
         margin: M,
