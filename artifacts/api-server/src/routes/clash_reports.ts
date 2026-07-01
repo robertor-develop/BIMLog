@@ -828,10 +828,45 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
     }
     try {
       const result = await db.transaction(async (tx) => {
-        const existing = await tx.select().from(lensViewpointsTable)
-          .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, ids)));
+        const allProjectRows = await tx.select().from(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId));
+        const byId = new Map(allProjectRows.map(v => [v.id, v]));
+        const childrenByParent = new Map<number, number[]>();
+        for (const row of allProjectRows) {
+          if (row.supersedesId == null) continue;
+          const list = childrenByParent.get(row.supersedesId) ?? [];
+          list.push(row.id);
+          childrenByParent.set(row.supersedesId, list);
+        }
+
+        const selectedExisting = ids.filter(id => byId.has(id));
+        const expandedIds = new Set<number>();
+        const addChain = (startId: number) => {
+          let rootId = startId;
+          const seenBack = new Set<number>();
+          for (let guard = 0; guard < 200; guard++) {
+            const row = byId.get(rootId);
+            if (!row || row.supersedesId == null || seenBack.has(rootId)) break;
+            seenBack.add(rootId);
+            rootId = row.supersedesId;
+          }
+
+          const stack = [rootId];
+          const seenForward = new Set<number>();
+          while (stack.length > 0) {
+            const id = stack.pop()!;
+            if (seenForward.has(id)) continue;
+            seenForward.add(id);
+            if (!byId.has(id)) continue;
+            expandedIds.add(id);
+            for (const childId of childrenByParent.get(id) ?? []) stack.push(childId);
+          }
+        };
+        for (const id of selectedExisting) addChain(id);
+
+        const existing = Array.from(expandedIds).map(id => byId.get(id)!).filter(Boolean);
         const changed = existing.filter(v => (v.floor ?? "") !== floor);
-        if (changed.length === 0) return { matched: existing.length, updated: 0 };
+        if (changed.length === 0) return { selected: selectedExisting.length, matched: existing.length, expanded: existing.length, updated: 0 };
         const changedIds = changed.map(v => v.id);
         const updated = await tx.update(lensViewpointsTable)
           .set({ floor, updatedAt: new Date() })
@@ -849,7 +884,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
           fileNameAfter: floor,
           details: reason,
         })));
-        return { matched: existing.length, updated: updated.length };
+        return { selected: selectedExisting.length, matched: existing.length, expanded: existing.length, updated: updated.length };
       });
       if (result.matched === 0) {
         res.status(404).json({ error: "not_found", message: "No selected Lens viewpoints were found in this project." });

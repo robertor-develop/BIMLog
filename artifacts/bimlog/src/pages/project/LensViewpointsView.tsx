@@ -480,7 +480,10 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       setFloorCorrectionOpen(false);
       setFloorCorrectionPhase("input");
       setSelectedIds(new Set());
-      showToast(t(`Corrected floor on ${d.updated ?? 0} viewpoint(s)`, `Piso corregido en ${d.updated ?? 0} vista(s)`));
+      showToast(t(
+        `Corrected floor on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
+        `Piso corregido en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
+      ));
       await loadViewpoints();
     } catch (e) {
       setFloorCorrectionPhase("input");
@@ -1312,10 +1315,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               </button>
             </div>
             <div style={{ marginTop: 14, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, lineHeight: 1.5 }}>
-              {t("This will change the official BIMLog floor value for the selected viewpoints and affect tables, PDF reports, and Excel exports. It does not renumber IDs and does not rename Navisworks saved viewpoints yet.", "Esto cambiara el piso oficial en BIMLog para las vistas seleccionadas y afectara tablas, reportes PDF y exportaciones Excel. No renumera IDs y todavia no renombra las vistas guardadas en Navisworks.")}
+              {t("This will change the official BIMLog floor value for the selected viewpoints and every older/newer revision in the same chain, so history stays consistent. It affects tables, PDF reports, and Excel exports. It does not renumber IDs. Use Pull from Platform in Navisworks after saving.", "Esto cambiara el piso oficial en BIMLog para las vistas seleccionadas y cada revision anterior/posterior de la misma cadena, para mantener el historial consistente. Afecta tablas, reportes PDF y exportaciones Excel. No renumera IDs. Use Pull from Platform en Navisworks despues de guardar.")}
             </div>
             <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ fontSize: 13, color: "#374151" }}>{t("Selected viewpoints", "Vistas seleccionadas")}: <strong>{selectedIds.size}</strong></div>
+              <div style={{ fontSize: 13, color: "#374151" }}>
+                {t("Selected viewpoints", "Vistas seleccionadas")}: <strong>{selectedIds.size}</strong>
+                <span style={{ color: "#6B7280" }}> {t("BIMLog will automatically include related superseded/current revisions.", "BIMLog incluira automaticamente revisiones relacionadas reemplazadas/actuales.")}</span>
+              </div>
               <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
                 {t("Correct floor", "Piso correcto")}
                 {correctionFloorOptions.length > 0 ? (
