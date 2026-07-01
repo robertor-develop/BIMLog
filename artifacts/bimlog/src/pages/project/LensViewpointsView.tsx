@@ -921,7 +921,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       {canWrite && selectedIds.size > 0 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 14, padding: "8px 14px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
           <span>{t("Selected Lens viewpoints", "Vistas Lens seleccionadas")}: <strong>{selectedIds.size}</strong></span>
-          <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds(new Set())} style={{ fontSize: 11, padding: "4px 10px" }}>{t("Clear selection", "Limpiar seleccion")}</button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={openFloorCorrection}
+              style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6, background: "#2563EB", borderColor: "#2563EB", color: "white" }}
+            >
+              <CheckCircle2 size={14} /> {t("Correct Floor", "Corregir Piso")}
+            </button>
+            <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds(new Set())} style={{ fontSize: 11, padding: "4px 10px" }}>{t("Clear selection", "Limpiar seleccion")}</button>
+          </div>
         </div>
       )}
 
