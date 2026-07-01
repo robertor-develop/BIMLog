@@ -801,6 +801,67 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+// BATCH FLOOR CORRECTION - fix selected Lens viewpoint floor values without
+// changing lifecycle state, revision, trade, or sequence numbers. Literal route
+// must be registered before /lens-viewpoints/:id.
+router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const ids: number[] = Array.isArray(req.body?.ids)
+      ? Array.from(new Set(req.body.ids.map((x: unknown) => Number(x)).filter((x: number) => Number.isInteger(x) && x > 0)))
+      : [];
+    const floor = req.body?.floor != null ? String(req.body.floor).trim() : "";
+    const reason = req.body?.reason != null ? String(req.body.reason).trim() : "";
+    if (ids.length === 0) {
+      res.status(400).json({ error: "invalid_ids", message: "Select at least one Lens viewpoint to correct." });
+      return;
+    }
+    if (!floor) {
+      res.status(400).json({ error: "invalid_floor", message: "New floor is required." });
+      return;
+    }
+    if (!reason) {
+      res.status(400).json({ error: "reason_required", message: "A reason is required for batch floor corrections." });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        const existing = await tx.select().from(lensViewpointsTable)
+          .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, ids)));
+        const changed = existing.filter(v => (v.floor ?? "") !== floor);
+        if (changed.length === 0) return { matched: existing.length, updated: 0 };
+        const changedIds = changed.map(v => v.id);
+        const updated = await tx.update(lensViewpointsTable)
+          .set({ floor, updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, changedIds)))
+          .returning({ id: lensViewpointsTable.id });
+        await tx.insert(activityLogTable).values(changed.map(v => ({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "floor_corrected",
+          entityType: "lens_viewpoint",
+          entityId: v.id,
+          fileNameBefore: v.floor ?? null,
+          fileNameAfter: floor,
+          details: reason,
+        })));
+        return { matched: existing.length, updated: updated.length };
+      });
+      if (result.matched === 0) {
+        res.status(404).json({ error: "not_found", message: "No selected Lens viewpoints were found in this project." });
+        return;
+      }
+      res.json({ success: true, ...result, floor });
+    } catch (err) {
+      res.status(500).json({ error: "lens_batch_floor_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // PATCH lens viewpoint status. Registered BEFORE the "/:reportId" routes so the
 // literal "lens-viewpoints" segment is not captured by the :reportId param.
 router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",

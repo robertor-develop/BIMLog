@@ -176,6 +176,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   >(null);
   const [actionPhase, setActionPhase] = useState<"input" | "submitting">("input");
   const [actionError, setActionError] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
+  const [floorLevels, setFloorLevels] = useState<string[]>([]);
+  const [floorCorrectionOpen, setFloorCorrectionOpen] = useState(false);
+  const [floorCorrectionFloor, setFloorCorrectionFloor] = useState("");
+  const [floorCorrectionReason, setFloorCorrectionReason] = useState("");
+  const [floorCorrectionPhase, setFloorCorrectionPhase] = useState<"input" | "submitting">("input");
+  const [floorCorrectionError, setFloorCorrectionError] = useState("");
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -251,6 +258,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       if (r.ok) {
         const d = await r.json();
         setViewpoints(d.viewpoints ?? []);
+        setSelectedIds(new Set());
         setUpdatesAvailable(false);
       } else {
         const d = await r.json().catch(() => ({}));
@@ -273,6 +281,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       if (r.ok) {
         const d = await r.json();
         setViewpoints(d.viewpoints ?? []);
+        setSelectedIds(new Set());
         setUpdatesAvailable(false);
       }
     } catch {
@@ -305,6 +314,25 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     };
     const iv = setInterval(checkForUpdates, 60000);
     return () => { cancelled = true; clearInterval(iv); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch(`${API}/projects/${projectId}/levels`, { headers });
+        if (!cancelled && r.ok) {
+          const d = await r.json();
+          if (Array.isArray(d.levels)) {
+            setFloorLevels(d.levels.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
+          }
+        }
+      } catch {
+        /* levels are helpful but not required; existing row floors remain available */
+      }
+    })();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
@@ -409,6 +437,54 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       setTimeout(() => setToast(cur => (cur === msg ? null : cur)), 2800);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const toggleSelected = (id: number, checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id); else next.delete(id);
+      return next;
+    });
+  };
+
+  const openFloorCorrection = () => {
+    if (selectedIds.size === 0) return;
+    setFloorCorrectionError("");
+    setFloorCorrectionPhase("input");
+    setFloorCorrectionFloor(floorLevels[0] || floors[0] || "");
+    setFloorCorrectionReason("");
+    setFloorCorrectionOpen(true);
+  };
+
+  const submitFloorCorrection = async () => {
+    const floor = floorCorrectionFloor.trim();
+    const reason = floorCorrectionReason.trim();
+    if (selectedIds.size === 0) { setFloorCorrectionError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
+    if (!floor) { setFloorCorrectionError(t("Select the correct floor.", "Seleccione el piso correcto.")); return; }
+    if (!reason) { setFloorCorrectionError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    setFloorCorrectionPhase("submitting");
+    setFloorCorrectionError("");
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/batch-floor`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), floor, reason }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setFloorCorrectionPhase("input");
+        setFloorCorrectionError(d.message || d.error || t("Floor correction failed.", "No se pudo corregir el piso."));
+        return;
+      }
+      setFloorCorrectionOpen(false);
+      setFloorCorrectionPhase("input");
+      setSelectedIds(new Set());
+      showToast(t(`Corrected floor on ${d.updated ?? 0} viewpoint(s)`, `Piso corregido en ${d.updated ?? 0} vista(s)`));
+      await loadViewpoints();
+    } catch (e) {
+      setFloorCorrectionPhase("input");
+      setFloorCorrectionError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -556,6 +632,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     Array.from(new Set(vals.filter((x): x is string => !!x))).sort();
   const trades = uniq(viewpoints.map(v => v.trade));
   const floors = uniq(viewpoints.map(v => v.floor));
+  const correctionFloorOptions = uniq([...floorLevels, ...floors]);
   const reportTypes = uniq(viewpoints.map(v => v.reportType));
 
   const filtered = viewpoints
@@ -564,6 +641,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     .filter(v => fReportType === "all" || v.reportType === fReportType)
     .filter(v => fStatus === "all" || v.status === fStatus)
     .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
+  const filteredIds = filtered.map(v => v.id);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => selectedIds.has(id));
 
   // Summary counts respect the trade/floor/report-type filters but ignore the lifecycle
   // scope so the strip can show the full Active/Superseded/Voided breakdown at once.
@@ -576,8 +655,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const st = (s: string) => activeStats.filter(v => v.status === s).length;
 
   // Column count for the full-width expansion rows — keep in lockstep with the
-  // dynamic columns rendered in the table header/body below (9 base + toggles).
-  const colCount = 9 + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
+  // dynamic columns rendered in the table header/body below.
+  const colCount = 9 + (canWrite ? 1 : 0) + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
 
   const lastSynced = viewpoints.reduce<string | null>((max, v) => {
     if (!v.capturedAt) return max;
@@ -724,6 +803,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           {canWrite && (
             <button
               className="btn btn-sm btn-outline"
+              onClick={openFloorCorrection}
+              disabled={selectedIds.size === 0}
+              title={t("Correct the floor value for selected Lens viewpoints", "Corregir el piso de las vistas Lens seleccionadas")}
+              style={{ display: "flex", alignItems: "center", gap: 6, opacity: selectedIds.size === 0 ? 0.55 : 1 }}
+            >
+              <CheckCircle2 size={14} /> {t("Correct Floor", "Corregir Piso")} {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
+            </button>
+          )}
+          {canWrite && (
+            <button
+              className="btn btn-sm btn-outline"
               onClick={resetTestData}
               title={t("Testing only: clears Lens viewpoints, counters, reports, and revision history for this project", "Solo pruebas: borra vistas Lens, contadores, reportes e historial de revisiones de este proyecto")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#B45309", borderColor: "#F59E0B" }}
@@ -828,6 +918,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </div>
       )}
 
+      {canWrite && selectedIds.size > 0 && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 14, padding: "8px 14px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#92400E" }}>
+          <span>{t("Selected Lens viewpoints", "Vistas Lens seleccionadas")}: <strong>{selectedIds.size}</strong></span>
+          <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds(new Set())} style={{ fontSize: 11, padding: "4px 10px" }}>{t("Clear selection", "Limpiar seleccion")}</button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>{t("Loading...", "Cargando...")}</div>
       ) : viewpoints.length === 0 ? (
@@ -853,6 +950,21 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F" }}>
+                {canWrite && (
+                  <th style={{ padding: "8px 10px", width: 34 }}>
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      disabled={filteredIds.length === 0}
+                      onChange={e => setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        filteredIds.forEach(id => e.target.checked ? next.add(id) : next.delete(id));
+                        return next;
+                      })}
+                      title={t("Select all visible rows", "Seleccionar filas visibles")}
+                    />
+                  </th>
+                )}
                 {[
                   "ID",
                   ...(showGroupCol ? ["Group"] : []),
@@ -868,6 +980,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               {filtered.map(v => (
                 <Fragment key={v.id}>
                   <tr style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
+                    {canWrite && (
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(v.id)}
+                          onChange={e => toggleSelected(v.id, e.target.checked)}
+                          title={t("Select this viewpoint for batch correction", "Seleccionar esta vista para correccion por lote")}
+                        />
+                      </td>
+                    )}
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                       <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
                         {idFormatView === "code" ? viewpointCode(v) : (v.displayId || v.viewpointId || "—")}
@@ -1162,6 +1284,55 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       {toast && (
         <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 1100, display: "flex", alignItems: "center", gap: 8, background: "#16A34A", color: "white", fontSize: 13, fontWeight: 600, padding: "10px 16px", borderRadius: 8, boxShadow: "0 8px 24px rgba(0,0,0,0.25)" }}>
           <CheckCircle2 size={16} /> {toast}
+        </div>
+      )}
+
+      {floorCorrectionOpen && (
+        <div
+          onClick={() => floorCorrectionPhase !== "submitting" && setFloorCorrectionOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{t("Batch Correct Floor", "Corregir Piso por Lote")}</h3>
+              <button onClick={() => floorCorrectionPhase !== "submitting" && setFloorCorrectionOpen(false)} aria-label={t("Close", "Cerrar")} disabled={floorCorrectionPhase === "submitting"} style={{ background: "transparent", border: "none", cursor: floorCorrectionPhase === "submitting" ? "not-allowed" : "pointer", color: "#6B7280", lineHeight: 0, padding: 4 }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ marginTop: 14, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, lineHeight: 1.5 }}>
+              {t("This will change the official BIMLog floor value for the selected viewpoints and affect tables, PDF reports, and Excel exports. It does not renumber IDs and does not rename Navisworks saved viewpoints yet.", "Esto cambiara el piso oficial en BIMLog para las vistas seleccionadas y afectara tablas, reportes PDF y exportaciones Excel. No renumera IDs y todavia no renombra las vistas guardadas en Navisworks.")}
+            </div>
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontSize: 13, color: "#374151" }}>{t("Selected viewpoints", "Vistas seleccionadas")}: <strong>{selectedIds.size}</strong></div>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Correct floor", "Piso correcto")}
+                {correctionFloorOptions.length > 0 ? (
+                  <select value={floorCorrectionFloor} onChange={e => setFloorCorrectionFloor(e.target.value)} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, fontWeight: 400, background: "white" }}>
+                    <option value="">{t("Select floor", "Seleccionar piso")}</option>
+                    {correctionFloorOptions.map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                ) : (
+                  <input value={floorCorrectionFloor} onChange={e => setFloorCorrectionFloor(e.target.value)} placeholder="L14" style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, fontWeight: 400 }} />
+                )}
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Reason", "Motivo")}
+                <textarea value={floorCorrectionReason} onChange={e => setFloorCorrectionReason(e.target.value)} rows={3} placeholder={t("Example: Viewpoints were synced as CELLAR by mistake; correct floor is L14.", "Ejemplo: Las vistas se sincronizaron como CELLAR por error; el piso correcto es L14.")} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, resize: "vertical", fontWeight: 400 }} />
+              </label>
+            </div>
+            {floorCorrectionError && (
+              <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12.5, fontWeight: 600, padding: "8px 12px", borderRadius: 8 }}>{floorCorrectionError}</div>
+            )}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+              <button className="btn btn-sm btn-outline" onClick={() => setFloorCorrectionOpen(false)} disabled={floorCorrectionPhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px" }}>{t("Cancel", "Cancelar")}</button>
+              <button className="btn btn-sm btn-primary" onClick={submitFloorCorrection} disabled={floorCorrectionPhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+                {floorCorrectionPhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><CheckCircle2 size={14} /> {t("Apply Correction", "Aplicar Correccion")}</>}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
