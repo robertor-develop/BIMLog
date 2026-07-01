@@ -828,6 +828,48 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+// REPAIR LENS LIFECYCLE CHAINS - if a row says superseded but no newer row
+// actually points back to it, it is an orphaned historical marker and should be
+// active again. This protects test-reset/re-push workflows from stale local
+// Navisworks metadata incorrectly hiding current rows.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const rows = await db.select({
+        id: lensViewpointsTable.id,
+        displayId: lensViewpointsTable.displayId,
+        lifecycleStatus: lensViewpointsTable.lifecycleStatus,
+        supersedesId: lensViewpointsTable.supersedesId,
+      }).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId));
+      const hasChild = new Set(rows.map(r => r.supersedesId).filter((x): x is number => x != null));
+      const activeDisplayIds = new Set(
+        rows
+          .filter(r => (r.lifecycleStatus ?? "active") === "active" && r.displayId)
+          .map(r => r.displayId as string)
+      );
+      const repairIds = rows
+        .filter(r => r.lifecycleStatus === "superseded")
+        .filter(r => !hasChild.has(r.id))
+        .filter(r => !r.displayId || !activeDisplayIds.has(r.displayId))
+        .map(r => r.id);
+      if (repairIds.length === 0) {
+        res.json({ success: true, repaired: 0, checked: rows.length });
+        return;
+      }
+      const repaired = await db.update(lensViewpointsTable)
+        .set({ lifecycleStatus: "active", updatedAt: new Date() })
+        .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, repairIds)))
+        .returning({ id: lensViewpointsTable.id });
+      res.json({ success: true, repaired: repaired.length, checked: rows.length });
+    } catch (err) {
+      res.status(500).json({ error: "lens_lifecycle_repair_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // BATCH FLOOR CORRECTION - fix selected Lens viewpoint floor values without
 // changing lifecycle state, revision, trade, or sequence numbers. Literal route
 // must be registered before /lens-viewpoints/:id.

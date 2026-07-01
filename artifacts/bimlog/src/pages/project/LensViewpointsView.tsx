@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, Fragment } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle } from "lucide-react";
+import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import * as XLSX from "xlsx";
 
@@ -440,6 +440,24 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     }
   };
 
+  const repairChains = async () => {
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/repair-lifecycle`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setError(d.message || d.error || "Repair failed"); return; }
+      await loadViewpoints();
+      showToast(t(
+        `Repaired ${d.repaired ?? 0} orphaned chain record(s)`,
+        `Se repararon ${d.repaired ?? 0} registro(s) huerfanos de cadena`
+      ));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   const toggleSelected = (id: number, checked: boolean) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -812,6 +830,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               style={{ display: "flex", alignItems: "center", gap: 6, opacity: selectedIds.size === 0 ? 0.55 : 1 }}
             >
               <CheckCircle2 size={14} /> {t("Correct Floor", "Corregir Piso")} {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
+            </button>
+          )}
+          {canWrite && (
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={repairChains}
+              title={t("Repair orphaned revision chains if stale Navisworks metadata marked current rows as superseded", "Reparar cadenas huerfanas si metadatos antiguos de Navisworks marcaron filas vigentes como reemplazadas")}
+              style={{ display: "flex", alignItems: "center", gap: 6, color: "#1D4ED8", borderColor: "#93C5FD" }}
+            >
+              <Wrench size={14} /> {t("Repair Chains", "Reparar Cadenas")}
             </button>
           )}
           {canWrite && (
