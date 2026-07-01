@@ -575,6 +575,32 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
       const now = new Date();
       const seen = new Set<string>();
       console.log(`[lens-sync] project=${projectId} received ${viewpoints.length} viewpoint(s)`);
+      const repairOrphanedSupersededRows = async () => {
+        const rows = await db.select({
+          id: lensViewpointsTable.id,
+          displayId: lensViewpointsTable.displayId,
+          lifecycleStatus: lensViewpointsTable.lifecycleStatus,
+          supersedesId: lensViewpointsTable.supersedesId,
+        }).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId));
+        const hasChild = new Set(rows.map(r => r.supersedesId).filter((x): x is number => x != null));
+        const activeDisplayIds = new Set(
+          rows
+            .filter(r => (r.lifecycleStatus ?? "active") === "active" && r.displayId)
+            .map(r => r.displayId as string)
+        );
+        const repairIds = rows
+          .filter(r => r.lifecycleStatus === "superseded")
+          .filter(r => !hasChild.has(r.id))
+          .filter(r => !r.displayId || !activeDisplayIds.has(r.displayId))
+          .map(r => r.id);
+        if (repairIds.length === 0) return 0;
+        const repaired = await db.update(lensViewpointsTable)
+          .set({ lifecycleStatus: "active", updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, repairIds)))
+          .returning({ id: lensViewpointsTable.id });
+        console.warn(`[lens-sync] repaired ${repaired.length} orphaned superseded row(s) back to active for project=${projectId}`);
+        return repaired.length;
+      };
       // Trim to a non-empty string or null so blank GUIDs ("") do not collapse
       // distinct viewpoints into one dedup key or diverge from the conflict target.
       const norm = (x: unknown): string | null => {
@@ -746,7 +772,8 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           }
         }
       }
-      res.json({ success: true, results });
+      const repairedOrphanedSuperseded = await repairOrphanedSupersededRows();
+      res.json({ success: true, results, repairedOrphanedSuperseded });
     } catch (err) {
       res.status(500).json({ error: "lens_sync_failed", message: err instanceof Error ? err.message : String(err) });
     }
