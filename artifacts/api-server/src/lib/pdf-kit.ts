@@ -104,7 +104,9 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   const isoStamp = o.isoStamp !== false;
 
   // Navy header band
-  doc.rect(0, 0, W, 135).fill(PALETTE.NAVY);
+  const headerBandH = 148;
+  const projectBandY = headerBandH;
+  doc.rect(0, 0, W, headerBandH).fill(PALETTE.NAVY);
   if (o.logoBase64 && o.logoType) {
     try {
       doc.image(o.logoBase64, M, 15, { height: 50, fit: [120, 50] });
@@ -130,27 +132,27 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
     const isoY = 54;
     doc.rect(rightBlockX, isoY, rightBlockW, 30).lineWidth(1).stroke("#FFFFFF");
     doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white")
-      .text("ISO 19650", rightBlockX + rightTextInset, isoY + 7, { width: rightBlockW - rightTextInset * 2, align: "left", lineBreak: false });
+      .text("ISO 19650", rightBlockX + rightTextInset, isoY + 7, { width: rightBlockW - rightTextInset * 2, align: "center", lineBreak: false });
     doc.fontSize(7).font(PALETTE.FONT).fillColor("white")
-      .text("COMPLIANT", rightBlockX + rightTextInset, isoY + 18, { width: rightBlockW - rightTextInset * 2, align: "left", lineBreak: false });
+      .text("COMPLIANT", rightBlockX + rightTextInset, isoY + 18, { width: rightBlockW - rightTextInset * 2, align: "center", lineBreak: false });
   }
   doc.moveTo(M, 92).lineTo(W - M, 92).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
   doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 100);
   doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 114);
-  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 127);
+  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 128);
   if (o.submittedTo) {
     doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 114, { width: CW / 2, align: "left" });
   }
   if (o.issuedTo) {
-    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 127, { width: CW / 2, align: "left" });
+    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 128, { width: CW / 2, align: "left" });
   }
 
   // Project info band (neutral light grey)
   const address = o.projectAddress?.trim() ? o.projectAddress.trim() : "";
   const bandH = address ? 58 : 48;
-  doc.rect(0, 135, W, bandH).fill(PALETTE.BAND);
-  doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor(PALETTE.NAVY).text(o.projectName, M, 143);
-  let infoY = 165;
+  doc.rect(0, projectBandY, W, bandH).fill(PALETTE.BAND);
+  doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor(PALETTE.NAVY).text(o.projectName, M, projectBandY + 8);
+  let infoY = projectBandY + 30;
   if (address) {
     doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(address, M, infoY, { width: CW });
     infoY += 14;
@@ -159,7 +161,7 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
     doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(o.projectMeta, M, infoY);
   }
 
-  return 135 + bandH;
+  return projectBandY + bandH;
 }
 
 // ── Branded running header (for log-style reports) ──

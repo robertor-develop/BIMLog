@@ -1628,7 +1628,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         const hbX = M + 220;
         const pct = (v: number | null) => v === null ? "n/a" : `${v}%`;
         doc.fontSize(9).font("Helvetica").fillColor("#374151");
-        doc.text(`P1s resolved: ${pct(healthBreakdown.pctP1Resolved)}  (${p1Resolved}/${p1Total})`, hbX, hsY + 8);
+        doc.text(`Priority 1 resolved: ${pct(healthBreakdown.pctP1Resolved)}  (${p1Resolved}/${p1Total})`, hbX, hsY + 8);
         doc.text(`All viewpoints resolved: ${pct(healthBreakdown.pctAllResolved)}  (${allResolved}/${total})`, hbX, hsY + 28);
         doc.text(`Viewpoints with linked RFIs: ${pct(healthBreakdown.pctWithLinkedRfis)}  (${withLinkedRfis}/${total})`, hbX, hsY + 48);
         cursorY = hsY + 95;
@@ -1721,11 +1721,11 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           { label: "ID", width: 58, bold: true, format: (v: any) => idText(v) },
           { label: "From", width: 50, format: (v: any) => predecessorCodeOf(v) },
           ...(showGroupIds ? [{ label: "Group", width: 44, format: (v: any) => groupTokenOf(v) }] : []),
-          { label: "P", width: 24, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
-          { label: "Trade", width: 68, format: (v: any) => v.trade || "-" },
-          { label: "Report Type", width: 72, format: (v: any) => v.reportType || "-" },
+          { label: "Priority", width: 46, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
+          { label: "Trade", width: 62, format: (v: any) => v.trade || "-" },
+          { label: "Report Type", width: 66, format: (v: any) => v.reportType || "-" },
           { label: "Floor", width: 42, format: (v: any) => v.floor || "-" },
-          { label: "Note", width: showGroupIds ? 230 : 274, wrap: true, format: (v: any) => v.note || "-" },
+          { label: "Note", width: showGroupIds ? 220 : 264, wrap: true, format: (v: any) => v.note || "-" },
           { label: "Status", width: 62, format: (v: any) => statusLabel(v.status) },
           { label: "Captured", width: 62, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
         ];
