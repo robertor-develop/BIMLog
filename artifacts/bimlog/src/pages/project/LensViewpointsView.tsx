@@ -824,17 +824,6 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           {canWrite && (
             <button
               className="btn btn-sm btn-outline"
-              onClick={openFloorCorrection}
-              disabled={selectedIds.size === 0}
-              title={t("Correct the floor value for selected Lens viewpoints", "Corregir el piso de las vistas Lens seleccionadas")}
-              style={{ display: "flex", alignItems: "center", gap: 6, opacity: selectedIds.size === 0 ? 0.55 : 1 }}
-            >
-              <CheckCircle2 size={14} /> {t("Correct Floor", "Corregir Piso")} {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
-            </button>
-          )}
-          {canWrite && (
-            <button
-              className="btn btn-sm btn-outline"
               onClick={repairChains}
               title={t("Repair orphaned revision chains if stale Navisworks metadata marked current rows as superseded", "Reparar cadenas huerfanas si metadatos antiguos de Navisworks marcaron filas vigentes como reemplazadas")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#1D4ED8", borderColor: "#93C5FD" }}
