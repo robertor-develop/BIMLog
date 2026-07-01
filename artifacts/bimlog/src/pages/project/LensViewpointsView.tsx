@@ -1332,12 +1332,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               </button>
             </div>
             <div style={{ marginTop: 14, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, lineHeight: 1.5 }}>
-              {t("This will change the official BIMLog floor value for the selected viewpoints and every older/newer revision in the same chain, so history stays consistent. It affects tables, PDF reports, and Excel exports. It does not renumber IDs. Use Pull from Platform in Navisworks after saving.", "Esto cambiara el piso oficial en BIMLog para las vistas seleccionadas y cada revision anterior/posterior de la misma cadena, para mantener el historial consistente. Afecta tablas, reportes PDF y exportaciones Excel. No renumera IDs. Use Pull from Platform en Navisworks despues de guardar.")}
+              {t("This will change the official BIMLog floor value for the selected viewpoints, every viewpoint in the same group, and every older/newer revision in those chains. It affects tables, PDF reports, and Excel exports. It does not renumber IDs. Use Pull from Platform in Navisworks after saving.", "Esto cambiara el piso oficial en BIMLog para las vistas seleccionadas, cada vista del mismo grupo y cada revision anterior/posterior de esas cadenas. Afecta tablas, reportes PDF y exportaciones Excel. No renumera IDs. Use Pull from Platform en Navisworks despues de guardar.")}
             </div>
             <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ fontSize: 13, color: "#374151" }}>
                 {t("Selected viewpoints", "Vistas seleccionadas")}: <strong>{selectedIds.size}</strong>
-                <span style={{ color: "#6B7280" }}> {t("BIMLog will automatically include related superseded/current revisions.", "BIMLog incluira automaticamente revisiones relacionadas reemplazadas/actuales.")}</span>
+                <span style={{ color: "#6B7280" }}> {t("BIMLog will automatically include related group rows and superseded/current revisions.", "BIMLog incluira automaticamente filas del mismo grupo y revisiones relacionadas reemplazadas/actuales.")}</span>
               </div>
               <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
                 {t("Correct floor", "Piso correcto")}

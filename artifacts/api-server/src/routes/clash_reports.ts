@@ -901,11 +901,18 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
           .where(eq(lensViewpointsTable.projectId, projectId));
         const byId = new Map(allProjectRows.map(v => [v.id, v]));
         const childrenByParent = new Map<number, number[]>();
+        const idsByGroup = new Map<string, number[]>();
         for (const row of allProjectRows) {
           if (row.supersedesId == null) continue;
           const list = childrenByParent.get(row.supersedesId) ?? [];
           list.push(row.id);
           childrenByParent.set(row.supersedesId, list);
+        }
+        for (const row of allProjectRows) {
+          if (!row.issueGroupId) continue;
+          const list = idsByGroup.get(row.issueGroupId) ?? [];
+          list.push(row.id);
+          idsByGroup.set(row.issueGroupId, list);
         }
 
         const selectedExisting = ids.filter(id => byId.has(id));
@@ -931,7 +938,14 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
             for (const childId of childrenByParent.get(id) ?? []) stack.push(childId);
           }
         };
-        for (const id of selectedExisting) addChain(id);
+        for (const id of selectedExisting) {
+          const selectedRow = byId.get(id);
+          if (selectedRow?.issueGroupId) {
+            for (const groupId of idsByGroup.get(selectedRow.issueGroupId) ?? []) addChain(groupId);
+          } else {
+            addChain(id);
+          }
+        }
 
         const existing = Array.from(expandedIds).map(id => byId.get(id)!).filter(Boolean);
         const changed = existing.filter(v => (v.floor ?? "") !== floor);
