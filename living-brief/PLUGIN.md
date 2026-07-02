@@ -14,7 +14,8 @@ the DB, so after editing here also "Paste to Update" in-app to refresh the shown
 - Semantic versioning v1.6.x. Package with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
-  README revision + write a per-revision update .txt covering the delta. Current: v1.6.2.
+  README revision + write a per-revision update .txt covering the delta. Current: v1.6.3.
+  Shared source is `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` (keep both in sync 2021/2025).
 
 ## The shared display contract (DONE — was the big open item)
 Plugin viewpoint DisplayName and the platform table use the SAME clean field set. Plugin name:
@@ -51,6 +52,16 @@ duplicating rows). Void-records still sync. RefreshCounter counts a viewpoint as
 server knows its name/guid OR it has a serverId locally (edit/reassign copies get new names but
 real serverIds, so name-only matching under-counted them).
 
+## Sync recursion + one lifecycle authority (v1.6.3)
+`SyncWithBIMLog` walks the ENTIRE BIMLog tree via `FindAllBIMLogViewpointLocations` (recursive),
+so viewpoints a cleanup filed into subfolders sync too — before, only loose children of the date
+folder synced and history was skipped. Lifecycle (active/superseded/voided) is decided ONE way for
+both the counter and the push, by `EffectiveLifecycle(loc, entry)`: (1) own name marker
+(VOID-RECORD / [VOIDED] / [SUPERSEDED]) → (2) folder placement (history + status folders) → (3)
+loose in the dated `BIMLog ...` folder = active → (4) metadata last. Folder/name outrank stale
+`localLifecycle`, so a bad value left by `ApplyPlatformLensCorrectionsAsync` self-heals. NEVER add
+a second/parallel lifecycle-inference path — doing so once voided every viewpoint.
+
 ## Responsible Company (v1.6.2)
 Each trade row in Save has an editable `CboResponsible` combo (type or pick). Saved into
 metadata (`responsibleCompany`), sent in the lens-sync entry, round-tripped, carried forward on
@@ -62,7 +73,15 @@ edit/reassign/void. Platform stores it, shows a column + Set-Responsible-Company
   Edit/Reassign/Void, Floor corrections, Clean duplicates, Create RFI, Troubleshooting).
 - "Done Managing Viewpoints" button clears the manage panel and reminds to Sync if pending.
 - Clean Duplicate BIMLog Views uses the platform as source of truth and rebuilds into a clean
-  folder named `BIMLog <date> C-001` / `C-002` (never overwrites the original).
+  folder named `BIMLog <date> C-001` / `C-002` (never overwrites the original). The read-only
+  workaround (copy into a fresh folder + delete old) is deliberate — Navisworks won't release
+  read-only viewpoints; do not "fix" it.
+- Full folder set (v1.6.3): every cleanup rebuilds into the 8 folders that mirror the platform,
+  created even when empty: Open, Follow Up, Waiting Design, Approved, Resolved, Superseded,
+  Voided, Voided Records (`BIMLogSubfolders`). Active viewpoints file by platform workflow status
+  (`PlatformHistoryFolderName` → `StatusFolderName`: open/follow_up/waiting_design/approved/
+  resolved); history by lifecycle. `lens-pull` already returns `status`, so this was plugin-only.
+  Change a status on the platform → run cleanup → the viewpoint moves folder. Two-way verified.
 
 ## BIMLogApiClient.cs — HTTP contract
 Raw HttpWebRequest only. `Patch` = Edit; `Post` = Void/Reassign; `Get` = active-resolver.
@@ -78,4 +97,6 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Read-only plugin users still get a silent 401/403 sync failure with no clear UI signal — not
   yet addressed.
 - Responsible Company plugin field is free-text with no auto-loaded suggestion list yet (platform
-  side offers suggestions); v1.6.2 needs a live Navisworks test before shipping to Ruben.
+  side offers suggestions).
+- v1.6.3 confirmed live in Navisworks 2021 by Roberto (recursion + 8-folder mirror + two-way
+  status filing all verified) and packaged for Ruben (2025 zip).

@@ -14,8 +14,9 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   an AI editor. RULE: one agent per session, always commit before switching.
 - Plugin uses semantic versioning (v1.6.x). Every package ships README + a per-revision
   update .txt + the zip, built at `H:\BIMLogPlugin2025` via `Build-Package-2025.ps1`.
-  Current: v1.6.2. 2021 build at `C:\Dev\BIMLogPlugin` (Roberto/Navisworks 2021), 2025 build
-  at H: (Ruben/Navisworks 2025). Only `BIMLogLensPanel.cs` differs 2021 vs 2025; keep in sync.
+  Current: v1.6.3. 2021 build at `C:\Dev\BIMLogPlugin` (Roberto/Navisworks 2021), 2025 build
+  at H: (Ruben/Navisworks 2025). `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` are the shared
+  source; keep both in sync across 2021/2025.
 
 ### Platform (all committed + pushed to master)
 - Lens table View controls: Active-only default + All-revisions toggle; per-column show/hide
@@ -60,6 +61,24 @@ Updated manually after each feature ships. Reflects the real state of the platfo
 - KNOWN NAVISWORKS LIMITATION: the `SUPERSEDED->successor` marker on the OLD tree record is
   best-effort — Navisworks marks it read-only after the online round-trip, so the rename can
   fail. The PLATFORM is the source of truth for lifecycle display; the tree name is cosmetic.
+
+### Plugin v1.6.3 (2026-07-02) — Navisworks tree mirrors the platform (plugin-only, no republish)
+- **Sync now covers the whole BIMLog tree.** `SyncWithBIMLog` recurses every folder
+  (`FindAllBIMLogViewpointLocations`), so viewpoints a prior cleanup filed into subfolders sync
+  too — previously only loose viewpoints in the date folder synced, so history (Superseded/
+  Voided/Voided Records) was silently skipped after a cleanup.
+- **One lifecycle brain.** The counter and the sync push now decide active/superseded/voided the
+  same way, via folder-authoritative `EffectiveLifecycle`: own name marker → folder placement →
+  loose-in-date-folder = active → metadata last. Folder placement outranks stale metadata, so a
+  bad value left by a correction round-trip self-heals instead of flipping current rows to history.
+- **Full 8-folder set, created every cleanup even when empty**, mirroring the platform Show +
+  Status filters: Open, Follow Up, Waiting Design, Approved, Resolved, Superseded, Voided, Voided
+  Records. Active viewpoints file into their workflow-status folder (open/follow_up/waiting_design/
+  approved/resolved); history into its lifecycle folder. Change a status on the platform → run
+  Clean Duplicate BIMLog Views → the viewpoint moves to the matching folder. Verified two-way.
+- Backend unchanged: `lens-pull` already returned `status`, so this was plugin-only (no republish).
+- Packaged `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.6.3.zip` + README (Rev 1.6.3) +
+  `BIMLog_Lens_Revision_Update_v1.6.3.txt`. Both 2021 and 2025 build clean.
 
 ## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
