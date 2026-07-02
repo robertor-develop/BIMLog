@@ -772,8 +772,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           }
         }
       }
-      const repairedOrphanedSuperseded = await repairOrphanedSupersededRows();
-      res.json({ success: true, results, repairedOrphanedSuperseded });
+      res.json({ success: true, results });
     } catch (err) {
       res.status(500).json({ error: "lens_sync_failed", message: err instanceof Error ? err.message : String(err) });
     }
