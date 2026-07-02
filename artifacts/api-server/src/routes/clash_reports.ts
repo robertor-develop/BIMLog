@@ -7,7 +7,7 @@ import {
   PALETTE, statusText, priorityText, computeContentHash,
   drawCoverPage, sectionBar, drawTable, addPageNumbers,
 } from "../lib/pdf-kit";
-import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable } from "@workspace/db/schema";
+import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -628,6 +628,9 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const priorityNum = v?.priority != null && !Number.isNaN(Number(v.priority)) ? Number(v.priority) : 3;
         const capturedAt = v?.capturedAt ? new Date(v.capturedAt) : null;
         const tradeVal = v?.trade != null ? String(v.trade) : null;
+        const responsibleCompanyVal = v?.responsibleCompany != null && String(v.responsibleCompany).trim()
+          ? String(v.responsibleCompany).trim()
+          : null;
         const floorVal = v?.floor != null ? String(v.floor) : null;
         // Part 5: only stored if the plugin sends it; never generated server-side.
         const issueGroupId = norm(v?.issueGroupId);
@@ -703,6 +706,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               displayId,
               note: v?.note != null ? String(v.note) : null,
               trade: tradeVal,
+              responsibleCompany: responsibleCompanyVal,
               reportType: v?.reportType != null ? String(v.reportType) : null,
               priority: priorityNum,
               floor: floorVal,
@@ -805,6 +809,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         navisworksGuid: r.navisworksGuid,
         note: r.note,
         trade: r.trade,
+        responsibleCompany: r.responsibleCompany,
         reportType: r.reportType,
         priority: r.priority,
         floor: r.floor,
@@ -865,6 +870,36 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle
       res.json({ success: true, repaired: repaired.length, checked: rows.length });
     } catch (err) {
       res.status(500).json({ error: "lens_lifecycle_repair_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// RESPONSIBLE COMPANY SUGGESTIONS - reusable names from the project directory
+// plus prior Lens viewpoint entries. No fake contacts are created.
+router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-companies",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const [directoryRows, lensRows] = await Promise.all([
+        db.select({ companyName: projectDirectoryTable.companyName }).from(projectDirectoryTable)
+          .where(eq(projectDirectoryTable.projectId, projectId)),
+        db.select({ responsibleCompany: lensViewpointsTable.responsibleCompany }).from(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId)),
+      ]);
+      const names = new Set<string>();
+      for (const row of directoryRows) {
+        const v = row.companyName?.trim();
+        if (v) names.add(v);
+      }
+      for (const row of lensRows) {
+        const v = row.responsibleCompany?.trim();
+        if (v) names.add(v);
+      }
+      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)) });
+    } catch (err) {
+      res.status(500).json({ error: "responsible_companies_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );
@@ -979,6 +1014,116 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
   }
 );
 
+// BATCH RESPONSIBLE COMPANY - stores the company responsible for the selected
+// Lens viewpoint chains and groups. This affects platform tables/reports and is
+// pulled into Navisworks metadata through Pull from Platform.
+router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-responsible-company",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const ids: number[] = Array.isArray(req.body?.ids)
+      ? Array.from(new Set(req.body.ids.map((x: unknown) => Number(x)).filter((x: number) => Number.isInteger(x) && x > 0)))
+      : [];
+    const responsibleCompany = req.body?.responsibleCompany != null ? String(req.body.responsibleCompany).trim() : "";
+    const reason = req.body?.reason != null ? String(req.body.reason).trim() : "";
+    if (ids.length === 0) {
+      res.status(400).json({ error: "invalid_ids", message: "Select at least one Lens viewpoint to update." });
+      return;
+    }
+    if (!responsibleCompany) {
+      res.status(400).json({ error: "invalid_responsible_company", message: "Responsible Company is required." });
+      return;
+    }
+    if (!reason) {
+      res.status(400).json({ error: "reason_required", message: "A reason is required for responsible company changes." });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        const allProjectRows = await tx.select().from(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId));
+        const byId = new Map(allProjectRows.map(v => [v.id, v]));
+        const childrenByParent = new Map<number, number[]>();
+        const idsByGroup = new Map<string, number[]>();
+        for (const row of allProjectRows) {
+          if (row.supersedesId == null) continue;
+          const list = childrenByParent.get(row.supersedesId) ?? [];
+          list.push(row.id);
+          childrenByParent.set(row.supersedesId, list);
+        }
+        for (const row of allProjectRows) {
+          if (!row.issueGroupId) continue;
+          const list = idsByGroup.get(row.issueGroupId) ?? [];
+          list.push(row.id);
+          idsByGroup.set(row.issueGroupId, list);
+        }
+
+        const selectedExisting = ids.filter(id => byId.has(id));
+        const expandedIds = new Set<number>();
+        const addChain = (startId: number) => {
+          let rootId = startId;
+          const seenBack = new Set<number>();
+          for (let guard = 0; guard < 200; guard++) {
+            const row = byId.get(rootId);
+            if (!row || row.supersedesId == null || seenBack.has(rootId)) break;
+            seenBack.add(rootId);
+            rootId = row.supersedesId;
+          }
+
+          const stack = [rootId];
+          const seenForward = new Set<number>();
+          while (stack.length > 0) {
+            const id = stack.pop()!;
+            if (seenForward.has(id)) continue;
+            seenForward.add(id);
+            if (!byId.has(id)) continue;
+            expandedIds.add(id);
+            for (const childId of childrenByParent.get(id) ?? []) stack.push(childId);
+          }
+        };
+        for (const id of selectedExisting) {
+          const selectedRow = byId.get(id);
+          if (selectedRow?.issueGroupId) {
+            for (const groupId of idsByGroup.get(selectedRow.issueGroupId) ?? []) addChain(groupId);
+          } else {
+            addChain(id);
+          }
+        }
+
+        const existing = Array.from(expandedIds).map(id => byId.get(id)!).filter(Boolean);
+        const changed = existing.filter(v => (v.responsibleCompany ?? "") !== responsibleCompany);
+        if (changed.length === 0) return { selected: selectedExisting.length, matched: existing.length, expanded: existing.length, updated: 0 };
+        const changedIds = changed.map(v => v.id);
+        const updated = await tx.update(lensViewpointsTable)
+          .set({ responsibleCompany, updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, changedIds)))
+          .returning({ id: lensViewpointsTable.id });
+        await tx.insert(activityLogTable).values(changed.map(v => ({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "responsible_company_corrected",
+          entityType: "lens_viewpoint",
+          entityId: v.id,
+          fileNameBefore: v.responsibleCompany ?? null,
+          fileNameAfter: responsibleCompany,
+          details: reason,
+        })));
+        return { selected: selectedExisting.length, matched: existing.length, expanded: existing.length, updated: updated.length };
+      });
+      if (result.matched === 0) {
+        res.status(404).json({ error: "not_found", message: "No selected Lens viewpoints were found in this project." });
+        return;
+      }
+      res.json({ success: true, ...result, responsibleCompany });
+    } catch (err) {
+      res.status(500).json({ error: "lens_batch_responsible_company_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // PATCH lens viewpoint status. Registered BEFORE the "/:reportId" routes so the
 // literal "lens-viewpoints" segment is not captured by the :reportId param.
 router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
@@ -1082,6 +1227,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
           displayId: old.displayId,
           note: newNote,
           trade: old.trade,
+          responsibleCompany: old.responsibleCompany,
           reportType: old.reportType,
           priority: old.priority,
           floor: old.floor,
@@ -1172,6 +1318,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
           displayId: old.displayId,
           note: old.note,
           trade: newTrade,
+          responsibleCompany: old.responsibleCompany,
           reportType: old.reportType,
           priority: old.priority,
           floor: old.floor,
@@ -1667,6 +1814,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const snapshot = vps.map(v => ({
         id: v.id, viewpointId: v.viewpointId, displayId: v.displayId,
         note: v.note, trade: v.trade, reportType: v.reportType, priority: v.priority,
+        responsibleCompany: v.responsibleCompany,
         floor: v.floor, openItems: v.openItems, status: v.status,
         capturedAt: v.capturedAt, syncedAt: v.syncedAt,
         revisionNumber: v.revisionNumber, lifecycleStatus: v.lifecycleStatus,
@@ -1896,16 +2044,17 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.moveDown(0.4);
 
         const registerColumns = [
-          { label: "ID", width: 58, bold: true, format: (v: any) => idText(v) },
-          { label: "From", width: 50, format: (v: any) => predecessorCodeOf(v) },
-          ...(showGroupIds ? [{ label: "Group", width: 44, format: (v: any) => groupTokenOf(v) }] : []),
-          { label: "Priority", width: 46, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
-          { label: "Trade", width: 62, format: (v: any) => v.trade || "-" },
-          { label: "Report Type", width: 66, format: (v: any) => v.reportType || "-" },
-          { label: "Floor", width: 42, format: (v: any) => v.floor || "-" },
-          { label: "Note", width: showGroupIds ? 220 : 264, wrap: true, format: (v: any) => v.note || "-" },
-          { label: "Status", width: 62, format: (v: any) => statusLabel(v.status) },
-          { label: "Captured", width: 62, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
+          { label: "ID", width: 54, bold: true, format: (v: any) => idText(v) },
+          { label: "From", width: 44, format: (v: any) => predecessorCodeOf(v) },
+          ...(showGroupIds ? [{ label: "Group", width: 40, format: (v: any) => groupTokenOf(v) }] : []),
+          { label: "Priority", width: 42, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
+          { label: "Trade", width: 56, format: (v: any) => v.trade || "-" },
+          { label: "Responsible", width: 74, format: (v: any) => v.responsibleCompany || "-" },
+          { label: "Report Type", width: 62, format: (v: any) => v.reportType || "-" },
+          { label: "Floor", width: 38, format: (v: any) => v.floor || "-" },
+          { label: "Note", width: showGroupIds ? 174 : 214, wrap: true, format: (v: any) => v.note || "-" },
+          { label: "Status", width: 54, format: (v: any) => statusLabel(v.status) },
+          { label: "Captured", width: 54, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
         ];
 
         const endY = drawTable(doc, {
@@ -1978,8 +2127,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
               { label: "State", width: 70, format: (r) => lifecycleLabel(r.lifecycleStatus ?? "active") },
               { label: "From", width: 62, format: (r) => predecessorCodeOf(r) },
               { label: "Trade", width: 72, format: (r) => r.trade || "-" },
+              { label: "Responsible", width: 86, format: (r) => r.responsibleCompany || "-" },
               { label: "Report Type", width: 78, format: (r) => r.reportType || "-" },
-              { label: "Note", width: 288, wrap: true, format: (r) => r.note || "-" },
+              { label: "Note", width: 202, wrap: true, format: (r) => r.note || "-" },
               { label: "Captured", width: 72, color: PALETTE.MUTED, format: (r) => fmtShort(r.capturedAt) },
             ],
             onPageBreak: () => {

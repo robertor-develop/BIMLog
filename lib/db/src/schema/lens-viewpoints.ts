@@ -7,6 +7,7 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   viewpointId: text("viewpoint_id").notNull(),
   note: text("note"),
   trade: text("trade"),
+  responsibleCompany: text("responsible_company"),
   reportType: text("report_type"),
   priority: integer("priority").default(3),
   floor: text("floor"),

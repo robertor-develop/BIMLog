@@ -16,6 +16,7 @@ interface LensViewpoint {
   navisworksGuid?: string | null;
   note?: string | null;
   trade?: string | null;
+  responsibleCompany?: string | null;
   reportType?: string | null;
   priority?: number | null;
   floor?: string | null;
@@ -183,6 +184,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [floorCorrectionReason, setFloorCorrectionReason] = useState("");
   const [floorCorrectionPhase, setFloorCorrectionPhase] = useState<"input" | "submitting">("input");
   const [floorCorrectionError, setFloorCorrectionError] = useState("");
+  const [responsibleCompanies, setResponsibleCompanies] = useState<string[]>([]);
+  const [responsibleOpen, setResponsibleOpen] = useState(false);
+  const [responsibleCompany, setResponsibleCompany] = useState("");
+  const [responsibleReason, setResponsibleReason] = useState("");
+  const [responsiblePhase, setResponsiblePhase] = useState<"input" | "submitting">("input");
+  const [responsibleError, setResponsibleError] = useState("");
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -330,6 +337,25 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         }
       } catch {
         /* levels are helpful but not required; existing row floors remain available */
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/responsible-companies`, { headers });
+        if (!cancelled && r.ok) {
+          const d = await r.json();
+          if (Array.isArray(d.companies)) {
+            setResponsibleCompanies(d.companies.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
+          }
+        }
+      } catch {
+        /* suggestions are helpful but not required; the user can type a company */
       }
     })();
     return () => { cancelled = true; };
@@ -509,6 +535,50 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     }
   };
 
+  const openResponsibleCompany = () => {
+    if (selectedIds.size === 0) return;
+    setResponsibleError("");
+    setResponsiblePhase("input");
+    setResponsibleCompany(responsibleCompanies[0] || "");
+    setResponsibleReason("");
+    setResponsibleOpen(true);
+  };
+
+  const submitResponsibleCompany = async () => {
+    const company = responsibleCompany.trim();
+    const reason = responsibleReason.trim();
+    if (selectedIds.size === 0) { setResponsibleError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
+    if (!company) { setResponsibleError(t("Responsible Company is required.", "La empresa responsable es obligatoria.")); return; }
+    if (!reason) { setResponsibleError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    setResponsiblePhase("submitting");
+    setResponsibleError("");
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/batch-responsible-company`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), responsibleCompany: company, reason }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setResponsiblePhase("input");
+        setResponsibleError(d.message || d.error || t("Responsible Company update failed.", "No se pudo actualizar la empresa responsable."));
+        return;
+      }
+      setResponsibleOpen(false);
+      setResponsiblePhase("input");
+      setSelectedIds(new Set());
+      setResponsibleCompanies(prev => prev.includes(company) ? prev : [...prev, company].sort((a, b) => a.localeCompare(b)));
+      showToast(t(
+        `Set Responsible Company on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
+        `Empresa responsable aplicada en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
+      ));
+      await loadViewpoints();
+    } catch (e) {
+      setResponsiblePhase("input");
+      setResponsibleError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   // Edit/Reassign/Void open a real modal (no native prompt/confirm). The modal
   // collects input, then submitAction drives a visible submitting -> success/error
   // state so a click never silently no-ops the way window.prompt could.
@@ -677,7 +747,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   // Column count for the full-width expansion rows — keep in lockstep with the
   // dynamic columns rendered in the table header/body below.
-  const colCount = 9 + (canWrite ? 1 : 0) + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
+  const colCount = 10 + (canWrite ? 1 : 0) + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
 
   const lastSynced = viewpoints.reduce<string | null>((max, v) => {
     if (!v.capturedAt) return max;
@@ -689,13 +759,14 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     // Mirror the live on-screen view: `filtered` already applies the trade/floor/
     // report-type/status filters AND the state scope, so the export reflects
     // exactly what the user is looking at rather than dumping every row.
-    const header = ["Date", "Code", "FileName", "Floor", "Trade", "ReportType", "Priority", "State", "Rev", "Note", "OpenItems", "Status"];
+    const header = ["Date", "Code", "FileName", "Floor", "Trade", "Responsible Company", "ReportType", "Priority", "State", "Rev", "Note", "OpenItems", "Status"];
     const data = filtered.map(v => [
       fmtCaptured(v.capturedAt),
       viewpointCode(v),
       v.viewpointId,
       v.floor || "",
       v.trade || "",
+      v.responsibleCompany || "",
       v.reportType || "",
       v.priority ? `P${v.priority}` : "",
       LIFECYCLE_BADGE[v.lifecycleStatus || "active"]?.label || v.lifecycleStatus || "Current",
@@ -712,7 +783,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       ...data,
     ]);
     ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
-    ws["!cols"] = header.map((_, i) => ({ wch: i === 9 ? 40 : i === 2 ? 24 : 14 }));
+    ws["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 40 : i === 2 ? 24 : i === 5 ? 24 : 14 }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Lens Viewpoints");
     XLSX.writeFile(wb, `Lens-Viewpoints-${projectId}.xlsx`);
@@ -949,6 +1020,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             >
               <CheckCircle2 size={14} /> {t("Correct Floor", "Corregir Piso")}
             </button>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={openResponsibleCompany}
+              style={{ fontSize: 12, padding: "6px 12px", display: "flex", alignItems: "center", gap: 6, background: "#2563EB", borderColor: "#2563EB", color: "white" }}
+            >
+              <CheckCircle2 size={14} /> {t("Responsible Company", "Empresa Responsable")}
+            </button>
             <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds(new Set())} style={{ fontSize: 11, padding: "4px 10px" }}>{t("Clear selection", "Limpiar seleccion")}</button>
           </div>
         </div>
@@ -999,7 +1077,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   ...(showGroupCol ? ["Group"] : []),
                   ...(showLifecycleCol ? ["State"] : []),
                   ...(showRevisionCol ? ["Rev"] : []),
-                  "Priority", "Trade", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
+                  "Priority", "Trade", "Responsible Company", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
                 ].map(h => (
                   <th key={h} title={HEADER_TIPS[h] || undefined} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", cursor: HEADER_TIPS[h] ? "help" : undefined }}>{h}</th>
                 ))}
@@ -1066,6 +1144,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     )}
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><LensPBadge p={v.priority} /></td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.trade || "—"}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.responsibleCompany || "—"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.reportType || "—"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.floor || "—"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12, minWidth: 240, maxWidth: 420 }}>
@@ -1362,6 +1441,53 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               <button className="btn btn-sm btn-outline" onClick={() => setFloorCorrectionOpen(false)} disabled={floorCorrectionPhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px" }}>{t("Cancel", "Cancelar")}</button>
               <button className="btn btn-sm btn-primary" onClick={submitFloorCorrection} disabled={floorCorrectionPhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
                 {floorCorrectionPhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><CheckCircle2 size={14} /> {t("Apply Correction", "Aplicar Correccion")}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {responsibleOpen && (
+        <div
+          onClick={() => responsiblePhase !== "submitting" && setResponsibleOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{t("Set Responsible Company", "Asignar Empresa Responsable")}</h3>
+              <button onClick={() => responsiblePhase !== "submitting" && setResponsibleOpen(false)} aria-label={t("Close", "Cerrar")} disabled={responsiblePhase === "submitting"} style={{ background: "transparent", border: "none", cursor: responsiblePhase === "submitting" ? "not-allowed" : "pointer", color: "#6B7280", lineHeight: 0, padding: 4 }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ marginTop: 14, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, lineHeight: 1.5 }}>
+              {t("This sets the responsible company for the selected viewpoints and every group/chain-linked revision. It shows in the table, PDF report and Excel export. Choose an existing company or type a new one. Use Pull from Platform in Navisworks after saving.", "Esto asigna la empresa responsable a las vistas seleccionadas y a cada revision del mismo grupo/cadena. Aparece en la tabla, el reporte PDF y la exportacion Excel. Elija una empresa existente o escriba una nueva. Use Pull from Platform en Navisworks despues de guardar.")}
+            </div>
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontSize: 13, color: "#374151" }}>
+                {t("Selected viewpoints", "Vistas seleccionadas")}: <strong>{selectedIds.size}</strong>
+              </div>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Responsible Company", "Empresa Responsable")}
+                <input list="lens-responsible-companies" value={responsibleCompany} onChange={e => setResponsibleCompany(e.target.value)} placeholder={t("Choose or type a company", "Elija o escriba una empresa")} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, fontWeight: 400 }} />
+                <datalist id="lens-responsible-companies">
+                  {responsibleCompanies.map(c => <option key={c} value={c} />)}
+                </datalist>
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
+                {t("Reason", "Motivo")}
+                <textarea value={responsibleReason} onChange={e => setResponsibleReason(e.target.value)} rows={3} placeholder={t("Example: Plumbing scope assigned to ACME Mechanical.", "Ejemplo: El alcance de plomeria se asigno a ACME Mechanical.")} style={{ fontSize: 13, padding: "8px 10px", border: "1px solid #D1D5DB", borderRadius: 8, resize: "vertical", fontWeight: 400 }} />
+              </label>
+            </div>
+            {responsibleError && (
+              <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12.5, fontWeight: 600, padding: "8px 12px", borderRadius: 8 }}>{responsibleError}</div>
+            )}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+              <button className="btn btn-sm btn-outline" onClick={() => setResponsibleOpen(false)} disabled={responsiblePhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px" }}>{t("Cancel", "Cancelar")}</button>
+              <button className="btn btn-sm btn-primary" onClick={submitResponsibleCompany} disabled={responsiblePhase === "submitting"} style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+                {responsiblePhase === "submitting" ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</> : <><CheckCircle2 size={14} /> {t("Apply", "Aplicar")}</>}
               </button>
             </div>
           </div>
