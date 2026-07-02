@@ -3,7 +3,63 @@
 Updated manually after each feature ships. Reflects the real state of the platform.
 
 ## Last updated
-- 2026-06-24
+- 2026-07-02
+
+## What shipped since 2026-06-24 — Lens Viewpoints hardening + Responsible Company
+
+### Workflow change
+- The platform monorepo is now cloned locally (github.com/robertor-develop/BIMLog, branch
+  `master`; `main` is a stale March snapshot). Two AI agents edit the real repos directly:
+  Claude Code and Codex. Replit is the host/deploy only (Neon + Publish), no longer used as
+  an AI editor. RULE: one agent per session, always commit before switching.
+- Plugin uses semantic versioning (v1.6.x). Every package ships README + a per-revision
+  update .txt + the zip, built at `H:\BIMLogPlugin2025` via `Build-Package-2025.ps1`.
+  Current: v1.6.2. 2021 build at `C:\Dev\BIMLogPlugin` (Roberto/Navisworks 2021), 2025 build
+  at H: (Ruben/Navisworks 2025). Only `BIMLogLensPanel.cs` differs 2021 vs 2025; keep in sync.
+
+### Platform (all committed + pushed to master)
+- Lens table View controls: Active-only default + All-revisions toggle; per-column show/hide
+  (Group/Lifecycle/Rev); ID format toggle. ID short code is now `FI-001` (2-letter trade +
+  seq) everywhere — table, report register, Excel — matching the plugin.
+- Group column shows the `G:XXXX` token (first 4 of issueGroupId, same as plugin); column
+  headers have plain-language tooltips.
+- Supersession lineage on the successor row: "left-arrow supersedes FI-001".
+- Stats strip above the table (Open/Follow Up/Waiting/Approved/Resolved + Superseded/Voided);
+  report Executive Summary has a lifecycle line.
+- Report: "Include revision history" toggle; VOID-RECORD rows excluded from the register;
+  short `FI-001` ID by default.
+- Report-history per-entry delete. Deleting a lens viewpoint now ALSO deletes its
+  `activity_log` rows (no orphaned revision history resurfacing in reports).
+- Admin test-reset (`POST .../lens-viewpoints/reset-test-data`, admin-write) + a danger-zone
+  button: wipes a project's lens viewpoints + sequence counters + reports + events + lens
+  activity-log for a clean test baseline.
+- Floor-correction expanded to grouped viewpoints + chain repair for orphaned superseded rows
+  (Codex).
+- Responsible Company (v1.6.2): `responsible_company` column (schema + startup migration);
+  stored on sync; returned in lens-pull; suggestions endpoint; batch set across group/chain
+  (`.../batch-responsible-company`); table column + Set-Responsible-Company modal (datalist);
+  Excel + PDF; carried forward on Edit/Reassign.
+
+### Plugin (v1.6.x, 2021 deployed + 2025 packaged)
+- DisplayName rework DONE (shared display contract): names are now clean —
+  `ID | Trade-Seq | [R{n}] | [SUPERSEDED->succ / VOIDED] | ReportType | Floor | Priority |
+  Note[RL] | [G:xxxx] | [<-predecessor]`. Who/why/when/reason moved to plain-text
+  `[BIMLog history]` comments (invisible to the metadata parser).
+- Sync duplication fixed: `lens-sync` push skips viewpoints that already have a serverId or a
+  pending placeholder (edit/reassign copies are created by the action endpoints, not re-pushed).
+- Sync-first GUARDRAIL: Edit/Void/Reassign on an un-synced viewpoint pops "Sync required
+  first" (Sync now / offline anyway / Cancel) instead of silently queuing offline.
+- Done Managing Viewpoints button; RefreshCounter fixed (synced = server knows the name OR the
+  viewpoint has a serverId — edit/reassign copies have new names but real serverIds).
+- Group token `G:xxxx`; `<-predecessor` lineage on reassign copies; offline seq reads
+  `pending` (not `PEND004`).
+- Guidance dropdown (Codex): topic help (Daily workflow, Save, Markup, Edit/Reassign/Void,
+  Floor corrections, Clean duplicates, Create RFI, Troubleshooting) + Show-guidance toggle.
+- Clean Duplicate Views rebuilds into `BIMLog <date> C-001/C-002` (Codex).
+- Responsible Company field per trade row (v1.6.2) — synced, round-tripped, carried forward.
+- KNOWN NAVISWORKS LIMITATION: the `SUPERSEDED->successor` marker on the OLD tree record is
+  best-effort — Navisworks marks it read-only after the online round-trip, so the rename can
+  fail. The PLATFORM is the source of truth for lifecycle display; the tree name is cosmetic.
 
 ## What is working right now (June 15, 2026)
 - BIMLog Lens: Save Viewpoint, Sync, Jump to Viewpoint, Delete, tab persistence, amber refresh
