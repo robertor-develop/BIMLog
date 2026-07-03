@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, doublePrecision, index } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -57,4 +57,7 @@ export const clashesTable = pgTable("clashes", {
   updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"),
   deleteReason: text("delete_reason"),
-});
+}, (t) => ({
+  // Exact name of the index app.ts creates at runtime in production.
+  projectFingerprintIdx: index("clashes_project_fingerprint_idx").on(t.projectId, t.fingerprint),
+}));

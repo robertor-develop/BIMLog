@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
 
 // History of generated Lens Viewpoint PDF reports. One row per export. The
 // `snapshot` column stores the full array of viewpoints at export time, which is
@@ -25,6 +25,8 @@ export const lensViewpointReportsTable = pgTable("lens_viewpoint_reports", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (t) => ({
   projectNumberUnique: uniqueIndex("lens_viewpoint_reports_project_number_unique").on(t.projectId, t.reportNumber),
+  // Exact name of the index app.ts creates at runtime in production.
+  projectIdx: index("lens_viewpoint_reports_project_idx").on(t.projectId),
 }));
 
 // Status-change events for Lens viewpoints. Populated from now on whenever a
@@ -40,4 +42,7 @@ export const lensViewpointEventsTable = pgTable("lens_viewpoint_events", {
   toStatus: text("to_status"),
   changedById: integer("changed_by_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => ({
+  // Exact name of the index app.ts creates at runtime in production.
+  viewpointIdx: index("lens_viewpoint_events_viewpoint_idx").on(t.viewpointId),
+}));

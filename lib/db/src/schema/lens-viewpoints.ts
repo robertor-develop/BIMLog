@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, uniqueIndex, foreignKey } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const lensViewpointsTable = pgTable("lens_viewpoints", {
@@ -30,7 +30,9 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   // Lifecycle state, distinct from the workflow `status`. active | superseded | voided.
   lifecycleStatus: text("lifecycle_status").notNull().default("active"),
   // Self-reference: a Reassign creates a new row pointing back at the row it supersedes.
-  supersedesId: integer("supersedes_id").references((): AnyPgColumn => lensViewpointsTable.id),
+  // FK declared below in the table config with the exact production constraint name
+  // (lens_viewpoints_supersedes_id_fk, created at runtime by app.ts).
+  supersedesId: integer("supersedes_id"),
   // Single visible revision counter. Starts at 1; every Edit or Reassign creates a
   // new row with revision_number = old.revision_number + 1. Walk supersedes_id
   // backward to recover prior revisions.
@@ -52,4 +54,10 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   // and would otherwise miss it). NULL display_ids stay distinct.
   projectDisplayActiveUnique: uniqueIndex("lens_viewpoints_project_display_active_unique")
     .on(t.projectId, t.displayId).where(sql`lifecycle_status = 'active' AND display_id IS NOT NULL`),
+  // Self-referencing FK with the exact name app.ts creates at runtime in production.
+  supersedesFk: foreignKey({
+    columns: [t.supersedesId],
+    foreignColumns: [t.id],
+    name: "lens_viewpoints_supersedes_id_fk",
+  }),
 }));
