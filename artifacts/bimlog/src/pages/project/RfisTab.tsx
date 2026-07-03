@@ -1262,12 +1262,18 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoCostAmt, setInfoCostAmt] = useState("");
   const [infoSched, setInfoSched] = useState("");
   const [infoSchedDays, setInfoSchedDays] = useState("");
+  const [infoToCompany, setInfoToCompany] = useState("");
+  const [infoToPerson, setInfoToPerson] = useState("");
+  const [infoToEmail, setInfoToEmail] = useState("");
   const startInfoEdit = () => {
     setInfoQuestion(rfi.question || rfi.description || "");
     setInfoCost(rfi.costImpact || "");
     setInfoCostAmt(rfi.costImpactAmount || "");
     setInfoSched(rfi.scheduleImpact || "");
     setInfoSchedDays(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+    setInfoToCompany(rfi.submittedToCompany || "");
+    setInfoToPerson(rfi.submittedToPerson || "");
+    setInfoToEmail(rfi.submittedToEmail || "");
     setInfoEdit(true);
   };
   const infoInput = { width: "100%", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontFamily: "inherit", background: "transparent", color: "inherit" } as const;
@@ -1869,11 +1875,26 @@ ${hasResp ? `
               {rfi.submittedByAddress && <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}><MapPin style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedByAddress}</span></div>}
             </div>
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Submitted To", "Enviado A", lang)}</div>
-              {rfi.submittedToCompany && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><Building2 style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{rfi.submittedToCompany}</span></div>}
-              {rfi.submittedToPerson && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><User style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToPerson}</span></div>}
-              {rfi.submittedToEmail && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Mail style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToEmail}</span></div>}
-              {!rfi.submittedToCompany && !rfi.submittedToPerson && <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>—</span>}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted To", "Enviado A", lang)}</div>
+                {canWrite && !infoEdit && (
+                  <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
+                )}
+              </div>
+              {infoEdit ? (
+                <>
+                  <input value={infoToCompany} onChange={e => setInfoToCompany(e.target.value)} placeholder={w("Company (recipient)", "Empresa (destinatario)", lang)} style={infoInput} />
+                  <input value={infoToPerson} onChange={e => setInfoToPerson(e.target.value)} placeholder={w("Person", "Persona", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  <input value={infoToEmail} onChange={e => setInfoToEmail(e.target.value)} placeholder={w("Email", "Correo", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                </>
+              ) : (
+                <>
+                  {rfi.submittedToCompany && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><Building2 style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{rfi.submittedToCompany}</span></div>}
+                  {rfi.submittedToPerson && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><User style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToPerson}</span></div>}
+                  {rfi.submittedToEmail && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Mail style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToEmail}</span></div>}
+                  {!rfi.submittedToCompany && !rfi.submittedToPerson && <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>—</span>}
+                </>
+              )}
             </div>
           </div>
 
@@ -2035,7 +2056,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 
