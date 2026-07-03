@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
 import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
@@ -802,10 +802,32 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
       storagePath = await storage.upload(buffer, projectId, fileName);
       const defaultFileStatus = await getDefaultValue("file_status");
 
+      // Smart prefill from the source viewpoint if it's already synced: route the RFI to the
+      // viewpoint's Responsible Company and pre-fill the question + location from it, so the RFI
+      // arrives half-written. Best-effort — left blank if the viewpoint isn't found.
+      let vpToCompany: string | null = null;
+      let vpQuestion: string | null = null;
+      let vpLocation: string | null = null;
+      try {
+        const [vp] = await db.select({
+          responsibleCompany: lensViewpointsTable.responsibleCompany,
+          note: lensViewpointsTable.note,
+          floor: lensViewpointsTable.floor,
+        }).from(lensViewpointsTable).where(and(
+          eq(lensViewpointsTable.projectId, projectId),
+          or(eq(lensViewpointsTable.displayId, sourceViewpointId), eq(lensViewpointsTable.viewpointId, sourceViewpointId)),
+        )).limit(1);
+        if (vp) {
+          vpToCompany = vp.responsibleCompany || null;
+          vpQuestion = vp.note || null;
+          vpLocation = vp.floor || null;
+        }
+      } catch { /* prefill is best-effort — never block RFI creation */ }
+
       const result = await db.transaction(async (tx) => {
         // The creator is the ASKER, not the responder: stamp Submitted By with the creator's
-        // company/name so the RFI is never shown with the creator holding the ball. The
-        // recipient (Submitted To) is left blank for the user to fill in on the editable detail.
+        // company/name so the RFI is never shown with the creator holding the ball. Route it TO
+        // the viewpoint's Responsible Company (the party expected to answer) when known.
         const created = await createRfiForProject(
           projectId,
           {
@@ -814,6 +836,9 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
             sourceViewpointId,
             submittedByCompany: req.user!.companyName || null,
             submittedByContact: req.user!.fullName || null,
+            submittedToCompany: vpToCompany,
+            question: vpQuestion,
+            locationDescription: vpLocation,
           },
           req.user!,
           tx,
