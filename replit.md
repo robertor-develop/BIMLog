@@ -102,10 +102,13 @@ Both panels have identical CRUD capabilities:
 ## Environment Safety Lock (MANDATORY)
 
 **Two separate databases exist. They are NOT the same.**
-- **Development DB**: `postgresql://postgres:password@helium/heliumdb` -- used by dev server in Replit workspace
-- **Production DB**: separate Replit-managed instance -- used by the published/deployed app only
-- Cleaning dev DB does NOT clean production DB. They are independent.
-- To modify production DB: either use `executeSql({environment:"production"})` (read-only) or deploy code that performs the change on startup (then remove it).
+- **Runtime DB (dev AND prod)**: Neon via `PROD_DATABASE_URL` (shared env scope, host `ep-cold-wind-...neon.tech/neondb`). The api-server ALWAYS connects here — in the workspace dev run and in the published deployment. Verified via the deployment log line `[DB] Connecting to: ...neon.tech/neondb`. This is the only database with real data.
+- **Replit built-in DB (helium)**: `DATABASE_URL` — used ONLY by drizzle-kit CLI (`pnpm --filter @workspace/db run push`). Never used at runtime. No app data lives here.
+
+**PUBLISH SAFETY (CRITICAL — cause of repeated data loss until 2026-07-03):**
+- Replit's Publish flow diffs the helium dev DB against the production DB and auto-generates migrations. If helium is missing tables/columns that exist in prod (because they were created by the app.ts startup block), Publish generates `DROP TABLE ... CASCADE` and approving it WIPES production data.
+- Rule 1: after ANY schema change, run `pnpm --filter @workspace/db run push-force` to sync helium (registered as validation step `db-dev-sync`).
+- Rule 2: NEVER click "Approve and publish" if the migration preview shows any "You're about to delete..." / DROP warnings. Cancel and sync helium first.
 
 **Environment check endpoint**: `GET /api/v1/env-check` returns `{mode, dbHost, dbName, nodeEnv}`. In development: `mode=DEVELOPMENT, dbHost=helium`. In production: `mode=PRODUCTION, dbHost=<production-host>`.
 
@@ -132,7 +135,7 @@ Both panels have identical CRUD capabilities:
 - **Connection**: Single `DATABASE_URL` env var per environment, no fallback
 - **Persistence**: Guaranteed by Replit infrastructure across restarts
 - **Auto-seeding**: NONE. Seed script at `scripts/src/seed.ts` is manual-only
-- **Auto-migration**: NONE. No drizzle-kit push runs on startup
+- **Auto-migration**: api-server runs an idempotent startup block in `app.ts` (`CREATE TABLE / ALTER TABLE ... IF NOT EXISTS`) against the runtime Neon DB on every boot. No drizzle-kit push runs on startup — drizzle-kit is CLI-only against helium (see PUBLISH SAFETY above)
 - **Clean state**: Full reset 2026-04-09. One super admin: user 11 (Roberto Rodriguez, robertor@rryasociados.com, company 30 RRY Asociados). Production DB has user 18 (same email/credentials).
 - **System config preserved**: feature_flags (6 rows), config_options (33 rows, 8 categories)
 
