@@ -803,7 +803,21 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
       const defaultFileStatus = await getDefaultValue("file_status");
 
       const result = await db.transaction(async (tx) => {
-        const created = await createRfiForProject(projectId, { subject, priority, sourceViewpointId }, req.user!, tx);
+        // The creator is the ASKER, not the responder: stamp Submitted By with the creator's
+        // company/name so the RFI is never shown with the creator holding the ball. The
+        // recipient (Submitted To) is left blank for the user to fill in on the editable detail.
+        const created = await createRfiForProject(
+          projectId,
+          {
+            subject,
+            priority,
+            sourceViewpointId,
+            submittedByCompany: req.user!.companyName || null,
+            submittedByContact: req.user!.fullName || null,
+          },
+          req.user!,
+          tx,
+        );
         if (!created.ok) return created;
         await tx.insert(filesTable).values({
           projectId,
