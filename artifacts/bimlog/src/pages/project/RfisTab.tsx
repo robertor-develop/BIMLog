@@ -1706,9 +1706,9 @@ ${hasResp ? `
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex" }}>
-      <div style={{ flex: 1, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
-      <div style={{ width: 760, maxWidth: "95vw", background: "hsl(var(--background))", boxShadow: "-4px 0 32px rgba(0,0,0,0.18)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto" }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
+      <div style={{ position: "relative", width: "100%", maxWidth: 1080, margin: "24px 16px", background: "hsl(var(--background))", borderRadius: 12, boxShadow: "0 8px 40px rgba(0,0,0,0.22)", display: "flex", flexDirection: "column", overflow: "hidden", maxHeight: "calc(100vh - 48px)" }}>
         {/* Header */}
         <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
           <div>
