@@ -1251,6 +1251,26 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [costAmount, setCostAmount] = useState(rfi.costImpactAmount || "");
   const [schedImpact, setSchedImpact] = useState(rfi.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+
+  // Inline edit of the RFI's OWN details (question + cost/schedule impact), separate from the
+  // Response fields above — so editing happens right in the detail, no separate form to hunt for.
+  // Cost/schedule are free text plus an amount/days field, so "GC to determine" or "3 days @ $75"
+  // both fit.
+  const [infoEdit, setInfoEdit] = useState(false);
+  const [infoQuestion, setInfoQuestion] = useState("");
+  const [infoCost, setInfoCost] = useState("");
+  const [infoCostAmt, setInfoCostAmt] = useState("");
+  const [infoSched, setInfoSched] = useState("");
+  const [infoSchedDays, setInfoSchedDays] = useState("");
+  const startInfoEdit = () => {
+    setInfoQuestion(rfi.question || rfi.description || "");
+    setInfoCost(rfi.costImpact || "");
+    setInfoCostAmt(rfi.costImpactAmount || "");
+    setInfoSched(rfi.scheduleImpact || "");
+    setInfoSchedDays(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+    setInfoEdit(true);
+  };
+  const infoInput = { width: "100%", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontFamily: "inherit", background: "transparent", color: "inherit" } as const;
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
@@ -1958,8 +1978,17 @@ ${hasResp ? `
 
           {/* Question */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
-            <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
+              {canWrite && !infoEdit && (
+                <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
+              )}
+            </div>
+            {infoEdit ? (
+              <textarea value={infoQuestion} onChange={e => setInfoQuestion(e.target.value)} rows={4} placeholder={w("Type the question or issue...", "Escriba la pregunta o el problema...", lang)} style={{ ...infoInput, lineHeight: 1.6, resize: "vertical" }} />
+            ) : (
+              <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
+            )}
             {(rfi.attachmentsJson as string[] | null)?.length ? (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
@@ -1973,18 +2002,42 @@ ${hasResp ? `
           </div>
 
           {/* Impact */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
-              {rfi.costImpact === "Cost Increase Known" && rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
+              {infoEdit ? (
+                <>
+                  <input value={infoCost} onChange={e => setInfoCost(e.target.value)} placeholder={w("e.g. GC / Mech to determine", "ej. GC / Mecánico por determinar", lang)} style={infoInput} />
+                  <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Amount, e.g. $1,800", "Monto, ej. $1,800", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
+                  {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
+                </>
+              )}
             </div>
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
-              {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
+              {infoEdit ? (
+                <>
+                  <input value={infoSched} onChange={e => setInfoSched(e.target.value)} placeholder={w("e.g. adds ~3 days coordination", "ej. suma ~3 días de coordinación", lang)} style={infoInput} />
+                  <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Days", "Días", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
+                  {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
+                </>
+              )}
             </div>
           </div>
+          {infoEdit && (
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
+              <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+            </div>
+          )}
 
           {/* Response section */}
           <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
