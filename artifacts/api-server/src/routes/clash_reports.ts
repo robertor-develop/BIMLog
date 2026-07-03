@@ -642,6 +642,12 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         // flattening those rows back to ordinary active R1 viewpoints.
         const localLifecycleRaw = norm(v?.localLifecycle);
         const replayLifecycle = localLifecycleRaw === "superseded" || localLifecycleRaw === "voided" ? localLifecycleRaw : "active";
+        // Replay the workflow status the plugin pushed (from the viewpoint's status folder) so a
+        // wipe + re-sync restores Follow Up / Waiting Design / Approved / Resolved. Unknown/blank
+        // falls back to open — the default for a brand-new viewpoint.
+        const incomingStatus = norm(v?.status);
+        const LENS_STATUSES = ["open", "follow_up", "waiting_design", "approved", "resolved"];
+        const replayStatus = incomingStatus && LENS_STATUSES.includes(incomingStatus) ? incomingStatus : "open";
         const replayRevision = v?.revisionNumber != null && !Number.isNaN(Number(v.revisionNumber)) ? Math.max(1, Number(v.revisionNumber)) : 1;
         const localSupersedesDisplayId = norm(v?.localSupersedesId);
         // Atomic dedup: INSERT ... ON CONFLICT DO NOTHING on navisworks_guid when
@@ -712,7 +718,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               floor: floorVal,
               openItems: v?.openItems != null ? String(v.openItems) : null,
               capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
-              status: "open",
+              status: replayStatus,
               issueGroupId,
               lifecycleStatus: replayLifecycle,
               supersedesId: replaySupersedesId,
