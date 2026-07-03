@@ -224,3 +224,123 @@ KNOWN LIMITATION CARRIED FORWARD: the from-viewpoint screenshot is a real filesT
 system-generated PDFs and returns 501 for binary uploads because the disk path was never persisted to
 the DB. This is pre-existing and affects every user upload today; it was not introduced by this
 feature and needs a small follow-up to extend the download route.
+
+FULL RE-AUDIT — July 3 2026
+
+Method: fresh grep verification of every wiring claim against current route and frontend code,
+plus live read-only row counts queried today against the production Neon database. Append-only —
+nothing above this line was changed.
+
+CONTEXT EVENT: the double-database publish hazard was diagnosed and closed this week. Replit's
+Publish flow diffs the (unused) built-in dev DB against production and had been generating
+DROP TABLE migrations for runtime-created tables; approved publishes wiped lens_viewpoints,
+lens_viewpoint_events/reports/sequence_counters, and platform_settings on prior occasions.
+The dev DB is now schema-synced (drizzle push, registered as validation step db-dev-sync) and
+publish safety rules are documented in replit.md. Row counts below reflect post-incident state;
+zero-row lens_viewpoint_events/reports may partly reflect that wipe, not just lack of use.
+
+CROSS-CUTTING TRUTHS (re-verified)
+
+activity_log — WIRED and active (164 rows, up from 108). Written by rfis, submittals, files,
+change_orders, transmittals, meeting_minutes, clash_reports, schedule, project_directory,
+conventions, members, submittal_reports, linked_items, and the overdue-notifier background job.
+Still the one concern genuinely wired everywhere.
+
+Notifications — createNotification now has THREE callers: transmittals (transmittal_received,
+transmittals.ts:146), meeting_minutes (action_item_due, meeting_minutes.ts:168), and — FIXED
+since June 14 — change_orders (change_order_status, change_orders.ts:151, fired on
+submit/approve/reject to notify the initiator). The former "imports but never calls" gap is
+CLOSED. notifications table still 0 rows because all three source tables are empty
+(transmittals=0, action_items=0, change_orders=0).
+
+rfi_ball_in_court_history — NO LONGER ORPHANED. Single custody writer is POST
+.../rfis/:rfiId/mark-sent (rfis.ts:1475) inside a transaction with a concurrency guard and a
+partial-unique open-custody index. 1 row in production — the mechanism has fired in real use.
+
+Agents on save — UNCHANGED GAP. runClashAgent / runRfiAgent / runBriefingAgent are still called
+only from src/agents/* and the manual agents router; no create/update handler triggers them and
+no web frontend calls the manual endpoints. (Dashboard.tsx and TotalControl.tsx call
+/dashboard/briefing, which is the separate dashboard_briefing route, not the agents router.)
+agent_insights = 7 rows (up from 2), all from manual/delete-pattern paths.
+
+linked_items — unchanged: creation only via POST /projects/:id/links, still gated
+requirePermission("admin","write") (linked_items.ts:30); LinkedItemsPanel mounted in RfisTab,
+SubmittalsTab, LensViewpointsView. Prod = 0 rows. Wired but unused.
+
+NEW WIRING SINCE JUNE 14 (all verified live)
+
+RFI send custody: rfis.send_status/sent_at/sent_by_id/send_method drive the draft-to-sent flow;
+mark-sent is the sole ball-in-court writer; email preview via generate-email-preview. In prod:
+rfis=11 (up from 4), rfi_view_events=17.
+RFI from Navisworks viewpoint: POST .../rfis/from-viewpoint (atomic transaction + storage
+compensation), rfis.source_viewpoint_id, deep-link prefill, Jump to Viewpoint button.
+Lens Viewpoints lifecycle: lens_viewpoint_sequence_counters is the sequence authority (14 rows —
+actively used); Edit/Reassign supersede-and-insert revisions write lens_viewpoint_events;
+lens_viewpoint_reports stores generated report metadata. Both 0 rows in prod today (see context
+event above). lens_viewpoints = 19 rows, actively fed by the desktop plugin.
+Living Brief: editable docs (CLAUDE.md, VISION.md, PLUGIN.md) persist to platform_settings
+(living_brief_doc:* keys); PLATFORM/STATUS/AUDIT read from disk. Access gated by
+users.can_access_living_brief. platform_settings = 1 row.
+Storage adapter: all file I/O in routes goes through lib/storage-adapter.ts (buffer-based seam).
+
+MODULE-BY-MODULE (own-table write / activity_log / notification)
+
+RFIs: YES / YES / no in-app notification (email path on manual send). Active: 11 rfis, 1
+response, 17 view events, 1 custody row.
+Submittals: YES / YES / no. submittals=1; submittal_items and submittal_register still 0.
+Change Orders: YES / YES / YES (change_order_status — gap closed). Tables still 0 rows.
+Transmittals: YES / YES / YES (transmittal_received). Tables 0.
+Meeting Minutes: YES / YES / YES (action_item_due). meetings=1, attendees=0 (was 14 — rows gone),
+action_items=0.
+Clash Reports: YES / YES / no. clash_reports=5, clashes=2666, fed by desktop plugin.
+Files: YES / YES / no. files=11.
+Schedule: YES / YES / no. milestones=1.
+Project Directory: YES / YES / no. =0.
+Conventions: YES / YES / no. Active and growing: 7 conventions, 29 versions, 56 fields.
+Members: YES / YES / no (invites by email). members=12, invitations=0.
+Coordination: YES / YES / no. =7 rows.
+
+STILL-ORPHANED ROUTES (unchanged)
+
+agents router (insights, briefing, agents/clash, agents/rfi): no web frontend caller.
+documents router (/documents/search, /documents/ai-search): no caller anywhere.
+GET /projects/:projectId/levels (conventions.ts:105): defined, no frontend consumer.
+autodesk router and clash_reports lens-pull/plugin-pull: desktop-plugin-wired by design, not
+orphaned.
+
+STATIC-ONLY FRONTEND TABS (unchanged, intentional)
+
+IntegrationsTab: static integration and API docs. SetupGuide: static docs plus sync-agent
+download link.
+
+GENUINE WIRING GAPS REMAINING (priority order)
+
+1. Agents never fire in normal flows — unchanged since June 14. Wire clash/rfi/briefing agents
+   to saves or surface the manual endpoints in the UI.
+2. Binary uploads still not downloadable: files.ts:482 returns 501 for user-uploaded binaries via
+   the generic download route (only system-generated PDFs are served). Pre-existing limitation,
+   now affects 11 files.
+3. linked_items creation remains admin-write gated and barely surfaced — 0 rows ever.
+4. meeting_attendees dropped 14 -> 0 with meeting_minutes unchanged at 1 — consistent with the
+   publish-wipe incident window or a re-save that cleared attendees; worth a look next time
+   meetings are exercised.
+
+CLOSED SINCE LAST FULL AUDIT
+
+- change_orders notification gap (now calls createNotification on status changes).
+- rfi_ball_in_court_history orphaned table (now written by mark-sent; 1 live row).
+- Double-DB publish data-loss hazard (schema sync + guardrails; see context event).
+
+PRODUCTION DB TABLE COUNTS — July 3 2026
+
+action_items: 0, activity_log: 164, admin_actions_log: 3, agent_insights: 7,
+change_order_documents: 0, change_orders: 0, clash_reports: 5, clashes: 2666, companies: 6,
+company_profiles: 0, config_options: 90, contact_submissions: 0, coordination_intake_events: 7,
+email_log: 7, feature_flags: 11, files: 11, lens_viewpoint_events: 0, lens_viewpoint_reports: 0,
+lens_viewpoint_sequence_counters: 14, lens_viewpoints: 19, linked_items: 0, meeting_attendees: 0,
+meeting_minutes: 1, naming_convention_versions: 29, naming_conventions: 7, naming_fields: 56,
+notifications: 0, platform_settings: 1, project_directory: 0, project_invitations: 0,
+project_members: 12, project_milestones: 1, projects: 11, rfi_ball_in_court_history: 1,
+rfi_responses: 1, rfi_view_events: 17, rfis: 11, submittal_items: 0, submittal_register: 0,
+submittal_reports: 1, submittal_view_events: 0, submittals: 1, transmittal_items: 0,
+transmittals: 0, users: 7.
