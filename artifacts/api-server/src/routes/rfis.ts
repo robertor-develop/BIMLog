@@ -1495,12 +1495,16 @@ router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requir
       }
 
       const sentAt = new Date();
+      // Auto-advance the workflow: a just-sent RFI moves to "in review" (the reviewer now
+      // holds the ball). Don't downgrade one that's already responded/approved/closed.
+      const advanceStatus = (existing.status === "open" || existing.status === "draft") ? "in_review" : existing.status;
       const updatedRows = await tx.update(rfisTable).set({
         sendStatus: "sent",
         sentAt,
         sentById: req.user!.userId,
         sendMethod: "copy_paste",
         ballInCourt: recipientCompany,
+        status: advanceStatus,
         updatedAt: sentAt,
       }).where(and(
         eq(rfisTable.id, rfiId),
