@@ -2104,11 +2104,11 @@ ${hasResp ? `
             ) : (
               <div>
                 <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
-                  {w("Not sent yet. Copy the message below into your own email client, send it, then mark it as sent to start the response clock.", "Aún no enviado. Copie el mensaje a su propio correo, envíelo y luego márquelo como enviado para iniciar el reloj de respuesta.", lang)}
+                  {w("Not sent yet. Draft a professional email with AI, add your own context, copy it into your email client, then mark it as sent to start the response clock.", "Aún no enviado. Redacte un correo profesional con IA, agregue su contexto, cópielo a su cliente de correo y márquelo como enviado para iniciar el reloj de respuesta.", lang)}
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
-                  <Button variant="outline" size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next && aiPreview === null && !previewLoading) { void generatePreview(); } }} style={{ gap: 5, fontSize: 11 }}>
-                    <Mail style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Preview email", "Vista previa", lang)}
+                  <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) { setShowContextInput(true); if (aiPreview === null && !previewLoading) void generatePreview(); } }} style={{ gap: 5, fontSize: 11 }}>
+                    <Sparkles style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Draft email with AI", "Redactar correo con IA", lang)}
                   </Button>
                   {canWrite && rfi.status !== "closed" && (
                     <Button size="sm" onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
