@@ -1441,6 +1441,29 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     }
   };
 
+  const [qAiLoading, setQAiLoading] = useState(false);
+  const handleQuestionAi = async () => {
+    const seed = (infoQuestion || rfi.question || rfi.description || rfi.subject || "").trim();
+    if (!seed) { toast({ title: w("Write a rough note first, then AI Assist.", "Escriba una nota primero, luego Asistencia IA.", lang), variant: "destructive" }); return; }
+    setQAiLoading(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/rfis/generate-question`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ description: seed, subject: rfi.subject }),
+      });
+      if (!resp.ok) throw new Error("AI request failed");
+      const data = await resp.json() as { question: string };
+      setInfoQuestion(data.question);
+      toast({ title: w("AI drafted the question — review before saving", "IA redactó la pregunta — revise antes de guardar", lang) });
+    } catch {
+      toast({ title: w("AI assist failed", "Asistencia IA falló", lang), variant: "destructive" });
+    } finally {
+      setQAiLoading(false);
+    }
+  };
+
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
     try {
@@ -1982,6 +2005,12 @@ ${hasResp ? `
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
               {canWrite && !infoEdit && (
                 <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
+              )}
+              {infoEdit && (
+                <button onClick={handleQuestionAi} disabled={qAiLoading} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#7C3AED", background: "transparent", border: "1px solid #C4B5FD", borderRadius: 6, padding: "3px 8px", cursor: "pointer" }}>
+                  {qAiLoading ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <Sparkles style={{ width: 11, height: 11 }} />}
+                  {w("AI Assist", "Asistencia IA", lang)}
+                </button>
               )}
             </div>
             {infoEdit ? (
