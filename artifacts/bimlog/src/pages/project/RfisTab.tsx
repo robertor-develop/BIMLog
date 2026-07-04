@@ -1675,6 +1675,9 @@ ${hasResp ? `
   const due = rfi.dateRequired || rfi.dueDate;
   const isOverdue = rfi.status !== "closed" && due ? new Date(due) < new Date() : false;
   const days = differenceInDays(new Date(), new Date(rfi.createdAt));
+  // The single impact block shows what the asker flagged plus what the latest response confirmed.
+  const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
+  const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
 
   const handleSaveResponse = async () => {
     if (!answer.trim()) {
@@ -1995,6 +1998,7 @@ ${hasResp ? `
           </div>
 
           {/* Impact */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Impact — flagged by asker, confirmed in response", "Impacto — señalado por el solicitante, confirmado en la respuesta", lang)}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
@@ -2007,6 +2011,7 @@ ${hasResp ? `
                 <>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
                   {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
+                  {confirmedCost?.costImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedCost.costImpact}</div>}
                 </>
               )}
             </div>
@@ -2021,6 +2026,7 @@ ${hasResp ? `
                 <>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
                   {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
+                  {confirmedSched?.scheduleImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedSched.scheduleImpact}{confirmedSched.scheduleImpactDays != null ? ` (${confirmedSched.scheduleImpactDays}d)` : ""}</div>}
                 </>
               )}
             </div>
@@ -2265,7 +2271,8 @@ ${hasResp ? `
                 </div>
 
                 {/* Impact update */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 12, marginBottom: 2 }}>{w("This response confirms the Impact shown above.", "Esta respuesta confirma el Impacto mostrado arriba.", lang)}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 6 }}>
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Cost Impact", "Impacto Costo", lang)}</label>
                     {["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].map(opt => (
