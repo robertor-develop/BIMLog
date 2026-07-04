@@ -1283,6 +1283,17 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoEdit(true);
   };
   const infoInput = { width: "100%", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontFamily: "inherit", background: "transparent", color: "inherit" } as const;
+
+  // Project Directory for the recipient picker: pick an existing company/person (auto-fills
+  // their email) or just type a new one.
+  const [rfiDirectory, setRfiDirectory] = useState<{ fullName: string; email: string; companyName: string | null }[]>([]);
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then((d) => { if (Array.isArray(d)) setRfiDirectory(d); })
+      .catch(() => {});
+  }, [projectId]);
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
@@ -1904,9 +1915,19 @@ ${hasResp ? `
               </div>
               {infoEdit ? (
                 <>
-                  <input value={infoToCompany} onChange={e => setInfoToCompany(e.target.value)} placeholder={w("Company (recipient)", "Empresa (destinatario)", lang)} style={infoInput} />
-                  <input value={infoToPerson} onChange={e => setInfoToPerson(e.target.value)} placeholder={w("Person", "Persona", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  <input list="rfi-dir-companies" value={infoToCompany} onChange={e => {
+                    const v = e.target.value; setInfoToCompany(v);
+                    const m = rfiDirectory.find(d => (d.companyName || "") === v);
+                    if (m && !infoToEmail) { if (m.fullName) setInfoToPerson(m.fullName); if (m.email) setInfoToEmail(m.email); }
+                  }} placeholder={w("Company — pick from directory or type new", "Empresa — elija del directorio o escriba nueva", lang)} style={infoInput} />
+                  <input list="rfi-dir-people" value={infoToPerson} onChange={e => {
+                    const v = e.target.value; setInfoToPerson(v);
+                    const m = rfiDirectory.find(d => d.fullName === v);
+                    if (m) { if (m.companyName) setInfoToCompany(m.companyName); if (m.email) setInfoToEmail(m.email); }
+                  }} placeholder={w("Person — pick or type new", "Persona — elija o escriba nueva", lang)} style={{ ...infoInput, marginTop: 6 }} />
                   <input value={infoToEmail} onChange={e => setInfoToEmail(e.target.value)} placeholder={w("Email", "Correo", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  <datalist id="rfi-dir-companies">{[...new Set(rfiDirectory.map(d => d.companyName).filter((c): c is string => !!c))].map((c, i) => <option key={i} value={c} />)}</datalist>
+                  <datalist id="rfi-dir-people">{rfiDirectory.map((d, i) => <option key={i} value={d.fullName}>{d.companyName ? `${d.fullName} — ${d.companyName}` : d.fullName}</option>)}</datalist>
                 </>
               ) : (
                 <>
