@@ -1270,9 +1270,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoFromEmail, setInfoFromEmail] = useState("");
   const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
   const [questionDocInput, setQuestionDocInput] = useState("");
+  const [infoSubject, setInfoSubject] = useState("");
   const startInfoEdit = () => {
     setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
     setQuestionDocInput("");
+    setInfoSubject(rfi.subject || "");
     setInfoQuestion(rfi.question || rfi.description || "");
     setInfoCost(rfi.costImpact || "");
     setInfoCostAmt(rfi.costImpactAmount || "");
@@ -1801,7 +1803,11 @@ ${hasResp ? `
               <span className={`badge ${PRIORITY_BADGE[rfi.priority] ?? "badge-gray"}`}>{getLabel("rfi_priority", rfi.priority)}</span>
               {(rfi.revisionNumber ?? 0) > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", padding: "2px 6px", borderRadius: 4, background: "#EDE9FE" }}>Rev {rfi.revisionNumber}</span>}
             </div>
-            <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>{rfi.subject}</div>
+            {infoEdit ? (
+              <input value={infoSubject} onChange={e => setInfoSubject(e.target.value)} placeholder={w("RFI title / subject", "Título / asunto del RFI", lang)} style={{ ...infoInput, fontSize: 16, fontWeight: 700, marginTop: 4 }} />
+            ) : (
+              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>{rfi.subject}</div>
+            )}
             {bic && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, padding: "4px 10px", borderRadius: 20, background: bic.color + "15", border: `1px solid ${bic.color}44`, width: "fit-content" }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: bic.color }} />
@@ -2123,7 +2129,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 

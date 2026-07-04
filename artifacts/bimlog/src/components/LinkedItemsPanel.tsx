@@ -161,7 +161,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
             style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
             {REL_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-          <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={addLink}>+ Link</button>
+          <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={addLink}>+ Add linked item</button>
           <button className="btn btn-sm" onClick={() => navigate(`/projects/${projectId}/${CREATE_ROUTES[selType]}`)} title={`Create a new ${TYPE_LABELS[selType]} to link`}>+ Create {TYPE_LABELS[selType]}</button>
         </div>
       )}
