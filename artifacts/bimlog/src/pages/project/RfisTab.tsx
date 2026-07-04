@@ -2127,84 +2127,6 @@ ${hasResp ? `
             </div>
           )}
 
-          {/* Sending & accountability */}
-          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-              <Send style={{ width: 12, height: 12 }} />{w("Sending", "Envío", lang)}
-            </div>
-
-            {rfi.sendStatus === "sent" ? (
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
-                <PenLine style={{ width: 14, height: 14, color: "#B45309", flexShrink: 0, marginTop: 1 }} />
-                <div style={{ fontSize: 12, color: "#92400E" }}>
-                  <span style={{ fontWeight: 700 }}>{w("Manually marked as sent", "Marcado manualmente como enviado", lang)}</span>
-                  {rfi.sentAt && <span> · {fmt(rfi.sentAt)}</span>}
-                  <div style={{ fontSize: 11, color: "#B45309", marginTop: 2 }}>{w("Self-reported by the author. BIMLog did not send this email.", "Auto-reportado por el autor. BIMLog no envió este correo.", lang)}</div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
-                  {w("Not sent yet. Draft a professional email with AI, add your own context, copy it into your email client, then mark it as sent to start the response clock.", "Aún no enviado. Redacte un correo profesional con IA, agregue su contexto, cópielo a su cliente de correo y márquelo como enviado para iniciar el reloj de respuesta.", lang)}
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
-                  <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) { setShowContextInput(true); if (aiPreview === null && !previewLoading) void generatePreview(); } }} style={{ gap: 5, fontSize: 11 }}>
-                    <Sparkles style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Draft email with AI", "Redactar correo con IA", lang)}
-                  </Button>
-                  {canWrite && rfi.status !== "closed" && (
-                    <Button size="sm" onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
-                      {marking ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
-                      {w("Mark as Sent", "Marcar como Enviado", lang)}
-                    </Button>
-                  )}
-                </div>
-                {showSendPreview && (
-                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: 5 }}>
-                        <Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}
-                      </span>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <Button variant="outline" size="sm" onClick={() => setShowContextInput(v => !v)} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide context", "Ocultar contexto", lang) : w("Add context", "Agregar contexto", lang)}
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <RefreshCw style={{ width: 12, height: 12 }} />}
-                          {w("Regenerate", "Regenerar", lang)}
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleCopyPreview} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-                          {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
-                        </Button>
-                      </div>
-                    </div>
-                    {showContextInput && (
-                      <div style={{ padding: "8px 10px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.2)" }}>
-                        <textarea
-                          value={userContext}
-                          onChange={e => setUserContext(e.target.value)}
-                          placeholder={w("Add extra context for the AI (optional), then Regenerate…", "Agregue contexto adicional para la IA (opcional), luego Regenere…", lang)}
-                          style={{ width: "100%", minHeight: 56, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                        />
-                      </div>
-                    )}
-                    {previewFailed && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 11, color: "#B45309", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
-                        <AlertTriangle style={{ width: 12, height: 12, flexShrink: 0 }} />{w("AI draft unavailable — using basic template.", "Borrador de IA no disponible — usando plantilla básica.", lang)}
-                      </div>
-                    )}
-                    {previewLoading ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 12px", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                        <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />{w("Drafting email…", "Redactando correo…", lang)}
-                      </div>
-                    ) : (
-                      <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{previewText}</pre>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
           {/* Response section */}
           <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
@@ -2428,6 +2350,84 @@ ${hasResp ? `
               </div>
             </div>
           ) : null}
+          {/* Sending & accountability */}
+          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <Send style={{ width: 12, height: 12 }} />{w("Sending", "Envío", lang)}
+            </div>
+
+            {rfi.sendStatus === "sent" ? (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
+                <PenLine style={{ width: 14, height: 14, color: "#B45309", flexShrink: 0, marginTop: 1 }} />
+                <div style={{ fontSize: 12, color: "#92400E" }}>
+                  <span style={{ fontWeight: 700 }}>{w("Manually marked as sent", "Marcado manualmente como enviado", lang)}</span>
+                  {rfi.sentAt && <span> · {fmt(rfi.sentAt)}</span>}
+                  <div style={{ fontSize: 11, color: "#B45309", marginTop: 2 }}>{w("Self-reported by the author. BIMLog did not send this email.", "Auto-reportado por el autor. BIMLog no envió este correo.", lang)}</div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
+                  {w("Not sent yet. Draft a professional email with AI, add your own context, copy it into your email client, then mark it as sent to start the response clock.", "Aún no enviado. Redacte un correo profesional con IA, agregue su contexto, cópielo a su cliente de correo y márquelo como enviado para iniciar el reloj de respuesta.", lang)}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
+                  <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) { setShowContextInput(true); if (aiPreview === null && !previewLoading) void generatePreview(); } }} style={{ gap: 5, fontSize: 11 }}>
+                    <Sparkles style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Draft email with AI", "Redactar correo con IA", lang)}
+                  </Button>
+                  {canWrite && rfi.status !== "closed" && (
+                    <Button size="sm" onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
+                      {marking ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
+                      {w("Mark as Sent", "Marcar como Enviado", lang)}
+                    </Button>
+                  )}
+                </div>
+                {showSendPreview && (
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: 5 }}>
+                        <Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}
+                      </span>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <Button variant="outline" size="sm" onClick={() => setShowContextInput(v => !v)} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide context", "Ocultar contexto", lang) : w("Add context", "Agregar contexto", lang)}
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <RefreshCw style={{ width: 12, height: 12 }} />}
+                          {w("Regenerate", "Regenerar", lang)}
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleCopyPreview} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
+                          {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+                          {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
+                        </Button>
+                      </div>
+                    </div>
+                    {showContextInput && (
+                      <div style={{ padding: "8px 10px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.2)" }}>
+                        <textarea
+                          value={userContext}
+                          onChange={e => setUserContext(e.target.value)}
+                          placeholder={w("Add extra context for the AI (optional), then Regenerate…", "Agregue contexto adicional para la IA (opcional), luego Regenere…", lang)}
+                          style={{ width: "100%", minHeight: 56, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                        />
+                      </div>
+                    )}
+                    {previewFailed && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 11, color: "#B45309", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
+                        <AlertTriangle style={{ width: 12, height: 12, flexShrink: 0 }} />{w("AI draft unavailable — using basic template.", "Borrador de IA no disponible — usando plantilla básica.", lang)}
+                      </div>
+                    )}
+                    {previewLoading ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 12px", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                        <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />{w("Drafting email…", "Redactando correo…", lang)}
+                      </div>
+                    ) : (
+                      <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{previewText}</pre>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
