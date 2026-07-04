@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 
 const API = "/api/v1";
@@ -15,6 +16,15 @@ const TYPE_LABELS: Record<LinkType, string> = {
 
 const REL_OPTIONS = ["related", "resolves", "caused_by", "blocks"];
 
+// Where to go to create a new item of each type (then come back and link it).
+const CREATE_ROUTES: Record<LinkType, string> = {
+  clash: "clash-reports",
+  submittal: "submittals",
+  transmittal: "transmittals",
+  change_order: "change-orders",
+  meeting: "meetings",
+};
+
 interface LinkRow {
   id: number; fromType: string; fromId: number; toType: string; toId: number; linkType: string;
 }
@@ -28,6 +38,7 @@ interface Props {
 
 export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = true }: Props) {
   const { token } = useAuthStore();
+  const [, navigate] = useLocation();
   const headers = { Authorization: `Bearer ${token}` };
   const [links, setLinks] = useState<LinkRow[]>([]);
   const [items, setItems] = useState<Record<LinkType, { id: number; label: string }[]>>({
@@ -151,7 +162,11 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
             {REL_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
           <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={addLink}>+ Link</button>
+          <button className="btn btn-sm" onClick={() => navigate(`/projects/${projectId}/${CREATE_ROUTES[selType]}`)} title={`Create a new ${TYPE_LABELS[selType]} to link`}>+ Create {TYPE_LABELS[selType]}</button>
         </div>
+      )}
+      {canWrite && currentOptions.length === 0 && (
+        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>No {TYPE_LABELS[selType]} to link yet — use “+ Create {TYPE_LABELS[selType]}” to make one.</div>
       )}
     </div>
   );
