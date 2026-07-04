@@ -1268,7 +1268,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoFromCompany, setInfoFromCompany] = useState("");
   const [infoFromContact, setInfoFromContact] = useState("");
   const [infoFromEmail, setInfoFromEmail] = useState("");
+  const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
+  const [questionDocInput, setQuestionDocInput] = useState("");
   const startInfoEdit = () => {
+    setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
+    setQuestionDocInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
     setInfoCost(rfi.costImpact || "");
     setInfoCostAmt(rfi.costImpactAmount || "");
@@ -1985,7 +1989,22 @@ ${hasResp ? `
             ) : (
               <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
             )}
-            {(rfi.attachmentsJson as string[] | null)?.length ? (
+            {infoEdit ? (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments (sketches, markups, references)", "Adjuntos (croquis, marcados, referencias)", lang)}</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input value={questionDocInput} onChange={e => setQuestionDocInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); e.preventDefault(); } }} placeholder={w("Paste a URL or file name, e.g. SK-105 Rev2.pdf", "Pegue URL o nombre de archivo, ej. SK-105 Rev2.pdf", lang)} style={{ ...infoInput, flex: 1 }} />
+                  <button type="button" onClick={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Add", "Agregar", lang)}</button>
+                </div>
+                {questionDocs.map((a, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
+                    <ExternalLink style={{ width: 12, height: 12 }} />
+                    <span style={{ flex: 1 }}>{a}</span>
+                    <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
+                  </div>
+                ))}
+              </div>
+            ) : (rfi.attachmentsJson as string[] | null)?.length ? (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
                 {(rfi.attachmentsJson as string[]).map((a, i) => (
@@ -2034,7 +2053,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 
