@@ -25,6 +25,7 @@ export const filesTable = pgTable("files", {
   hashComparisonNote: text("hash_comparison_note"),
   fileTypeTier: text("file_type_tier"),
   source: text("source").default("user-uploaded"),
+  storagePath: text("storage_path"),
   linkedRfiId: integer("linked_rfi_id").references(() => rfisTable.id),
   contentVerificationResult: text("content_verification_result"),
   cvrWorkflowStatus: text("cvr_workflow_status").default("clean"),

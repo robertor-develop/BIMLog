@@ -852,6 +852,7 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
           status: defaultFileStatus,
           uploadedById: req.user!.userId,
           source: "lens-viewpoint",
+          storagePath,
           linkedRfiId: created.rfi.id,
         });
         return created;

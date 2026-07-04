@@ -157,6 +157,7 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_by_id integer`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_method text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_id text`);
+    await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_sent_by_id_users_id_fk') THEN
         ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);

@@ -477,6 +477,23 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
       return;
     }
 
+    // Stored binary (e.g. the Lens viewpoint screenshot) — serve the persisted file directly.
+    if (file.storagePath) {
+      try {
+        const buffer = await storage.download(file.storagePath);
+        const ct = file.fileType === "png" ? "image/png"
+          : file.fileType === "jpg" || file.fileType === "jpeg" ? "image/jpeg"
+          : file.fileType === "pdf" ? "application/pdf"
+          : "application/octet-stream";
+        res.setHeader("Content-Type", ct);
+        res.setHeader("Content-Disposition", `inline; filename="${file.fileName}"`);
+        res.send(buffer);
+      } catch {
+        res.status(404).json({ error: "Stored file not found" });
+      }
+      return;
+    }
+
     // Only system-generated response docs can be downloaded — generate on the fly
     if (file.source !== "system-generated" || !file.linkedRfiId) {
       res.status(501).json({ error: "Binary download not available — only system-generated documents can be downloaded directly." });

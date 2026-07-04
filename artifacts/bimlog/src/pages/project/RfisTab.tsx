@@ -1298,6 +1298,20 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       .then((d) => { if (Array.isArray(d)) setRfiDirectory(d); })
       .catch(() => {});
   }, [projectId]);
+
+  // Load the source viewpoint screenshot (stored as a lens-viewpoint file) for inline display.
+  const [vpImageUrl, setVpImageUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const vpFile = (files || []).find(f => f.source === "lens-viewpoint" && f.linkedRfiId === rfi.id);
+    if (!vpFile) { setVpImageUrl(null); return; }
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    let url: string | null = null;
+    fetch(`/api/v1/projects/${projectId}/files/${vpFile.id}/download`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.blob() : null)
+      .then(b => { if (b) { url = URL.createObjectURL(b); setVpImageUrl(url); } })
+      .catch(() => {});
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [files, rfi.id, projectId]);
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
@@ -1994,6 +2008,11 @@ ${hasResp ? `
                   <Navigation style={{ width: 12, height: 12 }} />{w("Viewpoint", "Punto de Vista", lang)} {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId}
                 </span>
                 <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("linked automatically — this RFI came from this viewpoint", "vinculado automáticamente — este RFI proviene de este punto de vista", lang)}</span>
+              </div>
+            )}
+            {vpImageUrl && (
+              <div style={{ marginBottom: 10 }}>
+                <img src={vpImageUrl} alt={w("Viewpoint screenshot", "Captura del punto de vista", lang)} style={{ maxWidth: "100%", borderRadius: 8, border: "1px solid hsl(var(--border))", display: "block" }} />
               </div>
             )}
             <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
