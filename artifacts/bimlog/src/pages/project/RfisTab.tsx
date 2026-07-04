@@ -1456,20 +1456,42 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   };
 
   const [qAiLoading, setQAiLoading] = useState(false);
-  const handleQuestionAi = async () => {
-    const seed = (infoQuestion || rfi.question || rfi.description || rfi.subject || "").trim();
-    if (!seed) { toast({ title: w("Write a rough note first, then AI Assist.", "Escriba una nota primero, luego Asistencia IA.", lang), variant: "destructive" }); return; }
+  const handleQuestionAi = async (extraDesc?: string) => {
+    const seed = (extraDesc || infoQuestion || rfi.question || rfi.description || "").trim();
     setQAiLoading(true);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const vpCode = (rfi as { sourceViewpointId?: string | null }).sourceViewpointId || undefined;
+      const atts = questionDocs.length ? questionDocs : ((rfi.attachmentsJson as string[] | null) || undefined);
       const resp = await fetch(`/api/v1/rfis/generate-question`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ description: seed, subject: rfi.subject }),
+        body: JSON.stringify({
+          description: seed,
+          subject: rfi.subject,
+          viewpointCode: vpCode,
+          drawingRef: rfi.drawingNumber || undefined,
+          specRef: rfi.specSection || undefined,
+          location: rfi.locationDescription || undefined,
+          attachments: atts,
+          costImpact: rfi.costImpact || undefined,
+          scheduleImpact: rfi.scheduleImpact || undefined,
+        }),
       });
       if (!resp.ok) throw new Error("AI request failed");
       const data = await resp.json() as { question: string };
-      setInfoQuestion(data.question);
+      const q = (data.question || "").trim();
+      if (q.toUpperCase().startsWith("NEED_MORE_INFO:")) {
+        const ask = q.replace(/^NEED_MORE_INFO:\s*/i, "");
+        const more = window.prompt(w("The AI needs a bit more to write a specific question:", "La IA necesita un poco más para escribir una pregunta específica:", lang) + "\n\n" + ask, "");
+        if (more && more.trim()) {
+          await handleQuestionAi(`${seed}\nCoordinator clarification (${ask}): ${more.trim()}`);
+        } else {
+          toast({ title: w("Add a brief description and try AI Assist again.", "Agregue una breve descripción e intente Asistencia IA de nuevo.", lang) });
+        }
+        return;
+      }
+      setInfoQuestion(q);
       toast({ title: w("AI drafted the question — review before saving", "IA redactó la pregunta — revise antes de guardar", lang) });
     } catch {
       toast({ title: w("AI assist failed", "Asistencia IA falló", lang), variant: "destructive" });

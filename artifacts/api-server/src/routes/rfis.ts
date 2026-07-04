@@ -1743,9 +1743,11 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
 
 router.post("/rfis/generate-question", authMiddleware, async (req, res) => {
   try {
-    const { description, projectName, subject } = req.body as { description: string; projectName?: string; subject?: string };
-    if (!description) {
-      res.status(400).json({ error: "description is required" });
+    const { description, projectName, subject, viewpointCode, drawingRef, specRef, location, attachments, costImpact, scheduleImpact } = req.body as {
+      description?: string; projectName?: string; subject?: string; viewpointCode?: string; drawingRef?: string; specRef?: string; location?: string; attachments?: string[]; costImpact?: string; scheduleImpact?: string;
+    };
+    if (!description && !subject && !viewpointCode) {
+      res.status(400).json({ error: "description or context is required" });
       return;
     }
 
@@ -1754,20 +1756,30 @@ router.post("/rfis/generate-question", authMiddleware, async (req, res) => {
       baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
     });
 
-    const prompt = `You are a construction project manager. Convert the following informal description into a formal, professional RFI (Request for Information) question suitable for an AEC/construction project.
+    const context = [
+      projectName ? `Project: ${projectName}` : "",
+      subject ? `RFI subject: ${subject}` : "",
+      viewpointCode ? `Source coordination viewpoint: ${viewpointCode}` : "",
+      location ? `Location / floor: ${location}` : "",
+      drawingRef ? `Drawing reference: ${drawingRef}` : "",
+      specRef ? `Spec section: ${specRef}` : "",
+      Array.isArray(attachments) && attachments.length ? `Attached references (sketches, markups, submittals): ${attachments.join(", ")}` : "",
+      costImpact ? `Flagged cost impact: ${costImpact}` : "",
+      scheduleImpact ? `Flagged schedule impact: ${scheduleImpact}` : "",
+      description ? `Issue description from the coordinator: ${description}` : "",
+    ].filter(Boolean).join("\n");
 
-The question should:
-- Be written in professional construction industry language
-- Clearly state the issue or ambiguity that needs clarification
-- Reference drawing numbers or spec sections if provided
-- Request a specific type of response or clarification
-- Be concise but complete (2-4 paragraphs maximum)
+    const prompt = `You are a senior BIM coordination manager writing a construction RFI (Request for Information). Use ONLY the context provided below — never invent dimensions, part numbers, drawing numbers, or facts that are not given.
 
-${projectName ? `Project: ${projectName}` : ""}
-${subject ? `RFI Subject: ${subject}` : ""}
-Issue Description: ${description}
+If the context clearly conveys a specific coordination issue (a clash, a fit or clearance problem, a missing detail, or a discrepancy between drawings, specs, or submittals), write a formal, professional RFI question in AEC construction language: state the exact issue and its location, reference the relevant drawings / specs / submittals / viewpoint that are provided, and request a specific decision or clarification. Keep it to 2-4 short paragraphs.
 
-Write only the formal RFI question text, nothing else.`;
+If the context is too thin to write a specific technical question — i.e. you would have to guess what the actual conflict is — do NOT make something up. Instead reply with a single line beginning exactly with:
+NEED_MORE_INFO: <a short, specific question asking the coordinator for the one or two missing details you need>
+
+Context:
+${context}
+
+Reply with either the finished RFI question text, or a single NEED_MORE_INFO line.`;
 
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5",
