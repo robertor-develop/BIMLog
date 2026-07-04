@@ -1755,8 +1755,8 @@ ${hasResp ? `
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
               </Button>
             )}
-            {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && (
-              <Button variant="outline" size="sm" onClick={() => onRevise(rfi)} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
+            {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && !infoEdit && (
+              <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
               </Button>
             )}
@@ -1919,6 +1919,98 @@ ${hasResp ? `
             </div>
           </div>
 
+
+          {/* Reference info */}
+          {(rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription) && (
+            <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10 }}>{w("Reference Information", "Información de Referencia", lang)}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                <InfoRow label={w("Drawing #", "Plano #", lang)} value={rfi.drawingNumber} />
+                <InfoRow label={w("Drawing Title", "Título Plano", lang)} value={rfi.drawingTitle} />
+                <InfoRow label={w("Spec Section", "Sección Esp.", lang)} value={rfi.specSection} />
+                <InfoRow label={w("Detail #", "Detalle #", lang)} value={rfi.detailNumber} />
+                <InfoRow label={w("Note #", "Nota #", lang)} value={rfi.noteNumber} />
+                <InfoRow label={w("Location", "Ubicación", lang)} value={rfi.locationDescription} />
+              </div>
+            </div>
+          )}
+
+          {/* Linked Items */}
+          <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid hsl(var(--border) / 0.4)", flexWrap: "wrap" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: "#F0FDFA", color: "#0F766E", border: "1px solid #5EEAD4" }}>
+                  <Navigation style={{ width: 12, height: 12 }} />{w("Viewpoint", "Punto de Vista", lang)} {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId}
+                </span>
+                <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("linked automatically — this RFI came from this viewpoint", "vinculado automáticamente — este RFI proviene de este punto de vista", lang)}</span>
+              </div>
+            )}
+            <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
+          </div>
+
+          {/* Question */}
+          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
+              {canWrite && !infoEdit && (
+                <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
+              )}
+            </div>
+            {infoEdit ? (
+              <textarea value={infoQuestion} onChange={e => setInfoQuestion(e.target.value)} rows={4} placeholder={w("Type the question or issue...", "Escriba la pregunta o el problema...", lang)} style={{ ...infoInput, lineHeight: 1.6, resize: "vertical" }} />
+            ) : (
+              <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
+            )}
+            {(rfi.attachmentsJson as string[] | null)?.length ? (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
+                {(rfi.attachmentsJson as string[]).map((a, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
+                    <ExternalLink style={{ width: 12, height: 12 }} />{a}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Impact */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
+            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
+              {infoEdit ? (
+                <>
+                  <input value={infoCost} onChange={e => setInfoCost(e.target.value)} placeholder={w("e.g. GC / Mech to determine", "ej. GC / Mecánico por determinar", lang)} style={infoInput} />
+                  <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Amount, e.g. $1,800", "Monto, ej. $1,800", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
+                  {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
+                </>
+              )}
+            </div>
+            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</div>
+              {infoEdit ? (
+                <>
+                  <input value={infoSched} onChange={e => setInfoSched(e.target.value)} placeholder={w("e.g. adds ~3 days coordination", "ej. suma ~3 días de coordinación", lang)} style={infoInput} />
+                  <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Days", "Días", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
+                  {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
+                </>
+              )}
+            </div>
+          </div>
+          {infoEdit && (
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
+              <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+            </div>
+          )}
+
           {/* Sending & accountability */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
@@ -1997,90 +2089,6 @@ ${hasResp ? `
               </div>
             )}
           </div>
-
-          {/* Reference info */}
-          {(rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription) && (
-            <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10 }}>{w("Reference Information", "Información de Referencia", lang)}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                <InfoRow label={w("Drawing #", "Plano #", lang)} value={rfi.drawingNumber} />
-                <InfoRow label={w("Drawing Title", "Título Plano", lang)} value={rfi.drawingTitle} />
-                <InfoRow label={w("Spec Section", "Sección Esp.", lang)} value={rfi.specSection} />
-                <InfoRow label={w("Detail #", "Detalle #", lang)} value={rfi.detailNumber} />
-                <InfoRow label={w("Note #", "Nota #", lang)} value={rfi.noteNumber} />
-                <InfoRow label={w("Location", "Ubicación", lang)} value={rfi.locationDescription} />
-              </div>
-            </div>
-          )}
-
-          {/* Linked Items */}
-          <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
-          </div>
-
-          {/* Question */}
-          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
-              {canWrite && !infoEdit && (
-                <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
-              )}
-            </div>
-            {infoEdit ? (
-              <textarea value={infoQuestion} onChange={e => setInfoQuestion(e.target.value)} rows={4} placeholder={w("Type the question or issue...", "Escriba la pregunta o el problema...", lang)} style={{ ...infoInput, lineHeight: 1.6, resize: "vertical" }} />
-            ) : (
-              <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
-            )}
-            {(rfi.attachmentsJson as string[] | null)?.length ? (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
-                {(rfi.attachmentsJson as string[]).map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                    <ExternalLink style={{ width: 12, height: 12 }} />{a}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          {/* Impact */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
-              {infoEdit ? (
-                <>
-                  <input value={infoCost} onChange={e => setInfoCost(e.target.value)} placeholder={w("e.g. GC / Mech to determine", "ej. GC / Mecánico por determinar", lang)} style={infoInput} />
-                  <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Amount, e.g. $1,800", "Monto, ej. $1,800", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
-                  {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
-                </>
-              )}
-            </div>
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</div>
-              {infoEdit ? (
-                <>
-                  <input value={infoSched} onChange={e => setInfoSched(e.target.value)} placeholder={w("e.g. adds ~3 days coordination", "ej. suma ~3 días de coordinación", lang)} style={infoInput} />
-                  <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Days", "Días", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
-                  {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
-                </>
-              )}
-            </div>
-          </div>
-          {infoEdit && (
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
-              <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
-            </div>
-          )}
-
           {/* Response section */}
           <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
