@@ -446,6 +446,22 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       )}
 
+      {/* Stats strip — Lens-style, clickable to filter */}
+      <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap", marginBottom: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--secondary) / 0.3)" }}>
+        <button onClick={() => setStatusFilter("all")} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 700, color: statusFilter === "all" ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>
+          {stats.total} {w("total", "total", lang)}
+        </button>
+        {statusOptions.map(o => {
+          const n = (rfis || []).filter(r => r.status === o.value).length;
+          return (
+            <button key={o.value} onClick={() => setStatusFilter(o.value)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: statusFilter === o.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", display: "inline-flex", alignItems: "center", gap: 5 }}>
+              {getLabel("rfi_status", o.value)} <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>{n}</span>
+            </button>
+          );
+        })}
+        {overdueCount > 0 && <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#BE123C" }}>{overdueCount} {w("overdue", "vencido(s)", lang)}</span>}
+      </div>
+
       <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
         <Input placeholder={w("Search RFIs…", "Buscar RFIs…", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 280, fontSize: 12 }} />
         <div style={{ display: "flex", gap: 4 }}>
