@@ -2048,7 +2048,7 @@ ${hasResp ? `
                 <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
               )}
               {infoEdit && (
-                <button onClick={handleQuestionAi} disabled={qAiLoading} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#7C3AED", background: "transparent", border: "1px solid #C4B5FD", borderRadius: 6, padding: "3px 8px", cursor: "pointer" }}>
+                <button onClick={() => handleQuestionAi()} disabled={qAiLoading} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#7C3AED", background: "transparent", border: "1px solid #C4B5FD", borderRadius: 6, padding: "3px 8px", cursor: "pointer" }}>
                   {qAiLoading ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <Sparkles style={{ width: 11, height: 11 }} />}
                   {w("AI Assist", "Asistencia IA", lang)}
                 </button>
