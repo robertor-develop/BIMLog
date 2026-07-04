@@ -378,6 +378,22 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     );
   }
 
+  // Create / edit RFI as a full page too (not a modal).
+  if (showCreate || revising) {
+    return (
+      <RfiCreatePanel
+        projectId={projectId}
+        preload={revising ?? undefined}
+        prefill={createPreload}
+        existingRfis={rfis || []}
+        members={members || []}
+        user={user}
+        lang={lang}
+        onClose={() => { setShowCreate(false); setRevising(null); setCreatePreload(undefined); }}
+      />
+    );
+  }
+
   return (
     <div style={{ position: "relative" }}>
       {/* Header */}
@@ -627,21 +643,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         />
       )}
 
-      {/* Slide-out Create Panel */}
-      {(showCreate || revising) && (
-        <RfiCreatePanel
-          projectId={projectId}
-          preload={revising ?? undefined}
-          prefill={createPreload}
-          existingRfis={rfis || []}
-          members={members || []}
-          user={user}
-          lang={lang}
-          onClose={() => { setShowCreate(false); setRevising(null); setCreatePreload(undefined); }}
-        />
-      )}
-
-      {/* Detail is rendered as a full page via the early return above — no modal. */}
+      {/* Create/edit and detail both render as full pages via the early returns above — no modals. */}
     </div>
   );
 }
@@ -853,9 +855,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex" }}>
-      <div style={{ flex: 1, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
-      <div style={{ width: 680, maxWidth: "95vw", background: "hsl(var(--background))", boxShadow: "-4px 0 32px rgba(0,0,0,0.18)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
+        <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
+      </button>
+      <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700 }}>{w(isRevision ? "Revise RFI" : "New RFI", isRevision ? "Revisar RFI" : "Nuevo RFI", lang)}</div>
@@ -866,7 +870,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </button>
         </div>
 
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 24px 24px" }}>
+        <div style={{ padding: "0 24px 24px" }}>
           {/* Section 1 — Header */}
           <SectionHeader title={w("1. Header Information", "1. Información del Encabezado", lang)} />
           <FormGrid>
