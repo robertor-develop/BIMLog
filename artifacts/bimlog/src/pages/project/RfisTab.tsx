@@ -18,7 +18,7 @@ import {
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
-  Send, Copy, Check, PenLine, Navigation,
+  Send, Copy, Check, PenLine, Navigation, ChevronLeft,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
@@ -359,6 +359,25 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 
   const statusOptions = getOptions("rfi_status");
 
+  // Full-page RFI detail (not a modal): when a row is selected, render only the detail page
+  // with a Back button — matching Change Orders / Lens Viewpoints. No overlay, no pop-up.
+  if (selectedRfi) {
+    return (
+      <RfiDetailPanel
+        projectId={projectId}
+        rfi={selectedRfi}
+        canWrite={canWrite}
+        lang={lang}
+        members={members || []}
+        user={user}
+        onClose={() => setSelectedRfi(null)}
+        onRevise={(rfi) => { setSelectedRfi(null); setRevising(rfi); }}
+        onExportPdf={handleExportPdf}
+        onUpdate={(updated) => setSelectedRfi(updated)}
+      />
+    );
+  }
+
   return (
     <div style={{ position: "relative" }}>
       {/* Header */}
@@ -622,21 +641,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         />
       )}
 
-      {/* Detail Panel */}
-      {selectedRfi && (
-        <RfiDetailPanel
-          projectId={projectId}
-          rfi={selectedRfi}
-          canWrite={canWrite}
-          lang={lang}
-          members={members || []}
-          user={user}
-          onClose={() => setSelectedRfi(null)}
-          onRevise={(rfi) => { setSelectedRfi(null); setRevising(rfi); }}
-          onExportPdf={handleExportPdf}
-          onUpdate={(updated) => setSelectedRfi(updated)}
-        />
-      )}
+      {/* Detail is rendered as a full page via the early return above — no modal. */}
     </div>
   );
 }
@@ -1791,9 +1796,11 @@ ${hasResp ? `
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto" }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} onClick={onClose} />
-      <div style={{ position: "relative", width: "100%", maxWidth: 1080, margin: "24px 16px", background: "hsl(var(--background))", borderRadius: 12, boxShadow: "0 8px 40px rgba(0,0,0,0.22)", display: "flex", flexDirection: "column", overflow: "hidden", maxHeight: "calc(100vh - 48px)" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
+        <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
+      </button>
+      <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {/* Header */}
         <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
           <div>
@@ -1872,7 +1879,7 @@ ${hasResp ? `
         </div>
 
         {/* Content */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "20px 24px 24px" }}>
+        <div style={{ padding: "20px 24px 24px" }}>
           {isOverdue && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
               <AlertTriangle style={{ width: 14, height: 14 }} />
