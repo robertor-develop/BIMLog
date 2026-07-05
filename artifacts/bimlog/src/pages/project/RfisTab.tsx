@@ -1772,6 +1772,12 @@ ${hasResp ? `
   // The single impact block shows what the asker flagged plus what the latest response confirmed.
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
+  const timeline = [
+    { label: w("Created", "Creado", lang), date: rfi.createdAt as string | Date | null, by: rfi.createdByName || undefined },
+    ...(rfi.sentAt ? [{ label: w("Sent to reviewer", "Enviado al revisor", lang), date: rfi.sentAt as string | Date | null, by: undefined as string | undefined }] : []),
+    ...rfiResponses.map(r => ({ label: w("Response", "Respuesta", lang), date: r.createdAt as string | Date | null, by: r.answeredBy || undefined })),
+    ...(rfi.dateAnswered ? [{ label: w("Answered", "Respondido", lang), date: rfi.dateAnswered as string | Date | null, by: undefined as string | undefined }] : []),
+  ].filter(e => !!e.date).sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
 
   const handleSaveResponse = async () => {
     if (!answer.trim()) {
@@ -1983,6 +1989,23 @@ ${hasResp ? `
               </div>
             ))}
           </div>
+
+          {/* Activity timeline */}
+          {timeline.length > 0 && (
+            <div style={{ marginBottom: 16, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Activity", "Actividad", lang)}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {timeline.map((e, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#1D4ED8", flexShrink: 0 }} />
+                    <span style={{ fontWeight: 600 }}>{e.label}</span>
+                    {e.by && <span style={{ color: "hsl(var(--muted-foreground))" }}>· {e.by}</span>}
+                    <span style={{ marginLeft: "auto", color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{fmt(e.date)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Submitted By / To */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
