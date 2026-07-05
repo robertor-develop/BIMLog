@@ -1967,6 +1967,41 @@ router.post("/projects/:projectId/rfis/import-prefill",
   }
 );
 
+// ─── POST /projects/:projectId/rfis/attachments/upload ───────────────────────
+// Uploads a file from the user's computer, stores it via the storage adapter as
+// a downloadable file record, and returns a download URL to add to an RFI's
+// attachments. rfiId is optional (the create form has no RFI yet).
+router.post("/projects/:projectId/rfis/attachments/upload",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const rfiId = req.body?.rfiId ? Number(req.body.rfiId) : null;
+      const fileName = req.file.originalname || "attachment";
+      const ext = (fileName.split(".").pop() || "").toLowerCase();
+      const storagePath = await storage.upload(req.file.buffer, projectId, `rfi-attach-${Date.now()}-${fileName}`);
+      const defaultFileStatus = await getDefaultValue("file_status");
+      const [row] = await db.insert(filesTable).values({
+        projectId,
+        fileName,
+        fileSize: req.file.size,
+        fileType: ext || "bin",
+        status: defaultFileStatus,
+        uploadedById: req.user!.userId,
+        source: "rfi-attachment",
+        storagePath,
+        linkedRfiId: rfiId,
+      }).returning();
+      res.json({ fileId: row.id, fileName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(fileName)}` });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Upload failed" });
+    }
+  }
+);
+
 // ─── GET /projects/:projectId/rfis/:rfiId/responses ──────────────────────────
 router.get("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

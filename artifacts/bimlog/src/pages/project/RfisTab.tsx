@@ -41,6 +41,15 @@ const PRIORITY_BADGE: Record<string, string> = {
 
 const RFI_TYPES = ["Coordination", "General", "Drawing", "Spec", "Submittal", "Safety Data Sheet", "Change", "Other"];
 
+// Attachments are plain strings (a URL, a file name, or an uploaded-file
+// download URL carrying ?name=). These render them nicely + clickably.
+const isUrlAttach = (v: string) => /^https?:\/\//.test(v) || v.startsWith("/api/");
+const attachLabel = (v: string) => {
+  const m = v.match(/[?&]name=([^&]+)/);
+  if (m) { try { return decodeURIComponent(m[1]); } catch { return m[1]; } }
+  return v;
+};
+
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
   if (rfi.status === "closed") return null;
   // Not sent yet: the author still holds it — nobody is "responding" to a draft.
@@ -799,6 +808,29 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
   };
 
+  // Upload an attachment from the user's computer, then add its download URL.
+  const attachFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingAtt, setUploadingAtt] = useState(false);
+  const uploadAttachment = async (file: File) => {
+    setUploadingAtt(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const fd = new FormData();
+      fd.append("file", file);
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      if (!resp.ok) throw new Error("Upload failed");
+      const { downloadUrl } = await resp.json() as { downloadUrl: string };
+      setAttachments(prev => [...prev, downloadUrl]);
+      toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
+    } catch {
+      toast({ title: w("Upload failed", "Error al subir", lang), variant: "destructive" });
+    } finally {
+      setUploadingAtt(false);
+    }
+  };
+
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
   const companyPeople = (company: string) => members.filter(m => m.userCompanyName === company);
 
@@ -1203,11 +1235,15 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL…", "Pegar nombre de archivo o URL…", lang)} style={{ fontSize: 12, flex: 1 }}
                   onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
                 <Button size="sm" variant="outline" onClick={() => { if (attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); } }} style={{ fontSize: 11 }}>{w("Add", "Agregar", lang)}</Button>
+                <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
+                <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
+                  {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
+                </Button>
               </div>
               {attachments.map((a, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
                   <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                  <span style={{ flex: 1 }}>{a}</span>
+                  {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
                   <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
                 </div>
               ))}
@@ -1593,6 +1629,31 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       toast({ title: e instanceof Error ? e.message : w("Send failed", "Error al enviar", lang), variant: "destructive" });
     } finally {
       setSending(false);
+    }
+  };
+
+  // Upload attachments from the user's computer (question + response docs).
+  const qAttachFileRef = useRef<HTMLInputElement>(null);
+  const rAttachFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const uploadDoc = async (file: File, onUploaded: (url: string) => void) => {
+    setUploadingDoc(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("rfiId", String(rfi.id));
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      if (!resp.ok) throw new Error("Upload failed");
+      const { downloadUrl } = await resp.json() as { downloadUrl: string };
+      onUploaded(downloadUrl);
+      toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
+    } catch {
+      toast({ title: w("Upload failed", "Error al subir", lang), variant: "destructive" });
+    } finally {
+      setUploadingDoc(false);
     }
   };
 
@@ -2298,11 +2359,15 @@ ${hasResp ? `
                 <div style={{ display: "flex", gap: 6 }}>
                   <input value={questionDocInput} onChange={e => setQuestionDocInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); e.preventDefault(); } }} placeholder={w("Paste a URL or file name, e.g. SK-105 Rev2.pdf", "Pegue URL o nombre de archivo, ej. SK-105 Rev2.pdf", lang)} style={{ ...infoInput, flex: 1 }} />
                   <button type="button" onClick={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Add", "Agregar", lang)}</button>
+                  <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
+                  <button type="button" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
+                  </button>
                 </div>
                 {questionDocs.map((a, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
                     <ExternalLink style={{ width: 12, height: 12 }} />
-                    <span style={{ flex: 1 }}>{a}</span>
+                    {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
                     <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
                   </div>
                 ))}
@@ -2312,7 +2377,7 @@ ${hasResp ? `
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
                 {(rfi.attachmentsJson as string[]).map((a, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                    <ExternalLink style={{ width: 12, height: 12 }} />{a}
+                    <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(a)}</a> : a}
                   </div>
                 ))}
               </div>
@@ -2408,7 +2473,7 @@ ${hasResp ? `
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 4 }}>{w("Response Documents", "Documentos de Respuesta", lang)}</div>
                     {(rfi.responseAttachmentsJson as string[]).map((doc, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                        <ExternalLink style={{ width: 12, height: 12 }} />{doc}
+                        <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(doc)}</a> : doc}
                       </div>
                     ))}
                   </div>
@@ -2495,6 +2560,10 @@ ${hasResp ? `
                     <Button size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }} style={{ fontSize: 11 }}>
                       {w("Add", "Agregar", lang)}
                     </Button>
+                    <input ref={rAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setResponseDocs(prev => [...prev, url])); e.target.value = ""; }} />
+                    <Button size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
+                      {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
+                    </Button>
                   </div>
                   {showFileSearch && (
                     <div style={{ position: "relative" }}>
@@ -2508,7 +2577,7 @@ ${hasResp ? `
                   {responseDocs.map((doc, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
                       <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                      <span style={{ flex: 1 }}>{doc}</span>
+                      {isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(doc)}</a> : <span style={{ flex: 1 }}>{doc}</span>}
                       <button onClick={() => setResponseDocs(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
                     </div>
                   ))}
