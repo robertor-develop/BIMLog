@@ -57,6 +57,7 @@ function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unkn
 // writes the activity-log entry. Returns a discriminated result the route maps to HTTP.
 type CreateRfiInput = {
   subject: string;
+  rfiType?: string | null;
   priority: string;
   description?: string | null;
   assignedToId?: number | null;
@@ -126,6 +127,7 @@ async function createRfiForProject(
     projectId,
     number,
     subject: input.subject,
+    rfiType: input.rfiType || null,
     description: input.description || null,
     status: defaultRfiStatus,
     priority: input.priority,
@@ -930,6 +932,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.subject) updates.subject = body.subject;
+    if (body.rfiType !== undefined) updates.rfiType = body.rfiType;
     if (body.description !== undefined) updates.description = body.description;
     if (body.status) {
       updates.status = body.status;

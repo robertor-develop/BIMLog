@@ -7,6 +7,7 @@ export const rfisTable = pgTable("rfis", {
   projectId: integer("project_id").references(() => projectsTable.id).notNull(),
   number: text("number").notNull(),
   subject: text("subject").notNull(),
+  rfiType: text("rfi_type"),
   description: text("description"),
   status: text("status").notNull(),
   priority: text("priority").notNull(),

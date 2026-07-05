@@ -233,6 +233,7 @@ export const CreateRfiParams = zod.object({
 
 export const CreateRfiBody = zod.object({
   subject: zod.string(),
+  rfiType: zod.string().optional(),
   description: zod.string().optional(),
   priority: zod.string(),
   assignedToId: zod.number().optional(),
@@ -274,6 +275,7 @@ export const UpdateRfiParams = zod.object({
 
 export const UpdateRfiBody = zod.object({
   subject: zod.string().optional(),
+  rfiType: zod.string().optional(),
   description: zod.string().optional(),
   status: zod.string().optional(),
   priority: zod.string().optional(),

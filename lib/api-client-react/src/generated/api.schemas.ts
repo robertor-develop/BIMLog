@@ -144,6 +144,7 @@ export interface Rfi {
   projectId: number;
   number: string;
   subject: string;
+  rfiType?: string;
   description?: string;
   status: string;
   priority: string;
@@ -194,6 +195,7 @@ export interface Rfi {
 
 export interface CreateRfiRequest {
   subject: string;
+  rfiType?: string;
   description?: string;
   priority: string;
   assignedToId?: number;
@@ -227,6 +229,7 @@ export interface CreateRfiRequest {
 
 export interface UpdateRfiRequest {
   subject?: string;
+  rfiType?: string;
   description?: string;
   status?: string;
   priority?: string;
