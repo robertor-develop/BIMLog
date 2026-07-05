@@ -1809,6 +1809,9 @@ ${hasResp ? `
   const due = rfi.dateRequired || rfi.dueDate;
   const isOverdue = rfi.status !== "closed" && due ? new Date(due) < new Date() : false;
   const days = differenceInDays(new Date(), new Date(rfi.createdAt));
+  // The response form is open (drafting an answer). The single Save Response
+  // action for it lives at the very bottom of the page, below the email.
+  const responseFormOpen = canWrite && rfi.status !== "closed" && ((rfiResponses.length === 0 && !rfi.answer && !rfi.response) || showAddResponse);
   // The single impact block shows what the asker flagged plus what the latest response confirmed.
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
@@ -2316,7 +2319,7 @@ ${hasResp ? `
               </button>
             )}
 
-            {canWrite && rfi.status !== "closed" && (rfiResponses.length === 0 && !rfi.answer && !rfi.response || showAddResponse) && (
+            {responseFormOpen && (
               <div style={{ borderTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? 12 : 0 }}>
                 {isCoi && (
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FFFBEB", border: "1.5px solid #F59E0B", borderRadius: 7, marginBottom: 12 }}>
@@ -2430,17 +2433,6 @@ ${hasResp ? `
                       <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Days", "Días", lang)} style={{ fontSize: 11, marginTop: 3 }} />
                     )}
                   </div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 10 }}>
-                  {(rfiResponses.length > 0 || rfi.answer || rfi.response) && (
-                    <Button variant="outline" size="sm" onClick={() => setShowAddResponse(false)} style={{ fontSize: 12 }}>
-                      {w("Cancel", "Cancelar", lang)}
-                    </Button>
-                  )}
-                  <Button onClick={handleSaveResponse} disabled={isUpdating} style={{ fontSize: 12, gap: 5 }}>
-                    {isUpdating ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : null}
-                    {w("Submit Response", "Enviar Respuesta", lang)}
-                  </Button>
                 </div>
               </div>
             )}
@@ -2577,6 +2569,21 @@ ${hasResp ? `
               </div>
             )}
           </div>
+
+          {/* Save Response — the final action for the whole page, below the email */}
+          {responseFormOpen && (
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 8, paddingTop: 14, borderTop: "1px solid hsl(var(--border))" }}>
+              {(rfiResponses.length > 0 || rfi.answer || rfi.response) && (
+                <Button variant="outline" size="sm" onClick={() => setShowAddResponse(false)} style={{ fontSize: 12 }}>
+                  {w("Cancel", "Cancelar", lang)}
+                </Button>
+              )}
+              <Button onClick={handleSaveResponse} disabled={isUpdating} style={{ fontSize: 13, gap: 6, padding: "8px 22px" }}>
+                {isUpdating ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : <CheckCircle2 style={{ width: 15, height: 15 }} />}
+                {w("Save Response", "Guardar Respuesta", lang)}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
