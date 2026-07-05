@@ -1296,10 +1296,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
   const [questionDocInput, setQuestionDocInput] = useState("");
   const [infoSubject, setInfoSubject] = useState("");
+  const [infoDist, setInfoDist] = useState<string[]>((rfi.distributionList as string[] | null) || []);
+  const [distInput, setDistInput] = useState("");
   const startInfoEdit = () => {
     setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
     setQuestionDocInput("");
     setInfoSubject(rfi.subject || "");
+    setInfoDist((rfi.distributionList as string[] | null) || []);
+    setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
     setInfoCost(rfi.costImpact || "");
     setInfoCostAmt(rfi.costImpactAmount || "");
@@ -2156,7 +2160,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 
@@ -2366,21 +2370,38 @@ ${hasResp ? `
             </div>
           )}
 
-          {/* Distribution list */}
-          {(rfi.distributionList as string[] | null)?.length ? (
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Distribution List", "Lista de Distribución", lang)}</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {(rfi.distributionList as string[]).map(e => {
-                  const parsed = parseDistEntry(e);
-                  return (
-                    <span key={e} style={{ fontSize: 11, padding: "3px 8px", background: parsed.isExternal ? "#E0F2FE" : "hsl(var(--secondary))", borderRadius: 12, display: "flex", alignItems: "center", gap: 4, border: parsed.isExternal ? "1px solid #BAE6FD" : "none" }}>
-                      {parsed.isExternal ? <UserPlus style={{ width: 10, height: 10, color: "#0369A1" }} /> : <Mail style={{ width: 10, height: 10 }} />}
-                      {parsed.display}
-                    </span>
-                  );
-                })}
-              </div>
+          {/* Distribution list (CC) */}
+          {(infoEdit || (rfi.distributionList as string[] | null)?.length) ? (
+            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, marginBottom: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Distribution List (CC)", "Lista de Distribución (CC)", lang)}</div>
+              {infoEdit ? (
+                <>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input value={distInput} onChange={e => setDistInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && distInput.trim()) { setInfoDist(prev => [...prev, distInput.trim()]); setDistInput(""); e.preventDefault(); } }} placeholder={w("Email or name to copy…", "Correo o nombre a copiar…", lang)} style={{ ...infoInput, flex: 1 }} />
+                    <button type="button" onClick={() => { if (distInput.trim()) { setInfoDist(prev => [...prev, distInput.trim()]); setDistInput(""); } }} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Add", "Agregar", lang)}</button>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                    {infoDist.map((e, i) => (
+                      <span key={i} style={{ fontSize: 11, padding: "3px 8px", background: "hsl(var(--secondary))", borderRadius: 12, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Mail style={{ width: 10, height: 10 }} />{parseDistEntry(e).display}
+                        <button type="button" onClick={() => setInfoDist(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 0, marginLeft: 2 }}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {(rfi.distributionList as string[]).map(e => {
+                    const parsed = parseDistEntry(e);
+                    return (
+                      <span key={e} style={{ fontSize: 11, padding: "3px 8px", background: parsed.isExternal ? "#E0F2FE" : "hsl(var(--secondary))", borderRadius: 12, display: "flex", alignItems: "center", gap: 4, border: parsed.isExternal ? "1px solid #BAE6FD" : "none" }}>
+                        {parsed.isExternal ? <UserPlus style={{ width: 10, height: 10, color: "#0369A1" }} /> : <Mail style={{ width: 10, height: 10 }} />}
+                        {parsed.display}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ) : null}
           {/* Sending & accountability */}
