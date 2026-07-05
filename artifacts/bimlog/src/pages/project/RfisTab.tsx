@@ -43,6 +43,10 @@ const RFI_TYPES = ["Coordination", "General", "Drawing", "Spec", "Submittal", "S
 
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
   if (rfi.status === "closed") return null;
+  // Not sent yet: the author still holds it — nobody is "responding" to a draft.
+  if (rfi.sendStatus !== "sent" && !rfi.sentAt) {
+    return { label: `${rfi.submittedByCompany || rfi.createdByName || "Author"} — to send`, color: "#B45309" };
+  }
   if (rfi.status === "responded") {
     return { label: rfi.submittedByCompany || rfi.createdByName || "Submitter", color: "#7C3AED" };
   }
@@ -360,7 +364,9 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     }
   };
 
-  const statusOptions = getOptions("rfi_status");
+  // Config can contain duplicate rfi_status entries; dedupe by value so the stats
+  // strip, filter tabs, and status <select> each show a status only once.
+  const statusOptions = [...new Map(getOptions("rfi_status").map(o => [o.value, o])).values()];
 
   // Full-page RFI detail (not a modal): when a row is selected, render only the detail page
   // with a Back button — matching Change Orders / Lens Viewpoints. No overlay, no pop-up.
@@ -1770,7 +1776,7 @@ ${hasResp ? `
     }
   };
 
-  const allStatusOptions = getOptions("rfi_status");
+  const allStatusOptions = [...new Map(getOptions("rfi_status").map(o => [o.value, o])).values()];
   // Only project_admin can close an RFI
   const currentMember = members.find(m => m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase());
   const isProjectAdmin = currentMember?.role === "project_admin";
