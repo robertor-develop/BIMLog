@@ -19,7 +19,7 @@ import {
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
-  Send, Copy, Check, PenLine, Navigation, ChevronLeft,
+  Send, Copy, Check, PenLine, Navigation, ChevronLeft, FolderOpen,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
@@ -831,6 +831,16 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
   };
 
+  const [gdConnectedCreate, setGdConnectedCreate] = useState(false);
+  const [showGdPicker, setShowGdPicker] = useState(false);
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then((d) => { const gd = Array.isArray(d) ? (d as { provider: string; status: string }[]).find(c => c.provider === "google_drive") : null; setGdConnectedCreate(!!gd && gd.status === "connected"); })
+      .catch(() => {});
+  }, []);
+
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
   const companyPeople = (company: string) => members.filter(m => m.userCompanyName === company);
 
@@ -1239,6 +1249,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                   {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                 </Button>
+                {gdConnectedCreate && (
+                  <Button size="sm" variant="outline" onClick={() => setShowGdPicker(true)} style={{ fontSize: 11, gap: 4 }}>
+                    <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                  </Button>
+                )}
               </div>
               {attachments.map((a, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
@@ -1353,6 +1368,14 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </Button>
         </div>
       </div>
+      {showGdPicker && (
+        <GoogleDrivePicker
+          projectId={projectId}
+          lang={lang}
+          onAttached={url => setAttachments(prev => [...prev, url])}
+          onClose={() => setShowGdPicker(false)}
+        />
+      )}
     </div>
   );
 }
@@ -1588,6 +1611,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // Does THIS user have their own SendGrid connected? Drives the real Send
   // button vs. the copy-paste + "connect" nudge.
   const [sgConnected, setSgConnected] = useState<boolean | null>(null);
+  const [gdConnected, setGdConnected] = useState(false);
+  const [gdPickerTarget, setGdPickerTarget] = useState<null | "question" | "response">(null);
   const [hideSgNudge, setHideSgNudge] = useState(() => localStorage.getItem("bimlog-hide-sendgrid-nudge") === "1");
   const [sending, setSending] = useState(false);
   useEffect(() => {
@@ -1595,8 +1620,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : [])
       .then((d) => {
-        const sg = Array.isArray(d) ? d.find((c: { provider: string; status: string }) => c.provider === "sendgrid") : null;
+        const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
+        const sg = list.find(c => c.provider === "sendgrid");
         setSgConnected(!!sg && sg.status === "connected");
+        const gd = list.find(c => c.provider === "google_drive");
+        setGdConnected(!!gd && gd.status === "connected");
       })
       .catch(() => setSgConnected(false));
   }, []);
@@ -2363,6 +2391,11 @@ ${hasResp ? `
                   <button type="button" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
                     {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                   </button>
+                  {gdConnected && (
+                    <button type="button" onClick={() => setGdPickerTarget("question")} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                    </button>
+                  )}
                 </div>
                 {questionDocs.map((a, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
@@ -2564,6 +2597,11 @@ ${hasResp ? `
                     <Button size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                       {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                     </Button>
+                    {gdConnected && (
+                      <Button size="sm" variant="outline" onClick={() => setGdPickerTarget("response")} style={{ fontSize: 11, gap: 4 }}>
+                        <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                      </Button>
+                    )}
                   </div>
                   {showFileSearch && (
                     <div style={{ position: "relative" }}>
@@ -2789,6 +2827,15 @@ ${hasResp ? `
           )}
         </div>
       </div>
+      {gdPickerTarget && (
+        <GoogleDrivePicker
+          projectId={projectId}
+          rfiId={rfi.id}
+          lang={lang}
+          onAttached={url => { if (gdPickerTarget === "question") setQuestionDocs(prev => [...prev, url]); else setResponseDocs(prev => [...prev, url]); }}
+          onClose={() => setGdPickerTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -2815,6 +2862,80 @@ function FormField({ label, children, full }: { label: string; children: React.R
     <div style={{ gridColumn: full ? "span 2" : undefined, display: "flex", flexDirection: "column", gap: 3 }}>
       <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>{label}</label>
       {children}
+    </div>
+  );
+}
+
+// Google Drive file picker — browse the user's connected Drive and import a file
+// as an RFI attachment. A transient modal (the RFI itself stays a full page).
+function GoogleDrivePicker({ projectId, rfiId, lang, onAttached, onClose }: {
+  projectId: number; rfiId?: number; lang: string;
+  onAttached: (url: string) => void; onClose: () => void;
+}) {
+  const { toast } = useToast();
+  const [q, setQ] = useState("");
+  const [files, setFiles] = useState<{ id: string; name: string; mimeType: string; size?: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [importingId, setImportingId] = useState<string | null>(null);
+  const tok = () => JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+
+  const load = async (query: string) => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/v1/me/connections/google-drive/files?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${tok()}` } });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Failed to load Drive"); }
+      const d = await r.json() as { files?: typeof files };
+      setFiles(d.files || []);
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : w("Failed to load Drive", "Error al cargar Drive", lang), variant: "destructive" });
+      setFiles([]);
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { load(""); /* eslint-disable-next-line */ }, []);
+
+  const pick = async (f: { id: string; name: string; mimeType: string }) => {
+    setImportingId(f.id);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/from-google-drive`, {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok()}` },
+        body: JSON.stringify({ fileId: f.id, fileName: f.name, mimeType: f.mimeType, rfiId }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Import failed"); }
+      const { downloadUrl } = await r.json() as { downloadUrl: string };
+      onAttached(downloadUrl);
+      toast({ title: w("Attached from Google Drive", "Adjuntado desde Google Drive", lang) });
+      onClose();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : w("Import failed", "Error al importar", lang), variant: "destructive" });
+    } finally { setImportingId(null); }
+  };
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", width: "100%", maxWidth: 560, maxHeight: "80vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{w("Attach from Google Drive", "Adjuntar desde Google Drive", lang)}</div>
+          <button onClick={onClose} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 16, height: 16 }} /></button>
+        </div>
+        <div style={{ padding: "12px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 6 }}>
+          <Input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === "Enter") load(q); }} placeholder={w("Search your Drive…", "Buscar en tu Drive…", lang)} style={{ fontSize: 12, flex: 1 }} />
+          <Button size="sm" onClick={() => load(q)} disabled={loading} style={{ fontSize: 11, gap: 4 }}>
+            {loading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Search style={{ width: 12, height: 12 }} />}{w("Search", "Buscar", lang)}
+          </Button>
+        </div>
+        <div style={{ overflowY: "auto", padding: "8px 10px" }}>
+          {loading && files.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Loading…", "Cargando…", lang)}</div>}
+          {!loading && files.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No files found.", "No se encontraron archivos.", lang)}</div>}
+          {files.map(f => (
+            <button key={f.id} onClick={() => pick(f)} disabled={!!importingId} style={{ width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", fontSize: 12 }}
+              onMouseEnter={e => (e.currentTarget.style.background = "hsl(var(--muted) / 0.5)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+              <FileText style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} />
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</span>
+              {importingId === f.id && <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
