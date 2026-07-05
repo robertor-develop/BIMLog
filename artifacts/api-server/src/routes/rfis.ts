@@ -1911,6 +1911,62 @@ Reply with either the finished RFI question text, or a single NEED_MORE_INFO lin
   }
 });
 
+// ─── POST /projects/:projectId/rfis/import-prefill ───────────────────────────
+// Reads ONE uploaded document (PDF/Word/Excel/image-of-text) and returns a
+// single set of proposed RFI fields for the user to REVIEW in the create form.
+// It does not create anything. Uses only what's in the document — no invention.
+router.post("/projects/:projectId/rfis/import-prefill",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropic = new Anthropic({
+        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
+        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      });
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+      const schemaHint = `{"subject":"","rfiType":"one of Coordination|General|Drawing|Spec|Submittal|Safety Data Sheet|Change|Other, or null","question":"","submittedToCompany":"","submittedToPerson":"","submittedToEmail":"","submittedByCompany":"","submittedByContact":"","submittedByEmail":"","drawingNumber":"","specSection":"","locationDescription":"","costImpact":"one of No Cost Impact|Cost Increase TBD|Cost Increase Known|Cost Decrease, or null","scheduleImpact":"one of No Schedule Impact|Increase in Calendar Days|Decrease in Calendar Days, or null","priority":"one of low|medium|high, or null","dateRequired":"YYYY-MM-DD or null"}`;
+      const instruction = `You are reading a construction document that describes ONE RFI (Request for Information) or an issue that should become one. Extract the fields into a SINGLE JSON object (no markdown fences, no array). Use ONLY information present in the document; leave a field as "" or null if it is not stated — never invent drawing numbers, companies, names, dates, or amounts. Fields: ${schemaHint}`;
+
+      let raw = "";
+      if (isPdf && pdfBase64) {
+        const msg = await anthropic.messages.create({
+          model: "claude-sonnet-4-5",
+          max_tokens: 1500,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
+              { type: "text", text: instruction },
+            ] as any,
+          }],
+        });
+        raw = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+      } else {
+        const text = (chunks || []).join("\n").slice(0, 20000);
+        const msg = await anthropic.messages.create({
+          model: "claude-sonnet-4-5",
+          max_tokens: 1500,
+          messages: [{ role: "user", content: `${instruction}\n\nDocument:\n${text}` }],
+        });
+        raw = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+      }
+
+      let fields: Record<string, unknown> = {};
+      try {
+        const parsed = JSON.parse(raw.replace(/```json\n?|```/g, "").trim());
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) fields = parsed;
+      } catch { /* leave empty on unparseable output — no fabrication */ }
+
+      res.json({ fields, sourceFileName: req.file.originalname });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to read document" });
+    }
+  }
+);
+
 // ─── GET /projects/:projectId/rfis/:rfiId/responses ──────────────────────────
 router.get("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

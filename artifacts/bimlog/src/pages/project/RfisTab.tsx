@@ -757,6 +757,48 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const [aiDesc, setAiDesc] = useState("");
   const [showAi, setShowAi] = useState(false);
 
+  // AI document import: read an existing PDF/Word/Excel and prefill this form.
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [importedFrom, setImportedFrom] = useState<string | null>(null);
+  const handleImportPrefill = async (file: File) => {
+    setImporting(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const fd = new FormData();
+      fd.append("file", file);
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/import-prefill`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (!resp.ok) { const d = await resp.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Import failed"); }
+      const { fields } = await resp.json() as { fields: Record<string, string | null> };
+      const s = (k: string) => (typeof fields[k] === "string" ? (fields[k] as string).trim() : "");
+      if (s("subject")) setSubject(s("subject"));
+      if (s("question")) setQuestion(s("question"));
+      if (s("submittedToCompany")) setsToCompany(s("submittedToCompany"));
+      if (s("submittedToPerson")) setsToPerson(s("submittedToPerson"));
+      if (s("submittedToEmail")) setsToEmail(s("submittedToEmail"));
+      if (s("submittedByCompany")) setsByCompany(s("submittedByCompany"));
+      if (s("submittedByContact")) setsByContact(s("submittedByContact"));
+      if (s("submittedByEmail")) setsByEmail(s("submittedByEmail"));
+      if (s("drawingNumber")) setDrawingNum(s("drawingNumber"));
+      if (s("specSection")) setSpecSection(s("specSection"));
+      if (s("locationDescription")) setLocation(s("locationDescription"));
+      if (["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].includes(s("costImpact"))) setCostImpact(s("costImpact"));
+      if (["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"].includes(s("scheduleImpact"))) setSchedImpact(s("scheduleImpact"));
+      if (["low", "medium", "high"].includes(s("priority"))) setPriority(s("priority"));
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s("dateRequired"))) setDateRequired(s("dateRequired"));
+      setImportedFrom(file.name);
+      toast({ title: w("Fields filled from document — review before creating", "Campos completados del documento — revise antes de crear", lang) });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : w("Could not read document", "No se pudo leer el documento", lang), variant: "destructive" });
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
   const companyPeople = (company: string) => members.filter(m => m.userCompanyName === company);
 
@@ -896,6 +938,25 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         </div>
 
         <div style={{ padding: "0 24px 24px" }}>
+          {!isRevision && (
+            <div style={{ margin: "16px 0 4px", padding: "12px 14px", border: "1px dashed #C4B5FD", borderRadius: 8, background: "#FAF5FF", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <Sparkles style={{ width: 16, height: 16, color: "#7C3AED", flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#6D28D9" }}>{w("Start from an existing document", "Comenzar desde un documento existente", lang)}</div>
+                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                  {importedFrom
+                    ? w(`Filled from ${importedFrom} — review the fields below.`, `Completado desde ${importedFrom} — revise los campos abajo.`, lang)
+                    : w("Upload a PDF, Word, Excel or image — AI reads it and fills the fields for you to review.", "Suba un PDF, Word, Excel o imagen — la IA lo lee y completa los campos para su revisión.", lang)}
+                </div>
+              </div>
+              <input ref={importInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" style={{ display: "none" }}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleImportPrefill(f); e.target.value = ""; }} />
+              <Button size="sm" variant="outline" disabled={importing} onClick={() => importInputRef.current?.click()} style={{ gap: 5, fontSize: 11, flexShrink: 0 }}>
+                {importing ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <FileText style={{ width: 12, height: 12 }} />}
+                {importing ? w("Reading…", "Leyendo…", lang) : w("Import document", "Importar documento", lang)}
+              </Button>
+            </div>
+          )}
           {/* Section 1 — Header */}
           <SectionHeader title={w("1. Header Information", "1. Información del Encabezado", lang)} />
           <FormGrid>
