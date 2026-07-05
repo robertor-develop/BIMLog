@@ -316,6 +316,15 @@ export function Profile() {
     loadMyProjects();
     loadRecentActivity();
     loadConnections();
+    // Handle the OAuth return from a provider connect.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("connected")) {
+      toast({ title: `${params.get("connected")} connected` });
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (params.get("connect_error")) {
+      toast({ title: `Connect failed: ${params.get("connect_error")}`, variant: "destructive" });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   useEffect(() => {
@@ -499,6 +508,28 @@ export function Profile() {
       toast({ title: e instanceof Error ? e.message : "Failed to disconnect", variant: "destructive" });
     } finally {
       setRemovingSg(false);
+    }
+  }
+
+  async function connectGoogleDrive() {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/google-drive/authorize`, { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not start Google connect");
+      window.location.href = data.url; // provider consent screen (self-service)
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "Could not start Google connect", variant: "destructive" });
+    }
+  }
+
+  async function disconnectProvider(provider: string) {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/${provider}`, { method: "DELETE", headers: authHeaders });
+      if (!res.ok) throw new Error((await res.json()).error);
+      toast({ title: "Disconnected" });
+      await loadConnections();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "Failed to disconnect", variant: "destructive" });
     }
   }
 
@@ -1315,6 +1346,35 @@ export function Profile() {
               </div>
             );
           })()}
+        </SectionCard>
+
+        {/* File Sources — per-user cloud storage connections */}
+        <SectionCard title="File Sources" icon={FolderOpen}>
+          <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
+            Connect your own cloud storage so you can attach files from it to RFIs and documents. Each account is connected per user.
+          </p>
+          {(() => {
+            const gd = connections.find(c => c.provider === "google_drive");
+            return (
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 6, background: "#E8F0FE", color: "#1A73E8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>GD</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>Google Drive</div>
+                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{gd ? (gd.accountLabel ? `Connected — ${gd.accountLabel}` : "Connected") : "Not connected"}</div>
+                </div>
+                {gd ? (
+                  <Button size="sm" variant="outline" onClick={() => disconnectProvider("google_drive")} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6, flexShrink: 0 }}>
+                    <Trash2 style={{ width: 12, height: 12 }} />Disconnect
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={connectGoogleDrive} style={{ flexShrink: 0 }}>Connect</Button>
+                )}
+              </div>
+            );
+          })()}
+          <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 10 }}>
+            Dropbox, BIM 360 and Procore are coming next.
+          </p>
         </SectionCard>
 
             </div>

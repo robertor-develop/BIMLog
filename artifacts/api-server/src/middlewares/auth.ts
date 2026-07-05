@@ -111,6 +111,17 @@ export function verifyBriefAccessToken(token: string): { userId: number; scope: 
   return jwt.verify(token, JWT_SECRET) as { userId: number; scope: string };
 }
 
+// Short-lived signed state for OAuth connect flows. Carries the user identity
+// through the provider redirect (the callback is a browser hop with no JWT
+// header) so the returned tokens are stored against the right user.
+export function signOAuthState(userId: number, provider: string): string {
+  return jwt.sign({ userId, provider, scope: "oauth_state" }, JWT_SECRET, { expiresIn: "15m" });
+}
+
+export function verifyOAuthState(token: string): { userId: number; provider: string; scope: string } {
+  return jwt.verify(token, JWT_SECRET) as { userId: number; provider: string; scope: string };
+}
+
 export async function isSuperAdminMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   if (!req.user) { res.status(401).json({ error: "Authentication required" }); return; }
   const [u] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user.userId)).limit(1);
