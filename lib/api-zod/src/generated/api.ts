@@ -276,6 +276,7 @@ export const UpdateRfiParams = zod.object({
 export const UpdateRfiBody = zod.object({
   subject: zod.string().optional(),
   rfiType: zod.string().optional(),
+  sourceViewpointLabel: zod.string().optional(),
   description: zod.string().optional(),
   status: zod.string().optional(),
   priority: zod.string().optional(),

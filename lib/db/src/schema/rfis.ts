@@ -76,6 +76,7 @@ export const rfisTable = pgTable("rfis", {
   // Set when an RFI is created from a Navisworks viewpoint via the plugin. Holds
   // the source viewpoint's code so the detail panel can deep-link back to it.
   sourceViewpointId: text("source_viewpoint_id"),
+  sourceViewpointLabel: text("source_viewpoint_label"),
 });
 
 export type Rfi = typeof rfisTable.$inferSelect;

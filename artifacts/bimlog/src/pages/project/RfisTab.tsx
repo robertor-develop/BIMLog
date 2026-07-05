@@ -1299,6 +1299,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [questionDocInput, setQuestionDocInput] = useState("");
   const [infoSubject, setInfoSubject] = useState("");
   const [infoType, setInfoType] = useState("");
+  const [infoVpLabel, setInfoVpLabel] = useState("");
   const [infoDist, setInfoDist] = useState<string[]>((rfi.distributionList as string[] | null) || []);
   const [distInput, setDistInput] = useState("");
   const startInfoEdit = () => {
@@ -1306,6 +1307,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setQuestionDocInput("");
     setInfoSubject(rfi.subject || "");
     setInfoType(rfi.rfiType || "");
+    setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
@@ -2099,9 +2101,18 @@ ${hasResp ? `
             {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid hsl(var(--border) / 0.4)", flexWrap: "wrap" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: "#F0FDFA", color: "#0F766E", border: "1px solid #5EEAD4" }}>
-                  <Navigation style={{ width: 12, height: 12 }} />{w("Viewpoint", "Punto de Vista", lang)} {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId}
+                  <Navigation style={{ width: 12, height: 12 }} />{w("Viewpoint", "Punto de Vista", lang)} {(rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || (rfi as { sourceViewpointId?: string | null }).sourceViewpointId}
                 </span>
-                <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("linked automatically — this RFI came from this viewpoint", "vinculado automáticamente — este RFI proviene de este punto de vista", lang)}</span>
+                {infoEdit ? (
+                  <input
+                    value={infoVpLabel}
+                    onChange={(e) => setInfoVpLabel(e.target.value)}
+                    placeholder={(rfi as { sourceViewpointId?: string | null }).sourceViewpointId || w("custom label", "etiqueta personalizada", lang)}
+                    style={{ fontSize: 12, padding: "3px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", minWidth: 180 }}
+                  />
+                ) : (
+                  <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("linked automatically — this RFI came from this viewpoint", "vinculado automáticamente — este RFI proviene de este punto de vista", lang)}</span>
+                )}
               </div>
             )}
             {vpImageUrl && (
@@ -2195,7 +2206,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 

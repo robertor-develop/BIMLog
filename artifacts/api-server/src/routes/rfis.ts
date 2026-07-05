@@ -933,6 +933,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.subject) updates.subject = body.subject;
     if (body.rfiType !== undefined) updates.rfiType = body.rfiType;
+    if (body.sourceViewpointLabel !== undefined) updates.sourceViewpointLabel = body.sourceViewpointLabel;
     if (body.description !== undefined) updates.description = body.description;
     if (body.status) {
       updates.status = body.status;

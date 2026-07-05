@@ -230,6 +230,7 @@ export interface CreateRfiRequest {
 export interface UpdateRfiRequest {
   subject?: string;
   rfiType?: string;
+  sourceViewpointLabel?: string;
   description?: string;
   status?: string;
   priority?: string;
