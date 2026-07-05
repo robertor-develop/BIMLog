@@ -160,6 +160,20 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS rfi_type text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_label text`);
     await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS user_connections (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      provider text NOT NULL,
+      kind text,
+      status text NOT NULL DEFAULT 'connected',
+      credentials jsonb,
+      account_label text,
+      metadata jsonb,
+      last_error text,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS user_connections_user_provider_uidx ON user_connections (user_id, provider)`);
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_sent_by_id_users_id_fk') THEN
         ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);

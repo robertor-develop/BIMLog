@@ -31,6 +31,7 @@ import linkedItemsRouter from "./linked_items";
 import agentsRouter from "./agents";
 import autodeskRouter from "./autodesk";
 import livingBriefRouter from "./living_brief";
+import connectionsRouter from "./connections";
 
 const router: IRouter = Router();
 
@@ -66,6 +67,7 @@ router.use(linkedItemsRouter);
 router.use(agentsRouter);
 router.use(autodeskRouter);
 router.use(livingBriefRouter);
+router.use(connectionsRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId
