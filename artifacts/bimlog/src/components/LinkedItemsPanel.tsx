@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 
 const API = "/api/v1";
@@ -14,9 +13,12 @@ const TYPE_LABELS: Record<LinkType, string> = {
   meeting: "Meeting",
 };
 
-const REL_OPTIONS = ["related", "resolves", "caused_by", "blocks"];
+// Document-style linked items. Clash is deliberately kept separate (its own
+// section) — mixing clashes with documents was confusing.
+const DOC_TYPES: LinkType[] = ["submittal", "transmittal", "change_order", "meeting"];
 
-// Where to go to create a new item of each type (then come back and link it).
+// Where to go to create a new item of each type (opened in a new tab so the RFI
+// stays put; come back and link it from the picker).
 const CREATE_ROUTES: Record<LinkType, string> = {
   clash: "clash-reports",
   submittal: "submittals",
@@ -38,15 +40,14 @@ interface Props {
 
 export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = true }: Props) {
   const { token } = useAuthStore();
-  const [, navigate] = useLocation();
   const headers = { Authorization: `Bearer ${token}` };
   const [links, setLinks] = useState<LinkRow[]>([]);
   const [items, setItems] = useState<Record<LinkType, { id: number; label: string }[]>>({
     clash: [], submittal: [], transmittal: [], change_order: [], meeting: [],
   });
-  const [selType, setSelType] = useState<LinkType>("clash");
+  const [selType, setSelType] = useState<LinkType>("submittal");
   const [selId, setSelId] = useState("");
-  const [rel, setRel] = useState("related");
+  const [selClashId, setSelClashId] = useState("");
   const [busy, setBusy] = useState(false);
 
   const loadLinks = async () => {
@@ -108,17 +109,17 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
     return list?.find(x => x.id === id)?.label || `#${id}`;
   };
 
-  const addLink = async () => {
-    const toId = Number(selId);
+  const createLink = async (toType: LinkType, toIdStr: string, clearSel: () => void) => {
+    const toId = Number(toIdStr);
     if (!toId) return;
     setBusy(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/links`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ fromType: entityType, fromId: entityId, toType: selType, toId, linkType: rel }),
+        body: JSON.stringify({ fromType: entityType, fromId: entityId, toType, toId, linkType: "related" }),
       });
-      if (r.ok) { setSelId(""); await loadLinks(); }
+      if (r.ok) { clearSel(); await loadLinks(); }
     } finally { setBusy(false); }
   };
 
@@ -127,46 +128,65 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
     await loadLinks();
   };
 
-  const currentOptions = items[selType].filter(o => !(selType === entityType && o.id === entityId));
+  // Open the target module's create page in a new tab so this RFI stays open;
+  // the user creates the item there, returns here, and picks it to link.
+  const openCreate = (type: LinkType) => window.open(`/projects/${projectId}/${CREATE_ROUTES[type]}`, "_blank");
+
+  const docOptions = items[selType].filter(o => !(selType === entityType && o.id === entityId));
+  const clashOptions = items.clash;
+
+  const docLinks = links.filter(l => otherSide(l).type !== "clash");
+  const clashLinks = links.filter(l => otherSide(l).type === "clash");
+
+  const renderLink = (l: LinkRow) => {
+    const o = otherSide(l);
+    return (
+      <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 10px", background: "#EFF6FF", borderRadius: 6 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase" }}>{TYPE_LABELS[o.type as LinkType] || o.type}</span>
+        <span style={{ fontSize: 11, color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}>{findLabel(o.type, o.id)}</span>
+        {canWrite && (
+          <button onClick={() => removeLink(l.id)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#DC2626", cursor: "pointer", fontSize: 14 }}>×</button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div style={{ marginTop: 12, borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
-      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Linked Items</div>
-      {links.length === 0 && <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 8 }}>No linked items yet</div>}
-      {links.map(l => {
-        const o = otherSide(l);
-        return (
-          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 10px", background: "#EFF6FF", borderRadius: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase" }}>{TYPE_LABELS[o.type as LinkType] || o.type}</span>
-            <span style={{ fontSize: 11, color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}>{findLabel(o.type, o.id)}</span>
-            <span style={{ fontSize: 10, color: "#6B7280" }}>{l.linkType}</span>
-            {canWrite && (
-              <button onClick={() => removeLink(l.id)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#DC2626", cursor: "pointer", fontSize: 14 }}>×</button>
-            )}
-          </div>
-        );
-      })}
+      {/* Documents */}
+      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Linked Documents</div>
+      {docLinks.length === 0 && <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 8 }}>No linked documents yet</div>}
+      {docLinks.map(renderLink)}
       {canWrite && (
         <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
           <select value={selType} onChange={e => { setSelType(e.target.value as LinkType); setSelId(""); }}
             style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
-            {(Object.keys(TYPE_LABELS) as LinkType[]).map(tp => <option key={tp} value={tp}>{TYPE_LABELS[tp]}</option>)}
+            {DOC_TYPES.map(tp => <option key={tp} value={tp}>{TYPE_LABELS[tp]}</option>)}
           </select>
           <select value={selId} onChange={e => setSelId(e.target.value)}
             style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, flex: 1, minWidth: 200 }}>
-            <option value="">— Select —</option>
-            {currentOptions.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+            <option value="">{docOptions.length ? "— Select existing —" : `— No ${TYPE_LABELS[selType]} yet —`}</option>
+            {docOptions.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
-          <select value={rel} onChange={e => setRel(e.target.value)}
-            style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
-            {REL_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-          <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={addLink}>+ Add linked item</button>
-          <button className="btn btn-sm" onClick={() => navigate(`/projects/${projectId}/${CREATE_ROUTES[selType]}`)} title={`Create a new ${TYPE_LABELS[selType]} to link`}>+ Create {TYPE_LABELS[selType]}</button>
+          <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={() => createLink(selType, selId, () => setSelId(""))}>+ Attach</button>
+          <button className="btn btn-sm" onClick={() => openCreate(selType)} title={`Create a new ${TYPE_LABELS[selType]} in a new tab, then attach it here`}>+ Create {TYPE_LABELS[selType]}</button>
         </div>
       )}
-      {canWrite && currentOptions.length === 0 && (
-        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>No {TYPE_LABELS[selType]} to link yet — use “+ Create {TYPE_LABELS[selType]}” to make one.</div>
+
+      {/* Clashes — kept separate from documents */}
+      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", margin: "16px 0 8px" }}>Linked Clashes</div>
+      {clashLinks.length === 0 && <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 8 }}>No linked clashes yet</div>}
+      {clashLinks.map(renderLink)}
+      {canWrite && (
+        <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+          <select value={selClashId} onChange={e => setSelClashId(e.target.value)}
+            style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, flex: 1, minWidth: 200 }}>
+            <option value="">{clashOptions.length ? "— Select clash —" : "— No clashes yet —"}</option>
+            {clashOptions.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+          </select>
+          <button className="btn btn-sm btn-primary" disabled={busy || !selClashId} onClick={() => createLink("clash", selClashId, () => setSelClashId(""))}>+ Attach</button>
+          <button className="btn btn-sm" onClick={() => openCreate("clash")} title="Open clash reports in a new tab">+ Open Clashes</button>
+        </div>
       )}
     </div>
   );
