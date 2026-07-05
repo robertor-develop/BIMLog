@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   User, Building2, Lock, Bell, Zap, Key, ChevronLeft,
   Check, Copy, RefreshCw, Pen, Upload, Trash2, AlertTriangle,
-  FolderOpen, Clock, Activity, ExternalLink, Camera
+  FolderOpen, Clock, Activity, ExternalLink, Camera, Mail
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
@@ -172,6 +172,12 @@ export function Profile() {
   const [savingOpenaiKey, setSavingOpenaiKey] = useState(false);
   const [removingOpenaiKey, setRemovingOpenaiKey] = useState(false);
 
+  const [connections, setConnections] = useState<{ provider: string; status: string; accountLabel: string | null }[]>([]);
+  const [sgKeyInput, setSgKeyInput] = useState("");
+  const [sgFromInput, setSgFromInput] = useState("");
+  const [savingSg, setSavingSg] = useState(false);
+  const [removingSg, setRemovingSg] = useState(false);
+
   const [signatureMode, setSignatureMode] = useState<"canvas" | "upload">("canvas");
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
@@ -309,6 +315,7 @@ export function Profile() {
     loadPerformance();
     loadMyProjects();
     loadRecentActivity();
+    loadConnections();
   }, []);
 
   useEffect(() => {
@@ -450,6 +457,48 @@ export function Profile() {
       toast({ title: e instanceof Error ? e.message : "Failed to remove key", variant: "destructive" });
     } finally {
       setRemovingOpenaiKey(false);
+    }
+  }
+
+  async function loadConnections() {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections`, { headers: authHeaders });
+      const data = await res.json();
+      setConnections(Array.isArray(data) ? data : []);
+    } catch {}
+  }
+
+  async function saveSendgrid() {
+    if (!sgKeyInput.trim() || !sgFromInput.trim()) return;
+    setSavingSg(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/sendgrid`, {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify({ apiKey: sgKeyInput.trim(), fromEmail: sgFromInput.trim() }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      toast({ title: "SendGrid connected" });
+      setSgKeyInput("");
+      await loadConnections();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "Failed to connect SendGrid", variant: "destructive" });
+    } finally {
+      setSavingSg(false);
+    }
+  }
+
+  async function removeSendgrid() {
+    setRemovingSg(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/sendgrid`, { method: "DELETE", headers: authHeaders });
+      if (!res.ok) throw new Error((await res.json()).error);
+      toast({ title: "SendGrid disconnected" });
+      await loadConnections();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "Failed to disconnect", variant: "destructive" });
+    } finally {
+      setRemovingSg(false);
     }
   }
 
@@ -1216,6 +1265,56 @@ export function Profile() {
               </p>
             </div>
           )}
+        </SectionCard>
+
+        {/* Email Sending — per-user SendGrid connection */}
+        <SectionCard title="Email Sending (SendGrid)" icon={Mail}>
+          {(() => {
+            const sg = connections.find(c => c.provider === "sendgrid");
+            if (sg) {
+              return (
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+                    <Badge style={{ background: sg.status === "connected" ? "#DCFCE7" : "#FEF3C7", color: sg.status === "connected" ? "#16A34A" : "#B45309", border: `1px solid ${sg.status === "connected" ? "#BBF7D0" : "#FDE68A"}`, padding: "4px 10px", fontWeight: 600 }}>
+                      <Check style={{ width: 12, height: 12, marginRight: 4 }} /> {sg.status === "connected" ? "Connected" : "Needs attention"}
+                    </Badge>
+                    {sg.accountLabel && <span style={{ fontSize: 13, color: "hsl(var(--muted-foreground))" }}>Sends as {sg.accountLabel}</span>}
+                  </div>
+                  <Button size="sm" variant="outline" onClick={removeSendgrid} disabled={removingSg} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6 }}>
+                    <Trash2 style={{ width: 12, height: 12 }} />
+                    {removingSg ? "Disconnecting…" : "Disconnect"}
+                  </Button>
+                </div>
+              );
+            }
+            return (
+              <div>
+                <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
+                  Connect your own SendGrid account to send RFI emails from BIMLog as yourself. Your key is stored securely, used only for your account, and validated before it is saved.
+                </p>
+                <div style={{ display: "grid", gap: 10, maxWidth: 460 }}>
+                  <div>
+                    <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>SendGrid API Key</Label>
+                    <Input type="password" value={sgKeyInput} onChange={e => setSgKeyInput(e.target.value)} placeholder="SG.xxxxx" style={{ fontFamily: "monospace", fontSize: 12 }} />
+                  </div>
+                  <div>
+                    <Label style={{ fontSize: 12, marginBottom: 4, display: "block" }}>Verified Sender Email</Label>
+                    <Input value={sgFromInput} onChange={e => setSgFromInput(e.target.value)} placeholder="you@company.com" style={{ fontSize: 12 }} />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button size="sm" onClick={saveSendgrid} disabled={savingSg || !sgKeyInput.trim() || !sgFromInput.trim()}>
+                      {savingSg ? "Connecting…" : "Connect SendGrid"}
+                    </Button>
+                  </div>
+                </div>
+                <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 8 }}>
+                  Create a key at{" "}
+                  <a href="https://app.sendgrid.com/settings/api_keys" target="_blank" rel="noreferrer" style={{ color: "#2563EB" }}>app.sendgrid.com</a>{" "}
+                  with Mail Send permission. The sender email must be a verified sender in your SendGrid account.
+                </p>
+              </div>
+            );
+          })()}
         </SectionCard>
 
             </div>

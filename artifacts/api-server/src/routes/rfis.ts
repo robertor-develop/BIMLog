@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
 import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
@@ -1545,6 +1545,120 @@ router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requir
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
+  }
+});
+
+// ─── POST /projects/:projectId/rfis/:rfiId/send ──────────────────────────────
+// Sends the RFI email through the AUTHOR'S OWN connected SendGrid account (per
+// user, not a platform key). On a successful send it performs the same
+// mark-sent transition. Requires the user to have connected SendGrid first.
+router.post("/projects/:projectId/rfis/:rfiId/send", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const { to, cc, subject, body } = req.body as { to?: unknown; cc?: unknown; subject?: unknown; body?: unknown };
+    if (typeof to !== "string" || !to.includes("@")) { res.status(422).json({ error: "A valid recipient email (Submitted To) is required to send." }); return; }
+    if (typeof subject !== "string" || !subject.trim()) { res.status(400).json({ error: "subject is required" }); return; }
+    if (typeof body !== "string" || !body.trim()) { res.status(400).json({ error: "email body is required" }); return; }
+
+    // The author's own SendGrid connection.
+    const [conn] = await db.select().from(userConnectionsTable)
+      .where(and(eq(userConnectionsTable.userId, req.user!.userId), eq(userConnectionsTable.provider, "sendgrid")));
+    if (!conn || conn.status !== "connected") {
+      res.status(428).json({ error: "Connect your SendGrid account before sending.", code: "SENDGRID_NOT_CONNECTED" });
+      return;
+    }
+    const apiKey = (conn.credentials as { apiKey?: string } | null)?.apiKey;
+    const fromEmail = conn.accountLabel;
+    if (!apiKey || !fromEmail) {
+      res.status(428).json({ error: "Your SendGrid connection is incomplete — reconnect it.", code: "SENDGRID_NOT_CONNECTED" });
+      return;
+    }
+
+    const ccList = Array.isArray(cc) ? cc.filter((e): e is string => typeof e === "string" && e.includes("@")).map(e => ({ email: e })) : [];
+    const personalization: Record<string, unknown> = { to: [{ email: to }], subject };
+    if (ccList.length) personalization.cc = ccList;
+
+    // Send via SendGrid v3 using the user's key (per-request; no global state).
+    let sendErr: string | null = null;
+    try {
+      const sg = await fetch("https://api.sendgrid.com/v3/mail/send", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personalizations: [personalization],
+          from: { email: fromEmail },
+          reply_to: { email: fromEmail },
+          content: [{ type: "text/plain", value: body }],
+        }),
+      });
+      if (!sg.ok) sendErr = `SendGrid rejected the send (${sg.status})`;
+    } catch (err) {
+      sendErr = err instanceof Error ? err.message : "network error";
+    }
+
+    // Record the attempt.
+    try {
+      await db.insert(emailLogTable).values({ toEmail: to, subject, triggerType: "rfi_send", status: sendErr ? "failed" : "sent", errorMessage: sendErr });
+    } catch { /* non-fatal */ }
+
+    if (sendErr) {
+      // Flag the connection so the UI can prompt a reconnect if the key went bad.
+      if (/\b401\b/.test(sendErr)) {
+        await db.update(userConnectionsTable).set({ status: "error", lastError: sendErr, updatedAt: new Date() })
+          .where(eq(userConnectionsTable.id, conn.id));
+      }
+      res.status(502).json({ error: `Could not send: ${sendErr}` });
+      return;
+    }
+
+    // Sent successfully — perform the same mark-sent transition.
+    const outcome = await db.transaction(async (tx) => {
+      const [existing] = await tx.select().from(rfisTable)
+        .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!existing) return { status: 404 as const, error: "RFI not found" };
+
+      const recipientCompany = existing.submittedToCompany;
+      const recipientPerson = existing.submittedToPerson || existing.submittedToCompany;
+      const sentAt = new Date();
+      const advanceStatus = (existing.status === "open" || existing.status === "draft") ? "in_review" : existing.status;
+      const updatedRows = await tx.update(rfisTable).set({
+        sendStatus: "sent",
+        sentAt,
+        sentById: req.user!.userId,
+        sendMethod: "sendgrid",
+        ballInCourt: recipientCompany,
+        status: advanceStatus,
+        updatedAt: sentAt,
+      }).where(and(
+        eq(rfisTable.id, rfiId),
+        or(ne(rfisTable.sendStatus, "sent"), isNull(rfisTable.sendStatus)),
+      )).returning();
+
+      // Already sent by another path — the email still went out; report success.
+      if (updatedRows.length === 0) {
+        const [creator] = await tx.select({ fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, existing.createdById)).limit(1);
+        return { status: 200 as const, body: rfiToJson(existing, { createdByName: creator?.fullName }) };
+      }
+      const updated = updatedRows[0];
+
+      if (recipientCompany && recipientPerson) {
+        await tx.insert(rfiBallInCourtHistoryTable).values({
+          rfiId, heldBy: recipientPerson, heldByCompany: recipientCompany, fromDate: sentAt, toDate: null, daysHeld: null,
+        });
+      }
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "update", entityType: "rfi", entityId: rfiId,
+        details: `Sent RFI ${existing.number} to ${to} via SendGrid`,
+      });
+      const [creator] = await tx.select({ fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, existing.createdById)).limit(1);
+      return { status: 200 as const, body: rfiToJson(updated, { createdByName: creator?.fullName }) };
+    });
+
+    if (outcome.status !== 200) { res.status(outcome.status).json({ error: outcome.error }); return; }
+    res.json(outcome.body);
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "Bad request" });
   }
 });
 

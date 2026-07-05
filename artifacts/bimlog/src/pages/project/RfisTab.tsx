@@ -1488,6 +1488,53 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     }
   };
 
+  // Does THIS user have their own SendGrid connected? Drives the real Send
+  // button vs. the copy-paste + "connect" nudge.
+  const [sgConnected, setSgConnected] = useState<boolean | null>(null);
+  const [hideSgNudge, setHideSgNudge] = useState(() => localStorage.getItem("bimlog-hide-sendgrid-nudge") === "1");
+  const [sending, setSending] = useState(false);
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then((d) => {
+        const sg = Array.isArray(d) ? d.find((c: { provider: string; status: string }) => c.provider === "sendgrid") : null;
+        setSgConnected(!!sg && sg.status === "connected");
+      })
+      .catch(() => setSgConnected(false));
+  }, []);
+
+  const handleSendReal = async () => {
+    setSending(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const to = rfi.submittedToEmail || "";
+      const cc = ((rfi.distributionList as string[] | null) || [])
+        .map(e => (e.match(/[^\s<>]+@[^\s<>]+/) || [])[0])
+        .filter((e): e is string => !!e);
+      const subject = `${rfi.number} — ${rfi.subject}`;
+      // Strip any leading To:/Subject: header lines so the body is clean.
+      const body = previewText.replace(/^(To:.*\n|Subject:.*\n|\s*\n)+/i, "").trim();
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/send`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ to, cc, subject, body }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error || "Send failed");
+      }
+      const data = await resp.json() as Rfi;
+      onUpdate(data);
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+      toast({ title: w("RFI sent via your SendGrid — ball is now with the recipient", "RFI enviado por tu SendGrid — la pelota está con el destinatario", lang) });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : w("Send failed", "Error al enviar", lang), variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleCopyPreview = async () => {
     try {
       await navigator.clipboard.writeText(previewText);
@@ -2501,17 +2548,43 @@ ${hasResp ? `
                 <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
                   {w("Not sent yet. Compose the email: type what you want to say, then click Generate with AI to turn it into a professional message. Copy it into your email client and mark it as sent to start the response clock.", "Aún no enviado. Redacte el correo: escriba lo que quiere decir, luego pulse Generar con IA para convertirlo en un mensaje profesional. Cópielo a su cliente de correo y márquelo como enviado para iniciar el reloj de respuesta.", lang)}
                 </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: showSendPreview ? 10 : 0 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: showSendPreview ? 10 : 0 }}>
                   <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) setShowContextInput(true); }} style={{ gap: 5, fontSize: 11 }}>
                     <Mail style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Compose email", "Redactar correo", lang)}
                   </Button>
+                  {canWrite && rfi.status !== "closed" && sgConnected === true && (
+                    <Button size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail}
+                      title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}
+                      style={{ gap: 5, fontSize: 11 }}>
+                      {sending ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
+                      {w("Send via SendGrid", "Enviar por SendGrid", lang)}
+                    </Button>
+                  )}
                   {canWrite && rfi.status !== "closed" && (
-                    <Button size="sm" onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
+                    <Button size="sm" variant={sgConnected === true ? "outline" : "default"} onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
                       {marking ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
                       {w("Mark as Sent", "Marcar como Enviado", lang)}
                     </Button>
                   )}
+                  {sgConnected === false && (
+                    <button type="button" onClick={() => setPage("/profile")} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
+                      {w("Set up email sending", "Configurar envío de correo", lang)}
+                    </button>
+                  )}
                 </div>
+                {sgConnected === false && !hideSgNudge && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, padding: "8px 12px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8 }}>
+                    <Mail style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "#1E3A5F", flex: 1 }}>
+                      {w("Connect your own SendGrid account to send RFIs directly from BIMLog — no copy-paste.", "Conecte su cuenta de SendGrid para enviar RFIs directamente desde BIMLog — sin copiar y pegar.", lang)}
+                    </span>
+                    <Button size="sm" onClick={() => setPage("/profile")} style={{ fontSize: 11, gap: 4, flexShrink: 0 }}>{w("Connect", "Conectar", lang)}</Button>
+                    <button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }}
+                      style={{ background: "transparent", border: "none", cursor: "pointer", color: "#64748B", flexShrink: 0, padding: 2 }}>
+                      <X style={{ width: 14, height: 14 }} />
+                    </button>
+                  </div>
+                )}
                 {showSendPreview && (
                   <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
