@@ -5,6 +5,7 @@ import {
 } from "@workspace/api-client-react";
 import type { Rfi, ProjectFile } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
@@ -1561,6 +1562,33 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     }
   };
 
+  const [, setPage] = useLocation();
+  const [raisingCo, setRaisingCo] = useState(false);
+  const handleRaiseChangeOrder = async () => {
+    setRaisingCo(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/change-orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: `${rfi.number} — ${rfi.subject}`,
+          description: rfi.question || rfi.description || "",
+          contract_value_impact: rfi.costImpactAmount || rfi.costImpact || null,
+          schedule_impact_days: rfi.scheduleImpactDays ?? null,
+          linked_rfi_ids: [rfi.id],
+        }),
+      });
+      if (!resp.ok) throw new Error("Create failed");
+      toast({ title: w("Change Order raised from RFI", "Orden de Cambio creada desde RFI", lang) });
+      setPage(`/projects/${projectId}/change-orders`);
+    } catch {
+      toast({ title: w("Could not raise Change Order", "No se pudo crear la Orden de Cambio", lang), variant: "destructive" });
+    } finally {
+      setRaisingCo(false);
+    }
+  };
+
   const handleExportWord = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -1892,6 +1920,11 @@ ${hasResp ? `
             {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && !infoEdit && (
               <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
+              </Button>
+            )}
+            {canWrite && (
+              <Button variant="outline" size="sm" disabled={raisingCo} onClick={handleRaiseChangeOrder} style={{ gap: 5, fontSize: 11, color: "#B45309", borderColor: "#FCD34D", background: "#FFFBEB", opacity: raisingCo ? 0.6 : 1 }}>
+                <FileText style={{ width: 12, height: 12 }} />{w("Raise Change Order", "Crear Orden de Cambio", lang)}
               </Button>
             )}
             {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
