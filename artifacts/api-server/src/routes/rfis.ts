@@ -11,6 +11,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
+import { getValidAccessToken } from "../lib/oauth";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
@@ -1910,6 +1911,42 @@ Reply with either the finished RFI question text, or a single NEED_MORE_INFO lin
     res.status(500).json({ error: message });
   }
 });
+
+// ─── POST /projects/:projectId/rfis/attachments/from-google-drive ────────────
+// Downloads a file from the user's connected Google Drive and stores it as a
+// downloadable attachment (same file-record shape as a local upload).
+router.post("/projects/:projectId/rfis/attachments/from-google-drive",
+  authMiddleware, requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const { fileId, fileName, mimeType, rfiId } = req.body as { fileId?: string; fileName?: string; mimeType?: string; rfiId?: number };
+    if (!fileId || !fileName) { res.status(400).json({ error: "fileId and fileName are required" }); return; }
+    try {
+      const token = await getValidAccessToken(req.user!.userId, "google_drive");
+      const isGoogleDoc = (mimeType || "").startsWith("application/vnd.google-apps");
+      // Google-native docs must be exported; regular files stream with alt=media.
+      const url = isGoogleDoc
+        ? `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`
+        : `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+      const dl = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!dl.ok) { res.status(502).json({ error: `Google Drive download failed (${dl.status})` }); return; }
+      const buffer = Buffer.from(await dl.arrayBuffer());
+      const finalName = isGoogleDoc && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
+      const ext = (finalName.split(".").pop() || "").toLowerCase();
+      const storagePath = await storage.upload(buffer, projectId, `rfi-attach-${Date.now()}-${finalName}`);
+      const defaultFileStatus = await getDefaultValue("file_status");
+      const [row] = await db.insert(filesTable).values({
+        projectId, fileName: finalName, fileSize: buffer.length, fileType: ext || "bin",
+        status: defaultFileStatus, uploadedById: req.user!.userId, source: "rfi-attachment",
+        storagePath, linkedRfiId: rfiId ? Number(rfiId) : null,
+      }).returning();
+      res.json({ fileId: row.id, fileName: finalName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(finalName)}` });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Import failed";
+      res.status(msg === "not_connected" ? 428 : 500).json({ error: msg === "not_connected" ? "Connect Google Drive first." : msg });
+    }
+  }
+);
 
 // ─── POST /projects/:projectId/rfis/import-prefill ───────────────────────────
 // Reads ONE uploaded document (PDF/Word/Excel/image-of-text) and returns a

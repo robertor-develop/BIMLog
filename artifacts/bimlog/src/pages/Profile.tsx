@@ -511,14 +511,14 @@ export function Profile() {
     }
   }
 
-  async function connectGoogleDrive() {
+  async function connectProvider(providerParam: string) {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/me/connections/google-drive/authorize`, { headers: authHeaders });
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/${providerParam}/authorize`, { headers: authHeaders });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not start Google connect");
+      if (!res.ok) throw new Error(data.error || "Could not start connect");
       window.location.href = data.url; // provider consent screen (self-service)
     } catch (e) {
-      toast({ title: e instanceof Error ? e.message : "Could not start Google connect", variant: "destructive" });
+      toast({ title: e instanceof Error ? e.message : "Could not start connect", variant: "destructive" });
     }
   }
 
@@ -1348,33 +1348,37 @@ export function Profile() {
           })()}
         </SectionCard>
 
-        {/* File Sources — per-user cloud storage connections */}
-        <SectionCard title="File Sources" icon={FolderOpen}>
+        {/* Integrations — per-user cloud storage + PM connections */}
+        <SectionCard title="File Sources & Integrations" icon={FolderOpen}>
           <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
-            Connect your own cloud storage so you can attach files from it to RFIs and documents. Each account is connected per user.
+            Connect your own accounts so you can attach files from them to RFIs and documents. Each account is connected per user — connect once and it's yours.
           </p>
-          {(() => {
-            const gd = connections.find(c => c.provider === "google_drive");
-            return (
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 6, background: "#E8F0FE", color: "#1A73E8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>GD</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>Google Drive</div>
-                  <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{gd ? (gd.accountLabel ? `Connected — ${gd.accountLabel}` : "Connected") : "Not connected"}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { key: "google_drive", param: "google-drive", label: "Google Drive", badge: "GD", color: "#1A73E8", bg: "#E8F0FE" },
+              { key: "dropbox", param: "dropbox", label: "Dropbox", badge: "DB", color: "#0061FF", bg: "#E6EEFF" },
+              { key: "bim360", param: "bim360", label: "BIM 360 / Autodesk", badge: "AU", color: "#0696D7", bg: "#E3F4FB" },
+              { key: "procore", param: "procore", label: "Procore", badge: "PC", color: "#F47E42", bg: "#FDEEE4" },
+            ].map(p => {
+              const conn = connections.find(c => c.provider === p.key);
+              return (
+                <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 6, background: p.bg, color: p.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{p.badge}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{p.label}</div>
+                    <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{conn ? (conn.accountLabel ? `Connected — ${conn.accountLabel}` : "Connected") : "Not connected"}</div>
+                  </div>
+                  {conn ? (
+                    <Button size="sm" variant="outline" onClick={() => disconnectProvider(p.key)} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6, flexShrink: 0 }}>
+                      <Trash2 style={{ width: 12, height: 12 }} />Disconnect
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={() => connectProvider(p.param)} style={{ flexShrink: 0 }}>Connect</Button>
+                  )}
                 </div>
-                {gd ? (
-                  <Button size="sm" variant="outline" onClick={() => disconnectProvider("google_drive")} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6, flexShrink: 0 }}>
-                    <Trash2 style={{ width: 12, height: 12 }} />Disconnect
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={connectGoogleDrive} style={{ flexShrink: 0 }}>Connect</Button>
-                )}
-              </div>
-            );
-          })()}
-          <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 10 }}>
-            Dropbox, BIM 360 and Procore are coming next.
-          </p>
+              );
+            })}
+          </div>
         </SectionCard>
 
             </div>

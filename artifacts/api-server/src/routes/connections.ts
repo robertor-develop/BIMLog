@@ -4,10 +4,9 @@ import { userConnectionsTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authMiddleware, signOAuthState, verifyOAuthState } from "../middlewares/auth";
 import { getAppUrl } from "../lib/email";
+import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
 
 const router: Router = Router();
-
-const GOOGLE_REDIRECT = () => `${getAppUrl()}/api/v1/connections/google-drive/callback`;
 
 // Safe projection — never leaks `credentials`.
 function toSafe(c: typeof userConnectionsTable.$inferSelect) {
@@ -88,71 +87,53 @@ router.put("/me/connections/sendgrid", authMiddleware, async (req, res) => {
   }
 });
 
-// ── Google Drive (OAuth) — per-user self-service connect ──────────────────────
-// The platform registers ONE Google app (GOOGLE_CLIENT_ID/SECRET as server
-// config); every user connects their own account through the flow below.
+// ── OAuth self-service connect (generic, one engine for every provider) ───────
+// The platform registers ONE app per provider (client id/secret in server env);
+// every user connects their OWN account through the flow below.
 
 // Step 1: authenticated user asks for the consent URL to open.
-router.get("/me/connections/google-drive/authorize", authMiddleware, (req, res) => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    res.status(503).json({ error: "Google Drive is not enabled on this BIMLog yet — the platform Google app is not configured.", code: "PROVIDER_NOT_CONFIGURED" });
+router.get("/me/connections/:provider/authorize", authMiddleware, (req, res) => {
+  const providerParam = String(req.params.provider);
+  const key = providerFromParam(providerParam);
+  if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
+  if (!providerConfigured(key)) {
+    res.status(503).json({ error: `${OAUTH_PROVIDERS[key].label} is not enabled on this BIMLog yet — the platform app is not configured.`, code: "PROVIDER_NOT_CONFIGURED" });
     return;
   }
-  const state = signOAuthState(req.user!.userId, "google_drive");
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: GOOGLE_REDIRECT(),
-    response_type: "code",
-    access_type: "offline",
-    prompt: "consent",
-    include_granted_scopes: "true",
-    scope: "https://www.googleapis.com/auth/drive.readonly openid email",
-    state,
-  });
-  res.json({ url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}` });
+  const state = signOAuthState(req.user!.userId, key);
+  res.json({ url: buildAuthorizeUrl(key, state, redirectUriFor(providerParam)) });
 });
 
-// Step 2: Google redirects the browser back here with ?code&state (no JWT header
-// — identity comes from the signed state). Exchange the code and store tokens.
-router.get("/connections/google-drive/callback", async (req, res) => {
+// Step 2: the provider redirects the browser back here with ?code&state (no JWT
+// header — identity comes from the signed state). Exchange the code, store tokens.
+router.get("/connections/:provider/callback", async (req, res) => {
   const appUrl = getAppUrl();
+  const providerParam = String(req.params.provider);
   const fail = (msg: string) => res.redirect(`${appUrl}/profile?connect_error=${encodeURIComponent(msg)}`);
+  const key = providerFromParam(providerParam);
+  if (!key) return fail("Unknown provider");
   try {
     const code = String(req.query.code || "");
     const state = String(req.query.state || "");
     if (!code || !state) return fail("Missing authorization code");
     let payload: { userId: number; provider: string; scope: string };
     try { payload = verifyOAuthState(state); } catch { return fail("Invalid or expired connect link"); }
-    if (payload.scope !== "oauth_state" || payload.provider !== "google_drive") return fail("Invalid connect state");
+    if (payload.scope !== "oauth_state" || payload.provider !== key) return fail("Invalid connect state");
+    if (!providerConfigured(key)) return fail("Provider not configured");
 
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    if (!clientId || !clientSecret) return fail("Google app not configured");
+    const tok = await exchangeCodeForTokens(key, code, redirectUriFor(providerParam));
+    if (!tok.access_token) return fail("No access token returned");
 
-    const tokenResp = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code, client_id: clientId, client_secret: clientSecret,
-        redirect_uri: GOOGLE_REDIRECT(), grant_type: "authorization_code",
-      }).toString(),
-    });
-    if (!tokenResp.ok) return fail("Google token exchange failed");
-    const tok = await tokenResp.json() as { access_token?: string; refresh_token?: string; expires_in?: number };
-    if (!tok.access_token) return fail("Google returned no access token");
-
-    // Refresh token only comes back on first consent — keep the existing one if absent.
-    let refreshToken = tok.refresh_token ?? null;
+    // Refresh token often comes back only on first consent — keep the old one if absent.
     const [existing] = await db.select().from(userConnectionsTable)
-      .where(and(eq(userConnectionsTable.userId, payload.userId), eq(userConnectionsTable.provider, "google_drive")));
-    if (!refreshToken) refreshToken = (existing?.credentials as { refreshToken?: string } | null)?.refreshToken ?? null;
+      .where(and(eq(userConnectionsTable.userId, payload.userId), eq(userConnectionsTable.provider, key)));
+    const refreshToken = tok.refresh_token ?? (existing?.credentials as { refreshToken?: string } | null)?.refreshToken ?? null;
 
     let accountLabel: string | null = existing?.accountLabel ?? null;
-    try {
-      const ui = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", { headers: { Authorization: `Bearer ${tok.access_token}` } });
-      if (ui.ok) { const u = await ui.json() as { email?: string }; if (u.email) accountLabel = u.email; }
-    } catch { /* label is best-effort */ }
+    const cfg = OAUTH_PROVIDERS[key];
+    if (cfg.accountLabel) {
+      try { const lbl = await cfg.accountLabel(tok.access_token); if (lbl) accountLabel = lbl; } catch { /* best-effort */ }
+    }
 
     const now = new Date();
     const credentials = {
@@ -161,16 +142,38 @@ router.get("/connections/google-drive/callback", async (req, res) => {
       expiresAt: tok.expires_in ? new Date(now.getTime() + tok.expires_in * 1000).toISOString() : null,
     };
     await db.insert(userConnectionsTable).values({
-      userId: payload.userId, provider: "google_drive", kind: "file_source", status: "connected",
+      userId: payload.userId, provider: key, kind: cfg.kind, status: "connected",
       credentials, accountLabel, updatedAt: now,
     }).onConflictDoUpdate({
       target: [userConnectionsTable.userId, userConnectionsTable.provider],
       set: { credentials, accountLabel, status: "connected", lastError: null, updatedAt: now },
     });
 
-    res.redirect(`${appUrl}/profile?connected=google-drive`);
+    res.redirect(`${appUrl}/profile?connected=${providerParam}`);
   } catch (err) {
     return fail(err instanceof Error ? err.message : "Connect failed");
+  }
+});
+
+// ── GET /me/connections/google-drive/files — browse the user's Drive ──────────
+router.get("/me/connections/google-drive/files", authMiddleware, async (req, res) => {
+  try {
+    const token = await getValidAccessToken(req.user!.userId, "google_drive");
+    const q = String(req.query.q || "").trim();
+    const driveQuery = ["trashed = false", q ? `name contains '${q.replace(/'/g, "\\'")}'` : ""].filter(Boolean).join(" and ");
+    const params = new URLSearchParams({
+      q: driveQuery,
+      pageSize: "25",
+      fields: "files(id,name,mimeType,size,iconLink,modifiedTime)",
+      orderBy: "modifiedTime desc",
+    });
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) { res.status(502).json({ error: `Google Drive request failed (${r.status})` }); return; }
+    const data = await r.json() as { files?: unknown[] };
+    res.json({ files: data.files ?? [] });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to list Drive files";
+    res.status(msg === "not_connected" ? 428 : 502).json({ error: msg });
   }
 });
 
