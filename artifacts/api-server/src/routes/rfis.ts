@@ -238,7 +238,7 @@ function makeRfiPdf(
   // ── Section 2: Two-column info grid ─────────────────────────────────────────
   const infoFields: [string, string][] = [
     ["Project",        project?.name || "—"],
-    ["Status",         (rfi.status || "").replace(/_/g, " ") || "—"],
+    ["Status",         (rfi.status || "—").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())],
     ["Priority",       rfi.priority || "—"],
     ["Date Requested", fmtD(rfi.dateRequested || rfi.createdAt)],
     ["Date Required",  fmtD(rfi.dateRequired || rfi.dueDate)],
@@ -246,6 +246,7 @@ function makeRfiPdf(
     ["Submitted To",   `${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}`],
     ["Drawing Number", rfi.drawingNumber || "—"],
     ["Spec Section",   rfi.specSection || "—"],
+    ["Source Viewpoint", (rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "—"],
   ];
   const numRows = Math.ceil(infoFields.length / 2);
   const gridH   = numRows * 28;
@@ -309,50 +310,41 @@ function makeRfiPdf(
     y += 72;
   }
 
-  // ── Section 5: Cost Impact checkboxes ───────────────────────────────────────
-  const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
-  checkPage(20 + costOpts.length * 16);
+  // ── Section 5: Cost Impact (actual value from the RFI) ──────────────────────
+  checkPage(46);
   doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
     .text("COST IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
   y += 16;
-  for (const opt of costOpts) {
-    const checked = rfi.costImpact === opt;
-    const label   = opt === "Cost Increase Known" && rfi.costImpactAmount ? `${opt}: ${rfi.costImpactAmount}` : opt;
-    drawCheckbox(MARGIN + 8, y + 2, checked);
-    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(label, MARGIN + 22, y + 2, { lineBreak: false });
-    y += 16;
-  }
-  y += 4;
+  const costLine = [rfi.costImpact || "—", rfi.costImpactAmount ? `(${rfi.costImpactAmount})` : ""].filter(Boolean).join("   ");
+  const costH = Math.max(doc.heightOfString(costLine, { width: contentW - 16 }) + 12, 26);
+  doc.rect(MARGIN, y, contentW, costH).stroke("#E2E8F0");
+  doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica").text(costLine, MARGIN + 8, y + 6, { width: contentW - 16 });
+  y += costH + 6;
 
-  // ── Section 6: Schedule Impact checkboxes ────────────────────────────────────
-  const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
-  checkPage(20 + schedOpts.length * 16);
+  // ── Section 6: Schedule Impact (actual value from the RFI) ──────────────────
+  checkPage(46);
   doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
     .text("SCHEDULE IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
   y += 16;
-  for (const opt of schedOpts) {
-    const checked = rfi.scheduleImpact === opt;
-    const label   = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null
-      ? `${opt}: ${rfi.scheduleImpactDays} days` : opt;
-    drawCheckbox(MARGIN + 8, y + 2, checked);
-    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(label, MARGIN + 22, y + 2, { lineBreak: false });
-    y += 16;
-  }
-  y += 4;
+  const schedLine = [rfi.scheduleImpact || "—", rfi.scheduleImpactDays != null ? `(${rfi.scheduleImpactDays} days)` : ""].filter(Boolean).join("   ");
+  const schedH = Math.max(doc.heightOfString(schedLine, { width: contentW - 16 }) + 12, 26);
+  doc.rect(MARGIN, y, contentW, schedH).stroke("#E2E8F0");
+  doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica").text(schedLine, MARGIN + 8, y + 6, { width: contentW - 16 });
+  y += schedH + 6;
 
-  // ── Section 7: Attachments checkboxes ───────────────────────────────────────
-  const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
-  checkPage(20 + attachOpts.length * 16);
+  // ── Section 7: Attachments / references (actual list from the RFI) ──────────
+  const attList = (rfi.attachmentsJson as unknown as string[] | null) || [];
+  const attLines = attList.length > 0 ? attList : ["None"];
+  checkPage(20 + attLines.length * 14);
   doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
-    .text("ATTACHMENTS", MARGIN + 8, y + 5, { lineBreak: false });
+    .text("ATTACHMENTS / REFERENCES", MARGIN + 8, y + 5, { lineBreak: false });
   y += 16;
-  for (const opt of attachOpts) {
-    drawCheckbox(MARGIN + 8, y + 2, false);
-    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(opt, MARGIN + 22, y + 2, { lineBreak: false });
-    y += 16;
+  for (const a of attLines) {
+    doc.fillColor("#1E293B").fontSize(9).font("Helvetica").text(`•  ${a}`, MARGIN + 8, y + 2, { width: contentW - 16, lineBreak: false });
+    y += 14;
   }
   y += 4;
 
