@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Calendar, CheckCircle2, Clock, ExternalLink, LayoutGrid,
   List, Loader2, Plus, Trash2,
@@ -59,6 +60,7 @@ const MODULE_OPTIONS = [
 export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const { toast } = useToast();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<ScheduleItem[]>([]);
@@ -151,6 +153,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       setForm({ title: "", due_date: "", linked_module: "", linked_id: "" });
       await load();
       setViewMode("board");
+      toast({ title: t("Schedule item added", "Fecha agregada al cronograma") });
     } finally {
       setSaving(false);
     }
@@ -175,6 +178,13 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const openItem = (item: ScheduleItem) => {
     if (item.route) window.location.href = item.route;
     else setSelected(item);
+  };
+
+  const openNewForDate = (date: Date) => {
+    if (!canWrite) return;
+    setForm(f => ({ ...f, due_date: dayKey(date) }));
+    setError("");
+    setShowForm(true);
   };
 
   const filtered = useMemo(() => {
@@ -432,11 +442,22 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               const events = byDay[dayKey(day)] || [];
               const inMonth = day.getMonth() === thisMonth.getMonth();
               return (
-                <div key={dayKey(day)} style={{ minHeight: 118, background: "white", padding: 8, opacity: inMonth ? 1 : 0.45 }}>
+                <div
+                  key={dayKey(day)}
+                  onClick={() => openNewForDate(day)}
+                  title={canWrite ? t("Click to add a schedule item on this date", "Clic para agregar una fecha en este dia") : undefined}
+                  style={{
+                    minHeight: 118,
+                    background: "white",
+                    padding: 8,
+                    opacity: inMonth ? 1 : 0.45,
+                    cursor: canWrite ? "pointer" : "default",
+                  }}
+                >
                   <div style={{ fontSize: 12, fontWeight: 900, color: "#334155", marginBottom: 6 }}>{day.getDate()}</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     {events.slice(0, 4).map(item => (
-                      <button key={`${item.source}-${item.id}`} onClick={() => openItem(item)}
+                      <button key={`${item.source}-${item.id}`} onClick={(e) => { e.stopPropagation(); openItem(item); }}
                         style={{ textAlign: "left", border: "1px solid #DBEAFE", background: item.isOverdue ? "#FEF2F2" : "#EFF6FF", color: "#1E3A5F", borderRadius: 5, padding: "4px 5px", fontSize: 10, cursor: "pointer" }}>
                         <strong>{item.label}</strong> {item.title}
                       </button>
