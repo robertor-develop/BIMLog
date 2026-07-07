@@ -1028,7 +1028,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
         </select>
         <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => handleExport("excel")}>
           <Download style={{ width: 12, height: 12 }} />
-          {w("Export All", "Exportar Todo", lang)}
+          {w("Export Excel", "Exportar Excel", lang)}
         </Button>
       </div>
 
@@ -1652,7 +1652,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [aiRejectionLoading, setAiRejectionLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(canWrite);
   const [editSaving, setEditSaving] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [rfis, setRfis] = useState<RFI[]>([]);
@@ -1689,6 +1689,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const respondRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setEditOpen(canWrite);
     setEditForm({
       title: submittal.title || "",
       status: submittal.status || "pending",
@@ -1717,7 +1718,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       description: submittal.description || "",
       attachmentsText: (submittal.attachmentsJson || []).join("\n"),
     });
-  }, [submittal.id]);
+  }, [submittal.id, canWrite]);
 
   useEffect(() => {
     if (respondOpen && respondRef.current) {
@@ -1952,6 +1953,16 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
 
   return (
     <div style={{ paddingTop: 8 }}>
+      <input
+        ref={attachFileRef}
+        type="file"
+        style={{ display: "none" }}
+        onChange={e => {
+          const file = e.target.files?.[0];
+          if (file) void uploadAndAttachFile(file);
+          e.currentTarget.value = "";
+        }}
+      />
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         {canWrite && (
@@ -2089,16 +2100,6 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
             </Field>
             <Field label={w("Upload From Computer", "Subir Desde Computadora", lang)}>
               <div style={{ display: "flex", gap: 8 }}>
-                <input
-                  ref={attachFileRef}
-                  type="file"
-                  style={{ display: "none" }}
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) void uploadAndAttachFile(file);
-                    e.currentTarget.value = "";
-                  }}
-                />
                 <Button type="button" variant="outline" size="sm" disabled={uploadingAttachment} onClick={() => attachFileRef.current?.click()} style={{ width: "100%", fontSize: 12, gap: 5 }}>
                   {uploadingAttachment ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Paperclip style={{ width: 12, height: 12 }} />}
                   {uploadingAttachment ? w("Uploading...", "Subiendo...", lang) : w("Attach file now", "Adjuntar archivo ahora", lang)}
@@ -2213,6 +2214,13 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
             {uploadingAttachment ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Paperclip style={{ width: 12, height: 12 }} />}
             {uploadingAttachment ? w("Uploading...", "Subiendo...", lang) : w("Attach product PDF/image/file", "Adjuntar PDF/imagen/archivo de producto", lang)}
           </Button>
+          <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6, lineHeight: 1.4 }}>
+            {w(
+              "Attach product files here, then use Edit Submittal above to revise manufacturer, model, submitted-to, and product data.",
+              "Adjunte archivos de producto aqui, luego use Editar Entregable arriba para corregir fabricante, modelo, destinatario e informacion de producto.",
+              lang
+            )}
+          </div>
         </div>
       )}
       {submittal.description && (
