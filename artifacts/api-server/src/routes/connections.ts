@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { authMiddleware, signOAuthState, verifyOAuthState } from "../middlewares/auth";
 import { getAppUrl } from "../lib/email";
 import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
+import { getAiUsageSummary, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
 
@@ -28,6 +29,15 @@ router.get("/me/connections", authMiddleware, async (req, res) => {
       .where(eq(userConnectionsTable.userId, req.user!.userId));
     res.json(rows.map(toSafe));
   } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+router.get("/me/ai-usage", authMiddleware, async (req, res) => {
+  try {
+    res.json(await getAiUsageSummary(req.user!.userId));
+  } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });

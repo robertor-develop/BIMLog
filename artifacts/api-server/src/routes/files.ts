@@ -11,7 +11,7 @@ import { getDefaultValue, validateConfigValue } from "../middlewares/config-vali
 import { storage } from "../lib/storage-adapter";
 import { PDFParse as PDFParseClass } from "pdf-parse";
 import PDFDocument from "pdfkit";
-import Anthropic from "@anthropic-ai/sdk";
+import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 async function pdfParse(buffer: Buffer) {
   const parser = new PDFParseClass({ data: buffer, verbosity: 0 });
@@ -268,9 +268,10 @@ async function runContentVerification(fileId: number, projectId: number, fileNam
     const words = extractedText.split(/\s+/).filter(Boolean);
     const snippet = words.slice(0, 500).join(" ");
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: uploadedById,
+      projectId,
+      feature: "files.content_verification",
     });
 
     const message = await anthropic.messages.create({
@@ -392,6 +393,12 @@ CRITICAL RULES:
       }
     }
   } catch (err) {
+    if (err instanceof AiUsageError) {
+      await db.update(filesTable)
+        .set({ contentVerificationResult: "not_applicable", hashComparisonNote: err.message, updatedAt: new Date() })
+        .where(eq(filesTable.id, fileId));
+      return;
+    }
     console.error(`[files] AI content verification failed for file ${fileId}:`, err instanceof Error ? err.message : err);
     await db.update(filesTable).set({ contentVerificationResult: "not_applicable", updatedAt: new Date() }).where(eq(filesTable.id, fileId));
   }
@@ -683,9 +690,10 @@ router.post("/projects/:projectId/files/suggest-name", authMiddleware, requirePr
       return parts.join(conventionSep) + ext;
     };
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "files.naming_suggestion",
     });
 
     // ── PATH A: extractedText available — content-first analysis ─────────────
@@ -782,6 +790,7 @@ Return ONLY JSON in this format:
       res.json({ isRelevant: true, suggestedName: suggested, reason: "Built by matching your file name against allowed convention values." });
     }
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });

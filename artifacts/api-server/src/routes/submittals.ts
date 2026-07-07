@@ -12,7 +12,6 @@ import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod"
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
-import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
@@ -1357,9 +1356,10 @@ router.post("/projects/:projectId/submittals/:submittalId/ai-draft-rejection", a
       res.status(400).json({ error: "Enter a rejection reason first, then click AI Draft Rejection to rewrite it professionally." });
       return;
     }
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId: Number(req.params.projectId),
+      feature: "submittals.ai_draft_rejection",
     });
     const prompt = `You are a senior construction project manager or architect. The following is a draft rejection reason for a submittal. Rewrite it as a formal, professional rejection notice specifying exactly what needs to be corrected and why. Be precise, technical, and reference the relevant spec section or standard if mentioned. Output only the rewritten rejection reason with no preamble.
 
@@ -1378,6 +1378,7 @@ ${body.existingReason}`;
     const suggestion = message.content[0].type === "text" ? message.content[0].text.trim() : "";
     res.json({ suggestion });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
@@ -1390,9 +1391,10 @@ router.post("/projects/:projectId/submittals/inline-ai-check", authMiddleware, r
       title?: string; specSection?: string; submittalCategory?: string; submittedByCompany?: string;
       submittedToCompany?: string; description?: string; manufacturer?: string; modelNumber?: string;
     };
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId: parseInt(projectId as string),
+      feature: "submittals.inline_ai_check",
     });
 
     const [project] = await db.select({ name: projectsTable.name }).from(projectsTable)
@@ -1432,6 +1434,7 @@ Check for: missing required fields, spec section format (XX XX XX), naming conve
     const result = jsonMatch ? JSON.parse(jsonMatch[0]) : { overall: "warning", summary: "Could not analyze submittal.", checks: [] };
     res.json(result);
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
@@ -1476,9 +1479,10 @@ router.post("/projects/:projectId/submittals/import",
       let records: any[] = extractSpreadsheetSubmittals(req.file.buffer, req.file.originalname);
       let usedDeterministicSpreadsheetImport = records.length > 0;
       if (!usedDeterministicSpreadsheetImport) {
-        const anthropicClient = new Anthropic({
-          apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-          baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+        const anthropicClient = await getAnthropicClientForUser({
+          userId: req.user!.userId,
+          projectId,
+          feature: "submittals.ai_import",
         });
         const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
         if (isPdf && pdfBase64) {
@@ -1580,6 +1584,7 @@ ${chunk}`
       });
       res.json({ imported, message: `${imported} submittals imported successfully`, renamed: renamedSub, renameCount: renamedSub.length });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       console.error("[submittal-import]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }

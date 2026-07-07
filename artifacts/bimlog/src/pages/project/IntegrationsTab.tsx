@@ -23,6 +23,17 @@ type ConnectedService = {
   lastError: string | null;
 };
 
+type AiUsageSummary = {
+  mode: "platform_internal" | "user_key" | "included_platform" | "setup_required" | "limit_reached";
+  providerConnected: boolean;
+  providerLabel: string;
+  internalUser: boolean;
+  platformConfigured: boolean;
+  includedUsed: number;
+  includedLimit: number;
+  includedRemaining: number;
+};
+
 const INTEGRATIONS: Integration[] = [
   {
     id: "procore",
@@ -457,6 +468,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [showApiDocs, setShowApiDocs] = useState(false);
   const [showAnthropicConnect, setShowAnthropicConnect] = useState(false);
   const [connections, setConnections] = useState<ConnectedService[]>([]);
+  const [aiUsage, setAiUsage] = useState<AiUsageSummary | null>(null);
 
   async function loadConnections() {
     if (!token) return;
@@ -466,11 +478,28 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
     setConnections(Array.isArray(data) ? data : []);
   }
 
+  async function loadAiUsage() {
+    if (!token) return;
+    const response = await fetch("/api/v1/me/ai-usage", { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) return;
+    setAiUsage(await response.json());
+  }
+
   useEffect(() => {
     loadConnections().catch(() => {});
+    loadAiUsage().catch(() => {});
   }, [token]);
 
   const connectedByProvider = new Map(connections.map(c => [c.provider, c]));
+  const aiModeLabel = aiUsage?.mode === "platform_internal"
+    ? "BIMLog internal"
+    : aiUsage?.mode === "user_key"
+      ? "Your AI key"
+      : aiUsage?.mode === "included_platform"
+        ? "Included credits"
+        : aiUsage?.mode === "limit_reached"
+          ? "Credits used"
+          : "Setup needed";
 
   const filtered = filter === "all"
     ? INTEGRATIONS
@@ -503,7 +532,10 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         <AnthropicConnectModal
           token={token}
           onClose={() => setShowAnthropicConnect(false)}
-          onConnected={() => loadConnections().catch(() => {})}
+          onConnected={() => {
+            loadConnections().catch(() => {});
+            loadAiUsage().catch(() => {});
+          }}
         />
       )}
 
@@ -522,10 +554,16 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           <div className="pill pill-green">Validate · Managed · Agent · OAuth</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">AI engines</div>
-          <div className="kpi-value" style={{ color: "#5B21B6" }}>2</div>
-          <div className="kpi-sub">Claude and Gemini</div>
-          <div className="pill pill-purple">Connect to activate</div>
+          <div className="kpi-label">AI usage</div>
+          <div className="kpi-value" style={{ fontSize: 18, color: "#5B21B6" }}>{aiModeLabel}</div>
+          <div className="kpi-sub">
+            {aiUsage
+              ? `${aiUsage.includedUsed}/${aiUsage.includedLimit} included credits used`
+              : "Loading AI status"}
+          </div>
+          <div className="pill pill-purple">
+            {aiUsage?.providerConnected ? aiUsage.providerLabel : "Connect your own key"}
+          </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Data standard</div>

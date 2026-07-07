@@ -76,6 +76,63 @@ async function includedUsageThisMonth(userId: number) {
   return Number(row?.count ?? 0);
 }
 
+export async function getAiUsageSummary(userId: number) {
+  const [user] = await db
+    .select({ email: usersTable.email })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+
+  if (!user) {
+    throw new AiUsageError(404, "AI_SETUP_REQUIRED", "User not found.");
+  }
+
+  const [connection] = await db
+    .select({
+      provider: userConnectionsTable.provider,
+      status: userConnectionsTable.status,
+      accountLabel: userConnectionsTable.accountLabel,
+    })
+    .from(userConnectionsTable)
+    .where(and(
+      eq(userConnectionsTable.userId, userId),
+      eq(userConnectionsTable.provider, "anthropic"),
+      eq(userConnectionsTable.status, "connected"),
+    ))
+    .limit(1);
+
+  const includedLimit = monthlyLimit();
+  const includedUsed = await includedUsageThisMonth(userId);
+  const internalUser = isInternalAiUser(user.email);
+  const platformConfigured = Boolean(platformAnthropicKey());
+  const providerConnected = connection?.status === "connected";
+
+  let mode: "platform_internal" | "user_key" | "included_platform" | "setup_required" | "limit_reached";
+  if (internalUser) {
+    mode = platformConfigured ? "platform_internal" : "setup_required";
+  } else if (providerConnected) {
+    mode = "user_key";
+  } else if (!platformConfigured) {
+    mode = "setup_required";
+  } else if (includedUsed >= includedLimit) {
+    mode = "limit_reached";
+  } else {
+    mode = "included_platform";
+  }
+
+  return {
+    mode,
+    provider: "anthropic",
+    providerConnected,
+    providerLabel: connection?.accountLabel ?? "Claude / Anthropic",
+    internalUser,
+    platformConfigured,
+    includedUsed,
+    includedLimit,
+    includedRemaining: Math.max(0, includedLimit - includedUsed),
+  };
+}
+
 export async function getAnthropicClientForUser(input: AiClientInput) {
   const [user] = await db
     .select({ email: usersTable.email })
