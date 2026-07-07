@@ -105,6 +105,115 @@ router.get("/admin/platform-stats", authMiddleware, async (req, res) => {
 });
 
 // ── Tab 1: Platform Overview ──────────────────────────────────────────────────
+router.get("/admin/ai-usage", async (req, res) => {
+  try {
+    if (!req.user?.isSuperAdmin) {
+      res.status(403).json({ error: "Super admin only" });
+      return;
+    }
+
+    const monthParam = String(req.query.month || "").trim();
+    const monthStart = /^\d{4}-\d{2}$/.test(monthParam)
+      ? new Date(`${monthParam}-01T00:00:00.000Z`)
+      : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
+    const monthEnd = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 1));
+
+    const [summaryResult, usersResult, featuresResult, projectsResult, recentResult] = await Promise.all([
+      db.execute(sql`
+        SELECT
+          count(*)::int AS total_calls,
+          coalesce(sum(estimated_units), 0)::int AS total_units,
+          count(*) FILTER (WHERE billing_mode = 'included_platform')::int AS included_calls,
+          count(*) FILTER (WHERE billing_mode = 'platform_internal')::int AS internal_calls,
+          count(*) FILTER (WHERE billing_mode = 'user_key')::int AS user_key_calls,
+          count(DISTINCT user_id)::int AS active_users,
+          count(DISTINCT project_id) FILTER (WHERE project_id IS NOT NULL)::int AS active_projects
+        FROM ai_usage_events
+        WHERE created_at >= ${monthStart} AND created_at < ${monthEnd}
+      `),
+      db.execute(sql`
+        SELECT
+          u.id AS user_id,
+          u.email,
+          u.full_name,
+          c.name AS company_name,
+          count(e.id)::int AS total_calls,
+          coalesce(sum(e.estimated_units), 0)::int AS total_units,
+          count(e.id) FILTER (WHERE e.billing_mode = 'included_platform')::int AS included_calls,
+          count(e.id) FILTER (WHERE e.billing_mode = 'platform_internal')::int AS internal_calls,
+          count(e.id) FILTER (WHERE e.billing_mode = 'user_key')::int AS user_key_calls,
+          max(e.created_at) AS last_used_at
+        FROM ai_usage_events e
+        JOIN users u ON u.id = e.user_id
+        LEFT JOIN companies c ON c.id = u.company_id
+        WHERE e.created_at >= ${monthStart} AND e.created_at < ${monthEnd}
+        GROUP BY u.id, u.email, u.full_name, c.name
+        ORDER BY total_units DESC, total_calls DESC, last_used_at DESC
+        LIMIT 100
+      `),
+      db.execute(sql`
+        SELECT
+          feature,
+          billing_mode,
+          count(*)::int AS total_calls,
+          coalesce(sum(estimated_units), 0)::int AS total_units
+        FROM ai_usage_events
+        WHERE created_at >= ${monthStart} AND created_at < ${monthEnd}
+        GROUP BY feature, billing_mode
+        ORDER BY total_units DESC, total_calls DESC
+        LIMIT 100
+      `),
+      db.execute(sql`
+        SELECT
+          p.id AS project_id,
+          p.name AS project_name,
+          p.code AS project_code,
+          count(e.id)::int AS total_calls,
+          coalesce(sum(e.estimated_units), 0)::int AS total_units
+        FROM ai_usage_events e
+        LEFT JOIN projects p ON p.id = e.project_id
+        WHERE e.created_at >= ${monthStart} AND e.created_at < ${monthEnd}
+        GROUP BY p.id, p.name, p.code
+        ORDER BY total_units DESC, total_calls DESC
+        LIMIT 50
+      `),
+      db.execute(sql`
+        SELECT
+          e.id,
+          e.created_at,
+          e.feature,
+          e.provider,
+          e.billing_mode,
+          e.estimated_units,
+          u.email,
+          u.full_name,
+          p.name AS project_name,
+          p.code AS project_code
+        FROM ai_usage_events e
+        JOIN users u ON u.id = e.user_id
+        LEFT JOIN projects p ON p.id = e.project_id
+        WHERE e.created_at >= ${monthStart} AND e.created_at < ${monthEnd}
+        ORDER BY e.created_at DESC
+        LIMIT 100
+      `),
+    ]);
+
+    const rows = <T>(result: unknown) => ((result as { rows?: T[] }).rows ?? []);
+    res.json({
+      month: monthStart.toISOString().slice(0, 7),
+      periodStart: monthStart.toISOString(),
+      periodEnd: monthEnd.toISOString(),
+      summary: rows<Record<string, unknown>>(summaryResult)[0] ?? {},
+      users: rows(usersResult),
+      features: rows(featuresResult),
+      projects: rows(projectsResult),
+      recent: rows(recentResult),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 router.get("/admin/overview", async (req, res) => {
   try {
     const scope = String(req.query.scope || "");

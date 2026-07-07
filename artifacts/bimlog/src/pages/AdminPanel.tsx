@@ -14,7 +14,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage"];
 
 const FLAG_LABELS: Record<string, string> = {
   ai_presubmission_check: "AI Pre-Submission Check",
@@ -626,6 +626,195 @@ function AdminActionsLogTab({ token }: { token: string }) {
 }
 
 // ── Main AdminPanel ───────────────────────────────────────────────────────────
+type AiUsageData = {
+  month: string;
+  summary: Record<string, number | string | null>;
+  users: Record<string, unknown>[];
+  features: Record<string, unknown>[];
+  projects: Record<string, unknown>[];
+  recent: Record<string, unknown>[];
+};
+
+function billingModeLabel(mode: unknown) {
+  const value = String(mode || "");
+  if (value === "platform_internal") return "BIMLog internal";
+  if (value === "included_platform") return "Included credits";
+  if (value === "user_key") return "User key";
+  return value || "Unknown";
+}
+
+function numberValue(value: unknown) {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function AiUsageTab({ token }: { token: string }) {
+  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [data, setData] = useState<AiUsageData | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    setError("");
+    apiFetch(`/admin/ai-usage?month=${encodeURIComponent(month)}`, token)
+      .then(async r => {
+        const body = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(body.error || "Unable to load AI usage.");
+        setData(body);
+      })
+      .catch(err => setError(err instanceof Error ? err.message : "Unable to load AI usage."))
+      .finally(() => setLoading(false));
+  }, [month, token]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const summary = data?.summary ?? {};
+  const users = data?.users ?? [];
+  const features = data?.features ?? [];
+  const projects = data?.projects ?? [];
+  const recent = data?.recent ?? [];
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>AI Usage</h2>
+          <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+            Super-admin view of AI calls, credit units, billing mode, users, projects, and recent activity.
+          </p>
+        </div>
+        <Input type="month" value={month} onChange={e => setMonth(e.target.value)} style={{ width: 160, marginLeft: "auto" }} />
+        <Button size="sm" variant="outline" onClick={load} disabled={loading}>{loading ? "Loading..." : "Refresh"}</Button>
+      </div>
+
+      {error && (
+        <div style={{ background: "#ef444422", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13 }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard label="AI Calls" value={numberValue(summary.total_calls)} />
+        <StatCard label="Credit Units" value={numberValue(summary.total_units)} />
+        <StatCard label="Included Calls" value={numberValue(summary.included_calls)} />
+        <StatCard label="Internal Calls" value={numberValue(summary.internal_calls)} />
+        <StatCard label="User-Key Calls" value={numberValue(summary.user_key_calls)} />
+        <StatCard label="Active Users" value={numberValue(summary.active_users)} />
+        <StatCard label="Projects" value={numberValue(summary.active_projects)} />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 20, alignItems: "start" }}>
+        <section style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16 }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 800 }}>Usage by User</h3>
+          {users.length === 0 ? (
+            <div style={{ padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No AI usage for this month.</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><Th>User</Th><Th>Company</Th><Th>Calls</Th><Th>Units</Th><Th>Included</Th><Th>Internal</Th><Th>User Key</Th><Th>Last Used</Th></tr></thead>
+                <tbody>
+                  {users.map(u => (
+                    <tr key={String(u.user_id)}>
+                      <Td>
+                        <div style={{ fontWeight: 700, fontSize: 12 }}>{String(u.full_name || "Unnamed")}</div>
+                        <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(u.email || "")}</div>
+                      </Td>
+                      <Td style={{ fontSize: 12 }}>{String(u.company_name || "-")}</Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(u.total_calls)}</Td>
+                      <Td style={{ fontSize: 12, fontWeight: 700 }}>{numberValue(u.total_units)}</Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(u.included_calls)}</Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(u.internal_calls)}</Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(u.user_key_calls)}</Td>
+                      <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{u.last_used_at ? new Date(String(u.last_used_at)).toLocaleString() : "-"}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16 }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 800 }}>Usage by Feature</h3>
+          {features.length === 0 ? (
+            <div style={{ padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No feature usage yet.</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><Th>Feature</Th><Th>Mode</Th><Th>Calls</Th><Th>Units</Th></tr></thead>
+                <tbody>
+                  {features.map((f, i) => (
+                    <tr key={`${String(f.feature)}-${String(f.billing_mode)}-${i}`}>
+                      <Td style={{ fontSize: 12, fontWeight: 700 }}>{String(f.feature || "-")}</Td>
+                      <Td><Badge label={billingModeLabel(f.billing_mode)} color={String(f.billing_mode) === "user_key" ? "#22c55e" : "#3b82f6"} /></Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(f.total_calls)}</Td>
+                      <Td style={{ fontSize: 12, fontWeight: 700 }}>{numberValue(f.total_units)}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16 }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 800 }}>Usage by Project</h3>
+          {projects.length === 0 ? (
+            <div style={{ padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No project usage yet.</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><Th>Project</Th><Th>Calls</Th><Th>Units</Th></tr></thead>
+                <tbody>
+                  {projects.map((p, i) => (
+                    <tr key={`${String(p.project_id || "none")}-${i}`}>
+                      <Td>
+                        <div style={{ fontWeight: 700, fontSize: 12 }}>{String(p.project_name || "No project")}</div>
+                        <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(p.project_code || "")}</div>
+                      </Td>
+                      <Td style={{ fontSize: 12 }}>{numberValue(p.total_calls)}</Td>
+                      <Td style={{ fontSize: 12, fontWeight: 700 }}>{numberValue(p.total_units)}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16 }}>
+          <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 800 }}>Recent AI Calls</h3>
+          {recent.length === 0 ? (
+            <div style={{ padding: "24px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No recent AI calls.</div>
+          ) : (
+            <div style={{ overflowX: "auto", maxHeight: 420, overflowY: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><Th>When</Th><Th>User</Th><Th>Feature</Th><Th>Mode</Th><Th>Units</Th><Th>Project</Th></tr></thead>
+                <tbody>
+                  {recent.map(r => (
+                    <tr key={String(r.id)}>
+                      <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(r.created_at)).toLocaleString()}</Td>
+                      <Td>
+                        <div style={{ fontWeight: 700, fontSize: 12 }}>{String(r.full_name || "Unnamed")}</div>
+                        <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(r.email || "")}</div>
+                      </Td>
+                      <Td style={{ fontSize: 12 }}>{String(r.feature || "-")}</Td>
+                      <Td><Badge label={billingModeLabel(r.billing_mode)} color={String(r.billing_mode) === "user_key" ? "#22c55e" : "#3b82f6"} /></Td>
+                      <Td style={{ fontSize: 12, fontWeight: 700 }}>{numberValue(r.estimated_units)}</Td>
+                      <Td style={{ fontSize: 12 }}>{String(r.project_name || r.project_code || "-")}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function AdminPanel() {
   const [, setLocation] = useLocation();
   const { token } = useAuthStore();
@@ -676,6 +865,7 @@ export function AdminPanel() {
         {activeTab === 5 && <ActivityFeedTab token={token} />}
         {activeTab === 6 && <FeatureFlagsTab token={token} />}
         {activeTab === 7 && <AdminActionsLogTab token={token} />}
+        {activeTab === 8 && <AiUsageTab token={token} />}
       </div>
     </div>
   );
