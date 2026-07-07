@@ -16,6 +16,8 @@ type LiveScheduleEvent = {
   priority: string | null;
   company: string | null;
   route: string | null;
+  linkedModule?: string | null;
+  linkedId?: number | null;
   isOverdue: boolean;
 };
 
@@ -42,6 +44,12 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
 
     const events: LiveScheduleEvent[] = [];
 
+    const milestoneRoute = (linkedModule: string | null, linkedId: number | null) => {
+      if (linkedModule === "rfi" && linkedId) return `/projects/${projectId}/rfis?rfi=${linkedId}`;
+      if (linkedModule === "submittal" && linkedId) return `/projects/${projectId}/submittals`;
+      return null;
+    };
+
     events.push(...milestones.map((m) => ({
       id: m.id,
       source: "milestone" as const,
@@ -51,7 +59,9 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
       status: m.status || "pending",
       priority: null,
       company: null,
-      route: null,
+      route: milestoneRoute(m.linkedModule, m.linkedId),
+      linkedModule: m.linkedModule,
+      linkedId: m.linkedId,
       isOverdue: !isDone(m.status) && new Date(m.dueDate) < now,
     })));
 
@@ -155,6 +165,33 @@ router.patch("/projects/:projectId/milestones/:milestoneId", authMiddleware, req
       .where(and(eq(projectMilestonesTable.id, msId), eq(projectMilestonesTable.projectId, projectId))).returning();
     if (!updated) { res.status(404).json({ error: "Not found" }); return; }
     res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── DELETE /projects/:projectId/milestones/:milestoneId ──────────────────────
+router.delete("/projects/:projectId/milestones/:milestoneId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const msId = Number(req.params.milestoneId);
+  try {
+    const [deleted] = await db.delete(projectMilestonesTable)
+      .where(and(eq(projectMilestonesTable.id, msId), eq(projectMilestonesTable.projectId, projectId)))
+      .returning();
+    if (!deleted) { res.status(404).json({ error: "Not found" }); return; }
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "delete",
+      entityType: "milestone",
+      entityId: msId,
+      fileNameBefore: null,
+      fileNameAfter: null,
+      details: `Deleted milestone: ${deleted.title}`,
+    });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
