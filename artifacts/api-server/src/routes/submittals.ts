@@ -4,12 +4,14 @@ import {
   submittalsTable, usersTable, activityLogTable, projectsTable,
   projectMembersTable, companiesTable, rfisTable,
   submittalRegisterTable, submittalViewEventsTable,
-  linkedItemsTable, agentInsightsTable,
+  linkedItemsTable, agentInsightsTable, filesTable,
 } from "@workspace/db/schema";
 import { sendEmail, makeSubmittalAssignedEmail, makeProcurementAlertEmail, makeRapidApprovalEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and, count, isNull, or } from "drizzle-orm";
 import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { getDefaultValue } from "../middlewares/config-validator";
+import { storage } from "../lib/storage-adapter";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
@@ -1427,6 +1429,35 @@ Check for: missing required fields, spec section format (XX XX XX), naming conve
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
+
+router.post("/projects/:projectId/submittals/attachments/upload",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const fileName = req.file.originalname || "attachment";
+      const ext = (fileName.split(".").pop() || "").toLowerCase();
+      const storagePath = await storage.upload(req.file.buffer, projectId, `submittal-attach-${Date.now()}-${fileName}`);
+      const defaultFileStatus = await getDefaultValue("file_status");
+      const [row] = await db.insert(filesTable).values({
+        projectId,
+        fileName,
+        fileSize: req.file.size,
+        fileType: ext || "bin",
+        status: defaultFileStatus,
+        uploadedById: req.user!.userId,
+        source: "submittal-attachment",
+        storagePath,
+      }).returning();
+      res.json({ fileId: row.id, fileName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(fileName)}` });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Upload failed" });
+    }
+  }
+);
 
 router.post("/projects/:projectId/submittals/import",
   authMiddleware,

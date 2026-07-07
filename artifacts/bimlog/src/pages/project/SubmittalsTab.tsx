@@ -125,6 +125,17 @@ function fmtDate(d: string | null | undefined) {
   const dt = new Date(d);
   return isValid(dt) ? format(dt, "MMM d, yyyy") : "—";
 }
+function isAttachmentUrl(value: string) {
+  return /^https?:\/\//i.test(value) || value.startsWith("/api/");
+}
+function attachmentLabel(value: string) {
+  try {
+    const url = new URL(value, window.location.origin);
+    return url.searchParams.get("name") || decodeURIComponent(url.pathname.split("/").pop() || value);
+  } catch {
+    return value;
+  }
+}
 function daysOut(d: string | null | undefined) {
   if (!d) return null;
   const dt = new Date(d);
@@ -1643,8 +1654,10 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [auditLoading, setAuditLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [rfis, setRfis] = useState<RFI[]>([]);
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
+  const attachFileRef = useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState({
     title: submittal.title || "",
     status: submittal.status || "pending",
@@ -1654,8 +1667,20 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     trade: submittal.trade || "",
     floor: submittal.floor || "",
     responsibleCompany: submittal.responsibleCompany || "",
+    submittedByCompany: submittal.submittedByCompany || "",
+    submittedByPerson: submittal.submittedByPerson || "",
+    submittedByEmail: submittal.submittedByEmail || "",
+    submittedByPhone: submittal.submittedByPhone || "",
+    submittedToCompany: submittal.submittedToCompany || "",
+    submittedToPerson: submittal.submittedToPerson || "",
+    submittedToEmail: submittal.submittedToEmail || "",
+    manufacturer: submittal.manufacturer || "",
+    modelNumber: submittal.modelNumber || "",
+    procurementStatus: submittal.procurementStatus || "not_ordered",
+    ballInCourt: submittal.ballInCourt || "",
     drawingNumber: submittal.drawingNumber || "",
     drawingTitle: submittal.drawingTitle || "",
+    dateSubmitted: submittal.dateSubmitted ? submittal.dateSubmitted.slice(0, 10) : "",
     dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
     linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
     description: submittal.description || "",
@@ -1673,8 +1698,20 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       trade: submittal.trade || "",
       floor: submittal.floor || "",
       responsibleCompany: submittal.responsibleCompany || "",
+      submittedByCompany: submittal.submittedByCompany || "",
+      submittedByPerson: submittal.submittedByPerson || "",
+      submittedByEmail: submittal.submittedByEmail || "",
+      submittedByPhone: submittal.submittedByPhone || "",
+      submittedToCompany: submittal.submittedToCompany || "",
+      submittedToPerson: submittal.submittedToPerson || "",
+      submittedToEmail: submittal.submittedToEmail || "",
+      manufacturer: submittal.manufacturer || "",
+      modelNumber: submittal.modelNumber || "",
+      procurementStatus: submittal.procurementStatus || "not_ordered",
+      ballInCourt: submittal.ballInCourt || "",
       drawingNumber: submittal.drawingNumber || "",
       drawingTitle: submittal.drawingTitle || "",
+      dateSubmitted: submittal.dateSubmitted ? submittal.dateSubmitted.slice(0, 10) : "",
       dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
       linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
       description: submittal.description || "",
@@ -1717,6 +1754,44 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     });
   };
 
+  const uploadAndAttachFile = async (file: File) => {
+    setUploadingAttachment(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const upload = await fetch(`/api/v1/projects/${projectId}/submittals/attachments/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      });
+      if (!upload.ok) {
+        const err = await upload.json().catch(() => ({})) as { error?: string };
+        throw new Error(err.error || "Upload failed");
+      }
+      const { downloadUrl } = await upload.json() as { downloadUrl: string };
+      const nextAttachments = [...(submittal.attachmentsJson || [])];
+      if (!nextAttachments.includes(downloadUrl)) nextAttachments.push(downloadUrl);
+      const save = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({ attachmentsJson: nextAttachments }),
+      });
+      if (!save.ok) {
+        const err = await save.json().catch(() => ({})) as { error?: string };
+        throw new Error(err.error || "Attachment save failed");
+      }
+      const updated = await save.json() as Submittal;
+      setEditForm(f => ({ ...f, attachmentsText: (updated.attachmentsJson || []).join("\n") }));
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
+      onUpdated({ ...submittal, ...updated });
+      toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Upload failed", "Error al subir", lang), variant: "destructive" });
+    } finally {
+      setUploadingAttachment(false);
+    }
+  };
+
   const handleSaveEdit = async () => {
     if (!editForm.title.trim()) {
       toast({ title: w("Title is required", "El titulo es requerido", lang), variant: "destructive" });
@@ -1733,8 +1808,20 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         trade: editForm.trade || null,
         floor: editForm.floor || null,
         responsibleCompany: editForm.responsibleCompany || null,
+        submittedByCompany: editForm.submittedByCompany || null,
+        submittedByPerson: editForm.submittedByPerson || null,
+        submittedByEmail: editForm.submittedByEmail || null,
+        submittedByPhone: editForm.submittedByPhone || null,
+        submittedToCompany: editForm.submittedToCompany || null,
+        submittedToPerson: editForm.submittedToPerson || null,
+        submittedToEmail: editForm.submittedToEmail || null,
+        manufacturer: editForm.manufacturer || null,
+        modelNumber: editForm.modelNumber || null,
+        procurementStatus: editForm.procurementStatus || null,
+        ballInCourt: editForm.ballInCourt || null,
         drawingNumber: editForm.drawingNumber || null,
         drawingTitle: editForm.drawingTitle || null,
+        dateSubmitted: editForm.dateSubmitted || null,
         dateRequired: editForm.dateRequired || null,
         linkedRfiId: editForm.linkedRfiId ? parseInt(editForm.linkedRfiId) : null,
         description: editForm.description || null,
@@ -1940,6 +2027,41 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
             <Field label={w("Responsible Company", "Empresa Responsable", lang)}>
               <FieldInput value={editForm.responsibleCompany} onChange={e => setEdit("responsibleCompany", e.target.value)} />
             </Field>
+            <Field label={w("Submitted To Company", "Empresa Destinataria", lang)}>
+              <FieldInput value={editForm.submittedToCompany} onChange={e => setEdit("submittedToCompany", e.target.value)} />
+            </Field>
+            <Field label={w("Submitted To Contact", "Contacto Destinatario", lang)}>
+              <FieldInput value={editForm.submittedToPerson} onChange={e => setEdit("submittedToPerson", e.target.value)} />
+            </Field>
+            <Field label={w("Submitted To Email", "Correo Destinatario", lang)}>
+              <FieldInput type="email" value={editForm.submittedToEmail} onChange={e => setEdit("submittedToEmail", e.target.value)} />
+            </Field>
+            <Field label={w("Submitted By Company", "Empresa Remitente", lang)}>
+              <FieldInput value={editForm.submittedByCompany} onChange={e => setEdit("submittedByCompany", e.target.value)} />
+            </Field>
+            <Field label={w("Submitted By Contact", "Contacto Remitente", lang)}>
+              <FieldInput value={editForm.submittedByPerson} onChange={e => setEdit("submittedByPerson", e.target.value)} />
+            </Field>
+            <Field label={w("Submitted By Email", "Correo Remitente", lang)}>
+              <FieldInput type="email" value={editForm.submittedByEmail} onChange={e => setEdit("submittedByEmail", e.target.value)} />
+            </Field>
+            <Field label={w("Manufacturer", "Fabricante", lang)}>
+              <FieldInput value={editForm.manufacturer} onChange={e => setEdit("manufacturer", e.target.value)} />
+            </Field>
+            <Field label={w("Model Number", "Numero de Modelo", lang)}>
+              <FieldInput value={editForm.modelNumber} onChange={e => setEdit("modelNumber", e.target.value)} />
+            </Field>
+            <Field label={w("Procurement", "Adquisicion", lang)}>
+              <FieldSelect value={editForm.procurementStatus} onChange={e => setEdit("procurementStatus", e.target.value)}>
+                {PROCUREMENT_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
+              </FieldSelect>
+            </Field>
+            <Field label={w("Ball in Court", "En Espera De", lang)}>
+              <FieldInput value={editForm.ballInCourt} onChange={e => setEdit("ballInCourt", e.target.value)} />
+            </Field>
+            <Field label={w("Date Submitted", "Fecha de Envio", lang)}>
+              <FieldInput type="date" value={editForm.dateSubmitted} onChange={e => setEdit("dateSubmitted", e.target.value)} />
+            </Field>
             <Field label={w("Date Required", "Fecha Requerida", lang)}>
               <FieldInput type="date" value={editForm.dateRequired} onChange={e => setEdit("dateRequired", e.target.value)} />
             </Field>
@@ -1964,6 +2086,24 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
                   <option key={file.id} value={file.fileName}>{file.fileName}</option>
                 ))}
               </FieldSelect>
+            </Field>
+            <Field label={w("Upload From Computer", "Subir Desde Computadora", lang)}>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  ref={attachFileRef}
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) void uploadAndAttachFile(file);
+                    e.currentTarget.value = "";
+                  }}
+                />
+                <Button type="button" variant="outline" size="sm" disabled={uploadingAttachment} onClick={() => attachFileRef.current?.click()} style={{ width: "100%", fontSize: 12, gap: 5 }}>
+                  {uploadingAttachment ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Paperclip style={{ width: 12, height: 12 }} />}
+                  {uploadingAttachment ? w("Uploading...", "Subiendo...", lang) : w("Attach file now", "Adjuntar archivo ahora", lang)}
+                </Button>
+              </div>
             </Field>
           </div>
           <Field label={w("Description", "Descripcion", lang)}>
@@ -2039,7 +2179,12 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {(submittal.attachmentsJson || []).map((name, idx) => (
               <div key={`${name}-${idx}`} style={{ fontSize: 12, color: "#1E293B", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 6, padding: "5px 8px" }}>
-                {name}
+                {isAttachmentUrl(name) ? (
+                  <a href={name} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <ExternalLink style={{ width: 12, height: 12 }} />
+                    {attachmentLabel(name)}
+                  </a>
+                ) : name}
               </div>
             ))}
           </div>
@@ -2062,6 +2207,14 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       <InfoRow label={w("Model Number", "Número de Modelo", lang)} value={submittal.modelNumber} />
       <InfoRow label={w("Procurement", "Adquisición", lang)} value={PROCUREMENT_OPTIONS.find(o => o.value === submittal.procurementStatus)?.[lang === "es" ? "labelEs" : "label"] || submittal.procurementStatus} />
       <InfoRow label={w("Ball in Court", "En Espera De", lang)} value={submittal.ballInCourt} />
+      {canWrite && (
+        <div style={{ margin: "8px 0 4px" }}>
+          <Button type="button" variant="outline" size="sm" disabled={uploadingAttachment} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 5 }}>
+            {uploadingAttachment ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Paperclip style={{ width: 12, height: 12 }} />}
+            {uploadingAttachment ? w("Uploading...", "Subiendo...", lang) : w("Attach product PDF/image/file", "Adjuntar PDF/imagen/archivo de producto", lang)}
+          </Button>
+        </div>
+      )}
       {submittal.description && (
         <div style={{ padding: "8px 0", borderBottom: "1px solid #F3F4F6" }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>{w("Description", "Descripción", lang)}</div>
