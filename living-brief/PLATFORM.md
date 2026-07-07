@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-03T18:31:27.682Z
+> Last generated: 2026-07-07T14:12:37.423Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -32,6 +32,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/company-profile.ts
 - artifacts/api-server/src/routes/config.ts
+- artifacts/api-server/src/routes/connections.ts
 - artifacts/api-server/src/routes/contact.ts
 - artifacts/api-server/src/routes/conventions.ts
 - artifacts/api-server/src/routes/coordination.ts
@@ -90,15 +91,18 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - agentsRouter
 - autodeskRouter
 - livingBriefRouter
+- connectionsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
 - artifacts/api-server/src/middlewares/config-validator.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
+- artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/extract-file-text.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
+- artifacts/api-server/src/lib/oauth.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
@@ -147,6 +151,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib/db/src/schema/submittal_reports.ts
 - lib/db/src/schema/submittals.ts
 - lib/db/src/schema/transmittals.ts
+- lib/db/src/schema/user-connections.ts
 - lib/db/src/schema/users.ts
 
 ## Frontend pages (artifacts/bimlog/src/pages)

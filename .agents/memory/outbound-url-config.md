@@ -18,6 +18,8 @@ Replit, verified). Source-level fallbacks still read the old
 **How to apply:** if outbound links show the wrong domain, check that BOTH env vars
 are set; changing only one leaves transmittals/directory (or email/invite/reset) on
 the other value. Env var changes take effect on api-server restart (dev) and on the
-next Publish (prod). autodesk.ts REDIRECT_URI is separately hardcoded and must match
-the callback URL registered in the Autodesk/APS developer console — do NOT repoint it
-without updating that console too.
+next Publish (prod). autodesk.ts REDIRECT_URI now derives from APP_URL/BIMLOG_URL
+(with `AUTODESK_REDIRECT_URI` as an outright override), so it follows the domain too —
+currently `https://bimlog.app/api/v1/autodesk/callback`. This URL MUST be registered
+verbatim in the Autodesk/APS app console or the OAuth flow fails with redirect_uri
+mismatch. Keep the old replit.app callback registered alongside during any transition.
