@@ -189,6 +189,17 @@ startOverdueNotifier();
 
 (async () => {
   try {
+    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS trade TEXT`);
+    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS floor TEXT`);
+    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
+    console.log("[migration] submittals tracker columns ensured");
+  } catch (e) {
+    console.error("[migration] submittals tracker columns migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL,

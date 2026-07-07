@@ -14,6 +14,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
+import * as XLSX from "xlsx";
 
 const router: IRouter = Router();
 
@@ -61,6 +62,82 @@ function subToJson(s: typeof submittalsTable.$inferSelect, extras: Record<string
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
   };
+}
+
+function cleanCell(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  const text = String(value).trim();
+  return text ? text : null;
+}
+
+function parseDateCell(value: unknown): Date | null {
+  if (value === undefined || value === null || value === "") return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+  if (typeof value === "number") {
+    const parsed = XLSX.SSF.parse_date_code(value);
+    if (parsed) return new Date(parsed.y, parsed.m - 1, parsed.d);
+  }
+  const text = String(value).trim();
+  if (!text) return null;
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function normalizeImportedStatus(value: unknown): string {
+  const raw = cleanCell(value)?.toLowerCase().replace(/[_-]+/g, " ") ?? "";
+  if (!raw) return "pending";
+  if (raw.includes("approved as noted") || raw.includes("approved with")) return "approved_as_noted";
+  if (raw.includes("revise") || raw.includes("resubmit")) return "revise_resubmit";
+  if (raw.includes("reject")) return "rejected";
+  if (raw.includes("approved")) return "approved";
+  if (raw.includes("review")) return "under_review";
+  if (raw.includes("submit")) return "submitted";
+  if (raw.includes("pending")) return "pending";
+  return raw.replace(/\s+/g, "_");
+}
+
+function normalizeHeader(value: unknown): string {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[#/().:_-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getMappedCell(row: Record<string, unknown>, names: string[]): unknown {
+  for (const name of names) {
+    if (row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== "") return row[name];
+  }
+  return undefined;
+}
+
+function extractSpreadsheetSubmittals(buffer: Buffer, filename: string) {
+  if (!/\.(xlsx|xls|csv)$/i.test(filename)) return [];
+  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const sheetName = workbook.SheetNames[0];
+  if (!sheetName) return [];
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" });
+  return rows.map((rawRow) => {
+    const row: Record<string, unknown> = {};
+    Object.entries(rawRow).forEach(([key, value]) => {
+      row[normalizeHeader(key)] = value;
+    });
+    const number = cleanCell(getMappedCell(row, ["submittal", "submittal #", "submittal no", "submittal number", "number", "no"]));
+    const title = cleanCell(getMappedCell(row, ["submittal name", "name", "title", "file name", "filename", "description"]));
+    return {
+      number,
+      title,
+      description: cleanCell(getMappedCell(row, ["description", "notes", "open items"])),
+      status: normalizeImportedStatus(getMappedCell(row, ["status", "submittal status"])),
+      specSection: cleanCell(getMappedCell(row, ["spec section", "specification section", "section"])),
+      submittalType: cleanCell(getMappedCell(row, ["type", "submittal type"])) || "Shop Drawing",
+      trade: cleanCell(getMappedCell(row, ["trade", "discipline"])),
+      floor: cleanCell(getMappedCell(row, ["floor", "level"])),
+      responsibleCompany: cleanCell(getMappedCell(row, ["responsible company", "contractor", "company"])),
+      dateRequired: parseDateCell(getMappedCell(row, ["due date", "date required", "required date"])),
+      reviewDecision: normalizeImportedStatus(getMappedCell(row, ["structural engineer", "mep engineer", "architect", "owner"])),
+    };
+  }).filter(r => r.title || r.number);
 }
 
 // ─── GET /projects/:projectId/submittals ──────────────────────────────────────
@@ -118,6 +195,9 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
       specSection: (body.specSection as string) || null,
       drawingNumber: (body.drawingNumber as string) || null,
       drawingTitle: (body.drawingTitle as string) || null,
+      trade: (body.trade as string) || null,
+      floor: (body.floor as string) || null,
+      responsibleCompany: (body.responsibleCompany as string) || null,
       submittedById: req.user!.userId,
 
       submittedByCompany: (body.submittedByCompany as string) || company[0]?.name || req.user!.companyName || null,
@@ -320,7 +400,7 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     const textFields = [
       "title", "description", "status", "specSection", "drawingNumber", "drawingTitle",
-      "submittalCategory", "submittalType",
+      "submittalCategory", "submittalType", "trade", "floor", "responsibleCompany",
       "submittedByCompany", "submittedByPerson", "submittedByEmail", "submittedByPhone", "submittedByAddress",
       "submittedToCompany", "submittedToPerson", "submittedToEmail",
       "manufacturer", "modelNumber", "procurementStatus", "ballInCourt",
@@ -1178,13 +1258,15 @@ router.post("/projects/:projectId/submittals/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const anthropicClient = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-      });
-      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
-      let records: any[] = [];
-      if (isPdf && pdfBase64) {
+      let records: any[] = extractSpreadsheetSubmittals(req.file.buffer, req.file.originalname);
+      let usedDeterministicSpreadsheetImport = records.length > 0;
+      if (!usedDeterministicSpreadsheetImport) {
+        const anthropicClient = new Anthropic({
+          apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
+          baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+        });
+        const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+        if (isPdf && pdfBase64) {
         try {
           const extractMsg = await anthropicClient.messages.create({
             model: "claude-sonnet-4-5",
@@ -1226,9 +1308,10 @@ ${chunk}`
         }
       }
       } // end else (non-PDF)
+      }
 
       const forceImport = req.body?.forceImport === "true";
-      if (!forceImport && records.length > 0) {
+      if (!forceImport && records.length > 0 && !usedDeterministicSpreadsheetImport) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
         const intelligence = await checkImportIntelligence(projectId, records, "submittal");
         if (intelligence.warnings.length > 0) {
@@ -1262,8 +1345,13 @@ ${chunk}`
           status: r.status || "pending",
           specSection: r.specSection || null,
           submittalType: r.submittalType || "Shop Drawing",
-          submittedByCompany: r.submittedByCompany || null,
+          trade: r.trade || null,
+          floor: r.floor || null,
+          responsibleCompany: r.responsibleCompany || null,
+          dateRequired: r.dateRequired || null,
+          submittedByCompany: r.submittedByCompany || r.responsibleCompany || null,
           submittedByPerson: r.submittedByPerson || null,
+          reviewDecision: r.reviewDecision && r.reviewDecision !== "pending" ? r.reviewDecision : null,
           submittedById: req.user!.userId,
           assignedToId: null,
         });

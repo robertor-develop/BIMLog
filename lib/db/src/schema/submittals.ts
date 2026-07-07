@@ -21,6 +21,9 @@ export const submittalsTable = pgTable("submittals", {
   drawingNumber: text("drawing_number"),
   drawingTitle: text("drawing_title"),
   submittalCategory: text("submittal_category"),
+  trade: text("trade"),
+  floor: text("floor"),
+  responsibleCompany: text("responsible_company"),
 
   submittedByCompany: text("submitted_by_company"),
   submittedByPerson: text("submitted_by_person"),

@@ -27,6 +27,7 @@ type AiCheckResult = {
 type Submittal = {
   id: number; projectId: number; number: string; title: string; description?: string | null;
   status: string; specSection?: string | null; submittalType: string; submittalCategory?: string | null;
+  trade?: string | null; floor?: string | null; responsibleCompany?: string | null;
   submittedById: number; submittedByName?: string;
   submittedByCompany?: string | null; submittedByPerson?: string | null;
   submittedByEmail?: string | null; submittedByPhone?: string | null; submittedByAddress?: string | null;
@@ -241,6 +242,7 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
 
   const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Other"];
   function tradeOf(s: Submittal): string {
+    if (s.trade) return s.trade;
     const t = (s.submittalCategory ?? s.submittalType ?? "").toLowerCase();
     if (t.includes("plumb")) return "Plumbing";
     if (t.includes("hvac") || t.includes("mechanical")) return "HVAC";
@@ -249,7 +251,7 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
     return "Other";
   }
   function floorOf(s: Submittal): string {
-    return (s as any).level || (s as any).floor || s.drawingNumber || w("Unassigned", "Sin asignar", lang);
+    return s.floor || s.drawingNumber || w("Unassigned", "Sin asignar", lang);
   }
 
   const grouped: Record<string, Record<string, Submittal[]>> = {};
@@ -275,6 +277,34 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
     );
   }
 
+  const overdueCount = submittals.filter(s => {
+    const raw = s.dateRequired || s.dueDate;
+    return raw && new Date(raw).getTime() < Date.now() && !["approved", "approved_as_noted", "closed"].includes((s.status || "").toLowerCase());
+  }).length;
+  const missingResponsible = submittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
+  const missingDueDate = submittals.filter(s => !s.dateRequired && !s.dueDate).length;
+
+  const exportTrackerExcel = () => {
+    const rows = submittals.map(s => ({
+      "Submittal No": s.number,
+      "Submittal Name": s.title,
+      "Floor": floorOf(s),
+      "Trade": tradeOf(s),
+      "Type": s.submittalCategory || s.submittalType || "",
+      "Responsible Company": s.responsibleCompany || s.submittedByCompany || "",
+      "Due Date": fmtDate(s.dateRequired || s.dueDate),
+      "Status": s.status,
+      "Review Decision": s.reviewDecision || "",
+      "Ball in Court": s.ballInCourt || "",
+      "RFI": s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "",
+      "Notes": s.description || "",
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Submittal Tracker");
+    XLSX.writeFile(wb, "Submittal-Tracker.xlsx");
+    toast({ title: w("Tracker Excel exported", "Excel del seguimiento exportado", lang) });
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
@@ -290,6 +320,27 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
         <Button size="sm" variant="outline" onClick={() => toast({ title: w("Export PDF coming soon", "Exportar PDF próximamente", lang) })}>
           <Download style={{ width: 13, height: 13, marginRight: 4 }} />
           {w("Export PDF", "Exportar PDF", lang)}
+        </Button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(120px, 1fr))", gap: 10, marginBottom: 14 }}>
+        {[
+          [w("Total", "Total", lang), submittals.length, "#1E3A5F"],
+          [w("Overdue", "Vencidos", lang), overdueCount, overdueCount ? "#DC2626" : "#16A34A"],
+          [w("Missing due date", "Sin fecha", lang), missingDueDate, missingDueDate ? "#D97706" : "#16A34A"],
+          [w("Missing company", "Sin empresa", lang), missingResponsible, missingResponsible ? "#D97706" : "#16A34A"],
+        ].map(([label, value, color]) => (
+          <div key={String(label)} style={{ border: "1px solid #E5E7EB", borderRadius: 8, padding: "10px 12px", background: "white" }}>
+            <div style={{ fontSize: 10, textTransform: "uppercase", fontWeight: 800, color: "#64748B" }}>{label}</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: String(color), marginTop: 2 }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <Button size="sm" variant="outline" onClick={exportTrackerExcel}>
+          <Download style={{ width: 13, height: 13, marginRight: 4 }} />
+          {w("Export Excel", "Exportar Excel", lang)}
         </Button>
       </div>
 
@@ -795,6 +846,9 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
     if (format === "excel") {
       const rows = submittals.map(s => ({
         "Number": s.number, "Title": s.title,
+        "Trade": s.trade || "",
+        "Floor": s.floor || "",
+        "Responsible Company": s.responsibleCompany || s.submittedByCompany || "",
         "Type": s.submittalCategory || s.submittalType,
         "Status": s.status, "Spec Section": s.specSection || "",
         "Submitted By": s.submittedByCompany || s.submittedByName || "",
@@ -998,6 +1052,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
 
   const [form, setForm] = useState({
     title: "", specSection: "", submittalCategory: "shop_drawing", submittalType: "shop_drawing",
+    trade: "", floor: "", responsibleCompany: "",
     drawingNumber: "", drawingTitle: "",
     dateSubmitted: new Date().toISOString().slice(0, 10),
     dateRequired: "",
