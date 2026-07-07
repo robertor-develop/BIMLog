@@ -372,7 +372,7 @@ router.post("/auth/forgot-password", async (req, res) => {
       passwordResetToken: token,
       passwordResetExpires: expires,
     }).where(eq(usersTable.id, user.id));
-    const resetLink = `${process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app"}/reset-password?token=${token}`;
+    const resetLink = `${process.env.BIMLOG_URL || "https://bimlog.app"}/reset-password?token=${token}`;
     await sendEmail({
       to: user.email,
       subject: "Reset your BIMLog password",

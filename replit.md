@@ -7,7 +7,7 @@ BIMLog is a full-stack BIM project coordination and accountability platform for 
 ## Email Notification System (SendGrid)
 
 - **Email service**: `artifacts/api-server/src/lib/email.ts` — 10 HTML templates (T1–T10), `sendEmail()`, `notifEnabled()`, `getUserLang()`
-- **Env vars**: `SENDGRID_API_KEY`, `BIMLOG_URL` (defaults to `https://bim-log-ignite.replit.app`)
+- **Env vars**: `SENDGRID_API_KEY`, `BIMLOG_URL` (defaults to `https://bimlog.app`)
 - **FROM address**: `notifications@ignitesmart.ai`
 - **Background job**: `artifacts/api-server/src/lib/overdue-notifier.ts` runs hourly RFI + submittal overdue checks
 

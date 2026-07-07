@@ -127,7 +127,7 @@ router.post("/projects/:projectId/directory/:entryId/invite", authMiddleware, re
       .where(eq(projectDirectoryTable.id, entryId));
 
     // Send invitation email
-    const appUrl = process.env.APP_URL || "https://bim-log-ignite.replit.app";
+    const appUrl = process.env.APP_URL || process.env.BIMLOG_URL || "https://bimlog.app";
     await sendEmail({
       to: email,
       subject: `You've been invited to join BIMLog`,

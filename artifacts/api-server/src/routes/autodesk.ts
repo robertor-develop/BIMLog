@@ -9,7 +9,7 @@ declare module "express-session" {
 
 const router: Router = Router();
 
-const REDIRECT_URI = "https://bim-log-ignite.replit.app/api/v1/autodesk/callback";
+const REDIRECT_URI = process.env.AUTODESK_REDIRECT_URI || "https://bimlog.app/api/v1/autodesk/callback";
 
 router.get("/autodesk/token", async (_req, res) => {
   const clientId = process.env.APS_CLIENT_ID;
