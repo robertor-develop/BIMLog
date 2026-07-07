@@ -20,3 +20,4 @@
 - [Lens viewpoint lifecycle + seq authority](lens-viewpoint-lifecycle.md) — partial active-only unique indexes; atomic counter table is the seq source; Reassign = supersede-then-insert in one tx
 - [lens display_id uniqueness](lens-display-id-uniqueness.md) — active-scoped display_id unique index + lens-sync collision guard; dedup only keys guid/viewpoint_id so display_id slips through
 - [Lens columns + export mirror](lens-columns-and-export-mirror.md) — lifecycle attrs get own toggleable columns; PDF is row-filter-only mirror (fixed register cols by decision); Excel mirrors live `filtered`; expand-row colSpan must use colCount
+- [Outbound base URL config](outbound-url-config.md) — email links use TWO env vars (BIMLOG_URL + APP_URL), both must be set; now https://bimlog.app; autodesk REDIRECT_URI is separate/hardcoded
