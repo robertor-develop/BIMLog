@@ -8,7 +8,6 @@ import { ProjectSidebar } from "@/components/layout/ProjectSidebar";
 import { FilesTab } from "./project/FilesTab";
 import { RfisTab } from "./project/RfisTab";
 import { SubmittalsTab } from "./project/SubmittalsTab";
-import { SubmittalTrackerTab } from "./project/SubmittalTrackerTab";
 import { ActivityTab } from "./project/ActivityTab";
 import { TeamTab } from "./project/TeamTab";
 import { ConventionBuilder } from "./project/ConventionBuilder";
@@ -188,7 +187,7 @@ export function ProjectDetail() {
           {tab === "files"          && <FilesTab          projectId={projectId} canWrite={canWrite} />}
           {tab === "rfis"           && <RfisTab           projectId={projectId} canWrite={canWrite} />}
           {tab === "submittals"     && <SubmittalsTab     projectId={projectId} canWrite={canWrite} />}
-          {tab === "submittal-tracker" && <SubmittalTrackerTab projectId={projectId} canWrite={canWrite} />}
+          {tab === "submittal-tracker" && <SubmittalsTab projectId={projectId} canWrite={canWrite} initialView="tracking" />}
           {tab === "activity"       && <ActivityTab       projectId={projectId} />}
           {tab === "team"           && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
           {tab === "generator"      && <NameGenerator     projectId={projectId} onGoToConvention={() => setLocation(`/projects/${projectId}/convention`)} />}

@@ -411,16 +411,20 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 }
 
 // ─── Main SubmittalsTab ───────────────────────────────────────────────────────
-export function SubmittalsTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
+export function SubmittalsTab({ projectId, canWrite = true, initialView = "submittals" }: {
+  projectId: number; canWrite?: boolean; initialView?: "register" | "submittals" | "tracking";
+}) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
-  const [view, setView] = useState<"register" | "submittals" | "tracking">("submittals");
+  const [view, setView] = useState<"register" | "submittals" | "tracking">(initialView);
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const submittalsQueryClient = useQueryClient();
   const [showNewForm, setShowNewForm] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+
+  useEffect(() => { setView(initialView); }, [initialView, projectId]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
