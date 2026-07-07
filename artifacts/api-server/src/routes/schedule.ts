@@ -1,12 +1,102 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { projectMilestonesTable, activityLogTable } from "@workspace/db/schema";
-import { eq, and, asc } from "drizzle-orm";
+import { projectMilestonesTable, activityLogTable, rfisTable, submittalsTable } from "@workspace/db/schema";
+import { eq, and, asc, isNull } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 
 const router: Router = Router();
 
+type LiveScheduleEvent = {
+  id: number;
+  source: "milestone" | "rfi" | "submittal";
+  label: string;
+  title: string;
+  dueDate: string;
+  status: string;
+  priority: string | null;
+  company: string | null;
+  route: string | null;
+  isOverdue: boolean;
+};
+
 // ── GET /projects/:projectId/milestones ───────────────────────────────────────
+router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  try {
+    const [milestones, rfis, submittals] = await Promise.all([
+      db.select().from(projectMilestonesTable)
+        .where(eq(projectMilestonesTable.projectId, projectId))
+        .orderBy(asc(projectMilestonesTable.dueDate)),
+      db.select().from(rfisTable)
+        .where(and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))),
+      db.select().from(submittalsTable)
+        .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))),
+    ]);
+
+    const now = new Date();
+    const toIso = (d: Date | string) => new Date(d).toISOString();
+    const isDone = (status: string | null | undefined) => {
+      const s = (status || "").toLowerCase();
+      return ["completed", "closed", "resolved", "approved", "approved_as_noted"].includes(s);
+    };
+
+    const events: LiveScheduleEvent[] = [];
+
+    events.push(...milestones.map((m) => ({
+      id: m.id,
+      source: "milestone" as const,
+      label: "Milestone",
+      title: m.title || "Untitled milestone",
+      dueDate: toIso(m.dueDate),
+      status: m.status || "pending",
+      priority: null,
+      company: null,
+      route: null,
+      isOverdue: !isDone(m.status) && new Date(m.dueDate) < now,
+    })));
+
+    for (const r of rfis) {
+      const due = r.dateRequired || r.dueDate;
+      if (!due) continue;
+      events.push({
+        id: r.id,
+        source: "rfi" as const,
+        label: "RFI",
+        title: `${r.number || `RFI-${r.id}`}: ${r.subject || "Untitled RFI"}`,
+        dueDate: toIso(due),
+        status: r.status || "open",
+        priority: r.priority || null,
+        company: r.submittedToCompany || r.ballInCourt || null,
+        route: `/projects/${projectId}/rfis?rfi=${r.id}`,
+        isOverdue: !isDone(r.status) && new Date(due) < now,
+      });
+    }
+
+    for (const s of submittals) {
+      const due = s.dateRequired || s.dueDate;
+      if (!due) continue;
+      events.push({
+        id: s.id,
+        source: "submittal" as const,
+        label: "Submittal",
+        title: `${s.number || `SUB-${s.id}`}: ${s.title || "Untitled submittal"}`,
+        dueDate: toIso(due),
+        status: s.reviewDecision || s.status || "pending",
+        priority: null,
+        company: s.responsibleCompany || s.submittedByCompany || null,
+        route: `/projects/${projectId}/submittals`,
+        isOverdue: !isDone(s.reviewDecision || s.status) && new Date(due) < now,
+      });
+    }
+
+    events.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 router.get("/projects/:projectId/milestones", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {

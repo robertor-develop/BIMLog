@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { AlertTriangle, Calendar } from "lucide-react";
 
-interface Milestone {
-  id: number; title: string; dueDate: string; status: string;
-  linkedModule?: string; isOverdue?: boolean; createdAt: string;
+interface ScheduleItem {
+  id: number; source: "milestone" | "rfi" | "submittal"; label: string;
+  title: string; dueDate: string; status: string; priority?: string | null;
+  company?: string | null; route?: string | null; linkedModule?: string | null;
+  isOverdue?: boolean; createdAt?: string;
 }
 
 const API = "/api/v1";
@@ -20,13 +22,14 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const { token } = useAuthStore();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
-  const [items, setItems] = useState<Milestone[]>([]);
+  const [items, setItems] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", due_date: "", linked_module: "" });
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "calendar" | "board">("calendar");
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,12 +62,15 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const load = async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API}/projects/${projectId}/milestones`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`${API}/projects/${projectId}/schedule/live`, { headers: { Authorization: `Bearer ${token}` } });
       if (r.ok) setItems(await r.json());
     } finally { setLoading(false); setLoaded(true); }
   };
 
-  if (!loaded && !loading) { load(); }
+  useEffect(() => {
+    if (!token) return;
+    load();
+  }, [projectId, token]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError("");
@@ -98,6 +104,40 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       {overdue && s !== "completed" ? t("OVERDUE", "VENCIDO") : s.replace(/_/g, " ")}
     </span>
   );
+
+  const sourceBadge = (item: ScheduleItem) => {
+    const color = item.source === "rfi" ? "#7C3AED" : item.source === "submittal" ? "#2563EB" : "#16A34A";
+    return (
+      <span style={{ padding: "2px 7px", borderRadius: 20, background: `${color}16`, color, fontSize: 10, fontWeight: 800, textTransform: "uppercase" }}>
+        {item.label}
+      </span>
+    );
+  };
+
+  const thisMonth = new Date();
+  const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+  const calendarStart = new Date(monthStart);
+  calendarStart.setDate(monthStart.getDate() - monthStart.getDay());
+  const calendarDays = Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(calendarStart);
+    d.setDate(calendarStart.getDate() + i);
+    return d;
+  });
+  const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+  const byDay = filtered.reduce<Record<string, ScheduleItem[]>>((acc, item) => {
+    const key = dayKey(new Date(item.dueDate));
+    (acc[key] ||= []).push(item);
+    return acc;
+  }, {});
+  const now = new Date();
+  const inDays = (item: ScheduleItem) => Math.ceil((new Date(item.dueDate).getTime() - now.getTime()) / 86400000);
+  const boardBuckets = [
+    { key: "overdue", label: t("Overdue", "Vencidos"), rows: filtered.filter(i => i.isOverdue && i.status !== "completed") },
+    { key: "this-week", label: t("This Week", "Esta Semana"), rows: filtered.filter(i => !i.isOverdue && inDays(i) <= 7 && i.status !== "completed") },
+    { key: "next-week", label: t("Next Week", "Próxima Semana"), rows: filtered.filter(i => !i.isOverdue && inDays(i) > 7 && inDays(i) <= 14 && i.status !== "completed") },
+    { key: "later", label: t("Later", "Después"), rows: filtered.filter(i => !i.isOverdue && inDays(i) > 14 && i.status !== "completed") },
+    { key: "done", label: t("Completed", "Completados"), rows: filtered.filter(i => i.status === "completed" || ["closed", "resolved", "approved", "approved_as_noted"].includes(i.status)) },
+  ];
 
   return (
     <div className="tab-content-wrapper">
@@ -150,6 +190,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         ))}
       </div>
 
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {[
+          ["calendar", t("Calendar", "Calendario")],
+          ["board", t("Board", "Tablero")],
+          ["list", t("List", "Lista")],
+        ].map(([key, label]) => (
+          <button key={key} className={`btn btn-sm ${viewMode === key ? "btn-primary" : "btn-outline"}`} onClick={() => setViewMode(key as "list" | "calendar" | "board")}>
+            {label}
+          </button>
+        ))}
+      </div>
+
       {showForm && (
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("Add Milestone", "Agregar Hito")}</h3>
@@ -191,24 +243,80 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
+      {!loading && filtered.length > 0 && viewMode === "calendar" && (
+        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "12px 14px", borderBottom: "1px solid #E5E7EB", fontWeight: 800, color: "#1E3A5F" }}>
+            {thisMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(110px, 1fr))", background: "#E5E7EB", gap: 1 }}>
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+              <div key={day} style={{ background: "#F8FAFC", padding: "8px 10px", fontSize: 11, fontWeight: 800, color: "#64748B" }}>{day}</div>
+            ))}
+            {calendarDays.map((day) => {
+              const events = byDay[dayKey(day)] || [];
+              const inMonth = day.getMonth() === thisMonth.getMonth();
+              return (
+                <div key={dayKey(day)} style={{ minHeight: 112, background: "white", padding: 8, opacity: inMonth ? 1 : 0.45 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#334155", marginBottom: 6 }}>{day.getDate()}</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {events.slice(0, 4).map(item => (
+                      <button key={`${item.source}-${item.id}`} onClick={() => item.route && (window.location.href = item.route)}
+                        style={{ textAlign: "left", border: "1px solid #DBEAFE", background: item.isOverdue ? "#FEF2F2" : "#EFF6FF", color: "#1E3A5F", borderRadius: 5, padding: "4px 5px", fontSize: 10, cursor: item.route ? "pointer" : "default" }}>
+                        <strong>{item.label}</strong> {item.title}
+                      </button>
+                    ))}
+                    {events.length > 4 && <div style={{ fontSize: 10, color: "#64748B" }}>+{events.length - 4} {t("more", "mas")}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!loading && filtered.length > 0 && viewMode === "board" && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(180px, 1fr))", gap: 12, alignItems: "start" }}>
+          {boardBuckets.map(bucket => (
+            <div key={bucket.key} className="card" style={{ padding: 10, minHeight: 180 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#1E3A5F" }}>{bucket.label}</div>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#64748B" }}>{bucket.rows.length}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {bucket.rows.map(item => (
+                  <div key={`${item.source}-${item.id}`} style={{ border: "1px solid #E5E7EB", borderRadius: 8, padding: 9, background: item.isOverdue ? "#FEF2F2" : "white" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 6, marginBottom: 6 }}>{sourceBadge(item)}{statusBadge(item.status, item.isOverdue)}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#0F172A" }}>{item.title}</div>
+                    <div style={{ fontSize: 11, color: "#64748B", marginTop: 5 }}>{new Date(item.dueDate).toLocaleDateString()}{item.company ? ` - ${item.company}` : ""}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && filtered.length > 0 && viewMode === "list" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {filtered.map(ms => (
-            <div key={ms.id} className="card" style={{ padding: "12px 16px", borderLeft: `3px solid ${ms.isOverdue && ms.status !== "completed" ? "#DC2626" : STATUS_COLORS[ms.status] ?? "#6B7280"}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div key={`${ms.source}-${ms.id}`} className="card" style={{ padding: "12px 16px", borderLeft: `3px solid ${ms.isOverdue && ms.status !== "completed" ? "#DC2626" : STATUS_COLORS[ms.status] ?? "#6B7280"}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                 <div>
-                  <div style={{ fontWeight: 600 }}>{ms.title}</div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                    {sourceBadge(ms)}
+                    <div style={{ fontWeight: 600 }}>{ms.title}</div>
+                  </div>
                   <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
                     <Calendar size={11} style={{ marginRight: 3 }} />{new Date(ms.dueDate).toLocaleDateString()}
-                    {ms.linkedModule && <span> · {ms.linkedModule}</span>}
+                    {ms.company && <span> - {ms.company}</span>}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   {statusBadge(ms.status, ms.isOverdue)}
-                  {canWrite && ms.status !== "completed" && (
-                    <button className="btn btn-sm btn-outline" onClick={() => updateStatus(ms.id, "completed")}>✓</button>
+                  {canWrite && ms.source === "milestone" && ms.status !== "completed" && (
+                    <button className="btn btn-sm btn-outline" onClick={() => updateStatus(ms.id, "completed")}>Done</button>
                   )}
-                  {canWrite && ms.status !== "in_progress" && ms.status !== "completed" && (
+                  {canWrite && ms.source === "milestone" && ms.status !== "in_progress" && ms.status !== "completed" && (
                     <button className="btn btn-sm btn-outline" onClick={() => updateStatus(ms.id, "in_progress")}>{t("Start", "Iniciar")}</button>
                   )}
                 </div>
