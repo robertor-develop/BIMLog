@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import {
   submittalsTable, usersTable, activityLogTable, projectsTable,
@@ -905,8 +905,7 @@ Respond ONLY with a JSON object in this exact format:
   }
 });
 
-// ─── POST /projects/:projectId/submittals/:submittalId/ai-assist-description ──
-router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), async (req, res) => {
+async function handleAiAssistDescription(req: Request, res: Response) {
   try {
     const body = req.body as {
       userDescription?: string; specSection?: string; submittalCategory?: string; title?: string;
@@ -947,7 +946,13 @@ Write a concise, formal submittal description under 150 words that covers what i
     if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
-});
+}
+
+// Project-level route is used by unsaved/new submittals. It stays before parameterized submittal routes.
+router.post("/projects/:projectId/submittals/ai-assist-description", authMiddleware, requireProjectMember(), handleAiAssistDescription);
+
+// Compatibility alias for older deployed clients that called the legacy /submittals/0 route.
+router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), handleAiAssistDescription);
 
 // --- POST /projects/:projectId/submittals/:submittalId/ai-email-draft ---
 router.post("/projects/:projectId/submittals/:submittalId/ai-email-draft", authMiddleware, requireProjectMember(), async (req, res) => {

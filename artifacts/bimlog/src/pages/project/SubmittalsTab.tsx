@@ -1200,7 +1200,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/submittals/0/ai-assist-description`, {
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/ai-assist-description`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({
@@ -1208,6 +1208,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           specSection: form.specSection,
           submittalCategory: form.submittalCategory,
           title: form.title,
+          trade: form.trade,
+          floor: form.floor,
+          manufacturer: form.manufacturer,
+          modelNumber: form.modelNumber,
         }),
       });
       if (r.ok) {
