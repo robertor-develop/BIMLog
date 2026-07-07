@@ -174,6 +174,18 @@ startOverdueNotifier();
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS user_connections_user_provider_uidx ON user_connections (user_id, provider)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS ai_usage_events (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      project_id integer REFERENCES projects(id),
+      feature text NOT NULL,
+      provider text NOT NULL,
+      billing_mode text NOT NULL,
+      estimated_units integer NOT NULL DEFAULT 1,
+      created_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS ai_usage_events_user_created_idx ON ai_usage_events (user_id, created_at)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS ai_usage_events_project_created_idx ON ai_usage_events (project_id, created_at)`);
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_sent_by_id_users_id_fk') THEN
         ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);

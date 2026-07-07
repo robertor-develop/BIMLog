@@ -16,6 +16,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import * as XLSX from "xlsx";
 
 const router: IRouter = Router();
@@ -810,9 +811,10 @@ router.post("/projects/:projectId/submittals/:submittalId/ai-check", authMiddlew
       .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
     if (!sub) { res.status(404).json({ error: "Submittal not found" }); return; }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "submittals.ai_check",
     });
 
     const prompt = `You are a BIM/AEC submittal review expert. Analyze this submittal for potential rejection risks based on the 7 most common causes.
@@ -877,6 +879,7 @@ Respond ONLY with a JSON object in this exact format:
 
     res.json(aiResult);
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
@@ -885,9 +888,11 @@ Respond ONLY with a JSON object in this exact format:
 router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const body = req.body as { userDescription?: string; specSection?: string; submittalCategory?: string; title?: string };
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY!,
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const projectId = Number(req.params.projectId);
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId: Number.isFinite(projectId) ? projectId : null,
+      feature: "submittals.ai_assist_description",
     });
 
     const prompt = body.userDescription && body.userDescription.trim()
@@ -911,6 +916,7 @@ Write a concise, formal submittal description under 150 words that covers what i
     const suggestion = message.content[0].type === "text" ? message.content[0].text.trim() : "";
     res.json({ suggestion });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });

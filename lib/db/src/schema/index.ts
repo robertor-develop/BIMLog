@@ -34,3 +34,4 @@ export * from "./linked-items";
 export * from "./agent-insights";
 export * from "./platform-settings";
 export * from "./user-connections";
+export * from "./ai-usage-events";

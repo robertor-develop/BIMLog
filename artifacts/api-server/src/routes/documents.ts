@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { filesTable, usersTable } from "@workspace/db/schema";
 import { eq, and, ilike, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: IRouter = Router();
 
@@ -182,9 +182,10 @@ USER QUESTION: ${question}
 
 Answer the question based on the document contents above. Include specific file references.`;
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "documents.ai_search",
     });
 
     const message = await anthropic.messages.create({
@@ -199,6 +200,7 @@ Answer the question based on the document contents above. Include specific file 
 
     res.json({ answer, relevantFiles, totalFiles: allFiles.length });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     const message = error instanceof Error ? error.message : "AI search failed";
     res.status(500).json({ error: message });
   }

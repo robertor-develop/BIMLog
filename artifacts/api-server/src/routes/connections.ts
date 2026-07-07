@@ -87,6 +87,61 @@ router.put("/me/connections/sendgrid", authMiddleware, async (req, res) => {
   }
 });
 
+// ── PUT /me/connections/anthropic — connect this user's own AI provider ──────
+router.put("/me/connections/anthropic", authMiddleware, async (req, res) => {
+  const { apiKey, accountLabel, baseURL } = req.body as {
+    apiKey?: unknown;
+    accountLabel?: unknown;
+    baseURL?: unknown;
+  };
+
+  if (typeof apiKey !== "string" || !apiKey.trim()) {
+    res.status(400).json({ error: "apiKey is required" });
+    return;
+  }
+  if (baseURL !== undefined && (typeof baseURL !== "string" || !/^https?:\/\//i.test(baseURL.trim()))) {
+    res.status(400).json({ error: "baseURL must be a valid http(s) URL when provided" });
+    return;
+  }
+
+  try {
+    const now = new Date();
+    const label = typeof accountLabel === "string" && accountLabel.trim()
+      ? accountLabel.trim()
+      : "Anthropic API key";
+    const credentials: Record<string, string> = { apiKey: apiKey.trim() };
+    if (typeof baseURL === "string" && baseURL.trim()) credentials.baseURL = baseURL.trim();
+
+    await db.insert(userConnectionsTable).values({
+      userId: req.user!.userId,
+      provider: "anthropic",
+      kind: "ai",
+      status: "connected",
+      credentials,
+      accountLabel: label,
+      metadata: { providerLabel: "Claude / Anthropic" },
+      lastError: null,
+      updatedAt: now,
+    }).onConflictDoUpdate({
+      target: [userConnectionsTable.userId, userConnectionsTable.provider],
+      set: {
+        credentials,
+        accountLabel: label,
+        metadata: { providerLabel: "Claude / Anthropic" },
+        status: "connected",
+        lastError: null,
+        updatedAt: now,
+      },
+    });
+
+    const [row] = await db.select().from(userConnectionsTable)
+      .where(and(eq(userConnectionsTable.userId, req.user!.userId), eq(userConnectionsTable.provider, "anthropic")));
+    res.json(toSafe(row));
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 // ── OAuth self-service connect (generic, one engine for every provider) ───────
 // The platform registers ONE app per provider (client id/secret in server env);
 // every user connects their OWN account through the flow below.

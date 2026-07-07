@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { ExternalLink, Zap, X, Plus, Code2 } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
+import { useAuthStore } from "@/store/auth";
 
 interface IntegrationsTabProps { projectId: number; }
 
@@ -13,6 +14,14 @@ interface Integration extends IntegrationInfo {
   stats?: string;
   docsUrl?: string;
 }
+
+type ConnectedService = {
+  provider: string;
+  kind: string | null;
+  status: string;
+  accountLabel: string | null;
+  lastError: string | null;
+};
 
 const INTEGRATIONS: Integration[] = [
   {
@@ -207,6 +216,105 @@ function ApiDocsModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function AnthropicConnectModal({
+  token,
+  onClose,
+  onConnected,
+}: {
+  token: string | null;
+  onClose: () => void;
+  onConnected: () => void;
+}) {
+  const [apiKey, setApiKey] = useState("");
+  const [accountLabel, setAccountLabel] = useState("Claude / Anthropic");
+  const [baseURL, setBaseURL] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function save() {
+    if (!token) {
+      setError("You must be logged in to connect an AI provider.");
+      return;
+    }
+    if (!apiKey.trim()) {
+      setError("Paste your Anthropic API key.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch("/api/v1/me/connections/anthropic", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          accountLabel: accountLabel.trim() || "Claude / Anthropic",
+          baseURL: baseURL.trim() || undefined,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to connect Anthropic.");
+      }
+      onConnected();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to connect Anthropic.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "8px 10px",
+    border: "1px solid hsl(var(--border))",
+    borderRadius: 6,
+    fontSize: 12,
+    color: "hsl(var(--foreground))",
+    background: "hsl(var(--background))",
+    outline: "none",
+    fontFamily: "inherit",
+  };
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, width: "100%", maxWidth: 480, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid hsl(var(--border))" }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", fontFamily: "var(--font-display)" }}>Connect Claude / Anthropic</div>
+            <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Use your own AI key for BIMLog AI actions.</div>
+          </div>
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "hsl(var(--secondary))", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "hsl(var(--muted-foreground))" }}>
+            <X style={{ width: 14, height: 14 }} />
+          </button>
+        </div>
+        <div style={{ padding: 20 }}>
+          <div style={{ padding: "10px 12px", borderRadius: 7, background: "#F0F7FF", border: "1px solid #BFDBFE", fontSize: 11, color: "#1E3A5F", lineHeight: 1.5, marginBottom: 14 }}>
+            BIMLog stores this key server-side only. It is never shown back in the browser. Internal BIMLog test accounts keep using BIMLog AI; production users can connect their own key or use included credits when available.
+          </div>
+          <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>API key</label>
+          <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="Paste Anthropic API key" style={inputStyle} autoComplete="off" />
+          <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", margin: "12px 0 4px" }}>Label</label>
+          <input type="text" value={accountLabel} onChange={e => setAccountLabel(e.target.value)} placeholder="Claude / Anthropic" style={inputStyle} />
+          <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", margin: "12px 0 4px" }}>Base URL (optional)</label>
+          <input type="text" value={baseURL} onChange={e => setBaseURL(e.target.value)} placeholder="Leave blank for Anthropic default" style={inputStyle} />
+          {error && <div style={{ marginTop: 12, fontSize: 11, color: "#B91C1C" }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
+            <button onClick={onClose} style={{ padding: "8px 14px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+            <button onClick={save} disabled={saving} style={{ padding: "8px 14px", borderRadius: 6, border: "none", background: saving ? "#94A3B8" : "#2563EB", color: "#fff", fontSize: 12, fontWeight: 700, cursor: saving ? "default" : "pointer" }}>
+              {saving ? "Saving..." : "Connect AI"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AddIntegrationModal({ onClose, onSelect }: { onClose: () => void; onSelect: (p: IntegrationInfo) => void }) {
   const [other, setOther] = useState("");
 
@@ -342,10 +450,27 @@ function AddIntegrationModal({ onClose, onSelect }: { onClose: () => void; onSel
 export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const { t } = useI18n();
   const [, navigate] = useLocation();
+  const { token } = useAuthStore();
   const [filter, setFilter] = useState<string>("all");
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showApiDocs, setShowApiDocs] = useState(false);
+  const [showAnthropicConnect, setShowAnthropicConnect] = useState(false);
+  const [connections, setConnections] = useState<ConnectedService[]>([]);
+
+  async function loadConnections() {
+    if (!token) return;
+    const response = await fetch("/api/v1/me/connections", { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) return;
+    const data = await response.json();
+    setConnections(Array.isArray(data) ? data : []);
+  }
+
+  useEffect(() => {
+    loadConnections().catch(() => {});
+  }, [token]);
+
+  const connectedByProvider = new Map(connections.map(c => [c.provider, c]));
 
   const filtered = filter === "all"
     ? INTEGRATIONS
@@ -374,6 +499,13 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         />
       )}
       {showApiDocs && <ApiDocsModal onClose={() => setShowApiDocs(false)} />}
+      {showAnthropicConnect && (
+        <AnthropicConnectModal
+          token={token}
+          onClose={() => setShowAnthropicConnect(false)}
+          onConnected={() => loadConnections().catch(() => {})}
+        />
+      )}
 
       {/* Header KPIs */}
       <div className="kpi-grid-4" style={{ marginBottom: 20 }}>
@@ -436,6 +568,11 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
             {items.map(integration => (
               <div key={integration.id} className="integration-card">
+                {(() => {
+                  const connection = integration.id === "claude" ? connectedByProvider.get("anthropic") : connectedByProvider.get(integration.id);
+                  const isConnected = connection?.status === "connected";
+                  return (
+                    <>
                 {/* Top row */}
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                   <div
@@ -444,14 +581,15 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   >
                     {integration.logoText}
                   </div>
-                  {/* Fix 7: all badges show "Not connected" with gray dot */}
                   <div style={{
                     display: "flex", alignItems: "center", gap: 5,
                     padding: "3px 8px", borderRadius: 5, fontSize: 10, fontWeight: 700,
-                    background: "#F8FAFC", color: "#94A3B8", border: "1px solid #E2E8F0",
+                    background: isConnected ? "#F0FDF4" : "#F8FAFC",
+                    color: isConnected ? "#15803D" : "#94A3B8",
+                    border: isConnected ? "1px solid #BBF7D0" : "1px solid #E2E8F0",
                   }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#CBD5E1" }} />
-                    Not connected
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: isConnected ? "#16A34A" : "#CBD5E1" }} />
+                    {isConnected ? "Connected" : "Not connected"}
                   </div>
                 </div>
 
@@ -468,13 +606,13 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                 {/* Stats row */}
                 <div style={{ marginTop: 4 }}>
                   <span style={{ fontSize: 10, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>
-                    {integration.stats}
+                    {isConnected ? connection?.accountLabel || "Connected" : integration.stats}
                   </span>
                 </div>
 
                 {/* Action */}
                 <button
-                  onClick={() => setSelectedIntegration(integration)}
+                  onClick={() => integration.id === "claude" ? setShowAnthropicConnect(true) : setSelectedIntegration(integration)}
                   style={{
                     marginTop: 6, width: "100%", padding: "6px 0",
                     borderRadius: 6, fontSize: 11, fontWeight: 600,
@@ -486,8 +624,11 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   }}
                 >
                   <Zap style={{ width: 11, height: 11 }} />
-                  Connect
+                  {isConnected && integration.id === "claude" ? "Update AI key" : "Connect"}
                 </button>
+                    </>
+                  );
+                })()}
               </div>
             ))}
           </div>

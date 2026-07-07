@@ -12,6 +12,7 @@ import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken } from "../lib/oauth";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
 
@@ -1373,9 +1374,10 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-response", authMiddleware
 
     const questionText = stripMarkdown(rfi.question || rfi.description || "");
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "rfis.generate_response",
     });
 
     const prompt = userDraft.length > 0
@@ -1393,6 +1395,7 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-response", authMiddleware
 
     res.json({ response });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     const message = error instanceof Error ? error.message : "Failed to generate response";
     res.status(500).json({ error: message });
   }
@@ -1420,9 +1423,10 @@ router.post("/projects/:projectId/rfis/:rfiId/generate-email-preview", authMiddl
     const senderCompany = rfi.submittedByCompany || "";
     const dueDate = rfi.dateRequired ? new Date(rfi.dateRequired).toISOString().slice(0, 10) : "";
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "rfis.generate_email_preview",
     });
 
     const prompt = `You are a construction project manager writing the cover email that accompanies a formal RFI (Request for Information) being sent to a project stakeholder.
@@ -1461,6 +1465,7 @@ Write only the full email body text, starting from the greeting and ending with 
 
     res.json({ email });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     const message = error instanceof Error ? error.message : "Failed to generate email preview";
     res.status(500).json({ error: message });
   }
