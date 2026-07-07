@@ -51,6 +51,43 @@ function fmtTs(d: Date | string) {
   });
 }
 
+function trackerTrade(s: typeof submittalsTable.$inferSelect): string {
+  if (s.trade) return s.trade;
+  const raw = `${s.submittalCategory ?? ""} ${s.submittalType ?? ""}`.toLowerCase();
+  if (raw.includes("plumb")) return "Plumbing";
+  if (raw.includes("hvac") || raw.includes("mechanical")) return "HVAC";
+  if (raw.includes("fire")) return "Fire Protection";
+  if (raw.includes("electr")) return "Electrical";
+  return "Other";
+}
+
+function trackerFloor(s: typeof submittalsTable.$inferSelect): string {
+  return s.floor || s.drawingNumber || "Unassigned";
+}
+
+function trackerDecision(s: typeof submittalsTable.$inferSelect): string {
+  const decision = (s.reviewDecision || "").replace(/_/g, " ").trim();
+  if (decision) return decision.replace(/\b\w/g, c => c.toUpperCase());
+  return "Pending";
+}
+
+function trackerRows(subs: Array<typeof submittalsTable.$inferSelect>) {
+  return subs.map((s) => ({
+    "Submittal No": s.number,
+    "Submittal Name": s.title,
+    "Floor": trackerFloor(s),
+    "Trade": trackerTrade(s),
+    "Type": s.submittalCategory || s.submittalType || "",
+    "Responsible Company": s.responsibleCompany || s.submittedByCompany || "",
+    "Due Date": s.dateRequired || s.dueDate ? new Date((s.dateRequired || s.dueDate)!).toLocaleDateString() : "",
+    "Status": s.status || "",
+    "Review Decision": trackerDecision(s),
+    "Ball in Court": s.ballInCourt || "",
+    "RFI": s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "",
+    "Notes": s.description || "",
+  }));
+}
+
 function subToJson(s: typeof submittalsTable.$inferSelect, extras: Record<string, unknown> = {}) {
   return {
     ...s,
@@ -280,7 +317,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
   try {
     const projectId = parseInt(String(req.params.projectId));
     const subs = await db.select().from(submittalsTable)
-      .where(eq(submittalsTable.projectId, projectId))
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
       .orderBy(submittalsTable.createdAt);
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
@@ -385,7 +422,148 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
   }
 });
 
-// ─── PATCH /projects/:projectId/submittals/:submittalId ───────────────────────
+// Live tracker exports must stay before /submittals/:submittalId.
+router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId));
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const subs = await db.select().from(submittalsTable)
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
+      .orderBy(submittalsTable.createdAt);
+
+    const rows = trackerRows(subs);
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const columns = Object.keys(rows[0] || {
+      "Submittal No": "",
+      "Submittal Name": "",
+      "Floor": "",
+      "Trade": "",
+      "Type": "",
+      "Responsible Company": "",
+      "Due Date": "",
+      "Status": "",
+      "Review Decision": "",
+      "Ball in Court": "",
+      "RFI": "",
+      "Notes": "",
+    });
+    worksheet["!cols"] = columns.map((key) => ({
+      wch: Math.min(48, Math.max(12, key.length + 2, ...rows.map((row) => String(row[key as keyof typeof row] ?? "").length + 2))),
+    }));
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Submittal Tracker");
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Submittal-Tracker.xlsx"`);
+    res.setHeader("Content-Length", buffer.length);
+    res.send(buffer);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId));
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const subs = await db.select().from(submittalsTable)
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
+      .orderBy(submittalsTable.createdAt);
+
+    const rows = trackerRows(subs);
+    const doc = new PDFDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    doc.page.margins.bottom = 0;
+    const chunks: Buffer[] = [];
+    doc.on("data", (c: Buffer) => chunks.push(c));
+    doc.on("end", () => {
+      const buf = Buffer.concat(chunks);
+      const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Submittal-Tracker.pdf"`);
+      res.setHeader("Content-Length", buf.length);
+      res.send(buf);
+    });
+
+    let y = LOG_MARGIN;
+    doc.rect(0, 0, LOG_W, 58).fill("#1E3A5F");
+    doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
+      .text("SUBMITTAL TRACKER", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
+    doc.fillColor("#BFDBFE").fontSize(9).font("Helvetica")
+      .text(`${project?.name || "Project"} | ${rows.length} live submittals | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 34, { width: LOG_CONTENT_W, lineBreak: false });
+    y = 70;
+
+    const stats = [
+      ["Total", rows.length],
+      ["Missing Due Date", rows.filter((r) => !r["Due Date"]).length],
+      ["Missing Company", rows.filter((r) => !r["Responsible Company"]).length],
+      ["RFIs Linked", rows.filter((r) => r.RFI).length],
+    ];
+    const statW = LOG_CONTENT_W / stats.length;
+    stats.forEach(([label, value], idx) => {
+      const x = LOG_MARGIN + idx * statW;
+      doc.rect(x, y, statW - 8, 38).stroke("#CBD5E1");
+      doc.fillColor("#1E3A5F").fontSize(15).font("Helvetica-Bold")
+        .text(String(value), x + 8, y + 8, { width: statW - 24, align: "center", lineBreak: false });
+      doc.fillColor("#64748B").fontSize(7).font("Helvetica-Bold")
+        .text(String(label).toUpperCase(), x + 8, y + 26, { width: statW - 24, align: "center", lineBreak: false });
+    });
+    y += 52;
+
+    const cols = [
+      { key: "Submittal No", label: "Submittal No", w: 70 },
+      { key: "Floor", label: "Floor", w: 45 },
+      { key: "Trade", label: "Trade", w: 78 },
+      { key: "Type", label: "Type", w: 70 },
+      { key: "Submittal Name", label: "Submittal Name", w: 160 },
+      { key: "Responsible Company", label: "Company", w: 90 },
+      { key: "Due Date", label: "Due", w: 55 },
+      { key: "Status", label: "Status", w: 62 },
+      { key: "Review Decision", label: "Decision", w: 80 },
+      { key: "RFI", label: "RFI", w: LOG_CONTENT_W - (70 + 45 + 78 + 70 + 160 + 90 + 55 + 62 + 80) },
+    ] as const;
+
+    const drawHeader = () => {
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 17).fill("#EFF6FF");
+      let x = LOG_MARGIN;
+      cols.forEach((col) => {
+        doc.fillColor("#1E3A5F").fontSize(6.8).font("Helvetica-Bold")
+          .text(col.label, x + 3, y + 5, { width: col.w - 6, lineBreak: false });
+        x += col.w;
+      });
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 17).stroke("#BFDBFE");
+      y += 17;
+    };
+
+    drawHeader();
+    rows.forEach((row, idx) => {
+      const rowH = 18;
+      if (y + rowH > LOG_CONTENT_BOT) {
+        doc.addPage();
+        doc.page.margins.bottom = 0;
+        y = LOG_MARGIN;
+        drawHeader();
+      }
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).fill(idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC");
+      let x = LOG_MARGIN;
+      cols.forEach((col) => {
+        doc.fillColor("#334155").fontSize(6.3).font(col.key === "Submittal No" ? "Helvetica-Bold" : "Helvetica")
+          .text(String(row[col.key] || "-"), x + 3, y + 5, { width: col.w - 6, lineBreak: false });
+        x += col.w;
+      });
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).stroke("#F1F5F9");
+      y += rowH;
+    });
+
+    doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
+      .text(`Submittal Tracker | ${project?.name || ""} | BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
 router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, submittalId } = UpdateSubmittalParams.parse({

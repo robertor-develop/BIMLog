@@ -220,8 +220,8 @@ function AiBadge({ result }: { result: "pass" | "possible_issue" | "fail" }) {
 }
 
 // ─── Submittal Tracking List ──────────────────────────────────────────────────
-function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
-  submittals: Submittal[]; lang: string; onGoSubmittals: () => void;
+function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: {
+  projectId: number; submittals: Submittal[]; lang: string; onGoSubmittals: () => void;
 }) {
   const { toast } = useToast();
 
@@ -284,25 +284,32 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
   const missingResponsible = submittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
   const missingDueDate = submittals.filter(s => !s.dateRequired && !s.dueDate).length;
 
-  const exportTrackerExcel = () => {
-    const rows = submittals.map(s => ({
-      "Submittal No": s.number,
-      "Submittal Name": s.title,
-      "Floor": floorOf(s),
-      "Trade": tradeOf(s),
-      "Type": s.submittalCategory || s.submittalType || "",
-      "Responsible Company": s.responsibleCompany || s.submittedByCompany || "",
-      "Due Date": fmtDate(s.dateRequired || s.dueDate),
-      "Status": s.status,
-      "Review Decision": s.reviewDecision || "",
-      "Ball in Court": s.ballInCourt || "",
-      "RFI": s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "",
-      "Notes": s.description || "",
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Submittal Tracker");
-    XLSX.writeFile(wb, "Submittal-Tracker.xlsx");
-    toast({ title: w("Tracker Excel exported", "Excel del seguimiento exportado", lang) });
+  const downloadTracker = async (format: "pdf" | "excel") => {
+    const endpoint = format === "pdf"
+      ? `/api/v1/projects/${projectId}/submittals/tracker-pdf`
+      : `/api/v1/projects/${projectId}/submittals/tracker-excel`;
+    const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (!response.ok) {
+      toast({
+        title: w("Tracker export failed", "Error al exportar seguimiento", lang),
+        variant: "destructive",
+      });
+      return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = format === "pdf" ? `Submittal-Tracker-Project${projectId}.pdf` : `Submittal-Tracker-Project${projectId}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast({
+      title: format === "pdf"
+        ? w("Tracker PDF exported", "PDF del seguimiento exportado", lang)
+        : w("Tracker Excel exported", "Excel del seguimiento exportado", lang),
+    });
   };
 
   return (
@@ -317,7 +324,7 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
                "Última versión y estado de RFI por plano — compartir con cliente", lang)}
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={() => toast({ title: w("Export PDF coming soon", "Exportar PDF próximamente", lang) })}>
+        <Button size="sm" variant="outline" onClick={() => downloadTracker("pdf")}>
           <Download style={{ width: 13, height: 13, marginRight: 4 }} />
           {w("Export PDF", "Exportar PDF", lang)}
         </Button>
@@ -338,7 +345,7 @@ function SubmittalTrackingList({ submittals, lang, onGoSubmittals }: {
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-        <Button size="sm" variant="outline" onClick={exportTrackerExcel}>
+        <Button size="sm" variant="outline" onClick={() => downloadTracker("excel")}>
           <Download style={{ width: 13, height: 13, marginRight: 4 }} />
           {w("Export Excel", "Exportar Excel", lang)}
         </Button>
@@ -538,7 +545,7 @@ export function SubmittalsTab({ projectId, canWrite = true }: { projectId: numbe
       {view === "register" ? (
         <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
       ) : view === "tracking" ? (
-        <SubmittalTrackingList submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
+        <SubmittalTrackingList projectId={projectId} submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
       ) : (
         <SubmittalsList
           onRequestDelete={(s) => setDeleteTarget({ id: s.id, label: s.number })}
