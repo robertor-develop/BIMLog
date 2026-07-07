@@ -240,7 +240,7 @@ router.post("/projects/:projectId/invitations", authMiddleware, requirePermissio
         const projectName = project[0]?.name || "Unknown Project";
         const inviterUser = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
         const inviterName = inviterUser[0]?.fullName || req.user!.fullName;
-        const inviteLink = `${process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app"}/register`;
+        const inviteLink = `${process.env.BIMLOG_URL || "https://bimlog.app"}/register`;
         await sendEmail({
           to: email,
           subject: `You've been invited to join ${projectName} on BIMLog`,

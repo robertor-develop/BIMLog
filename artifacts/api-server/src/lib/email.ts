@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { emailLogTable } from "@workspace/db/schema";
 
 const FROM = "notifications@ignitesmart.ai";
-const APP_URL = process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app";
+const APP_URL = process.env.BIMLOG_URL || "https://bimlog.app";
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);

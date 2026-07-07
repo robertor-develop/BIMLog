@@ -3,6 +3,18 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+iframe[src*="replit"],
+iframe[title*="Replit" i],
+iframe[aria-label*="Replit" i],
+[class*="replit" i],
+[id*="replit" i],
+[data-replit],
+[data-testid*="replit" i] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -124,7 +124,7 @@ router.post("/projects/:projectId/transmittals/:transmittalId/send", authMiddlew
       .where(eq(transmittalsTable.id, txId));
 
     const recipients = (tx.sentTo as { email?: string; userId?: number; name?: string }[]) ?? [];
-    const appUrl = process.env.APP_URL || "https://bim-log-ignite.replit.app";
+    const appUrl = process.env.APP_URL || "https://bimlog.app";
 
     for (const r of recipients) {
       if (r.email) {

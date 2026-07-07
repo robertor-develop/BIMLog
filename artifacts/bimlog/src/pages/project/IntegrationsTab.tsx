@@ -183,7 +183,7 @@ function ApiDocsModal({ onClose }: { onClose: () => void }) {
           <div style={{ padding: "12px 14px", background: "#F0F7FF", border: "1px solid #BFDBFE", borderRadius: 8, marginBottom: 16, fontSize: 12, color: "#1E3A5F", lineHeight: 1.7 }}>
             BIMLog exposes a full REST API for integration with any platform that supports standard HTTP authentication.
             <br />
-            <strong>Base URL:</strong> <code style={{ fontFamily: "var(--font-mono)", background: "#DBEAFE", padding: "1px 5px", borderRadius: 3 }}>https://bim-log-ignite.replit.app/api/v1</code>
+            <strong>Base URL:</strong> <code style={{ fontFamily: "var(--font-mono)", background: "#DBEAFE", padding: "1px 5px", borderRadius: 3 }}>https://bimlog.app/api/v1</code>
             <br />
             <strong>Authentication:</strong> Bearer token via JWT — contact <a href="mailto:info@ignitesmart.ai" style={{ color: "#2563EB" }}>info@ignitesmart.ai</a> to request API credentials.
           </div>

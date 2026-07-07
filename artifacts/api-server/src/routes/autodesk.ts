@@ -10,10 +10,8 @@ declare module "express-session" {
 const router: Router = Router();
 
 // Must EXACTLY match a callback URL registered in the Autodesk APS app console.
-// Derives from the app's public base URL (APP_URL/BIMLOG_URL); AUTODESK_REDIRECT_URI
-// overrides it outright if ever needed.
-const APP_URL = process.env.APP_URL || process.env.BIMLOG_URL || "https://bim-log-ignite.replit.app";
-const REDIRECT_URI = process.env.AUTODESK_REDIRECT_URI || `${APP_URL}/api/v1/autodesk/callback`;
+// AUTODESK_REDIRECT_URI overrides it if ever needed.
+const REDIRECT_URI = process.env.AUTODESK_REDIRECT_URI || "https://bimlog.app/api/v1/autodesk/callback";
 
 router.get("/autodesk/token", async (_req, res) => {
   const clientId = process.env.APS_CLIENT_ID;
