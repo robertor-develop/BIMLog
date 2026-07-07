@@ -73,6 +73,15 @@ function trackerDecision(s: typeof submittalsTable.$inferSelect): string {
   return "Pending";
 }
 
+function attachmentDisplayName(value: string): string {
+  try {
+    const url = new URL(value, "https://bimlog.app");
+    return url.searchParams.get("name") || decodeURIComponent(url.pathname.split("/").pop() || value);
+  } catch {
+    return value;
+  }
+}
+
 function trackerRows(subs: Array<typeof submittalsTable.$inferSelect>) {
   return subs.map((s) => ({
     "Submittal No": s.number,
@@ -86,6 +95,7 @@ function trackerRows(subs: Array<typeof submittalsTable.$inferSelect>) {
     "Review Decision": trackerDecision(s),
     "Ball in Court": s.ballInCourt || "",
     "RFI": s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "",
+    "Attachments": ((s.attachmentsJson as string[] | null) || []).map(attachmentDisplayName).join("; "),
     "Notes": s.description || "",
   }));
 }
@@ -435,7 +445,6 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
 
     const rows = trackerRows(subs);
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(rows);
     const columns = Object.keys(rows[0] || {
       "Submittal No": "",
       "Submittal Name": "",
@@ -448,8 +457,21 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
       "Review Decision": "",
       "Ball in Court": "",
       "RFI": "",
+      "Attachments": "",
       "Notes": "",
     });
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ["BIMLog by IgniteSmart", project?.name || `Project ${projectId}`],
+      ["Submittal Tracker", `Generated ${new Date().toLocaleString()}`],
+      [],
+    ]);
+    XLSX.utils.sheet_add_json(worksheet, rows, { origin: "A4" });
+    worksheet["!autofilter"] = {
+      ref: XLSX.utils.encode_range({
+        s: { r: 3, c: 0 },
+        e: { r: Math.max(3, rows.length + 3), c: Math.max(0, columns.length - 1) },
+      }),
+    };
     worksheet["!cols"] = columns.map((key) => ({
       wch: Math.min(48, Math.max(12, key.length + 2, ...rows.map((row) => String(row[key as keyof typeof row] ?? "").length + 2))),
     }));
@@ -1029,6 +1051,12 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     row2("Manufacturer", sub.manufacturer || "—", "Model No.", sub.modelNumber || "—");
     row2("Procurement", (sub.procurementStatus || "not_ordered").replace(/_/g, " "), "Ball in Court", sub.ballInCourt || "—");
     y += 4;
+    const attachments = ((sub.attachmentsJson as string[] | null) || []).filter(Boolean);
+    if (attachments.length > 0) {
+      sectionHeader("ATTACHMENTS / PRODUCT FILES");
+      textBlock("Files", attachments.map(attachmentDisplayName).join("\n"));
+      y += 6;
+    }
     textBlock("Description", sub.description || "—");
     y += 6;
 

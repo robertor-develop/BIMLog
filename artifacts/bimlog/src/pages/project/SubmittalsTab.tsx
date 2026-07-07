@@ -62,6 +62,13 @@ type ViewEvent = {
 
 type RFI = { id: number; number: string; subject: string; status: string };
 type ProjectFile = { id: number; fileName: string; fileType: string; fileUrl?: string };
+type DirectoryEntry = {
+  id: number;
+  fullName?: string | null;
+  email?: string | null;
+  companyName?: string | null;
+  role?: string | null;
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORY_OPTIONS = [
@@ -135,6 +142,13 @@ function attachmentLabel(value: string) {
   } catch {
     return value;
   }
+}
+function attachmentValues(value: string) {
+  return value.split(/\r?\n|,/).map(v => v.trim()).filter(Boolean);
+}
+function uniqSorted(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.map(v => v?.trim()).filter(Boolean) as string[]))
+    .sort((a, b) => a.localeCompare(b));
 }
 function daysOut(d: string | null | undefined) {
   if (!d) return null;
@@ -1657,6 +1671,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [rfis, setRfis] = useState<RFI[]>([]);
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
+  const [directory, setDirectory] = useState<DirectoryEntry[]>([]);
   const attachFileRef = useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState({
     title: submittal.title || "",
@@ -1742,9 +1757,28 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     void fetch(`/api/v1/projects/${projectId}/files`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     }).then(r => r.ok ? r.json() : []).then(data => setProjectFiles(data as ProjectFile[]));
+    void fetch(`/api/v1/projects/${projectId}/directory`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setDirectory(data as DirectoryEntry[]));
   }, [submittal.id, projectId]);
 
   const setEdit = (key: string, value: string) => setEditForm(f => ({ ...f, [key]: value }));
+  const companyOptions = uniqSorted([
+    ...directory.map(d => d.companyName),
+    submittal.responsibleCompany,
+    submittal.submittedByCompany,
+    submittal.submittedToCompany,
+  ]);
+  const contactOptions = uniqSorted([
+    ...directory.map(d => d.fullName),
+    submittal.submittedByPerson,
+    submittal.submittedToPerson,
+  ]);
+  const emailOptions = uniqSorted([
+    ...directory.map(d => d.email),
+    submittal.submittedByEmail,
+    submittal.submittedToEmail,
+  ]);
 
   const addAttachmentName = (name: string) => {
     if (!name) return;
@@ -1826,7 +1860,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         dateRequired: editForm.dateRequired || null,
         linkedRfiId: editForm.linkedRfiId ? parseInt(editForm.linkedRfiId) : null,
         description: editForm.description || null,
-        attachmentsJson: editForm.attachmentsText.split(/\r?\n|,/).map(v => v.trim()).filter(Boolean),
+        attachmentsJson: attachmentValues(editForm.attachmentsText),
       };
       const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}`, {
         method: "PATCH",
@@ -1963,6 +1997,15 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           e.currentTarget.value = "";
         }}
       />
+      <datalist id={`submittal-companies-${submittal.id}`}>
+        {companyOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
+      <datalist id={`submittal-contacts-${submittal.id}`}>
+        {contactOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
+      <datalist id={`submittal-emails-${submittal.id}`}>
+        {emailOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         {canWrite && (
@@ -2036,25 +2079,25 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               <FieldInput value={editForm.floor} onChange={e => setEdit("floor", e.target.value)} />
             </Field>
             <Field label={w("Responsible Company", "Empresa Responsable", lang)}>
-              <FieldInput value={editForm.responsibleCompany} onChange={e => setEdit("responsibleCompany", e.target.value)} />
+              <FieldInput list={`submittal-companies-${submittal.id}`} placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={editForm.responsibleCompany} onChange={e => setEdit("responsibleCompany", e.target.value)} />
             </Field>
             <Field label={w("Submitted To Company", "Empresa Destinataria", lang)}>
-              <FieldInput value={editForm.submittedToCompany} onChange={e => setEdit("submittedToCompany", e.target.value)} />
+              <FieldInput list={`submittal-companies-${submittal.id}`} placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={editForm.submittedToCompany} onChange={e => setEdit("submittedToCompany", e.target.value)} />
             </Field>
             <Field label={w("Submitted To Contact", "Contacto Destinatario", lang)}>
-              <FieldInput value={editForm.submittedToPerson} onChange={e => setEdit("submittedToPerson", e.target.value)} />
+              <FieldInput list={`submittal-contacts-${submittal.id}`} placeholder={w("Pick an existing contact or type a new one", "Seleccione un contacto o escriba uno nuevo", lang)} value={editForm.submittedToPerson} onChange={e => setEdit("submittedToPerson", e.target.value)} />
             </Field>
             <Field label={w("Submitted To Email", "Correo Destinatario", lang)}>
-              <FieldInput type="email" value={editForm.submittedToEmail} onChange={e => setEdit("submittedToEmail", e.target.value)} />
+              <FieldInput type="email" list={`submittal-emails-${submittal.id}`} placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)} value={editForm.submittedToEmail} onChange={e => setEdit("submittedToEmail", e.target.value)} />
             </Field>
             <Field label={w("Submitted By Company", "Empresa Remitente", lang)}>
-              <FieldInput value={editForm.submittedByCompany} onChange={e => setEdit("submittedByCompany", e.target.value)} />
+              <FieldInput list={`submittal-companies-${submittal.id}`} placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={editForm.submittedByCompany} onChange={e => setEdit("submittedByCompany", e.target.value)} />
             </Field>
             <Field label={w("Submitted By Contact", "Contacto Remitente", lang)}>
-              <FieldInput value={editForm.submittedByPerson} onChange={e => setEdit("submittedByPerson", e.target.value)} />
+              <FieldInput list={`submittal-contacts-${submittal.id}`} placeholder={w("Pick an existing contact or type a new one", "Seleccione un contacto o escriba uno nuevo", lang)} value={editForm.submittedByPerson} onChange={e => setEdit("submittedByPerson", e.target.value)} />
             </Field>
             <Field label={w("Submitted By Email", "Correo Remitente", lang)}>
-              <FieldInput type="email" value={editForm.submittedByEmail} onChange={e => setEdit("submittedByEmail", e.target.value)} />
+              <FieldInput type="email" list={`submittal-emails-${submittal.id}`} placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)} value={editForm.submittedByEmail} onChange={e => setEdit("submittedByEmail", e.target.value)} />
             </Field>
             <Field label={w("Manufacturer", "Fabricante", lang)}>
               <FieldInput value={editForm.manufacturer} onChange={e => setEdit("manufacturer", e.target.value)} />
@@ -2067,8 +2110,11 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
                 {PROCUREMENT_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
               </FieldSelect>
             </Field>
-            <Field label={w("Ball in Court", "En Espera De", lang)}>
-              <FieldInput value={editForm.ballInCourt} onChange={e => setEdit("ballInCourt", e.target.value)} />
+            <Field label={w("Current Responsible Party (Ball in Court)", "Responsable Actual", lang)}>
+              <FieldInput list={`submittal-companies-${submittal.id}`} placeholder={w("Who must act next? Example: Plumbing contractor, architect, GC", "Quien debe actuar ahora? Ej: contratista de plomeria, arquitecto, GC", lang)} value={editForm.ballInCourt} onChange={e => setEdit("ballInCourt", e.target.value)} />
+              <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+                {w("Use this for the company or person currently expected to review, revise, or answer.", "Use este campo para la empresa o persona que debe revisar, corregir o responder.", lang)}
+              </div>
             </Field>
             <Field label={w("Date Submitted", "Fecha de Envio", lang)}>
               <FieldInput type="date" value={editForm.dateSubmitted} onChange={e => setEdit("dateSubmitted", e.target.value)} />
@@ -2107,16 +2153,23 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               </div>
             </Field>
           </div>
-          <Field label={w("Description", "Descripcion", lang)}>
-            <FieldTextarea rows={3} value={editForm.description} onChange={e => setEdit("description", e.target.value)} />
-          </Field>
-          <Field label={w("Attachments / Image Names", "Archivos / Imagenes", lang)}>
+          <Field label={w("Attachments / Product Files", "Archivos / Producto", lang)}>
             <FieldTextarea
               rows={3}
               value={editForm.attachmentsText}
               onChange={e => setEdit("attachmentsText", e.target.value)}
               placeholder={w("One file name or URL per line", "Un archivo o URL por linea", lang)}
             />
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 6 }}>
+              {attachmentValues(editForm.attachmentsText).map((name, idx) => (
+                <div key={`${name}-${idx}`} style={{ fontSize: 11, color: "#374151", background: "white", border: "1px solid #E5E7EB", borderRadius: 6, padding: "4px 7px" }}>
+                  {attachmentLabel(name)}
+                </div>
+              ))}
+            </div>
+          </Field>
+          <Field label={w("Description", "Descripcion", lang)}>
+            <FieldTextarea rows={3} value={editForm.description} onChange={e => setEdit("description", e.target.value)} />
           </Field>
         </div>
       )}
