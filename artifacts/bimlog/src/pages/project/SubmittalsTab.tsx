@@ -12,6 +12,7 @@ import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
   Sparkles, CheckCircle2, Clock, Search, Filter, ExternalLink, Eye, Shield,
   BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList, Trash2,
+  Pencil, Save, Link as LinkIcon, Paperclip,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
@@ -192,6 +193,27 @@ function FieldTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>)
   return <textarea {...props} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, resize: "vertical", ...props.style }} />;
 }
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel") {
+  const endpoint = format === "pdf"
+    ? `/api/v1/projects/${projectId}/submittals/tracker-pdf`
+    : `/api/v1/projects/${projectId}/submittals/tracker-excel`;
+  const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
+  if (!response.ok) throw new Error("Tracker export failed");
+  const blob = await response.blob();
+  downloadBlob(blob, format === "pdf" ? `Submittal-Tracker-Project${projectId}.pdf` : `Submittal-Tracker-Project${projectId}.xlsx`);
+}
+
 // ─── Status badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status, lang }: { status: string; lang: string }) {
   const s = STATUS_BADGE[status] ?? STATUS_BADGE.pending;
@@ -285,31 +307,19 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   const missingDueDate = submittals.filter(s => !s.dateRequired && !s.dueDate).length;
 
   const downloadTracker = async (format: "pdf" | "excel") => {
-    const endpoint = format === "pdf"
-      ? `/api/v1/projects/${projectId}/submittals/tracker-pdf`
-      : `/api/v1/projects/${projectId}/submittals/tracker-excel`;
-    const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
-    if (!response.ok) {
+    try {
+      await downloadSubmittalTracker(projectId, format);
+      toast({
+        title: format === "pdf"
+          ? w("Tracker PDF exported", "PDF del seguimiento exportado", lang)
+          : w("Tracker Excel exported", "Excel del seguimiento exportado", lang),
+      });
+    } catch {
       toast({
         title: w("Tracker export failed", "Error al exportar seguimiento", lang),
         variant: "destructive",
       });
-      return;
     }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = format === "pdf" ? `Submittal-Tracker-Project${projectId}.pdf` : `Submittal-Tracker-Project${projectId}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast({
-      title: format === "pdf"
-        ? w("Tracker PDF exported", "PDF del seguimiento exportado", lang)
-        : w("Tracker Excel exported", "Excel del seguimiento exportado", lang),
-    });
   };
 
   return (
@@ -324,10 +334,15 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
                "Última versión y estado de RFI por plano — compartir con cliente", lang)}
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={() => downloadTracker("pdf")}>
-          <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-          {w("Export PDF", "Exportar PDF", lang)}
-        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button size="sm" variant="outline" onClick={onGoSubmittals}>
+            {w("Back to Submittals", "Volver a Entregables", lang)}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => downloadTracker("pdf")}>
+            <Download style={{ width: 13, height: 13, marginRight: 4 }} />
+            {w("Export PDF", "Exportar PDF", lang)}
+          </Button>
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(120px, 1fr))", gap: 10, marginBottom: 14 }}>
@@ -416,6 +431,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const { toast } = useToast();
   const [view, setView] = useState<"register" | "submittals" | "tracking">(initialView);
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
@@ -453,6 +469,19 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 
   const { data: submittals = [], isLoading } = useListSubmittals(projectId) as {
     data: Submittal[]; isLoading: boolean;
+  };
+
+  const handleTrackerExport = async (format: "pdf" | "excel") => {
+    try {
+      await downloadSubmittalTracker(projectId, format);
+      toast({
+        title: format === "pdf"
+          ? w("Submittal tracker PDF exported", "PDF de seguimiento exportado", lang)
+          : w("Submittal tracker Excel exported", "Excel de seguimiento exportado", lang),
+      });
+    } catch {
+      toast({ title: w("Export failed", "Error al exportar", lang), variant: "destructive" });
+    }
   };
 
   const pendingCount = submittals.filter(s => !["approved", "approved_as_noted", "rejected"].includes(s.status)).length;
@@ -514,7 +543,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
               }}
             >
               <ClipboardList style={{ width: 12, height: 12 }} />
-              {w("Tracking List", "Lista de Seguimiento", lang)}
+              {w("Tracking Table", "Tabla de Seguimiento", lang)}
             </button>
           </div>
           {canWrite && view === "submittals" && (
@@ -525,6 +554,14 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
               </span>
             </label>
           )}
+          <Button size="sm" variant="outline" onClick={() => handleTrackerExport("excel")} style={{ gap: 5, fontSize: 12 }}>
+            <Download style={{ width: 13, height: 13 }} />
+            {w("Export Excel", "Exportar Excel", lang)}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => handleTrackerExport("pdf")} style={{ gap: 5, fontSize: 12 }}>
+            <FileText style={{ width: 13, height: 13 }} />
+            {w("Export PDF", "Exportar PDF", lang)}
+          </Button>
           {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
           {canWrite && view === "submittals" && (
             <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
@@ -547,7 +584,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
       )}
 
       {view === "register" ? (
-        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
+        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} onBack={() => setView("submittals")} />
       ) : view === "tracking" ? (
         <SubmittalTrackingList projectId={projectId} submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
       ) : (
@@ -613,7 +650,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 }
 
 // ─── Register View ────────────────────────────────────────────────────────────
-function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWrite: boolean; lang: string }) {
+function RegisterView({ projectId, canWrite, lang, onBack }: { projectId: number; canWrite: boolean; lang: string; onBack: () => void }) {
   const { toast } = useToast();
   const [items, setItems] = useState<RegisterItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -706,7 +743,17 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center" }}>
-        <span style={{ fontSize: 12, color: "#6B7280" }}>{items.length} {w("items in register", "ítems en registro", lang)}</span>
+        <Button variant="outline" size="sm" style={{ fontSize: 11 }} onClick={onBack}>
+          {w("Back to Submittals", "Volver a Entregables", lang)}
+        </Button>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F" }}>
+            {w("Required Submittal Register", "Registro de Entregables Requeridos", lang)}
+          </div>
+          <div style={{ fontSize: 11, color: "#6B7280" }}>
+            {items.length} {w("planned items from the spec book. Actual submissions live in Submittals.", "items planificados del libro de especificaciones. Los envios reales viven en Entregables.", lang)}
+          </div>
+        </div>
         <div style={{ flex: 1 }} />
         {canWrite && (
           <>
@@ -820,7 +867,27 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
                         </span>
                       </td>
                       {canWrite && (
-                        <td style={{ textAlign: "right" }}>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                          <button
+                            onClick={() => {
+                              setEditId(item.id);
+                              setForm({
+                                specSection: item.specSection || "",
+                                description: item.description || "",
+                                trade: item.trade || "",
+                                submittalType: item.submittalType || "",
+                                requiredByDate: item.requiredByDate ? item.requiredByDate.slice(0, 10) : "",
+                                leadTimeDays: item.leadTimeDays ? String(item.leadTimeDays) : "",
+                                responsibleCompany: item.responsibleCompany || "",
+                                status: item.status || "pending",
+                              });
+                              setShowForm(true);
+                            }}
+                            style={{ border: "none", background: "transparent", cursor: "pointer", color: "#1D4ED8", padding: 4 }}
+                            title={w("Edit", "Editar", lang)}
+                          >
+                            <Pencil style={{ width: 12, height: 12 }} />
+                          </button>
                           <button
                             onClick={() => deleteItem(item.id)}
                             style={{ border: "none", background: "transparent", cursor: "pointer", color: "#DC2626", padding: 4 }}
@@ -1574,7 +1641,46 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [aiRejectionLoading, setAiRejectionLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [rfis, setRfis] = useState<RFI[]>([]);
+  const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
+  const [editForm, setEditForm] = useState({
+    title: submittal.title || "",
+    status: submittal.status || "pending",
+    specSection: submittal.specSection || "",
+    submittalCategory: submittal.submittalCategory || submittal.submittalType || "shop_drawing",
+    submittalType: submittal.submittalType || "shop_drawing",
+    trade: submittal.trade || "",
+    floor: submittal.floor || "",
+    responsibleCompany: submittal.responsibleCompany || "",
+    drawingNumber: submittal.drawingNumber || "",
+    drawingTitle: submittal.drawingTitle || "",
+    dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
+    linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
+    description: submittal.description || "",
+    attachmentsText: (submittal.attachmentsJson || []).join("\n"),
+  });
   const respondRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setEditForm({
+      title: submittal.title || "",
+      status: submittal.status || "pending",
+      specSection: submittal.specSection || "",
+      submittalCategory: submittal.submittalCategory || submittal.submittalType || "shop_drawing",
+      submittalType: submittal.submittalType || "shop_drawing",
+      trade: submittal.trade || "",
+      floor: submittal.floor || "",
+      responsibleCompany: submittal.responsibleCompany || "",
+      drawingNumber: submittal.drawingNumber || "",
+      drawingTitle: submittal.drawingTitle || "",
+      dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
+      linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
+      description: submittal.description || "",
+      attachmentsText: (submittal.attachmentsJson || []).join("\n"),
+    });
+  }, [submittal.id]);
 
   useEffect(() => {
     if (respondOpen && respondRef.current) {
@@ -1592,7 +1698,68 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     void fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}/viewed-by`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     }).then(r => r.ok ? r.json() : []).then(data => setViewEvents(data as ViewEvent[]));
+    void fetch(`/api/v1/projects/${projectId}/rfis`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setRfis(data as RFI[]));
+    void fetch(`/api/v1/projects/${projectId}/files`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setProjectFiles(data as ProjectFile[]));
   }, [submittal.id, projectId]);
+
+  const setEdit = (key: string, value: string) => setEditForm(f => ({ ...f, [key]: value }));
+
+  const addAttachmentName = (name: string) => {
+    if (!name) return;
+    setEditForm(f => {
+      const current = f.attachmentsText.split(/\r?\n/).map(v => v.trim()).filter(Boolean);
+      if (!current.includes(name)) current.push(name);
+      return { ...f, attachmentsText: current.join("\n") };
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm.title.trim()) {
+      toast({ title: w("Title is required", "El titulo es requerido", lang), variant: "destructive" });
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const body = {
+        title: editForm.title.trim(),
+        status: editForm.status,
+        specSection: editForm.specSection || null,
+        submittalCategory: editForm.submittalCategory || null,
+        submittalType: editForm.submittalType || editForm.submittalCategory || "shop_drawing",
+        trade: editForm.trade || null,
+        floor: editForm.floor || null,
+        responsibleCompany: editForm.responsibleCompany || null,
+        drawingNumber: editForm.drawingNumber || null,
+        drawingTitle: editForm.drawingTitle || null,
+        dateRequired: editForm.dateRequired || null,
+        linkedRfiId: editForm.linkedRfiId ? parseInt(editForm.linkedRfiId) : null,
+        description: editForm.description || null,
+        attachmentsJson: editForm.attachmentsText.split(/\r?\n|,/).map(v => v.trim()).filter(Boolean),
+      };
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({})) as { error?: string };
+        throw new Error(err.error || "Save failed");
+      }
+      const updated = await r.json() as Submittal;
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
+      onUpdated({ ...submittal, ...updated });
+      setEditOpen(false);
+      toast({ title: w("Submittal updated", "Entregable actualizado", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Failed to save", "Error al guardar", lang), variant: "destructive" });
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const handleAiCheck = async () => {
     setAiCheckLoading(true);
@@ -1700,6 +1867,12 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     <div style={{ paddingTop: 8 }}>
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        {canWrite && (
+          <Button variant={editOpen ? "default" : "outline"} size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => setEditOpen(v => !v)}>
+            <Pencil style={{ width: 12, height: 12 }} />
+            {editOpen ? w("Close Edit", "Cerrar Edicion", lang) : w("Edit Submittal", "Editar Entregable", lang)}
+          </Button>
+        )}
         <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={handleExportPdf} disabled={exportLoading}>
           {exportLoading ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Download style={{ width: 12, height: 12 }} />}
           {w("Export PDF", "Exportar PDF", lang)}
@@ -1727,6 +1900,85 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           </Button>
         )}
       </div>
+
+      {editOpen && canWrite && (
+        <div style={{ border: "1.5px solid #BFDBFE", borderRadius: 8, padding: 14, background: "#F8FAFC", marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: "#1E3A5F" }}>
+              {w("Edit Submittal", "Editar Entregable", lang)}
+            </div>
+            <Button size="sm" onClick={handleSaveEdit} disabled={editSaving || !editForm.title.trim()} style={{ fontSize: 11, gap: 5 }}>
+              {editSaving ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Save style={{ width: 12, height: 12 }} />}
+              {w("Save Changes", "Guardar Cambios", lang)}
+            </Button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <Field label={w("Title *", "Titulo *", lang)}>
+              <FieldInput value={editForm.title} onChange={e => setEdit("title", e.target.value)} />
+            </Field>
+            <Field label={w("Status", "Estado", lang)}>
+              <FieldSelect value={editForm.status} onChange={e => setEdit("status", e.target.value)}>
+                {Object.entries(STATUS_BADGE).map(([key, value]) => (
+                  <option key={key} value={key}>{lang === "es" ? value.labelEs : value.label}</option>
+                ))}
+              </FieldSelect>
+            </Field>
+            <Field label={w("Spec Section", "Seccion", lang)}>
+              <FieldInput value={editForm.specSection} onChange={e => setEdit("specSection", e.target.value)} />
+            </Field>
+            <Field label={w("Category", "Categoria", lang)}>
+              <FieldSelect value={editForm.submittalCategory} onChange={e => { setEdit("submittalCategory", e.target.value); setEdit("submittalType", e.target.value); }}>
+                {CATEGORY_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
+              </FieldSelect>
+            </Field>
+            <Field label={w("Trade", "Gremio", lang)}>
+              <FieldInput value={editForm.trade} onChange={e => setEdit("trade", e.target.value)} />
+            </Field>
+            <Field label={w("Floor", "Piso", lang)}>
+              <FieldInput value={editForm.floor} onChange={e => setEdit("floor", e.target.value)} />
+            </Field>
+            <Field label={w("Responsible Company", "Empresa Responsable", lang)}>
+              <FieldInput value={editForm.responsibleCompany} onChange={e => setEdit("responsibleCompany", e.target.value)} />
+            </Field>
+            <Field label={w("Date Required", "Fecha Requerida", lang)}>
+              <FieldInput type="date" value={editForm.dateRequired} onChange={e => setEdit("dateRequired", e.target.value)} />
+            </Field>
+            <Field label={w("Drawing Number", "Numero de Plano", lang)}>
+              <FieldInput value={editForm.drawingNumber} onChange={e => setEdit("drawingNumber", e.target.value)} />
+            </Field>
+            <Field label={w("Drawing Title", "Titulo de Plano", lang)}>
+              <FieldInput value={editForm.drawingTitle} onChange={e => setEdit("drawingTitle", e.target.value)} />
+            </Field>
+            <Field label={w("Linked RFI", "RFI Relacionado", lang)}>
+              <FieldSelect value={editForm.linkedRfiId} onChange={e => setEdit("linkedRfiId", e.target.value)}>
+                <option value="">{w("No linked RFI", "Sin RFI relacionado", lang)}</option>
+                {rfis.map(rfi => (
+                  <option key={rfi.id} value={String(rfi.id)}>{rfi.number}: {rfi.subject}</option>
+                ))}
+              </FieldSelect>
+            </Field>
+            <Field label={w("Add Existing Project File", "Agregar Archivo Existente", lang)}>
+              <FieldSelect value="" onChange={e => addAttachmentName(e.target.value)}>
+                <option value="">{projectFiles.length ? w("Select file to attach", "Seleccione archivo", lang) : w("No project files uploaded", "Sin archivos del proyecto", lang)}</option>
+                {projectFiles.map(file => (
+                  <option key={file.id} value={file.fileName}>{file.fileName}</option>
+                ))}
+              </FieldSelect>
+            </Field>
+          </div>
+          <Field label={w("Description", "Descripcion", lang)}>
+            <FieldTextarea rows={3} value={editForm.description} onChange={e => setEdit("description", e.target.value)} />
+          </Field>
+          <Field label={w("Attachments / Image Names", "Archivos / Imagenes", lang)}>
+            <FieldTextarea
+              rows={3}
+              value={editForm.attachmentsText}
+              onChange={e => setEdit("attachmentsText", e.target.value)}
+              placeholder={w("One file name or URL per line", "Un archivo o URL por linea", lang)}
+            />
+          </Field>
+        </div>
+      )}
 
       {/* Status + flags */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14 }}>
@@ -1769,6 +2021,30 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={fmtDate(submittal.dateSubmitted || submittal.createdAt)} />
       <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={fmtDate(submittal.dateRequired || submittal.dueDate)} />
       <InfoRow label={w("Linked RFI", "RFI Relacionado", lang)} value={submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null} />
+      {submittal.linkedRfiId && (
+        <button
+          onClick={() => window.location.href = `/projects/${projectId}/rfis?rfi=${submittal.linkedRfiId}`}
+          style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1D4ED8", borderRadius: 6, padding: "5px 9px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+        >
+          <LinkIcon style={{ width: 12, height: 12 }} />
+          {w("Open linked RFI", "Abrir RFI relacionado", lang)}
+        </button>
+      )}
+      {(submittal.attachmentsJson || []).length > 0 && (
+        <div style={{ marginTop: 10, padding: "8px 0", borderBottom: "1px solid #F3F4F6" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>
+            <Paperclip style={{ width: 12, height: 12 }} />
+            {w("Attachments", "Archivos", lang)}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {(submittal.attachmentsJson || []).map((name, idx) => (
+              <div key={`${name}-${idx}`} style={{ fontSize: 12, color: "#1E293B", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 6, padding: "5px 8px" }}>
+                {name}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <PanelSection title={w("Submitted By", "Enviado Por", lang)} />
       <InfoRow label={w("Company", "Empresa", lang)} value={submittal.submittedByCompany} />
