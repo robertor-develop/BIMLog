@@ -908,7 +908,10 @@ Respond ONLY with a JSON object in this exact format:
 // ─── POST /projects/:projectId/submittals/:submittalId/ai-assist-description ──
 router.post("/projects/:projectId/submittals/:submittalId/ai-assist-description", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
-    const body = req.body as { userDescription?: string; specSection?: string; submittalCategory?: string; title?: string };
+    const body = req.body as {
+      userDescription?: string; specSection?: string; submittalCategory?: string; title?: string;
+      trade?: string; floor?: string; manufacturer?: string; modelNumber?: string;
+    };
     const projectId = Number(req.params.projectId);
     const anthropic = await getAnthropicClientForUser({
       userId: req.user!.userId,
@@ -925,17 +928,98 @@ ${body.userDescription}`
 - Title: ${body.title || "Not specified"}
 - Spec Section: ${body.specSection || "Not specified"}
 - Category: ${body.submittalCategory || "Not specified"}
+- Trade: ${body.trade || "Not specified"}
+- Floor/Area: ${body.floor || "Not specified"}
+- Manufacturer: ${body.manufacturer || "Not specified"}
+- Model Number: ${body.modelNumber || "Not specified"}
 
-Write a concise, formal submittal description under 150 words that covers what is being submitted, its intended use, and relevant compliance or certification notes.`;
+Write a concise, formal submittal description under 150 words that covers what is being submitted, its intended use, and relevant compliance or certification notes. Use only the text fields above. Do not imply that you reviewed attached files.`;
 
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 8192,
+      max_tokens: 800,
       messages: [{ role: "user", content: prompt }],
     });
 
     const suggestion = message.content[0].type === "text" ? message.content[0].text.trim() : "";
     res.json({ suggestion });
+  } catch (error) {
+    if (sendAiUsageError(res, error)) return;
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+// --- POST /projects/:projectId/submittals/:submittalId/ai-email-draft ---
+router.post("/projects/:projectId/submittals/:submittalId/ai-email-draft", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, submittalId } = UpdateSubmittalParams.parse({
+      projectId: req.params.projectId, submittalId: req.params.submittalId,
+    });
+    const body = req.body as {
+      purpose?: string;
+      notes?: string;
+      draft?: Partial<typeof submittalsTable.$inferSelect>;
+    };
+
+    const [sub] = await db.select().from(submittalsTable)
+      .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
+    if (!sub) { res.status(404).json({ error: "Submittal not found" }); return; }
+
+    const [project] = await db.select({ name: projectsTable.name }).from(projectsTable)
+      .where(eq(projectsTable.id, projectId)).limit(1);
+
+    const draft = body.draft || {};
+    const merged = { ...sub, ...draft };
+    const attachments = Array.isArray(merged.attachmentsJson) ? merged.attachmentsJson : [];
+
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "submittals.ai_email_draft",
+    });
+
+    const prompt = `You are a senior construction coordinator drafting a concise professional email about a submittal. This is a low-cost text-only assist. Use only the text fields below. Do not read or claim to have reviewed attached file contents.
+
+Project: ${project?.name || "Unknown"}
+Submittal Number: ${sub.number}
+Title: ${merged.title || "Not specified"}
+Status: ${merged.status || "Not specified"}
+Spec Section: ${merged.specSection || "Not specified"}
+Category: ${merged.submittalCategory || merged.submittalType || "Not specified"}
+Trade: ${merged.trade || "Not specified"}
+Floor/Area: ${merged.floor || "Not specified"}
+Responsible Company: ${merged.responsibleCompany || "Not specified"}
+Submitted By: ${merged.submittedByCompany || "Not specified"} / ${merged.submittedByPerson || "Not specified"} / ${merged.submittedByEmail || "Not specified"}
+Submitted To: ${merged.submittedToCompany || "Not specified"} / ${merged.submittedToPerson || "Not specified"} / ${merged.submittedToEmail || "Not specified"}
+Manufacturer: ${merged.manufacturer || "Not specified"}
+Model Number: ${merged.modelNumber || "Not specified"}
+Ball in Court: ${merged.ballInCourt || "Not specified"}
+Date Submitted: ${merged.dateSubmitted || "Not specified"}
+Date Required: ${merged.dateRequired || "Not specified"}
+Description: ${merged.description || "Not provided"}
+Attachment names only, not contents: ${attachments.length ? attachments.join("; ") : "None listed"}
+User notes/instructions: ${body.notes || "None"}
+
+Return only valid JSON with:
+{
+  "subject": "clear email subject",
+  "body": "professional email body with greeting, concise message, clear requested action, and closing"
+}`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1200,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const text = message.content[0].type === "text" ? message.content[0].text.trim() : "{}";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const draftResult = jsonMatch ? JSON.parse(jsonMatch[0]) : { subject: `${sub.number} - ${merged.title || "Submittal"}`, body: text };
+    res.json({
+      subject: String(draftResult.subject || `${sub.number} - ${merged.title || "Submittal"}`),
+      body: String(draftResult.body || ""),
+      mode: "text_only",
+    });
   } catch (error) {
     if (sendAiUsageError(res, error)) return;
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

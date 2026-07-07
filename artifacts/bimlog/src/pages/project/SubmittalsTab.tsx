@@ -1664,6 +1664,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [rejectionReason, setRejectionReason] = useState("");
   const [respondLoading, setRespondLoading] = useState(false);
   const [aiRejectionLoading, setAiRejectionLoading] = useState(false);
+  const [aiDescriptionLoading, setAiDescriptionLoading] = useState(false);
+  const [aiEmailLoading, setAiEmailLoading] = useState(false);
+  const [aiEmailDraft, setAiEmailDraft] = useState<{ subject: string; body: string } | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(canWrite);
@@ -1928,6 +1931,81 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     finally { setAiRejectionLoading(false); }
   };
 
+  const handleAiDescriptionAssist = async () => {
+    if (!editForm.title.trim() && !editForm.description.trim()) {
+      toast({ title: w("Add a title or rough description first.", "Agregue un titulo o descripcion primero.", lang), variant: "destructive" });
+      return;
+    }
+    setAiDescriptionLoading(true);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}/ai-assist-description`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({
+          userDescription: editForm.description,
+          title: editForm.title,
+          specSection: editForm.specSection,
+          submittalCategory: editForm.submittalCategory,
+          trade: editForm.trade,
+          floor: editForm.floor,
+          manufacturer: editForm.manufacturer,
+          modelNumber: editForm.modelNumber,
+        }),
+      });
+      const d = await r.json().catch(() => ({})) as { suggestion?: string; error?: string };
+      if (!r.ok) throw new Error(d.error || "AI description assist failed");
+      setEdit("description", d.suggestion || "");
+      toast({ title: w("Description drafted from text fields only", "Descripcion generada solo con campos de texto", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("AI description assist failed", "Error de asistencia IA", lang), variant: "destructive" });
+    } finally {
+      setAiDescriptionLoading(false);
+    }
+  };
+
+  const handleAiEmailDraft = async () => {
+    setAiEmailLoading(true);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}/ai-email-draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        body: JSON.stringify({
+          draft: {
+            title: editForm.title,
+            status: editForm.status,
+            specSection: editForm.specSection,
+            submittalCategory: editForm.submittalCategory,
+            submittalType: editForm.submittalType,
+            trade: editForm.trade,
+            floor: editForm.floor,
+            responsibleCompany: editForm.responsibleCompany,
+            submittedByCompany: editForm.submittedByCompany,
+            submittedByPerson: editForm.submittedByPerson,
+            submittedByEmail: editForm.submittedByEmail,
+            submittedToCompany: editForm.submittedToCompany,
+            submittedToPerson: editForm.submittedToPerson,
+            submittedToEmail: editForm.submittedToEmail,
+            manufacturer: editForm.manufacturer,
+            modelNumber: editForm.modelNumber,
+            ballInCourt: editForm.ballInCourt,
+            dateSubmitted: editForm.dateSubmitted,
+            dateRequired: editForm.dateRequired,
+            description: editForm.description,
+            attachmentsJson: attachmentValues(editForm.attachmentsText),
+          },
+        }),
+      });
+      const d = await r.json().catch(() => ({})) as { subject?: string; body?: string; error?: string };
+      if (!r.ok) throw new Error(d.error || "AI email draft failed");
+      setAiEmailDraft({ subject: d.subject || "", body: d.body || "" });
+      toast({ title: w("Email draft created from text fields only", "Correo generado solo con campos de texto", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("AI email draft failed", "Error al generar correo IA", lang), variant: "destructive" });
+    } finally {
+      setAiEmailLoading(false);
+    }
+  };
+
   const handleRespond = async () => {
     if (!reviewDecision) { toast({ title: w("Select a review decision", "Seleccione una decisión de revisión", lang), variant: "destructive" }); return; }
     setRespondLoading(true);
@@ -2032,7 +2110,20 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           }}
         >
           {aiCheckLoading ? <Loader2 style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} /> : <Sparkles style={{ width: 11, height: 11 }} />}
-          {w("Run AI Check", "Verificar con IA", lang)}
+          {w("AI Compliance Check", "Verificacion IA", lang)}
+        </button>
+        <button
+          onClick={handleAiEmailDraft}
+          disabled={aiEmailLoading}
+          title={w("Text-only draft. Does not read attachments. Uses configured AI credits.", "Borrador solo con texto. No lee adjuntos. Usa creditos IA configurados.", lang)}
+          style={{
+            display: "flex", alignItems: "center", gap: 5, padding: "5px 10px",
+            borderRadius: 6, border: "1px solid #93C5FD", background: "#EFF6FF", color: "#1D4ED8",
+            cursor: "pointer", fontSize: 11, fontWeight: 700,
+          }}
+        >
+          {aiEmailLoading ? <Loader2 style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} /> : <Sparkles style={{ width: 11, height: 11 }} />}
+          {w("AI Email Draft", "Borrador Email IA", lang)}
         </button>
         {canWrite && !respondOpen && (
           <Button size="sm" style={{ fontSize: 11, gap: 5, marginLeft: "auto" }} onClick={() => setRespondOpen(true)}>
@@ -2041,6 +2132,39 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           </Button>
         )}
       </div>
+
+      {aiEmailDraft && (
+        <div style={{ border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", padding: 12, marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#1E3A5F" }}>{w("AI Email Draft", "Borrador Email IA", lang)}</div>
+              <div style={{ fontSize: 11, color: "#475569" }}>
+                {w("Draft only. Does not send email or read attached files. Uses configured AI credits.", "Solo borrador. No envia correo ni lee archivos adjuntos. Usa creditos IA configurados.", lang)}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              style={{ fontSize: 11, gap: 5 }}
+              onClick={() => {
+                const text = `Subject: ${aiEmailDraft.subject}\n\n${aiEmailDraft.body}`;
+                void navigator.clipboard?.writeText(text);
+                toast({ title: w("Email draft copied", "Borrador copiado", lang) });
+              }}
+            >
+              <Copy style={{ width: 12, height: 12 }} />
+              {w("Copy", "Copiar", lang)}
+            </Button>
+          </div>
+          <Field label={w("Subject", "Asunto", lang)}>
+            <FieldInput value={aiEmailDraft.subject} onChange={e => setAiEmailDraft(d => d ? { ...d, subject: e.target.value } : d)} />
+          </Field>
+          <Field label={w("Email Body", "Cuerpo del Email", lang)}>
+            <FieldTextarea rows={7} value={aiEmailDraft.body} onChange={e => setAiEmailDraft(d => d ? { ...d, body: e.target.value } : d)} />
+          </Field>
+        </div>
+      )}
 
       {editOpen && canWrite && (
         <div style={{ border: "1.5px solid #BFDBFE", borderRadius: 8, padding: 14, background: "#F8FAFC", marginBottom: 16 }}>
@@ -2168,9 +2292,29 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               ))}
             </div>
           </Field>
-          <Field label={w("Description", "Descripcion", lang)}>
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#374151" }}>{w("Description", "Descripcion", lang)}</div>
+              <button
+                type="button"
+                onClick={handleAiDescriptionAssist}
+                disabled={aiDescriptionLoading}
+                title={w("Text-only assist. Does not read attachments. Uses configured AI credits.", "Asistencia solo con texto. No lee adjuntos. Usa creditos IA configurados.", lang)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 8px",
+                  borderRadius: 6, border: "1px solid #93C5FD", background: "#EFF6FF", color: "#1D4ED8",
+                  cursor: "pointer", fontSize: 11, fontWeight: 700,
+                }}
+              >
+                {aiDescriptionLoading ? <Loader2 style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} /> : <Sparkles style={{ width: 11, height: 11 }} />}
+                {w("AI Draft Description", "Descripcion IA", lang)}
+              </button>
+            </div>
             <FieldTextarea rows={3} value={editForm.description} onChange={e => setEdit("description", e.target.value)} />
-          </Field>
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+              {w("Text-only assist. It does not read attached files or images.", "Asistencia solo con texto. No lee archivos ni imagenes adjuntas.", lang)}
+            </div>
+          </div>
         </div>
       )}
 
