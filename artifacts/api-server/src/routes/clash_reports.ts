@@ -1640,24 +1640,48 @@ router.delete("/projects/:projectId/clash-reports/lens-viewpoints/:id",
     const projectId = Number(req.params.projectId);
     const id = Number(req.params.id);
     try {
-      const [deleted] = await db.delete(lensViewpointsTable)
+      const [existing] = await db.select({ id: lensViewpointsTable.id })
+        .from(lensViewpointsTable)
         .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
-        .returning();
-      if (!deleted) {
-        res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" });
-        return;
-      }
-      // Clear this viewpoint's history so a deleted viewpoint leaves no orphaned revision
-      // events behind (they would otherwise resurface in future reports / via id reuse).
-      await db.delete(activityLogTable).where(and(
-        eq(activityLogTable.projectId, projectId),
-        eq(activityLogTable.entityType, "lens_viewpoint"),
-        eq(activityLogTable.entityId, id),
-      ));
+        .limit(1);
+      if (!existing) { res.status(404).json({ error: "not_found", message: "Lens viewpoint not found" }); return; }
+
+      await db.transaction(async (tx) => {
+        // If the selected row is an older revision, detach direct children before
+        // deleting it so the self-referencing supersedes FK does not block cleanup.
+        await tx.update(lensViewpointsTable)
+          .set({ supersedesId: null, updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.supersedesId, id)));
+
+        await tx.delete(linkedItemsTable).where(and(
+          eq(linkedItemsTable.projectId, projectId),
+          or(
+            and(eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, id)),
+            and(eq(linkedItemsTable.toType, "lens_viewpoint"), eq(linkedItemsTable.toId, id)),
+          ),
+        ));
+        await tx.delete(lensViewpointEventsTable).where(and(
+          eq(lensViewpointEventsTable.projectId, projectId),
+          eq(lensViewpointEventsTable.viewpointId, id),
+        ));
+        await tx.delete(activityLogTable).where(and(
+          eq(activityLogTable.projectId, projectId),
+          eq(activityLogTable.entityType, "lens_viewpoint"),
+          eq(activityLogTable.entityId, id),
+        ));
+
+        await tx.delete(lensViewpointsTable)
+          .where(and(eq(lensViewpointsTable.id, id), eq(lensViewpointsTable.projectId, projectId)))
+          .returning({ id: lensViewpointsTable.id });
+      });
       console.log(`[lens-delete] project=${projectId} removed viewpoint id=${id}`);
       res.json({ success: true, id });
     } catch (err) {
-      res.status(500).json({ error: "lens_delete_failed", message: err instanceof Error ? err.message : String(err) });
+      console.error("[lens-delete] failed", { projectId, id, err });
+      res.status(500).json({
+        error: "lens_delete_failed",
+        message: "Could not delete this Lens viewpoint. Please refresh and try again.",
+      });
     }
   }
 );
