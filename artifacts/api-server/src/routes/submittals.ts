@@ -267,7 +267,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
       dueDate: body.dueDate ? new Date(body.dueDate as string) : null,
 
       procurementStatus: (body.procurementStatus as string) || "not_ordered",
-      ballInCourt: (body.submittedToCompany as string) || null,
+      ballInCourt: (body.ballInCourt as string) || (body.submittedToCompany as string) || null,
 
       linkedRfiId: (body.linkedRfiId as number) || null,
       parentSubmittalId: (body.parentSubmittalId as number) || null,
@@ -325,6 +325,78 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
 });
 
 // ─── GET /projects/:projectId/submittals/export-all (REMOVED — Excel is client-side) ─
+router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(String(req.params.projectId));
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const subs = await db.select().from(submittalsTable)
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
+      .orderBy(submittalsTable.createdAt);
+
+    const projectLabel = project ? `${project.name}${project.code ? ` (${project.code})` : ""}` : `Project ${projectId}`;
+    const fmt = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("en-US") : "";
+    const daysOutstanding = (value: Date | string | null | undefined) => {
+      if (!value) return "";
+      return Math.ceil((new Date(value).getTime() - Date.now()) / 86400000);
+    };
+    const rows = subs.map(s => ({
+      "Number": s.number,
+      "Title": s.title,
+      "Trade": s.trade || "",
+      "Floor": s.floor || "",
+      "Responsible Company": s.responsibleCompany || "",
+      "Type": s.submittalCategory || s.submittalType || "",
+      "Status": s.status || "",
+      "Spec Section": s.specSection || "",
+      "Submitted By Company": s.submittedByCompany || "",
+      "Submitted By Contact": s.submittedByPerson || "",
+      "Submitted By Email": s.submittedByEmail || "",
+      "Submitted To Company": s.submittedToCompany || "",
+      "Submitted To Contact": s.submittedToPerson || "",
+      "Submitted To Email": s.submittedToEmail || "",
+      "Date Submitted": fmt(s.dateSubmitted || s.createdAt),
+      "Date Required": fmt(s.dateRequired || s.dueDate),
+      "Days Outstanding": daysOutstanding(s.dateRequired || s.dueDate),
+      "Ball in Court": s.ballInCourt || "",
+      "Linked RFI": s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "",
+      "Attachments": ((s.attachmentsJson as string[] | null) || []).map(attachmentDisplayName).join("; "),
+      "Description": s.description || "",
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ["BIMLog by IgniteSmart", projectLabel],
+      ["Submittal Log", `Generated ${new Date().toLocaleString("en-US")}`],
+      [],
+    ]);
+    XLSX.utils.sheet_add_json(worksheet, rows, { origin: "A4" });
+    const headers = Object.keys(rows[0] || {
+      "Number": "", "Title": "", "Trade": "", "Floor": "", "Responsible Company": "", "Type": "", "Status": "", "Spec Section": "",
+      "Submitted By Company": "", "Submitted By Contact": "", "Submitted By Email": "", "Submitted To Company": "", "Submitted To Contact": "",
+      "Submitted To Email": "", "Date Submitted": "", "Date Required": "", "Days Outstanding": "", "Ball in Court": "", "Linked RFI": "",
+      "Attachments": "", "Description": "",
+    });
+    worksheet["!cols"] = headers.map(header => {
+      const maxValue = Math.max(header.length, ...rows.map(row => String((row as Record<string, unknown>)[header] || "").length));
+      return { wch: Math.min(Math.max(maxValue + 2, 12), 45) };
+    });
+    worksheet["!autofilter"] = {
+      ref: XLSX.utils.encode_range({
+        s: { r: 3, c: 0 },
+        e: { r: Math.max(rows.length + 3, 3), c: headers.length - 1 },
+      }),
+    };
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Submittal Log");
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const fileBase = String(project?.code || project?.name || `Project${projectId}`).replace(/[^\w.-]+/g, "-");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileBase}-Submittal-Log.xlsx"`);
+    res.send(buffer);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
 router.get("/projects/:projectId/submittals/export-all", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const projectId = parseInt(String(req.params.projectId));
@@ -754,7 +826,7 @@ router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddlewa
             actionType: "warning",
             entityType: "submittal",
             entityId: submittalId,
-            details: `⚠️ RAPID APPROVAL WARNING: Submittal ${existing.number} was approved in under 60 seconds of first being opened. Review may be inadequate.`,
+            details: `RAPID APPROVAL WARNING: Submittal ${existing.number} was approved in under 60 seconds of first being opened. Review may be inadequate.`,
           });
         }
       }
@@ -1108,7 +1180,7 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
       doc.rect(MARGIN, y, CONTENT_W, 22).fill("#FEF3C7");
       doc.rect(MARGIN, y, 4, 22).fill("#D97706");
       doc.fillColor("#B45309").fontSize(8).font("Helvetica-Bold")
-        .text("⚠ RAPID APPROVAL FLAG: This submittal was approved in under 60 seconds of first being opened.", MARGIN + 10, y + 7, { width: CONTENT_W - 14, lineBreak: false });
+        .text("RAPID APPROVAL FLAG: This submittal was approved in under 60 seconds of first being opened.", MARGIN + 10, y + 7, { width: CONTENT_W - 14, lineBreak: false });
       doc.fillColor("black"); y += 28;
     }
 
@@ -1321,7 +1393,7 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
     if (sub.rapidApprovalFlag) {
       doc.rect(MARGIN, y, CONTENT_W, 16).fill("#FEF3C7");
       doc.fillColor("#B45309").fontSize(7).font("Helvetica-Bold")
-        .text("⚠ RAPID APPROVAL FLAG: Approved in under 60 seconds of first open.", MARGIN + 4, y + 4.5, { lineBreak: false });
+        .text("RAPID APPROVAL FLAG: Approved in under 60 seconds of first open.", MARGIN + 4, y + 4.5, { lineBreak: false });
       doc.fillColor("black"); y += 16;
     }
     y += 6;

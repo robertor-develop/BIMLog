@@ -352,7 +352,7 @@ CRITICAL RULES:
         uploaderCompany = uploaderCo?.name || "";
       }
 
-      const severity = result === "clear_mismatch" ? "⚠️ CLEAR MISMATCH" : "⚠️ Possible Mismatch";
+      const severity = result === "clear_mismatch" ? "CLEAR MISMATCH" : "Possible Mismatch";
       const details = `AI content verification flagged file "${fileName}" — ${severity}. ${reason} File has been marked for coordinator review.`;
 
       // Activity log entry — flagging event

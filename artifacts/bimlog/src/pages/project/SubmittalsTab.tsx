@@ -947,23 +947,15 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
 
   const handleExport = async (format: "pdf" | "excel") => {
     if (format === "excel") {
-      const rows = submittals.map(s => ({
-        "Number": s.number, "Title": s.title,
-        "Trade": s.trade || "",
-        "Floor": s.floor || "",
-        "Responsible Company": s.responsibleCompany || s.submittedByCompany || "",
-        "Type": s.submittalCategory || s.submittalType,
-        "Status": s.status, "Spec Section": s.specSection || "",
-        "Submitted By": s.submittedByCompany || s.submittedByName || "",
-        "Submitted To": s.submittedToCompany || "",
-        "Date Submitted": fmtDate(s.dateSubmitted || s.createdAt),
-        "Date Required": fmtDate(s.dateRequired || s.dueDate),
-        "Days Outstanding": s.dateRequired ? Math.ceil((new Date(s.dateRequired).getTime() - Date.now()) / 86400000) : "",
-        "Ball in Court": s.ballInCourt || "",
-      }));
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Submittal Log");
-      XLSX.writeFile(wb, `Submittal-Log-Project${projectId}.xlsx`);
+      const r = await fetch(`/api/v1/projects/${projectId}/submittals/export-excel`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!r.ok) {
+        toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
+        return;
+      }
+      const blob = await r.blob();
+      downloadBlob(blob, `Submittal-Log-Project${projectId}.xlsx`);
       toast({ title: w("Excel exported", "Excel exportado", lang) });
       return;
     }
@@ -1163,8 +1155,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
     submittedToCompany: "", submittedToPerson: "", submittedToEmail: "", submittedToExternal: false,
     manufacturer: "", modelNumber: "", description: "",
     procurementStatus: "not_ordered",
+    ballInCourt: "",
     linkedRfiId: "",
     distributionList: "",
+    attachmentsJson: [] as string[],
   });
 
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
@@ -1173,8 +1167,12 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
   const [submitting, setSubmitting] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [rfis, setRfis] = useState<RFI[]>([]);
+  const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
+  const [directory, setDirectory] = useState<DirectoryEntry[]>([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [byEmailError, setByEmailError] = useState("");
   const [toEmailError, setToEmailError] = useState("");
+  const attachFileRef = useRef<HTMLInputElement>(null);
 
   const validateEmail = (email: string) => !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -1195,7 +1193,60 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
     void fetch(`/api/v1/projects/${projectId}/rfis`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     }).then(r => r.ok ? r.json() : []).then(data => setRfis(data as RFI[]));
+    void fetch(`/api/v1/projects/${projectId}/files`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setProjectFiles(data as ProjectFile[]));
+    void fetch(`/api/v1/projects/${projectId}/directory`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    }).then(r => r.ok ? r.json() : []).then(data => setDirectory(data as DirectoryEntry[]));
   }, [projectId]);
+
+  const companyOptions = uniqSorted([
+    ...directory.map(d => d.companyName),
+    form.responsibleCompany,
+    form.submittedByCompany,
+    form.submittedToCompany,
+  ]);
+  const contactOptions = uniqSorted([
+    ...directory.map(d => d.fullName),
+    form.submittedByPerson,
+    form.submittedToPerson,
+  ]);
+  const emailOptions = uniqSorted([
+    ...directory.map(d => d.email),
+    form.submittedByEmail,
+    form.submittedToEmail,
+  ]);
+
+  const addAttachmentName = (name: string) => {
+    if (!name) return;
+    setForm(f => {
+      const next = [...f.attachmentsJson];
+      if (!next.includes(name)) next.push(name);
+      return { ...f, attachmentsJson: next };
+    });
+  };
+
+  const uploadAndAttachFile = async (file: File) => {
+    setUploadingAttachment(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const upload = await fetch(`/api/v1/projects/${projectId}/submittals/attachments/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      });
+      const body = await upload.json().catch(() => ({})) as { fileName?: string; downloadUrl?: string; error?: string };
+      if (!upload.ok) throw new Error(body.error || "Upload failed");
+      addAttachmentName(body.downloadUrl || body.fileName || file.name);
+      toast({ title: w("Attachment uploaded", "Adjunto subido", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Upload failed", "Error al subir", lang), variant: "destructive" });
+    } finally {
+      setUploadingAttachment(false);
+    }
+  };
 
   const handleAiAssist = async () => {
     setAiAssistLoading(true);
@@ -1285,6 +1336,25 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
 
   return (
     <div style={{ paddingTop: 4 }}>
+      <input
+        ref={attachFileRef}
+        type="file"
+        style={{ display: "none" }}
+        onChange={e => {
+          const file = e.target.files?.[0];
+          if (file) void uploadAndAttachFile(file);
+          e.currentTarget.value = "";
+        }}
+      />
+      <datalist id="new-submittal-companies">
+        {companyOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
+      <datalist id="new-submittal-contacts">
+        {contactOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
+      <datalist id="new-submittal-emails">
+        {emailOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
       {/* Section 1: Header */}
       <PanelSection title={w("1. Submittal Header", "1. Encabezado del Entregable", lang)} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -1314,10 +1384,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       <PanelSection title={w("2. Submitted By", "2. Enviado Por", lang)} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Field label={w("Company", "Empresa", lang)}>
-          <FieldInput value={form.submittedByCompany} onChange={e => set("submittedByCompany", e.target.value)} />
+          <FieldInput list="new-submittal-companies" placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={form.submittedByCompany} onChange={e => set("submittedByCompany", e.target.value)} />
         </Field>
         <Field label={w("Contact Person", "Persona de Contacto", lang)}>
-          <FieldInput value={form.submittedByPerson} onChange={e => set("submittedByPerson", e.target.value)} />
+          <FieldInput list="new-submittal-contacts" placeholder={w("Pick an existing contact or type a new one", "Seleccione un contacto o escriba uno nuevo", lang)} value={form.submittedByPerson} onChange={e => set("submittedByPerson", e.target.value)} />
         </Field>
         <Field label={w("Phone", "Teléfono", lang)}>
           <FieldInput value={form.submittedByPhone} onChange={e => set("submittedByPhone", e.target.value)} />
@@ -1325,6 +1395,8 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
         <Field label={w("Email", "Correo", lang)}>
           <FieldInput
             type="email"
+            list="new-submittal-emails"
+            placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)}
             value={form.submittedByEmail}
             onChange={e => { set("submittedByEmail", e.target.value); if (byEmailError) setByEmailError(""); }}
             onBlur={() => !validateEmail(form.submittedByEmail) ? setByEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setByEmailError("")}
@@ -1338,14 +1410,16 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       <PanelSection title={w("3. Submitted To", "3. Enviado A", lang)} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Field label={w("Company", "Empresa", lang)}>
-          <FieldInput value={form.submittedToCompany} onChange={e => set("submittedToCompany", e.target.value)} />
+          <FieldInput list="new-submittal-companies" placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={form.submittedToCompany} onChange={e => set("submittedToCompany", e.target.value)} />
         </Field>
         <Field label={w("Contact Person", "Persona de Contacto", lang)}>
-          <FieldInput value={form.submittedToPerson} onChange={e => set("submittedToPerson", e.target.value)} />
+          <FieldInput list="new-submittal-contacts" placeholder={w("Pick an existing contact or type a new one", "Seleccione un contacto o escriba uno nuevo", lang)} value={form.submittedToPerson} onChange={e => set("submittedToPerson", e.target.value)} />
         </Field>
         <Field label={w("Email", "Correo", lang)}>
           <FieldInput
             type="email"
+            list="new-submittal-emails"
+            placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)}
             value={form.submittedToEmail}
             onChange={e => { set("submittedToEmail", e.target.value); if (toEmailError) setToEmailError(""); }}
             onBlur={() => !validateEmail(form.submittedToEmail) ? setToEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setToEmailError("")}
@@ -1370,7 +1444,43 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
         <Field label={w("Model Number", "Número de Modelo", lang)}>
           <FieldInput value={form.modelNumber} onChange={e => set("modelNumber", e.target.value)} />
         </Field>
+        <Field label={w("Responsible Company", "Empresa Responsable", lang)}>
+          <FieldInput list="new-submittal-companies" placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={form.responsibleCompany} onChange={e => set("responsibleCompany", e.target.value)} />
+        </Field>
+        <Field label={w("Current Responsible Party (Ball in Court)", "Responsable Actual", lang)}>
+          <FieldInput list="new-submittal-companies" placeholder={w("Who must act next? Example: plumbing contractor, architect, GC", "Quien debe actuar ahora? Ej: contratista de plomeria, arquitecto, GC", lang)} value={form.ballInCourt} onChange={e => set("ballInCourt", e.target.value)} />
+          <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+            {w("Use this for the company or person currently expected to review, revise, or answer.", "Use este campo para la empresa o persona que debe revisar, corregir o responder.", lang)}
+          </div>
+        </Field>
       </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <Field label={w("Add Existing Project File", "Agregar Archivo Existente", lang)}>
+          <FieldSelect value="" onChange={e => addAttachmentName(e.target.value)}>
+            <option value="">{projectFiles.length ? w("Select file to attach", "Seleccione archivo", lang) : w("No project files uploaded", "Sin archivos del proyecto", lang)}</option>
+            {projectFiles.map(file => (
+              <option key={file.id} value={file.fileUrl || file.fileName}>{file.fileName}</option>
+            ))}
+          </FieldSelect>
+        </Field>
+        <Field label={w("Upload From Computer", "Subir Desde Computadora", lang)}>
+          <Button type="button" variant="outline" size="sm" disabled={uploadingAttachment} onClick={() => attachFileRef.current?.click()} style={{ width: "100%", fontSize: 12, gap: 5 }}>
+            {uploadingAttachment ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Paperclip style={{ width: 12, height: 12 }} />}
+            {uploadingAttachment ? w("Uploading...", "Subiendo...", lang) : w("Attach file now", "Adjuntar archivo ahora", lang)}
+          </Button>
+        </Field>
+      </div>
+      {form.attachmentsJson.length > 0 && (
+        <Field label={w("Attachments / Product Files", "Archivos / Producto", lang)}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {form.attachmentsJson.map((name, idx) => (
+              <div key={`${name}-${idx}`} style={{ fontSize: 11, color: "#374151", background: "white", border: "1px solid #E5E7EB", borderRadius: 6, padding: "4px 7px" }}>
+                {attachmentLabel(name)}
+              </div>
+            ))}
+          </div>
+        </Field>
+      )}
       <Field label={w("Description of Submittal", "Descripción del Entregable", lang)}>
         <FieldTextarea
           rows={5}
@@ -1390,6 +1500,9 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           {aiAssistLoading ? <Loader2 style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} /> : <Sparkles style={{ width: 11, height: 11 }} />}
           {w("AI Assist", "Asistencia IA", lang)}
         </button>
+        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+          {w("Text-only assist. It does not read attached files or images.", "Asistencia solo con texto. No lee archivos ni imagenes adjuntas.", lang)}
+        </div>
       </Field>
 
       {/* Section 5: Reference Documents */}
