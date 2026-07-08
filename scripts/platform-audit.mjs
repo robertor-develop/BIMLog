@@ -67,8 +67,8 @@ for (const file of files) {
 const routeRegistrations = [];
 for (const file of files.filter(f => rel(f).startsWith("artifacts/api-server/src/routes/"))) {
   readLines(file).forEach((line, index) => {
-    const match = line.match(/router\.(get|post|patch|delete)\(\s*["'`]([^"'`]+)["'`]/);
-    if (match) routeRegistrations.push({ key: `${match[1].toUpperCase()} ${match[2]}`, file: rel(file), line: index + 1 });
+    const match = line.match(/router\.(get|post|patch|put|delete)\(\s*["'`]([^"'`]+)["'`]/);
+    if (match) routeRegistrations.push({ method: match[1].toUpperCase(), path: match[2], key: `${match[1].toUpperCase()} ${match[2]}`, file: rel(file), line: index + 1 });
   });
 }
 
@@ -86,6 +86,46 @@ for (const [key, locations] of routesByKey) {
       file: locations.map(l => `${l.file}:${l.line}`).join(", "),
       detail: `Duplicate route registration: ${key}`,
     });
+  }
+}
+
+function routeCanShadow(earlierPath, laterPath) {
+  const earlierSegments = earlierPath.split("/").filter(Boolean);
+  const laterSegments = laterPath.split("/").filter(Boolean);
+  if (earlierSegments.length !== laterSegments.length) return false;
+
+  let shadowingParam = false;
+  for (let i = 0; i < earlierSegments.length; i += 1) {
+    const earlier = earlierSegments[i];
+    const later = laterSegments[i];
+    if (earlier === later) continue;
+    if (earlier.startsWith(":")) {
+      if (!later.startsWith(":")) shadowingParam = true;
+      continue;
+    }
+    return false;
+  }
+  return shadowingParam;
+}
+
+for (let i = 0; i < routeRegistrations.length; i += 1) {
+  const earlier = routeRegistrations[i];
+  for (let j = i + 1; j < routeRegistrations.length; j += 1) {
+    const later = routeRegistrations[j];
+    if (earlier.file !== later.file || earlier.method !== later.method) continue;
+    if (!routeCanShadow(earlier.path, later.path)) continue;
+
+    const sourcePath = path.join(root, earlier.file);
+    const sourceWindow = readLines(sourcePath).slice(earlier.line - 1, earlier.line + 12).join("\n");
+    const hasPassThroughGuard = /next\s*\(/.test(sourceWindow) && /\\d/.test(sourceWindow);
+    if (!hasPassThroughGuard) {
+      findings.push({
+        severity: "P1",
+        category: "route-order",
+        file: `${earlier.file}:${earlier.line}`,
+        detail: `${earlier.method} ${earlier.path} can shadow later literal route ${later.path} at ${later.file}:${later.line}. Move the literal route earlier or add an explicit numeric pass-through guard.`,
+      });
+    }
   }
 }
 

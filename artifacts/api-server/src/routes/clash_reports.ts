@@ -2278,9 +2278,13 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
   }
 );
 
-router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res) => {
+router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res, next) => {
+  const reportIdParam = Array.isArray(req.params.reportId) ? req.params.reportId[0] : req.params.reportId;
+  if (!/^\d+$/.test(reportIdParam)) {
+    return next();
+  }
   const projectId = Number(req.params.projectId);
-  const reportId = Number(req.params.reportId);
+  const reportId = Number(reportIdParam);
   try {
     const [report] = await db.select().from(clashReportsTable)
       .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
