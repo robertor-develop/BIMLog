@@ -4,7 +4,15 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
-const scanRoots = ["artifacts/api-server/src", "artifacts/bimlog/src", "lib/db/src", "replit.md", "package.json"];
+const scanRoots = [
+  "artifacts/api-server/src",
+  "artifacts/bimlog/src",
+  "artifacts/sync-agent",
+  "lib/api-client-react/src",
+  "lib/db/src",
+  "replit.md",
+  "package.json",
+];
 
 function walk(target) {
   const absolute = path.join(root, target);

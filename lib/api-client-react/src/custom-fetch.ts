@@ -278,7 +278,9 @@ function getStoredToken(): string | null {
       const parsed = JSON.parse(stored);
       return parsed?.state?.token || null;
     }
-  } catch {}
+  } catch (error) {
+    console.warn("Could not read stored BIMLog auth token:", error);
+  }
   return null;
 }
 
@@ -293,7 +295,9 @@ function clearStoredToken(): void {
         localStorage.setItem("bimlog-auth", JSON.stringify(parsed));
       }
     }
-  } catch {}
+  } catch (error) {
+    console.warn("Could not clear stored BIMLog auth token:", error);
+  }
 }
 
 export async function customFetch<T = unknown>(

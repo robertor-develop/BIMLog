@@ -196,7 +196,7 @@
     </div>
     <div class="field">
       <label>BIMLog Base URL</label>
-      <input type="text" id="baseUrl" placeholder="https://bim-log-ignite.replit.app" />
+      <input type="text" id="baseUrl" placeholder="https://bimlog.app" />
     </div>
   </div>
 
@@ -305,7 +305,7 @@
     const settings = {
       apiToken:    document.getElementById("apiToken").value.trim(),
       projectId:   document.getElementById("projectId").value.trim(),
-      baseUrl:     document.getElementById("baseUrl").value.trim() || "https://bim-log-ignite.replit.app",
+      baseUrl:     document.getElementById("baseUrl").value.trim() || "https://bimlog.app",
       watchFolder: document.getElementById("watchFolder").value.trim(),
     };
     await window.bimlog.saveSettings(settings);
@@ -337,7 +337,7 @@
     const settings = await window.bimlog.loadSettings();
     document.getElementById("apiToken").value    = settings.apiToken    || "";
     document.getElementById("projectId").value   = settings.projectId   || "";
-    document.getElementById("baseUrl").value     = settings.baseUrl     || "https://bim-log-ignite.replit.app";
+    document.getElementById("baseUrl").value     = settings.baseUrl     || "https://bimlog.app";
     document.getElementById("watchFolder").value = settings.watchFolder || "";
 
     const status = await window.bimlog.getWatcherStatus();

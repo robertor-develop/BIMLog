@@ -16,8 +16,10 @@ function loadSettings() {
     if (fs.existsSync(CONFIG_PATH)) {
       return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
     }
-  } catch (_) {}
-  return { apiToken: "", projectId: "", baseUrl: "https://bim-log-ignite.replit.app", watchFolder: "" };
+  } catch (error) {
+    console.warn("[sync-agent] Could not load settings:", error instanceof Error ? error.message : String(error));
+  }
+  return { apiToken: "", projectId: "", baseUrl: "https://bimlog.app", watchFolder: "" };
 }
 
 function saveSettings(settings) {
@@ -28,7 +30,11 @@ let inMemoryLogs = [];
 
 function appendLog(entry) {
   const line = `[${entry.timestamp}] [${entry.status.toUpperCase()}] ${entry.fileName} — ${entry.message}\n`;
-  try { fs.appendFileSync(LOG_PATH, line, "utf8"); } catch (_) {}
+  try {
+    fs.appendFileSync(LOG_PATH, line, "utf8");
+  } catch (error) {
+    console.warn("[sync-agent] Could not write log:", error instanceof Error ? error.message : String(error));
+  }
   inMemoryLogs.unshift(entry);
   if (inMemoryLogs.length > 200) inMemoryLogs = inMemoryLogs.slice(0, 200);
   if (settingsWindow && !settingsWindow.isDestroyed()) {
