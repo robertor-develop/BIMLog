@@ -840,6 +840,89 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const trade = String(req.query.trade ?? "all");
+    const floor = String(req.query.floor ?? "all");
+    const reportType = String(req.query.reportType ?? "all");
+    const status = String(req.query.status ?? "all");
+    const lifecycleScope = String(req.query.lifecycleScope ?? "active");
+    try {
+      const [project] = await db.select({ name: projectsTable.name, code: projectsTable.code })
+        .from(projectsTable)
+        .where(eq(projectsTable.id, projectId));
+      const rows = await db.select().from(lensViewpointsTable)
+        .where(eq(lensViewpointsTable.projectId, projectId))
+        .orderBy(desc(lensViewpointsTable.capturedAt));
+      const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null; displayId: string | null; viewpointId: string }): string => {
+        if (row.tradeFloorSeq != null) {
+          const abbr = ((row.trade || "").length > 2 ? (row.trade || "").slice(0, 2) : (row.trade || "")).toUpperCase() || "??";
+          return `${abbr}-${String(row.tradeFloorSeq).padStart(3, "0")}`;
+        }
+        return row.displayId || row.viewpointId || "";
+      };
+      const stateLabel = (value: string | null): string => {
+        const state = value || "active";
+        if (state === "active") return "Current";
+        if (state === "superseded") return "Superseded";
+        if (state === "voided") return "Voided";
+        return state;
+      };
+      const statusLabel = (value: string | null): string => {
+        if (value === "follow_up") return "Follow Up";
+        if (value === "waiting_design") return "Waiting Design";
+        if (value === "approved") return "Approved";
+        if (value === "resolved") return "Resolved";
+        return "Open";
+      };
+      const filtered = rows
+        .filter(v => trade === "all" || v.trade === trade)
+        .filter(v => floor === "all" || v.floor === floor)
+        .filter(v => reportType === "all" || v.reportType === reportType)
+        .filter(v => status === "all" || v.status === status)
+        .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
+      const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status"];
+      const worksheet = XLSX.utils.aoa_to_sheet([
+        ["BIMLog by IgniteSmart"],
+        [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
+        [`Exported: ${new Date().toISOString()}`],
+        [`Rows: ${filtered.length}`],
+        [],
+        header,
+        ...filtered.map(v => [
+          v.capturedAt ? new Date(v.capturedAt).toISOString().slice(0, 10) : "",
+          codeOf(v),
+          v.viewpointId,
+          v.floor || "",
+          v.trade || "",
+          v.responsibleCompany || "",
+          v.reportType || "",
+          v.priority ? `P${v.priority}` : "",
+          stateLabel(v.lifecycleStatus),
+          (v.revisionNumber ?? 1) > 1 ? `Rev ${v.revisionNumber}` : "",
+          v.note || "",
+          v.openItems || "",
+          statusLabel(v.status),
+        ]),
+      ]);
+      worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
+      worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
+      worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 5, c: 0 }, e: { r: Math.max(5, filtered.length + 5), c: header.length - 1 } }) };
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Lens Viewpoints");
+      const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
+      res.send(buffer);
+    } catch (err) {
+      res.status(500).json({ error: "lens_excel_export_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
 // REPAIR LENS LIFECYCLE CHAINS - if a row says superseded but no newer row
 // actually points back to it, it is an orphaned historical marker and should be
 // active again. This protects test-reset/re-push workflows from stale local

@@ -13,7 +13,6 @@ import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from "xlsx";
 import {
   MessageSquare, Plus, X, FileText, Download,
   LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
@@ -246,73 +245,31 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     finally { setImporting(false); e.target.value = ""; }
   };
 
-  const handleExportAllExcel = () => {
+  const handleExportAllExcel = async () => {
     if (!rfis) return;
-    const isLog = view === "log";
-    const rows = isLog ? filtered.length > 0 ? filtered : rfis : filtered.length > 0 ? filtered : rfis;
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     try {
-      const wb = XLSX.utils.book_new();
-      if (isLog) {
-        const headerRow = [
-          "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
-          "Submitted By Company", "Submitted By Contact", "Submitted By Email",
-          "Submitted To Company", "Submitted To Person", "Submitted To Email",
-          "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
-          "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
-          "Ball In Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
-        ];
-        const data = rows.map(r => {
-          const bic = getBallInCourt(r);
-          const days = differenceInDays(new Date(), new Date(r.createdAt));
-          return [
-            r.number, r.subject, r.status, r.priority,
-            fmt(r.dateRequested || r.createdAt), fmt(r.dateRequired || r.dueDate),
-            r.submittedByCompany || "", r.submittedByContact || "", r.submittedByEmail || "",
-            r.submittedToCompany || "", r.submittedToPerson || "", r.submittedToEmail || "",
-            r.drawingNumber || "", r.drawingTitle || "", r.specSection || "",
-            r.detailNumber || "", r.noteNumber || "", r.locationDescription || "",
-            r.costImpact || "", r.costImpactAmount || "",
-            r.scheduleImpact || "", r.scheduleImpactDays != null ? r.scheduleImpactDays : "",
-            bic?.label || "", days, r.answer || r.response || "",
-            r.answeredBy || "", fmt(r.dateAnswered || r.respondedAt),
-          ];
-        });
-        const ws = XLSX.utils.aoa_to_sheet([
-          [`BIMLog by IgniteSmart — RFI Log`],
-          [`Exported: ${new Date().toLocaleDateString()}`],
-          [],
-          headerRow,
-          ...data,
-        ]);
-        ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
-        ws["!cols"] = headerRow.map((_, i) => ({ wch: i < 2 ? 12 : i < 5 ? 18 : 20 }));
-        XLSX.utils.book_append_sheet(wb, ws, "RFI Log");
-        XLSX.writeFile(wb, `RFI-Log-${projectId}.xlsx`);
-      } else {
-        const headerRow = ["RFI #", "Subject", "Status", "Priority", "Ball In Court", "Days Outstanding"];
-        const data = rows.map(r => {
-          const bic = getBallInCourt(r);
-          const days = differenceInDays(new Date(), new Date(r.createdAt));
-          return [r.number, r.subject, r.status, r.priority, bic?.label || "Closed", days];
-        });
-        const ws = XLSX.utils.aoa_to_sheet([
-          [`BIMLog by IgniteSmart — RFI Summary`],
-          [`Exported: ${new Date().toLocaleDateString()}`],
-          [],
-          headerRow,
-          ...data,
-        ]);
-        ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headerRow.length - 1 } }];
-        ws["!cols"] = [{ wch: 12 }, { wch: 40 }, { wch: 14 }, { wch: 12 }, { wch: 28 }, { wch: 14 }];
-        XLSX.utils.book_append_sheet(wb, ws, "RFI Summary");
-        XLSX.writeFile(wb, `RFI-Summary-${projectId}.xlsx`);
+      const params = new URLSearchParams({ view, status: statusFilter, search });
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/export-excel?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "Excel export failed");
       }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `RFI-${view === "log" ? "Log" : "Summary"}-${projectId}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
       toast({ title: w("Excel exported", "Excel exportado", lang) });
-    } catch {
+    } catch (error) {
+      logClientError("RFI Excel export", error);
       toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
     }
   };
-
   const filtered = useMemo(() => {
     if (!rfis) return [];
     return rfis

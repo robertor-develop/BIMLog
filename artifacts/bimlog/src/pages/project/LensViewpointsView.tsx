@@ -4,7 +4,6 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
-import * as XLSX from "xlsx";
 
 const API = "/api/v1";
 const PLUGIN_BASE = "http://localhost:8765";
@@ -755,38 +754,30 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     return max;
   }, null);
 
-  const exportExcel = () => {
-    // Mirror the live on-screen view: `filtered` already applies the trade/floor/
-    // report-type/status filters AND the state scope, so the export reflects
-    // exactly what the user is looking at rather than dumping every row.
-    const header = ["Date", "Code", "FileName", "Floor", "Trade", "Responsible Company", "ReportType", "Priority", "State", "Rev", "Note", "OpenItems", "Status"];
-    const data = filtered.map(v => [
-      fmtCaptured(v.capturedAt),
-      viewpointCode(v),
-      v.viewpointId,
-      v.floor || "",
-      v.trade || "",
-      v.responsibleCompany || "",
-      v.reportType || "",
-      v.priority ? `P${v.priority}` : "",
-      LIFECYCLE_BADGE[v.lifecycleStatus || "active"]?.label || v.lifecycleStatus || "Current",
-      (v.revisionNumber ?? 1) > 1 ? `R${v.revisionNumber}` : "",
-      v.note || "",
-      v.openItems || "",
-      lensStatusLabel(v.status),
-    ]);
-    const ws = XLSX.utils.aoa_to_sheet([
-      ["BIMLog by IgniteSmart — Lens Viewpoints"],
-      [`Exported: ${new Date().toLocaleDateString()}`],
-      [],
-      header,
-      ...data,
-    ]);
-    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
-    ws["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 40 : i === 2 ? 24 : i === 5 ? 24 : 14 }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Lens Viewpoints");
-    XLSX.writeFile(wb, `Lens-Viewpoints-${projectId}.xlsx`);
+  const exportExcel = async () => {
+    const params = new URLSearchParams({
+      trade: fTrade,
+      floor: fFloor,
+      reportType: fReportType,
+      status: fStatus,
+      lifecycleScope,
+    });
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/export-excel?${params}`, { headers });
+      if (!response.ok) throw new Error(`Export failed (${response.status})`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Lens-Viewpoints-${projectId}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Lens Excel export failed", err);
+      alert(t("Excel export failed. Please try again.", "La exportacion a Excel fallo. Intente de nuevo."));
+    }
   };
 
   const loadHistory = async () => {

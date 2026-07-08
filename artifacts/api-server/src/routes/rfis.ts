@@ -9,6 +9,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
 import PDFDocument from "pdfkit";
+import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken } from "../lib/oauth";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
@@ -724,6 +725,101 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
 });
 
 // ─── POST /projects/:projectId/rfis ─────────────────────────────────────────
+router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
+    const view = String(req.query.view || "cards");
+    const status = String(req.query.status || "all");
+    const search = String(req.query.search || "").trim().toLowerCase();
+
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const rfis = await db.query.rfisTable.findMany({
+      where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
+      orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
+    });
+
+    const filtered = rfis
+      .filter(rfi => status === "all" || rfi.status === status)
+      .filter(rfi => {
+        if (!search) return true;
+        return [
+          rfi.number,
+          rfi.subject,
+          rfi.submittedByCompany,
+          rfi.submittedToCompany,
+          rfi.submittedToPerson,
+          rfi.submittedToEmail,
+        ].some(value => String(value || "").toLowerCase().includes(search));
+      });
+
+    const rows = filtered.length > 0 ? filtered : rfis;
+    const fmt = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("en-US") : "";
+    const ballInCourt = (rfi: typeof rfisTable.$inferSelect) => {
+      if (rfi.status === "closed") return "Closed";
+      if (rfi.status === "responded") return rfi.submittedByCompany || "Submitter";
+      return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
+    };
+    const projectLabel = project ? `${project.name}${project.code ? ` (${project.code})` : ""}` : `Project ${projectId}`;
+    const isLog = view === "log";
+    const headerRow = isLog
+      ? [
+          "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
+          "Submitted By Company", "Submitted By Contact", "Submitted By Email",
+          "Submitted To Company", "Submitted To Contact", "Submitted To Email",
+          "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
+          "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
+          "Ball in Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
+        ]
+      : ["RFI #", "Subject", "Status", "Priority", "Ball in Court", "Days Outstanding"];
+    const data = rows.map(rfi => {
+      const days = daysSince(rfi.createdAt);
+      if (!isLog) {
+        return [rfi.number, rfi.subject, rfi.status, rfi.priority, ballInCourt(rfi), days];
+      }
+      return [
+        rfi.number, rfi.subject, rfi.status, rfi.priority,
+        fmt(rfi.dateRequested || rfi.createdAt), fmt(rfi.dateRequired || rfi.dueDate),
+        rfi.submittedByCompany || "", rfi.submittedByContact || "", rfi.submittedByEmail || "",
+        rfi.submittedToCompany || "", rfi.submittedToPerson || "", rfi.submittedToEmail || "",
+        rfi.drawingNumber || "", rfi.drawingTitle || "", rfi.specSection || "",
+        rfi.detailNumber || "", rfi.noteNumber || "", rfi.locationDescription || "",
+        rfi.costImpact || "", rfi.costImpactAmount || "",
+        rfi.scheduleImpact || "", rfi.scheduleImpactDays != null ? rfi.scheduleImpactDays : "",
+        ballInCourt(rfi), days, rfi.answer || rfi.response || "",
+        rfi.answeredBy || "", fmt(rfi.dateAnswered || rfi.respondedAt),
+      ];
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ["BIMLog by IgniteSmart", projectLabel],
+      [isLog ? "RFI Log" : "RFI Summary", `Generated ${new Date().toLocaleString("en-US")}`],
+      [],
+      headerRow,
+      ...data,
+    ]);
+    worksheet["!cols"] = headerRow.map((header, columnIndex) => {
+      const maxValue = Math.max(header.length, ...data.map(row => String(row[columnIndex] || "").length));
+      return { wch: Math.min(Math.max(maxValue + 2, 12), 45) };
+    });
+    worksheet["!autofilter"] = {
+      ref: XLSX.utils.encode_range({
+        s: { r: 3, c: 0 },
+        e: { r: Math.max(data.length + 3, 3), c: headerRow.length - 1 },
+      }),
+    };
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, isLog ? "RFI Log" : "RFI Summary");
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const projectCode = String(project?.code || project?.name || `Project${projectId}`).replace(/[^\w.-]+/g, "-");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-${isLog ? "RFI-Log" : "RFI-Summary"}.xlsx"`);
+    res.send(buffer);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
 router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
