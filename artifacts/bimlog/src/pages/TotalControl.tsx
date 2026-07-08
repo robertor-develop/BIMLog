@@ -245,15 +245,21 @@ function AssignUserModal({ projectId, companyCode, token, onClose, onDone }: { p
       });
       if (r?.ok) { onDone(); }
       else {
-        const data = await r?.json().catch(() => null);
+        const data = await r?.json().catch(err => {
+          console.warn("[TotalControl] failed to parse assignment error response:", err);
+          return null;
+        });
         setError(data?.error || "Failed to assign user");
       }
-    } catch { setError("Network error"); }
+    } catch (err) {
+      console.warn("[TotalControl] assign-company-user failed:", err);
+      setError("Network error");
+    }
     setSubmitting(false);
   };
 
   return (
-    <TCModal title={`Assign User — ${companyCode}`} onClose={onClose}>
+    <TCModal title={`Assign User - ${companyCode}`} onClose={onClose}>
       <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>
         Create a new user for convention company <strong>{companyCode}</strong> in this project.
       </div>

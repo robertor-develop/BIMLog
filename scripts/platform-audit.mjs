@@ -47,7 +47,7 @@ function add(severity, category, file, line, detail) {
 for (const file of files) {
   const fileRel = rel(file);
   const isApi = fileRel.startsWith("artifacts/api-server/src/");
-  const isFrontend = fileRel.startsWith("artifacts/bimlog/src/");
+  const isFrontend = fileRel.startsWith("artifacts/bimlog/src/") || fileRel.startsWith("lib/api-client-react/src/");
   const isAiUsage = fileRel === "artifacts/api-server/src/lib/ai-usage.ts";
   const isSharedPdf = fileRel === "artifacts/api-server/src/lib/pdf-kit.ts";
 
@@ -65,7 +65,7 @@ for (const file of files) {
     if (isApi && /AI_INTEGRATIONS_ANTHROPIC_API_KEY\s*\|\|\s*["']dummy["']/.test(line)) {
       add("P0", "dummy-ai-key", file, lineNo, "Dummy AI key masks configuration failure instead of failing loudly.");
     }
-    if ((isApi || isFrontend) && /catch\s*\{\s*\}|catch\s*\(_\)\s*\{\s*\}|\.catch\(\(\)\s*=>\s*\{\s*\}\)/.test(line)) {
+    if ((isApi || isFrontend) && /catch\s*(?:\([^)]*\)\s*)?\{\s*(?:return\s+(?:null|undefined);)?\s*\}|\.catch\(\(\)\s*=>\s*(?:\{\s*\}|(?:null|undefined))\)/.test(line)) {
       add("P1", "silent-catch", file, lineNo, "Silent catch can hide broken user workflows.");
     }
     if (isApi && !isSharedPdf && /new\s+PDFDocument\s*\(|from\s+["']pdfkit["']|require\(["']pdfkit["']\)/.test(line)) {

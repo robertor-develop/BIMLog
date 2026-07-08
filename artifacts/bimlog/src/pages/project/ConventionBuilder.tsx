@@ -597,8 +597,17 @@ function CompanyAssignmentBlock({ projectId, convention, lang, token, onRefresh 
         body: JSON.stringify({ companyCode: assignCode, newUserData: { fullName: fullName.trim(), email: email.trim().toLowerCase(), companyName: companyName.trim() } }),
       });
       if (r.ok) { setAssignCode(null); setFullName(""); setEmail(""); setCompanyName(""); onRefresh(); }
-      else { const d = await r.json().catch(() => null); setError(d?.error || "Failed"); }
-    } catch { setError("Network error"); }
+      else {
+        const d = await r.json().catch(err => {
+          console.warn("[ConventionBuilder] failed to parse assignment error response:", err);
+          return null;
+        });
+        setError(d?.error || "Failed");
+      }
+    } catch (err) {
+      console.warn("[ConventionBuilder] assign-company-user failed:", err);
+      setError("Network error");
+    }
     setSubmitting(false);
   };
 

@@ -127,7 +127,10 @@ export function useCoordinationConfirm(projectId: number) {
           try {
             const stored = localStorage.getItem("bimlog-auth");
             return stored ? JSON.parse(stored)?.state?.token ?? null : null;
-          } catch { return null; }
+          } catch (err) {
+            console.warn("[coordination] failed to read auth token for file download:", err);
+            return null;
+          }
         })();
         const resp = await fetch(url, {
           method: "POST",

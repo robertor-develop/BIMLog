@@ -379,7 +379,10 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
             }
             const d = new Date(val);
             return isNaN(d.getTime()) ? null : d;
-          } catch { return null; }
+          } catch (err) {
+            console.warn("[clash-upload] failed to parse date cell:", err);
+            return null;
+          }
         };
 
         parsed = dataRows
