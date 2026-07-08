@@ -53,6 +53,7 @@ const MODULE_OPTIONS = [
   { value: "", label: "General Milestone", labelEs: "Hito General" },
   { value: "rfi", label: "Linked RFI", labelEs: "RFI Vinculado" },
   { value: "submittal", label: "Linked Submittal", labelEs: "Entregable Vinculado" },
+  { value: "3d_model", label: "3D Model", labelEs: "Modelo 3D" },
   { value: "change_order", label: "Change Order Milestone", labelEs: "Hito de Orden de Cambio" },
   { value: "meeting", label: "Meeting Milestone", labelEs: "Hito de Reunión" },
 ];
@@ -66,6 +67,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [items, setItems] = useState<ScheduleItem[]>([]);
   const [rfis, setRfis] = useState<LinkOption[]>([]);
   const [submittals, setSubmittals] = useState<LinkOption[]>([]);
+  const [levels, setLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -73,17 +75,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [filter, setFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"calendar" | "board" | "list">("board");
   const [selected, setSelected] = useState<ScheduleItem | null>(null);
-  const [form, setForm] = useState({ title: "", due_date: "", linked_module: "", linked_id: "" });
+  const [form, setForm] = useState({ title: "", due_date: "", linked_module: "", linked_id: "", level: "" });
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
   const load = async () => {
     setLoading(true);
     try {
-      const [scheduleRes, rfiRes, submittalRes] = await Promise.all([
+      const [scheduleRes, rfiRes, submittalRes, levelsRes] = await Promise.all([
         fetch(`${API}/projects/${projectId}/schedule/live`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API}/projects/${projectId}/rfis`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API}/projects/${projectId}/submittals`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/projects/${projectId}/levels`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       if (scheduleRes.ok) setItems(await scheduleRes.json());
       if (rfiRes.ok) {
@@ -105,6 +108,10 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           dueDate: s.dateRequired || s.dueDate || null,
           route: `/projects/${projectId}/submittals`,
         })));
+      }
+      if (levelsRes.ok) {
+        const data = await levelsRes.json();
+        setLevels(Array.isArray(data.levels) ? data.levels : []);
       }
     } finally {
       setLoading(false);
@@ -133,8 +140,10 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     setSaving(true);
     setError("");
     try {
+      const isModelItem = form.linked_module === "3d_model";
+      const modelTitle = isModelItem && form.level ? `3D Model - ${form.level}` : "";
       const body = {
-        title: form.title.trim(),
+        title: form.title.trim() || modelTitle,
         due_date: form.due_date,
         linked_module: form.linked_module || undefined,
         linked_id: form.linked_id ? Number(form.linked_id) : undefined,
@@ -150,7 +159,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         return;
       }
       setShowForm(false);
-      setForm({ title: "", due_date: "", linked_module: "", linked_id: "" });
+      setForm({ title: "", due_date: "", linked_module: "", linked_id: "", level: "" });
       await load();
       setViewMode("board");
       toast({ title: t("Schedule item added", "Fecha agregada al cronograma") });
@@ -366,7 +375,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           <form onSubmit={save} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <label className="label">{t("Item Type", "Tipo")}</label>
-              <select className="input" value={form.linked_module} onChange={e => setForm(f => ({ ...f, linked_module: e.target.value, linked_id: "" }))}>
+              <select className="input" value={form.linked_module} onChange={e => setForm(f => ({ ...f, linked_module: e.target.value, linked_id: "", level: "" }))}>
                 {MODULE_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
               </select>
             </div>
@@ -379,9 +388,22 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 </select>
               </div>
             )}
+            {form.linked_module === "3d_model" && (
+              <div>
+                <label className="label">{t("Building Level", "Nivel")}</label>
+                <select className="input" required value={form.level} onChange={e => setForm(f => ({
+                  ...f,
+                  level: e.target.value,
+                  title: f.title || (e.target.value ? `3D Model - ${e.target.value}` : ""),
+                }))}>
+                  <option value="">{t("Select level", "Seleccionar nivel")}</option>
+                  {levels.map(level => <option key={level} value={level}>{level}</option>)}
+                </select>
+              </div>
+            )}
             <div style={{ gridColumn: "1 / -1" }}>
               <label className="label">{t("Title", "Título")} *</label>
-              <input className="input" required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+              <input className="input" required={form.linked_module !== "3d_model"} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
             </div>
             <div>
               <label className="label">{t("Due Date", "Fecha Límite")} *</label>

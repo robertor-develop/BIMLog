@@ -53,7 +53,7 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
     events.push(...milestones.map((m) => ({
       id: m.id,
       source: "milestone" as const,
-      label: "Milestone",
+      label: m.linkedModule === "3d_model" ? "3D Model" : "Milestone",
       title: m.title || "Untitled milestone",
       dueDate: toIso(m.dueDate),
       status: m.status || "pending",

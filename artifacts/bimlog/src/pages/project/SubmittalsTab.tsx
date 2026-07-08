@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment } from "react";
+import { useState, useEffect, useRef, Fragment, useMemo } from "react";
 import { useListSubmittals, useCreateSubmittal } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -272,21 +272,6 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 }) {
   const { toast } = useToast();
 
-  if (submittals.length === 0) {
-    return (
-      <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-        <ClipboardList size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
-        <div style={{ fontWeight: 600, marginBottom: 10 }}>
-          {w("No submittals yet. Create submittals in the Submittals tab to see them here.",
-             "Sin entregables aún. Crea entregables en la pestaña de Entregables para verlos aquí.", lang)}
-        </div>
-        <Button size="sm" onClick={onGoSubmittals}>
-          {w("Go to Submittals", "Ir a Entregables", lang)}
-        </Button>
-      </div>
-    );
-  }
-
   const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Other"];
   function tradeOf(s: Submittal): string {
     if (s.trade) return s.trade;
@@ -301,8 +286,66 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     return s.floor || s.drawingNumber || w("Unassigned", "Sin asignar", lang);
   }
 
+  function typeOf(s: Submittal): string {
+    const raw = `${s.submittalType ?? ""} ${s.submittalCategory ?? ""}`.toLowerCase();
+    if (raw.includes("sleeve") && (raw.includes("vert") || raw.includes("vertical") || raw.includes(" v"))) return "Sleeve V";
+    if (raw.includes("sleeve") && (raw.includes("horiz") || raw.includes("horizontal") || raw.includes(" h"))) return "Sleeve H";
+    if (raw.includes("shop")) return "Shop";
+    if (raw.includes("sleeve")) return "Sleeve";
+    return w("Other", "Otro", lang);
+  }
+
+  function trackerDateRaw(s: Submittal): string {
+    const raw = s.reviewedAt || s.dateRequired || s.dueDate || s.dateSubmitted || s.createdAt;
+    return raw ? String(raw).slice(0, 10) : "";
+  }
+
+  function trackerDateLabel(raw: string): string {
+    if (!raw) return w("No date", "Sin fecha", lang);
+    const d = new Date(raw);
+    return isValid(d) ? format(d, "MM/dd/yy") : raw;
+  }
+
+  const [filterFloor, setFilterFloor] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
+  const filterOptions = useMemo(() => {
+    const uniq = (rows: string[]) => Array.from(new Set(rows.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    return {
+      floors: uniq(submittals.map(floorOf)),
+      types: uniq(submittals.map(typeOf)),
+      dates: uniq(submittals.map(trackerDateRaw)),
+      statuses: uniq(submittals.map(s => s.status || w("Unknown", "Desconocido", lang))),
+    };
+  }, [submittals, lang]);
+
+  const visibleSubmittals = useMemo(() => submittals.filter(s => {
+    if (filterFloor && floorOf(s) !== filterFloor) return false;
+    if (filterType && typeOf(s) !== filterType) return false;
+    if (filterDate && trackerDateRaw(s) !== filterDate) return false;
+    if (filterStatus && (s.status || w("Unknown", "Desconocido", lang)) !== filterStatus) return false;
+    return true;
+  }), [submittals, filterFloor, filterType, filterDate, filterStatus, lang]);
+
+  if (submittals.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
+        <ClipboardList size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
+        <div style={{ fontWeight: 600, marginBottom: 10 }}>
+          {w("No submittals yet. Create submittals in the Submittals tab to see them here.",
+             "Sin entregables aun. Crea entregables en la pestana de Entregables para verlos aqui.", lang)}
+        </div>
+        <Button size="sm" onClick={onGoSubmittals}>
+          {w("Go to Submittals", "Ir a Entregables", lang)}
+        </Button>
+      </div>
+    );
+  }
+
   const grouped: Record<string, Record<string, Submittal[]>> = {};
-  for (const s of submittals) {
+  for (const s of visibleSubmittals) {
     const tr = tradeOf(s);
     const fl = floorOf(s);
     if (!grouped[tr]) grouped[tr] = {};
@@ -324,12 +367,13 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     );
   }
 
-  const overdueCount = submittals.filter(s => {
+  const overdueCount = visibleSubmittals.filter(s => {
     const raw = s.dateRequired || s.dueDate;
     return raw && new Date(raw).getTime() < Date.now() && !["approved", "approved_as_noted", "closed"].includes((s.status || "").toLowerCase());
   }).length;
-  const missingResponsible = submittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
-  const missingDueDate = submittals.filter(s => !s.dateRequired && !s.dueDate).length;
+  const missingResponsible = visibleSubmittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
+  const missingDueDate = visibleSubmittals.filter(s => !s.dateRequired && !s.dueDate).length;
+  const filtersActive = Boolean(filterFloor || filterType || filterDate || filterStatus);
 
   const downloadTracker = async (format: "pdf" | "excel") => {
     try {
@@ -370,9 +414,58 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         </div>
       </div>
 
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, minmax(150px, 1fr)) auto",
+        gap: 10,
+        alignItems: "end",
+        background: "white",
+        border: "1px solid #E5E7EB",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 14,
+      }}>
+        <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
+          {w("Floor", "Piso", lang)}
+          <select className="input" value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
+            <option value="">{w("All Floors", "Todos los Pisos", lang)}</option>
+            {filterOptions.floors.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
+        <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
+          {w("Type", "Tipo", lang)}
+          <select className="input" value={filterType} onChange={e => setFilterType(e.target.value)}>
+            <option value="">{w("All Types", "Todos los Tipos", lang)}</option>
+            {filterOptions.types.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
+        <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
+          {w("Date", "Fecha", lang)}
+          <select className="input" value={filterDate} onChange={e => setFilterDate(e.target.value)}>
+            <option value="">{w("All Dates", "Todas las Fechas", lang)}</option>
+            {filterOptions.dates.map(v => <option key={v || "none"} value={v}>{trackerDateLabel(v)}</option>)}
+          </select>
+        </label>
+        <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
+          {w("Status", "Estado", lang)}
+          <select className="input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+            <option value="">{w("All Statuses", "Todos los Estados", lang)}</option>
+            {filterOptions.statuses.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!filtersActive}
+          onClick={() => { setFilterFloor(""); setFilterType(""); setFilterDate(""); setFilterStatus(""); }}
+        >
+          {w("Clear", "Limpiar", lang)}
+        </Button>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(120px, 1fr))", gap: 10, marginBottom: 14 }}>
         {[
-          [w("Total", "Total", lang), submittals.length, "#1E3A5F"],
+          [filtersActive ? w("Visible", "Visible", lang) : w("Total", "Total", lang), visibleSubmittals.length, "#1E3A5F"],
           [w("Overdue", "Vencidos", lang), overdueCount, overdueCount ? "#DC2626" : "#16A34A"],
           [w("Missing due date", "Sin fecha", lang), missingDueDate, missingDueDate ? "#D97706" : "#16A34A"],
           [w("Missing company", "Sin empresa", lang), missingResponsible, missingResponsible ? "#D97706" : "#16A34A"],
@@ -415,26 +508,27 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
                         fontWeight: 700, fontSize: 11 }}>{fl}</td>
                     </tr>
                     {grouped[tr][fl].map(s => {
-                      const isShop = (s.submittalType ?? "").toLowerCase().includes("shop");
+                      const trackerType = typeOf(s);
+                      const trackerDate = trackerDateRaw(s);
                       return (
                         <tr key={s.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{fl}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{isShop ? "Yes" : ""}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("vert") ? "X" : ""}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("horiz") ? "X" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Shop" ? "Yes" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Sleeve V" ? "X" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Sleeve H" ? "X" : ""}</td>
                           <td style={{ padding: "6px 10px" }}>{approvalCell(s)}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11, whiteSpace: "nowrap" }}>
-                            {s.reviewedAt ? format(new Date(s.reviewedAt), "MM/dd/yy") : "—"}
+                            {trackerDate ? trackerDateLabel(trackerDate) : "-"}
                           </td>
                           <td style={{ padding: "6px 10px", fontSize: 11, maxWidth: 240 }}>{s.title}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{s.status}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11, color: "#374151", whiteSpace: "nowrap" }}>
                             R{(s as any).revisionNumber ?? 0}
                           </td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "—"}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>—</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{s.linkedRfiId ? `RFI-${s.linkedRfiId}` : "-"}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>-</td>
                           <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", maxWidth: 200 }}>
-                            {s.ballInCourt ? `${w("Ball in Court","Pelota en Cancha", lang)}: ${s.ballInCourt}` : "—"}
+                            {s.ballInCourt ? `${w("Ball in Court","Pelota en Cancha", lang)}: ${s.ballInCourt}` : "-"}
                           </td>
                         </tr>
                       );
