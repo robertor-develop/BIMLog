@@ -914,7 +914,9 @@ router.post(
                 html: makeNamingViolationEmail({ lang, fileName, projectName, failedFields, projectId, recipientName: adminUser[0].fullName }),
               });
             }
-          } catch (_) {}
+          } catch (notificationError) {
+            console.error("[files] Failed to send naming violation notifications:", notificationError instanceof Error ? notificationError.message : notificationError);
+          }
         });
 
         return;

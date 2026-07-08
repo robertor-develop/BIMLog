@@ -150,10 +150,14 @@ export function startOverdueNotifier(): void {
     await checkOverdueRfis();
     await checkOverdueSubmittals();
   };
-  run().catch(() => {});
+  run().catch((error) => {
+    console.error("[overdue-notifier] Initial overdue check failed:", error instanceof Error ? error.message : error);
+  });
   setInterval(run, ONE_HOUR_MS);
 
   const runCvr = async () => { await checkCvrReminders(); };
-  runCvr().catch(() => {});
+  runCvr().catch((error) => {
+    console.error("[overdue-notifier] Initial CVR reminder check failed:", error instanceof Error ? error.message : error);
+  });
   setInterval(runCvr, SIX_HOURS_MS);
 }

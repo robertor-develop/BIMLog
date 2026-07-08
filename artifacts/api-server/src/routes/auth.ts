@@ -49,7 +49,9 @@ router.post("/auth/register", async (req, res) => {
         }
         await db.update(projectInvitations).set({ status: "accepted", acceptedAt: new Date() }).where(eq(projectInvitations.id, inv.id));
       }
-    } catch (_) {}
+    } catch (inviteError) {
+      console.error("[auth/register] Failed to auto-accept pending invitations:", inviteError instanceof Error ? inviteError.message : inviteError);
+    }
 
     const companyName = company.length > 0 ? company[0].name : body.companyName;
     const payload: AuthPayload = {

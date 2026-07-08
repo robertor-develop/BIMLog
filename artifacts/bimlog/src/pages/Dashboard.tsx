@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
+import { logClientError } from "@/lib/client-log";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -199,7 +200,7 @@ export function Dashboard() {
     fetch(`${API_BASE}/api/v1/cvr-health`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setCvrHealth(data); })
-      .catch(() => {});
+      .catch((error) => logClientError("dashboard CVR health load", error));
   }, [token]);
 
   // ── Cross-project data ─────────────────────────────────────────────────────

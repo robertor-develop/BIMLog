@@ -1350,7 +1350,9 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       entityType: "rfi",
       entityId: rfiId,
       details: `PDF exported: ${rfi.number}`,
-    }).catch(() => {});
+    }).catch((activityError) => {
+      console.error("[rfis] Failed to log PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });

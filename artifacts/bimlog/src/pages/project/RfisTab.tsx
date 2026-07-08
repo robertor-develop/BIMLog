@@ -22,6 +22,7 @@ import {
   Send, Copy, Check, PenLine, Navigation, ChevronLeft, FolderOpen,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { logClientError } from "@/lib/client-log";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -838,7 +839,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : [])
       .then((d) => { const gd = Array.isArray(d) ? (d as { provider: string; status: string }[]).find(c => c.provider === "google_drive") : null; setGdConnectedCreate(!!gd && gd.status === "connected"); })
-      .catch(() => {});
+      .catch((error) => logClientError("RFI create Google Drive connection load", error));
   }, []);
 
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
@@ -1460,7 +1461,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : [])
       .then((d) => { if (Array.isArray(d)) setRfiDirectory(d); })
-      .catch(() => {});
+      .catch((error) => logClientError("RFI directory load", error));
   }, [projectId]);
 
   // Load the source viewpoint screenshot (stored as a lens-viewpoint file) for inline display.
@@ -1473,7 +1474,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     fetch(`/api/v1/projects/${projectId}/files/${vpFile.id}/download`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.blob() : null)
       .then(b => { if (b) { url = URL.createObjectURL(b); setVpImageUrl(url); } })
-      .catch(() => {});
+      .catch((error) => logClientError("RFI viewpoint image load", error));
     return () => { if (url) URL.revokeObjectURL(url); };
   }, [files, rfi.id, projectId]);
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
@@ -1502,7 +1503,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/view`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-    }).catch(() => {});
+    }).catch((error) => logClientError("RFI view event log", error));
     fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/viewed-by`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -1510,7 +1511,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       .then((data: { id: number; userFullName: string; userCompanyName: string; viewedAt: string }[]) => {
         if (Array.isArray(data)) setViewEvents(data);
       })
-      .catch(() => {});
+      .catch((error) => logClientError("RFI viewed-by load", error));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1523,7 +1524,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     })
       .then(r => r.ok ? r.json() : [])
       .then((data) => { if (Array.isArray(data)) setRfiResponses(data); })
-      .catch(() => {})
+      .catch((error) => logClientError("RFI responses load", error))
       .finally(() => setResponsesLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rfi.id]);

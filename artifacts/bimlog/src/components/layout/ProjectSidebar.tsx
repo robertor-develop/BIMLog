@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { LangToggle } from "@/components/layout/LangToggle";
 import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
+import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
@@ -79,7 +80,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
 
   useEffect(() => {
     if (!token) return;
-    getMe().then((data) => { if (data.isSuperAdmin) setIsSuperAdminState(true); }).catch(() => {});
+    getMe().then((data) => { if (data.isSuperAdmin) setIsSuperAdminState(true); }).catch((error) => logClientError("project sidebar user profile load", error));
   }, [token]);
 
   const getLabel = (id: string, label: string) => {

@@ -23,7 +23,9 @@ export async function sendEmail(params: {
     setImmediate(async () => {
       try {
         await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "skipped", errorMessage: "SENDGRID_API_KEY not set" });
-      } catch (_) {}
+      } catch (logError) {
+        console.error("[email] Failed to log skipped email:", logError instanceof Error ? logError.message : logError);
+      }
     });
     return;
   }
@@ -39,7 +41,9 @@ export async function sendEmail(params: {
     setImmediate(async () => {
       try {
         await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "sent" });
-      } catch (_) {}
+      } catch (logError) {
+        console.error("[email] Failed to log sent email:", logError instanceof Error ? logError.message : logError);
+      }
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
@@ -47,7 +51,9 @@ export async function sendEmail(params: {
     setImmediate(async () => {
       try {
         await db.insert(emailLogTable).values({ toEmail: params.to, subject: params.subject, triggerType: params.triggerType || null, status: "failed", errorMessage: errMsg });
-      } catch (_) {}
+      } catch (logError) {
+        console.error("[email] Failed to log failed email:", logError instanceof Error ? logError.message : logError);
+      }
     });
   }
 }

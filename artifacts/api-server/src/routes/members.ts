@@ -126,7 +126,9 @@ router.post("/projects/:projectId/members", authMiddleware, requirePermission("a
             projectId,
           }),
         });
-      } catch (_) {}
+      } catch (emailError) {
+        console.error("[members] Failed to send team member added email:", emailError instanceof Error ? emailError.message : emailError);
+      }
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
@@ -253,7 +255,9 @@ router.post("/projects/:projectId/invitations", authMiddleware, requirePermissio
             projectId,
           }),
         });
-      } catch (_) {}
+      } catch (emailError) {
+        console.error("[members] Failed to send invitation email:", emailError instanceof Error ? emailError.message : emailError);
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

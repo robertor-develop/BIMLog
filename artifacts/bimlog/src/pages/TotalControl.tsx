@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
+import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Eye, EyeOff } from "lucide-react";
 
@@ -390,7 +391,7 @@ function TCUsersTab({ token }: { token: string }) {
   }, [search, token]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
-    apiFetch("/admin/projects-list", token).then(r => r.json()).then(setProjectsList).catch(() => {});
+    apiFetch("/admin/projects-list", token).then(r => r.json()).then(setProjectsList).catch((error) => logClientError("total control project list load", error));
   }, [token]);
 
   const deleteUser = async (id: number, name: string) => {
@@ -492,7 +493,7 @@ function TCCompaniesTab({ token }: { token: string }) {
   const [msg, setMsg] = useState("");
 
   const load = () => {
-    apiFetch("/admin/companies", token).then(r => r.json()).then(d => setCompanies(Array.isArray(d) ? d : [])).catch(() => {});
+    apiFetch("/admin/companies", token).then(r => r.json()).then(d => setCompanies(Array.isArray(d) ? d : [])).catch((error) => logClientError("total control companies load", error));
   };
   useEffect(() => { load(); }, [token]);
 
@@ -558,8 +559,8 @@ function TCProjectsTab({ token }: { token: string }) {
   const [msg, setMsg] = useState("");
 
   const load = () => {
-    apiFetch("/admin/projects", token).then(r => r.json()).then(d => setProjects(Array.isArray(d) ? d : [])).catch(() => {});
-    apiFetch("/admin/users", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch(() => {});
+    apiFetch("/admin/projects", token).then(r => r.json()).then(d => setProjects(Array.isArray(d) ? d : [])).catch((error) => logClientError("total control projects load", error));
+    apiFetch("/admin/users", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch((error) => logClientError("total control project users load", error));
   };
   useEffect(() => { load(); }, [token]);
 
@@ -647,7 +648,7 @@ function TCEmailLogTab({ token }: { token: string }) {
 
   const load = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/email-log?${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("total control email log load", error));
   }, [token, page, filters]);
   useEffect(() => { load(); }, [load]);
 
@@ -697,7 +698,7 @@ function TCActivityFeedTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const load = useCallback(() => {
-    apiFetch(`/admin/activity?page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/activity?page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("total control activity load", error));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (

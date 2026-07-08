@@ -10,6 +10,7 @@ import { Users, Plus, X, Trash2, Building2, Shield, Mail, Clock, UserCheck, Arro
 import { format } from "date-fns";
 import { ROLES, ROLE_KEYS, getRole, type RoleKey } from "@/lib/roles";
 import { useAuthStore } from "@/store/auth";
+import { logClientError } from "@/lib/client-log";
 
 const AVATAR_COLORS = ["av-blue", "av-purple", "av-green", "av-orange", "av-teal", "av-red"];
 
@@ -408,7 +409,9 @@ function PendingInvitations({ projectId }: { projectId: number }) {
       if (!r.ok) return;
       const data = await r.json();
       setInvitations(data.filter((i: any) => i.status === "pending"));
-    } catch (_) {}
+    } catch (error) {
+      logClientError("team pending invitations load", error);
+    }
   };
 
   useEffect(() => { loadInvitations(); }, [projectId]);

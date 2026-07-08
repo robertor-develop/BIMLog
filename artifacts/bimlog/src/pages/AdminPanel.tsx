@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { logClientError } from "@/lib/client-log";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -89,7 +90,7 @@ function Td({ children, style }: { children: React.ReactNode; style?: React.CSSP
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 function OverviewTab({ token }: { token: string }) {
   const [data, setData] = useState<{ stats: Record<string, number>; activity: Record<string, unknown>[] } | null>(null);
-  useEffect(() => { apiFetch("/admin/overview?scope=mine", token).then(r => r.json()).then(setData).catch(() => {}); }, [token]);
+  useEffect(() => { apiFetch("/admin/overview?scope=mine", token).then(r => r.json()).then(setData).catch((error) => logClientError("admin overview load", error)); }, [token]);
   if (!data) return <div style={{ padding: 32, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
   return (
     <div>
@@ -148,7 +149,7 @@ function UsersTab({ token }: { token: string }) {
   }, [search, token]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
-    apiFetch("/admin/projects-list?scope=mine", token).then(r => r.json()).then(setProjectsList).catch(() => {});
+    apiFetch("/admin/projects-list?scope=mine", token).then(r => r.json()).then(setProjectsList).catch((error) => logClientError("admin users project list load", error));
   }, [token]);
 
   const deleteUser = async (id: number, name: string) => {
@@ -257,7 +258,7 @@ function CompaniesTab({ token }: { token: string }) {
   const [msg, setMsg] = useState("");
 
   const load = () => {
-    apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch(() => {});
+    apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch((error) => logClientError("admin companies load", error));
     apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then((projects: any[]) => {
       setConventionSummary(projects
         .filter(p => p.conventionCompanyCodes?.length > 0)
@@ -268,7 +269,7 @@ function CompaniesTab({ token }: { token: string }) {
           assignedCodes: (p.conventionCompanyCodes || []).filter((c: string) => !(p.unassignedConventionCompanies || []).includes(c)),
           unassignedCodes: p.unassignedConventionCompanies || [],
         })));
-    }).catch(() => {});
+    }).catch((error) => logClientError("admin company users load", error));
   };
   useEffect(() => { load(); }, [token]);
 
@@ -367,8 +368,8 @@ function ProjectsTab({ token }: { token: string }) {
   const [msg, setMsg] = useState("");
 
   const load = () => {
-    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then(setProjects).catch(() => {});
-    apiFetch("/admin/users?scope=mine", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch(() => {});
+    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then(setProjects).catch((error) => logClientError("admin projects load", error));
+    apiFetch("/admin/users?scope=mine", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch((error) => logClientError("admin project users load", error));
   };
   useEffect(() => { load(); }, [token]);
 
@@ -457,7 +458,7 @@ function EmailLogTab({ token }: { token: string }) {
 
   const load = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?scope=mine&${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/email-log?scope=mine&${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin email log load", error));
   }, [token, page, filters]);
   useEffect(() => { load(); }, [load]);
 
@@ -508,7 +509,7 @@ function ActivityFeedTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const load = useCallback(() => {
-    apiFetch(`/admin/activity?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/activity?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin activity load", error));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
@@ -547,7 +548,7 @@ function ActivityFeedTab({ token }: { token: string }) {
 function FeatureFlagsTab({ token }: { token: string }) {
   const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
   const [msg, setMsg] = useState("");
-  const load = () => apiFetch("/admin/feature-flags?scope=mine", token).then(r => r.json()).then(setFlags).catch(() => {});
+  const load = () => apiFetch("/admin/feature-flags?scope=mine", token).then(r => r.json()).then(setFlags).catch((error) => logClientError("admin feature flags load", error));
   useEffect(() => { load(); }, [token]);
   const toggle = async (id: number, enabled: boolean) => {
     await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
@@ -586,7 +587,7 @@ function AdminActionsLogTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const load = useCallback(() => {
-    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch(() => {});
+    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin actions log load", error));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (

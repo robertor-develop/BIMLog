@@ -14,6 +14,7 @@ import {
   ArrowUp, ArrowDown, RefreshCw, Upload, FileText, Info,
   Clock, GitMerge, Brain, Lock, ShieldAlert,
 } from "lucide-react";
+import { logClientError } from "@/lib/client-log";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -3784,7 +3785,7 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
           setLatestVersion(usable);
         }
       })
-      .catch(() => {});
+      .catch((error) => logClientError("convention version history load", error));
   }, [projectId, token, refetchKey]);
 
   const sep = ws.separator || "-";
@@ -4226,7 +4227,7 @@ function ConventionStatusPanel({ projectId, token, flowPhase, enteredFromDiscove
     })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d && d.activeVersion > 0) setStatus(d as ConventionStatus); })
-      .catch(() => {});
+      .catch((error) => logClientError("convention status load", error));
   }, [projectId, token]);
 
   if (!status) return null;
@@ -4539,7 +4540,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
           };
         });
       })
-      .catch(() => {});
+      .catch((error) => logClientError("convention latest accepted proposal load", error));
   }, [setupStatus]);
 
   const { mutate } = useUpsertConvention({
@@ -4570,7 +4571,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
               changeSummary: "Convention saved from wizard",
               userGuidance: ws.userGuidance || null,
             }),
-          }).catch(() => {});
+          }).catch((error) => logClientError("convention version snapshot save", error));
         }
         // Use savedFlash so the confirmation appears on the CheckpointScreen (which replaces
         // ReviewScreen in the same React batch). Increment refetchKey so CheckpointScreen

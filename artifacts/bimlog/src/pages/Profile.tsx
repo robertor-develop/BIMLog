@@ -16,6 +16,7 @@ import {
   FolderOpen, Clock, Activity, ExternalLink, Camera, Mail
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { logClientError } from "@/lib/client-log";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -234,7 +235,9 @@ export function Profile() {
       const res = await fetch(`${API_BASE}/api/v1/users/me/performance-score`, { headers: authHeaders });
       const data = await res.json();
       setPerfScore(data);
-    } catch {}
+    } catch (error) {
+      logClientError("profile performance score load", error);
+    }
   }
 
   async function loadMyProjects() {
@@ -243,7 +246,9 @@ export function Profile() {
       const res = await fetch(`${API_BASE}/api/v1/projects`, { headers: authHeaders });
       const data = await res.json();
       setMyProjects(Array.isArray(data) ? data : []);
-    } catch {} finally {
+    } catch (error) {
+      logClientError("profile projects load", error);
+    } finally {
       setLoadingProjects(false);
     }
   }
@@ -276,12 +281,16 @@ export function Profile() {
               .filter((s: any) => s.submittedToEmail === userEmail && s.status === "pending")
               .forEach((s: any) => submittals.push({ id: s.id, number: s.number, title: s.title, projectId: proj.id, projectName: proj.name, createdAt: s.createdAt, dueDate: s.dueDate || null }));
           }
-        } catch {}
+        } catch (error) {
+          logClientError(`profile pending items load for project ${proj.id}`, error);
+        }
       }));
 
       setPendingRfis(rfis);
       setPendingSubmittals(submittals);
-    } catch {} finally {
+    } catch (error) {
+      logClientError("profile pending items load", error);
+    } finally {
       setLoadingPending(false);
     }
   }
@@ -300,12 +309,16 @@ export function Profile() {
           if (Array.isArray(data)) {
             data.forEach((e: any) => entries.push({ ...e, projectId: proj.id, projectName: proj.name }));
           }
-        } catch {}
+        } catch (error) {
+          logClientError(`profile recent activity load for project ${proj.id}`, error);
+        }
       }));
 
       entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setRecentActivity(entries.slice(0, 10));
-    } catch {} finally {
+    } catch (error) {
+      logClientError("profile recent activity load", error);
+    } finally {
       setLoadingActivity(false);
     }
   }
@@ -474,7 +487,9 @@ export function Profile() {
       const res = await fetch(`${API_BASE}/api/v1/me/connections`, { headers: authHeaders });
       const data = await res.json();
       setConnections(Array.isArray(data) ? data : []);
-    } catch {}
+    } catch (error) {
+      logClientError("profile connections load", error);
+    }
   }
 
   async function saveSendgrid() {

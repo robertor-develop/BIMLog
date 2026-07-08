@@ -316,7 +316,9 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
               projectId,
             }),
           });
-        } catch (_) {}
+        } catch (emailError) {
+          console.error("[submittals] Failed to send submittal assigned email:", emailError instanceof Error ? emailError.message : emailError);
+        }
       });
     }
   } catch (error) {
@@ -739,7 +741,9 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
               }),
             });
           }
-        } catch (_) {}
+        } catch (emailError) {
+          console.error("[submittals] Failed to send procurement alert email:", emailError instanceof Error ? emailError.message : emailError);
+        }
       });
     }
   } catch (error) {
@@ -885,7 +889,9 @@ router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddlewa
               }),
             });
           }
-        } catch (_) {}
+        } catch (emailError) {
+          console.error("[submittals] Failed to send rapid approval email:", emailError instanceof Error ? emailError.message : emailError);
+        }
       });
     }
   } catch (error) {

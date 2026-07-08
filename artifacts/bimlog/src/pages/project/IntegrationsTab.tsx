@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { ExternalLink, Zap, X, Plus, Code2 } from "lucide-react";
 import { ConnectModal, type IntegrationInfo } from "@/components/IntegrationModal";
 import { useAuthStore } from "@/store/auth";
+import { logClientError } from "@/lib/client-log";
 
 interface IntegrationsTabProps { projectId: number; }
 
@@ -486,8 +487,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   }
 
   useEffect(() => {
-    loadConnections().catch(() => {});
-    loadAiUsage().catch(() => {});
+    loadConnections().catch((error) => logClientError("integrations connections load", error));
+    loadAiUsage().catch((error) => logClientError("integrations AI usage load", error));
   }, [token]);
 
   const connectedByProvider = new Map(connections.map(c => [c.provider, c]));
@@ -533,8 +534,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           token={token}
           onClose={() => setShowAnthropicConnect(false)}
           onConnected={() => {
-            loadConnections().catch(() => {});
-            loadAiUsage().catch(() => {});
+            loadConnections().catch((error) => logClientError("integrations connections refresh", error));
+            loadAiUsage().catch((error) => logClientError("integrations AI usage refresh", error));
           }}
         />
       )}

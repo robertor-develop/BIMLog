@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { Info, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef } from "react";
+import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 
 export function Navbar() {
@@ -37,14 +38,14 @@ export function Navbar() {
         if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
         if (data.isSuperAdmin) setIsSuperAdmin(true);
       })
-      .catch(() => {});
+      .catch((error) => logClientError("navbar user profile load", error));
     const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
     fetch(`${BASE}/api/v1/users/me/company-profile`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then((cp: { logoUrl?: string | null } | null) => {
         if (cp?.logoUrl) setCompanyLogoUrl(cp.logoUrl);
       })
-      .catch(() => {});
+      .catch((error) => logClientError("navbar company profile load", error));
   }, [user?.id, token]);
 
   useEffect(() => {

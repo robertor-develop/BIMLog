@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { LangToggle } from "@/components/layout/LangToggle";
 import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
+import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import { Bell, Search, X, Building2 } from "lucide-react";
 
@@ -60,14 +61,14 @@ export function MasterSidebar() {
         if (d.avatarUrl) setAvatarUrl(d.avatarUrl);
         if (d.companyName) setCompanyName(d.companyName);
       })
-      .catch(() => {});
+      .catch((error) => logClientError("master sidebar user profile load", error));
     fetch(`${API_BASE}/api/v1/users/me/company-profile`, { headers })
       .then(r => r.ok ? r.json() : null)
       .then((cp: { logoUrl?: string | null; companyName?: string | null } | null) => {
         if (cp?.logoUrl) setCompanyLogoUrl(cp.logoUrl);
         if (cp?.companyName) setCompanyName(prev => prev || cp.companyName!);
       })
-      .catch(() => {});
+      .catch((error) => logClientError("master sidebar company profile load", error));
     fetch(`${API_BASE}/api/v1/projects`, { headers })
       .then(r => r.json())
       .then((projects: Array<{ userRole?: string }>) => {
@@ -75,7 +76,7 @@ export function MasterSidebar() {
           setShowAdminPanel(true);
         }
       })
-      .catch(() => {});
+      .catch((error) => logClientError("master sidebar projects load", error));
     loadNotifications();
   }, [user?.id, token]);
 

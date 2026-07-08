@@ -272,7 +272,9 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
           });
           return response.text ?? "";
         } finally {
-          try { fs.unlinkSync(tmpPath); } catch {}
+          try { fs.unlinkSync(tmpPath); } catch (cleanupError) {
+            console.warn("[meeting_minutes] Failed to remove transcription temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          }
         }
       }
 
@@ -292,8 +294,12 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
           const compressed = fs.readFileSync(outputPath);
           fullTranscript = await transcribeBuffer(compressed, "audio.mp3");
         } finally {
-          try { fs.unlinkSync(inputPath); } catch {}
-          try { fs.unlinkSync(outputPath); } catch {}
+          try { fs.unlinkSync(inputPath); } catch (cleanupError) {
+            console.warn("[meeting_minutes] Failed to remove input temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          }
+          try { fs.unlinkSync(outputPath); } catch (cleanupError) {
+            console.warn("[meeting_minutes] Failed to remove compressed temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          }
         }
       } else {
         const { execSync } = await import("child_process");
@@ -324,14 +330,20 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
                 const chunkTranscript = await transcribeBuffer(chunk, `chunk_${i}.mp3`);
                 transcripts.push(chunkTranscript);
               } finally {
-                try { fs.unlinkSync(chunkPath); } catch {}
+                try { fs.unlinkSync(chunkPath); } catch (cleanupError) {
+                  console.warn("[meeting_minutes] Failed to remove chunk temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+                }
               }
             }
             fullTranscript = transcripts.join(" ");
           }
         } finally {
-          try { fs.unlinkSync(inputPath); } catch {}
-          try { fs.unlinkSync(compressedPath); } catch {}
+          try { fs.unlinkSync(inputPath); } catch (cleanupError) {
+            console.warn("[meeting_minutes] Failed to remove large input temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          }
+          try { fs.unlinkSync(compressedPath); } catch (cleanupError) {
+            console.warn("[meeting_minutes] Failed to remove large compressed temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          }
         }
       }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { isDebug, toggleDebug } from "@/lib/debug";
+import { logClientError } from "@/lib/client-log";
 
 interface LogEntry {
   time: string;
@@ -58,7 +59,7 @@ export function DebugBanner() {
         const res = await origFetch(input, init);
         const cloned = res.clone();
         if (!res.ok) {
-          cloned.text().then(body => addLog("error", `${method} ${url} => ${res.status} | ${body.slice(0, 300)}`)).catch(() => {});
+          cloned.text().then(body => addLog("error", `${method} ${url} => ${res.status} | ${body.slice(0, 300)}`)).catch((error) => logClientError("debug banner response body read", error));
         } else {
           addLog("fetch", `${method} ${url} => ${res.status} OK`);
         }
