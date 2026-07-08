@@ -11,8 +11,15 @@
 //   - SHA-256 fingerprint of the DATA SNAPSHOT (not rendered bytes) on the last
 //     page.
 import { createHash } from "crypto";
+import PDFDocument from "pdfkit";
 
 type Doc = PDFKit.PDFDocument;
+type PdfDocumentOptions = ConstructorParameters<typeof PDFDocument>[0];
+
+export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFDocument {
+  return new PDFDocument(options);
+}
+
 
 // ── Palette / shared constants ──
 export const PALETTE = {

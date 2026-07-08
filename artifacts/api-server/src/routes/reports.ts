@@ -8,7 +8,7 @@ import {
 } from "@workspace/db/schema";
 import { eq, and, inArray, desc, ne } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import jwt from "jsonwebtoken";
 
 async function verifyReportToken(req: any, res: any): Promise<number | null> {
@@ -79,7 +79,7 @@ router.get("/projects/:projectId/reports/project-health/pdf", async (req, res) =
     const validFiles = files.filter(f => f.status === "valid");
     const compRate = files.length ? Math.round((validFiles.length / files.length) * 100) : 0;
 
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="project-health-${project.code}.pdf"`);
     doc.pipe(res);
@@ -115,7 +115,7 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
     const project = await getProject(projectId);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const files = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId)).orderBy(desc(filesTable.createdAt));
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="compliance-${project.code}.pdf"`);
     doc.pipe(res);
@@ -154,7 +154,7 @@ router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
       .where(and(eq(rfisTable.projectId, projectId), ne(rfisTable.status, "closed")))
       .orderBy(rfisTable.createdAt);
     const now = Date.now();
-    const doc = new PDFDocument({ size: "LETTER", margin: 50, layout: "landscape" });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, layout: "landscape" });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="rfi-aging-${project.code}.pdf"`);
     doc.pipe(res);
@@ -184,7 +184,7 @@ router.get("/projects/:projectId/reports/submittal-status/pdf", async (req, res)
     const project = await getProject(projectId);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const subs = await db.select().from(submittalsTable).where(eq(submittalsTable.projectId, projectId)).orderBy(submittalsTable.number);
-    const doc = new PDFDocument({ size: "LETTER", margin: 50, layout: "landscape" });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, layout: "landscape" });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="submittal-status-${project.code}.pdf"`);
     doc.pipe(res);
@@ -217,7 +217,7 @@ router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
       db.select({ userId: projectMembersTable.userId }).from(projectMembersTable).where(eq(projectMembersTable.projectId, projectId)),
     ]);
     const now = Date.now();
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="performance-${project.code}.pdf"`);
     doc.pipe(res);
@@ -251,7 +251,7 @@ router.get("/projects/:projectId/reports/dispute/:module/:itemId/pdf", async (re
       .where(and(eq(activityLogTable.projectId, projectId), eq(activityLogTable.entityId, itemId)))
       .orderBy(activityLogTable.createdAt);
 
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="dispute-${module}-${itemId}.pdf"`);
     doc.pipe(res);
@@ -280,7 +280,7 @@ router.get("/projects/:projectId/reports/audit-certificate/pdf", async (req, res
     const project = await getProject(projectId);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const files = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="audit-cert-${project.code}.pdf"`);
     doc.pipe(res);
@@ -309,7 +309,7 @@ router.get("/projects/:projectId/reports/meeting-minutes/pdf", async (req, res) 
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const meetings = await db.select().from(meetingMinutesTable)
       .where(eq(meetingMinutesTable.projectId, projectId)).orderBy(desc(meetingMinutesTable.meetingDate));
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="meeting-minutes-${project.code}.pdf"`);
     doc.pipe(res);
@@ -340,7 +340,7 @@ router.get("/projects/:projectId/reports/change-order-log/pdf", async (req, res)
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const cos = await db.select().from(changeOrdersTable)
       .where(eq(changeOrdersTable.projectId, projectId)).orderBy(changeOrdersTable.number);
-    const doc = new PDFDocument({ size: "LETTER", margin: 50, layout: "landscape" });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, layout: "landscape" });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="co-log-${project.code}.pdf"`);
     doc.pipe(res);
@@ -368,7 +368,7 @@ router.get("/projects/:projectId/reports/transmittal-log/pdf", async (req, res) 
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
     const txs = await db.select().from(transmittalsTable)
       .where(eq(transmittalsTable.projectId, projectId)).orderBy(transmittalsTable.number);
-    const doc = new PDFDocument({ size: "LETTER", margin: 50, layout: "landscape" });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, layout: "landscape" });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="transmittal-log-${project.code}.pdf"`);
     doc.pipe(res);
@@ -420,7 +420,7 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
     const adminRejected = allFiles.filter(f => f.cvrWorkflowStatus === "admin_rejected").length;
     const notApplicable = allFiles.filter(f => f.contentVerificationResult === "not_applicable").length;
 
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="cvr-report-${project.code}.pdf"`);
     doc.pipe(res);
@@ -550,3 +550,5 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
 });
 
 export default router;
+
+

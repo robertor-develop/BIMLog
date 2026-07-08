@@ -9,7 +9,7 @@ import { eq, and, desc, inArray, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import multer from "multer";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
@@ -209,7 +209,7 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
     if (!co) { res.status(404).json({ error: "Not found" }); return; }
     const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="co-${co.number}.pdf"`);
     doc.pipe(res);
@@ -397,3 +397,5 @@ router.delete("/projects/:projectId/change-orders/:changeOrderId",
 );
 
 export default router;
+
+

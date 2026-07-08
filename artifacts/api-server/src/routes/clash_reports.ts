@@ -4,7 +4,7 @@ import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointRepo
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
-  PALETTE, statusText, priorityText, computeContentHash,
+  PALETTE, statusText, priorityText, computeContentHash, createPdfDocument,
   drawCoverPage, sectionBar, drawTable, addPageNumbers,
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
@@ -1971,9 +1971,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }).from(lensViewpointReportsTable)
         .where(eq(lensViewpointReportsTable.projectId, projectId))
         .orderBy(desc(lensViewpointReportsTable.generatedAt)) : [];
-
-      const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="${reportNumber}.pdf"`);
       doc.pipe(res);
@@ -2505,9 +2503,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         const order: Record<string, number> = { P1: 0, P2: 1, P3: 2, P4: 3 };
         return (order[a.priority ?? ""] ?? 4) - (order[b.priority ?? ""] ?? 4);
       });
-
-      const PDFDocument = (await import("pdfkit")).default;
-      const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
       doc.pipe(res);
@@ -2969,3 +2965,5 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
 );
 
 export default router;
+
+

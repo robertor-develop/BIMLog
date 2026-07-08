@@ -8,7 +8,7 @@ import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken } from "../lib/oauth";
@@ -542,7 +542,7 @@ function makeRfiLogWord(
   const colDefs = buildLogColDefs(fmtD, getBic, creatorMap);
 
   // Measure natural widths using a temporary PDFKit doc (same font size 8 approach)
-  const measDoc = new PDFDocument({ autoFirstPage: false });
+  const measDoc = createPdfDocument({ autoFirstPage: false });
   const naturalWidths = measureColWidths(measDoc, colDefs, rfis);
   const totalNatural  = naturalWidths.reduce((s, w) => s + w, 0);
   // Scale proportionally to fit LOG_CONTENT_W = 720 pt
@@ -1423,7 +1423,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("end", () => {
@@ -1817,7 +1817,7 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     const fmtTs = (d: Date | string) =>
       new Date(d).toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -2458,3 +2458,5 @@ router.delete("/projects/:projectId/rfis/:rfiId",
 );
 
 export default router;
+
+

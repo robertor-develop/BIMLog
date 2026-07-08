@@ -10,7 +10,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
 import multer from "multer";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
@@ -221,7 +221,7 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
     const items = await db.select().from(transmittalItemsTable).where(eq(transmittalItemsTable.transmittalId, txId));
     const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const doc = new PDFDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="transmittal-${tx.number}.pdf"`);
     doc.pipe(res);
@@ -421,3 +421,5 @@ router.delete("/projects/:projectId/transmittals/:transmittalId",
 );
 
 export default router;
+
+

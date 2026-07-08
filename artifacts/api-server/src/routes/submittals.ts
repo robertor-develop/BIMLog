@@ -13,7 +13,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import multer from "multer";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import * as XLSX from "xlsx";
@@ -407,7 +407,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       .orderBy(submittalsTable.createdAt);
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const doc = new PDFDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -571,7 +571,7 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
       .orderBy(submittalsTable.createdAt);
 
     const rows = trackerRows(subs);
-    const doc = new PDFDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -1124,7 +1124,7 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     const aiCheck = sub.aiCheckResult as typeof sub.aiCheckResult;
     const bic = (sub.ballInCourtHistory as Array<{ party: string; setAt: string; setBy: string }>) || [];
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -1350,7 +1350,7 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
       .where(and(eq(activityLogTable.entityType, "submittal"), eq(activityLogTable.entityId, submittalId)))
       .orderBy(activityLogTable.createdAt);
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -1833,3 +1833,5 @@ router.delete("/projects/:projectId/submittals/:submittalId",
 );
 
 export default router;
+
+

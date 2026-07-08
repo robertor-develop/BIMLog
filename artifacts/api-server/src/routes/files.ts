@@ -10,7 +10,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import { PDFParse as PDFParseClass } from "pdf-parse";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 async function pdfParse(buffer: Buffer) {
@@ -523,7 +523,7 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
     const fmtD = (d: Date | string | null | undefined) =>
       d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
-    const doc = new PDFDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -1405,3 +1405,5 @@ router.post("/:projectId/files/:fileId/supersede", authMiddleware, async (req, r
 });
 
 export default router;
+
+

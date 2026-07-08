@@ -8,7 +8,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import PDFDocument from "pdfkit";
+import { createPdfDocument } from "../lib/pdf-kit";
 import jwt from "jsonwebtoken";
 import { extractFileText } from "../lib/extract-file-text";
 
@@ -408,7 +408,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
     const items = await db.select().from(submittalItemsTable)
       .where(eq(submittalItemsTable.reportId, reportId));
 
-    const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
+    const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="submittal-tracker-${project.code}-${reportId}.pdf"`);
     doc.pipe(res);
@@ -531,3 +531,5 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
 });
 
 export default router;
+
+
