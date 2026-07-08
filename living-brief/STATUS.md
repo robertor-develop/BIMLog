@@ -56,7 +56,9 @@ Updated manually after each feature ships. Reflects the real state of the platfo
   `pending` (not `PEND004`).
 - Guidance dropdown (Codex): topic help (Daily workflow, Save, Markup, Edit/Reassign/Void,
   Floor corrections, Clean duplicates, Create RFI, Troubleshooting) + Show-guidance toggle.
-- Clean Duplicate Views rebuilds into `BIMLog <date> C-001/C-002` (Codex).
+- Clean Duplicate Views rebuilds/migrates into one stable `BIMLog Viewpoints` root with
+  Open/Follow Up/Waiting Design/Approved/Resolved/Superseded/Voided/Voided Records folders;
+  legacy dated folders and old cleanup folders are recognized only for migration.
 - Responsible Company field per trade row (v1.6.2) — synced, round-tripped, carried forward.
 - KNOWN NAVISWORKS LIMITATION: the `SUPERSEDED->successor` marker on the OLD tree record is
   best-effort — Navisworks marks it read-only after the online round-trip, so the rename can

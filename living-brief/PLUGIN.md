@@ -72,11 +72,13 @@ edit/reassign/void. Platform stores it, shows a column + Set-Responsible-Company
 - In-panel "Show guidance" checkbox + a Guidance TOPIC dropdown (Daily workflow, Save, Markup,
   Edit/Reassign/Void, Floor corrections, Clean duplicates, Create RFI, Troubleshooting).
 - "Done Managing Viewpoints" button clears the manage panel and reminds to Sync if pending.
-- Clean Duplicate BIMLog Views uses the platform as source of truth and rebuilds into a clean
-  folder named `BIMLog <date> C-001` / `C-002` (never overwrites the original). The read-only
+- Clean Duplicate BIMLog Views uses the platform as source of truth and rebuilds/migrates into
+  one stable root folder named `BIMLog Viewpoints`. Legacy dated folders and old cleanup folders
+  are recognized only for migration. Non-BIMLog folders such as `LEVELS` are protected because
+  cleanup only manages real BIMLog Lens viewpoints inside recognized BIMLog roots. The read-only
   workaround (copy into a fresh folder + delete old) is deliberate — Navisworks won't release
-  read-only viewpoints; do not "fix" it.
-- Full folder set (v1.6.3): every cleanup rebuilds into the 8 folders that mirror the platform,
+  read-only viewpoints; do not replace it with direct rename/delete-only logic.
+- Full folder set (v1.6.3+): every cleanup rebuilds into the 8 folders that mirror the platform,
   created even when empty: Open, Follow Up, Waiting Design, Approved, Resolved, Superseded,
   Voided, Voided Records (`BIMLogSubfolders`). Active viewpoints file by platform workflow status
   (`PlatformHistoryFolderName` → `StatusFolderName`: open/follow_up/waiting_design/approved/
