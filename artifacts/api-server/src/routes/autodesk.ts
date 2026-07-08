@@ -100,10 +100,15 @@ router.get("/autodesk/callback", async (req, res) => {
       body: body.toString(),
     });
 
-    const data = await response.json();
+    const data = await response.json() as { access_token?: unknown; refresh_token?: unknown; [key: string]: unknown };
 
     if (!response.ok) {
       res.status(response.status).json(data);
+      return;
+    }
+
+    if (typeof data.access_token !== "string" || typeof data.refresh_token !== "string") {
+      res.status(502).json({ error: "Autodesk token response was missing required token fields" });
       return;
     }
 

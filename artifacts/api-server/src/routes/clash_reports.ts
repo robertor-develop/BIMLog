@@ -2324,7 +2324,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/clashes",
         priority: body.priority ?? null,
       }).returning();
       await db.update(clashReportsTable)
-        .set({ totalClashes: report.totalClashes + 1 })
+        .set({ totalClashes: (report.totalClashes ?? 0) + 1 })
         .where(eq(clashReportsTable.id, reportId));
       res.status(201).json(clash);
     } catch (err) {

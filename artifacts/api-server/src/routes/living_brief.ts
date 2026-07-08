@@ -171,7 +171,7 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
 // from the build and STATUS.md/AUDIT.md are maintained in the repo. Writing to the
 // DB (not disk) makes edits permanent across every future deploy on every instance.
 router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
-  const name = req.params.name;
+  const name = String(req.params.name);
   if (!EDITABLE_DOCS.has(name)) {
     res.status(400).json({ error: "This document is not editable" });
     return;

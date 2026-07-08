@@ -9,7 +9,7 @@ const router: Router = Router();
 // GET all links for a specific entity
 router.get("/projects/:projectId/links/:entityType/:entityId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
-  const entityType = req.params.entityType;
+  const entityType = String(req.params.entityType);
   const entityId = Number(req.params.entityId);
   try {
     const links = await db.select().from(linkedItemsTable)

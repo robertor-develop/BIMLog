@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import type { ReactElement } from "react";
 import { useLocation } from "wouter";
 import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, FilePen, Download } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
@@ -28,9 +29,9 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
 
 // Minimal markdown renderer (no external deps): headings, bold, inline code, hr,
 // blockquotes, unordered lists, and paragraphs. Keeps output readable and plain.
-function renderMarkdown(md: string): JSX.Element[] {
+function renderMarkdown(md: string): ReactElement[] {
   const lines = md.split("\n");
-  const out: JSX.Element[] = [];
+  const out: ReactElement[] = [];
   let list: string[] = [];
   const flushList = (key: number) => {
     if (list.length) {
@@ -43,7 +44,7 @@ function renderMarkdown(md: string): JSX.Element[] {
     }
   };
   const renderInline = (s: string) => {
-    const parts: (string | JSX.Element)[] = [];
+    const parts: (string | ReactElement)[] = [];
     let rest = s;
     let k = 0;
     const re = /(\*\*([^*]+)\*\*|`([^`]+)`)/;

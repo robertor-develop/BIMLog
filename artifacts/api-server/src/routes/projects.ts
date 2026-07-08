@@ -244,7 +244,7 @@ router.delete("/projects/:projectId", authMiddleware, requireProjectMember(), as
 
 router.post("/projects/:projectId/assign-company-user", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId);
+    const projectId = parseInt(String(req.params.projectId), 10);
     const { companyCode, userId, newUserData } = req.body as {
       companyCode: string;
       userId?: number;

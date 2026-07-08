@@ -104,7 +104,7 @@ router.post("/users/me/company-logo", authMiddleware, (req, res) => {
 // ── GET another user's company profile (for project dashboard) ───────────────
 router.get("/users/:userId/company-profile", authMiddleware, async (req, res) => {
   try {
-    const userId = parseInt(req.params.userId, 10);
+    const userId = parseInt(String(req.params.userId), 10);
     if (!Number.isFinite(userId)) { res.status(400).json({ error: "Invalid user id" }); return; }
     const rows = await db.select().from(companyProfilesTable).where(eq(companyProfilesTable.userId, userId)).limit(1);
     if (rows.length === 0) {
