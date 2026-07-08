@@ -274,3 +274,7 @@ Customer feedback closeout checklist:
 - Where is the user-facing brief or release note?
 
 This is the prevention mechanism for limbo work: no invisible backlog, no forgotten widget, no orphaned feature, no duplicate workflow.
+Additional enforcement:
+- The Open Loop Register in STATUS.md is the source of truth for unfinished customer feedback.
+- A feature is not ready for customer retest until code, exports/reports, guidance, release note, commit/push, publish/package status, and real workflow verification are accounted for.
+- If a request includes multiple examples, extract the underlying category and audit the whole category, not only the first example.

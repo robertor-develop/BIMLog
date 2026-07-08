@@ -301,32 +301,87 @@ lightly used (6 projects, 4 users), so most empty tables are unused, not broken.
 
 This register exists so customer feedback and interrupted builds do not disappear into chat history.
 Every item must end in one of four states: shipped, verified, deferred, or rejected with reason.
-If an item is built but not tested by the real user, it is not closed.
+If an item is built but not tested by the real user after publish/package, it is not closed.
 
-### Open - needs product/code follow-through
-- BIMLog feedback widget: Replit's production feedback/sign-in widget must not be the final user experience. Build a BIMLog-owned feedback/support widget that lets users submit feedback without Replit branding or Replit login. Keep the useful feedback function, replace the vendor UX.
-- Submittals final connection audit: verify Submittals, Register, and Tracking Table are one connected module. Existing manually created submittals must appear where they should, imported register rows must connect to real submittals, and exports must use the same source records.
-- RFI continuation: RFI work was intentionally paused while Ruben's submittal/schedule/plugin requests were handled. Remaining RFI work from RFI_HANDOVER.md still needs a dedicated pass: cloud pickers, impact layout, save unification, RFI types config, numbering, attachment/download polish, and optional AI assist.
-- AI assist split: platform-wide AI must separate cheap text assistance from expensive file-reading AI. Text assist can help descriptions/emails with a clear usage notice; file reading must require explicit confirmation and credit warning. Super admin and users need clear usage tracking.
-- User-owned AI/billing model: Roberto/internal test users may use the internal Anthropic/Replit proxy. External users should be guided toward configured user/company AI keys or an explicit BIMLog managed-credit model. This needs final product rules and UI copy.
-- BIMLog feedback/support and guidance system: guidance exists in parts of the platform/plugin, but the whole product needs a consistent on/off guidance model, not scattered helper text.
-- Reports/PDF standardization continuation: Lens PDF has been heavily improved, but every report module still needs the Quality Standard audit for cover/header/footer, page numbers, fingerprint, filters, Excel parity, and no dirty history.
-- Full module cross-linking: linked_items exists but remains lightly surfaced and admin-write gated. RFIs, submittals, transmittals, change orders, schedule, files, clash reports, and Lens should feel connected, not like isolated tabs.
-- Change order notifications: change_orders imports createNotification but still needs a real notification decision and implementation.
-- Cloud storage backend: storage adapter exists, but OneDrive/Dropbox/BIM 360/Procore picker and download behavior are not complete across the platform.
-- Navisworks plugin 2025 verification: v1.60.6 package exists for Ruben, but Ruben still needs to install and verify in Navisworks 2025 on his real project.
+### Process rule - mandatory from now on
+- Before starting new customer-requested work, read this register and decide whether the new work touches an open loop.
+- When a customer request is mentioned in chat, add it here unless it is completed in the same session and verified.
+- When a build changes a module, update the matching user-facing release note before saying the customer can test.
+- Never treat one example as the whole task. If Roberto asks for a review of missing items, mine the whole conversation and update this register.
 
-### Recently shipped - needs real-user verification
-- Lens Viewpoints deletion hardening for Ruben's project: platform fix pushed. Needs Ruben to confirm he can delete viewpoints in project 30 after Replit pull/republish/API restart.
-- Plugin stable folder doctrine: v1.60.6 zip built at `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.6.zip`. Needs Ruben's real Navisworks 2025 confirmation.
-- Submittal tracker inside Submittals: code pushed, but user experience still needs Ruben verification against his real `SUBMITTAL TRACK.xlsx` workflow.
-- Schedule refinements: calendar/board/list direction pushed, but the value depends on real RFI/submittal/model-date data and Ruben's workflow test.
-- QUALITY.md Living Brief: added and published to the repo; needs to be kept as an active build gate, not just documentation.
+### Platform, domain, and Replit shell
+- Open: BIMLog feedback widget. Roberto liked the feedback function but wants a BIMLog-owned widget, not Replit branding/sign-in. Do not build until explicitly prioritized; keep as open product item.
+- Open: Confirm bimlog.app and www.bimlog.app production behavior after DNS/certificate propagation. Replit old URL cleanup was merged and pushed, but live browser verification is still needed.
+- Open: Living Brief persistence. QUALITY.md exists as a Living Brief tab, but DB-backed Living Brief docs may still require paste-to-update unless the disk/DB sync path is confirmed. Need eliminate manual paste drift.
+- Open: Publishing discipline. GitHub commits are not live until Replit pulls and republishes. Release notes must clearly say: committed/pushed, needs publish, or live verified.
 
-### Deferred by product decision
-- AI agents auto-firing on every save: deferred because bulk sync could create real latency/cost. Manual or targeted AI triggers are preferred until the cost model is mature.
-- True bidirectional Navisworks delete sync: not started. Needs a separate design so local deletions do not accidentally wipe valid platform history.
-- Blockchain anchoring: strategic direction only. First priority is clean, reproducible, hashable records.
+### AI and cost control
+- Open: Platform-wide AI usage audit. Admin AI Usage page exists, but every AI call site must be audited to prove usage is logged with user, project, feature, billing mode, and estimated credit units.
+- Open: User-owned AI keys and managed-credit model. Internal Roberto/test users may use the current Anthropic/Replit proxy, but external users need a clear own-key or managed-credit path with visible cost controls.
+- Open: User-facing AI usage. Super admin can see platform usage; each normal user still needs a simple usage/billing visibility surface.
+- Open: Separate cheap text AI from expensive file-reading AI. Description/email assist should be low-cost and easy to trigger; file-reading/OCR AI must require a clear cost warning before use.
+- Open: Submittal AI assist. Roberto approved AI Description Assist and AI Email Draft; file-reading assist must remain separate and explicit. Verify final UX and cost logging before closing.
 
-### Quality rule for this register
-Before starting any new customer-requested feature, review this register. If the new work touches an open item, either close it properly or explicitly carry it forward with a reason. Do not create another parallel workflow that bypasses the unfinished one.
+### Submittals and Submittal Tracker
+- Open: Submittal Tracker must feel like part of Submittals, not a disconnected sidebar module. Desired layout: Submittals / Register / Tracking Table as left-side internal tabs like Clash Reports, with Import, Export Excel, Export PDF, and New Submittal actions on the right.
+- Open: Existing submittals must appear in the Tracking Table when they have enough data. Current concern: Roberto's one manual submittal did not track. Audit register rows vs submittal rows and remove disconnected logic.
+- Open: Explain and wire Register. The UI must make clear that Register is the planned/spec item list, while Submittals are actual submissions against those planned items. If that is not the real code behavior, fix the code or rename it.
+- Open: Tracker filters requested by Ruben: Building Level, Drawing Type, Date, Review Status. Building Level must come from project convention levels when available, not only from currently loaded rows.
+- Open: Excel export quality. Submittal exports must be professional, formatted, human-readable, filter-respecting, and usable even when users create submittals inside BIMLog instead of importing Excel.
+- Open: PDF and audit certificate quality. Roberto called current outputs unclear/ugly. Audit certificate needs either a clear purpose and polished output or removal/deferment.
+- Open: Attachment UX. Users must be able to add files/images from their computer to submittals and product info. Display names must be human file names, not raw API download URLs. Attachments should appear above Description where Roberto requested.
+- Open: Editable detail UX. Submitted By, Submitted To, contacts, emails, responsible company, product information, ball-in-court, status, and review data must be editable in one consistent detail panel and must populate immediately after save.
+- Open: Company/contact pickers. Responsible Company, Submitted To Company, Submitted To Contact, Submitted To Email, and Submitted By Contact should choose from the project directory/company list or allow adding a new reusable company/contact.
+- Open: Links. Link to RFI, Transmittal, Change Order, and related Submittal must be visible and actually persist. Roberto said this worked before and disappeared.
+- Open: Ball in Court guidance. The field is unclear. It should be a controlled choice or guided field, not a mystery text box.
+
+### Coordination Schedule
+- Open: Schedule must be useful, not just visible. Calendar, Board, and List need actionable cards that open/edit linked RFIs, submittals, milestones, and model items.
+- Open: Add Schedule Item flow. A prior test showed adding a linked submittal/date/title appeared to do nothing. Verify create path, activity log, refresh, and empty/error states.
+- Open: Outlook-like calendar and Planner-like board. Ruben asked for calendar and sprint/kanban-style coordination workflow. Current board needs usability verification.
+- Open: Add item type: 3D Model. Ruben requested this in Coordination Schedule.
+- Open: Building Level selector in Schedule should come from the project's Building Levels / Convention Builder values.
+- Open: Schedule should automatically surface RFI and submittal due dates when present, plus allow manual project milestones.
+
+### Lens Viewpoints - platform
+- Shipped, needs Ruben verification: Project 30 delete hardening. Ruben could not delete viewpoints due to raw query/returning error. Fix was committed and pushed, but needs Replit publish/backend restart and Ruben retest.
+- Open: Viewpoint deletion UX. Errors should be clean user messages, never raw SQL.
+- Shipped, needs verification: Issue Age column for Lens Viewpoints. Platform should track accountability by captured date, revision age, last action, responsible company/contact, and status.
+- Open: Aging dashboard/report metrics for Lens: open items, closed/resolved, voided, reassigned, superseded, aging by company/trade/status.
+- Deferred: True bidirectional Navisworks local delete sync. Needs dedicated design so the server can reconcile local deletions without accidental data loss.
+
+### Navisworks plugin
+- Shipped, needs Ruben verification: v1.60.6 2025 package at H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.6.zip.
+- Open: Verify Navisworks 2025 with Ruben after latest 2021-to-2025 source sync. Do not assume 2021 success means 2025 success.
+- Shipped, needs field verification: Stable root folder doctrine. New root should be BIMLog Viewpoints; new views should go under status folders, not daily folder explosions.
+- Open: Cleanup/reconcile workflow must be tested end to end: Sync with BIMLog, Pull from Platform, Clean Duplicate BIMLog Views. It must not delete unsynced local work when the platform is empty.
+- Open: Plugin guidance. Add clear in-panel workflow instructions/dropdowns so users know when to Sync, Pull, Clean, Save Viewpoint, Create RFI, and how redline/markup viewpoints work.
+- Open: Project switching in Navisworks. Ruben reported changing Project ID in settings required closing/reopening Navisworks. A fix was claimed earlier; needs Ruben's 2025 retest.
+- Open: Read-only permission failure. Plugin users with insufficient permission still need a clear 401/403 message and recovery path.
+- Open: Unknown/Unknown trades via ComAPI. Element property reading remains unresolved.
+- Open: Maintain release documentation. Every plugin version after v1.60.6 should use v1.60.7, v1.60.8, etc., with README and latest revision update file.
+
+### RFI and cross-module workflow
+- Open: RFI handover work remains. RFI_HANDOVER.md lists cloud pickers, impact layout, save unification, RFI types config, numbering, and OAuth env details.
+- Open: RFI attachment/file handling and generic binary download route. Prior limitation affects uploaded files beyond generated PDFs.
+- Open: RFI AI assist should follow the AI split: cheap text/email assist allowed with clear logging; file reading requires explicit warning.
+- Open: Cross-linking module UX. linked_items exists but is lightly surfaced/admin-gated; relationships remain empty in practice.
+
+### Reports, PDF, and Excel
+- Open: Platform-wide report standardization is not complete. Lens reports improved, but every PDF and Excel export needs Quality Standard review.
+- Open: Excel exports must be polished, branded, filtered, auto-sized, and human-readable. No raw DB headers.
+- Open: PDF reports must align with on-screen filters and include only the intended records. History appendices must be scoped, optional, and understandable.
+- Open: Mojibake prevention. Repo-wide scan for bad encoding patterns must run before publish. User-facing strings containing mojibake block release.
+
+### Data cleanup and admin operations
+- Open: Test users 22, 23, and 24 were audited as isolated test data. Safe deletion requires removing their isolated projects/files/RFIs/activity first; do not bare-delete users.
+- Open: Production test cleanup tools. Admin-only cleanup must be precise by project/module, not broad destructive buttons.
+- Open: Living Brief access. No user had can_access_living_brief in the audit; decide whether Roberto-only is intentional or if specific admins need access.
+- Open: Change order notifications. createNotification is imported but is not called in change orders.
+- Deferred: Agents auto-firing on every save. Deferred for cost/latency until a managed AI budget model is in place.
+
+### Quality and platform stabilization
+- Open: Full top-to-bottom platform audit is not truly complete. Partial audits and targeted fixes were done, but every tab/export/report/tool has not been exhaustively verified.
+- Open: Module-by-module Quality 4.0 audit should be scheduled in rounds: Auth/Admin, Projects/Dashboard, RFIs, Submittals, Schedule, Files, Reports, Clash/Lens, Plugin, Integrations, PDFs/Excel, AI/cost.
+- Open: Release note discipline. For every customer-facing update, create a user-facing summary before telling Ruben or another customer to test.
+- Open: Avoid duplicate disconnected builds. Before adding new UI, search existing tabs/routes/schema and either extend the existing feature or deliberately replace it.
