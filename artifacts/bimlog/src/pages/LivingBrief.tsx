@@ -6,10 +6,10 @@ import { useAuthStore } from "@/store/auth";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const BRIEF_TOKEN_KEY = "bimlog-brief-token";
-// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md):
+// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md):
 // PLATFORM.md auto-regenerates from the build and STATUS.md/AUDIT.md are maintained
 // in the repo after features ship.
-const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md"];
+const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md"];
 
 type Doc = { name: string; content: string; updatedAt: string };
 type AccessUser = {
@@ -161,7 +161,7 @@ export function LivingBrief() {
     const day = now.toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric" });
     const time = now.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
     const stamp = `${day.replace(",", "")} at ${time}`;
-    const header = `BIMLog Living Brief — Copied ${stamp}`;
+    const header = `BIMLog Living Brief - Copied ${stamp}`;
     const full = header + "\n\n" + docs
       .map((d) => `===== ${d.name} =====\n\n${d.content.trim()}`)
       .join(`\n\n${"=".repeat(60)}\n\n`);
@@ -173,7 +173,7 @@ export function LivingBrief() {
     }
   };
 
-  // Export the latest CLAUDE.md + VISION.md as one text file so the edits can be
+  // Export the latest editable docs as one text file so the edits can be
   // pasted back into the repo during a dev session. Fetches fresh from the
   // DB-backed endpoint on click so a concurrent edit by another admin is
   // reflected rather than stale local state.
@@ -184,7 +184,7 @@ export function LivingBrief() {
     const data = await r.json();
     const fresh: Doc[] = data.docs ?? [];
     setDocs(fresh);
-    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md"];
+    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md"];
     const present = wanted.filter((n) => fresh.some((d) => d.name === n));
     if (!present.length) { showToast("Nothing to export"); return; }
     const body = present
@@ -237,7 +237,7 @@ export function LivingBrief() {
   const card: React.CSSProperties = { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20 };
 
   if (eligible === null) {
-    return <div style={{ maxWidth: 900, margin: "60px auto", padding: 24, color: "hsl(var(--muted-foreground))" }}>Loading…</div>;
+    return <div style={{ maxWidth: 900, margin: "60px auto", padding: 24, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
   }
 
   if (!eligible) {
@@ -260,7 +260,7 @@ export function LivingBrief() {
       <div style={{ maxWidth: 480, margin: "80px auto", padding: 24 }}>
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief — Locked</h1>
+            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief - Locked</h1>
           </div>
           <input
             type="password"

@@ -28,6 +28,27 @@ quietly producing structured data that can power advanced BIM, AI, and owner ope
   transmittals, change orders, viewpoints, clashes, companies, contacts, floors, trades,
   systems, documents, photos, reports, and audit history.
 
+## Quality 4.0 doctrine
+The Calidad 4.0 source material is now part of BIMLog's product doctrine, documented in
+QUALITY.md. Its practical meaning for BIMLog is:
+
+- Quality is not inspection at the end. Quality is a live operating system of people,
+  process, data, technology, ethics, and continuous improvement.
+- Technology does not replace judgment. AI, sensors, reports, automations, and dashboards
+  must support human decisions and leave a clear audit trail.
+- Data is the raw material of improvement. Dirty imports, disconnected records, unclear
+  ownership, and misleading reports are quality failures, not cosmetic bugs.
+- BIMLog must move coordination from reactive to preventive: flag missing data, stale
+  records, overdue dates, chain inconsistencies, unclear responsibility, and report
+  contamination before they reach the client.
+- Every feature should produce immediate field value and future digital-twin value at the
+  same time.
+- Interoperability is a product requirement: RFIs, submittals, transmittals, change orders,
+  schedule, files, directory, clashes, Lens viewpoints, PDFs, Excel, and APIs must speak the
+  same project language.
+- Every important record should be hashable, reproducible, explainable, and suitable for
+  future immutable anchoring through DLT or smart-contract workflows.
+
 ## CERQA / digital twin positioning
 CERQA validates the market direction: owners want a building data platform that combines
 models, documents, scans, photos, field records, systems, analytics, and portfolio views.
