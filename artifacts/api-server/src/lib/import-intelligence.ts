@@ -1,12 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@workspace/db";
 import { rfisTable, clashesTable, submittalItemsTable, transmittalsTable, changeOrdersTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
+import { getAnthropicClientForUser } from "./ai-usage";
 
 export interface DuplicateWarning {
   recordIndex: number;
@@ -24,11 +19,18 @@ export interface IntelligenceResult {
 }
 
 export async function checkImportIntelligence(
+  userId: number,
   projectId: number,
   records: any[],
   entityType: string
 ): Promise<IntelligenceResult> {
   try {
+    const anthropic = await getAnthropicClientForUser({
+      userId,
+      projectId,
+      feature: `${entityType}_import_intelligence`,
+    });
+
     const [rfis, clashes, submittalItems, transmittals, changeOrders] = await Promise.all([
       db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject, status: rfisTable.status }).from(rfisTable).where(eq(rfisTable.projectId, projectId)),
       db.select({ id: clashesTable.id, clashIdOriginal: clashesTable.clashIdOriginal, description: clashesTable.description, status: clashesTable.status }).from(clashesTable).where(eq(clashesTable.projectId, projectId)),

@@ -1,10 +1,11 @@
 import { db } from "@workspace/db";
 import { rfisTable, clashesTable, submittalsTable } from "@workspace/db/schema";
 import { eq, and, ne, lt } from "drizzle-orm";
-import { anthropic, saveInsight, getLinkedItems } from "./base-agent";
+import { getAgentAnthropicClient, saveInsight, getLinkedItems } from "./base-agent";
 
-export async function runRfiAgent(projectId: number, rfiId?: number) {
+export async function runRfiAgent(projectId: number, userId: number, rfiId?: number) {
   try {
+    const anthropic = await getAgentAnthropicClient(userId, projectId, "rfi_agent");
     const now = new Date();
     const rfis = rfiId
       ? await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId)))

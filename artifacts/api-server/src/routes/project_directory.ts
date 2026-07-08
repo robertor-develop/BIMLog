@@ -6,14 +6,9 @@ import {
 import { eq, and } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
-import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import { extractFileText } from "../lib/extract-file-text";
-
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
 
@@ -159,6 +154,11 @@ router.post("/projects/:projectId/directory/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "project_directory_import",
+      });
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
       if (isPdf && pdfBase64) {
@@ -228,6 +228,7 @@ ${chunk}`
       });
       res.json({ imported, message: `${imported} contacts imported successfully` });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       console.error("[directory-import]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }

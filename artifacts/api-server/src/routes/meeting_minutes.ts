@@ -9,17 +9,13 @@ import { eq, and, desc, ne, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import multer from "multer";
 import { extractFileText } from "../lib/extract-file-text";
 
 const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
 
 const router: Router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 // ── GET /projects/:projectId/meetings ─────────────────────────────────────────
@@ -129,6 +125,11 @@ Meeting: ${meeting.title} on ${new Date(meeting.meetingDate).toLocaleDateString(
 Notes: ${meeting.notes ?? "(no notes)"}
 Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "assigned_to_name": "...", "assigned_to_email": "...", "due_date": "YYYY-MM-DD or null" }] }`;
 
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "meeting_ai_summary",
+    });
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-5", max_tokens: 800,
       messages: [{ role: "user", content: prompt }],
@@ -140,6 +141,7 @@ Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "
       .where(eq(meetingMinutesTable.id, meetingId));
     res.json(parsed);
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
@@ -333,6 +335,11 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
         }
       }
 
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "meeting_transcript_analysis",
+      });
       const msg = await anthropic.messages.create({
         model: "claude-sonnet-4-5",
         max_tokens: 2000,
@@ -366,6 +373,7 @@ If information is not mentioned use empty string or empty array.`
       res.json({ ...parsed, transcript: fullTranscript, fileSizeMB });
 
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error("[transcribe-audio] FAILED:", errMsg);
       res.status(500).json({ error: "transcription_failed", message: errMsg });
@@ -382,6 +390,11 @@ router.post("/projects/:projectId/meetings/import",
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "meeting_import",
+      });
       let data: any = { title: null, meetingDate: null, meetingTime: null, location: null, meetingNumber: null, notes: null, attendees: [], actionItems: [] };
       if (isPdf && pdfBase64) {
         try {
@@ -520,6 +533,7 @@ ${chunk}`
 
       res.json({ imported: 1, meetingId: meeting.id, title: meeting.title, message: "Meeting imported successfully" });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       console.error("[meeting-import]", err);
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }

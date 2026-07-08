@@ -1,12 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@workspace/db";
 import { agentInsightsTable, linkedItemsTable, activityLogTable } from "@workspace/db/schema";
 import { eq, and, or } from "drizzle-orm";
-
-export const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
+import { getAnthropicClientForUser } from "../lib/ai-usage";
 
 export interface AgentContext {
   projectId: number;
@@ -47,4 +42,8 @@ export async function getLinkedItems(projectId: number, entityType: string, enti
       )
     )
   );
+}
+
+export function getAgentAnthropicClient(userId: number, projectId: number, feature: string) {
+  return getAnthropicClientForUser({ userId, projectId, feature });
 }

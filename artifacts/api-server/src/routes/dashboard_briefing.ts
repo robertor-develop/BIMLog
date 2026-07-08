@@ -6,13 +6,9 @@ import {
 } from "@workspace/db/schema";
 import { eq, and, inArray, ne, or } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser } from "../lib/ai-usage";
 
 const router: Router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 
 // In-memory cache: userId → { result, expiresAt }
 const cache = new Map<number, { result: object; expiresAt: number }>();
@@ -173,6 +169,10 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
 
     const todaysDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
+    const anthropic = await getAnthropicClientForUser({
+      userId,
+      feature: "dashboard_briefing",
+    });
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 200,

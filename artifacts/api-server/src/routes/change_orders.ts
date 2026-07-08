@@ -8,16 +8,12 @@ import {
 import { eq, and, desc, inArray, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
-import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 
 async function nextCONumber(projectId: number, projectCode: string): Promise<string> {
   const existing = await db.select({ id: changeOrdersTable.id })
@@ -184,6 +180,11 @@ Linked RFIs: ${rfis.map(r => `${r.number}: ${r.subject}`).join(", ") || "none"}
 Linked Submittals: ${subs.map(s => `${s.number}: ${s.title}`).join(", ") || "none"}
 Return JSON only: { "description": "...", "suggested_cost_impact": "...", "suggested_schedule_impact": "..." }`;
 
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "change_order_ai_draft",
+    });
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-5", max_tokens: 400,
       messages: [{ role: "user", content: prompt }],
@@ -193,6 +194,7 @@ Return JSON only: { "description": "...", "suggested_cost_impact": "...", "sugge
     await db.update(changeOrdersTable).set({ aiDraftUsed: true, updatedAt: new Date() }).where(eq(changeOrdersTable.id, coId));
     res.json(parsed);
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
@@ -244,6 +246,11 @@ router.post("/projects/:projectId/change-orders/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "change_order_import",
+      });
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
       if (isPdf && pdfBase64) {
@@ -292,7 +299,7 @@ ${chunk}`
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(projectId, records, "change_order");
+        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "change_order");
         if (intelligence.warnings.length > 0) {
           res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
           return;
@@ -335,6 +342,7 @@ ${chunk}`
       });
       res.json({ imported, message: `${imported} change orders imported`, renamed: renamedCo, renameCount: renamedCo.length });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

@@ -7,16 +7,12 @@ import { projectsTable, usersTable, companiesTable, activityLogTable } from "@wo
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import PDFDocument from "pdfkit";
 import jwt from "jsonwebtoken";
 import { extractFileText } from "../lib/extract-file-text";
 
 const router: Router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 }, fileFilter: (_req: any, _file: any, cb: any) => cb(null, true) });
 
 // GET all reports
@@ -80,6 +76,11 @@ router.post("/projects/:projectId/submittal-reports/upload",
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
       let fileText = "";
       const useXLSX = ["xlsx","xls","csv"].includes(ext);
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "submittal_report_import",
+      });
 
       let workbook: any = null;
       if (useXLSX) {
@@ -248,6 +249,7 @@ CRITICAL RULES:
       });
       res.status(201).json({ report_id: report.id, total_parsed: parsed.length, status: "complete" });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       console.error("[submittal-upload] FAILED:", err);
       res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
     }

@@ -5,7 +5,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
@@ -517,9 +517,10 @@ Return ONLY this JSON structure (no markdown, no explanation):
   "analysisSummary": "2-4 sentence summary of findings"
 }`;
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "convention_discovery",
     });
 
     const message = await anthropic.messages.create({
@@ -554,6 +555,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
     res.json(parsed);
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     const message = error instanceof Error ? error.message : "Discovery failed";
     res.status(500).json({ error: message });
   }
@@ -713,9 +715,10 @@ Return ONLY this JSON structure (no markdown, no explanation):
   "analysisSummary": "2-4 sentence summary of findings"
 }`;
 
-      const anthropic = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "convention_discovery_upload",
       });
 
       const message = await anthropic.messages.create({
@@ -754,6 +757,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
       res.json(parsed);
     } catch (error) {
+      if (sendAiUsageError(res, error)) return;
       const message = error instanceof Error ? error.message : "Discovery failed";
       res.status(500).json({ error: message });
     }
@@ -1090,9 +1094,10 @@ Return ONLY this JSON structure (no markdown, no explanation):
   "proposedNextVersionSummary": "one paragraph describing what the next version snapshot should include"
 }`;
 
-      const anthropic = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "convention_reanalysis",
       });
 
       const message = await anthropic.messages.create({
@@ -1159,6 +1164,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
 
       res.json(parsed);
     } catch (error) {
+      if (sendAiUsageError(res, error)) return;
       const message = error instanceof Error ? error.message : "Re-analysis failed";
       res.status(500).json({ error: message });
     }

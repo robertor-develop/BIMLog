@@ -13,7 +13,7 @@ import {
 import { createHash } from "crypto";
 import { eq, desc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import multer from "multer";
 import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
@@ -225,9 +225,10 @@ Return ONLY this JSON shape (no markdown, no code block):
   "keywords": ["array", "of", "strings"]
 }`;
 
-      const anthropic = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "coordination_intake",
       });
 
       const message = await anthropic.messages.create({
@@ -263,6 +264,7 @@ Return ONLY this JSON shape (no markdown, no code block):
         analysis: parsed,
       });
     } catch (error) {
+      if (sendAiUsageError(res, error)) return;
       res.status(500).json({ error: error instanceof Error ? error.message : "Intake failed" });
     }
   }

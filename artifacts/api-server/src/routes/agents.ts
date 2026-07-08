@@ -6,6 +6,7 @@ import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { runBriefingAgent } from "../agents/briefing-agent";
 import { runClashAgent } from "../agents/clash-agent";
 import { runRfiAgent } from "../agents/rfi-agent";
+import { sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
 
@@ -27,9 +28,10 @@ router.get("/projects/:projectId/insights", authMiddleware, requireProjectMember
 router.post("/projects/:projectId/briefing", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
-    const briefing = await runBriefingAgent(projectId);
+    const briefing = await runBriefingAgent(projectId, req.user!.userId);
     res.json({ briefing });
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -39,13 +41,14 @@ router.post("/projects/:projectId/agents/clash/:clashId", authMiddleware, requir
   const projectId = Number(req.params.projectId);
   const clashId = Number(req.params.clashId);
   try {
-    await runClashAgent(projectId, clashId);
+    await runClashAgent(projectId, req.user!.userId, clashId);
     const insights = await db.select().from(agentInsightsTable)
       .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, clashId), eq(agentInsightsTable.entityType, "clash")))
       .orderBy(desc(agentInsightsTable.createdAt))
       .limit(5);
     res.json({ insights });
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -55,13 +58,14 @@ router.post("/projects/:projectId/agents/rfi/:rfiId", authMiddleware, requirePro
   const projectId = Number(req.params.projectId);
   const rfiId = Number(req.params.rfiId);
   try {
-    await runRfiAgent(projectId, rfiId);
+    await runRfiAgent(projectId, req.user!.userId, rfiId);
     const insights = await db.select().from(agentInsightsTable)
       .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, rfiId), eq(agentInsightsTable.entityType, "rfi")))
       .orderBy(desc(agentInsightsTable.createdAt))
       .limit(5);
     res.json({ insights });
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });

@@ -9,16 +9,12 @@ import { eq, and, desc, count, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
-import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 
 async function nextTransmittalNumber(projectId: number, projectCode: string): Promise<string> {
   const existing = await db.select({ id: transmittalsTable.id })
@@ -193,6 +189,11 @@ Transmittal Title: ${tx.title}
 Items: ${items.map(i => i.description ?? `File ${i.fileId}`).join(", ")}
 Return JSON only: { "purpose": "...", "description": "..." }`;
 
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "transmittal_ai_draft",
+    });
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-5", max_tokens: 300,
       messages: [{ role: "user", content: prompt }],
@@ -204,6 +205,7 @@ Return JSON only: { "purpose": "...", "description": "..." }`;
       .where(eq(transmittalsTable.id, txId));
     res.json(parsed);
   } catch (err) {
+    if (sendAiUsageError(res, err)) return;
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
@@ -267,6 +269,11 @@ router.post("/projects/:projectId/transmittals/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "transmittal_import",
+      });
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
       if (isPdf && pdfBase64) {
@@ -315,7 +322,7 @@ ${chunk}`
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(projectId, records, "transmittal");
+        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "transmittal");
         if (intelligence.warnings.length > 0) {
           res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
           return;
@@ -359,6 +366,7 @@ ${chunk}`
       });
       res.json({ imported, message: `${imported} transmittals imported`, renamed: renamedTx, renameCount: renamedTx.length });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

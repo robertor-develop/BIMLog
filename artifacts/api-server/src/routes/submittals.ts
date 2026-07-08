@@ -1649,7 +1649,7 @@ ${chunk}`
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0 && !usedDeterministicSpreadsheetImport) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(projectId, records, "submittal");
+        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "submittal");
         if (intelligence.warnings.length > 0) {
           res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
           return;

@@ -1,10 +1,11 @@
 import { db } from "@workspace/db";
 import { clashesTable, clashReportsTable, rfisTable, submittalItemsTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { anthropic, saveInsight, getLinkedItems } from "./base-agent";
+import { getAgentAnthropicClient, saveInsight, getLinkedItems } from "./base-agent";
 
-export async function runClashAgent(projectId: number, clashId?: number) {
+export async function runClashAgent(projectId: number, userId: number, clashId?: number) {
   try {
+    const anthropic = await getAgentAnthropicClient(userId, projectId, "clash_agent");
     // Get clashes to analyze
     const clashes = clashId
       ? await db.select().from(clashesTable).where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId)))

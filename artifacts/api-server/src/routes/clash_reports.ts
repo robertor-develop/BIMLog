@@ -11,7 +11,7 @@ import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItem
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import multer from "multer";
 import * as XLSX from "xlsx";
-import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 // String-aware repair for the Navisworks plugin's malformed JSON. The plugin
 // runs under a non-invariant locale (e.g. es-*) so .NET formats decimal numbers
@@ -136,10 +136,6 @@ async function assignTradeFloorSeq(
   return { seq, correction };
 }
 
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "",
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
-});
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -205,6 +201,11 @@ router.post("/projects/:projectId/clash-reports/upload",
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
       const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
       const isXml = ext === "xml";
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "clash_report_import",
+      });
 
       let parsed: { clashIdOriginal: string; description: string; holdUps: string; discipline1: string; level: string; assignedToName: string; resolutionNotes: string | null; status: string; dueDate: Date | null }[] = [];
 
@@ -447,13 +448,14 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
       res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
       rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       console.error("[clash-reports/upload] FAILED:", err);
       res.status(500).json({ error: "upload_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );
 
-async function rankClashesWithAI(reportId: number, _projectId: number, clashList: any[], anthropicClient: Anthropic) {
+async function rankClashesWithAI(reportId: number, _projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }) {
   try {
     console.log("[rankAI] Starting — clashList length:", clashList.length, "reportId:", reportId);
     if (clashList.length === 0) {
@@ -2245,6 +2247,11 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
         .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
         .where(eq(clashReportsTable.id, reportId));
       try {
+        const anthropic = await getAnthropicClientForUser({
+          userId: req.user!.userId,
+          projectId,
+          feature: "clash_report_rerank",
+        });
         await rankClashesWithAI(reportId, projectId, clashList, anthropic);
         const updated = await db.select().from(clashReportsTable).where(eq(clashReportsTable.id, reportId));
         await db.insert(activityLogTable).values({
@@ -2259,10 +2266,12 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
         });
         res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
       } catch (err) {
+        if (sendAiUsageError(res, err)) return;
         console.error("[rerank] FAILED:", err);
         res.status(500).json({ error: "rerank_failed", message: err instanceof Error ? err.message : String(err) });
       }
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

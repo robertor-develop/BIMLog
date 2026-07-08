@@ -7,7 +7,6 @@ import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
-import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { extractFileText } from "../lib/extract-file-text";
@@ -1871,9 +1870,9 @@ router.post("/rfis/generate-question", authMiddleware, async (req, res) => {
       return;
     }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      feature: "rfi_generate_question",
     });
 
     const context = [
@@ -1912,6 +1911,7 @@ Reply with either the finished RFI question text, or a single NEED_MORE_INFO lin
 
     res.json({ question });
   } catch (error) {
+    if (sendAiUsageError(res, error)) return;
     const message = error instanceof Error ? error.message : "Failed to generate question";
     res.status(500).json({ error: message });
   }
@@ -1964,9 +1964,11 @@ router.post("/projects/:projectId/rfis/import-prefill",
   async (req, res) => {
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const anthropic = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || "dummy",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      const projectId = Number(req.params.projectId);
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "rfi_import_prefill",
       });
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       const schemaHint = `{"subject":"","rfiType":"one of Coordination|General|Drawing|Spec|Submittal|Safety Data Sheet|Change|Other, or null","question":"","submittedToCompany":"","submittedToPerson":"","submittedToEmail":"","submittedByCompany":"","submittedByContact":"","submittedByEmail":"","drawingNumber":"","specSection":"","locationDescription":"","costImpact":"one of No Cost Impact|Cost Increase TBD|Cost Increase Known|Cost Decrease, or null","scheduleImpact":"one of No Schedule Impact|Increase in Calendar Days|Decrease in Calendar Days, or null","priority":"one of low|medium|high, or null","dateRequired":"YYYY-MM-DD or null"}`;
@@ -2004,6 +2006,7 @@ router.post("/projects/:projectId/rfis/import-prefill",
 
       res.json({ fields, sourceFileName: req.file.originalname });
     } catch (error) {
+      if (sendAiUsageError(res, error)) return;
       res.status(500).json({ error: error instanceof Error ? error.message : "Failed to read document" });
     }
   }
@@ -2197,9 +2200,10 @@ router.post("/projects/:projectId/rfis/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const anthropicClient = new Anthropic({
-        apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? "",
-        baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? undefined,
+      const anthropicClient = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "rfi_import",
       });
       const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
       let records: any[] = [];
@@ -2249,7 +2253,7 @@ ${chunk}`
       const forceImport = req.body?.forceImport === "true";
       if (!forceImport && records.length > 0) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(projectId, records, "rfi");
+        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "rfi");
         if (intelligence.warnings.length > 0) {
           res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
           return;
@@ -2349,6 +2353,7 @@ router.delete("/projects/:projectId/rfis/:rfiId",
 
       res.json({ success: true });
     } catch (err) {
+      if (sendAiUsageError(res, err)) return;
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
   }

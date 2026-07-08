@@ -1,16 +1,17 @@
 import { db } from "@workspace/db";
 import { agentInsightsTable, clashesTable, rfisTable, submittalItemsTable, actionItemsTable, lensViewpointsTable, linkedItemsTable } from "@workspace/db/schema";
 import { eq, and, eq as eqOp } from "drizzle-orm";
-import { anthropic, saveInsight } from "./base-agent";
+import { getAgentAnthropicClient, saveInsight } from "./base-agent";
 import { runClashAgent } from "./clash-agent";
 import { runRfiAgent } from "./rfi-agent";
 
-export async function runBriefingAgent(projectId: number): Promise<string> {
+export async function runBriefingAgent(projectId: number, userId: number): Promise<string> {
   try {
+    const anthropic = await getAgentAnthropicClient(userId, projectId, "briefing_agent");
     // Run all agents first
     await Promise.all([
-      runClashAgent(projectId),
-      runRfiAgent(projectId),
+      runClashAgent(projectId, userId),
+      runRfiAgent(projectId, userId),
     ]);
 
     // Gather all unread insights
