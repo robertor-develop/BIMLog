@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { db } from "@workspace/db";
 import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
@@ -109,7 +109,7 @@ class ReassignConflict extends Error {
 }
 
 // Atomic Trade+Floor sequence assignment (Part 2). One round-trip: creates the
-// counter row on first use and atomically increments it under concurrency — no
+// counter row on first use and atomically increments it under concurrency - no
 // read-then-write race. trade/floor are coalesced to "" so a row with no trade or
 // floor still gets a stable, deterministic counter key.
 async function assignTradeFloorSeq(
@@ -446,7 +446,7 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
         actionType: "upload",
         entityType: "clash_report",
         entityId: report.id,
-        details: `Uploaded clash report: ${req.file.originalname} — ${parsed.length} clashes imported (${autoReportNumber})`,
+        details: `Uploaded clash report: ${req.file.originalname} - ${parsed.length} clashes imported (${autoReportNumber})`,
       });
       res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
       rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
@@ -460,9 +460,9 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
 
 async function rankClashesWithAI(reportId: number, _projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }) {
   try {
-    console.log("[rankAI] Starting — clashList length:", clashList.length, "reportId:", reportId);
+    console.log("[rankAI] Starting - clashList length:", clashList.length, "reportId:", reportId);
     if (clashList.length === 0) {
-      console.log("[rankAI] EARLY EXIT — empty clashList");
+      console.log("[rankAI] EARLY EXIT - empty clashList");
       await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
       return;
     }
@@ -526,7 +526,7 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
   }
 }
 
-// BIMLog Lens viewpoint sync — receive viewpoints from the Navisworks plugin.
+// BIMLog Lens viewpoint sync - receive viewpoints from the Navisworks plugin.
 // Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not
 // captured by the :reportId path parameter.
 router.post("/projects/:projectId/clash-reports/lens-sync",
@@ -612,8 +612,14 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const s = x != null ? String(x).trim() : "";
         return s.length > 0 ? s : null;
       };
+      const readSourceProjectId = (payload: any): number | null => {
+        const raw = payload?.sourceProjectId ?? payload?.projectId ?? req.body?.sourceProjectId ?? req.body?.projectId;
+        if (raw == null || String(raw).trim() === "") return null;
+        const parsed = Number(raw);
+        return parsed;
+      };
       // The plugin sends an all-zeros GUID as a placeholder for viewpoints saved
-      // in earlier sessions. It is NOT a real key — treating it as one would make
+      // in earlier sessions. It is not a real key; treating it as one would make
       // every such viewpoint collide on the (project_id, navisworks_guid) unique
       // constraint. Normalize it (and null/empty) to null so these route to the
       // viewpoint_id arbiter instead and never raise a unique-violation.
@@ -621,6 +627,16 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
       for (const v of viewpoints) {
         const viewpointId = norm(v?.viewpointId);
         if (!viewpointId) continue;
+        const sourceProjectId = readSourceProjectId(v);
+        if (sourceProjectId != null && (!Number.isFinite(sourceProjectId) || sourceProjectId !== projectId)) {
+          res.status(409).json({
+            error: "project_mismatch",
+            message: "This Navisworks model is locked to a different BIMLog project. Open BIMLog Lens Settings and choose the correct project before syncing.",
+            expectedProjectId: projectId,
+            receivedProjectId: Number.isFinite(sourceProjectId) ? sourceProjectId : null,
+          });
+          return;
+        }
         const rawGuid = norm(v?.navisworksGuid);
         const navisworksGuid = rawGuid && rawGuid.toLowerCase() !== ZERO_GUID ? rawGuid : null;
         const displayId = norm(v?.displayId);
@@ -649,7 +665,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const replayLifecycle = localLifecycleRaw === "superseded" || localLifecycleRaw === "voided" ? localLifecycleRaw : "active";
         // Replay the workflow status the plugin pushed (from the viewpoint's status folder) so a
         // wipe + re-sync restores Follow Up / Waiting Design / Approved / Resolved. Unknown/blank
-        // falls back to open — the default for a brand-new viewpoint.
+        // falls back to open - the default for a brand-new viewpoint.
         const incomingStatus = norm(v?.status);
         const LENS_STATUSES = ["open", "follow_up", "waiting_design", "approved", "resolved"];
         const replayStatus = incomingStatus && LENS_STATUSES.includes(incomingStatus) ? incomingStatus : "open";
@@ -687,7 +703,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             ));
           if (displayClash && displayClash.viewpointId !== viewpointId) {
             console.warn(`[lens-sync] SKIPPED display_id collision: displayId="${displayId}" already active on id=${displayClash.id} (viewpointId="${displayClash.viewpointId}"), incoming viewpointId="${viewpointId}"`);
-            // id:null deliberately — the colliding row belongs to a DIFFERENT viewpoint
+            // id:null deliberately - the colliding row belongs to a DIFFERENT viewpoint
             // (matched by display_id, not the incoming viewpoint_id). Returning its real
             // id in an "already exists"-shaped body would let an unaware plugin mis-bind
             // its sync receipt to a row it never touched. skipped/reason carry the signal.
@@ -737,7 +753,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             const inserted = insertedRows[0];
             // Part 2: real Trade+Floor sequence authority. A single atomic
             // statement creates the counter row on first use and increments it
-            // under concurrency — no read-then-write race.
+            // under concurrency - no read-then-write race.
             const r = await assignTradeFloorSeq(projectId, tradeVal, floorVal, claimedSeq, tx);
             await tx.update(lensViewpointsTable)
               .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
@@ -777,7 +793,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.displayId, displayId), eq(lensViewpointsTable.lifecycleStatus, "active")));
             if (displayClash && displayClash.viewpointId !== viewpointId) {
               console.warn(`[lens-sync] SKIPPED display_id collision (race): displayId="${displayId}" active on id=${displayClash.id}, incoming viewpointId="${viewpointId}"`);
-              // id:null deliberately — see the pre-insert guard above for the rationale.
+              // id:null deliberately - see the pre-insert guard above for the rationale.
               results.push({ viewpointId, id: null, status: displayClash.status, created: false, skipped: true, reason: "display_id_collision" });
             } else {
               throw err;
@@ -794,7 +810,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
   }
 );
 
-// BIMLog Lens viewpoint pull — all viewpoints for a project, newest capture first.
+// BIMLog Lens viewpoint pull - all viewpoints for a project, newest capture first.
 router.get("/projects/:projectId/clash-reports/lens-pull",
   authMiddleware,
   requireProjectMember(),
@@ -888,6 +904,21 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         .filter(v => status === "all" || v.status === status)
         .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
       const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status"];
+      const exportRows = filtered.map(v => ({
+        date: v.capturedAt ? new Date(v.capturedAt).toISOString().slice(0, 10) : "",
+        code: codeOf(v),
+        viewpointId: v.viewpointId,
+        floor: v.floor || "",
+        trade: v.trade || "",
+        responsibleCompany: v.responsibleCompany || "",
+        reportType: v.reportType || "",
+        priority: v.priority ? `P${v.priority}` : "",
+        state: stateLabel(v.lifecycleStatus),
+        revision: (v.revisionNumber ?? 1) > 1 ? `Rev ${v.revisionNumber}` : "",
+        note: v.note || "",
+        openItems: v.openItems || "",
+        status: statusLabel(v.status),
+      }));
       const worksheet = XLSX.utils.aoa_to_sheet([
         ["BIMLog by IgniteSmart"],
         [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
@@ -895,27 +926,96 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         [`Rows: ${filtered.length}`],
         [],
         header,
-        ...filtered.map(v => [
-          v.capturedAt ? new Date(v.capturedAt).toISOString().slice(0, 10) : "",
-          codeOf(v),
+        ...exportRows.map(v => [
+          v.date,
+          v.code,
           v.viewpointId,
-          v.floor || "",
-          v.trade || "",
-          v.responsibleCompany || "",
-          v.reportType || "",
-          v.priority ? `P${v.priority}` : "",
-          stateLabel(v.lifecycleStatus),
-          (v.revisionNumber ?? 1) > 1 ? `Rev ${v.revisionNumber}` : "",
-          v.note || "",
-          v.openItems || "",
-          statusLabel(v.status),
+          v.floor,
+          v.trade,
+          v.responsibleCompany,
+          v.reportType,
+          v.priority,
+          v.state,
+          v.revision,
+          v.note,
+          v.openItems,
+          v.status,
         ]),
       ]);
       worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
       worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
       worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 5, c: 0 }, e: { r: Math.max(5, filtered.length + 5), c: header.length - 1 } }) };
+      worksheet["!freeze"] = { xSplit: 0, ySplit: 6 };
+
+      const dataStartRow = 7;
+      const dataEndRow = Math.max(dataStartRow, dataStartRow + exportRows.length - 1);
+      const summary = XLSX.utils.aoa_to_sheet([
+        ["BIMLog Lens Export Summary"],
+        [`Project`, `${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
+        [`Generated`, new Date().toISOString()],
+        [],
+        ["Metric", "Value"],
+        ["Total rows", { f: `COUNTA('Lens Viewpoints'!B${dataStartRow}:B${dataEndRow})` }],
+        ["Current rows", { f: `COUNTIF('Lens Viewpoints'!I${dataStartRow}:I${dataEndRow},"Current")` }],
+        ["Superseded rows", { f: `COUNTIF('Lens Viewpoints'!I${dataStartRow}:I${dataEndRow},"Superseded")` }],
+        ["Voided rows", { f: `COUNTIF('Lens Viewpoints'!I${dataStartRow}:I${dataEndRow},"Voided")` }],
+        ["Open status", { f: `COUNTIF('Lens Viewpoints'!M${dataStartRow}:M${dataEndRow},"Open")` }],
+        ["Resolved status", { f: `COUNTIF('Lens Viewpoints'!M${dataStartRow}:M${dataEndRow},"Resolved")` }],
+        ["P1 Critical", { f: `COUNTIF('Lens Viewpoints'!H${dataStartRow}:H${dataEndRow},"P1")` }],
+        ["P2 High", { f: `COUNTIF('Lens Viewpoints'!H${dataStartRow}:H${dataEndRow},"P2")` }],
+        ["P3 Medium", { f: `COUNTIF('Lens Viewpoints'!H${dataStartRow}:H${dataEndRow},"P3")` }],
+      ]);
+      summary["!cols"] = [{ wch: 28 }, { wch: 32 }];
+
+      const rubenRows: Array<Array<string>> = [];
+      const rubenSheetRows: Array<{ level?: number }> = [];
+      const pushRubenRow = (row: Array<string>, level?: number) => {
+        rubenRows.push(row);
+        rubenSheetRows.push(level == null ? {} : { level });
+      };
+      pushRubenRow(["Status", status === "all" ? "(Multiple Items)" : statusLabel(status)]);
+      pushRubenRow([]);
+      pushRubenRow(["Trade", "Responsible Company", "Floor", "Code", "Note"]);
+      const normalized = (value: string, fallback: string) => (value && value.trim()) || fallback;
+      const rubenSorted = [...exportRows].sort((a, b) => [
+        normalized(a.trade, "Unassigned").localeCompare(normalized(b.trade, "Unassigned")),
+        normalized(a.responsibleCompany, "Unassigned").localeCompare(normalized(b.responsibleCompany, "Unassigned")),
+        normalized(a.floor, "Unassigned").localeCompare(normalized(b.floor, "Unassigned")),
+        normalized(a.code, "").localeCompare(normalized(b.code, "")),
+      ].find(n => n !== 0) ?? 0);
+      let lastTrade = "";
+      let lastResponsibleCompany = "";
+      let lastFloor = "";
+      for (const row of rubenSorted) {
+        const rowTrade = normalized(row.trade, "Unassigned");
+        const rowResponsibleCompany = normalized(row.responsibleCompany, "Unassigned");
+        const rowFloor = normalized(row.floor, "Unassigned");
+        if (rowTrade !== lastTrade) {
+          pushRubenRow([rowTrade, "", "", "", ""], 0);
+          lastTrade = rowTrade;
+          lastResponsibleCompany = "";
+          lastFloor = "";
+        }
+        if (rowResponsibleCompany !== lastResponsibleCompany) {
+          pushRubenRow(["", rowResponsibleCompany, "", "", ""], 1);
+          lastResponsibleCompany = rowResponsibleCompany;
+          lastFloor = "";
+        }
+        if (rowFloor !== lastFloor) {
+          pushRubenRow(["", "", rowFloor, "", ""], 2);
+          lastFloor = rowFloor;
+        }
+        pushRubenRow(["", "", "", row.code, row.note], 3);
+      }
+      const rubenReport = XLSX.utils.aoa_to_sheet(rubenRows);
+      rubenReport["!cols"] = [{ wch: 24 }, { wch: 30 }, { wch: 18 }, { wch: 16 }, { wch: 64 }];
+      rubenReport["!rows"] = rubenSheetRows;
+      rubenReport["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 2, c: 0 }, e: { r: Math.max(2, rubenRows.length - 1), c: 4 } }) };
+      rubenReport["!freeze"] = { xSplit: 0, ySplit: 3 };
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Lens Viewpoints");
+      XLSX.utils.book_append_sheet(workbook, rubenReport, "RUBEN REPORT");
+      XLSX.utils.book_append_sheet(workbook, summary, "Report Summary");
       const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
@@ -1267,13 +1367,13 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
   }
 );
 
-// ── Lifecycle actions (Part 6): Edit / Reassign / Void ──────────────────────
+// -- Lifecycle actions (Part 6): Edit / Reassign / Void ----------------------
 // All mutate viewpoint state, so they require write permission (authMiddleware +
-// requirePermission("admin","write")) like the other write routes — membership
+// requirePermission("admin","write")) like the other write routes - membership
 // alone is not enough. Registered BEFORE the "/:reportId" routes so the literal
 // "lens-viewpoints" segment is not captured by the :reportId param.
 
-// EDIT — supersede the OLD row and create a NEW active revision with the updated
+// EDIT - supersede the OLD row and create a NEW active revision with the updated
 // note. Every other field (trade, floor, reportType, priority, openItems,
 // displayId, viewpointId, navisworksGuid, issueGroupId, and the Trade+Floor
 // sequence) is copied unchanged, so the display code stays identical and only the
@@ -1362,7 +1462,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
   }
 );
 
-// REASSIGN — supersede the OLD row and create a NEW active row under a new trade,
+// REASSIGN - supersede the OLD row and create a NEW active row under a new trade,
 // with a real atomic Trade+Floor sequence and inherited issue_group_id.
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
   authMiddleware,
@@ -1389,7 +1489,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
       }
       // All-or-nothing: counter increment, supersede of the old row, creation of
       // the new active row, and the activity log entry must commit together or not
-      // at all — otherwise a mid-sequence failure could leave the old row
+      // at all - otherwise a mid-sequence failure could leave the old row
       // superseded with no replacement, or burn a sequence number.
       const result = await db.transaction(async (tx) => {
         // The atomic counter for (project, NEW trade, floor) is the real authority.
@@ -1453,7 +1553,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
   }
 );
 
-// VOID — mark the row voided. No new row created; it stays visible everywhere.
+// VOID - mark the row voided. No new row created; it stays visible everywhere.
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
   authMiddleware,
   requirePermission("admin", "write"),
@@ -1509,7 +1609,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
   }
 );
 
-// HISTORY — full revision chain for a viewpoint. Walks supersedes_id backward from
+// HISTORY - full revision chain for a viewpoint. Walks supersedes_id backward from
 // the given row to the original, then attaches the activity_log events (edit /
 // reassign / voided) keyed by each row id in the chain. Read-only; any project
 // member may view. Registered BEFORE the "/:reportId" routes.
@@ -1577,7 +1677,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
   }
 );
 
-// RESOLVE ACTIVE HEAD — given any row id in a supersede chain (typically an old,
+// RESOLVE ACTIVE HEAD - given any row id in a supersede chain (typically an old,
 // now-superseded id an external client still holds), walk supersedes_id FORWARD to
 // the current tip of the same physical viewpoint. Lets a plugin re-target a queued
 // action that would otherwise retry forever against a superseded id. Registered
@@ -1604,7 +1704,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/active",
         if (!child) break;
         cursor = child;
       }
-      // cursor is the chain tip — the active head unless the whole chain was
+      // cursor is the chain tip - the active head unless the whole chain was
       // voided/deleted. Report lifecycleStatus so the client decides what to do.
       res.json({
         success: true,
@@ -1630,7 +1730,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/active",
   }
 );
 
-// DELETE a lens viewpoint (hard delete — row disappears from lens-pull).
+// DELETE a lens viewpoint (hard delete - row disappears from lens-pull).
 // Registered BEFORE the "/:reportId" routes so the literal "lens-viewpoints"
 // segment is not captured by the :reportId path parameter.
 router.delete("/projects/:projectId/clash-reports/lens-viewpoints/:id",
@@ -1715,7 +1815,7 @@ router.get("/projects/:projectId/clash-reports/lens-next-id",
   }
 );
 
-// ── LENS VIEWPOINTS — report history list ─────────────────────────────────────
+// -- LENS VIEWPOINTS - report history list -------------------------------------
 // Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
 // captured by the :reportId path parameter.
 router.get("/projects/:projectId/clash-reports/lens-viewpoints/reports",
@@ -1799,7 +1899,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data"
   }
 );
 
-// ── LENS VIEWPOINTS — generate professional PDF report ─────────────────────────
+// -- LENS VIEWPOINTS - generate professional PDF report -------------------------
 // Registered BEFORE "/:reportId" so the literal "lens-viewpoints" segment is not
 // captured by the :reportId path parameter. Accepts modal data as JSON, writes a
 // history row with a snapshot, then streams the PDF back as an attachment.
@@ -1889,7 +1989,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return;
       }
 
-      // ── Coordination Health Score (Round 1 — three simplified metrics) ──
+      // -- Coordination Health Score (Round 1 - three simplified metrics) --
       const ids = vps.map(v => v.id);
       const linkedRfiVpIds = new Set<number>();
       if (ids.length) {
@@ -1928,7 +2028,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         p1Total, p1Resolved, total, allResolved, withLinkedRfis,
       };
 
-      // ── Snapshot (basis for the SHA-256 fingerprint) ──
+      // -- Snapshot (basis for the SHA-256 fingerprint) --
       const snapshot = vps.map(v => ({
         id: v.id, viewpointId: v.viewpointId, displayId: v.displayId,
         note: v.note, trade: v.trade, reportType: v.reportType, priority: v.priority,
@@ -1940,7 +2040,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         hasLinkedRfi: linkedRfiVpIds.has(v.id),
       }));
 
-      // ── Sequential report number (<CODE>-LV-001) + persist, made
+      // -- Sequential report number (<CODE>-LV-001) + persist, made
       // concurrency-safe by a UNIQUE(project_id, report_number) constraint and a
       // retry-on-unique-violation loop. The contentHash embeds the final number,
       // so both are computed inside the loop.
@@ -1986,7 +2086,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return;
       }
 
-      // ── Build the PDF ──
+      // -- Build the PDF --
       const reportHistoryRows = includeReportHistory ? await db.select({
         reportNumber: lensViewpointReportsTable.reportNumber,
         generatedByName: lensViewpointReportsTable.generatedByName,
@@ -2016,21 +2116,21 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const watermarkLabel = (s: string) => s === "issued" ? "Issued for Coordination" : s === "superseded" ? "Superseded" : s === "draft" ? "Draft" : "-";
       const watermarkText = watermarkType === "issued" ? "ISSUED FOR COORDINATION" : watermarkType === "superseded" ? "SUPERSEDED" : "DRAFT";
       const fmtShort = (v: Date | string | null | undefined) => {
-        if (!v) return "—";
+        if (!v) return "-";
         const d = new Date(v);
-        if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "—";
+        if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "-";
         return d.toLocaleDateString();
       };
       // Server-side mirror of the frontend viewpointCode() helper, plus the
       // "(Rev N)" suffix once a viewpoint has been revised beyond its first version.
       const codeOf = (v: typeof vps[number]) => {
-        if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "—";
+        if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "-";
         const tr = v.trade || "";
         const abbr = (tr.length > 2 ? tr.slice(0, 2) : tr).toUpperCase() || "??";
         return `${abbr}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
       };
       const idText = (v: typeof vps[number]) => {
-        const base = idFormat === "code" ? codeOf(v) : (v.displayId || v.viewpointId || "—");
+        const base = idFormat === "code" ? codeOf(v) : (v.displayId || v.viewpointId || "-");
         return (v.revisionNumber ?? 1) > 1 ? `${base} (Rev ${v.revisionNumber})` : base;
       };
       const predecessorCodeOf = (v: typeof vps[number]) => {
@@ -2040,7 +2140,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       };
       const groupTokenOf = (v: typeof vps[number]) => v.issueGroupId ? `G:${String(v.issueGroupId).replace(/-/g, "").slice(0, 4).toUpperCase()}` : "-";
 
-      // ── COVER PAGE (shared helper) ──
+      // -- COVER PAGE (shared helper) --
       const projectAddress = typeof project.location === "string" ? project.location.trim() : "";
       drawCoverPage(doc, {
         margin: M,
@@ -2065,7 +2165,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         const hsY = cursorY;
         doc.rect(M, hsY, 200, 80).fillAndStroke("#FFFFFF", "#D1D5DB");
         doc.fontSize(40).font("Helvetica-Bold").fillColor(NAVY).text(String(healthScore), M, hsY + 12, { width: 200, align: "center" });
-        doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0–100)", M, hsY + 60, { width: 200, align: "center" });
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0â€“100)", M, hsY + 60, { width: 200, align: "center" });
         // health sub-metrics (a metric reads "n/a" when it has no applicable items)
         const hbX = M + 220;
         const pct = (v: number | null) => v === null ? "n/a" : `${v}%`;
@@ -2089,7 +2189,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.fontSize(24).font("Helvetica-Bold").fillColor("#111827").text(String(card.value), x, cardY + 8, { width: pcW, align: "center" });
         doc.fontSize(7).font("Helvetica-Bold").fillColor("#6B7280").text(card.label, x, cardY + 40, { width: pcW, align: "center" });
       });
-      // Lifecycle breakdown line — counts the rows actually included in this report.
+      // Lifecycle breakdown line - counts the rows actually included in this report.
       const lcCounts: Record<string, number> = { active: 0, superseded: 0, voided: 0 };
       vps.forEach(v => { const s = v.lifecycleStatus ?? "active"; if (lcCounts[s] !== undefined) lcCounts[s]++; });
       doc.fontSize(8).font("Helvetica").fillColor("#6B7280")
@@ -2101,7 +2201,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         const m = new Map<string, number>();
         vps.forEach(v => {
           const raw = (v as any)[key];
-          const k = key === "status" ? statusLabel(raw ?? "open") : (raw || "—");
+          const k = key === "status" ? statusLabel(raw ?? "open") : (raw || "-");
           m.set(k, (m.get(k) ?? 0) + 1);
         });
         return Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
@@ -2135,9 +2235,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         critical.forEach((v, ci) => {
           const yy = doc.y;
           doc.rect(M, yy, CW, 16).fill(ci % 2 === 0 ? "#FFFFFF" : "#F4F6F8");
-          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(v.priority ? `P${v.priority}` : "—", M + 5, yy + 4, { width: 28 });
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("#111827").text(v.priority ? `P${v.priority}` : "-", M + 5, yy + 4, { width: 28 });
           doc.fontSize(8).font("Helvetica").fillColor("#111827")
-            .text(`[${idText(v)}] ${v.note ?? "—"}  (${v.trade || "—"} · ${v.floor || "—"} · ${statusLabel(v.status)})`, M + 36, yy + 4, { width: CW - 42, height: 12, ellipsis: true, lineBreak: false });
+            .text(`[${idText(v)}] ${v.note ?? "-"}  (${v.trade || "-"} / ${v.floor || "-"} / ${statusLabel(v.status)})`, M + 36, yy + 4, { width: CW - 42, height: 12, ellipsis: true, lineBreak: false });
           doc.y = yy + 16;
         });
 
@@ -2154,7 +2254,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
         doc.y = oY + 58;
       } else {
-        // ── MAIN VIEWPOINTS TABLE (shared drawTable helper) ──
+        // -- MAIN VIEWPOINTS TABLE (shared drawTable helper) --
         if (doc.y + 60 > 530) { doc.addPage(); doc.y = 40; }
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
@@ -2182,13 +2282,13 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           onPageBreak: () => {
             doc.addPage();
             doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
-            doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) — Lens Viewpoints Report`, M, 8, { width: CW });
+            doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Lens Viewpoints Report`, M, 8, { width: CW });
             return 35;
           },
         });
         doc.y = endY;
 
-        // ── SIGNATURE BLOCK (last page) ──
+        // -- SIGNATURE BLOCK (last page) --
         if (doc.y + 110 > 535) { doc.addPage(); doc.y = 45; }
         doc.moveDown(1);
         const sgY = doc.y + 10;
@@ -2210,7 +2310,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           doc.fontSize(9).font("Helvetica-Bold").fillColor("#1E3A5F").text(b.role, x, blockY + 12);
         });
 
-        // ── REVISION HISTORY APPENDIX (full report only) ──
+        // -- REVISION HISTORY APPENDIX (full report only) --
         // Scope the appendix to the revision chains of the viewpoints actually in
         // this report: each in-scope row plus its superseded ancestors. Without
         // this, a filtered or active-only report would surface unrelated
@@ -2374,7 +2474,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
           actionType: "rerank",
           entityType: "clash_report",
           entityId: reportId,
-          details: `Re-ranked clash report ${reportId} — AI assigned priorities to ${clashes.length} clashes`,
+          details: `Re-ranked clash report ${reportId} - AI assigned priorities to ${clashes.length} clashes`,
         });
         res.json({ message: "Re-ranking complete", total_clashes: clashes.length, report: updated[0] });
       } catch (err) {
@@ -2543,7 +2643,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       const M = 40;
       const CW = W - M * 2;
 
-      // ── COVER PAGE ──────────────────────────────────────────────────────
+      // -- COVER PAGE ------------------------------------------------------
       // Dark header bar
       doc.rect(0, 0, W, 135).fill("#1E3A5F");
 
@@ -2577,7 +2677,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
         .text(user?.email ?? "", M, 70, { align: "right", width: CW });
 
-      // Powered by — very subtle bottom right
+      // Powered by - very subtle bottom right
       doc.fontSize(7.5).font("Helvetica").fillColor("#7BA4C8")
         .text("Powered by BIMLog | IgniteSmart.ai", M, 112, { align: "right", width: CW });
 
@@ -2672,7 +2772,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
           doc.rect(0, 0, W, 25).fill("#1E3A5F");
           const pageDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
           doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
-            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) — Clash Coordination Report`, M, 8, { width: CW - 100 });
+            .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) - Clash Coordination Report`, M, 8, { width: CW - 100 });
           doc.fontSize(8).font("Helvetica").fillColor("#93C5FD")
             .text(pageDate, M, 8, { align: "right", width: CW });
           doc.y = 35;
@@ -2687,18 +2787,18 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         const pColor = P_COLORS_PDF[c.priority ?? ""] ?? { bg: "#F3F4F6", text: "#6B7280" };
         doc.rect(x + 2, rY + 4, 38, 14).fill(pColor.bg);
         doc.fontSize(8).font("Helvetica-Bold").fillColor(pColor.text)
-          .text(c.priority ?? "—", x + 2, rY + 7, { width: 38, align: "center" });
+          .text(c.priority ?? "-", x + 2, rY + 7, { width: 38, align: "center" });
         x += cols[0].w;
 
         const vals = [
-          c.clashIdOriginal ?? "—",
-          c.description ?? "—",
-          c.element1 ?? "—",
-          c.discipline1 ?? "—",
-          c.level ?? "—",
-          c.status ?? "—",
-          c.assignedToName ?? "—",
-          c.dueDate && !String(c.dueDate).startsWith("1970") ? new Date(c.dueDate).toLocaleDateString() : "—",
+          c.clashIdOriginal ?? "-",
+          c.description ?? "-",
+          c.element1 ?? "-",
+          c.discipline1 ?? "-",
+          c.level ?? "-",
+          c.status ?? "-",
+          c.assignedToName ?? "-",
+          c.dueDate && !String(c.dueDate).startsWith("1970") ? new Date(c.dueDate).toLocaleDateString() : "-",
         ];
         vals.forEach((val, i) => {
           const colW = cols[i + 1].w - 4;
@@ -2741,7 +2841,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
   }
 );
 
-// ── DELETE individual clash (soft delete) ─────────────────────────────────────
+// -- DELETE individual clash (soft delete) -------------------------------------
 router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
   authMiddleware, requirePermission("admin", "write"), async (req, res) => {
     const projectId = Number(req.params.projectId);

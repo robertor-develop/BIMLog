@@ -855,9 +855,20 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
 router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const { subject, priority, sourceViewpointId, imageBase64 } = req.body as {
-      subject?: unknown; priority?: unknown; sourceViewpointId?: unknown; imageBase64?: unknown;
+    const { subject, priority, sourceViewpointId, imageBase64, sourceProjectId, projectId: bodyProjectId } = req.body as {
+      subject?: unknown; priority?: unknown; sourceViewpointId?: unknown; imageBase64?: unknown; sourceProjectId?: unknown; projectId?: unknown;
     };
+    const incomingProjectIdRaw = sourceProjectId ?? bodyProjectId;
+    const incomingProjectId = incomingProjectIdRaw == null || String(incomingProjectIdRaw).trim() === "" ? null : Number(incomingProjectIdRaw);
+    if (incomingProjectId != null && (!Number.isFinite(incomingProjectId) || incomingProjectId !== projectId)) {
+      res.status(409).json({
+        error: "project_mismatch",
+        message: "This Navisworks model is locked to a different BIMLog project. Open BIMLog Lens Settings and choose the correct project before creating an RFI.",
+        expectedProjectId: projectId,
+        receivedProjectId: Number.isFinite(incomingProjectId) ? incomingProjectId : null,
+      });
+      return;
+    }
     if (typeof subject !== "string" || !subject.trim()) {
       res.status(400).json({ error: "subject is required" });
       return;
