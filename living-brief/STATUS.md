@@ -296,3 +296,37 @@ lightly used (6 projects, 4 users), so most empty tables are unused, not broken.
 2. change_orders imports createNotification but never calls it — no notifications on change-order events.
 3. rfi_ball_in_court_history is never written — BIC history table is dead despite active RFIs.
 4. linked_items creation is admin-write gated and lightly surfaced — relationships stay empty in practice.
+
+## Open Loop Register - Customer Feedback and Half-Finished Work
+
+This register exists so customer feedback and interrupted builds do not disappear into chat history.
+Every item must end in one of four states: shipped, verified, deferred, or rejected with reason.
+If an item is built but not tested by the real user, it is not closed.
+
+### Open - needs product/code follow-through
+- BIMLog feedback widget: Replit's production feedback/sign-in widget must not be the final user experience. Build a BIMLog-owned feedback/support widget that lets users submit feedback without Replit branding or Replit login. Keep the useful feedback function, replace the vendor UX.
+- Submittals final connection audit: verify Submittals, Register, and Tracking Table are one connected module. Existing manually created submittals must appear where they should, imported register rows must connect to real submittals, and exports must use the same source records.
+- RFI continuation: RFI work was intentionally paused while Ruben's submittal/schedule/plugin requests were handled. Remaining RFI work from RFI_HANDOVER.md still needs a dedicated pass: cloud pickers, impact layout, save unification, RFI types config, numbering, attachment/download polish, and optional AI assist.
+- AI assist split: platform-wide AI must separate cheap text assistance from expensive file-reading AI. Text assist can help descriptions/emails with a clear usage notice; file reading must require explicit confirmation and credit warning. Super admin and users need clear usage tracking.
+- User-owned AI/billing model: Roberto/internal test users may use the internal Anthropic/Replit proxy. External users should be guided toward configured user/company AI keys or an explicit BIMLog managed-credit model. This needs final product rules and UI copy.
+- BIMLog feedback/support and guidance system: guidance exists in parts of the platform/plugin, but the whole product needs a consistent on/off guidance model, not scattered helper text.
+- Reports/PDF standardization continuation: Lens PDF has been heavily improved, but every report module still needs the Quality Standard audit for cover/header/footer, page numbers, fingerprint, filters, Excel parity, and no dirty history.
+- Full module cross-linking: linked_items exists but remains lightly surfaced and admin-write gated. RFIs, submittals, transmittals, change orders, schedule, files, clash reports, and Lens should feel connected, not like isolated tabs.
+- Change order notifications: change_orders imports createNotification but still needs a real notification decision and implementation.
+- Cloud storage backend: storage adapter exists, but OneDrive/Dropbox/BIM 360/Procore picker and download behavior are not complete across the platform.
+- Navisworks plugin 2025 verification: v1.60.6 package exists for Ruben, but Ruben still needs to install and verify in Navisworks 2025 on his real project.
+
+### Recently shipped - needs real-user verification
+- Lens Viewpoints deletion hardening for Ruben's project: platform fix pushed. Needs Ruben to confirm he can delete viewpoints in project 30 after Replit pull/republish/API restart.
+- Plugin stable folder doctrine: v1.60.6 zip built at `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.6.zip`. Needs Ruben's real Navisworks 2025 confirmation.
+- Submittal tracker inside Submittals: code pushed, but user experience still needs Ruben verification against his real `SUBMITTAL TRACK.xlsx` workflow.
+- Schedule refinements: calendar/board/list direction pushed, but the value depends on real RFI/submittal/model-date data and Ruben's workflow test.
+- QUALITY.md Living Brief: added and published to the repo; needs to be kept as an active build gate, not just documentation.
+
+### Deferred by product decision
+- AI agents auto-firing on every save: deferred because bulk sync could create real latency/cost. Manual or targeted AI triggers are preferred until the cost model is mature.
+- True bidirectional Navisworks delete sync: not started. Needs a separate design so local deletions do not accidentally wipe valid platform history.
+- Blockchain anchoring: strategic direction only. First priority is clean, reproducible, hashable records.
+
+### Quality rule for this register
+Before starting any new customer-requested feature, review this register. If the new work touches an open item, either close it properly or explicitly carry it forward with a reason. Do not create another parallel workflow that bypasses the unfinished one.

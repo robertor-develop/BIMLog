@@ -241,3 +241,36 @@ Long-term impact:
 Build BIMLog so every construction decision becomes structured evidence, every piece of
 evidence becomes useful knowledge, and every useful insight helps people act earlier,
 clearer, and with less risk.
+
+## Open Loop Control - Mandatory Quality Gate
+
+Customer feedback is now treated as a quality record, not as chat memory.
+Every request, bug, complaint, or workflow gap that changes product behavior must be captured in STATUS.md under the Open Loop Register until closed.
+
+Allowed states:
+- Shipped: code/docs/package were built and committed.
+- Verified: the real workflow was tested after publish/package by Roberto or the customer.
+- Deferred: intentionally not built now, with a reason.
+- Rejected: not aligned with BIMLog, with a reason.
+
+Rules:
+- Do not call a customer item done just because code was written.
+- Do not leave a feature half-built without adding it to the Open Loop Register.
+- Do not build a second disconnected version of something that already exists.
+- Before adding UI, search for the existing module, route, schema, export, PDF, and activity-log paths.
+- Before changing reports, verify the live table filter, PDF output, Excel output, and history scope use the same records.
+- Before changing AI behavior, verify credit/cost visibility and whether the action is cheap text assist or expensive file/file-reading assist.
+- Before changing plugin behavior, verify both Navisworks 2021 and 2025 source copies or explicitly state which one was changed.
+- If a user complaint exposes a wider pattern, update QUALITY.md or STATUS.md so the same mistake is not repeated.
+
+Customer feedback closeout checklist:
+- What exactly did the customer ask for?
+- Which module owns it?
+- Does an existing feature already cover part of it?
+- What code paths were changed?
+- What exports/reports were affected?
+- What was verified locally?
+- What still needs publish/package/customer verification?
+- Where is the user-facing brief or release note?
+
+This is the prevention mechanism for limbo work: no invisible backlog, no forgotten widget, no orphaned feature, no duplicate workflow.
