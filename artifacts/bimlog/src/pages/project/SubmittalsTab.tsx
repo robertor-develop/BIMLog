@@ -11,7 +11,7 @@ import * as XLSX from "xlsx";
 import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
   Sparkles, CheckCircle2, Clock, Search, Filter, ExternalLink, Eye, Shield,
-  BookOpen, List, Loader2, Copy, TriangleAlert, ClipboardList, Trash2,
+  BookOpen, Loader2, Copy, TriangleAlert, ClipboardList, Trash2,
   Pencil, Save, Link as LinkIcon, Paperclip,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
@@ -128,9 +128,9 @@ const AI_BG: Record<string, string> = {
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
 function getToken() { return JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token || ""; }
 function fmtDate(d: string | null | undefined) {
-  if (!d) return "—";
+  if (!d) return "-";
   const dt = new Date(d);
-  return isValid(dt) ? format(dt, "MMM d, yyyy") : "—";
+  return isValid(dt) ? format(dt, "MMM d, yyyy") : "-";
 }
 function isAttachmentUrl(value: string) {
   return /^https?:\/\//i.test(value) || value.startsWith("/api/");
@@ -385,6 +385,11 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     if (!grouped[tr][fl]) grouped[tr][fl] = [];
     grouped[tr][fl].push(s);
   }
+  const groupedTradeKeys = Object.keys(grouped);
+  const orderedTradeKeys = [
+    ...TRADE_ORDER.filter(tr => groupedTradeKeys.includes(tr)),
+    ...groupedTradeKeys.filter(tr => !TRADE_ORDER.includes(tr)).sort((a, b) => a.localeCompare(b)),
+  ];
 
   function approvalCell(s: Submittal) {
     const d = (s.reviewDecision ?? "").toLowerCase();
@@ -525,7 +530,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
             </tr>
           </thead>
           <tbody>
-            {TRADE_ORDER.filter(tr => grouped[tr]).map(tr => (
+            {orderedTradeKeys.map(tr => (
               <Fragment key={tr}>
                 <tr>
                   <td colSpan={12} style={{ background: "#1E3A5F", color: "white", padding: "6px 12px",
@@ -610,7 +615,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
         setImportMsg(msg);
         setTimeout(() => window.location.reload(), 2500);
       } else {
-        setImportMsg("Import failed — please try again");
+        setImportMsg("Import failed - please try again");
       }
     } catch { setImportMsg("Import failed"); }
     finally { setImporting(false); e.target.value = ""; }
@@ -649,53 +654,11 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
             {w("Submittals", "Entregables", lang)}
           </div>
           <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
-            {submittals.length} {w("total", "total", lang)} · {pendingCount} {w("pending", "pendiente", lang)} · {approvedCount} {w("approved", "aprobado", lang)}
+            {submittals.length} {w("total", "total", lang)} - {pendingCount} {w("pending", "pendiente", lang)} - {approvedCount} {w("approved", "aprobado", lang)}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* View toggle */}
-          <div style={{ display: "flex", background: "#F3F4F6", borderRadius: 7, padding: 3 }}>
-            <button
-              onClick={() => setView("submittals")}
-              style={{
-                padding: "5px 12px", borderRadius: 5, border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                background: view === "submittals" ? "white" : "transparent",
-                color: view === "submittals" ? "#1E3A5F" : "#6B7280",
-                boxShadow: view === "submittals" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <List style={{ width: 12, height: 12 }} />
-              {w("Submittals", "Entregables", lang)}
-            </button>
-            <button
-              onClick={() => setView("register")}
-              style={{
-                padding: "5px 12px", borderRadius: 5, border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                background: view === "register" ? "white" : "transparent",
-                color: view === "register" ? "#1E3A5F" : "#6B7280",
-                boxShadow: view === "register" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <BookOpen style={{ width: 12, height: 12 }} />
-              {w("Register", "Registro", lang)}
-            </button>
-            <button
-              onClick={() => setView("tracking")}
-              style={{
-                padding: "5px 12px", borderRadius: 5, border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                background: view === "tracking" ? "white" : "transparent",
-                color: view === "tracking" ? "#1E3A5F" : "#6B7280",
-                boxShadow: view === "tracking" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                display: "flex", alignItems: "center", gap: 5,
-              }}
-            >
-              <ClipboardList style={{ width: 12, height: 12 }} />
-              {w("Tracking Table", "Tabla de Seguimiento", lang)}
-            </button>
-          </div>
-          {canWrite && view === "submittals" && (
+          {canWrite && (
             <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
               <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
               <span className="btn btn-outline btn-sm" style={{ fontSize: 12, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
@@ -712,13 +675,38 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
             {w("Export PDF", "Exportar PDF", lang)}
           </Button>
           {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
-          {canWrite && view === "submittals" && (
+          {canWrite && (
             <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
               <Plus style={{ width: 13, height: 13 }} />
               {w("New Submittal", "Nuevo Entregable", lang)}
             </Button>
           )}
         </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 18, borderBottom: "1px solid #E5E7EB", marginBottom: 16 }}>
+        {[
+          ["submittals", w("Submittals", "Entregables", lang)],
+          ["register", w("Register", "Registro", lang)],
+          ["tracking", w("Tracking Table", "Tabla de Seguimiento", lang)],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setView(key as typeof view)}
+            style={{
+              border: "none",
+              borderBottom: view === key ? "2px solid #2563EB" : "2px solid transparent",
+              background: "transparent",
+              color: view === key ? "#1D4ED8" : "#64748B",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "0 0 9px",
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Action needed banner */}
@@ -728,12 +716,12 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
           padding: "9px 13px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, fontSize: 12, color: "#B45309",
         }}>
           <AlertCircle style={{ width: 14, height: 14, flexShrink: 0 }} />
-          <strong>{actionNeeded}</strong>&nbsp;{w("submittal(s) under review for 14+ days — follow up required.", "entregable(s) en revisión por 14+ días — seguimiento requerido.", lang)}
+          <strong>{actionNeeded}</strong>&nbsp;{w("submittal(s) under review for 14+ days - follow up required.", "entregable(s) en revisión por 14+ días - seguimiento requerido.", lang)}
         </div>
       )}
 
       {view === "register" ? (
-        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} onBack={() => setView("submittals")} />
+        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
       ) : view === "tracking" ? (
         <SubmittalTrackingList projectId={projectId} submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
       ) : (
@@ -766,7 +754,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
       <SlidePanel
         open={!!selectedSubmittal}
         onClose={() => setSelectedSubmittal(null)}
-        title={selectedSubmittal ? `${selectedSubmittal.number} — ${selectedSubmittal.title}` : ""}
+        title={selectedSubmittal ? `${selectedSubmittal.number} - ${selectedSubmittal.title}` : ""}
         width={720}
       >
         {selectedSubmittal && (
@@ -799,7 +787,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 }
 
 // ─── Register View ────────────────────────────────────────────────────────────
-function RegisterView({ projectId, canWrite, lang, onBack }: { projectId: number; canWrite: boolean; lang: string; onBack: () => void }) {
+function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWrite: boolean; lang: string }) {
   const { toast } = useToast();
   const [items, setItems] = useState<RegisterItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -892,15 +880,12 @@ function RegisterView({ projectId, canWrite, lang, onBack }: { projectId: number
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center" }}>
-        <Button variant="outline" size="sm" style={{ fontSize: 11 }} onClick={onBack}>
-          {w("Back to Submittals", "Volver a Entregables", lang)}
-        </Button>
         <div>
           <div style={{ fontSize: 12, fontWeight: 700, color: "#1E3A5F" }}>
             {w("Required Submittal Register", "Registro de Entregables Requeridos", lang)}
           </div>
           <div style={{ fontSize: 11, color: "#6B7280" }}>
-            {items.length} {w("planned items from the spec book. Actual submissions live in Submittals.", "items planificados del libro de especificaciones. Los envios reales viven en Entregables.", lang)}
+            {items.length} {w("planned requirements from the spec book. Actual received packages live in Submittals; the Tracking Table combines them for control.", "requisitos planificados del libro de especificaciones. Los paquetes recibidos viven en Entregables; la Tabla de Seguimiento los combina para control.", lang)}
           </div>
         </div>
         <div style={{ flex: 1 }} />
@@ -936,7 +921,7 @@ function RegisterView({ projectId, canWrite, lang, onBack }: { projectId: number
             </Field>
             <Field label={w("Submittal Type", "Tipo de Entregable", lang)}>
               <FieldSelect value={form.submittalType} onChange={e => setForm(f => ({ ...f, submittalType: e.target.value }))}>
-                <option value="">—</option>
+                <option value="">-</option>
                 {CATEGORY_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
               </FieldSelect>
             </Field>
@@ -1000,11 +985,11 @@ function RegisterView({ projectId, canWrite, lang, onBack }: { projectId: number
                   {rows.map(item => (
                     <tr key={item.id}>
                       <td style={{ fontSize: 12 }}>{item.description}</td>
-                      <td style={{ fontSize: 11, color: "#6B7280" }}>{item.trade || "—"}</td>
-                      <td style={{ fontSize: 11, color: "#6B7280" }}>{item.submittalType ? (CATEGORY_OPTIONS.find(o => o.value === item.submittalType)?.[lang === "es" ? "labelEs" : "label"] || item.submittalType) : "—"}</td>
-                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? format(new Date(item.requiredByDate), "MMM d, yyyy") : "—"}</td>
-                      <td style={{ fontSize: 11 }}>{item.leadTimeDays ? `${item.leadTimeDays}d` : "—"}</td>
-                      <td style={{ fontSize: 11 }}>{item.responsibleCompany || "—"}</td>
+                      <td style={{ fontSize: 11, color: "#6B7280" }}>{item.trade || "-"}</td>
+                      <td style={{ fontSize: 11, color: "#6B7280" }}>{item.submittalType ? (CATEGORY_OPTIONS.find(o => o.value === item.submittalType)?.[lang === "es" ? "labelEs" : "label"] || item.submittalType) : "-"}</td>
+                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? format(new Date(item.requiredByDate), "MMM d, yyyy") : "-"}</td>
+                      <td style={{ fontSize: 11 }}>{item.leadTimeDays ? `${item.leadTimeDays}d` : "-"}</td>
+                      <td style={{ fontSize: 11 }}>{item.responsibleCompany || "-"}</td>
                       <td>
                         <span style={{
                           display: "inline-block", padding: "2px 7px", borderRadius: 10,
@@ -1214,9 +1199,9 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                       {CATEGORY_OPTIONS.find(o => o.value === (sub.submittalCategory || sub.submittalType))?.[lang === "es" ? "labelEs" : "label"] || sub.submittalCategory || sub.submittalType}
                     </td>
                     <td><StatusBadge status={sub.status} lang={lang} /></td>
-                    <td style={{ fontSize: 11, color: "#6B7280" }}>{sub.specSection || "—"}</td>
-                    <td style={{ fontSize: 11 }}>{sub.submittedByCompany || sub.submittedByName || "—"}</td>
-                    <td style={{ fontSize: 11 }}>{sub.submittedToCompany || "—"}</td>
+                    <td style={{ fontSize: 11, color: "#6B7280" }}>{sub.specSection || "-"}</td>
+                    <td style={{ fontSize: 11 }}>{sub.submittedByCompany || sub.submittedByName || "-"}</td>
+                    <td style={{ fontSize: 11 }}>{sub.submittedToCompany || "-"}</td>
                     <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{fmtDate(sub.dateRequired || sub.dueDate)}</td>
                     <td style={{ textAlign: "center" }}>
                       {days !== null && (
@@ -1225,7 +1210,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                         </span>
                       )}
                     </td>
-                    <td style={{ fontSize: 11, color: "#1E3A5F" }}>{sub.ballInCourt || "—"}</td>
+                    <td style={{ fontSize: 11, color: "#1E3A5F" }}>{sub.ballInCourt || "-"}</td>
                     <td style={{ textAlign: "center" }}>
                       {sub.aiCheckRan && aiCheck && <AiBadge result={aiCheck.overall} />}
                     </td>
@@ -1429,8 +1414,8 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
 
   const handleSubmit = async () => {
     if (!form.title) { toast({ title: w("Title is required", "El título es requerido", lang), variant: "destructive" }); return; }
-    if (!validateEmail(form.submittedByEmail)) { setByEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)); return; }
-    if (!validateEmail(form.submittedToEmail)) { setToEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)); return; }
+    if (!validateEmail(form.submittedByEmail)) { setByEmailError(w("Invalid email address - please check before submitting.", "Correo inválido - verifique antes de enviar.", lang)); return; }
+    if (!validateEmail(form.submittedToEmail)) { setToEmailError(w("Invalid email address - please check before submitting.", "Correo inválido - verifique antes de enviar.", lang)); return; }
     setSubmitting(true);
     try {
       const body = {
@@ -1523,7 +1508,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
             placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)}
             value={form.submittedByEmail}
             onChange={e => { set("submittedByEmail", e.target.value); if (byEmailError) setByEmailError(""); }}
-            onBlur={() => !validateEmail(form.submittedByEmail) ? setByEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setByEmailError("")}
+            onBlur={() => !validateEmail(form.submittedByEmail) ? setByEmailError(w("Invalid email address - please check before submitting.", "Correo inválido - verifique antes de enviar.", lang)) : setByEmailError("")}
             style={byEmailError ? { border: "1.5px solid #DC2626" } : undefined}
           />
           {byEmailError && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>{byEmailError}</p>}
@@ -1546,7 +1531,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
             placeholder={w("Pick an existing email or type a new one", "Seleccione un correo o escriba uno nuevo", lang)}
             value={form.submittedToEmail}
             onChange={e => { set("submittedToEmail", e.target.value); if (toEmailError) setToEmailError(""); }}
-            onBlur={() => !validateEmail(form.submittedToEmail) ? setToEmailError(w("Invalid email address — please check before submitting.", "Correo inválido — verifique antes de enviar.", lang)) : setToEmailError("")}
+            onBlur={() => !validateEmail(form.submittedToEmail) ? setToEmailError(w("Invalid email address - please check before submitting.", "Correo inválido - verifique antes de enviar.", lang)) : setToEmailError("")}
             style={toEmailError ? { border: "1.5px solid #DC2626" } : undefined}
           />
           {toEmailError && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 2 }}>{toEmailError}</p>}
@@ -1637,18 +1622,18 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
             <FieldInput value={form.drawingNumber} onChange={e => set("drawingNumber", e.target.value)} />
             <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingNumber", v.replace(/\.[^.]+$/, ""))} />
           </div>
-          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only — enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia — ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
+          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only - enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia - ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
         </Field>
         <Field label={w("Drawing Title", "Título de Plano", lang)}>
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
             <FieldInput value={form.drawingTitle} onChange={e => set("drawingTitle", e.target.value)} />
             <FileSearchButton projectId={projectId} lang={lang} onSelect={v => set("drawingTitle", v.replace(/\.[^.]+$/, ""))} />
           </div>
-          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only — enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia — ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
+          <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only - enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia - ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
         </Field>
         <Field label={w("Related RFI", "RFI Relacionado", lang)}>
           <FieldSelect value={form.linkedRfiId} onChange={e => set("linkedRfiId", e.target.value)}>
-            <option value="">{rfis.length === 0 ? w("No RFIs on this project yet", "Sin RFIs en este proyecto aún", lang) : w("— None —", "— Ninguno —", lang)}</option>
+            <option value="">{rfis.length === 0 ? w("No RFIs on this project yet", "Sin RFIs en este proyecto aún", lang) : w("- None -", "- Ninguno -", lang)}</option>
             {rfis.map(rfi => (
               <option key={rfi.id} value={String(rfi.id)}>{rfi.number}: {rfi.subject}</option>
             ))}
@@ -1680,7 +1665,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
         }}>
           <TriangleAlert style={{ width: 15, height: 15, flexShrink: 0, marginTop: 1 }} />
           <div>
-            <strong>{w("Warning — Procurement Before Approval:", "Advertencia — Adquisición Antes de Aprobación:", lang)}</strong>
+            <strong>{w("Warning - Procurement Before Approval:", "Advertencia - Adquisición Antes de Aprobación:", lang)}</strong>
             {" "}{w("Materials have been ordered or delivered before this submittal has been formally approved. This creates significant liability risk. Proceed only if you have written authorization from the responsible party.", "Los materiales han sido ordenados o entregados antes de que este entregable sea aprobado formalmente. Esto crea un riesgo de responsabilidad significativo. Proceda solo si tiene autorización escrita de la parte responsable.", lang)}
           </div>
         </div>
@@ -1702,7 +1687,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           {aiCheckLoading ? <Loader2 style={{ width: 13, height: 13, animation: "spin 1s linear infinite" }} /> : <Shield style={{ width: 13, height: 13 }} />}
           {w("Run AI Compliance Check", "Ejecutar Verificación IA", lang)}
         </button>
-        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("AI will check the current form fields — save afterwards to persist the result.", "La IA verificará los campos actuales — guarde después para persistir el resultado.", lang)}</span>}
+        {!savedId && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{w("AI will check the current form fields - save afterwards to persist the result.", "La IA verificará los campos actuales - guarde después para persistir el resultado.", lang)}</span>}
       </div>
       {aiCheckResult && <AiCheckDisplay result={aiCheckResult} lang={lang} />}
 
@@ -1788,7 +1773,7 @@ function FileSearchButton({ projectId, onSelect, lang }: {
             </div>
           ) : files.length === 0 ? (
             <div style={{ padding: "12px 14px", fontSize: 12, color: "#6B7280" }}>
-              {w("No files uploaded to this project yet — upload files in the Files tab to link them here.", "Sin archivos en este proyecto — suba archivos en la pestaña Archivos para enlazarlos aquí.", lang)}
+              {w("No files uploaded to this project yet - upload files in the Files tab to link them here.", "Sin archivos en este proyecto - suba archivos en la pestaña Archivos para enlazarlos aquí.", lang)}
             </div>
           ) : (
             <>
@@ -2300,7 +2285,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => (
     <div style={{ display: "flex", gap: 8, padding: "5px 0", borderBottom: "1px solid #F3F4F6" }}>
       <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", width: 140, flexShrink: 0 }}>{label}</span>
-      <span style={{ fontSize: 12, color: "#1E293B" }}>{value || "—"}</span>
+      <span style={{ fontSize: 12, color: "#1E293B" }}>{value || "-"}</span>
     </div>
   );
 
@@ -2580,7 +2565,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         }}>
           <TriangleAlert style={{ width: 15, height: 15, flexShrink: 0, marginTop: 1 }} />
           <div>
-            <strong>{w("Warning — Procurement Before Approval:", "Advertencia — Adquisición Antes de Aprobación:", lang)}</strong>
+            <strong>{w("Warning - Procurement Before Approval:", "Advertencia - Adquisición Antes de Aprobación:", lang)}</strong>
             {" "}{w("Materials have been ordered or delivered before this submittal has been formally approved. This creates significant liability risk. Proceed only if you have written authorization from the responsible party.", "Los materiales han sido ordenados o entregados antes de que este entregable sea aprobado formalmente. Esto crea un riesgo de responsabilidad significativo. Proceda solo si tiene autorización escrita de la parte responsable.", lang)}
           </div>
         </div>
@@ -2749,7 +2734,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               <div key={i} style={{ display: "flex", gap: 8, padding: "6px 8px", background: "#F8FAFC", borderRadius: 6, fontSize: 11 }}>
                 <span style={{ color: "#6B7280", width: 140, flexShrink: 0 }}>{fmtDate(entry.setAt)}</span>
                 <span style={{ fontWeight: 600, color: "#1E3A5F" }}>{entry.party}</span>
-                <span style={{ color: "#6B7280" }}>— {entry.setBy}</span>
+                <span style={{ color: "#6B7280" }}>- {entry.setBy}</span>
               </div>
             ))}
           </div>
@@ -2761,7 +2746,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         <>
           <PanelSection title={w("Version History", "Historial de Versiones", lang)} />
           <div style={{ padding: "6px 8px", background: "#F8FAFC", borderRadius: 6, fontSize: 11, color: "#6B7280" }}>
-            {w("Revision", "Revisión", lang)} {submittal.revisionNumber} · {w("Parent ID", "ID Padre", lang)}: {submittal.parentSubmittalId}
+            {w("Revision", "Revisión", lang)} {submittal.revisionNumber} - {w("Parent ID", "ID Padre", lang)}: {submittal.parentSubmittalId}
           </div>
         </>
       )}
