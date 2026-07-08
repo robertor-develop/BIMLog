@@ -36,7 +36,7 @@ interface LensViewpoint {
 // e.g. "FI-001". Floor and revision have their own columns, so they are not crammed into this
 // code. Falls back to the legacy display_id when no seq exists.
 function viewpointCode(v: LensViewpoint): string {
-  if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "—";
+  if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "-";
   const t = v.trade || "";
   const abbr = ((t.length > 2 ? t.slice(0, 2) : t).toUpperCase()) || "??";
   return `${abbr}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
@@ -55,7 +55,8 @@ const HEADER_TIPS: Record<string, string> = {
   "ID": "Viewpoint identifier. Toggle the format in the View bar (Display ID or Trade-Floor-Seq).",
   "Group": "Viewpoints sharing one physical location/issue across trades. Same token = same group.",
   "State": "Record state in the revision chain: Current, Superseded (replaced by an edit/reassign), or Voided (cancelled).",
-  "Rev": "Revision number — increments each time the viewpoint is edited or reassigned.",
+  "Rev": "Revision number - increments each time the viewpoint is edited or reassigned.",
+  "Issue Age": "Days since this viewpoint was first captured. Use this to track open coordination aging.",
   "Status": "Workflow status: Open, Follow Up, Waiting Design, Approved, Resolved.",
 };
 
@@ -96,7 +97,7 @@ function LensPBadge({ p }: { p?: number | null }) {
   const c = LENS_P_COLORS[p ?? 0] ?? { bg: "#F3F4F6", text: "#6B7280" };
   return (
     <span style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: c.bg, color: c.text }}>
-      {p ? `P${p}` : "—"}
+      {p ? `P${p}` : "-"}
     </span>
   );
 }
@@ -115,10 +116,25 @@ function lensStatusLabel(s: string) {
 }
 
 function fmtCaptured(v?: string | null): string {
-  if (!v) return "—";
+  if (!v) return "-";
   const d = new Date(v);
-  if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "—";
+  if (isNaN(d.getTime()) || String(v).startsWith("1970")) return "-";
   return d.toLocaleDateString();
+}
+
+function issueAgeDays(v?: string | null): number | null {
+  if (!v) return null;
+  const d = new Date(v);
+  if (isNaN(d.getTime()) || String(v).startsWith("1970")) return null;
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.max(0, Math.floor((today - start) / 86400000));
+}
+
+function issueAgeLabel(v?: string | null): string {
+  const days = issueAgeDays(v);
+  return days == null ? "-" : `${days}d`;
 }
 
 export function LensViewpointsView({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
@@ -132,7 +148,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   // Drives the refresh banner. Only true when a background poll detects the
-  // server's viewpoint set differs from what is currently displayed — never shown
+  // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
   const [updatesAvailable, setUpdatesAvailable] = useState(false);
   const [fTrade, setFTrade] = useState("all");
@@ -149,11 +165,11 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     try {
       const raw = localStorage.getItem(VIEW_OPTS_KEY);
       if (raw) return { ...VIEW_OPTS_DEFAULTS, ...JSON.parse(raw) };
-    } catch { /* malformed/blocked storage — fall back to defaults */ }
+    } catch { /* malformed/blocked storage - fall back to defaults */ }
     return VIEW_OPTS_DEFAULTS;
   });
   useEffect(() => {
-    try { localStorage.setItem(VIEW_OPTS_KEY, JSON.stringify(viewOpts)); } catch { /* storage blocked — view simply won't persist */ }
+    try { localStorage.setItem(VIEW_OPTS_KEY, JSON.stringify(viewOpts)); } catch { /* storage blocked - view simply will not persist */ }
   }, [VIEW_OPTS_KEY, viewOpts]);
   const { showGroupCol, showLifecycleCol, showRevisionCol, idFormatView, lifecycleScope } = viewOpts;
   const [showGuidance, setShowGuidance] = useState(() => {
@@ -252,7 +268,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         if (Array.isArray(list)) setMembers(list);
       }
     } catch {
-      /* prefill is best-effort — the user can still type everything manually */
+      /* prefill is best-effort - the user can still type everything manually */
     }
   };
 
@@ -291,7 +307,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         setUpdatesAvailable(false);
       }
     } catch {
-      /* transient network error — keep the current list, the user can retry */
+      /* transient network error - keep the current list, the user can retry */
     }
   };
 
@@ -315,7 +331,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         const changed = serverIds.length !== local.size || serverIds.some(id => !local.has(id));
         if (!cancelled && changed) setUpdatesAvailable(true);
       } catch {
-        /* transient — try again on the next tick */
+        /* transient - try again on the next tick */
       }
     };
     const iv = setInterval(checkForUpdates, 60000);
@@ -603,12 +619,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
 
   // Single submit path for Edit/Reassign/Void: always shows a submitting state,
   // then either a success toast + reload or an inline error inside the modal.
-  // No native dialogs and no silent success — every click ends in a visible result.
+  // No native dialogs and no silent success - every click ends in a visible result.
   const submitAction = async () => {
     if (!actionModal) return;
     const m = actionModal;
     if (m.type === "edit" && m.note.trim() === "") { setActionError(t("A note is required.", "La nota es requerida.")); return; }
-    if (m.type === "reassign" && !trades.includes(m.trade)) { setActionError(t("Select a valid trade.", "Seleccione una disciplina válida.")); return; }
+    if (m.type === "reassign" && !trades.includes(m.trade)) { setActionError(t("Select a valid trade.", "Seleccione una disciplina valida.")); return; }
     setActionError("");
     setActionPhase("submitting");
     try {
@@ -625,7 +641,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
         setActionPhase("input");
-        setActionError(d.message || d.error || t("The action failed. Please try again.", "La acción falló. Inténtelo de nuevo."));
+        setActionError(d.message || d.error || t("The action failed. Please try again.", "La accion fallo. Intentelo de nuevo."));
         return;
       }
       setActionModal(null);
@@ -680,7 +696,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
       } catch {
         clearTimeout(timer);
         setPluginConnected(false);
-        /* plugin not running / timed out — fall through to the manual-search modal */
+        /* plugin not running / timed out - fall through to the manual-search modal */
       }
     }
     setJumpTarget(v);
@@ -691,7 +707,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     try {
       await navigator.clipboard.writeText(id);
     } catch {
-      /* clipboard unavailable — the ID is still shown in the modal to search for */
+      /* clipboard unavailable - the ID is still shown in the modal to search for */
     }
     setCopiedId(v.id);
     setTimeout(() => setCopiedId(c => (c === v.id ? null : c)), 2500);
@@ -744,9 +760,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
   const activeStats = statsBase.filter(v => (v.lifecycleStatus ?? "active") === "active");
   const st = (s: string) => activeStats.filter(v => v.status === s).length;
 
-  // Column count for the full-width expansion rows — keep in lockstep with the
+  // Column count for the full-width expansion rows - keep in lockstep with the
   // dynamic columns rendered in the table header/body below.
-  const colCount = 10 + (canWrite ? 1 : 0) + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
+  const colCount = 11 + (canWrite ? 1 : 0) + (showGroupCol ? 1 : 0) + (showLifecycleCol ? 1 : 0) + (showRevisionCol ? 1 : 0);
 
   const lastSynced = viewpoints.reduce<string | null>((max, v) => {
     if (!v.capturedAt) return max;
@@ -788,7 +804,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         setHistory(d.reports ?? []);
       }
     } catch {
-      /* transient — the history list simply stays as-is */
+      /* transient - the history list simply stays as-is */
     }
   };
   useEffect(() => { loadHistory(); }, [projectId]);
@@ -861,7 +877,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Lens Viewpoints", "Vistas Lens")}</h2>
           <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
-            {t("Last synced", "Última sincronización")}: {fmtCaptured(lastSynced)}
+            {t("Last synced", "Ultima sincronizacion")}: {fmtCaptured(lastSynced)}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 12, color: "#6B7280" }}>
             <span style={{
@@ -951,7 +967,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151" }}>
           {t("ID", "ID")}
           <select value={idFormatView} onChange={e => setViewOpts(o => ({ ...o, idFormatView: e.target.value }))} style={selStyle}>
-            <option value="displayId">{t("Display ID", "ID de visualización")}</option>
+            <option value="displayId">{t("Display ID", "ID de visualizacion")}</option>
             <option value="code">{t("Trade-Floor-Seq", "Disciplina-Piso-Sec")}</option>
           </select>
         </label>
@@ -965,7 +981,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         </label>
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
           <input type="checkbox" checked={showRevisionCol} onChange={e => setViewOpts(o => ({ ...o, showRevisionCol: e.target.checked }))} />
-          {t("Revision", "Revisión")}
+          {t("Revision", "Revision")}
         </label>
       </div>
 
@@ -973,7 +989,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
           background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 14px", marginBottom: 14 }}>
           <span style={{ fontSize: 13, color: "#92400E" }}>
-            {t("New viewpoints are available — Click to refresh", "Hay nuevas vistas disponibles — Haga clic para actualizar")}
+            {t("New viewpoints are available - Click to refresh", "Hay nuevas vistas disponibles - Haga clic para actualizar")}
           </span>
           <button onClick={refreshViewpoints}
             style={{ display: "flex", alignItems: "center", gap: 6, background: "#F59E0B", border: "none", borderRadius: 6,
@@ -993,7 +1009,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center", marginBottom: 14, padding: "8px 14px", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12, color: "#374151" }}>
           <span style={{ fontWeight: 700, color: "#1E3A5F" }}>{activeStats.length} {t("active", "activas")}</span>
           <span style={{ color: "#6B7280" }}>
-            {t("Open", "Abiertas")} {st("open")} · {t("Follow Up", "Seguimiento")} {st("follow_up")} · {t("Waiting", "Esperando")} {st("waiting_design")} · {t("Approved", "Aprobadas")} {st("approved")} · {t("Resolved", "Resueltas")} {st("resolved")}
+            {t("Open", "Abiertas")} {st("open")} - {t("Follow Up", "Seguimiento")} {st("follow_up")} - {t("Waiting", "Esperando")} {st("waiting_design")} - {t("Approved", "Aprobadas")} {st("approved")} - {t("Resolved", "Resueltas")} {st("resolved")}
           </span>
           <span style={{ marginLeft: "auto", color: "#92400E" }}>{t("Superseded", "Reemplazadas")} {lc("superseded")}</span>
           <span style={{ color: "#6B7280" }}>{t("Voided", "Anuladas")} {lc("voided")}</span>
@@ -1031,7 +1047,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <div style={{ fontSize: 13, maxWidth: 460, margin: "0 auto" }}>
             {t(
               "No Lens Viewpoints synced yet. Use BIMLog Lens plugin in Navisworks to capture and sync viewpoints.",
-              "Aún no hay Vistas Lens sincronizadas. Usa el plugin BIMLog Lens en Navisworks para capturar y sincronizar vistas."
+              "Aun no hay Vistas Lens sincronizadas. Usa el plugin BIMLog Lens en Navisworks para capturar y sincronizar vistas."
             )}
           </div>
         </div>
@@ -1068,7 +1084,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   ...(showGroupCol ? ["Group"] : []),
                   ...(showLifecycleCol ? ["State"] : []),
                   ...(showRevisionCol ? ["Rev"] : []),
-                  "Priority", "Trade", "Responsible Company", "Report Type", "Floor", "Note", "Status", "Captured", "Actions",
+                  "Priority", "Trade", "Responsible Company", "Report Type", "Floor", "Note", "Status", "Captured", "Issue Age", "Actions",
                 ].map(h => (
                   <th key={h} title={HEADER_TIPS[h] || undefined} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "white", textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", cursor: HEADER_TIPS[h] ? "help" : undefined }}>{h}</th>
                 ))}
@@ -1090,12 +1106,12 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     )}
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                       <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700, background: "#DBEAFE", color: "#1D4ED8" }}>
-                        {idFormatView === "code" ? viewpointCode(v) : (v.displayId || v.viewpointId || "—")}
+                        {idFormatView === "code" ? viewpointCode(v) : (v.displayId || v.viewpointId || "-")}
                       </span>
                       {v.supersedesCode && (
                         <div style={{ marginTop: 3, fontSize: 10, color: "#6B7280", whiteSpace: "nowrap" }}
                           title={t("This viewpoint supersedes (replaced) an earlier one", "Esta vista reemplaza a una anterior")}>
-                          ← {t("supersedes", "reemplaza a")} {v.supersedesCode}
+                          {"<- "}{t("supersedes", "reemplaza a")} {v.supersedesCode}
                         </div>
                       )}
                     </td>
@@ -1110,17 +1126,17 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                           >
                             <Layers size={11} /> G:{groupToken(v.issueGroupId)}
                           </button>
-                        ) : <span style={{ color: "#9CA3AF" }}>—</span>}
+                        ) : <span style={{ color: "#9CA3AF" }}>-</span>}
                       </td>
                     )}
                     {showLifecycleCol && (
                       <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                         {(() => {
                           // Shared field-set contract: "active" is the unmarked default
-                          // state — only superseded/voided get a visible marker, matching
+                          // state - only superseded/voided get a visible marker, matching
                           // how the plugin should surface state in its own UI.
                           const ls = v.lifecycleStatus || "active";
-                          if (ls === "active") return <span style={{ color: "#9CA3AF" }}>—</span>;
+                          if (ls === "active") return <span style={{ color: "#9CA3AF" }}>-</span>;
                           const b = LIFECYCLE_BADGE[ls];
                           return b
                             ? <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: b.bg, color: b.text }}>{b.label}</span>
@@ -1130,16 +1146,16 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     )}
                     {showRevisionCol && (
                       <td style={{ padding: "8px 10px", whiteSpace: "nowrap", fontSize: 12, fontWeight: 700, color: "#1E3A5F" }}>
-                        {(v.revisionNumber ?? 1) > 1 ? `${t("Rev", "Rev")} ${v.revisionNumber}` : <span style={{ fontWeight: 400, color: "#9CA3AF" }}>—</span>}
+                        {(v.revisionNumber ?? 1) > 1 ? `${t("Rev", "Rev")} ${v.revisionNumber}` : <span style={{ fontWeight: 400, color: "#9CA3AF" }}>-</span>}
                       </td>
                     )}
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}><LensPBadge p={v.priority} /></td>
-                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.trade || "—"}</td>
-                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.responsibleCompany || "—"}</td>
-                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.reportType || "—"}</td>
-                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.floor || "—"}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.trade || "-"}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.responsibleCompany || "-"}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.reportType || "-"}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12 }}>{v.floor || "-"}</td>
                     <td style={{ padding: "8px 10px", fontSize: 12, minWidth: 240, maxWidth: 420 }}>
-                      <div style={{ color: "#111827" }}>{v.note || "—"}</div>
+                      <div style={{ color: "#111827" }}>{v.note || "-"}</div>
                       <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>{v.viewpointId}</div>
                     </td>
                     <td style={{ padding: "8px 10px" }}>
@@ -1158,6 +1174,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                       </select>
                     </td>
                     <td style={{ padding: "8px 10px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{fmtCaptured(v.capturedAt)}</td>
+                    <td style={{ padding: "8px 10px", fontSize: 12, fontWeight: 700, color: "#1E3A5F", whiteSpace: "nowrap" }}>{issueAgeLabel(v.capturedAt)}</td>
                     <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         <button className="btn btn-sm btn-outline" onClick={() => jumpToViewpoint(v)} style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
@@ -1204,7 +1221,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                               <thead>
                                 <tr style={{ color: "#6B7280", textAlign: "left" }}>
-                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Code", "Código")}</th>
+                                  <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Code", "Codigo")}</th>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("State", "Estado")}</th>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Trade", "Disciplina")}</th>
                                   <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Note", "Nota")}</th>
@@ -1215,8 +1232,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                   <tr key={o.id} style={{ borderTop: "1px solid #EEF2F7" }}>
                                     <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{viewpointCode(o)}</td>
                                     <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{o.lifecycleStatus === "active" || !o.lifecycleStatus ? "Current" : o.lifecycleStatus}</td>
-                                    <td style={{ padding: "4px 8px" }}>{o.trade || "—"}</td>
-                                    <td style={{ padding: "4px 8px" }}>{o.note || "—"}</td>
+                                    <td style={{ padding: "4px 8px" }}>{o.trade || "-"}</td>
+                                    <td style={{ padding: "4px 8px" }}>{o.note || "-"}</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -1240,7 +1257,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                           {t("Revision history", "Historial de revisiones")}
                         </div>
                         {historyData[v.id] === "loading" && (
-                          <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("Loading…", "Cargando…")}</div>
+                          <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("Loading...", "Cargando...")}</div>
                         )}
                         {historyData[v.id] === "error" && (
                           <div style={{ fontSize: 12, color: "#DC2626" }}>{t("Failed to load history.", "No se pudo cargar el historial.")}</div>
@@ -1268,9 +1285,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                       {h.chain.map((c: any) => (
                                         <tr key={c.id} style={{ borderTop: "1px solid #EEF2F7" }}>
                                           <td style={{ padding: "4px 8px", whiteSpace: "nowrap", fontWeight: 700, color: "#1E3A5F" }}>{c.revisionNumber ?? 1}</td>
-                                          <td style={{ padding: "4px 8px" }}>{c.note || "—"}</td>
-                                          <td style={{ padding: "4px 8px" }}>{c.trade || "—"}</td>
-                                          <td style={{ padding: "4px 8px" }}>{c.floor || "—"}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.note || "-"}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.trade || "-"}</td>
+                                          <td style={{ padding: "4px 8px" }}>{c.floor || "-"}</td>
                                           <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{c.lifecycleStatus === "active" || !c.lifecycleStatus ? "Current" : c.lifecycleStatus}</td>
                                           <td style={{ padding: "4px 8px", whiteSpace: "nowrap", color: "#6B7280" }}>{fmtCaptured(c.updatedAt || c.createdAt)}</td>
                                         </tr>
@@ -1280,13 +1297,13 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                 </div>
                               )}
                               {h.events.length === 0 ? (
-                                <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("No revisions yet — this is the original version.", "Sin revisiones — esta es la versión original.")}</div>
+                                <div style={{ fontSize: 12, color: "#9CA3AF" }}>{t("No revisions yet - this is the original version.", "Sin revisiones - esta es la version original.")}</div>
                               ) : (
                                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                                   <thead>
                                     <tr style={{ color: "#6B7280", textAlign: "left" }}>
-                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("When", "Cuándo")}</th>
-                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Action", "Acción")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("When", "Cuando")}</th>
+                                      <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Action", "Accion")}</th>
                                       <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("From", "De")}</th>
                                       <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("To", "A")}</th>
                                       <th style={{ padding: "4px 8px", fontWeight: 600 }}>{t("Reason", "Motivo")}</th>
@@ -1298,9 +1315,9 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                                       <tr key={e.id} style={{ borderTop: "1px solid #EEF2F7" }}>
                                         <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>{fmtCaptured(e.createdAt)}</td>
                                         <td style={{ padding: "4px 8px", whiteSpace: "nowrap", fontWeight: 700 }}>{ACTION_LABEL[e.actionType] || e.actionType}</td>
-                                        <td style={{ padding: "4px 8px" }}>{e.fileNameBefore || "—"}</td>
-                                        <td style={{ padding: "4px 8px" }}>{e.fileNameAfter || "—"}</td>
-                                        <td style={{ padding: "4px 8px" }}>{e.details || "—"}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.fileNameBefore || "-"}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.fileNameAfter || "-"}</td>
+                                        <td style={{ padding: "4px 8px" }}>{e.details || "-"}</td>
                                         <td style={{ padding: "4px 8px", color: "#6B7280" }}>{e.userCompanyName ? `${e.userFullName} (${e.userCompanyName})` : e.userFullName}</td>
                                       </tr>
                                     ))}
@@ -1359,10 +1376,10 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                     <tr key={rp.id} style={{ borderTop: "1px solid #F3F4F6" }}>
                       <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: "#1D4ED8", whiteSpace: "nowrap" }}>{rp.reportNumber}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{fmtCaptured(rp.generatedAt)}</td>
-                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.generatedByName || "—"}</td>
-                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.viewpointCount ?? "—"}</td>
-                      <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: hc }}>{hs === null ? "—" : hs}</td>
-                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "—"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.generatedByName || "-"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#111827" }}>{rp.viewpointCount ?? "-"}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: 700, color: hc }}>{hs === null ? "-" : hs}</td>
+                      <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "-"}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{rp.isExecutiveOnePager ? t("Executive", "Ejecutivo") : t("Full", "Completo")}</td>
                       <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
                         <button className="btn btn-sm btn-outline" onClick={() => deleteReport(rp.id)}
@@ -1538,7 +1555,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
               )}
               {actionModal.type === "void" && (
                 <p style={{ margin: 0, fontSize: 13, color: "#4B5563" }}>
-                  {t("This viewpoint will stay visible but be marked voided. You can review this in its history.", "Esta vista permanecerá visible pero se marcará como anulada. Puede revisarlo en su historial.")}
+                  {t("This viewpoint will stay visible but be marked voided. You can review this in its history.", "Esta vista permanecera visible pero se marcara como anulada. Puede revisarlo en su historial.")}
                 </p>
               )}
               <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, fontWeight: 600, color: "#374151" }}>
@@ -1573,7 +1590,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}
               >
                 {actionPhase === "submitting"
-                  ? <><RefreshCw size={14} /> {t("Saving…", "Guardando…")}</>
+                  ? <><RefreshCw size={14} /> {t("Saving...", "Guardando...")}</>
                   : actionModal.type === "void"
                     ? <><Ban size={14} /> {t("Void", "Anular")}</>
                     : <><CheckCircle2 size={14} /> {t("Save", "Guardar")}</>}
@@ -1632,7 +1649,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 style={{ fontSize: 13, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}
               >
                 <Copy size={14} />
-                {copiedId === jumpTarget.id ? t("Copied!", "¡Copiado!") : t("Copy", "Copiar")}
+                {copiedId === jumpTarget.id ? t("Copied!", "Copiado!") : t("Copy", "Copiar")}
               </button>
             </div>
           </div>
@@ -1687,7 +1704,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                   list="lens-submitted-to" placeholder={t("Select or type a recipient", "Selecciona o escribe un destinatario")} style={inpStyle} />
                 <datalist id="lens-submitted-to">
                   {members.map((m, i) => {
-                    const v = m.userCompanyName ? `${m.userFullName} — ${m.userCompanyName}` : m.userFullName;
+                    const v = m.userCompanyName ? `${m.userFullName} - ${m.userCompanyName}` : m.userFullName;
                     return v ? <option key={i} value={v} /> : null;
                   })}
                 </datalist>
@@ -1696,7 +1713,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 {t("Watermark", "Marca de Agua")}
                 <select value={form.watermarkType} onChange={e => setForm(f => ({ ...f, watermarkType: e.target.value }))} style={inpStyle}>
                   <option value="draft">{t("Draft", "Borrador")}</option>
-                  <option value="issued">{t("Issued for Coordination", "Emitido para Coordinación")}</option>
+                  <option value="issued">{t("Issued for Coordination", "Emitido para Coordinacion")}</option>
                   <option value="superseded">{t("Superseded", "Reemplazado")}</option>
                 </select>
               </label>
@@ -1760,7 +1777,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, fontSize: 13, color: "#374151", cursor: "pointer" }}>
               <input type="checkbox" checked={form.showHealthScore}
                 onChange={e => setForm(f => ({ ...f, showHealthScore: e.target.checked }))} />
-              {t("Show Coordination Health Score on the report", "Mostrar Puntaje de Salud de Coordinación en el reporte")}
+              {t("Show Coordination Health Score on the report", "Mostrar Puntaje de Salud de Coordinacion en el reporte")}
             </label>
 
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 13, color: "#374151", cursor: "pointer" }}>
@@ -1814,8 +1831,8 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
                 onChange={e => setForm(f => ({ ...f, idFormat: e.target.value }))}
                 style={{ border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13, padding: "6px 10px", minWidth: 240 }}
               >
-                <option value="displayId">{t("Display ID (plugin code)", "ID de visualización (código del plugin)")}</option>
-                <option value="code">{t("Viewpoint code (Trade-Floor-Seq)", "Código de vista (Disciplina-Piso-Sec)")}</option>
+                <option value="displayId">{t("Display ID (plugin code)", "ID de visualizacion (codigo del plugin)")}</option>
+                <option value="code">{t("Viewpoint code (Trade-Floor-Seq)", "Codigo de vista (Disciplina-Piso-Sec)")}</option>
               </select>
             </label>
 
