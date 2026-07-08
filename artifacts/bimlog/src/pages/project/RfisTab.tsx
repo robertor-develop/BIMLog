@@ -555,7 +555,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                           <span style={{ fontSize: 12, fontWeight: 600, color: bic.color }}>{bic.label}</span>
                         </div>
                       ) : (
-                        <span style={{ fontSize: 11, color: "#16A34A" }}>✓ {w("Closed", "Cerrado", lang)}</span>
+                        <span style={{ fontSize: 11, color: "#16A34A" }}>{w("Closed", "Cerrado", lang)}</span>
                       )}
                     </td>
                     <td><span style={{ fontSize: 12 }}>{rfi.submittedByCompany || rfi.createdByName || "—"}</span></td>

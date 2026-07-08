@@ -62,7 +62,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <div style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 24, minWidth: 400, maxWidth: 560, width: "90vw", maxHeight: "85vh", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ fontWeight: 700, fontSize: 16, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "hsl(var(--muted-foreground))" }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "hsl(var(--muted-foreground))" }}>X</button>
         </div>
         {children}
       </div>

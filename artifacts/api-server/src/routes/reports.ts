@@ -132,7 +132,7 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
       doc.fontSize(10).font("Helvetica-Bold").text("Non-Compliant Files:");
       doc.moveDown(0.3);
       rejected.slice(0, 30).forEach(f => {
-        doc.fontSize(8).font("Helvetica").fillColor("#DC2626").text(`✗ ${f.fileName}`, { indent: 10 });
+        doc.fontSize(8).font("Helvetica").fillColor("#DC2626").text(`Failed: ${f.fileName}`, { indent: 10 });
       });
     }
     pdfFooter(doc);

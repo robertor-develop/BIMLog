@@ -388,7 +388,7 @@ CRITICAL RULES:
           entityType: "file",
           entityId: fileId,
           fileNameAfter: fileName,
-          details: `📢 Coordinator alert: ${details}`,
+          details: `Coordinator alert: ${details}`,
         });
       }
     }

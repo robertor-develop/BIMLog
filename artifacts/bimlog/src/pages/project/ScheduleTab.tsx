@@ -160,11 +160,16 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   };
 
   const updateStatus = async (id: number, status: string) => {
-    await fetch(`${API}/projects/${projectId}/milestones/${id}`, {
+    const r = await fetch(`${API}/projects/${projectId}/milestones/${id}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ status }),
     });
+    if (!r.ok) {
+      toast({ title: t("Could not update schedule item", "No se pudo actualizar la fecha"), variant: "destructive" });
+      return;
+    }
+    setSelected(prev => prev && prev.source === "milestone" && prev.id === id ? { ...prev, status } : prev);
     await load();
   };
 
@@ -176,8 +181,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   };
 
   const openItem = (item: ScheduleItem) => {
-    if (item.route) window.location.href = item.route;
-    else setSelected(item);
+    setSelected(item);
   };
 
   const openNewForDate = (date: Date) => {
@@ -237,7 +241,12 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     d.setDate(calendarStart.getDate() + i);
     return d;
   });
-  const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+  const dayKey = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const byDay = filtered.reduce<Record<string, ScheduleItem[]>>((acc, item) => {
     const key = dayKey(new Date(item.dueDate));
     (acc[key] ||= []).push(item);
@@ -491,7 +500,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                   <td style={{ padding: 10 }}>{statusBadge(item.status, item.isOverdue)}</td>
                   <td style={{ padding: 10, whiteSpace: "nowrap" }}>
                     <button style={smallButtonStyle} onClick={() => openItem(item)}>
-                      <ExternalLink size={12} /> {item.route ? t("Open", "Abrir") : t("Details", "Detalle")}
+                      <ExternalLink size={12} /> {t("Details", "Detalle")}
                     </button>
                     {canWrite && item.source === "milestone" && !isDone(item.status) && (
                       <button style={{ ...smallButtonStyle, marginLeft: 6 }} onClick={() => updateStatus(item.id, "completed")}>
@@ -522,6 +531,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               <Detail label={t("Company", "Empresa")} value={selected.company || "-"} />
               <Detail label={t("Linked Module", "Módulo Vinculado")} value={selected.linkedModule || selected.source} />
             </div>
+            {selected.route && (
+              <div style={{ marginTop: 16, padding: 12, border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 8 }}>
+                <div style={{ fontSize: 12, color: "#1E3A5F", marginBottom: 10 }}>
+                  {selected.source === "milestone"
+                    ? t("This manual schedule item is linked to another BIMLog record.", "Esta fecha manual esta vinculada a otro registro de BIMLog.")
+                    : t("This date comes from the linked record. Edit the source record to change its date or status.", "Esta fecha viene del registro vinculado. Edita el registro fuente para cambiar fecha o estado.")}
+                </div>
+                <button className="btn btn-primary" onClick={() => { window.location.href = selected.route!; }}>
+                  <ExternalLink size={13} style={{ marginRight: 4 }} />{t("Open Linked Record", "Abrir Registro Vinculado")}
+                </button>
+              </div>
+            )}
             {canWrite && selected.source === "milestone" && (
               <div style={{ display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" }}>
                 {!isDone(selected.status) && (
@@ -589,7 +610,7 @@ function ScheduleCard({
       </button>
       <div style={{ display: "flex", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
         <button className="btn btn-sm btn-outline" onClick={onOpen}>
-          <ExternalLink size={11} style={{ marginRight: 3 }} />{item.route ? t("Open", "Abrir") : t("Details", "Detalle")}
+          <ExternalLink size={11} style={{ marginRight: 3 }} />{t("Details", "Detalle")}
         </button>
         {canWrite && item.source === "milestone" && !done && (
           <>

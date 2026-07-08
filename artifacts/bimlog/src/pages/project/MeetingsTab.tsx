@@ -506,7 +506,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                       </td>
                       <td style={{ padding: "10px 12px" }}>
                         {canWrite && ai.status !== "completed" && (
-                          <button className="btn btn-sm btn-outline" onClick={() => updateActionItem(ai.id, "completed")}>✓ {t("Done","Listo")}</button>
+                          <button className="btn btn-sm btn-outline" onClick={() => updateActionItem(ai.id, "completed")}>{t("Done","Listo")}</button>
                         )}
                       </td>
                     </tr>

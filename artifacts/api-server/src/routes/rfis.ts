@@ -32,7 +32,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-// Unicode checkbox characters — ☐ unchecked (\u2610), ☑ checked (\u2611)
+// PDF checkbox characters: unchecked (\u2610), checked (\u2611)
 // PDFKit built-in fonts lack these glyphs; boxes are drawn manually below.
 const UNCHECKED_BOX = "\u2610";
 const CHECKED_BOX   = "\u2611";

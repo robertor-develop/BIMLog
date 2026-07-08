@@ -2782,8 +2782,8 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
                       {isCollapsed ? <ChevronDown style={{ width: 13, height: 13 }} /> : <ChevronUp style={{ width: 13, height: 13 }} />}
                     </button>
                     {/* Per-category controls */}
-                    <button onClick={() => selectAllCat(cat)} title={w("Select all in this section", "Seleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "#1D4ED8", flexShrink: 0 }}>✓ {w("All", "Todos", lang)}</button>
-                    <button onClick={() => deselectAllCat(cat)} title={w("Deselect all in this section", "Deseleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>✕ {w("None", "Ninguno", lang)}</button>
+                    <button onClick={() => selectAllCat(cat)} title={w("Select all in this section", "Seleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "#1D4ED8", flexShrink: 0 }}>{w("All", "Todos", lang)}</button>
+                    <button onClick={() => deselectAllCat(cat)} title={w("Deselect all in this section", "Deseleccionar todos en esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>{w("None", "Ninguno", lang)}</button>
                     <button onClick={() => setAddingToCat(addingToCat === cat ? null : cat)} title={w("Add custom type to this section", "Agregar tipo personalizado a esta sección", lang)} style={{ padding: "5px 8px", fontSize: 10, fontWeight: 700, border: "1px solid hsl(var(--border))", borderRadius: 5, cursor: "pointer", background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
                       <Plus style={{ width: 10, height: 10 }} />
                     </button>
@@ -2823,7 +2823,7 @@ function Step3({ state, setState, lang }: { state: WizardState; setState: React.
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 900, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))", marginBottom: 4 }}>{"0".repeat(n - 1)}1</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: state.seqDigits === n ? "#1D4ED8" : "hsl(var(--foreground))" }}>{n} {w("digits", "dígitos", lang)}</div>
               <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{n === 3 ? w("001 to 999 — smaller projects", "001 a 999 — proyectos pequeños", lang) : n === 4 ? w("0001 to 9999 — recommended", "0001 a 9999 — recomendado", lang) : w("00001 to 99999 — very large", "00001 a 99999 — proyectos muy grandes", lang)}</div>
-              {n === 4 && state.seqDigits === 4 && <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: "#166534", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "1px 6px", borderRadius: 4, display: "inline-block" }}>✓ {w("Recommended", "Recomendado", lang)}</div>}
+              {n === 4 && state.seqDigits === 4 && <div style={{ marginTop: 4, fontSize: 10, fontWeight: 700, color: "#166534", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "1px 6px", borderRadius: 4, display: "inline-block" }}>{w("Recommended", "Recomendado", lang)}</div>}
             </button>
           ))}
         </div>
@@ -3281,7 +3281,7 @@ function SmartSuggestInput({ value, onChange, fieldLabel, lang }: {
                             display: "flex", alignItems: "center", gap: 4,
                           }}
                         >
-                          {selected && <span style={{ fontSize: 9 }}>✓</span>}
+                          {selected && <span style={{ fontSize: 9 }}>Selected</span>}
                           {it.code}
                           <span style={{ fontSize: 9, fontWeight: 400, color: selected ? "#1D4ED8" : "hsl(var(--muted-foreground))", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {it.label.includes("—") ? it.label.split("—")[1].trim() : ""}

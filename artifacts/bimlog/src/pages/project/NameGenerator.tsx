@@ -124,7 +124,7 @@ function SearchableSelect({
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = opt === value ? color.bg : "transparent"; }}
               >
                 {opt}
-                {opt === value && <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.6 }}>✓</span>}
+                {opt === value && <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.6 }}>Selected</span>}
               </button>
             ))}
           </div>

@@ -419,7 +419,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
                       return (
                         <tr key={s.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{fl}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{isShop ? "✓" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{isShop ? "Yes" : ""}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("vert") ? "X" : ""}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{(s.submittalType ?? "").toLowerCase().includes("sleeve") && (s.submittalType ?? "").toLowerCase().includes("horiz") ? "X" : ""}</td>
                           <td style={{ padding: "6px 10px" }}>{approvalCell(s)}</td>
@@ -1713,7 +1713,7 @@ const RISK_SCORE: Record<string, { label: string; labelEs: string; color: string
   possible_issue: { label: "Medium", labelEs: "Medio",  color: "#B45309", bg: "#FFFBEB" },
   fail:           { label: "High",   labelEs: "Alto",   color: "#DC2626", bg: "#FEF2F2" },
 };
-const ASPECT_ICON: Record<string, string> = { pass: "✓", possible_issue: "!", fail: "✗" };
+const ASPECT_ICON: Record<string, string> = { pass: "Pass", possible_issue: "Review", fail: "Fail" };
 
 function AiCheckDisplay({ result, lang }: { result: AiCheckResult; lang: string }) {
   const risk = RISK_SCORE[result.overall] || RISK_SCORE.pass;

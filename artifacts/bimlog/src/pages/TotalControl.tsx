@@ -31,7 +31,7 @@ function TCModal({ title, onClose, children, wide }: { title: string; onClose: (
       <div style={{ background: "#fff", borderRadius: 14, padding: 28, maxWidth: wide ? 760 : 540, width: "92vw", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <h3 style={{ fontWeight: 800, fontSize: 16, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "#9CA3AF", lineHeight: 1 }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "#9CA3AF", lineHeight: 1 }}>X</button>
         </div>
         {children}
       </div>

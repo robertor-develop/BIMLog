@@ -137,7 +137,7 @@ function AiBriefingCard({ token }: { token?: string }) {
               <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 4 }}><Sparkles style={{ width: 13, height: 13 }} />{tl("AI Briefing", "Briefing IA")}</span>
               <span style={{ fontSize: 10, color: "#6B7280", marginLeft: 8 }}>{briefing.todaysDate}</span>
             </div>
-            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0 }}>✕</button>
+            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0 }}>X</button>
           </div>
           <p style={{ fontSize: 12, color: "#374151", margin: "0 0 10px", lineHeight: 1.6 }}>{briefing.summary}</p>
           {briefing.criticalItems?.length > 0 && (
@@ -540,7 +540,7 @@ export function Dashboard() {
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                         <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
-                        <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All items up to date ✓</span>
+                        <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All items up to date</span>
                       </div>
                     );
                   }

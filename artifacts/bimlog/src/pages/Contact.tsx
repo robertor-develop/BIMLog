@@ -98,7 +98,7 @@ export function Contact() {
           <div style={{ flex: 1, minWidth: 300 }}>
             {status === "sent" ? (
               <div style={{ background: "#22c55e11", border: "1px solid #22c55e44", borderRadius: 12, padding: "36px 32px", textAlign: "center" }}>
-                <div style={{ fontSize: 28, marginBottom: 12 }}>✓</div>
+                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Sent</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>Message received</div>
                 <div style={{ fontSize: 14, color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
                   Thank you for reaching out. We will reply to <strong>{form.email}</strong> within one business day.
