@@ -271,6 +271,26 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   projectId: number; submittals: Submittal[]; lang: string; onGoSubmittals: () => void;
 }) {
   const { toast } = useToast();
+  const [buildingLevels, setBuildingLevels] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const token = getToken();
+    fetch(`/api/v1/projects/${projectId}/levels`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+      .then(r => r.ok ? r.json() : { levels: [] })
+      .then(data => {
+        if (cancelled) return;
+        setBuildingLevels(Array.isArray(data.levels)
+          ? data.levels.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== "")
+          : []);
+      })
+      .catch(() => {
+        if (!cancelled) setBuildingLevels([]);
+      });
+    return () => { cancelled = true; };
+  }, [projectId]);
 
   const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Other"];
   function tradeOf(s: Submittal): string {
@@ -313,13 +333,26 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   const filterOptions = useMemo(() => {
     const uniq = (rows: string[]) => Array.from(new Set(rows.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+    const uniqPreserve = (rows: string[]) => {
+      const seen = new Set<string>();
+      const out: string[] = [];
+      for (const row of rows) {
+        const value = (row || "").trim();
+        const key = value.toLowerCase();
+        if (!value || seen.has(key)) continue;
+        seen.add(key);
+        out.push(value);
+      }
+      return out;
+    };
+    const standardTypes = ["Shop", "Sleeve V", "Sleeve H", "Sleeve", "Other"];
     return {
-      floors: uniq(submittals.map(floorOf)),
-      types: uniq(submittals.map(typeOf)),
+      floors: uniqPreserve([...buildingLevels, ...uniq(submittals.map(floorOf))]),
+      types: uniqPreserve([...standardTypes, ...uniq(submittals.map(typeOf))]),
       dates: uniq(submittals.map(trackerDateRaw)),
       statuses: uniq(submittals.map(s => s.status || w("Unknown", "Desconocido", lang))),
     };
-  }, [submittals, lang]);
+  }, [submittals, buildingLevels, lang]);
 
   const visibleSubmittals = useMemo(() => submittals.filter(s => {
     if (filterFloor && floorOf(s) !== filterFloor) return false;
@@ -396,17 +429,14 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 800, color: "#1E3A5F" }}>
-            {w("Shop Drawing Submittal Tracker", "Seguimiento de Entregables", lang)}
+            {w("Submittal Tracking Table", "Tabla de Seguimiento de Entregables", lang)}
           </div>
           <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-            {w("Latest version and RFI status per drawing — share with client",
-               "Última versión y estado de RFI por plano — compartir con cliente", lang)}
+            {w("Live control table by building level, drawing type, date, and review status.",
+               "Tabla viva por nivel, tipo de plano, fecha y estado de revision.", lang)}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <Button size="sm" variant="outline" onClick={onGoSubmittals}>
-            {w("Back to Submittals", "Volver a Entregables", lang)}
-          </Button>
           <Button size="sm" variant="outline" onClick={() => downloadTracker("pdf")}>
             <Download style={{ width: 13, height: 13, marginRight: 4 }} />
             {w("Export PDF", "Exportar PDF", lang)}
@@ -426,16 +456,16 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         marginBottom: 14,
       }}>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
-          {w("Floor", "Piso", lang)}
+          {w("Building Level", "Nivel", lang)}
           <select className="input" value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
-            <option value="">{w("All Floors", "Todos los Pisos", lang)}</option>
+            <option value="">{w("All Building Levels", "Todos los Niveles", lang)}</option>
             {filterOptions.floors.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
-          {w("Type", "Tipo", lang)}
+          {w("Drawing Type", "Tipo de Plano", lang)}
           <select className="input" value={filterType} onChange={e => setFilterType(e.target.value)}>
-            <option value="">{w("All Types", "Todos los Tipos", lang)}</option>
+            <option value="">{w("All Drawing Types", "Todos los Tipos de Plano", lang)}</option>
             {filterOptions.types.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>
@@ -447,9 +477,9 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
-          {w("Status", "Estado", lang)}
+          {w("Review Status", "Estado de Revision", lang)}
           <select className="input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="">{w("All Statuses", "Todos los Estados", lang)}</option>
+            <option value="">{w("All Review Statuses", "Todos los Estados de Revision", lang)}</option>
             {filterOptions.statuses.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>

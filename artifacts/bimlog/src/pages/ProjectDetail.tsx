@@ -84,7 +84,7 @@ export function ProjectDetail() {
         projectCode={project.code}
         projectName={project.name}
         projectDesc={project.description ?? undefined}
-        activeTab={tab}
+        activeTab={tab === "submittal-tracker" ? "submittals" : tab}
         isAdmin={isAdmin}
         memberRole={memberRole}
       />
