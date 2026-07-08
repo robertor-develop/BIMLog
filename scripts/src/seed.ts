@@ -14,9 +14,9 @@ import {
 } from "@workspace/db/schema";
 
 async function seed() {
-  console.log("🌱  Seeding database…\n");
+  console.log("Seeding database...\n");
 
-  // ── Companies ──────────────────────────────────────────────────────────────
+  // Companies
   const [bimtech] = await db
     .insert(companiesTable)
     .values({ name: "BIMtech Corp" })
@@ -25,9 +25,9 @@ async function seed() {
     .insert(companiesTable)
     .values({ name: "DDS Mechanical" })
     .returning();
-  console.log(`✔  Companies: ${bimtech!.name}, ${dds!.name}`);
+  console.log(`OK Companies: ${bimtech!.name}, ${dds!.name}`);
 
-  // ── Users ──────────────────────────────────────────────────────────────────
+  // Users
   const hash = await bcrypt.hash("Demo1234!", 10);
 
   const [roberto] = await db
@@ -42,9 +42,9 @@ async function seed() {
     .insert(usersTable)
     .values({ fullName: "Tom Davis", email: "tom@ddsmechanical.com", passwordHash: hash, companyId: dds!.id })
     .returning();
-  console.log(`✔  Users: ${roberto!.fullName}, ${maria!.fullName}, ${tom!.fullName}`);
+  console.log(`OK Users: ${roberto!.fullName}, ${maria!.fullName}, ${tom!.fullName}`);
 
-  // ── Project ────────────────────────────────────────────────────────────────
+  // Project
   const [project] = await db
     .insert(projectsTable)
     .values({
@@ -55,17 +55,17 @@ async function seed() {
       createdById: roberto!.id,
     })
     .returning();
-  console.log(`✔  Project: ${project!.name} (${project!.code})`);
+  console.log(`OK Project: ${project!.name} (${project!.code})`);
 
-  // ── Members ────────────────────────────────────────────────────────────────
+  // Members
   await db.insert(projectMembersTable).values([
     { projectId: project!.id, userId: roberto!.id, role: "project_admin" },
     { projectId: project!.id, userId: maria!.id,   role: "drafter" },
     { projectId: project!.id, userId: tom!.id,     role: "drafter" },
   ]);
-  console.log(`✔  Members: 3 added`);
+  console.log(`OK Members: 3 added`);
 
-  // ── Naming Convention ──────────────────────────────────────────────────────
+  // Naming Convention
   const [convention] = await db
     .insert(namingConventionsTable)
     .values({ projectId: project!.id, separator: "-", isActive: true })
@@ -85,9 +85,9 @@ async function seed() {
   await db.insert(namingFieldsTable).values(
     fieldDefs.map(f => ({ ...f, conventionId: convention!.id }))
   );
-  console.log(`✔  Convention: 8 fields defined`);
+  console.log(`OK Convention: 8 fields defined`);
 
-  // ── Files ──────────────────────────────────────────────────────────────────
+  // Files
   const now = new Date();
 
   const fileDefs = [
@@ -105,9 +105,9 @@ async function seed() {
     .insert(filesTable)
     .values(fileDefs.map(f => ({ ...f, projectId: project!.id, version: 1 })))
     .returning();
-  console.log(`✔  Files: ${insertedFiles.length} inserted`);
+  console.log(`OK Files: ${insertedFiles.length} inserted`);
 
-  // ── Activity Log ───────────────────────────────────────────────────────────
+  // Activity Log
   const activityEntries = insertedFiles.flatMap(f => {
     const uploader    = f.uploadedById === maria!.id ? maria! : f.uploadedById === roberto!.id ? roberto! : tom!;
     const uploaderCo  = f.uploadedById === tom!.id ? dds!.name : bimtech!.name;
@@ -150,9 +150,9 @@ async function seed() {
   });
 
   await db.insert(activityLogTable).values(activityEntries);
-  console.log(`✔  Activity log: ${activityEntries.length} entries`);
+  console.log(`OK Activity log: ${activityEntries.length} entries`);
 
-  // ── RFIs ───────────────────────────────────────────────────────────────────
+  // RFIs
   const rfiDefs = [
     {
       number: "RFI-001",
@@ -199,9 +199,9 @@ async function seed() {
   await db.insert(rfisTable).values(
     rfiDefs.map(r => ({ ...r, projectId: project!.id }))
   );
-  console.log(`✔  RFIs: ${rfiDefs.length} inserted`);
+  console.log(`OK RFIs: ${rfiDefs.length} inserted`);
 
-  // ── Submittals ─────────────────────────────────────────────────────────────
+  // Submittals
   const submittalDefs = [
     {
       number: "SUB-001",
@@ -238,10 +238,10 @@ async function seed() {
   await db.insert(submittalsTable).values(
     submittalDefs.map(s => ({ ...s, projectId: project!.id }))
   );
-  console.log(`✔  Submittals: ${submittalDefs.length} inserted`);
+  console.log(`OK Submittals: ${submittalDefs.length} inserted`);
 
-  // ── Summary ────────────────────────────────────────────────────────────────
-  console.log("\n✅  Seed complete:");
+  // Summary
+  console.log("\nSeed complete:");
   console.log(`   Companies  : 2`);
   console.log(`   Users      : 3  (password: Demo1234!)`);
   console.log(`   Projects   : 1`);
@@ -256,6 +256,6 @@ async function seed() {
 }
 
 seed().catch(err => {
-  console.error("❌  Seed failed:", err);
+  console.error("ERROR Seed failed:", err);
   process.exit(1);
 });

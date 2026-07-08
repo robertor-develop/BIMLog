@@ -10,6 +10,7 @@ const scanRoots = [
   "artifacts/sync-agent",
   "lib/api-client-react/src",
   "lib/db/src",
+  "scripts/src",
   "replit.md",
   "package.json",
 ];
@@ -37,6 +38,7 @@ function readLines(file) {
 
 const files = scanRoots.flatMap(walk).filter(file => /\.(ts|tsx|js|json|md)$/.test(file));
 const findings = [];
+const emojiPattern = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
 
 function add(severity, category, file, line, detail) {
   findings.push({ severity, category, file: rel(file), line, detail });
@@ -53,6 +55,9 @@ for (const file of files) {
     const lineNo = index + 1;
     if (line.includes("bim-log-ignite.replit.app")) {
       add("P0", "old-replit-url", file, lineNo, "Old Replit production URL is still referenced.");
+    }
+    if (emojiPattern.test(line)) {
+      add("P1", "emoji-source", file, lineNo, "Owner rule violation: emoji found in source code or user-visible text.");
     }
     if (isApi && !isAiUsage && /new\s+Anthropic\s*\(/.test(line)) {
       add("P0", "ai-billing-bypass", file, lineNo, "Direct Anthropic client bypasses getAnthropicClientForUser and AI usage tracking.");

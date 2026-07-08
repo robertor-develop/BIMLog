@@ -35,12 +35,12 @@ async function run() {
   );
 
   const user = userRes.rows[0];
-  console.log(`✅  Ready: ${user.full_name} <${user.email}>`);
+  console.log(`OK Ready: ${user.full_name} <${user.email}>`);
 
   await pool.end();
 }
 
 run().catch(err => {
-  console.error("❌  Failed:", err.message);
+  console.error("ERROR Failed:", err.message);
   process.exit(1);
 });

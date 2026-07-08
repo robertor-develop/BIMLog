@@ -173,7 +173,7 @@
   <div class="logo">B</div>
   <div class="header-text">
     <h1>BIMLog Sync Agent</h1>
-    <p>Folder watcher &amp; naming validator · IgniteSmart</p>
+    <p>Folder watcher &amp; naming validator - IgniteSmart</p>
   </div>
 </div>
 
@@ -261,7 +261,7 @@
         <span class="log-time">${formatTime(entry.timestamp)}</span>
         <span class="log-badge ${entry.status}">${entry.status}</span>
         <span class="log-file">${entry.fileName}</span>
-        <span class="log-msg">— ${entry.message}</span>
+        <span class="log-msg">- ${entry.message}</span>
       </div>
     `).join("");
   }
@@ -276,7 +276,7 @@
       <span class="log-time">${formatTime(entry.timestamp)}</span>
       <span class="log-badge ${entry.status}">${entry.status}</span>
       <span class="log-file">${entry.fileName}</span>
-      <span class="log-msg">— ${entry.message}</span>
+      <span class="log-msg">- ${entry.message}</span>
     `;
     container.insertBefore(div, container.firstChild);
   }
@@ -288,7 +288,7 @@
     const toggle = document.getElementById("watchToggle");
     if (watching) {
       dot.classList.add("active");
-      label.textContent = "Watching — active";
+      label.textContent = "Watching - active";
       label.classList.add("active");
       toggle.textContent = "Stop Watching";
       toggle.className = "watch-toggle stop";

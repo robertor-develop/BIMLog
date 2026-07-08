@@ -29,7 +29,7 @@ function saveSettings(settings) {
 let inMemoryLogs = [];
 
 function appendLog(entry) {
-  const line = `[${entry.timestamp}] [${entry.status.toUpperCase()}] ${entry.fileName} — ${entry.message}\n`;
+  const line = `[${entry.timestamp}] [${entry.status.toUpperCase()}] ${entry.fileName} - ${entry.message}\n`;
   try {
     fs.appendFileSync(LOG_PATH, line, "utf8");
   } catch (error) {
@@ -140,9 +140,9 @@ function startWatcher() {
     appendLog(entry);
 
     if (result.valid) {
-      showNotification("BIMLog — File Accepted", `${fileName}\n${result.message}`, "normal");
+      showNotification("BIMLog - File Accepted", `${fileName}\n${result.message}`, "normal");
     } else {
-      showNotification("BIMLog — File Rejected", `${fileName}\n${result.message}`, "critical");
+      showNotification("BIMLog - File Rejected", `${fileName}\n${result.message}`, "critical");
     }
 
     updateTrayMenu();
@@ -151,7 +151,7 @@ function startWatcher() {
   watcher.on("error", (err) => {
     appendLog({
       timestamp: new Date().toISOString(),
-      fileName: "—",
+      fileName: "-",
       status: "error",
       message: `Watcher error: ${err.message}`,
     });
@@ -184,7 +184,7 @@ function createTrayIcon() {
 
 function updateTrayMenu() {
   if (!tray) return;
-  const statusLabel = isWatching ? "Watching — active" : "Stopped";
+  const statusLabel = isWatching ? "Watching - active" : "Stopped";
   const menu = Menu.buildFromTemplate([
     { label: "BIMLog Sync Agent", enabled: false },
     { label: `Status: ${statusLabel}`, enabled: false },
@@ -202,7 +202,7 @@ function updateTrayMenu() {
     { label: "Quit BIMLog Sync Agent", click: () => app.quit() },
   ]);
   tray.setContextMenu(menu);
-  tray.setToolTip(`BIMLog Sync Agent — ${statusLabel}`);
+  tray.setToolTip(`BIMLog Sync Agent - ${statusLabel}`);
 }
 
 function openSettings() {
@@ -213,7 +213,7 @@ function openSettings() {
   settingsWindow = new BrowserWindow({
     width: 560,
     height: 680,
-    title: "BIMLog Sync Agent — Settings",
+    title: "BIMLog Sync Agent - Settings",
     resizable: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
