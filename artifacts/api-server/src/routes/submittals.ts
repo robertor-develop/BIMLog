@@ -326,7 +326,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
   }
 });
 
-// ─── GET /projects/:projectId/submittals/export-all (REMOVED — Excel is client-side) ─
+// GET /projects/:projectId/submittals/export-excel
 router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const projectId = parseInt(String(req.params.projectId));

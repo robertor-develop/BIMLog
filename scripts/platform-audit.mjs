@@ -157,15 +157,15 @@ if (fs.existsSync(authMiddlewarePath)) {
   }
 }
 
-const submittalFiles = files.map(rel).filter(file =>
-  file.includes("Submittal") || file.includes("submittal") || file.endsWith("/submittals.ts"),
-);
-findings.push({
-  severity: "INFO",
-  category: "module-surface",
-  file: "submittals",
-  detail: `Submittal-related source files found: ${submittalFiles.length}. Key UX split risk: SubmittalsTab, SubmittalTrackerTab, submittals.ts, submittal_reports.ts.`,
-});
+const orphanSubmittalTrackerPath = path.join(root, "artifacts/bimlog/src/pages/project/SubmittalTrackerTab.tsx");
+if (fs.existsSync(orphanSubmittalTrackerPath)) {
+  findings.push({
+    severity: "INFO",
+    category: "module-surface",
+    file: rel(orphanSubmittalTrackerPath),
+    detail: "Legacy standalone submittal tracker component exists. Keep submittal list, register, and tracking views unified in SubmittalsTab.",
+  });
+}
 
 const order = { P0: 0, P1: 1, P2: 2, INFO: 3 };
 findings.sort((a, b) => order[a.severity] - order[b.severity] || a.category.localeCompare(b.category) || a.file.localeCompare(b.file));
