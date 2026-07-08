@@ -89,6 +89,21 @@ for (const [key, locations] of routesByKey) {
   }
 }
 
+const authMiddlewarePath = path.join(root, "artifacts/api-server/src/middlewares/auth.ts");
+if (fs.existsSync(authMiddlewarePath)) {
+  const authSource = fs.readFileSync(authMiddlewarePath, "utf8");
+  const requirePermissionStart = authSource.indexOf("export function requirePermission");
+  const requirePermissionBlock = requirePermissionStart >= 0 ? authSource.slice(requirePermissionStart) : "";
+  if (!/userCheck\?\.isSuperAdmin/.test(requirePermissionBlock)) {
+    findings.push({
+      severity: "P0",
+      category: "super-admin-permission-bypass",
+      file: rel(authMiddlewarePath),
+      detail: "requirePermission must let data-driven super admins bypass project membership checks, matching requireProjectMember.",
+    });
+  }
+}
+
 const submittalFiles = files.map(rel).filter(file =>
   file.includes("Submittal") || file.includes("submittal") || file.endsWith("/submittals.ts"),
 );
