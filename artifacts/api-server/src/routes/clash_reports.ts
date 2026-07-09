@@ -1012,10 +1012,80 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       rubenReport["!rows"] = rubenSheetRows;
       rubenReport["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 2, c: 0 }, e: { r: Math.max(2, rubenRows.length - 1), c: 4 } }) };
       rubenReport["!freeze"] = { xSplit: 0, ySplit: 3 };
+
+      const cleanGroup = (value: string, fallback: string) => (value && value.trim()) || fallback;
+      const buildSummarySheet = (title: string, groupLabel: string, groupOf: (row: typeof exportRows[number]) => string) => {
+        const grouped = new Map<string, typeof exportRows>();
+        for (const row of exportRows) {
+          const key = cleanGroup(groupOf(row), "Unassigned");
+          const list = grouped.get(key) ?? [];
+          list.push(row);
+          grouped.set(key, list);
+        }
+        const table = Array.from(grouped.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([key, list]) => [
+            key,
+            list.length,
+            list.filter(r => r.state === "Current").length,
+            list.filter(r => r.state === "Superseded").length,
+            list.filter(r => r.state === "Voided").length,
+            list.filter(r => r.status === "Open").length,
+            list.filter(r => r.status === "Follow Up").length,
+            list.filter(r => r.status === "Waiting Design").length,
+            list.filter(r => r.status === "Approved").length,
+            list.filter(r => r.status === "Resolved").length,
+            list.filter(r => r.priority === "P1").length,
+            list.filter(r => r.priority === "P2").length,
+            list.filter(r => r.priority === "P3").length,
+            list.filter(r => r.priority === "P4").length,
+            list.filter(r => r.priority === "P5").length,
+          ]);
+        const sheet = XLSX.utils.aoa_to_sheet([
+          [title],
+          [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
+          [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; Scope=${lifecycleScope}`],
+          [],
+          [groupLabel, "Total", "Current", "Superseded", "Voided", "Open", "Follow Up", "Waiting Design", "Approved", "Resolved", "P1", "P2", "P3", "P4", "P5"],
+          ...table,
+        ]);
+        sheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }];
+        sheet["!cols"] = [{ wch: 28 }, ...Array(14).fill({ wch: 13 })];
+        sheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: Math.max(4, table.length + 4), c: 14 } }) };
+        sheet["!freeze"] = { xSplit: 0, ySplit: 5 };
+        return sheet;
+      };
+
+      const floorTradeKeys = Array.from(new Set(exportRows.map(r => cleanGroup(r.trade, "Unassigned")))).sort();
+      const floorRows = Array.from(new Set(exportRows.map(r => cleanGroup(r.floor, "Unassigned"))))
+        .sort()
+        .map(floorName => [
+          floorName,
+          ...floorTradeKeys.map(tradeName => exportRows.filter(r => cleanGroup(r.floor, "Unassigned") === floorName && cleanGroup(r.trade, "Unassigned") === tradeName).length),
+          exportRows.filter(r => cleanGroup(r.floor, "Unassigned") === floorName).length,
+        ]);
+      const matrixSheet = XLSX.utils.aoa_to_sheet([
+        ["Open Items Matrix"],
+        [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
+        [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; Scope=${lifecycleScope}`],
+        [],
+        ["Floor", ...floorTradeKeys, "Total"],
+        ...floorRows,
+      ]);
+      matrixSheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(1, floorTradeKeys.length + 1) } }];
+      matrixSheet["!cols"] = [{ wch: 22 }, ...floorTradeKeys.map(() => ({ wch: 16 })), { wch: 12 }];
+      matrixSheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: Math.max(4, floorRows.length + 4), c: floorTradeKeys.length + 1 } }) };
+      matrixSheet["!freeze"] = { xSplit: 1, ySplit: 5 };
+
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Lens Viewpoints");
-      XLSX.utils.book_append_sheet(workbook, rubenReport, "RUBEN REPORT");
+      XLSX.utils.book_append_sheet(workbook, rubenReport, "Custom Report");
       XLSX.utils.book_append_sheet(workbook, summary, "Report Summary");
+      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Building Level", "Building Level", row => row.floor), "Summary by Level");
+      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Trade", "Trade", row => row.trade), "Summary by Trade");
+      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Responsible Company", "Responsible Company", row => row.responsibleCompany), "Summary by Company");
+      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Review Status", "Review Status", row => row.status), "Summary by Status");
+      XLSX.utils.book_append_sheet(workbook, matrixSheet, "Floor Trade Matrix");
       const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
