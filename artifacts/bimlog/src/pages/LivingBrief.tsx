@@ -6,10 +6,10 @@ import { useAuthStore } from "@/store/auth";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const BRIEF_TOKEN_KEY = "bimlog-brief-token";
-// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md):
+// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, OPEN_LOOP.md):
 // PLATFORM.md auto-regenerates from the build and STATUS.md/AUDIT.md are maintained
 // in the repo after features ship.
-const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md"];
+const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md", "OPEN_LOOP.md"];
 
 type Doc = { name: string; content: string; updatedAt: string };
 type AccessUser = {
@@ -184,7 +184,7 @@ export function LivingBrief() {
     const data = await r.json();
     const fresh: Doc[] = data.docs ?? [];
     setDocs(fresh);
-    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md"];
+    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md", "OPEN_LOOP.md"];
     const present = wanted.filter((n) => fresh.some((d) => d.name === n));
     if (!present.length) { showToast("Nothing to export"); return; }
     const body = present
@@ -349,9 +349,8 @@ export function LivingBrief() {
         </div>
       )}
 
-      {/* Tabs render from the docs[] returned by GET /docs, which now includes
-          AUDIT.md. AUDIT is read-only: it is not in EDITABLE, so no Paste to
-          Update button appears for it. */}
+      {/* Tabs render from docs[] returned by GET /docs. OPEN_LOOP.md is editable;
+          AUDIT.md is read-only because it is not in EDITABLE. */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {docs.map((d, i) => (
           <button key={d.name} onClick={() => { setActiveDoc(i); setEditing(false); setEditContent(""); }} style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>

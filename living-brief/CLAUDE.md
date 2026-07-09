@@ -11,7 +11,7 @@ Living Brief UI and any agent tooling can read AI_DEV.md directly.
 - Owner: Roberto Rodriguez, CEO of BIMCapital Partners INC / IgniteSmart.
 - Primary field user: Ruben Crespo (rubenc@bimcorpgroup.com), first Founding Partner.
 - This is a multi-session build. Context is preserved through the Living Brief documents
-  in this folder: CLAUDE.md, PLATFORM.md, STATUS.md, VISION.md, PLUGIN.md, QUALITY.md.
+  in this folder: CLAUDE.md, PLATFORM.md, STATUS.md, VISION.md, PLUGIN.md, QUALITY.md, OPEN_LOOP.md.
 
 ## Standing Workflow Rule - read before touching anything
 Talk through the full goal and agreed design BEFORE writing code when the user is still
@@ -90,7 +90,7 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - bcryptjs is already installed. Use it for all password hashing.
 
 ## Living Brief specifics
-- CLAUDE.md, VISION.md, PLUGIN.md, and QUALITY.md are owned/hand-edited by AI partners and Roberto.
+- CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, and OPEN_LOOP.md are owned/hand-edited by AI partners and Roberto.
 - PLATFORM.md and STATUS.md may be generated/updated by Replit or build tooling.
 - AUDIT.md is append-only audit history.
 - PLATFORM.md is AUTO-GENERATED at build time by
@@ -103,6 +103,7 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - F5 ONLY routes eligible admins to `/living-brief`; Ctrl+R / Cmd+R remains normal refresh.
 - PLUGIN.md holds the full Navisworks plugin reference and is not auto-generated.
 - QUALITY.md holds the BIMLog Quality 4.0 doctrine derived from the Calidad 4.0 source
+- OPEN_LOOP.md is the active unfinished-work register. Add anything not completed in the current task, move shipped work to Watching/Closed with commit or version notes, and read it at the start of every new task.
   material. Read it before product, UX, report, AI, data, audit, and plugin decisions.
 
 ## AI / model / cost patterns

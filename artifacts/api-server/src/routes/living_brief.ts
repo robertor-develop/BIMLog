@@ -16,11 +16,11 @@ import {
 const router = Router();
 
 const PASSWORD_KEY = "living_brief_password_hash";
-// Editable docs (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md) are stored in platform_settings
+// Editable docs (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, OPEN_LOOP.md) are stored in platform_settings
 // under this key prefix so edits survive every deploy; the on-disk git file is only
 // the initial seed/fallback used until the first save.
 const DOC_KEY_PREFIX = "living_brief_doc:";
-const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md"]);
+const EDITABLE_DOCS = new Set(["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md", "OPEN_LOOP.md"]);
 
 const DOCS = [
   { name: "CLAUDE.md", file: "CLAUDE.md" },
@@ -29,6 +29,7 @@ const DOCS = [
   { name: "VISION.md", file: "VISION.md" },
   { name: "PLUGIN.md", file: "PLUGIN.md" },
   { name: "QUALITY.md", file: "QUALITY.md" },
+  { name: "OPEN_LOOP.md", file: "OPEN_LOOP.md" },
   { name: "AUDIT.md", file: "AUDIT.md" },
 ];
 
@@ -148,9 +149,9 @@ router.post("/living-brief/unlock", authMiddleware, async (req: Request, res: Re
 });
 
 // Return the documents (requires unlock). Editable docs (CLAUDE.md, VISION.md,
-// PLUGIN.md, QUALITY.md)
-// are served from platform_settings when a saved version exists, otherwise from
-// the on-disk seed file. PLATFORM.md, STATUS.md and AUDIT.md always read disk.
+// PLUGIN.md, QUALITY.md, OPEN_LOOP.md) are served from platform_settings when
+// a saved version exists, otherwise from the on-disk seed file. PLATFORM.md,
+// STATUS.md and AUDIT.md always read disk.
 router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_req: Request, res: Response) => {
   const dir = findLivingBriefDir();
   const overrides = await db
@@ -169,9 +170,9 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
 });
 
 // Save an editable document to the platform_settings DB (super admin only).
-// CLAUDE.md, VISION.md, PLUGIN.md and QUALITY.md are editable: PLATFORM.md
-// auto-regenerates from the build and STATUS.md/AUDIT.md are maintained in the repo. Writing to the
-// DB (not disk) makes edits permanent across every future deploy on every instance.
+// CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, and OPEN_LOOP.md are editable.
+// PLATFORM.md auto-regenerates from the build; STATUS.md and AUDIT.md are maintained in the repo.
+// Writing to the DB (not disk) makes edits permanent across every future deploy on every instance.
 router.post("/living-brief/docs/:name", authMiddleware, isSuperAdminMiddleware, async (req: Request, res: Response) => {
   const name = String(req.params.name);
   if (!EDITABLE_DOCS.has(name)) {
