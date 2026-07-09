@@ -213,9 +213,55 @@ startOverdueNotifier();
 (async () => {
   try {
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`);
-    console.log("[migration] project_milestones building_level column ensured");
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS item_type TEXT NOT NULL DEFAULT 'milestone'`);
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS trade TEXT`);
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS assigned_user_id INTEGER`);
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS notes TEXT`);
+    await pool.query(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'project_milestones_assigned_user_id_users_id_fk') THEN
+        ALTER TABLE project_milestones ADD CONSTRAINT project_milestones_assigned_user_id_users_id_fk FOREIGN KEY (assigned_user_id) REFERENCES users(id);
+      END IF;
+    END $$;`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS schedule_buckets (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      name text NOT NULL,
+      bucket_type text NOT NULL DEFAULT 'custom',
+      sort_order integer NOT NULL DEFAULT 0,
+      created_by_id integer REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS schedule_buckets_project_name_uidx ON schedule_buckets (project_id, name)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS schedule_item_placements (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      source_type text NOT NULL,
+      source_id integer NOT NULL,
+      bucket_id integer REFERENCES schedule_buckets(id),
+      rollover_count integer NOT NULL DEFAULT 0,
+      updated_by_id integer REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS schedule_item_placements_item_uidx ON schedule_item_placements (project_id, source_type, source_id)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS schedule_rollover_history (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      source_type text NOT NULL,
+      source_id integer NOT NULL,
+      from_bucket_id integer REFERENCES schedule_buckets(id),
+      from_bucket_name text NOT NULL,
+      to_bucket_id integer REFERENCES schedule_buckets(id),
+      to_bucket_name text NOT NULL,
+      moved_by_id integer REFERENCES users(id),
+      moved_by_name text,
+      moved_at timestamp NOT NULL DEFAULT now()
+    )`);
+    console.log("[migration] schedule planner tables and milestone columns ensured");
   } catch (e) {
-    console.error("[migration] project_milestones building_level migration failed:", e);
+    console.error("[migration] schedule planner migration failed:", e);
   }
 })();
 

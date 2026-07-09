@@ -23,6 +23,7 @@ export * from "./change-orders";
 export * from "./meeting-minutes";
 export * from "./action-items";
 export * from "./project-milestones";
+export * from "./schedule-planner";
 export * from "./coordination_intake_events";
 export * from "./company_profiles";
 export * from "./clash_reports";

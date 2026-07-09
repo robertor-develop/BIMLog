@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-09T20:17:06.499Z
+> Last generated: 2026-07-09T20:53:21.511Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -151,6 +151,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\rfi-responses.ts
 - lib\db\src\schema\rfi-view-events.ts
 - lib\db\src\schema\rfis.ts
+- lib\db\src\schema\schedule-planner.ts
 - lib\db\src\schema\submittal-register.ts
 - lib\db\src\schema\submittal-view-events.ts
 - lib\db\src\schema\submittal_reports.ts
