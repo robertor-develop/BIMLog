@@ -229,11 +229,18 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel") {
+type TrackerExportFilters = { floor?: string; type?: string; date?: string; status?: string };
+
+async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel", filters: TrackerExportFilters = {}) {
   const endpoint = format === "pdf"
     ? `/api/v1/projects/${projectId}/submittals/tracker-pdf`
     : `/api/v1/projects/${projectId}/submittals/tracker-excel`;
-  const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
   if (!response.ok) throw new Error("Tracker export failed");
   const blob = await response.blob();
   downloadBlob(blob, format === "pdf" ? `Submittal-Tracker-Project${projectId}.pdf` : `Submittal-Tracker-Project${projectId}.xlsx`);
@@ -415,7 +422,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   const downloadTracker = async (format: "pdf" | "excel") => {
     try {
-      await downloadSubmittalTracker(projectId, format);
+      await downloadSubmittalTracker(projectId, format, { floor: filterFloor, type: filterType, date: filterDate, status: filterStatus });
       toast({
         title: format === "pdf"
           ? w("Tracker PDF exported", "PDF del seguimiento exportado", lang)
