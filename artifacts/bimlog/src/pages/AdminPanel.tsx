@@ -15,7 +15,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback"];
 
 const FLAG_LABELS: Record<string, string> = {
   ai_presubmission_check: "AI Pre-Submission Check",
@@ -816,6 +816,158 @@ function AiUsageTab({ token }: { token: string }) {
   );
 }
 
+const FEEDBACK_STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "in_review", label: "In Review" },
+  { value: "planned", label: "Planned" },
+  { value: "done", label: "Done" },
+  { value: "rejected", label: "Rejected" },
+];
+
+function FeedbackTab({ token }: { token: string }) {
+  const [items, setItems] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const loadFeedback = useCallback(() => {
+    setLoading(true);
+    setError("");
+    apiFetch("/feedback/admin", token)
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Failed to load feedback");
+        setItems(Array.isArray(data.feedback) ? data.feedback : []);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load feedback");
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  useEffect(() => {
+    loadFeedback();
+  }, [loadFeedback]);
+
+  async function updateStatus(id: unknown, status: string) {
+    const numericId = Number(id);
+    if (!Number.isInteger(numericId)) return;
+    setError("");
+    try {
+      const response = await apiFetch(`/feedback/admin/${numericId}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Failed to update feedback");
+      setItems((current) => current.map((item) => Number(item.id) === numericId ? { ...item, status } : item));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update feedback");
+    }
+  }
+
+  const visibleItems = statusFilter === "all" ? items : items.filter((item) => String(item.status || "open") === statusFilter);
+  const openCount = items.filter((item) => String(item.status || "open") === "open").length;
+  const reviewCount = items.filter((item) => String(item.status || "open") === "in_review").length;
+  const plannedCount = items.filter((item) => String(item.status || "open") === "planned").length;
+  const closedCount = items.filter((item) => ["done", "rejected"].includes(String(item.status || "open"))).length;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Feedback</h2>
+          <p style={{ margin: "4px 0 0", color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
+            BIMLog user feedback, bug reports, workflow requests, and improvement ideas.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+        <StatCard label="Open" value={openCount} />
+        <StatCard label="In Review" value={reviewCount} />
+        <StatCard label="Planned" value={plannedCount} />
+        <StatCard label="Closed" value={closedCount} />
+      </div>
+
+      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
+        <label style={{ fontSize: 12, fontWeight: 700 }}>
+          Status
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            style={{ marginLeft: 8, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "7px 10px", background: "hsl(var(--background))" }}
+          >
+            <option value="all">All statuses</option>
+            {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
+      </div>
+
+      {error && <div style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", fontSize: 12 }}>{error}</div>}
+      {loading ? (
+        <div style={{ padding: 32, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading feedback...</div>
+      ) : visibleItems.length === 0 ? (
+        <div style={{ padding: 32, color: "hsl(var(--muted-foreground))", textAlign: "center", border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
+          No feedback matches this view.
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto", border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", background: "hsl(var(--card))" }}>
+            <thead>
+              <tr>
+                <Th>Created</Th>
+                <Th>User</Th>
+                <Th>Project</Th>
+                <Th>Type</Th>
+                <Th>Priority</Th>
+                <Th>Module</Th>
+                <Th>Message</Th>
+                <Th>Status</Th>
+                <Th>Page</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleItems.map((item) => (
+                <tr key={String(item.id)}>
+                  <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</Td>
+                  <Td>
+                    <div style={{ fontSize: 12, fontWeight: 700 }}>{String(item.userFullName || "Unnamed")}</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(item.userEmail || "")}</div>
+                  </Td>
+                  <Td>
+                    <div style={{ fontSize: 12, fontWeight: 700 }}>{String(item.projectName || "-")}</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(item.projectCode || "")}</div>
+                  </Td>
+                  <Td><Badge label={String(item.feedbackType || "-")} color="#3b82f6" /></Td>
+                  <Td><Badge label={String(item.priority || "normal")} color={String(item.priority) === "urgent" ? "#ef4444" : "#f59e0b"} /></Td>
+                  <Td style={{ fontSize: 12 }}>{String(item.module || "-")}</Td>
+                  <Td style={{ minWidth: 280, maxWidth: 460, whiteSpace: "normal", overflowWrap: "anywhere" }}>{String(item.message || "")}</Td>
+                  <Td>
+                    <select
+                      value={String(item.status || "open")}
+                      onChange={(event) => updateStatus(item.id, event.target.value)}
+                      style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "6px 8px", fontSize: 12, background: "hsl(var(--background))" }}
+                    >
+                      {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                  </Td>
+                  <Td style={{ maxWidth: 260, overflowWrap: "anywhere" }}>
+                    <a href={String(item.pageUrl || "#")} target="_blank" rel="noreferrer" style={{ color: "#1d4ed8", fontSize: 11 }}>
+                      {String(item.pageUrl || "-")}
+                    </a>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AdminPanel() {
   const [, setLocation] = useLocation();
   const { token } = useAuthStore();
@@ -839,7 +991,7 @@ export function AdminPanel() {
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Project Administration</h1>
             <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-              Scoped to your projects — companies, users, and data visible here belong to projects you administer.
+              Scoped to your projects - companies, users, and data visible here belong to projects you administer.
             </p>
           </div>
           <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>Back to Dashboard</Button>
@@ -867,6 +1019,7 @@ export function AdminPanel() {
         {activeTab === 6 && <FeatureFlagsTab token={token} />}
         {activeTab === 7 && <AdminActionsLogTab token={token} />}
         {activeTab === 8 && <AiUsageTab token={token} />}
+        {activeTab === 9 && <FeedbackTab token={token} />}
       </div>
     </div>
   );

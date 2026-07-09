@@ -221,6 +221,32 @@ startOverdueNotifier();
 
 (async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback_items (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      project_id integer REFERENCES projects(id),
+      feedback_type text NOT NULL,
+      priority text NOT NULL DEFAULT 'normal',
+      module text,
+      page_url text NOT NULL,
+      message text NOT NULL,
+      status text NOT NULL DEFAULT 'open',
+      metadata jsonb,
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now(),
+      resolved_at timestamp
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_status_created_idx ON feedback_items (status, created_at DESC)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_user_created_idx ON feedback_items (user_id, created_at DESC)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_project_created_idx ON feedback_items (project_id, created_at DESC)`);
+    console.log("[migration] feedback_items table ensured");
+  } catch (e) {
+    console.error("[migration] feedback_items migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL,

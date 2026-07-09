@@ -32,6 +32,7 @@ import { Features } from "@/pages/Features";
 import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/reset-password" component={ResetPasswordPage} />
 
-      {/* Legal pages — public */}
+      {/* Legal pages - public */}
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/disclaimer" component={Disclaimer} />
@@ -147,6 +148,7 @@ function App() {
                 <Router />
               </main>
             </div>
+            <FeedbackWidget />
           </WouterRouter>
           <Toaster />
         </TooltipProvider>

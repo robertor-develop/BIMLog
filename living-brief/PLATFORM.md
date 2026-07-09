@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-08T11:48:43.753Z
+> Last generated: 2026-07-09T15:36:48.377Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -39,6 +39,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\dashboard_briefing.ts
 - artifacts\api-server\src\routes\documents.ts
 - artifacts\api-server\src\routes\downloads.ts
+- artifacts\api-server\src\routes\feedback.ts
 - artifacts\api-server\src\routes\files.ts
 - artifacts\api-server\src\routes\health.ts
 - artifacts\api-server\src\routes\index.ts
@@ -92,6 +93,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - autodeskRouter
 - livingBriefRouter
 - connectionsRouter
+- feedbackRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts\api-server\src\middlewares\auth.ts
@@ -131,6 +133,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\coordination_intake_events.ts
 - lib\db\src\schema\email-log.ts
 - lib\db\src\schema\feature-flags.ts
+- lib\db\src\schema\feedback-items.ts
 - lib\db\src\schema\files.ts
 - lib\db\src\schema\index.ts
 - lib\db\src\schema\invitations.ts

@@ -23,20 +23,17 @@ export function Navbar() {
   const { user, token, logout } = useAuthStore();
   const [location] = useLocation();
   const isLanding = location === "/";
-  const isProjectPage = location.startsWith("/projects/");
   const isDashboard = location === "/dashboard";
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user || !token) { setAvatarUrl(null); setIsSuperAdmin(false); return; }
+    if (!user || !token) { setAvatarUrl(null); return; }
     getMe()
       .then(data => {
         if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
-        if (data.isSuperAdmin) setIsSuperAdmin(true);
       })
       .catch((error) => logClientError("navbar user profile load", error));
     const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
@@ -55,8 +52,6 @@ export function Navbar() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
-
-  if (isProjectPage || isDashboard) return null;
 
   const infoDropdown = (
     <div ref={infoRef} style={{ position: "relative" }}>
@@ -105,7 +100,7 @@ export function Navbar() {
   );
 
   return (
-    <header className="topbar">
+    <header className="topbar app-topbar">
       <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
         <div className="flex items-baseline gap-1.5">

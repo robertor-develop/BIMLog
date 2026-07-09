@@ -22,7 +22,7 @@ import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
 import { ClashReportsTab } from "./project/ClashReportsTab";
 import { CoordinationHub } from "./project/CoordinationHub";
-import { ChevronLeft, HelpCircle, Link2, Shield } from "lucide-react";
+import { ChevronLeft, HelpCircle, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 
@@ -90,8 +90,7 @@ export function ProjectDetail() {
       />
 
       <div className="main-area">
-        {/* Top bar */}
-        <div className="topbar">
+        <div className="project-context-bar">
           <div className="breadcrumb">
             <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}>
               <ChevronLeft style={{ width: 14, height: 14 }} />
@@ -101,7 +100,7 @@ export function ProjectDetail() {
             <span className="breadcrumb-active">{project.name}</span>
           </div>
 
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="project-context-actions">
             {/* Project Code badge (Fix 3B) */}
             <span
               title="Project Code (used in file naming)"
@@ -135,30 +134,33 @@ export function ProjectDetail() {
               </span>
             )}
 
-            {/* Admin inline card (Fix A) — visible without hover */}
+            {/* Admin inline card: visible without hover */}
             {adminMember && (
               <span
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
-                  height: 30, padding: "0 12px",
+                  minHeight: 30, padding: "0 12px",
                   fontSize: 11, fontWeight: 600,
                   background: "#F8FAFC", color: "#0F172A",
                   border: "1px solid #E2E8F0",
                   borderRadius: 8,
+                  maxWidth: 430,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
                 }}>
                 <span style={{ fontSize: 9, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Admin
                 </span>
-                <span style={{ fontWeight: 700 }}>{adminMember.userFullName}</span>
+                <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>{adminMember.userFullName}</span>
                 {adminMember.userCompanyName && (
-                  <span style={{ color: "#64748B", fontWeight: 500 }}>· {adminMember.userCompanyName}</span>
+                  <span style={{ color: "#64748B", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>- {adminMember.userCompanyName}</span>
                 )}
                 {adminMember.userEmail && (
                   <a
                     href={`mailto:${adminMember.userEmail}`}
-                    style={{ color: "#1D4ED8", textDecoration: "none", fontWeight: 500 }}
+                    style={{ color: "#1D4ED8", textDecoration: "none", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}
                   >
-                    · {adminMember.userEmail}
+                    - {adminMember.userEmail}
                   </a>
                 )}
               </span>
