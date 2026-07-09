@@ -214,6 +214,9 @@ startOverdueNotifier();
   try {
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`);
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS item_type TEXT NOT NULL DEFAULT 'milestone'`);
+    await pool.query(`ALTER TABLE project_milestones ALTER COLUMN item_type SET DEFAULT 'milestone'`);
+    await pool.query(`UPDATE project_milestones SET item_type = 'milestone' WHERE item_type IS NULL`);
+    await pool.query(`ALTER TABLE project_milestones ALTER COLUMN item_type SET NOT NULL`);
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS trade TEXT`);
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
     await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS assigned_user_id INTEGER`);
