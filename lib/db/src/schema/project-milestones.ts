@@ -7,6 +7,7 @@ export const projectMilestonesTable = pgTable("project_milestones", {
   projectId: integer("project_id").references(() => projectsTable.id).notNull(),
   title: text("title").notNull(),
   dueDate: timestamp("due_date").notNull(),
+  buildingLevel: text("building_level"),
   status: text("status").default("pending").notNull(),
   linkedModule: text("linked_module"),
   linkedId: integer("linked_id"),

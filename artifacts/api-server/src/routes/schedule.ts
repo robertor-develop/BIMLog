@@ -15,13 +15,14 @@ type LiveScheduleEvent = {
   status: string;
   priority: string | null;
   company: string | null;
+  buildingLevel?: string | null;
   route: string | null;
   linkedModule?: string | null;
   linkedId?: number | null;
   isOverdue: boolean;
 };
 
-// ── GET /projects/:projectId/milestones ───────────────────────────────────────
+// GET /projects/:projectId/schedule/live
 router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
@@ -59,6 +60,7 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
       status: m.status || "pending",
       priority: null,
       company: null,
+      buildingLevel: m.buildingLevel || null,
       route: milestoneRoute(m.linkedModule, m.linkedId),
       linkedModule: m.linkedModule,
       linkedId: m.linkedId,
@@ -77,6 +79,7 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         status: r.status || "open",
         priority: r.priority || null,
         company: r.submittedToCompany || r.ballInCourt || null,
+        buildingLevel: r.locationDescription || null,
         route: `/projects/${projectId}/rfis?rfi=${r.id}`,
         isOverdue: !isDone(r.status) && new Date(due) < now,
       });
@@ -94,6 +97,7 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         status: s.reviewDecision || s.status || "pending",
         priority: null,
         company: s.responsibleCompany || s.submittedByCompany || null,
+        buildingLevel: s.floor || null,
         route: `/projects/${projectId}/submittals`,
         isOverdue: !isDone(s.reviewDecision || s.status) && new Date(due) < now,
       });
@@ -124,15 +128,16 @@ router.get("/projects/:projectId/milestones", authMiddleware, requireProjectMemb
   }
 });
 
-// ── POST /projects/:projectId/milestones ──────────────────────────────────────
+// POST /projects/:projectId/milestones
 router.post("/projects/:projectId/milestones", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
-  const body = req.body as { title: string; due_date: string; linked_module?: string; linked_id?: number };
+  const body = req.body as { title: string; due_date: string; linked_module?: string; linked_id?: number; building_level?: string };
   if (!body.title || !body.due_date) { res.status(400).json({ error: "title and due_date required" }); return; }
   try {
     const [ms] = await db.insert(projectMilestonesTable).values({
       projectId, title: body.title,
       dueDate: new Date(body.due_date),
+      buildingLevel: body.building_level || null,
       linkedModule: body.linked_module ?? null,
       linkedId: body.linked_id ?? null,
       createdById: req.user!.userId,
@@ -151,16 +156,17 @@ router.post("/projects/:projectId/milestones", authMiddleware, requirePermission
   }
 });
 
-// ── PATCH /projects/:projectId/milestones/:milestoneId ────────────────────────
+// PATCH /projects/:projectId/milestones/:milestoneId
 router.patch("/projects/:projectId/milestones/:milestoneId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const msId = Number(req.params.milestoneId);
-  const body = req.body as Partial<{ title: string; due_date: string; status: string }>;
+  const body = req.body as Partial<{ title: string; due_date: string; status: string; building_level: string }>;
   try {
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (body.title !== undefined)    updates.title   = body.title;
     if (body.due_date !== undefined) updates.dueDate = body.due_date ? new Date(body.due_date) : null;
     if (body.status !== undefined)   updates.status  = body.status;
+    if (body.building_level !== undefined) updates.buildingLevel = body.building_level || null;
     const [updated] = await db.update(projectMilestonesTable).set(updates as any)
       .where(and(eq(projectMilestonesTable.id, msId), eq(projectMilestonesTable.projectId, projectId))).returning();
     if (!updated) { res.status(404).json({ error: "Not found" }); return; }

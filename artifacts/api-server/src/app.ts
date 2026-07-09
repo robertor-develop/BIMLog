@@ -212,6 +212,15 @@ startOverdueNotifier();
 
 (async () => {
   try {
+    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`);
+    console.log("[migration] project_milestones building_level column ensured");
+  } catch (e) {
+    console.error("[migration] project_milestones building_level migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL,

@@ -17,6 +17,7 @@ interface ScheduleItem {
   status: string;
   priority?: string | null;
   company?: string | null;
+  buildingLevel?: string | null;
   route?: string | null;
   linkedModule?: string | null;
   linkedId?: number | null;
@@ -145,6 +146,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       const body = {
         title: form.title.trim() || modelTitle,
         due_date: form.due_date,
+        building_level: form.level || undefined,
         linked_module: form.linked_module || undefined,
         linked_id: form.linked_id ? Number(form.linked_id) : undefined,
       };
@@ -507,7 +509,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F", color: "white" }}>
-                {["Source", "Title", "Due Date", "Company", "Status", "Actions"].map(h => (
+                {["Source", "Title", "Level", "Due Date", "Company", "Status", "Actions"].map(h => (
                   <th key={h} style={{ padding: "9px 10px", fontSize: 11, textTransform: "uppercase", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -517,6 +519,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 <tr key={`${item.source}-${item.id}`} style={{ borderBottom: "1px solid #E5E7EB" }}>
                   <td style={{ padding: 10 }}>{sourceBadge(item)}</td>
                   <td style={{ padding: 10, fontSize: 12, fontWeight: 700 }}>{item.title}</td>
+                  <td style={{ padding: 10, fontSize: 12, whiteSpace: "nowrap" }}>{item.buildingLevel || "-"}</td>
                   <td style={{ padding: 10, fontSize: 12, whiteSpace: "nowrap" }}>{new Date(item.dueDate).toLocaleDateString()}</td>
                   <td style={{ padding: 10, fontSize: 12 }}>{item.company || "-"}</td>
                   <td style={{ padding: 10 }}>{statusBadge(item.status, item.isOverdue)}</td>
@@ -549,6 +552,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             </div>
             <div style={{ display: "grid", gap: 10, fontSize: 13 }}>
               <Detail label={t("Due Date", "Fecha Límite")} value={new Date(selected.dueDate).toLocaleDateString()} />
+              <Detail label={t("Building Level", "Nivel")} value={selected.buildingLevel || "-"} />
               <Detail label={t("Status", "Estado")} value={selected.isOverdue && !isDone(selected.status) ? t("Overdue", "Vencido") : selected.status.replace(/_/g, " ")} />
               <Detail label={t("Company", "Empresa")} value={selected.company || "-"} />
               <Detail label={t("Linked Module", "Módulo Vinculado")} value={selected.linkedModule || selected.source} />
@@ -627,7 +631,9 @@ function ScheduleCard({
       <button onClick={onOpen} style={{ display: "block", width: "100%", textAlign: "left", border: "none", background: "transparent", padding: 0, cursor: "pointer" }}>
         <div style={{ fontSize: 12, fontWeight: 800, color: "#0F172A", lineHeight: 1.35 }}>{item.title}</div>
         <div style={{ fontSize: 11, color: "#64748B", marginTop: 6 }}>
-          {new Date(item.dueDate).toLocaleDateString()}{item.company ? ` - ${item.company}` : ""}
+          {new Date(item.dueDate).toLocaleDateString()}
+          {item.buildingLevel ? ` - ${item.buildingLevel}` : ""}
+          {item.company ? ` - ${item.company}` : ""}
         </div>
       </button>
       <div style={{ display: "flex", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
