@@ -1,0 +1,103 @@
+STOP. READ-ONLY AUDIT ONLY. DO NOT EDIT FILES. DO NOT BUILD. DO NOT PUBLISH. DO NOT RUN MIGRATIONS. DO NOT APPROVE OR APPLY ANY DATABASE CHANGE.
+
+Context:
+A Replit publish preview showed destructive SQL. Roberto cancelled the publish. We need to confirm the existing production data is still safe and that recently built features are present in code/workspace, without changing anything.
+
+Use PROD_DATABASE_URL only for database inspection. Do not use helium/dev DB. Do not print secrets.
+
+First, confirm production data safety with read-only SQL:
+- Start a read-only transaction/session if possible.
+- Count all rows in these tables if they exist:
+  projects
+  users
+  project_members
+  rfis
+  submittals
+  submittal_register
+  submittal_items
+  transmittals
+  change_orders
+  project_milestones
+  schedule_buckets
+  schedule_item_placements
+  schedule_rollover_history
+  lens_viewpoints
+  lens_viewpoint_reports
+  files
+  activity_log
+  feedback_items
+  ai_usage_events
+- Specifically check Ruben and Leidy users:
+  rubenc@bimcorpgroup.com
+  leidyp@bimcorpgroup.com
+- Specifically check Ruben’s projects and memberships:
+  list projects where Ruben is a member, with project id, project name, project code, role.
+- Specifically check Elara project data:
+  list projects with name/code containing ELARA or ELA.
+  for each Elara project, count lens_viewpoints by lifecycle_status, count submittals, count project_milestones, count files.
+- Confirm no tables from the destructive preview were dropped:
+  schedule_buckets
+  schedule_item_placements
+  schedule_rollover_history
+  project_milestones.item_type
+  project_milestones.trade
+  project_milestones.responsible_company
+  project_milestones.assigned_user_id
+  project_milestones.notes
+  feedback_items
+  ai_usage_events
+
+Second, inspect code/workspace only with grep/find:
+- Confirm Submittals has one sidebar entry and internal tabs for:
+  Submittal Packages
+  Register
+  Shop Drawing Control
+- Confirm there is no separate visible Submittal Tracker sidebar item.
+- Confirm Shop Drawing Control filters exist:
+  Building Level
+  Trade
+  Drawing Type
+  Date
+  Review Status
+- Confirm backend export routes/files use Shop Drawing Control naming, not old ambiguous “Tracking Table” naming.
+- Confirm Schedule code has:
+  Calendar
+  Board
+  List
+  buckets/sprints
+  rollover
+  3D Model item type
+  level/trade/company/assigned user fields.
+- Confirm Feedback widget code exists and is BIMLog branded, not Replit branded.
+- Confirm Living Brief currently includes or does not include OPEN_LOOP, and report exactly what is present in the tabs/files.
+
+Third, check schema drift risk without applying anything:
+- Compare app.ts startup migration definitions vs Drizzle schema files under lib/db/src/schema.
+- Report any table/column/index created in app.ts but missing from Drizzle schema.
+- Pay special attention to:
+  schedule_buckets
+  schedule_item_placements
+  schedule_rollover_history
+  project_milestones item_type/trade/responsible_company/assigned_user_id/notes
+  feedback_items indexes
+  ai_usage_events indexes
+- Do NOT generate or apply a migration. Just report missing schema definitions.
+
+Print all outputs as plain text. No collapsed boxes.
+
+Final answer format:
+DATA SAFETY
+- State whether production tables still exist.
+- State whether Ruben/Leidy users and memberships still exist.
+- State Elara counts.
+
+FEATURE PRESENCE
+- State what recent features are present in code.
+- State anything missing.
+
+SCHEMA DRIFT / PUBLISH BLOCKERS
+- List exact missing Drizzle schema/table/column/index definitions that could cause Replit to propose DROP SQL.
+- State clearly: SAFE TO PUBLISH = YES or NO.
+- If NO, explain the exact code files that need schema-only fixes before publishing.
+
+Again: READ ONLY. No edits. No build. No publish. No migrations.
