@@ -426,9 +426,9 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
       .text("SUBMITTAL LOG", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
-      .text(`${project?.name || "Project"} · Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
+      .text(`${project?.name || "Project"} | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(9)
-      .text(`${subs.length} submittals · BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 200, 32, { width: 200, align: "right", lineBreak: false });
+      .text(`${subs.length} submittals | BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 200, 32, { width: 200, align: "right", lineBreak: false });
     y = 62;
 
     // Column defs (landscape 792-72=720 content)
@@ -472,19 +472,19 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       const days = sub.dateRequired
         ? Math.ceil((new Date(sub.dateRequired).getTime() - Date.now()) / 86400000)
         : null;
-      const daysStr = days !== null ? (days < 0 ? `${Math.abs(days)}d over` : `${days}d`) : "—";
+      const daysStr = days !== null ? (days < 0 ? `${Math.abs(days)}d over` : `${days}d`) : "-";
 
       const vals = [
         sub.number,
         sub.title,
         (sub.submittalCategory || sub.submittalType || "").replace("_", " "),
-        sub.status || "—",
-        sub.submittedByCompany || "—",
-        sub.submittedToCompany || "—",
-        sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "—",
-        sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "—",
+        sub.status || "-",
+        sub.submittedByCompany || "-",
+        sub.submittedToCompany || "-",
+        sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "-",
+        sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "-",
         daysStr,
-        sub.ballInCourt || "—",
+        sub.ballInCourt || "-",
       ];
 
       cx = LOG_MARGIN;
@@ -501,7 +501,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     // Footer
     doc.page.margins.bottom = 0;
     doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
-      .text(`Submittal Log · ${project?.name || ""} · BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
+      .text(`Submittal Log | ${project?.name || ""} | BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
     doc.end();
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

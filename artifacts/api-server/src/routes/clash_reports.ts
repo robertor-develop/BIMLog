@@ -2165,7 +2165,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         const hsY = cursorY;
         doc.rect(M, hsY, 200, 80).fillAndStroke("#FFFFFF", "#D1D5DB");
         doc.fontSize(40).font("Helvetica-Bold").fillColor(NAVY).text(String(healthScore), M, hsY + 12, { width: 200, align: "center" });
-        doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0â€“100)", M, hsY + 60, { width: 200, align: "center" });
+  doc.fontSize(8).font("Helvetica-Bold").fillColor("#374151").text("COORDINATION HEALTH SCORE  (0-100)", M, hsY + 60, { width: 200, align: "center" });
         // health sub-metrics (a metric reads "n/a" when it has no applicable items)
         const hbX = M + 220;
         const pct = (v: number | null) => v === null ? "n/a" : `${v}%`;
