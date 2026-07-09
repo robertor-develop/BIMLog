@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, index } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { projectsTable } from "./projects";
 
@@ -11,6 +11,9 @@ export const aiUsageEventsTable = pgTable("ai_usage_events", {
   billingMode: text("billing_mode").notNull(),
   estimatedUnits: integer("estimated_units").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  userCreatedIdx: index("ai_usage_events_user_created_idx").on(t.userId, t.createdAt),
+  projectCreatedIdx: index("ai_usage_events_project_created_idx").on(t.projectId, t.createdAt),
+}));
 
 export type AiUsageEvent = typeof aiUsageEventsTable.$inferSelect;

@@ -20,5 +20,8 @@ Replit's publish flow compares the **dev helium database** (DATABASE_URL) agains
 
 **How to apply:** after ANY schema change (new table/column), also run `pnpm --filter @workspace/db run push-force` to sync helium. Before every publish, if the migration preview shows any DROP warnings, CANCEL — never approve a publish with destructive statements.
 
+## Indexes drift too — define them in the drizzle schema, not only app.ts
+The publish diff also proposes `DROP INDEX` for any prod index missing from helium. Indexes created only via `CREATE INDEX IF NOT EXISTS` in the app.ts startup block (e.g. ai_usage_events/feedback_items) never reach helium via push-force because drizzle doesn't know about them. Every prod index must ALSO be declared in `lib/db/src/schema/*.ts` (use `index("exact_prod_name").on(...)`, with `.desc()` where prod uses DESC), then push-force. Verify parity with a full dev-vs-prod diff of tables/columns/indexes before publish — the destructive set must be empty in BOTH directions.
+
 ## Stale db types after a schema edit
 `@workspace/db` is consumed by api-server via TS **project references** (composite, `emitDeclarationOnly`, outDir `lib/db/dist`). `tsc --noEmit` in api-server reads db's *built* `.d.ts`, NOT the source — so after editing `lib/db/src/schema/*.ts` you get phantom `Property 'X' does not exist on type` errors until you rebuild the declarations: `npx tsc -b lib/db --force`. The esbuild `pnpm build` bundles from source so it is unaffected, but rebuild the refs to get a clean typecheck.
