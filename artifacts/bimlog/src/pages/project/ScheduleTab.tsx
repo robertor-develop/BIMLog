@@ -63,6 +63,8 @@ const MODULE_OPTIONS = [
   { value: "submittal", label: "Linked Submittal Milestone", labelEs: "Hito Entregable Vinculado" },
 ];
 
+const LEGACY_EXAMPLE_BUCKETS = new Set(["Sprint 32", "Sprint 33"]);
+
 export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
@@ -97,6 +99,10 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     level: "",
     trade: "",
     company: "",
+    add_company_to_directory: false,
+    company_contact: "",
+    company_email: "",
+    company_role: "",
     assigned_user_id: "",
     notes: "",
     bucket_id: "",
@@ -147,10 +153,13 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       if (membersRes.ok) {
         const rows = await membersRes.json();
         setMembers(rows);
+        const memberCompanies = rows.map((m: Member) => m.userCompanyName).filter(Boolean) as string[];
+        setCompanies(prev => uniq([...prev, ...memberCompanies]));
       }
       if (directoryRes.ok) {
         const rows = await directoryRes.json() as DirectoryEntry[];
-        setCompanies(uniq(rows.map(r => r.companyName).filter(Boolean) as string[]));
+        const directoryCompanies = rows.map(r => r.companyName).filter(Boolean) as string[];
+        setCompanies(prev => uniq([...prev, ...directoryCompanies]));
       }
     } finally {
       setLoading(false);
@@ -182,6 +191,28 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     try {
       const isModelItem = form.linked_module === "3d_model";
       const modelTitle = isModelItem && form.level ? `3D Model - ${form.level}` : "";
+      if (form.add_company_to_directory) {
+        if (!form.company.trim() || !form.company_contact.trim() || !form.company_email.trim()) {
+          setError(t("Company name, contact name, and email are required to add a company to the directory. Use name only if you do not have the details yet.",
+            "Empresa, contacto y correo son requeridos para agregar la empresa al directorio. Usa solo nombre si todavia no tienes los datos."));
+          return;
+        }
+        const companyCreate = await fetch(`${API}/projects/${projectId}/directory`, {
+          method: "POST",
+          headers: jsonHeaders,
+          body: JSON.stringify({
+            full_name: form.company_contact.trim(),
+            email: form.company_email.trim(),
+            company_name: form.company.trim(),
+            role: form.company_role.trim() || "Schedule Responsible",
+          }),
+        });
+        if (!companyCreate.ok) {
+          const d = await companyCreate.json().catch(() => ({}));
+          setError(d.error || t("Could not add company to directory.", "No se pudo agregar la empresa al directorio."));
+          return;
+        }
+      }
       const body = {
         title: form.title.trim() || modelTitle,
         due_date: form.due_date,
@@ -206,7 +237,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         return;
       }
       setShowForm(false);
-      setForm({ title: "", due_date: "", linked_module: "", linked_id: "", level: "", trade: "", company: "", assigned_user_id: "", notes: "", bucket_id: "" });
+      setForm({ title: "", due_date: "", linked_module: "", linked_id: "", level: "", trade: "", company: "", add_company_to_directory: false, company_contact: "", company_email: "", company_role: "", assigned_user_id: "", notes: "", bucket_id: "" });
       await load();
       setViewMode("board");
       toast({ title: t("Schedule item added", "Fecha agregada al cronograma") });
@@ -282,7 +313,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     const r = await fetch(url, {
       method: editingBucket ? "PATCH" : "POST",
       headers: jsonHeaders,
-      body: JSON.stringify({ name, bucket_type: "sprint", sort_order: editingBucket?.sortOrder ?? 100 }),
+      body: JSON.stringify({ name, bucket_type: "custom", sort_order: editingBucket?.sortOrder ?? 100 }),
     });
     if (!r.ok) {
       const d = await r.json().catch(() => ({}));
@@ -337,7 +368,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     const color = itemOverdue && !isDone(s) ? "#DC2626" : STATUS_COLORS[s] ?? "#6B7280";
     return (
       <span style={{
-        display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 999,
+        display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 7px", borderRadius: 4,
         background: `${color}16`, color, fontSize: 11, fontWeight: 800, textTransform: "uppercase",
       }}>
         {itemOverdue && !isDone(s) ? t("Overdue", "Vencido") : s.replace(/_/g, " ")}
@@ -349,7 +380,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     const color = item.source === "rfi" ? "#7C3AED" : item.source === "submittal" ? "#2563EB" : item.label === "3D Model" ? "#0F766E" : "#16A34A";
     return (
       <span style={{
-        display: "inline-flex", padding: "3px 8px", borderRadius: 999,
+        display: "inline-flex", padding: "3px 7px", borderRadius: 4,
         background: `${color}16`, color, fontSize: 10, fontWeight: 900, textTransform: "uppercase",
       }}>
         {item.label}
@@ -371,9 +402,17 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     (acc[key] ||= []).push(item);
     return acc;
   }, {});
+  const itemCountsByBucket = items.reduce<Record<string, number>>((acc, item) => {
+    if (item.bucketName) acc[item.bucketName] = (acc[item.bucketName] || 0) + 1;
+    return acc;
+  }, {});
+  const visibleBuckets = buckets.filter(bucket => !LEGACY_EXAMPLE_BUCKETS.has(bucket.name) || (itemCountsByBucket[bucket.name] || 0) > 0);
+  const userBuckets = visibleBuckets.filter(bucket => bucket.bucketType !== "system" && !LEGACY_EXAMPLE_BUCKETS.has(bucket.name));
+  const rolloverTargetsFor = (bucketId?: number | null) => userBuckets.filter(bucket => bucket.id !== bucketId);
   const derivedBuckets = uniq(items.map(item => item.bucketName).filter(Boolean) as string[])
+    .filter(name => !LEGACY_EXAMPLE_BUCKETS.has(name) || (itemCountsByBucket[name] || 0) > 0)
     .map((name, index) => ({ id: -1 - index, name, bucketType: "derived", sortOrder: index }));
-  const effectiveBuckets = buckets.length > 0 ? buckets : derivedBuckets;
+  const effectiveBuckets = visibleBuckets.length > 0 ? visibleBuckets : derivedBuckets;
   const itemsByBucket = effectiveBuckets.map(bucket => ({
     bucket,
     rows: filtered.filter(item => item.bucketId === bucket.id || (!item.bucketId && item.bucketName === bucket.name)),
@@ -446,7 +485,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       `}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 18 }}>
         <div>
-          <h2 style={{ fontWeight: 800, fontSize: 22, margin: 0, color: "#0F172A" }}>{t("Coordination Planner", "Planner de Coordinacion")}</h2>
+          <h2 style={{ fontWeight: 800, fontSize: 22, margin: 0, color: "#0F172A" }}>{t("Schedule - Coordination Planner", "Cronograma - Planner de Coordinacion")}</h2>
           <p style={{ margin: "5px 0 0", color: "#64748B", fontSize: 13 }}>
             {t("Calendar, sprint board, and register for RFI due dates, submittal due dates, 3D models, and manual milestones.",
               "Calendario, tablero sprint y registro para RFIs, entregables, modelos 3D e hitos manuales.")}
@@ -524,7 +563,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "end" }}>
             <div style={{ minWidth: 260, flex: "0 1 320px" }}>
               <label className="label">{editingBucket ? t("Edit Bucket", "Editar Bucket") : t("Create Bucket or Sprint", "Crear Bucket o Sprint")}</label>
-              <input className="input" value={bucketName} onChange={e => setBucketName(e.target.value)} placeholder="Sprint 34" />
+              <input className="input" value={bucketName} onChange={e => setBucketName(e.target.value)} placeholder={t("New sprint or bucket name", "Nombre nuevo de sprint o bucket")} />
             </div>
             <button className="btn btn-primary" type="button" onClick={saveBucket}>{editingBucket ? t("Save Bucket", "Guardar Bucket") : t("Add Bucket", "Agregar Bucket")}</button>
             {editingBucket && <button className="btn btn-outline" type="button" onClick={() => { setEditingBucket(null); setBucketName(""); setActionError(""); }}>{t("Cancel", "Cancelar")}</button>}
@@ -550,7 +589,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             <Field label={t("Bucket / Sprint", "Bucket / Sprint")}>
               <select className="input" value={form.bucket_id} onChange={e => setForm(f => ({ ...f, bucket_id: e.target.value }))}>
                 <option value="">{t("Auto bucket", "Bucket automatico")}</option>
-                {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                {visibleBuckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </Field>
             {(form.linked_module === "rfi" || form.linked_module === "submittal") && (
@@ -572,11 +611,34 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               </select>
             </Field>
             <Field label={t("Trade", "Disciplina")}>
-              <input className="input" list="schedule-trades" value={form.trade} onChange={e => setForm(f => ({ ...f, trade: e.target.value }))} />
+              <input className="input" list="schedule-trades" value={form.trade} onChange={e => setForm(f => ({ ...f, trade: e.target.value }))} placeholder={t("Select existing trade or type one", "Selecciona o escribe una disciplina")} />
             </Field>
             <Field label={t("Responsible Company", "Empresa Responsable")}>
-              <input className="input" list="schedule-companies" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+              <input className="input" list="schedule-companies" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} placeholder={t("Select existing company or type name", "Selecciona o escribe una empresa")} />
             </Field>
+            <div style={{ gridColumn: "1 / -1", border: "1px solid #E2E8F0", borderRadius: 8, padding: 12, background: "#F8FAFC" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#1E3A5F" }}>
+                <input type="checkbox" checked={form.add_company_to_directory} onChange={e => setForm(f => ({ ...f, add_company_to_directory: e.target.checked }))} />
+                {t("Add this company to the Project Directory with contact info", "Agregar esta empresa al Directorio del Proyecto con contacto")}
+              </label>
+              <div style={{ fontSize: 11, color: "#64748B", marginTop: 5 }}>
+                {t("Leave unchecked to save only the company name on this schedule item for now.",
+                  "Dejalo sin marcar para guardar solo el nombre de la empresa en este item por ahora.")}
+              </div>
+              {form.add_company_to_directory && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 10 }}>
+                  <Field label={t("Contact Name", "Contacto")}>
+                    <input className="input" value={form.company_contact} onChange={e => setForm(f => ({ ...f, company_contact: e.target.value }))} />
+                  </Field>
+                  <Field label={t("Contact Email", "Correo")}>
+                    <input className="input" type="email" value={form.company_email} onChange={e => setForm(f => ({ ...f, company_email: e.target.value }))} />
+                  </Field>
+                  <Field label={t("Role", "Rol")}>
+                    <input className="input" value={form.company_role} onChange={e => setForm(f => ({ ...f, company_role: e.target.value }))} placeholder="Schedule Responsible" />
+                  </Field>
+                </div>
+              )}
+            </div>
             <Field label={t("Assigned User", "Usuario Asignado")}>
               <select className="input" value={form.assigned_user_id} onChange={e => setForm(f => ({ ...f, assigned_user_id: e.target.value }))}>
                 <option value="">{t("Unassigned", "Sin asignar")}</option>
@@ -597,7 +659,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
               <button className="btn btn-primary" type="submit" disabled={saving}>
                 {saving ? <Loader2 size={13} style={{ marginRight: 4, animation: "spin 1s linear infinite" }} /> : null}
-                {saving ? t("Saving...", "Guardando...") : t("Add to Schedule", "Agregar al Cronograma")}
+                {saving ? t("Saving...", "Guardando...") : t("Save Schedule Item", "Guardar Item de Cronograma")}
               </button>
               <button className="btn btn-outline" type="button" onClick={() => { setShowForm(false); setError(""); }}>
                 {t("Cancel", "Cancelar")}
@@ -629,15 +691,20 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 </button>
                 <span style={{ fontSize: 11, fontWeight: 900, color: "#64748B" }}>{rows.length}</span>
               </div>
-              {canWrite && bucket.bucketType !== "system" && (
-                <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+              {canWrite && bucket.bucketType !== "system" && bucket.id > 0 && (
+                <div style={{ display: "flex", gap: 6, marginBottom: 10, alignItems: "center" }}>
                   <select className="input" style={{ height: 30, fontSize: 11, padding: "4px 6px" }} value={rollTarget[bucket.id] || ""} onChange={e => setRollTarget(r => ({ ...r, [bucket.id]: e.target.value }))}>
                     <option value="">{t("Roll to...", "Transferir a...")}</option>
-                    {buckets.filter(b => b.id !== bucket.id).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    {rolloverTargetsFor(bucket.id).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
-                  <button className="btn btn-sm btn-outline" type="button" onClick={() => rolloverBucket(bucket)} title={t("Move unfinished work to selected bucket", "Mover trabajo pendiente al bucket seleccionado")}>
+                  <button className="btn btn-sm btn-outline" type="button" disabled={rolloverTargetsFor(bucket.id).length === 0} onClick={() => rolloverBucket(bucket)} title={t("Move unfinished work to selected bucket", "Mover trabajo pendiente al bucket seleccionado")}>
                     <MoveRight size={12} />
                   </button>
+                </div>
+              )}
+              {canWrite && bucket.bucketType !== "system" && bucket.id > 0 && rolloverTargetsFor(bucket.id).length === 0 && (
+                <div style={{ marginBottom: 10, color: "#64748B", fontSize: 11, fontWeight: 700 }}>
+                  {t("Create another bucket to roll unfinished work forward.", "Crea otro bucket para transferir trabajo pendiente.")}
                 </div>
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -645,7 +712,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                   <ScheduleCard
                     key={`${item.source}-${item.id}`}
                     item={item}
-                    buckets={buckets}
+                    buckets={visibleBuckets}
                     canWrite={canWrite}
                     onOpen={() => openItem(item)}
                     onMove={(bucketId, rollover) => moveItem(item, bucketId, rollover)}
@@ -666,7 +733,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           ))}
           {itemsByBucket.length === 0 && (
             <div className="card" style={{ padding: 18, color: "#64748B", fontSize: 13 }}>
-              {t("No buckets are available. Create Sprint 34 or reload after the API migration runs.", "No hay buckets disponibles. Crea Sprint 34 o recarga despues de ejecutar la migracion API.")}
+              {t("No buckets are available. Create a bucket or sprint above.", "No hay buckets disponibles. Crea un bucket o sprint arriba.")}
             </div>
           )}
         </div>
@@ -772,12 +839,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 <div style={{ display: "flex", gap: 8 }}>
                   <select className="input" defaultValue={selected.bucketId || ""} onChange={e => e.target.value && moveItem(selected, Number(e.target.value), false)}>
                     <option value="">{t("Select bucket", "Seleccionar bucket")}</option>
-                    {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    {visibleBuckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
-                  <select className="input" defaultValue="" onChange={e => e.target.value && moveItem(selected, Number(e.target.value), true)}>
-                    <option value="">{t("Rollover to...", "Transferir a...")}</option>
-                    {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
+                  {rolloverTargetsFor(selected.bucketId).length > 0 ? (
+                    <select className="input" defaultValue="" onChange={e => e.target.value && moveItem(selected, Number(e.target.value), true)}>
+                      <option value="">{t("Rollover to...", "Transferir a...")}</option>
+                      {rolloverTargetsFor(selected.bucketId).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    </select>
+                  ) : (
+                    <div style={{ flex: 1, minHeight: 36, display: "flex", alignItems: "center", color: "#64748B", fontSize: 12, fontWeight: 700 }}>
+                      {t("Create a sprint/bucket first to roll work forward.", "Crea primero un sprint/bucket para transferir trabajo.")}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

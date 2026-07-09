@@ -16,11 +16,9 @@ import { authMiddleware, requirePermission, requireProjectMember } from "../midd
 const router: Router = Router();
 
 const DEFAULT_BUCKETS = [
-  { name: "Sprint 32", bucketType: "sprint", sortOrder: 10 },
-  { name: "Sprint 33", bucketType: "sprint", sortOrder: 20 },
-  { name: "This Week", bucketType: "system", sortOrder: 30 },
-  { name: "Next Week", bucketType: "system", sortOrder: 40 },
-  { name: "Later", bucketType: "system", sortOrder: 50 },
+  { name: "This Week", bucketType: "system", sortOrder: 10 },
+  { name: "Next Week", bucketType: "system", sortOrder: 20 },
+  { name: "Later", bucketType: "system", sortOrder: 30 },
   { name: "Completed", bucketType: "system", sortOrder: 900 },
 ];
 
@@ -116,6 +114,14 @@ router.post("/projects/:projectId/schedule/buckets", authMiddleware, requirePerm
   const name = body.name?.trim();
   if (!name) { res.status(400).json({ error: "Bucket name is required" }); return; }
   try {
+    const existing = await db.select({ id: scheduleBucketsTable.id })
+      .from(scheduleBucketsTable)
+      .where(and(eq(scheduleBucketsTable.projectId, projectId), eq(scheduleBucketsTable.name, name)))
+      .limit(1);
+    if (existing.length > 0) {
+      res.status(409).json({ error: "A bucket with this name already exists" });
+      return;
+    }
     const [bucket] = await db.insert(scheduleBucketsTable).values({
       projectId,
       name,
