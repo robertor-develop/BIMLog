@@ -1326,6 +1326,12 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
     form.submittedByEmail,
     form.submittedToEmail,
   ]);
+  const responsibleOptions = uniqSorted([
+    ...companyOptions,
+    ...contactOptions,
+    ...emailOptions,
+    form.ballInCourt,
+  ]);
 
   const addAttachmentName = (name: string) => {
     if (!name) return;
@@ -1464,6 +1470,9 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       <datalist id="new-submittal-emails">
         {emailOptions.map(value => <option key={value} value={value} />)}
       </datalist>
+      <datalist id="new-submittal-responsible-parties">
+        {responsibleOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
       {/* Section 1: Header */}
       <PanelSection title={w("1. Submittal Header", "1. Encabezado del Entregable", lang)} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -1557,9 +1566,9 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
           <FieldInput list="new-submittal-companies" placeholder={w("Pick an existing company or type a new one", "Seleccione una empresa o escriba una nueva", lang)} value={form.responsibleCompany} onChange={e => set("responsibleCompany", e.target.value)} />
         </Field>
         <Field label={w("Current Responsible Party (Ball in Court)", "Responsable Actual", lang)}>
-          <FieldInput list="new-submittal-companies" placeholder={w("Who must act next? Example: plumbing contractor, architect, GC", "Quien debe actuar ahora? Ej: contratista de plomeria, arquitecto, GC", lang)} value={form.ballInCourt} onChange={e => set("ballInCourt", e.target.value)} />
+          <FieldInput list="new-submittal-responsible-parties" placeholder={w("Pick the company, contact, or email that owns the next action", "Seleccione la empresa, contacto o correo responsable de la proxima accion", lang)} value={form.ballInCourt} onChange={e => set("ballInCourt", e.target.value)} />
           <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
-            {w("Use this for the company or person currently expected to review, revise, or answer.", "Use este campo para la empresa o persona que debe revisar, corregir o responder.", lang)}
+            {w("This is not a free-form status. It identifies who owns the next action right now.", "No es un estado libre. Identifica quien tiene la proxima accion ahora.", lang)}
           </div>
         </Field>
       </div>
@@ -2008,6 +2017,12 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     submittal.submittedByEmail,
     submittal.submittedToEmail,
   ]);
+  const responsibleOptions = uniqSorted([
+    ...companyOptions,
+    ...contactOptions,
+    ...emailOptions,
+    submittal.ballInCourt,
+  ]);
 
   const addAttachmentName = (name: string) => {
     if (!name) return;
@@ -2310,6 +2325,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       <datalist id={`submittal-emails-${submittal.id}`}>
         {emailOptions.map(value => <option key={value} value={value} />)}
       </datalist>
+      <datalist id={`submittal-responsible-parties-${submittal.id}`}>
+        {responsibleOptions.map(value => <option key={value} value={value} />)}
+      </datalist>
       {/* Action buttons */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         {canWrite && (
@@ -2461,9 +2479,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               </FieldSelect>
             </Field>
             <Field label={w("Current Responsible Party (Ball in Court)", "Responsable Actual", lang)}>
-              <FieldInput list={`submittal-companies-${submittal.id}`} placeholder={w("Who must act next? Example: Plumbing contractor, architect, GC", "Quien debe actuar ahora? Ej: contratista de plomeria, arquitecto, GC", lang)} value={editForm.ballInCourt} onChange={e => setEdit("ballInCourt", e.target.value)} />
+              <FieldInput list={`submittal-responsible-parties-${submittal.id}`} placeholder={w("Pick the company, contact, or email that owns the next action", "Seleccione la empresa, contacto o correo responsable de la proxima accion", lang)} value={editForm.ballInCourt} onChange={e => setEdit("ballInCourt", e.target.value)} />
               <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
-                {w("Use this for the company or person currently expected to review, revise, or answer.", "Use este campo para la empresa o persona que debe revisar, corregir o responder.", lang)}
+                {w("This is not a free-form status. It identifies who owns the next action right now.", "No es un estado libre. Identifica quien tiene la proxima accion ahora.", lang)}
               </div>
             </Field>
             <Field label={w("Date Submitted", "Fecha de Envio", lang)}>
@@ -2490,7 +2508,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               <FieldSelect value="" onChange={e => addAttachmentName(e.target.value)}>
                 <option value="">{projectFiles.length ? w("Select file to attach", "Seleccione archivo", lang) : w("No project files uploaded", "Sin archivos del proyecto", lang)}</option>
                 {projectFiles.map(file => (
-                  <option key={file.id} value={file.fileName}>{file.fileName}</option>
+                  <option key={file.id} value={file.fileUrl || file.fileName}>{file.fileName}</option>
                 ))}
               </FieldSelect>
             </Field>
@@ -2510,6 +2528,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
               onChange={e => setEdit("attachmentsText", e.target.value)}
               placeholder={w("One file name or URL per line", "Un archivo o URL por linea", lang)}
             />
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+              {w("Stored links are shown as clean file names in the detail view, PDF, and Excel exports.", "Los enlaces guardados se muestran como nombres limpios en detalle, PDF y Excel.", lang)}
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 6 }}>
               {attachmentValues(editForm.attachmentsText).map((name, idx) => (
                 <div key={`${name}-${idx}`} style={{ fontSize: 11, color: "#374151", background: "white", border: "1px solid #E5E7EB", borderRadius: 6, padding: "4px 7px" }}>
@@ -2608,7 +2629,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
                     <ExternalLink style={{ width: 12, height: 12 }} />
                     {attachmentLabel(name)}
                   </a>
-                ) : name}
+                ) : attachmentLabel(name)}
               </div>
             ))}
           </div>
@@ -2630,7 +2651,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       <InfoRow label={w("Manufacturer", "Fabricante", lang)} value={submittal.manufacturer} />
       <InfoRow label={w("Model Number", "Número de Modelo", lang)} value={submittal.modelNumber} />
       <InfoRow label={w("Procurement", "Adquisición", lang)} value={PROCUREMENT_OPTIONS.find(o => o.value === submittal.procurementStatus)?.[lang === "es" ? "labelEs" : "label"] || submittal.procurementStatus} />
-      <InfoRow label={w("Ball in Court", "En Espera De", lang)} value={submittal.ballInCourt} />
+      <InfoRow label={w("Current Responsible Party", "Responsable Actual", lang)} value={submittal.ballInCourt} />
       {canWrite && (
         <div style={{ margin: "8px 0 4px" }}>
           <Button type="button" variant="outline" size="sm" disabled={uploadingAttachment} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 5 }}>
