@@ -81,6 +81,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"calendar" | "board" | "list">("board");
   const [selected, setSelected] = useState<ScheduleItem | null>(null);
@@ -247,13 +248,19 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
   const rolloverBucket = async (fromBucket: Bucket) => {
     const toId = Number(rollTarget[fromBucket.id]);
-    if (!toId) return;
+    if (!toId) {
+      setActionError(t("Select a target bucket before rolling work forward.", "Selecciona un bucket destino antes de transferir trabajo."));
+      return;
+    }
+    setActionError("");
     const r = await fetch(`${API}/projects/${projectId}/schedule/buckets/${fromBucket.id}/rollover`, {
       method: "POST",
       headers: jsonHeaders,
       body: JSON.stringify({ to_bucket_id: toId }),
     });
     if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      setActionError(d.error || t("Could not roll over bucket.", "No se pudo transferir el sprint."));
       toast({ title: t("Could not roll over bucket", "No se pudo transferir el sprint"), variant: "destructive" });
       return;
     }
@@ -264,7 +271,11 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
   const saveBucket = async () => {
     const name = bucketName.trim();
-    if (!name && !editingBucket) return;
+    if (!name) {
+      setActionError(t("Enter a bucket or sprint name first.", "Escribe primero el nombre del bucket o sprint."));
+      return;
+    }
+    setActionError("");
     const url = editingBucket
       ? `${API}/projects/${projectId}/schedule/buckets/${editingBucket.id}`
       : `${API}/projects/${projectId}/schedule/buckets`;
@@ -274,12 +285,15 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       body: JSON.stringify({ name, bucket_type: "sprint", sort_order: editingBucket?.sortOrder ?? 100 }),
     });
     if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      setActionError(d.error || t("Could not save bucket.", "No se pudo guardar el bucket."));
       toast({ title: t("Could not save bucket", "No se pudo guardar el bucket"), variant: "destructive" });
       return;
     }
     setBucketName("");
     setEditingBucket(null);
     await load();
+    toast({ title: editingBucket ? t("Bucket updated", "Bucket actualizado") : t("Bucket created", "Bucket creado") });
   };
 
   const deleteMilestone = async (id: number) => {
@@ -357,7 +371,10 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     (acc[key] ||= []).push(item);
     return acc;
   }, {});
-  const itemsByBucket = buckets.map(bucket => ({
+  const derivedBuckets = uniq(items.map(item => item.bucketName).filter(Boolean) as string[])
+    .map((name, index) => ({ id: -1 - index, name, bucketType: "derived", sortOrder: index }));
+  const effectiveBuckets = buckets.length > 0 ? buckets : derivedBuckets;
+  const itemsByBucket = effectiveBuckets.map(bucket => ({
     bucket,
     rows: filtered.filter(item => item.bucketId === bucket.id || (!item.bucketId && item.bucketName === bucket.name)),
   }));
@@ -376,7 +393,57 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   } as const;
 
   return (
-    <div className="tab-content-wrapper">
+    <div className="tab-content-wrapper schedule-planner">
+      <style>{`
+        .schedule-planner .btn {
+          border: 1px solid #CBD5E1;
+          background: #FFFFFF;
+          color: #0F172A;
+          border-radius: 6px;
+          min-height: 34px;
+          padding: 7px 12px;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          line-height: 1;
+          white-space: nowrap;
+        }
+        .schedule-planner .btn:hover { background: #F8FAFC; border-color: #94A3B8; }
+        .schedule-planner .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .schedule-planner .btn-primary { background: #1E3A5F; border-color: #1E3A5F; color: #FFFFFF; }
+        .schedule-planner .btn-primary:hover { background: #15304F; border-color: #15304F; }
+        .schedule-planner .btn-outline { background: #FFFFFF; color: #1E3A5F; }
+        .schedule-planner .btn-sm { min-height: 30px; padding: 6px 9px; font-size: 11px; }
+        .schedule-planner .input {
+          width: 100%;
+          height: 36px;
+          border: 1px solid #CBD5E1;
+          background: #FFFFFF;
+          color: #0F172A;
+          border-radius: 6px;
+          padding: 7px 10px;
+          font-size: 13px;
+          font-family: inherit;
+        }
+        .schedule-planner textarea.input { height: auto; min-height: 76px; resize: vertical; }
+        .schedule-planner .input:focus {
+          outline: none;
+          border-color: #2563EB;
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+        }
+        .schedule-planner .label {
+          display: block;
+          margin-bottom: 5px;
+          color: #475569;
+          font-size: 11px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+      `}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 18 }}>
         <div>
           <h2 style={{ fontWeight: 800, fontSize: 22, margin: 0, color: "#0F172A" }}>{t("Coordination Planner", "Planner de Coordinacion")}</h2>
@@ -386,7 +453,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </p>
         </div>
         {canWrite && (
-          <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} type="button">
             <Plus size={14} />
             {t("Add Schedule Item", "Agregar Fecha")}
           </button>
@@ -433,7 +500,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             ["completed", t("Completed", "Completado")],
             ["overdue", t("Overdue", "Vencidos")],
           ].map(([key, label]) => (
-            <button key={key} className={`btn btn-sm ${filter === key ? "btn-primary" : "btn-outline"}`} onClick={() => setFilter(key)}>
+            <button key={key} type="button" className={`btn btn-sm ${filter === key ? "btn-primary" : "btn-outline"}`} onClick={() => setFilter(key)}>
               {label}
             </button>
           ))}
@@ -444,7 +511,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             ["calendar", t("Calendar", "Calendario"), Calendar],
             ["list", t("List", "Lista"), List],
           ].map(([key, label, Icon]) => (
-            <button key={String(key)} className={`btn btn-sm ${viewMode === key ? "btn-primary" : "btn-outline"}`} onClick={() => setViewMode(key as "calendar" | "board" | "list")}>
+            <button key={String(key)} type="button" className={`btn btn-sm ${viewMode === key ? "btn-primary" : "btn-outline"}`} onClick={() => setViewMode(key as "calendar" | "board" | "list")}>
               <Icon size={13} style={{ marginRight: 4 }} />
               {label as string}
             </button>
@@ -455,13 +522,14 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       {canWrite && viewMode === "board" && (
         <div className="card" style={{ padding: 12, marginBottom: 14 }}>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "end" }}>
-            <div style={{ minWidth: 220 }}>
+            <div style={{ minWidth: 260, flex: "0 1 320px" }}>
               <label className="label">{editingBucket ? t("Edit Bucket", "Editar Bucket") : t("Create Bucket or Sprint", "Crear Bucket o Sprint")}</label>
               <input className="input" value={bucketName} onChange={e => setBucketName(e.target.value)} placeholder="Sprint 34" />
             </div>
-            <button className="btn btn-primary" onClick={saveBucket}>{editingBucket ? t("Save Bucket", "Guardar Bucket") : t("Add Bucket", "Agregar Bucket")}</button>
-            {editingBucket && <button className="btn btn-outline" onClick={() => { setEditingBucket(null); setBucketName(""); }}>{t("Cancel", "Cancelar")}</button>}
+            <button className="btn btn-primary" type="button" onClick={saveBucket}>{editingBucket ? t("Save Bucket", "Guardar Bucket") : t("Add Bucket", "Agregar Bucket")}</button>
+            {editingBucket && <button className="btn btn-outline" type="button" onClick={() => { setEditingBucket(null); setBucketName(""); setActionError(""); }}>{t("Cancel", "Cancelar")}</button>}
           </div>
+          {actionError && <div style={{ marginTop: 8, color: "#B91C1C", fontSize: 12, fontWeight: 700 }}>{actionError}</div>}
         </div>
       )}
 
@@ -543,7 +611,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
       {loading && <div className="text-muted">{t("Loading schedule...", "Cargando cronograma...")}</div>}
 
-      {!loading && filtered.length === 0 && (
+      {!loading && filtered.length === 0 && viewMode !== "board" && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF", background: "white", border: "1px solid #E5E7EB", borderRadius: 8 }}>
           <Calendar size={42} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
           <div style={{ fontWeight: 700 }}>{t("No schedule dates found", "No hay fechas en el cronograma")}</div>
@@ -551,12 +619,12 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         </div>
       )}
 
-      {!loading && filtered.length > 0 && viewMode === "board" && (
+      {!loading && viewMode === "board" && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 12, alignItems: "start" }}>
           {itemsByBucket.map(({ bucket, rows }) => (
             <div key={bucket.id} className="card" style={{ padding: 10, minHeight: 220 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
-                <button type="button" onClick={() => { if (canWrite && bucket.bucketType !== "system") { setEditingBucket(bucket); setBucketName(bucket.name); } }} style={{ border: "none", background: "transparent", padding: 0, fontSize: 12, fontWeight: 900, color: "#1E3A5F", cursor: canWrite && bucket.bucketType !== "system" ? "pointer" : "default" }}>
+                <button type="button" onClick={() => { if (canWrite && bucket.bucketType !== "system" && bucket.id > 0) { setEditingBucket(bucket); setBucketName(bucket.name); setActionError(""); } }} style={{ border: "none", background: "transparent", padding: 0, fontSize: 12, fontWeight: 900, color: "#1E3A5F", cursor: canWrite && bucket.bucketType !== "system" && bucket.id > 0 ? "pointer" : "default" }}>
                   {bucket.name}
                 </button>
                 <span style={{ fontSize: 11, fontWeight: 900, color: "#64748B" }}>{rows.length}</span>
@@ -567,7 +635,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                     <option value="">{t("Roll to...", "Transferir a...")}</option>
                     {buckets.filter(b => b.id !== bucket.id).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
-                  <button className="btn btn-sm btn-outline" onClick={() => rolloverBucket(bucket)} title={t("Move unfinished work to selected bucket", "Mover trabajo pendiente al bucket seleccionado")}>
+                  <button className="btn btn-sm btn-outline" type="button" onClick={() => rolloverBucket(bucket)} title={t("Move unfinished work to selected bucket", "Mover trabajo pendiente al bucket seleccionado")}>
                     <MoveRight size={12} />
                   </button>
                 </div>
@@ -588,9 +656,19 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                     t={t}
                   />
                 ))}
+                {rows.length === 0 && (
+                  <div style={{ border: "1px dashed #CBD5E1", borderRadius: 8, padding: 12, color: "#64748B", fontSize: 12, minHeight: 68 }}>
+                    {t("No items in this bucket.", "No hay items en este bucket.")}
+                  </div>
+                )}
               </div>
             </div>
           ))}
+          {itemsByBucket.length === 0 && (
+            <div className="card" style={{ padding: 18, color: "#64748B", fontSize: 13 }}>
+              {t("No buckets are available. Create Sprint 34 or reload after the API migration runs.", "No hay buckets disponibles. Crea Sprint 34 o recarga despues de ejecutar la migracion API.")}
+            </div>
+          )}
         </div>
       )}
 
