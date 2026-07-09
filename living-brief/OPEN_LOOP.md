@@ -51,6 +51,16 @@ Open design issue:
 
 ## Ready Next
 
+### RFI Unfinished Work
+Purpose: finish the RFI handover items without creating a second disconnected RFI workflow.
+
+Open items:
+- Cloud file pickers and OAuth environment follow-up from RFI_HANDOVER.md.
+- RFI attachment/file handling and generic binary download route for uploaded files.
+- RFI impact layout, save unification, configurable RFI types, and numbering cleanup.
+- RFI AI assist must stay split between low-cost text/email drafting and explicit-cost file reading.
+- Cross-module links from RFIs must persist through the existing linked-items model, not a duplicate relationship system.
+
 ### Navisworks Plugin Two-Way Status Sync
 Purpose: reduce web/plugin round-trips for status changes.
 
@@ -76,6 +86,15 @@ Requirements:
 - Super admin can review submitted feedback.
 - Should feed the Open Loop process instead of becoming lost chat context.
 
+### Domain / Replit Branding Follow-Ups
+Purpose: remove deployment confusion and keep BIMLog branding/customer paths clean.
+
+Open items:
+- Confirm bimlog.app and www.bimlog.app production behavior after DNS/certificate propagation.
+- Keep old Replit URLs out of user-facing source, OAuth callback docs, reports, and emails.
+- Clearly label future release notes as committed/pushed, needs publish, or live verified.
+- Do not publish from this task.
+
 ### Lens Excel Custom Report
 Purpose: satisfy Ruben's request for a customized Lens Excel export with a report-style summary.
 
@@ -95,6 +114,15 @@ Rule:
 - If two buttons do the same thing, keep one.
 - If two buttons export different scopes, name them by scope and add hover help.
 - This is a Quality 4.0 defect category, not cosmetic polish.
+
+### Mojibake / QUALITY.md Enforcement
+Purpose: keep Living Brief, UI text, reports, emails, and exports clean UTF-8.
+
+Open items:
+- Run `pnpm run check:mojibake` before production builds, publish prompts, and release handoffs.
+- Treat user-facing mojibake as a release blocker.
+- Enforce QUALITY.md rules: spreadsheet-simple UI, connected data, no duplicate controls, clear ownership, audit-ready output.
+- Do not fix corrupted text by deleting valid Spanish; repair the encoding/source.
 
 ### AI Usage / Cost Controls
 Purpose: make AI useful without surprising BIMLog or customers with hidden cost.

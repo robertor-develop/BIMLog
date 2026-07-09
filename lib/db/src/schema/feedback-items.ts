@@ -16,10 +16,10 @@ export const feedbackItemsTable = pgTable("feedback_items", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   resolvedAt: timestamp("resolved_at"),
-}, (t) => ({
-  statusCreatedIdx: index("feedback_items_status_created_idx").on(t.status, t.createdAt.desc()),
-  userCreatedIdx: index("feedback_items_user_created_idx").on(t.userId, t.createdAt.desc()),
-  projectCreatedIdx: index("feedback_items_project_created_idx").on(t.projectId, t.createdAt.desc()),
+}, (table) => ({
+  statusCreatedIdx: index("feedback_items_status_created_idx").on(table.status, table.createdAt.desc()),
+  userCreatedIdx: index("feedback_items_user_created_idx").on(table.userId, table.createdAt.desc()),
+  projectCreatedIdx: index("feedback_items_project_created_idx").on(table.projectId, table.createdAt.desc()),
 }));
 
 export type FeedbackItem = typeof feedbackItemsTable.$inferSelect;
