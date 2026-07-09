@@ -229,7 +229,7 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-type TrackerExportFilters = { floor?: string; type?: string; date?: string; status?: string };
+type TrackerExportFilters = { floor?: string; trade?: string; type?: string; date?: string; status?: string };
 
 async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel", filters: TrackerExportFilters = {}) {
   const endpoint = format === "pdf"
@@ -241,9 +241,9 @@ async function downloadSubmittalTracker(projectId: number, format: "pdf" | "exce
   });
   const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
   const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
-  if (!response.ok) throw new Error("Tracker export failed");
+  if (!response.ok) throw new Error("Shop Drawing Control export failed");
   const blob = await response.blob();
-  downloadBlob(blob, format === "pdf" ? `Submittal-Tracker-Project${projectId}.pdf` : `Submittal-Tracker-Project${projectId}.xlsx`);
+  downloadBlob(blob, format === "pdf" ? `Shop-Drawing-Control-Project${projectId}.pdf` : `Shop-Drawing-Control-Project${projectId}.xlsx`);
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -322,6 +322,12 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     return w("Other", "Otro", lang);
   }
 
+  function trackerTypeMatches(filter: string, actual: string): boolean {
+    if (!filter) return true;
+    if (filter === "Sleeve") return actual === "Sleeve" || actual === "Sleeve V" || actual === "Sleeve H";
+    return actual === filter;
+  }
+
   function trackerDateRaw(s: Submittal): string {
     const raw = s.reviewedAt || s.dateRequired || s.dueDate || s.dateSubmitted || s.createdAt;
     return raw ? String(raw).slice(0, 10) : "";
@@ -334,6 +340,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   }
 
   const [filterFloor, setFilterFloor] = useState("");
+  const [filterTrade, setFilterTrade] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -355,6 +362,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     const standardTypes = ["Shop", "Sleeve V", "Sleeve H", "Sleeve", "Other"];
     return {
       floors: uniqPreserve([...buildingLevels, ...uniq(submittals.map(floorOf))]),
+      trades: uniqPreserve([...TRADE_ORDER, ...uniq(submittals.map(tradeOf))]),
       types: uniqPreserve([...standardTypes, ...uniq(submittals.map(typeOf))]),
       dates: uniq(submittals.map(trackerDateRaw)),
       statuses: uniq(submittals.map(s => s.status || w("Unknown", "Desconocido", lang))),
@@ -363,11 +371,12 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   const visibleSubmittals = useMemo(() => submittals.filter(s => {
     if (filterFloor && floorOf(s) !== filterFloor) return false;
-    if (filterType && typeOf(s) !== filterType) return false;
+    if (filterTrade && tradeOf(s) !== filterTrade) return false;
+    if (!trackerTypeMatches(filterType, typeOf(s))) return false;
     if (filterDate && trackerDateRaw(s) !== filterDate) return false;
     if (filterStatus && (s.status || w("Unknown", "Desconocido", lang)) !== filterStatus) return false;
     return true;
-  }), [submittals, filterFloor, filterType, filterDate, filterStatus, lang]);
+  }), [submittals, filterFloor, filterTrade, filterType, filterDate, filterStatus, lang]);
 
   if (submittals.length === 0) {
     return (
@@ -418,19 +427,19 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   }).length;
   const missingResponsible = visibleSubmittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
   const missingDueDate = visibleSubmittals.filter(s => !s.dateRequired && !s.dueDate).length;
-  const filtersActive = Boolean(filterFloor || filterType || filterDate || filterStatus);
+  const filtersActive = Boolean(filterFloor || filterTrade || filterType || filterDate || filterStatus);
 
   const downloadTracker = async (format: "pdf" | "excel") => {
     try {
-      await downloadSubmittalTracker(projectId, format, { floor: filterFloor, type: filterType, date: filterDate, status: filterStatus });
+      await downloadSubmittalTracker(projectId, format, { floor: filterFloor, trade: filterTrade, type: filterType, date: filterDate, status: filterStatus });
       toast({
         title: format === "pdf"
-          ? w("Tracker PDF exported", "PDF del seguimiento exportado", lang)
-          : w("Tracker Excel exported", "Excel del seguimiento exportado", lang),
+          ? w("Control PDF exported", "PDF de control exportado", lang)
+          : w("Control Excel exported", "Excel de control exportado", lang),
       });
     } catch {
       toast({
-        title: w("Tracker export failed", "Error al exportar seguimiento", lang),
+        title: w("Control export failed", "Error al exportar control", lang),
         variant: "destructive",
       });
     }
@@ -441,38 +450,38 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 800, color: "#1E3A5F" }}>
-            {w("Submittal Tracking Table", "Tabla de Seguimiento de Entregables", lang)}
+            {w("Shop Drawing Control", "Control de Shop Drawings", lang)}
           </div>
           <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-            {w("Live control table by building level, drawing type, date, and review status.",
-               "Tabla viva por nivel, tipo de plano, fecha y estado de revision.", lang)}
+            {w("Live control table by building level, trade, drawing type, date, and review status.",
+               "Tabla viva por nivel, disciplina, tipo de plano, fecha y estado de revision.", lang)}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <Button
             size="sm"
             variant="outline"
-            title={w("Export the filtered tracking table to Excel.", "Exporta la tabla filtrada de seguimiento a Excel.", lang)}
+            title={w("Export the filtered Shop Drawing Control table to Excel.", "Exporta la tabla filtrada de control de shop drawings a Excel.", lang)}
             onClick={() => downloadTracker("excel")}
           >
             <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-            {w("Export Tracker Excel", "Exportar Seguimiento Excel", lang)}
+            {w("Export Control Excel", "Exportar Control Excel", lang)}
           </Button>
           <Button
             size="sm"
             variant="outline"
-            title={w("Export the filtered tracking table to PDF.", "Exporta la tabla filtrada de seguimiento a PDF.", lang)}
+            title={w("Export the filtered Shop Drawing Control table to PDF.", "Exporta la tabla filtrada de control de shop drawings a PDF.", lang)}
             onClick={() => downloadTracker("pdf")}
           >
             <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-            {w("Export Tracker PDF", "Exportar Seguimiento PDF", lang)}
+            {w("Export Control PDF", "Exportar Control PDF", lang)}
           </Button>
         </div>
       </div>
 
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(4, minmax(150px, 1fr)) auto",
+        gridTemplateColumns: "repeat(5, minmax(140px, 1fr)) auto",
         gap: 10,
         alignItems: "end",
         background: "white",
@@ -486,6 +495,13 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           <select className="input" value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
             <option value="">{w("All Building Levels", "Todos los Niveles", lang)}</option>
             {filterOptions.floors.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </label>
+        <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
+          {w("Trade", "Disciplina", lang)}
+          <select className="input" value={filterTrade} onChange={e => setFilterTrade(e.target.value)}>
+            <option value="">{w("All Trades", "Todas las Disciplinas", lang)}</option>
+            {filterOptions.trades.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
@@ -513,7 +529,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           size="sm"
           variant="outline"
           disabled={!filtersActive}
-          onClick={() => { setFilterFloor(""); setFilterType(""); setFilterDate(""); setFilterStatus(""); }}
+          onClick={() => { setFilterFloor(""); setFilterTrade(""); setFilterType(""); setFilterDate(""); setFilterStatus(""); }}
         >
           {w("Clear", "Limpiar", lang)}
         </Button>
@@ -537,7 +553,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#F9FAFB" }}>
-              {["Floor","Shop","Sleeve V","Sleeve H","Submittal","Date","Description","Status","Version","RFI Open","RFI Close","RFI Description"].map(h => (
+              {["Building Level","Shop","Sleeve V","Sleeve H","Review","Date","Description","Review Status","Version","RFI Open","RFI Close","RFI Description"].map(h => (
                 <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "#374151",
                   textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
               ))}
@@ -679,9 +695,9 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 
       <div style={{ display: "flex", gap: 18, borderBottom: "1px solid #E5E7EB", marginBottom: 16 }}>
         {[
-          ["submittals", w("Submittals", "Entregables", lang)],
+          ["submittals", w("Submittal Packages", "Paquetes de Entregables", lang)],
           ["register", w("Register", "Registro", lang)],
-          ["tracking", w("Tracking Table", "Tabla de Seguimiento", lang)],
+          ["tracking", w("Shop Drawing Control", "Control de Shop Drawings", lang)],
         ].map(([key, label]) => (
           <button
             key={key}

@@ -82,6 +82,12 @@ function trackerType(s: typeof submittalsTable.$inferSelect): string {
   return "Other";
 }
 
+function trackerTypeMatches(filter: string, actual: string): boolean {
+  if (!filter) return true;
+  if (filter === "Sleeve") return actual === "Sleeve" || actual === "Sleeve V" || actual === "Sleeve H";
+  return actual === filter;
+}
+
 function trackerDateValue(s: typeof submittalsTable.$inferSelect): string {
   const raw = s.reviewedAt || s.dateRequired || s.dueDate || s.dateSubmitted || s.createdAt;
   if (!raw) return "";
@@ -98,12 +104,14 @@ function trackerDateLabel(s: typeof submittalsTable.$inferSelect): string {
 
 function filterTrackerSubmittals(req: Request, subs: Array<typeof submittalsTable.$inferSelect>) {
   const floor = String(req.query.floor || "").trim();
+  const trade = String(req.query.trade || "").trim();
   const type = String(req.query.type || "").trim();
   const date = String(req.query.date || "").trim();
   const status = String(req.query.status || "").trim();
   return subs.filter((submittal) => {
     if (floor && trackerFloor(submittal) !== floor) return false;
-    if (type && trackerType(submittal) !== type) return false;
+    if (trade && trackerTrade(submittal) !== trade) return false;
+    if (!trackerTypeMatches(type, trackerType(submittal))) return false;
     if (date && trackerDateValue(submittal) !== date) return false;
     if (status && (submittal.status || "Unknown") !== status) return false;
     return true;
@@ -230,6 +238,23 @@ function normalizeHeader(value: unknown): string {
     .trim();
 }
 
+function readRowsFromSheet(sheet: XLSX.WorkSheet): Record<string, unknown>[] {
+  const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "", raw: false });
+  const headerIndex = matrix.findIndex((row) => {
+    const headers = row.map(normalizeHeader);
+    return headers.includes("description") || headers.includes("submittal no") || headers.includes("number");
+  });
+  if (headerIndex < 0) return [];
+  const headers = matrix[headerIndex].map(normalizeHeader);
+  return matrix.slice(headerIndex + 1).map((row) => {
+    const record: Record<string, unknown> = {};
+    headers.forEach((header, index) => {
+      if (header) record[header] = row[index];
+    });
+    return record;
+  }).filter(row => Object.values(row).some(value => String(value ?? "").trim() !== ""));
+}
+
 function getMappedCell(row: Record<string, unknown>, names: string[]): unknown {
   for (const name of names) {
     if (row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== "") return row[name];
@@ -240,28 +265,48 @@ function getMappedCell(row: Record<string, unknown>, names: string[]): unknown {
 function extractSpreadsheetSubmittals(buffer: Buffer, filename: string) {
   if (!/\.(xlsx|xls|csv)$/i.test(filename)) return [];
   const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) return [];
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" });
+  const trackingRows = workbook.Sheets["Tracking Table"] ? readRowsFromSheet(workbook.Sheets["Tracking Table"]) : [];
+  const detailsRows = workbook.Sheets["Details"] ? readRowsFromSheet(workbook.Sheets["Details"]) : [];
+  let rows: Record<string, unknown>[] = [];
+  if (trackingRows.length || detailsRows.length) {
+    const maxRows = Math.max(trackingRows.length, detailsRows.length);
+    rows = Array.from({ length: maxRows }, (_, index) => ({
+      ...(trackingRows[index] || {}),
+      ...(detailsRows[index] || {}),
+    }));
+  } else {
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) return [];
+    rows = readRowsFromSheet(workbook.Sheets[sheetName]);
+    if (rows.length === 0) {
+      rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" })
+        .map((rawRow) => {
+          const row: Record<string, unknown> = {};
+          Object.entries(rawRow).forEach(([key, value]) => {
+            row[normalizeHeader(key)] = value;
+          });
+          return row;
+        });
+    }
+  }
   return rows.map((rawRow) => {
     const row: Record<string, unknown> = {};
-    Object.entries(rawRow).forEach(([key, value]) => {
-      row[normalizeHeader(key)] = value;
-    });
-    const number = cleanCell(getMappedCell(row, ["submittal", "submittal #", "submittal no", "submittal number", "number", "no"]));
-    const title = cleanCell(getMappedCell(row, ["submittal name", "name", "title", "file name", "filename", "description"]));
+    Object.entries(rawRow).forEach(([key, value]) => { row[normalizeHeader(key)] = value; });
+    const number = cleanCell(getMappedCell(row, ["submittal no", "submittal #", "submittal number", "number", "no", "submittal"]));
+    const title = cleanCell(getMappedCell(row, ["description", "submittal name", "name", "title", "file name", "filename"]));
+    const drawingType = cleanCell(getMappedCell(row, ["drawing type", "type", "submittal type"]));
     return {
       number,
       title,
-      description: cleanCell(getMappedCell(row, ["description", "notes", "open items"])),
+      description: cleanCell(getMappedCell(row, ["notes", "rfi description", "open items"])),
       status: normalizeImportedStatus(getMappedCell(row, ["status", "submittal status"])),
       specSection: cleanCell(getMappedCell(row, ["spec section", "specification section", "section"])),
-      submittalType: cleanCell(getMappedCell(row, ["type", "submittal type"])) || "Shop Drawing",
+      submittalType: drawingType || "Shop Drawing",
       trade: cleanCell(getMappedCell(row, ["trade", "discipline"])),
-      floor: cleanCell(getMappedCell(row, ["floor", "level"])),
+      floor: cleanCell(getMappedCell(row, ["building level", "floor", "level"])),
       responsibleCompany: cleanCell(getMappedCell(row, ["responsible company", "contractor", "company"])),
-      dateRequired: parseDateCell(getMappedCell(row, ["due date", "date required", "required date"])),
-      reviewDecision: normalizeImportedStatus(getMappedCell(row, ["structural engineer", "mep engineer", "architect", "owner"])),
+      dateRequired: parseDateCell(getMappedCell(row, ["date", "due date", "date required", "required date"])),
+      reviewDecision: normalizeImportedStatus(getMappedCell(row, ["submittal", "review", "review status", "structural engineer", "mep engineer", "architect", "owner"])),
     };
   }).filter(r => r.title || r.number);
 }
@@ -602,6 +647,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     const generatedAt = new Date().toLocaleString("en-US");
     const filterSummary = [
       req.query.floor ? `Level: ${req.query.floor}` : "All building levels",
+      req.query.trade ? `Trade: ${req.query.trade}` : "All trades",
       req.query.type ? `Drawing Type: ${req.query.type}` : "All drawing types",
       req.query.date ? `Date: ${req.query.date}` : "All dates",
       req.query.status ? `Status: ${req.query.status}` : "All review statuses",
@@ -612,7 +658,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     ];
     const trackerSheet = XLSX.utils.aoa_to_sheet([
       ["BIMLog by IgniteSmart", projectName],
-      ["Submittal Tracking Table", `Generated ${generatedAt}`],
+      ["Shop Drawing Control", `Generated ${generatedAt}`],
       ["Filters", filterSummary],
       trackerColumns,
     ]);
@@ -628,7 +674,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     const summaryColumns = ["Building Level", "Shop", "Sleeve V", "Sleeve H", "Other", "Total", "Pending", "Approved", "Overdue"];
     const summarySheet = XLSX.utils.aoa_to_sheet([
       ["BIMLog by IgniteSmart", projectName],
-      ["Submittal Tracking Summary", `Generated ${generatedAt}`],
+      ["Shop Drawing Control Summary", `Generated ${generatedAt}`],
       ["Filters", filterSummary],
       summaryColumns,
     ]);
@@ -644,7 +690,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     const detailColumns = ["Submittal No", "Trade", "Drawing Type", "Responsible Company", "Attachments", "Notes"];
     const detailSheet = XLSX.utils.aoa_to_sheet([
       ["BIMLog by IgniteSmart", projectName],
-      ["Submittal Export Details", `Generated ${generatedAt}`],
+      ["Shop Drawing Control Details", `Generated ${generatedAt}`],
       ["Filters", filterSummary],
       detailColumns,
     ]);
@@ -661,7 +707,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Submittal-Tracking-Table.xlsx"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Shop-Drawing-Control.xlsx"`);
     res.setHeader("Content-Length", buffer.length);
     res.send(buffer);
   } catch (error) {
@@ -687,13 +733,14 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
       const buf = Buffer.concat(chunks);
       const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Submittal-Tracking-Table.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Shop-Drawing-Control.pdf"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
 
     const filterSummary = [
       req.query.floor ? `Level: ${req.query.floor}` : "All building levels",
+      req.query.trade ? `Trade: ${req.query.trade}` : "All trades",
       req.query.type ? `Drawing Type: ${req.query.type}` : "All drawing types",
       req.query.date ? `Date: ${req.query.date}` : "All dates",
       req.query.status ? `Status: ${req.query.status}` : "All review statuses",
@@ -702,7 +749,7 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
     let y = LOG_MARGIN;
     doc.rect(0, 0, LOG_W, 62).fill("#1E3A5F");
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text("SUBMITTAL TRACKING TABLE", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
+      .text("SHOP DRAWING CONTROL", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("#BFDBFE").fontSize(9).font("Helvetica")
       .text(`${project?.name || "Project"} | ${rows.length} shown of ${subs.length} submittals | Generated ${new Date().toLocaleDateString("en-US")}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(7).font("Helvetica")
@@ -775,7 +822,7 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
     });
 
     doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
-      .text(`Submittal Tracking Table | ${project?.name || ""} | BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
+      .text(`Shop Drawing Control | ${project?.name || ""} | BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
     doc.end();
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

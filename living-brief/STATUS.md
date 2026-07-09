@@ -322,12 +322,14 @@ If an item is built but not tested by the real user after publish/package, it is
 - Open: Separate cheap text AI from expensive file-reading AI. Description/email assist should be low-cost and easy to trigger; file-reading/OCR AI must require a clear cost warning before use.
 - Open: Submittal AI assist. Roberto approved AI Description Assist and AI Email Draft; file-reading assist must remain separate and explicit. Verify final UX and cost logging before closing.
 
-### Submittals and Submittal Tracker
-- Open: Submittal Tracker must feel like part of Submittals, not a disconnected sidebar module. Desired layout: Submittals / Register / Tracking Table as left-side internal tabs like Clash Reports, with Import, Export Excel, Export PDF, and New Submittal actions on the right.
-- Open: Existing submittals must appear in the Tracking Table when they have enough data. Current concern: Roberto's one manual submittal did not track. Audit register rows vs submittal rows and remove disconnected logic.
+### Submittals and Shop Drawing Control
+- Shipped, needs publish/Ruben verification: Submittals is now the single sidebar item. Inside it, the internal tabs are Submittal Packages, Register, and Shop Drawing Control. The old Submittal Tracker route remains only as a compatibility deep link into Submittals.
+- Shipped, needs publish/Ruben verification: Shop Drawing Control now renders from existing live submittal rows instead of a disconnected tracker-only concept, with an empty state that sends users back to Submittal Packages.
 - Open: Explain and wire Register. The UI must make clear that Register is the planned/spec item list, while Submittals are actual submissions against those planned items. If that is not the real code behavior, fix the code or rename it.
-- Open: Tracker filters requested by Ruben: Building Level, Drawing Type, Date, Review Status. Building Level must come from project convention levels when available, not only from currently loaded rows.
-- Open: Excel export quality. Submittal exports must be professional, formatted, human-readable, filter-respecting, and usable even when users create submittals inside BIMLog instead of importing Excel.
+- Shipped, needs publish/Ruben verification: Shop Drawing Control filters include Building Level, Trade, Drawing Type, Date, and Review Status. Building Level combines Convention Builder project levels from `/projects/:projectId/levels` with real imported/current submittal rows. Drawing Type Sleeve includes Sleeve, Sleeve V, and Sleeve H.
+- Shipped, needs publish/Ruben verification: Shop Drawing Control PDF/Excel exports use filtered scope, Shop Drawing Control filenames, clear export labels/tooltips, and backend filtering for Building Level, Trade, Drawing Type, Date, and Review Status.
+- Shipped, needs publish/Ruben verification: BIMLog's own Shop Drawing Control Excel export re-imports through the deterministic spreadsheet importer by reading the branded multi-sheet workbook headers and matching Tracking Table rows with Details rows.
+- Open: Platform-wide Excel export quality. Submittal exports are improved for this scope, but all exports still need Quality 4.0 review for professional formatting, filter parity, and client-ready output.
 - Open: PDF and audit certificate quality. Roberto called current outputs unclear/ugly. Audit certificate needs either a clear purpose and polished output or removal/deferment.
 - Open: Attachment UX. Users must be able to add files/images from their computer to submittals and product info. Display names must be human file names, not raw API download URLs. Attachments should appear above Description where Roberto requested.
 - Open: Editable detail UX. Submitted By, Submitted To, contacts, emails, responsible company, product information, ball-in-court, status, and review data must be editable in one consistent detail panel and must populate immediately after save.
