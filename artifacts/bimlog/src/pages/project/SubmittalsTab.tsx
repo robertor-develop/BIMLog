@@ -449,9 +449,23 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <Button size="sm" variant="outline" onClick={() => downloadTracker("pdf")}>
+          <Button
+            size="sm"
+            variant="outline"
+            title={w("Export the filtered tracking table to Excel.", "Exporta la tabla filtrada de seguimiento a Excel.", lang)}
+            onClick={() => downloadTracker("excel")}
+          >
             <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-            {w("Export PDF", "Exportar PDF", lang)}
+            {w("Export Tracker Excel", "Exportar Seguimiento Excel", lang)}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            title={w("Export the filtered tracking table to PDF.", "Exporta la tabla filtrada de seguimiento a PDF.", lang)}
+            onClick={() => downloadTracker("pdf")}
+          >
+            <Download style={{ width: 13, height: 13, marginRight: 4 }} />
+            {w("Export Tracker PDF", "Exportar Seguimiento PDF", lang)}
           </Button>
         </div>
       </div>
@@ -517,13 +531,6 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
             <div style={{ fontSize: 22, fontWeight: 900, color: String(color), marginTop: 2 }}>{value}</div>
           </div>
         ))}
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-        <Button size="sm" variant="outline" onClick={() => downloadTracker("excel")}>
-          <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-          {w("Export Excel", "Exportar Excel", lang)}
-        </Button>
       </div>
 
       <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
@@ -632,19 +639,6 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
     data: Submittal[]; isLoading: boolean;
   };
 
-  const handleTrackerExport = async (format: "pdf" | "excel") => {
-    try {
-      await downloadSubmittalTracker(projectId, format);
-      toast({
-        title: format === "pdf"
-          ? w("Submittal tracker PDF exported", "PDF de seguimiento exportado", lang)
-          : w("Submittal tracker Excel exported", "Excel de seguimiento exportado", lang),
-      });
-    } catch {
-      toast({ title: w("Export failed", "Error al exportar", lang), variant: "destructive" });
-    }
-  };
-
   const pendingCount = submittals.filter(s => !["approved", "approved_as_noted", "rejected"].includes(s.status)).length;
   const approvedCount = submittals.filter(s => s.status === "approved" || s.status === "approved_as_noted").length;
   const actionNeeded = submittals.filter(s => {
@@ -673,14 +667,6 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
               </span>
             </label>
           )}
-          <Button size="sm" variant="outline" onClick={() => handleTrackerExport("excel")} style={{ gap: 5, fontSize: 12 }}>
-            <Download style={{ width: 13, height: 13 }} />
-            {w("Export Excel", "Exportar Excel", lang)}
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => handleTrackerExport("pdf")} style={{ gap: 5, fontSize: 12 }}>
-            <FileText style={{ width: 13, height: 13 }} />
-            {w("Export PDF", "Exportar PDF", lang)}
-          </Button>
           {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
           {canWrite && (
             <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
@@ -1148,9 +1134,15 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
           <option value="">{w("All Types", "Todos los Tipos", lang)}</option>
           {CATEGORY_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
         </select>
-        <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => handleExport("excel")}>
+        <Button
+          variant="outline"
+          size="sm"
+          title={w("Export the visible Submittals table to Excel.", "Exporta la tabla visible de entregables a Excel.", lang)}
+          style={{ fontSize: 11, gap: 5 }}
+          onClick={() => handleExport("excel")}
+        >
           <Download style={{ width: 12, height: 12 }} />
-          {w("Export Excel", "Exportar Excel", lang)}
+          {w("Export Submittal Log", "Exportar Log de Entregables", lang)}
         </Button>
       </div>
 
