@@ -730,8 +730,10 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
   const [costImpact, setCostImpact] = useState(preload?.costImpact || "No Cost Impact");
   const [costAmount, setCostAmount] = useState(preload?.costImpactAmount || "");
+  const [costReason, setCostReason] = useState((preload as Rfi & { costImpactReason?: string })?.costImpactReason || "");
   const [schedImpact, setSchedImpact] = useState(preload?.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(preload?.scheduleImpactDays != null ? String(preload.scheduleImpactDays) : "");
+  const [schedReason, setSchedReason] = useState((preload as Rfi & { scheduleImpactReason?: string })?.scheduleImpactReason || "");
 
   const [distList, setDistList] = useState<string[]>(preload?.distributionList || []);
 
@@ -747,6 +749,15 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const [emailDraft, setEmailDraft] = useState("");
   const [emailDraftLoading, setEmailDraftLoading] = useState(false);
   const [emailDraftError, setEmailDraftError] = useState("");
+  const [emailCopied, setEmailCopied] = useState(false);
+  const costAmountRequired = costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
+  const scheduleDaysRequired = schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days";
+  const addReference = () => {
+    const value = attachInput.trim();
+    if (!value) return;
+    setAttachments(prev => prev.includes(value) ? prev : [...prev, value]);
+    setAttachInput("");
+  };
 
   // AI document import: read an existing PDF/Word/Excel and prefill this form.
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -898,6 +909,17 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
   };
 
+  const copyCreateEmailDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(emailDraft);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+      toast({ title: w("Email copied to clipboard", "Email copiado al portapapeles", lang) });
+    } catch {
+      toast({ title: w("Copy failed", "Error al copiar", lang), variant: "destructive" });
+    }
+  };
+
   // Fix 2 — save external person
   const handleAddExtPerson = () => {
     if (!extPersonName.trim() || !extPersonEmail.trim()) return;
@@ -945,9 +967,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       locationDescription: location || undefined,
       question: question || undefined,
       costImpact: costImpact || undefined,
-      costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
+      costImpactAmount: costAmountRequired ? costAmount : undefined,
+      costImpactReason: costAmountRequired ? costReason : undefined,
       scheduleImpact: schedImpact || undefined,
-      scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
+      scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
+      scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
       distributionList: distList.length > 0 ? distList : undefined,
       attachmentsJson: attachments.length > 0 ? attachments : undefined,
     };
@@ -975,9 +999,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         locationDescription: location || undefined,
         question: question || undefined,
         costImpact: costImpact || undefined,
-        costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
+        costImpactAmount: costAmountRequired ? costAmount : undefined,
+        costImpactReason: costAmountRequired ? costReason : undefined,
         scheduleImpact: schedImpact || undefined,
-        scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
+        scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
+        scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
         distributionList: distList.length > 0 ? distList : undefined,
         attachmentsJson: attachments.length > 0 ? attachments : undefined,
       },
@@ -1231,8 +1257,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</label>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL...", "Pegar nombre de archivo o URL...", lang)} style={{ fontSize: 12, flex: "1 1 260px" }}
-                onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
-              <Button size="sm" variant="outline" onClick={() => { if (attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); } }} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addReference(); } }} />
+              <Button type="button" size="sm" variant="outline" onClick={addReference} disabled={!attachInput.trim()} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
               <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
               <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                 {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingAtt ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
@@ -1249,7 +1275,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             {attachments.map((a, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
                 <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
+                {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{attachLabel(a)}</span>}
                 <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
               </div>
             ))}
@@ -1275,7 +1301,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
               {showAi && (
                 <div style={{ marginTop: 8, padding: 12, background: "hsl(var(--secondary) / 0.5)", borderRadius: 8, border: "1px solid #7C3AED44" }}>
                   <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
-                    {w("Describe your issue in plain language and AI will generate a formal RFI question:", "Describe tu problema en lenguaje simple y la IA generará una pregunta formal de RFI:", lang)}
+                    {w("Text-only AI assist uses AI credits. It does not read attached files unless you explicitly use file-reading AI.", "La asistencia IA solo de texto usa creditos IA. No lee archivos adjuntos salvo que use explicitamente IA de lectura de archivos.", lang)}
                   </p>
                   <textarea
                     value={aiDesc}
@@ -1304,8 +1330,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                   {opt}
                 </label>
               ))}
-              {costImpact === "Cost Increase Known" && (
-                <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder="$ Amount" style={{ fontSize: 12, marginTop: 4 }} />
+              {costAmountRequired && (
+                <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                  <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 12 }} />
+                  <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 64, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
+                </div>
               )}
             </div>
             <div>
@@ -1316,8 +1345,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                   {opt}
                 </label>
               ))}
-              {(schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days") && (
-                <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Number of days", "Número de días", lang)} style={{ fontSize: 12, marginTop: 4 }} />
+              {scheduleDaysRequired && (
+                <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                  <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Calendar Days", "Dias Calendario", lang)} style={{ fontSize: 12 }} />
+                  <textarea value={schedReason} onChange={e => setSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ width: "100%", minHeight: 64, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
+                </div>
               )}
             </div>
           </div>
@@ -1407,11 +1439,19 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
               </div>
               {emailDraftError && <div style={{ fontSize: 11, color: "#B45309", marginTop: 6 }}>{emailDraftError}</div>}
               {emailDraft && (
-                <textarea
-                  value={emailDraft}
-                  onChange={e => setEmailDraft(e.target.value)}
-                  style={{ width: "100%", minHeight: 120, marginTop: 8, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                />
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
+                    <Button type="button" size="sm" variant="outline" onClick={copyCreateEmailDraft} style={{ fontSize: 11, gap: 5 }}>
+                      {emailCopied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
+                      {emailCopied ? w("Copied", "Copiado", lang) : w("Copy Email", "Copiar Email", lang)}
+                    </Button>
+                  </div>
+                  <textarea
+                    value={emailDraft}
+                    onChange={e => setEmailDraft(e.target.value)}
+                    style={{ width: "100%", minHeight: 120, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -1464,8 +1504,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [closingStatus, setClosingStatus] = useState(rfi.status);
   const [costImpact, setCostImpact] = useState(rfi.costImpact || "No Cost Impact");
   const [costAmount, setCostAmount] = useState(rfi.costImpactAmount || "");
+  const [costReason, setCostReason] = useState((rfi as Rfi & { costImpactReason?: string }).costImpactReason || "");
   const [schedImpact, setSchedImpact] = useState(rfi.scheduleImpact || "No Schedule Impact");
   const [schedDays, setSchedDays] = useState(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+  const [schedReason, setSchedReason] = useState((rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason || "");
 
   // Inline edit of the RFI's OWN details (question + cost/schedule impact), separate from the
   // Response fields above — so editing happens right in the detail, no separate form to hunt for.
@@ -1475,8 +1517,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoQuestion, setInfoQuestion] = useState("");
   const [infoCost, setInfoCost] = useState("");
   const [infoCostAmt, setInfoCostAmt] = useState("");
+  const [infoCostReason, setInfoCostReason] = useState("");
   const [infoSched, setInfoSched] = useState("");
   const [infoSchedDays, setInfoSchedDays] = useState("");
+  const [infoSchedReason, setInfoSchedReason] = useState("");
   const [infoToCompany, setInfoToCompany] = useState("");
   const [infoToPerson, setInfoToPerson] = useState("");
   const [infoToEmail, setInfoToEmail] = useState("");
@@ -1499,10 +1543,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
-    setInfoCost(rfi.costImpact || "");
+    setInfoCost(rfi.costImpact || "No Cost Impact");
     setInfoCostAmt(rfi.costImpactAmount || "");
-    setInfoSched(rfi.scheduleImpact || "");
+    setInfoCostReason((rfi as Rfi & { costImpactReason?: string }).costImpactReason || "");
+    setInfoSched(rfi.scheduleImpact || "No Schedule Impact");
     setInfoSchedDays(rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : "");
+    setInfoSchedReason((rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason || "");
     setInfoToCompany(rfi.submittedToCompany || "");
     setInfoToPerson(rfi.submittedToPerson || "");
     setInfoToEmail(rfi.submittedToEmail || "");
@@ -1540,8 +1586,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
-    answeredByCompany: string | null; costImpact: string | null; scheduleImpact: string | null;
-    scheduleImpactDays: number | null; isConflictOfInterest: boolean | null; createdAt: string;
+    answeredByCompany: string | null; costImpact: string | null; costImpactAmount: string | null; costImpactReason: string | null;
+    scheduleImpact: string | null; scheduleImpactDays: number | null; scheduleImpactReason: string | null;
+    isConflictOfInterest: boolean | null; createdAt: string;
   }>>([]);
   const [responsesLoading, setResponsesLoading] = useState(false);
 
@@ -2082,6 +2129,10 @@ ${hasResp ? `
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
   const storedQuestionDocs = (rfi.attachmentsJson as string[] | null) || [];
+  const responseCostAmountRequired = costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
+  const responseScheduleDaysRequired = schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days";
+  const infoCostAmountRequired = infoCost === "Cost Increase Known" || infoCost === "Cost Decrease";
+  const infoScheduleDaysRequired = infoSched === "Increase in Calendar Days" || infoSched === "Decrease in Calendar Days";
   const timeline = [
     { label: w("Created", "Creado", lang), date: rfi.createdAt as string | Date | null, by: rfi.createdByName || undefined },
     ...(rfi.sentAt ? [{ label: w("Sent to reviewer", "Enviado al revisor", lang), date: rfi.sentAt as string | Date | null, by: undefined as string | undefined }] : []),
@@ -2103,9 +2154,11 @@ ${hasResp ? `
           responseText: answer,
           answeredBy: answeredBy || undefined,
           costImpact: costImpact || undefined,
-          costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
+          costImpactAmount: responseCostAmountRequired ? costAmount : undefined,
+          costImpactReason: responseCostAmountRequired ? costReason : undefined,
           scheduleImpact: schedImpact || undefined,
-          scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
+          scheduleImpactDays: responseScheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
+          scheduleImpactReason: responseScheduleDaysRequired ? schedReason : undefined,
           closingStatus,
           responseAttachmentsJson: responseDocs.length > 0 ? responseDocs : [],
         }),
@@ -2144,6 +2197,9 @@ ${hasResp ? `
         {/* Header */}
         <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
           <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+              {w(rfi.sendStatus === "sent" || rfi.sentAt ? "1. Header / RFI Status - Existing RFI / Sent RFI" : "1. Header / RFI Status - Existing RFI / Not Sent", rfi.sendStatus === "sent" || rfi.sentAt ? "1. Encabezado / Estado RFI - RFI Existente / Enviado" : "1. Encabezado / Estado RFI - RFI Existente / No Enviado", lang)}
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{rfi.number}</span>
               <span className={`badge ${STATUS_BADGE[rfi.status] ?? "badge-gray"}`}>{getLabel("rfi_status", rfi.status)}</span>
@@ -2199,7 +2255,7 @@ ${hasResp ? `
               </Button>
             )}
             {canWrite && (
-              <Button variant="outline" size="sm" disabled={raisingCo} onClick={handleRaiseChangeOrder} style={{ gap: 5, fontSize: 11, color: "#B45309", borderColor: "#FCD34D", background: "#FFFBEB", opacity: raisingCo ? 0.6 : 1 }}>
+              <Button variant="outline" size="sm" disabled={raisingCo} onClick={handleRaiseChangeOrder} style={{ gap: 5, fontSize: 11, opacity: raisingCo ? 0.6 : 1 }}>
                 <FileText style={{ width: 12, height: 12 }} />{w("Raise Change Order", "Crear Orden de Cambio", lang)}
               </Button>
             )}
@@ -2220,7 +2276,7 @@ ${hasResp ? `
                     toast({ title: w("Navisworks plugin not reachable — open the model in Navisworks and try again.", "Plugin de Navisworks no disponible — abra el modelo en Navisworks e intente de nuevo.", lang), variant: "destructive" });
                   }
                 }}
-                style={{ gap: 5, fontSize: 11, color: "#0F766E", borderColor: "#5EEAD4", background: "#F0FDFA" }}
+                style={{ gap: 5, fontSize: 11 }}
               >
                 <Navigation style={{ width: 12, height: 12 }} />{w("Jump to Viewpoint", "Ir al Punto de Vista", lang)}
               </Button>
@@ -2354,7 +2410,7 @@ ${hasResp ? `
             </div>
           )}
 
-          {/* Submitted By / To */}
+          <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -2381,7 +2437,7 @@ ${hasResp ? `
             </div>
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted To", "Enviado A", lang)}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("3. Submitted To", "3. Enviado A", lang)}</div>
                 {canWrite && !infoEdit && (
                   <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
                 )}
@@ -2413,6 +2469,7 @@ ${hasResp ? `
             </div>
           </div>
 
+          <SectionHeader title={w("4. Reference Information / Attachments", "4. Informacion de Referencia / Adjuntos", lang)} />
 
           {/* Reference info */}
           {(infoEdit || rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription || storedQuestionDocs.length > 0) && (
@@ -2445,7 +2502,7 @@ ${hasResp ? `
                   {questionDocs.map((a, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
                       <ExternalLink style={{ width: 12, height: 12 }} />
-                      {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
+                      {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{attachLabel(a)}</span>}
                       <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
                     </div>
                   ))}
@@ -2490,6 +2547,8 @@ ${hasResp ? `
             <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
           </div>
 
+          <SectionHeader title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)} />
+
           {/* Question */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -2511,21 +2570,32 @@ ${hasResp ? `
             )}
           </div>
 
-          {/* Impact */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Impact — flagged by asker, confirmed in response", "Impacto — señalado por el solicitante, confirmado en la respuesta", lang)}</div>
+          <SectionHeader title={w("6. Impact Assessment", "6. Evaluacion de Impacto", lang)} />
+          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Flagged by asker and confirmed in response.", "Senalado por el solicitante y confirmado en la respuesta.", lang)}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
               {infoEdit ? (
                 <>
-                  <input value={infoCost} onChange={e => setInfoCost(e.target.value)} placeholder={w("e.g. GC / Mech to determine", "ej. GC / Mecánico por determinar", lang)} style={infoInput} />
-                  <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Amount, e.g. $1,800", "Monto, ej. $1,800", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  {["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].map(opt => (
+                    <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
+                      <input type="radio" name="info_cost" checked={infoCost === opt} onChange={() => setInfoCost(opt)} />
+                      {opt}
+                    </label>
+                  ))}
+                  {infoCostAmountRequired && (
+                    <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                      <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={infoInput} />
+                      <textarea value={infoCostReason} onChange={e => setInfoCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ ...infoInput, minHeight: 64, resize: "vertical" }} />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
                   {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
-                  {confirmedCost?.costImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedCost.costImpact}</div>}
+                  {(rfi as Rfi & { costImpactReason?: string }).costImpactReason && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{(rfi as Rfi & { costImpactReason?: string }).costImpactReason}</div>}
+                  {confirmedCost?.costImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedCost.costImpact}{confirmedCost.costImpactAmount ? ` (${confirmedCost.costImpactAmount})` : ""}{confirmedCost.costImpactReason ? ` - ${confirmedCost.costImpactReason}` : ""}</div>}
                 </>
               )}
             </div>
@@ -2533,14 +2603,25 @@ ${hasResp ? `
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</div>
               {infoEdit ? (
                 <>
-                  <input value={infoSched} onChange={e => setInfoSched(e.target.value)} placeholder={w("e.g. adds ~3 days coordination", "ej. suma ~3 días de coordinación", lang)} style={infoInput} />
-                  <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Days", "Días", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  {["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"].map(opt => (
+                    <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
+                      <input type="radio" name="info_sched" checked={infoSched === opt} onChange={() => setInfoSched(opt)} />
+                      {opt}
+                    </label>
+                  ))}
+                  {infoScheduleDaysRequired && (
+                    <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                      <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Calendar Days", "Dias Calendario", lang)} style={infoInput} />
+                      <textarea value={infoSchedReason} onChange={e => setInfoSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ ...infoInput, minHeight: 64, resize: "vertical" }} />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
                   {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
-                  {confirmedSched?.scheduleImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedSched.scheduleImpact}{confirmedSched.scheduleImpactDays != null ? ` (${confirmedSched.scheduleImpactDays}d)` : ""}</div>}
+                  {(rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{(rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason}</div>}
+                  {confirmedSched?.scheduleImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedSched.scheduleImpact}{confirmedSched.scheduleImpactDays != null ? ` (${confirmedSched.scheduleImpactDays}d)` : ""}{confirmedSched.scheduleImpactReason ? ` - ${confirmedSched.scheduleImpactReason}` : ""}</div>}
                 </>
               )}
             </div>
@@ -2548,7 +2629,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmt, scheduleImpact: infoSched, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, ...(infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? { scheduleImpactDays: Number(infoSchedDays) } : {}) } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmountRequired ? infoCostAmt : null, costImpactReason: infoCostAmountRequired ? infoCostReason : null, scheduleImpact: infoSched, scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 
@@ -2580,9 +2661,9 @@ ${hasResp ? `
                     )}
                     <p style={{ fontSize: 12, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "#1E293B" }}>{resp.responseText}</p>
                     {(resp.costImpact || resp.scheduleImpact) && (
-                      <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11, color: "#64748B" }}>
-                        {resp.costImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {resp.costImpact}</span>}
-                        {resp.scheduleImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}</span>}
+                      <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11, color: "#64748B", flexWrap: "wrap" }}>
+                        {resp.costImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {resp.costImpact}{resp.costImpactAmount ? ` (${resp.costImpactAmount})` : ""}{resp.costImpactReason ? ` - ${resp.costImpactReason}` : ""}</span>}
+                        {resp.scheduleImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}{resp.scheduleImpactReason ? ` - ${resp.scheduleImpactReason}` : ""}</span>}
                       </div>
                     )}
                   </div>
@@ -2600,7 +2681,7 @@ ${hasResp ? `
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 4 }}>{w("Response Documents", "Documentos de Respuesta", lang)}</div>
                     {(rfi.responseAttachmentsJson as string[]).map((doc, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                        <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(doc)}</a> : doc}
+                        <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(doc)}</a> : attachLabel(doc)}
                       </div>
                     ))}
                   </div>
@@ -2709,7 +2790,7 @@ ${hasResp ? `
                   {responseDocs.map((doc, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
                       <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                      {isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(doc)}</a> : <span style={{ flex: 1 }}>{doc}</span>}
+                      {isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(doc)}</a> : <span style={{ flex: 1 }}>{attachLabel(doc)}</span>}
                       <button onClick={() => setResponseDocs(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
                     </div>
                   ))}
@@ -2726,8 +2807,11 @@ ${hasResp ? `
                         {opt}
                       </label>
                     ))}
-                    {costImpact === "Cost Increase Known" && (
-                      <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder="$ Amount" style={{ fontSize: 11, marginTop: 3 }} />
+                    {responseCostAmountRequired && (
+                      <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                        <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 11 }} />
+                        <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 60, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
+                      </div>
                     )}
                   </div>
                   <div>
@@ -2738,8 +2822,11 @@ ${hasResp ? `
                         {opt}
                       </label>
                     ))}
-                    {(schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days") && (
-                      <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Days", "Días", lang)} style={{ fontSize: 11, marginTop: 3 }} />
+                    {responseScheduleDaysRequired && (
+                      <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+                        <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Calendar Days", "Dias Calendario", lang)} style={{ fontSize: 11 }} />
+                        <textarea value={schedReason} onChange={e => setSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ width: "100%", minHeight: 60, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
+                      </div>
                     )}
                   </div>
                 </div>

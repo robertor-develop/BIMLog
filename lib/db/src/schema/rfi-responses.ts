@@ -13,8 +13,10 @@ export const rfiResponsesTable = pgTable("rfi_responses", {
   answeredByCompany: text("answered_by_company"),
   costImpact: text("cost_impact"),
   costImpactAmount: text("cost_impact_amount"),
+  costImpactReason: text("cost_impact_reason"),
   scheduleImpact: text("schedule_impact"),
   scheduleImpactDays: integer("schedule_impact_days"),
+  scheduleImpactReason: text("schedule_impact_reason"),
   isConflictOfInterest: boolean("is_conflict_of_interest").default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

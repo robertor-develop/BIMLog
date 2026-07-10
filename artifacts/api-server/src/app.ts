@@ -159,6 +159,10 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_id text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS rfi_type text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_label text`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
+    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
+    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
     await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);
     await pool.query(`CREATE TABLE IF NOT EXISTS user_connections (
       id serial PRIMARY KEY,

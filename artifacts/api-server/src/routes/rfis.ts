@@ -101,8 +101,10 @@ type CreateRfiInput = {
   question?: string | null;
   costImpact?: string | null;
   costImpactAmount?: string | null;
+  costImpactReason?: string | null;
   scheduleImpact?: string | null;
   scheduleImpactDays?: number | null;
+  scheduleImpactReason?: string | null;
   distributionList?: string[] | null;
   attachmentsJson?: string[] | null;
   projectAddress?: string | null;
@@ -173,8 +175,10 @@ async function createRfiForProject(
     question: input.question || null,
     costImpact: input.costImpact || null,
     costImpactAmount: input.costImpactAmount || null,
+    costImpactReason: input.costImpactReason || null,
     scheduleImpact: input.scheduleImpact || null,
     scheduleImpactDays: input.scheduleImpactDays || null,
+    scheduleImpactReason: input.scheduleImpactReason || null,
     distributionList: input.distributionList || [],
     attachmentsJson: input.attachmentsJson || [],
     projectAddress: input.projectAddress || null,
@@ -190,7 +194,7 @@ async function createRfiForProject(
     actionType: "create",
     entityType: "rfi",
     entityId: rfi.id,
-    details: `Created RFI ${number}: ${input.subject}`,
+    details: `Created RFI ${number}: ${input.subject}${input.costImpact ? ` | Cost: ${input.costImpact}${input.costImpactAmount ? ` (${input.costImpactAmount})` : ""}${input.costImpactReason ? ` - ${input.costImpactReason}` : ""}` : ""}${input.scheduleImpact ? ` | Schedule: ${input.scheduleImpact}${input.scheduleImpactDays != null ? ` (${input.scheduleImpactDays} days)` : ""}${input.scheduleImpactReason ? ` - ${input.scheduleImpactReason}` : ""}` : ""}`,
   });
 
   return { ok: true, rfi };
@@ -338,7 +342,7 @@ function makeRfiPdf(
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
     .text("COST IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
   y += 16;
-  const costLine = [rfi.costImpact || "—", rfi.costImpactAmount ? `(${rfi.costImpactAmount})` : ""].filter(Boolean).join("   ");
+  const costLine = [rfi.costImpact || "—", rfi.costImpactAmount ? `(${rfi.costImpactAmount})` : "", rfi.costImpactReason ? `Reason: ${rfi.costImpactReason}` : ""].filter(Boolean).join("   ");
   const costH = Math.max(doc.heightOfString(costLine, { width: contentW - 16 }) + 12, 26);
   doc.rect(MARGIN, y, contentW, costH).stroke("#E2E8F0");
   doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica").text(costLine, MARGIN + 8, y + 6, { width: contentW - 16 });
@@ -350,7 +354,7 @@ function makeRfiPdf(
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
     .text("SCHEDULE IMPACT", MARGIN + 8, y + 5, { lineBreak: false });
   y += 16;
-  const schedLine = [rfi.scheduleImpact || "—", rfi.scheduleImpactDays != null ? `(${rfi.scheduleImpactDays} days)` : ""].filter(Boolean).join("   ");
+  const schedLine = [rfi.scheduleImpact || "—", rfi.scheduleImpactDays != null ? `(${rfi.scheduleImpactDays} days)` : "", rfi.scheduleImpactReason ? `Reason: ${rfi.scheduleImpactReason}` : ""].filter(Boolean).join("   ");
   const schedH = Math.max(doc.heightOfString(schedLine, { width: contentW - 16 }) + 12, 26);
   doc.rect(MARGIN, y, contentW, schedH).stroke("#E2E8F0");
   doc.fillColor("#1E293B").fontSize(9.5).font("Helvetica").text(schedLine, MARGIN + 8, y + 6, { width: contentW - 16 });
@@ -785,7 +789,7 @@ router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProj
           "Submitted By Company", "Submitted By Contact", "Submitted By Email",
           "Submitted To Company", "Submitted To Contact", "Submitted To Email",
           "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
-          "Cost Impact", "Cost Amount", "Schedule Impact", "Schedule Days",
+          "Cost Impact", "Cost Amount", "Cost Reason", "Schedule Impact", "Schedule Days", "Schedule Reason",
           "Ball in Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
         ]
       : ["RFI #", "Subject", "Status", "Priority", "Ball in Court", "Days Outstanding"];
@@ -801,8 +805,8 @@ router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProj
         rfi.submittedToCompany || "", rfi.submittedToPerson || "", rfi.submittedToEmail || "",
         rfi.drawingNumber || "", rfi.drawingTitle || "", rfi.specSection || "",
         rfi.detailNumber || "", rfi.noteNumber || "", rfi.locationDescription || "",
-        rfi.costImpact || "", rfi.costImpactAmount || "",
-        rfi.scheduleImpact || "", rfi.scheduleImpactDays != null ? rfi.scheduleImpactDays : "",
+        rfi.costImpact || "", rfi.costImpactAmount || "", rfi.costImpactReason || "",
+        rfi.scheduleImpact || "", rfi.scheduleImpactDays != null ? rfi.scheduleImpactDays : "", rfi.scheduleImpactReason || "",
         ballInCourt(rfi), days, rfi.answer || rfi.response || "",
         rfi.answeredBy || "", fmt(rfi.dateAnswered || rfi.respondedAt),
       ];
@@ -1091,8 +1095,10 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     if (body.question !== undefined) updates.question = body.question;
     if (body.costImpact !== undefined) updates.costImpact = body.costImpact;
     if (body.costImpactAmount !== undefined) updates.costImpactAmount = body.costImpactAmount;
+    if (body.costImpactReason !== undefined) updates.costImpactReason = body.costImpactReason;
     if (body.scheduleImpact !== undefined) updates.scheduleImpact = body.scheduleImpact;
     if (body.scheduleImpactDays !== undefined) updates.scheduleImpactDays = body.scheduleImpactDays;
+    if (body.scheduleImpactReason !== undefined) updates.scheduleImpactReason = body.scheduleImpactReason;
     if (body.answer !== undefined) {
       updates.answer = body.answer;
       if (body.answer && !existing[0].dateAnswered) {
@@ -1117,7 +1123,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       actionType: "update",
       entityType: "rfi",
       entityId: rfiId,
-      details: `Updated RFI ${updated.number}${body.status ? ` → status: ${body.status}` : ""}${body.answer ? " (answered)" : ""}`,
+      details: `Updated RFI ${updated.number}${body.status ? ` → status: ${body.status}` : ""}${body.answer ? " (answered)" : ""}${body.costImpact !== undefined ? ` | Cost: ${body.costImpact || "cleared"}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact !== undefined ? ` | Schedule: ${body.scheduleImpact || "cleared"}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}`,
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));
@@ -1242,8 +1248,10 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
       question: orig.question,
       costImpact: orig.costImpact,
       costImpactAmount: orig.costImpactAmount,
+      costImpactReason: orig.costImpactReason,
       scheduleImpact: orig.scheduleImpact,
       scheduleImpactDays: orig.scheduleImpactDays,
+      scheduleImpactReason: orig.scheduleImpactReason,
       distributionList: orig.distributionList as string[],
       attachmentsJson: orig.attachmentsJson as string[],
       projectAddress: orig.projectAddress,
@@ -1316,14 +1324,18 @@ function buildRfiDocxDocument(
   const costOpts = ["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"];
   const costCheckboxes = costOpts.map(opt => {
     const isChecked = rfi.costImpact === opt;
-    const label = opt === "Cost Increase Known" && rfi.costImpactAmount ? `${opt}: ${rfi.costImpactAmount}` : opt;
+    const label = isChecked
+      ? [opt, rfi.costImpactAmount ? `Amount: ${rfi.costImpactAmount}` : "", rfi.costImpactReason ? `Reason: ${rfi.costImpactReason}` : ""].filter(Boolean).join(" | ")
+      : opt;
     return checkRow(label, isChecked);
   });
 
   const schedOpts = ["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"];
   const schedCheckboxes = schedOpts.map(opt => {
     const isChecked = rfi.scheduleImpact === opt;
-    const label = opt !== "No Schedule Impact" && rfi.scheduleImpactDays != null ? `${opt}: ${rfi.scheduleImpactDays} days` : opt;
+    const label = isChecked
+      ? [opt, rfi.scheduleImpactDays != null ? `${rfi.scheduleImpactDays} days` : "", rfi.scheduleImpactReason ? `Reason: ${rfi.scheduleImpactReason}` : ""].filter(Boolean).join(" | ")
+      : opt;
     return checkRow(label, isChecked);
   });
 
@@ -1397,6 +1409,19 @@ function buildRfiDocxDocument(
                       children: [
                         new Paragraph({ spacing: { before: 80, after: 60 }, children: [new TextRun({ text: "Response Text", bold: true, size: 16, color: "64748B" })] }),
                         new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: respText, size: 20 })] }),
+                        ...((resp.costImpact || resp.scheduleImpact) ? [
+                          new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Confirmed Impact", bold: true, size: 16, color: "64748B" })] }),
+                          new Paragraph({
+                            spacing: { after: 80 },
+                            children: [new TextRun({
+                              text: [
+                                resp.costImpact ? `Cost: ${resp.costImpact}${resp.costImpactAmount ? ` (${resp.costImpactAmount})` : ""}${resp.costImpactReason ? ` - ${resp.costImpactReason}` : ""}` : "",
+                                resp.scheduleImpact ? `Schedule: ${resp.scheduleImpact}${resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays} days)` : ""}${resp.scheduleImpactReason ? ` - ${resp.scheduleImpactReason}` : ""}` : "",
+                              ].filter(Boolean).join(" | "),
+                              size: 18,
+                            })],
+                          }),
+                        ] : []),
                         ...(respAtts.length > 0 ? [
                           new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
                           ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `- ${attachmentLabel(a)}`, size: 18 })] })),
@@ -1916,6 +1941,9 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     drawAuditRow("Date Created", fmtD(rfi.createdAt), "Created By", creator[0]?.fullName || "—");
     drawAuditRow("Date Required", fmtD(rfi.dateRequired || rfi.dueDate), "Date Answered", fmtD(rfi.dateAnswered || rfi.respondedAt));
     drawAuditRow("Answered By", rfi.answeredBy || "—", "Cost Impact", rfi.costImpact || "—");
+    drawAuditRow("Cost Amount", rfi.costImpactAmount || "—", "Cost Reason", rfi.costImpactReason || "—");
+    drawAuditRow("Schedule Impact", rfi.scheduleImpact || "—", "Schedule Reason", rfi.scheduleImpactReason || "—");
+    drawAuditRow("Schedule Days", rfi.scheduleImpactDays != null ? `${rfi.scheduleImpactDays} days` : "—");
     y += 6;
 
     // ── Immutable Activity Log ────────────────────────────────────────────────
@@ -2346,8 +2374,10 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       answeredByCompany?: string;
       costImpact?: string;
       costImpactAmount?: string;
+      costImpactReason?: string;
       scheduleImpact?: string;
       scheduleImpactDays?: number;
+      scheduleImpactReason?: string;
       closingStatus?: string;
       responseAttachmentsJson?: string[];
     };
@@ -2388,8 +2418,10 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       answeredByCompany: body.answeredByCompany || responderCompany || undefined,
       costImpact: body.costImpact || undefined,
       costImpactAmount: body.costImpactAmount || undefined,
+      costImpactReason: body.costImpactReason || undefined,
       scheduleImpact: body.scheduleImpact || undefined,
       scheduleImpactDays: body.scheduleImpactDays || undefined,
+      scheduleImpactReason: body.scheduleImpactReason || undefined,
       isConflictOfInterest: isCoi,
     }).returning();
 
@@ -2403,8 +2435,10 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       dateAnswered: answeredAt,
       costImpact: body.costImpact || undefined,
       costImpactAmount: body.costImpactAmount || undefined,
+      costImpactReason: body.costImpactReason || undefined,
       scheduleImpact: body.scheduleImpact || undefined,
       scheduleImpactDays: body.scheduleImpactDays || undefined,
+      scheduleImpactReason: body.scheduleImpactReason || undefined,
       responseAttachmentsJson: body.responseAttachmentsJson || [],
       ballInCourt: closesRfi ? null : submitterCompany,
       ...(body.closingStatus ? { status: body.closingStatus } : { status: "responded" }),
@@ -2456,7 +2490,7 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       entityType: "rfi",
       entityId: rfiId,
       fileNameAfter: rfi.number,
-      details: `RFI ${rfi.number} received official response from ${body.answeredBy || responderEmail || "Unknown"}`,
+      details: `RFI ${rfi.number} received official response from ${body.answeredBy || responderEmail || "Unknown"}${body.costImpact ? ` | Cost: ${body.costImpact}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact ? ` | Schedule: ${body.scheduleImpact}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}`,
       });
 
       return inserted;

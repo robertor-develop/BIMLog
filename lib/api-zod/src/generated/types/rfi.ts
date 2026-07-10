@@ -42,9 +42,11 @@ export interface Rfi {
   locationDescription?: string;
   question?: string;
   costImpact?: string;
-  costImpactAmount?: string;
+  costImpactAmount?: string | null;
+  costImpactReason?: string | null;
   scheduleImpact?: string;
-  scheduleImpactDays?: number;
+  scheduleImpactDays?: number | null;
+  scheduleImpactReason?: string | null;
   answer?: string;
   answeredBy?: string;
   dateAnswered?: string;

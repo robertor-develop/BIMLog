@@ -44,8 +44,10 @@ export const rfisTable = pgTable("rfis", {
 
   costImpact: text("cost_impact"),
   costImpactAmount: text("cost_impact_amount"),
+  costImpactReason: text("cost_impact_reason"),
   scheduleImpact: text("schedule_impact"),
   scheduleImpactDays: integer("schedule_impact_days"),
+  scheduleImpactReason: text("schedule_impact_reason"),
 
   answer: text("answer"),
   answeredBy: text("answered_by"),
