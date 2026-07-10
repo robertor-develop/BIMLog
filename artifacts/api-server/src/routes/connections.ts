@@ -4,6 +4,7 @@ import { userConnectionsTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authMiddleware, signOAuthState, verifyOAuthState } from "../middlewares/auth";
 import { getAppUrl } from "../lib/email";
+import { browseCloud } from "../lib/cloud-files";
 import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
 import { getAiUsageSummary, sendAiUsageError } from "../lib/ai-usage";
 
@@ -239,6 +240,27 @@ router.get("/me/connections/google-drive/files", authMiddleware, async (req, res
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to list Drive files";
     res.status(msg === "not_connected" ? 428 : 502).json({ error: msg });
+  }
+});
+
+// Generic cloud browse for RFI attachments. Keeps the existing Google Drive
+// endpoint above for compatibility while enabling Dropbox, BIM 360, and Procore.
+router.get("/me/connections/:provider/browse", authMiddleware, async (req, res) => {
+  const key = providerFromParam(String(req.params.provider));
+  if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
+  try {
+    const result = await browseCloud(
+      req.user!.userId,
+      key,
+      String(req.query.ref || ""),
+      String(req.query.q || "").trim(),
+    );
+    res.json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to browse files";
+    res.status(msg === "not_connected" ? 428 : 502).json({
+      error: msg === "not_connected" ? `Connect ${OAUTH_PROVIDERS[key].label} first.` : msg,
+    });
   }
 });
 
