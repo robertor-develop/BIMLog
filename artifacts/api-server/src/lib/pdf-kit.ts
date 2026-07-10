@@ -16,6 +16,8 @@ import PDFDocument from "pdfkit";
 type Doc = PDFKit.PDFDocument;
 type PdfDocumentOptions = ConstructorParameters<typeof PDFDocument>[0];
 
+export type ReportModule = "rfi" | "schedule" | "lens" | "submittal" | "transmittal" | "change_order" | "meeting" | "files" | "platform";
+
 export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFDocument {
   return new PDFDocument(options);
 }
@@ -36,6 +38,41 @@ export const PALETTE = {
   FONT_BOLD: "Helvetica-Bold",
   MARGIN: 40,
 } as const;
+
+export interface ReportTheme {
+  module: ReportModule;
+  variant: string;
+  primary: string;
+  dark: string;
+  light: string;
+  pattern: "solid" | "rule" | "double-rule" | "grid" | "dots";
+}
+
+const family = (module: ReportModule, primary: string, dark: string, light: string) =>
+  (variant: string, pattern: ReportTheme["pattern"]): ReportTheme => ({ module, variant, primary, dark, light, pattern });
+
+const rfi = family("rfi", "#2563A6", "#173F6B", "#EAF2FA");
+const schedule = family("schedule", "#277DA1", "#164E63", "#E7F3F7");
+const lens = family("lens", "#315C9B", "#1E3A5F", "#EBF0F8");
+const submittal = family("submittal", "#3B6EA8", "#234B78", "#ECF3FA");
+const reserved = (module: ReportModule, primary: string) => family(module, primary, PALETTE.NAVY, "#EEF4FA");
+
+/** Central report theme registry. Routes select a named variant; they never invent colors. */
+export const REPORT_THEMES = {
+  rfi: { detail: rfi("RFI PDF", "solid"), word: rfi("RFI DOCX", "rule"), audit: rfi("RFI Audit", "double-rule"), log: rfi("RFI Log", "grid") },
+  schedule: { calendar: schedule("Schedule Calendar", "grid"), board: schedule("Schedule Board", "dots"), list: schedule("Schedule List", "rule") },
+  lens: { coordination: lens("Lens Coordination", "solid"), register: lens("Lens Register", "grid"), audit: lens("Lens Audit", "double-rule") },
+  submittal: { detail: submittal("Submittal PDF", "solid"), log: submittal("Submittal Log", "rule"), tracker: submittal("Shop Drawing Control", "grid"), audit: submittal("Submittal Audit", "double-rule") },
+  transmittal: { detail: reserved("transmittal", "#356FA3")("Transmittal", "rule") },
+  changeOrder: { detail: reserved("change_order", "#2F6690")("Change Order", "double-rule") },
+  meeting: { minutes: reserved("meeting", "#4078A8")("Meeting Minutes", "dots") },
+  files: { register: reserved("files", "#4A6FA5")("Files Register", "grid") },
+  platform: { standard: reserved("platform", PALETTE.NAVY)("Platform Report", "solid") },
+} as const;
+
+export function reportFileName(title: string): string {
+  return `${title.trim().replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "")}.pdf`;
+}
 
 // ── Canonical terminology maps (platform-wide) ──
 const STATUS_LABEL: Record<string, string> = {
@@ -94,6 +131,7 @@ export interface CoverPageOptions {
   projectAddress?: string;
   /** One-line meta under the project name, e.g. "Project Code: X | Total: N". */
   projectMeta?: string;
+  theme?: ReportTheme;
 }
 
 const fmtLongDate = (d: Date) =>
@@ -113,7 +151,8 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   // Navy header band
   const headerBandH = 148;
   const projectBandY = headerBandH;
-  doc.rect(0, 0, W, headerBandH).fill(PALETTE.NAVY);
+  const theme = o.theme ?? REPORT_THEMES.platform.standard;
+  doc.rect(0, 0, W, headerBandH).fill(theme.dark);
   if (o.logoBase64 && o.logoType) {
     try {
       doc.image(o.logoBase64, M, 15, { height: 50, fit: [120, 50] });
@@ -158,7 +197,7 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   const address = o.projectAddress?.trim() ? o.projectAddress.trim() : "";
   const bandH = address ? 58 : 48;
   doc.rect(0, projectBandY, W, bandH).fill(PALETTE.BAND);
-  doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor(PALETTE.NAVY).text(o.projectName, M, projectBandY + 8);
+  doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor(theme.dark).text(o.projectName, M, projectBandY + 8);
   let infoY = projectBandY + 30;
   if (address) {
     doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(address, M, infoY, { width: CW });
@@ -183,6 +222,7 @@ export interface BrandedHeaderOptions {
   projectCode?: string;
   reportNumber?: string;
   reportDate?: Date;
+  theme?: ReportTheme;
 }
 
 /**
@@ -195,7 +235,10 @@ export function drawBrandedHeader(doc: Doc, o: BrandedHeaderOptions): number {
   const CW = W - M * 2;
   const bandH = 58;
 
-  doc.rect(0, 0, W, bandH).fill(PALETTE.NAVY);
+  const theme = o.theme ?? REPORT_THEMES.platform.standard;
+  doc.rect(0, 0, W, bandH).fill(theme.dark);
+  if (theme.pattern === "double-rule") doc.rect(0, bandH - 5, W, 2).fill(theme.primary);
+  if (theme.pattern === "rule" || theme.pattern === "grid" || theme.pattern === "dots") doc.rect(0, bandH - 3, W, 3).fill(theme.primary);
   if (o.logoBase64 && o.logoType) {
     try {
       doc.image(o.logoBase64, M, 10, { height: 36, fit: [110, 36] });
@@ -219,6 +262,7 @@ export function drawBrandedHeader(doc: Doc, o: BrandedHeaderOptions): number {
 export interface SectionBarOptions {
   margin?: number;
   fontSize?: number;
+  theme?: ReportTheme;
 }
 
 /** Navy section-header bar. Returns the Y just below it (y + 26). */
@@ -226,7 +270,7 @@ export function sectionBar(doc: Doc, label: string, y: number, o: SectionBarOpti
   const M = o.margin ?? PALETTE.MARGIN;
   const W = doc.page.width;
   const CW = W - M * 2;
-  doc.rect(M, y, CW, 20).fill(PALETTE.NAVY);
+  doc.rect(M, y, CW, 20).fill(o.theme?.primary ?? PALETTE.NAVY);
   doc.fontSize(o.fontSize ?? 11).font(PALETTE.FONT_BOLD).fillColor("white").text(label, M + 8, y + 5.5, { width: CW - 16 });
   return y + 26;
 }

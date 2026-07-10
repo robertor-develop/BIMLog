@@ -5,7 +5,7 @@ import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
   PALETTE, statusText, priorityText, computeContentHash, createPdfDocument,
-  drawCoverPage, sectionBar, drawTable, addPageNumbers,
+  drawCoverPage, sectionBar, drawTable, addPageNumbers, REPORT_THEMES, reportFileName,
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -2169,8 +2169,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         .where(eq(lensViewpointReportsTable.projectId, projectId))
         .orderBy(desc(lensViewpointReportsTable.generatedAt)) : [];
       const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      const reportTitle = `${reportNumber} - Lens Coordination Report`;
+      const reportTheme = REPORT_THEMES.lens.coordination;
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${reportNumber}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(reportTitle)}"`);
       doc.pipe(res);
 
       const W = doc.page.width;
@@ -2180,7 +2182,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // Formal engineering-deliverable palette comes from the shared pdf-kit
       // module. Navy header bars, white content, light-grey alternating rows,
       // black text. No priority/status colors.
-      const NAVY = PALETTE.NAVY;
+      const NAVY = reportTheme.dark;
       const statusLabel = (s: string) => statusText(s);
       const lifecycleLabel = (s: string) => s === "superseded" ? "Superseded" : s === "voided" ? "Voided" : "Current";
       const watermarkLabel = (s: string) => s === "issued" ? "Issued for Coordination" : s === "superseded" ? "Superseded" : s === "draft" ? "Draft" : "-";
@@ -2216,7 +2218,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         margin: M,
         logoBase64, logoType,
         companyName,
-        reportTitle: "BIM COORDINATION REPORT",
+        reportTitle,
         reportSubtitle: "BIMLog Lens Viewpoints",
         reportNumber,
         reportDate,
@@ -2227,6 +2229,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         projectName: project.name,
         projectAddress,
         projectMeta: `Project Code: ${project.code}  |  Report Rows: ${total}`,
+        theme: reportTheme,
       });
 
       // Health score block (monochrome; optional via the modal toggle)
@@ -2250,7 +2253,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // Priority breakdown cards
       const pCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
       vps.forEach(v => { const p = v.priority ?? 0; if (pCounts[p] !== undefined) pCounts[p]++; });
-      const cardY = sectionBar(doc, "Executive Summary", doc.y, { margin: M });
+      const cardY = sectionBar(doc, "Executive Summary", doc.y, { margin: M, theme: reportTheme });
       const pCards = [1, 2, 3, 4, 5].map((p) => ({ label: priorityText(p).toUpperCase(), value: pCounts[p] }));
       const pcW = (CW - 40) / 5;
       pCards.forEach((card, i) => {

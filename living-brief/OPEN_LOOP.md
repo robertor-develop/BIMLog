@@ -32,6 +32,22 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Platform-Wide Report Design System
+
+Shipped first implementation scope on 2026-07-10:
+- Central module/variant theme registry in `artifacts/api-server/src/lib/pdf-kit.ts`.
+- Schedule Calendar, Board, and List PDF variants.
+- RFI detail and audit PDF variants, with RFI DOCX/log variants reserved in the registry.
+- Lens Coordination PDF family and reserved Lens register/audit variants.
+- Submittal detail and audit PDF variants, with log/Shop Drawing Control variants reserved.
+- Modified PDF title/download filenames aligned; Schedule export controls distinguish configuration from generation.
+- Full route/control inventory recorded in `living-brief/REPORT_DESIGN_SYSTEM.md`.
+
+Intentionally deferred to the next report-standardization round:
+- Apply reserved families to Transmittals, Change Orders, Meetings, Files/CVR, Clash Reports, and the general Reports catalog.
+- Migrate remaining hand-rolled RFI/Submittal log and tracker chrome onto all shared header/footer primitives.
+- Full production-data visual regression fixtures for authenticated export routes; this round used deterministic multi-page PDF fixtures plus typecheck/build verification.
+
 ### Submittals / Shop Drawing Control Field Test
 Shipped baseline: commit 94c9c4b - Unify submittals shop drawing control.
 

@@ -325,7 +325,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     if (!resp.ok) { toast({ title: "Export failed", variant: "destructive" }); return; }
     const blob = await resp.blob();
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.pdf`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-Request-for-Information.pdf`; a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -2063,7 +2063,7 @@ ${hasResp ? `
       if (!resp.ok) throw new Error("Failed to generate audit certificate");
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-AuditCert.pdf`; a.click();
+      const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-RFI-Audit-Report.pdf`; a.click();
       URL.revokeObjectURL(url);
       toast({ title: w("Audit certificate downloaded", "Certificado de auditoría descargado", lang) });
     } catch {

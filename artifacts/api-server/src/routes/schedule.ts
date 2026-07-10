@@ -23,7 +23,10 @@ import {
   drawCoverPage,
   drawTable,
   PALETTE,
+  REPORT_THEMES,
+  reportFileName,
   sectionBar,
+  type ReportTheme,
   type TableColumn,
 } from "../lib/pdf-kit";
 
@@ -434,6 +437,7 @@ function addReportPage(doc: PDFKit.PDFDocument, opts: {
   projectCode?: string;
   reportNumber: string;
   reportDate: Date;
+  theme: ReportTheme;
 }) {
   doc.addPage();
   return drawBrandedHeader(doc, {
@@ -444,6 +448,7 @@ function addReportPage(doc: PDFKit.PDFDocument, opts: {
     projectCode: opts.projectCode,
     reportNumber: opts.reportNumber,
     reportDate: opts.reportDate,
+    theme: opts.theme,
   });
 }
 
@@ -547,10 +552,12 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     const { logoBase64, logoType } = await getCompanyLogo(req.user!.userId);
     const companyName = req.user!.companyName || "BIMLog";
     const reportTitle = view === "calendar" ? "Schedule Calendar Report" : view === "board" ? "Schedule Board Report" : "Schedule List Report";
+    const theme = REPORT_THEMES.schedule[view];
+    const fileName = reportFileName(reportTitle);
 
     const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="schedule-${view}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     doc.pipe(res);
 
     drawCoverPage(doc, {
@@ -566,6 +573,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       projectAddress: project.location || undefined,
       projectMeta: `Project Code: ${project.code} | Items: ${filtered.length} | View: ${view.toUpperCase()}`,
       isoStamp: false,
+      theme,
     });
 
     let y = addReportPage(doc, {
@@ -575,6 +583,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       projectCode: project.code,
       reportNumber,
       reportDate,
+      theme,
     }) + 10;
 
     const filterLines = [
@@ -587,7 +596,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     y = doc.y + 14;
 
     if (options.includeKpis) {
-      y = sectionBar(doc, "KPI Summary", y);
+      y = sectionBar(doc, "KPI Summary", y, { theme });
       y = drawSummaryCards(doc, y, [
         ["Total Items", String(filtered.length)],
         ["Action Needed", String(actionNeeded)],
@@ -598,7 +607,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     }
 
     if (options.includeProgress) {
-      y = sectionBar(doc, "Overall Progress", y);
+      y = sectionBar(doc, "Overall Progress", y, { theme });
       doc.rect(40, y, 712, 10).stroke(PALETTE.LINE);
       doc.rect(40, y, Math.max(0, Math.min(712, 712 * pct / 100)), 10).fill(PALETTE.TEXT);
       doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(`${pct}% complete`, 40, y + 16, { width: 712 });
@@ -624,7 +633,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       : baseColumns;
 
     if (view === "calendar") {
-      y = sectionBar(doc, "Calendar View", y);
+      y = sectionBar(doc, "Calendar View", y, { theme });
       const byMonth = new Map<string, LiveScheduleEvent[]>();
       filtered.forEach(item => {
         const d = new Date(item.dueDate);
@@ -633,7 +642,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       });
       if (byMonth.size === 0) byMonth.set("empty", []);
       for (const [monthKey, rows] of byMonth) {
-        if (y > 420) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+        if (y > 420) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme });
         const monthDate = monthKey === "empty" ? reportDate : new Date(`${monthKey}-01T00:00:00`);
         doc.fontSize(11).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT)
           .text(monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" }), 40, y);
@@ -641,7 +650,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
         const cellW = 101.7;
         const cellH = 66;
         ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((day, idx) => {
-          doc.rect(40 + idx * cellW, y, cellW, 16).fill(PALETTE.NAVY);
+          doc.rect(40 + idx * cellW, y, cellW, 16).fill(theme.primary);
           doc.fontSize(7).font(PALETTE.FONT_BOLD).fillColor("white").text(day, 43 + idx * cellW, y + 5, { width: cellW - 6 });
         });
         y += 16;
@@ -652,7 +661,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
           return acc;
         }, {});
         for (let week = 0; week < 6; week++) {
-          if (y + cellH > 540) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+          if (y + cellH > 540) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme });
           for (let day = 0; day < 7; day++) {
             const d = new Date(start);
             d.setDate(start.getDate() + week * 7 + day);
@@ -675,26 +684,26 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
         y += 18;
       }
     } else if (view === "board") {
-      y = sectionBar(doc, "Board / Sprint View", y);
+      y = sectionBar(doc, "Board / Sprint View", y, { theme });
       const grouped = new Map<string, LiveScheduleEvent[]>();
       filtered.forEach(item => grouped.set(item.bucketName || "Unassigned", [...(grouped.get(item.bucketName || "Unassigned") || []), item]));
       for (const [bucket, rows] of grouped) {
-        if (y > 500) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+        if (y > 500) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme });
         doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT).text(`${bucket} (${rows.length})`, 40, y);
         y += 14;
-        y = drawScheduleTable(doc, rows, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
+        y = drawScheduleTable(doc, rows, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme }));
         y += 14;
       }
       if (grouped.size === 0) doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text("No schedule items match the selected filters.", 40, y);
     } else {
-      y = sectionBar(doc, "List / Register View", y);
-      y = drawScheduleTable(doc, filtered, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
+      y = sectionBar(doc, "List / Register View", y, { theme });
+      y = drawScheduleTable(doc, filtered, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme }));
       if (filtered.length === 0) doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text("No schedule items match the selected filters.", 40, y);
     }
 
     if (options.includeRolloverHistory) {
-      if (doc.y > 470) y = addReportPage(doc, { companyName, title: "Rollover History", projectName: project.name, projectCode: project.code, reportNumber, reportDate });
-      y = sectionBar(doc, "Rollover History", Math.max(doc.y + 14, y + 14));
+      if (doc.y > 470) y = addReportPage(doc, { companyName, title: "Rollover History", projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme });
+      y = sectionBar(doc, "Rollover History", Math.max(doc.y + 14, y + 14), { theme });
       const historyColumns: TableColumn[] = [
         { label: "Item", width: 130, format: r => `${r.sourceType} #${r.sourceId}` },
         { label: "From", width: 120, format: r => r.fromBucketName },
@@ -710,7 +719,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
         fontSize: 7,
         rowMinHeight: 24,
         pageBottom: 540,
-        onPageBreak: () => addReportPage(doc, { companyName, title: "Rollover History", projectName: project.name, projectCode: project.code, reportNumber, reportDate }),
+        onPageBreak: () => addReportPage(doc, { companyName, title: "Rollover History", projectName: project.name, projectCode: project.code, reportNumber, reportDate, theme }),
       });
       if (filteredHistories.length === 0) doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text("No rollover history for selected items.", 40, y + 6);
     }
@@ -724,7 +733,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       entityType: "schedule_pdf",
       entityId: projectId,
       fileNameBefore: null,
-      fileNameAfter: `schedule-${view}.pdf`,
+      fileNameAfter: fileName,
       details: `Exported Schedule PDF ${reportNumber} (${view}, ${filtered.length} item(s))`,
     });
 

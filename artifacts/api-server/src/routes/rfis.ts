@@ -8,7 +8,7 @@ import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
-import { createPdfDocument } from "../lib/pdf-kit";
+import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken, providerFromParam } from "../lib/oauth";
@@ -253,11 +253,11 @@ function makeRfiPdf(
   };
 
   // ── Section 1: Navy header bar ──────────────────────────────────────────────
-  doc.rect(MARGIN, y, contentW, 38).fill("#1E3A5F");
+  doc.rect(MARGIN, y, contentW, 38).fill(REPORT_THEMES.rfi.detail.dark);
   doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
-    .text("REQUEST FOR INFORMATION", MARGIN + 10, y + 12, { lineBreak: false });
+    .text(`${rfi.number} - Request for Information`, MARGIN + 10, y + 12, { lineBreak: false });
   doc.fontSize(14).font("Helvetica-Bold")
-    .text(rfi.number, MARGIN + 10, y + 12, { width: contentW - 20, align: "right", lineBreak: false });
+    .text(REPORT_THEMES.rfi.detail.variant, MARGIN + 10, y + 12, { width: contentW - 20, align: "right", lineBreak: false });
   doc.fillColor("black");
   y += 42;
 
@@ -1484,7 +1484,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
     doc.on("end", () => {
       const pdfBuffer = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - Request for Information`)}"`);
       res.setHeader("Content-Length", pdfBuffer.length);
       res.send(pdfBuffer);
     });
@@ -1898,7 +1898,7 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     doc.on("end", () => {
       const pdfBuffer = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}-AuditCert.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - RFI Audit Report`)}"`);
       res.setHeader("Content-Length", pdfBuffer.length);
       res.send(pdfBuffer);
     });
@@ -1907,9 +1907,9 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     const contentW = LETTER_WIDTH - MARGIN * 2;
 
     // ── Header ───────────────────────────────────────────────────────────────
-    doc.rect(MARGIN, y, contentW, 44).fill("#1E3A5F");
+    doc.rect(MARGIN, y, contentW, 44).fill(REPORT_THEMES.rfi.audit.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text("IMMUTABLE AUDIT CERTIFICATE", MARGIN + 12, y + 8, { lineBreak: false });
+      .text(`${rfi.number} - RFI Audit Report`, MARGIN + 12, y + 8, { lineBreak: false });
     doc.fontSize(9).font("Helvetica")
       .text(`BIMLog by IgniteSmart  |  Generated ${new Date().toLocaleString()}`, MARGIN + 12, y + 28, { lineBreak: false });
     doc.fillColor("black");

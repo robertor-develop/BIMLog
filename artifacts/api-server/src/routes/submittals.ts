@@ -13,7 +13,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import multer from "multer";
-import { createPdfDocument } from "../lib/pdf-kit";
+import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import * as XLSX from "xlsx";
@@ -1298,7 +1298,7 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     doc.on("end", () => {
       const buf = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${sub.number}-Submittal.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${sub.number} - Submittal Report`)}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -1341,9 +1341,9 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     };
 
     // ── Cover header ──────────────────────────────────────────────────────────
-    doc.rect(MARGIN, y, CONTENT_W, 54).fill("#1E3A5F");
+    doc.rect(MARGIN, y, CONTENT_W, 54).fill(REPORT_THEMES.submittal.detail.dark);
     doc.fillColor("white").fontSize(18).font("Helvetica-Bold")
-      .text("SUBMITTAL TRANSMITTAL", MARGIN + 12, y + 8, { lineBreak: false });
+      .text(`${sub.number} - Submittal Report`, MARGIN + 12, y + 8, { lineBreak: false });
     doc.fontSize(9).font("Helvetica")
       .text(`BIMLog by IgniteSmart  |  ${project?.name || `Project ${projectId}`}`, MARGIN + 12, y + 30, { lineBreak: false });
     doc.fillColor("black"); y += 62;
@@ -1524,7 +1524,7 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
     doc.on("end", () => {
       const buf = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${sub.number}-AuditCert.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${sub.number} - Submittal Audit Report`)}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -1532,9 +1532,9 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
     let y = MARGIN;
 
     // ── Header ────────────────────────────────────────────────────────────────
-    doc.rect(MARGIN, y, CONTENT_W, 44).fill("#1E3A5F");
+    doc.rect(MARGIN, y, CONTENT_W, 44).fill(REPORT_THEMES.submittal.audit.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text("IMMUTABLE AUDIT CERTIFICATE", MARGIN + 12, y + 8, { lineBreak: false });
+      .text(`${sub.number} - Submittal Audit Report`, MARGIN + 12, y + 8, { lineBreak: false });
     doc.fontSize(9).font("Helvetica")
       .text(`BIMLog by IgniteSmart  |  Generated ${new Date().toLocaleString()}`, MARGIN + 12, y + 28, { lineBreak: false });
     doc.fillColor("black"); y += 52;

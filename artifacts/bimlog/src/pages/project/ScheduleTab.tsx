@@ -510,7 +510,8 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `schedule-${options.view}.pdf`;
+      const viewTitle = options.view === "calendar" ? "Schedule-Calendar-Report" : options.view === "board" ? "Schedule-Board-Report" : "Schedule-List-Report";
+      a.download = `${viewTitle}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -697,7 +698,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
           <button className="btn btn-outline" onClick={openExportModal} type="button" title={t("Export the current coordination schedule to PDF", "Exportar el cronograma de coordinacion a PDF")}>
             <FileDown size={14} />
-            {t("Export PDF", "Exportar PDF")}
+            {t("Configure Schedule PDF", "Configurar PDF del cronograma")}
           </button>
           {canWrite && (
             <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} type="button">
@@ -985,7 +986,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               <button className="btn btn-outline" type="button" onClick={() => setShowExportModal(false)}>{t("Cancel", "Cancelar")}</button>
               <button className="btn btn-primary" type="button" disabled={exporting} onClick={exportSchedulePdf}>
                 {exporting ? <Loader2 size={13} style={{ marginRight: 4, animation: "spin 1s linear infinite" }} /> : <FileDown size={13} />}
-                {exporting ? t("Exporting...", "Exportando...") : t("Export PDF", "Exportar PDF")}
+                {exporting ? t("Generating...", "Generando...") : t("Generate Schedule PDF", "Generar PDF del cronograma")}
               </button>
             </div>
           </div>

@@ -2291,7 +2291,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       if (r.ok) {
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = `${submittal.number}-Submittal.pdf`; a.click();
+        const a = document.createElement("a"); a.href = url; a.download = `${submittal.number}-Submittal-Report.pdf`; a.click();
         URL.revokeObjectURL(url);
       }
     } finally { setExportLoading(false); }
@@ -2306,7 +2306,7 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       if (r.ok) {
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = `${submittal.number}-AuditCert.pdf`; a.click();
+        const a = document.createElement("a"); a.href = url; a.download = `${submittal.number}-Submittal-Audit-Report.pdf`; a.click();
         URL.revokeObjectURL(url);
       }
     } finally { setAuditLoading(false); }
