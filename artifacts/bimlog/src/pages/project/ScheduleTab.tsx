@@ -10,7 +10,7 @@ import {
 
 interface ScheduleItem {
   id: number;
-  source: "milestone" | "rfi" | "submittal";
+  source: "milestone" | "rfi" | "submittal" | "meeting";
   label: string;
   title: string;
   dueDate: string;
@@ -56,6 +56,7 @@ const STATUS_COLORS: Record<string, string> = {
   closed: "#16A34A",
   delayed: "#DC2626",
   cancelled: "#6B7280",
+  scheduled: "#0891B2",
 };
 
 const MODULE_OPTIONS = [
@@ -516,9 +517,9 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     const color =
       item.source === "rfi" || item.label.includes("RFI") ? "#7C3AED" :
       item.source === "submittal" || item.label.includes("Submittal") ? "#2563EB" :
+      item.source === "meeting" || item.label === "Meeting" ? "#0891B2" :
       item.label === "3D Model" ? "#0F766E" :
       item.label === "Change Order" ? "#B45309" :
-      item.label === "Meeting" ? "#0891B2" :
       "#16A34A";
     return (
       <span style={{
@@ -1080,7 +1081,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 <div style={{ fontSize: 12, color: "#1E3A5F", marginBottom: 10 }}>
                   {selected.source === "milestone"
                     ? t("This manual schedule item is linked to another BIMLog record.", "Esta fecha manual esta vinculada a otro registro BIMLog.")
-                    : t("This date comes from the linked source record. Edit the RFI or submittal to change its due date.", "Esta fecha viene del registro fuente. Edita el RFI o entregable para cambiarla.")}
+                    : t("This date comes from the linked source record. Open that record to edit source-owned details.", "Esta fecha viene del registro fuente. Abre ese registro para editar detalles del modulo fuente.")}
                 </div>
                 <button className="btn btn-primary" onClick={() => { window.location.href = selected.route!; }}>
                   <ExternalLink size={13} style={{ marginRight: 4 }} />{t("Open Linked Record", "Abrir Registro Vinculado")}

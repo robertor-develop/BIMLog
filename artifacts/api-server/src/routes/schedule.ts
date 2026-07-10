@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import {
   activityLogTable,
+  meetingMinutesTable,
   projectMilestonesTable,
   rfisTable,
   scheduleBucketsTable,
@@ -22,7 +23,7 @@ const DEFAULT_BUCKETS = [
   { name: "Completed", bucketType: "system", sortOrder: 900 },
 ];
 
-type SourceType = "milestone" | "rfi" | "submittal";
+type SourceType = "milestone" | "rfi" | "submittal" | "meeting";
 
 type LiveScheduleEvent = {
   id: number;
@@ -131,6 +132,18 @@ router.post("/projects/:projectId/schedule/buckets", authMiddleware, requirePerm
       sortOrder: body.sort_order ?? 100,
       createdById: req.user!.userId,
     }).returning();
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "create",
+      entityType: "schedule_bucket",
+      entityId: bucket.id,
+      fileNameBefore: null,
+      fileNameAfter: null,
+      details: `Created schedule bucket: ${bucket.name}`,
+    });
     res.status(201).json(bucket);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
@@ -149,6 +162,18 @@ router.patch("/projects/:projectId/schedule/buckets/:bucketId", authMiddleware, 
       .where(and(eq(scheduleBucketsTable.id, bucketId), eq(scheduleBucketsTable.projectId, projectId)))
       .returning();
     if (!bucket) { res.status(404).json({ error: "Bucket not found" }); return; }
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "update",
+      entityType: "schedule_bucket",
+      entityId: bucket.id,
+      fileNameBefore: null,
+      fileNameAfter: null,
+      details: `Updated schedule bucket: ${bucket.name}`,
+    });
     res.json(bucket);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
@@ -158,7 +183,7 @@ router.patch("/projects/:projectId/schedule/buckets/:bucketId", authMiddleware, 
 router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
-    const [milestones, rfis, submittals, placements, users, buckets] = await Promise.all([
+    const [milestones, rfis, submittals, meetings, placements, users, buckets] = await Promise.all([
       db.select().from(projectMilestonesTable)
         .where(eq(projectMilestonesTable.projectId, projectId))
         .orderBy(asc(projectMilestonesTable.dueDate)),
@@ -166,6 +191,8 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         .where(and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))),
       db.select().from(submittalsTable)
         .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))),
+      db.select().from(meetingMinutesTable)
+        .where(and(eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))),
       db.select().from(scheduleItemPlacementsTable)
         .where(eq(scheduleItemPlacementsTable.projectId, projectId)),
       db.select({ id: usersTable.id, fullName: usersTable.fullName })
@@ -191,6 +218,11 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
     };
 
     const events: LiveScheduleEvent[] = [];
+    const manuallyScheduledMeetingIds = new Set(
+      milestones
+        .filter(m => m.linkedModule === "meeting" && m.linkedId)
+        .map(m => m.linkedId as number),
+    );
 
     const milestoneRoute = (linkedModule: string | null, linkedId: number | null) => {
       if (linkedModule === "rfi" && linkedId) return `/projects/${projectId}/rfis?rfi=${linkedId}`;
@@ -290,6 +322,37 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         daysOverdue: overdueDays,
         createdAt: s.createdAt ? toIso(s.createdAt) : null,
         updatedAt: s.updatedAt ? toIso(s.updatedAt) : null,
+      }));
+    }
+
+    for (const meeting of meetings) {
+      if (manuallyScheduledMeetingIds.has(meeting.id)) continue;
+      const meetingDate = meeting.meetingDate;
+      if (!meetingDate) continue;
+      const now = new Date();
+      const meetingStatus = new Date(meetingDate).getTime() < now.getTime() ? "completed" : "scheduled";
+      events.push(attachPlanner({
+        id: meeting.id,
+        source: "meeting",
+        label: "Meeting",
+        title: meeting.title || "Untitled meeting",
+        dueDate: toIso(meetingDate),
+        status: meetingStatus,
+        priority: null,
+        company: null,
+        responsibleCompany: null,
+        assignedUserId: meeting.createdById || null,
+        assignedUserName: meeting.createdById ? userById.get(meeting.createdById) || null : null,
+        trade: null,
+        buildingLevel: meeting.location || null,
+        notes: meeting.notes || null,
+        route: `/projects/${projectId}/meetings`,
+        linkedModule: "meeting",
+        linkedId: meeting.id,
+        isOverdue: false,
+        daysOverdue: 0,
+        createdAt: meeting.createdAt ? toIso(meeting.createdAt) : null,
+        updatedAt: meeting.updatedAt ? toIso(meeting.updatedAt) : null,
       }));
     }
 
@@ -393,6 +456,7 @@ router.post("/projects/:projectId/schedule/buckets/:fromBucketId/rollover", auth
     const milestoneIds = placements.filter(p => p.sourceType === "milestone").map(p => p.sourceId);
     const rfiIds = placements.filter(p => p.sourceType === "rfi").map(p => p.sourceId);
     const submittalIds = placements.filter(p => p.sourceType === "submittal").map(p => p.sourceId);
+    const meetingIds = placements.filter(p => p.sourceType === "meeting").map(p => p.sourceId);
     const completedMilestones = milestoneIds.length
       ? await db.select({ id: projectMilestonesTable.id, status: projectMilestonesTable.status }).from(projectMilestonesTable)
         .where(inArray(projectMilestonesTable.id, milestoneIds))
@@ -405,13 +469,19 @@ router.post("/projects/:projectId/schedule/buckets/:fromBucketId/rollover", auth
       ? await db.select({ id: submittalsTable.id, status: submittalsTable.status, reviewDecision: submittalsTable.reviewDecision }).from(submittalsTable)
         .where(inArray(submittalsTable.id, submittalIds))
       : [];
+    const placedMeetings = meetingIds.length
+      ? await db.select({ id: meetingMinutesTable.id, meetingDate: meetingMinutesTable.meetingDate }).from(meetingMinutesTable)
+        .where(inArray(meetingMinutesTable.id, meetingIds))
+      : [];
     const completedMilestoneIds = new Set(completedMilestones.filter(m => isDone(m.status)).map(m => m.id));
     const completedRfiIds = new Set(completedRfis.filter(r => isDone(r.status)).map(r => r.id));
     const completedSubmittalIds = new Set(completedSubmittals.filter(s => isDone(s.reviewDecision || s.status)).map(s => s.id));
+    const completedMeetingIds = new Set(placedMeetings.filter(m => new Date(m.meetingDate).getTime() < Date.now()).map(m => m.id));
     const toMove = placements.filter(p => {
       if (p.sourceType === "milestone") return !completedMilestoneIds.has(p.sourceId);
       if (p.sourceType === "rfi") return !completedRfiIds.has(p.sourceId);
       if (p.sourceType === "submittal") return !completedSubmittalIds.has(p.sourceId);
+      if (p.sourceType === "meeting") return !completedMeetingIds.has(p.sourceId);
       return true;
     });
 
@@ -436,6 +506,19 @@ router.post("/projects/:projectId/schedule/buckets/:fromBucketId/rollover", auth
         movedByName: req.user!.fullName,
       });
     }
+
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "rollover",
+      entityType: "schedule_bucket",
+      entityId: fromBucket[0].id,
+      fileNameBefore: null,
+      fileNameAfter: null,
+      details: `Rolled over ${toMove.length} unfinished schedule item(s) from ${fromBucket[0].name} to ${toBucket[0].name}`,
+    });
 
     res.json({ moved: toMove.length });
   } catch (err) {
