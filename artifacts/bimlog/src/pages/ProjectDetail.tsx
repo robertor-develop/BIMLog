@@ -22,7 +22,7 @@ import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
 import { ClashReportsTab } from "./project/ClashReportsTab";
 import { CoordinationHub } from "./project/CoordinationHub";
-import { ChevronLeft, HelpCircle, Shield } from "lucide-react";
+import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 
@@ -101,84 +101,46 @@ export function ProjectDetail() {
           </div>
 
           <div className="project-context-actions">
-            {/* Project Code badge (Fix 3B) */}
             <span
+              className="context-chip context-chip-mono"
               title="Project Code (used in file naming)"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                height: 30, padding: "0 12px",
-                fontSize: 10, fontWeight: 700, fontFamily: "var(--font-mono)",
-                background: "rgba(245,158,11,0.12)", color: "#D97706",
-                border: "1px solid rgba(245,158,11,0.3)",
-                borderRadius: 999,
-              }}>
-              <span style={{ fontWeight: 600, opacity: 0.7, fontFamily: "inherit" }}>CODE</span>
+            >
+              <span className="context-chip-label">CODE</span>
               {project.code}
             </span>
 
-            {/* Role badge */}
             {myRoleInfo && (
               <span
+                className="context-chip"
                 title={myRoleInfo.description}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  height: 30, padding: "0 10px",
-                  fontSize: 11, fontWeight: 700,
-                  background: myRoleInfo.badgeBg,
-                  color: myRoleInfo.badgeText,
-                  border: `1px solid ${myRoleInfo.badgeBg}`,
-                  borderRadius: 999,
-                }}>
+              >
                 <Shield style={{ width: 12, height: 12 }} />
                 {myRoleInfo.label}
               </span>
             )}
 
-            {/* Admin inline card: visible without hover */}
             {adminMember && (
               <span
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 8,
-                  minHeight: 30, padding: "0 12px",
-                  fontSize: 11, fontWeight: 600,
-                  background: "#F8FAFC", color: "#0F172A",
-                  border: "1px solid #E2E8F0",
-                  borderRadius: 8,
-                  maxWidth: 430,
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                className="context-chip context-chip-wide"
+                title={adminMember.userEmail ? `Project Admin: ${adminMember.userEmail}` : "Project Admin"}
+              >
+                <span className="context-chip-label">
                   Admin
                 </span>
-                <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>{adminMember.userFullName}</span>
+                <span className="context-chip-strong">{adminMember.userFullName}</span>
                 {adminMember.userCompanyName && (
-                  <span style={{ color: "#64748B", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>- {adminMember.userCompanyName}</span>
+                  <span className="context-chip-muted">- {adminMember.userCompanyName}</span>
                 )}
                 {adminMember.userEmail && (
                   <a
                     href={`mailto:${adminMember.userEmail}`}
-                    style={{ color: "#1D4ED8", textDecoration: "none", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}
+                    className="context-chip-link"
                   >
                     - {adminMember.userEmail}
                   </a>
                 )}
               </span>
             )}
-            <Link href={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${tab}`)}`}>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                height: 30, padding: "0 12px", borderRadius: 6,
-                fontSize: 11, fontWeight: 600,
-                color: "hsl(var(--muted-foreground))",
-                background: "hsl(var(--secondary))",
-                border: "1px solid hsl(var(--border))",
-                cursor: "pointer",
-              }}>
-                <HelpCircle style={{ width: 13, height: 13 }} />
-                Help
-              </button>
-            </Link>
           </div>
         </div>
 

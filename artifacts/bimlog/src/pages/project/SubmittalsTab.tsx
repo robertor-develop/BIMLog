@@ -1233,7 +1233,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                       <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
                         <button
                           onClick={() => handleRowExport(sub, "pdf")}
-                          title="Export PDF"
+                          title={w("Export this submittal as PDF", "Exportar este entregable como PDF", lang)}
                           style={{ padding: "2px 6px", borderRadius: 4, border: "1px solid #D1D5DB", background: "white", cursor: "pointer", fontSize: 10, color: "#DC2626" }}
                         >PDF</button>
                         <button
@@ -2351,7 +2351,14 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
             {editOpen ? w("Close Edit", "Cerrar Edicion", lang) : w("Edit Submittal", "Editar Entregable", lang)}
           </Button>
         )}
-        <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={handleExportPdf} disabled={exportLoading}>
+        <Button
+          variant="outline"
+          size="sm"
+          title={w("Export the current Shop Drawing Control view as PDF", "Exportar la vista actual de Shop Drawing Control como PDF", lang)}
+          style={{ fontSize: 11, gap: 5 }}
+          onClick={handleExportPdf}
+          disabled={exportLoading}
+        >
           {exportLoading ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Download style={{ width: 12, height: 12 }} />}
           {w("Export PDF", "Exportar PDF", lang)}
         </Button>

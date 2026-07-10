@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { LangToggle } from "@/components/layout/LangToggle";
-import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
+import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import {
@@ -144,18 +143,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       )}
 
       <div className="sidebar">
-        <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">B</div>
-          <div>
-            <div className="sidebar-logo-name">BIMLog</div>
-            <div className="sidebar-logo-by">by IgniteSmart</div>
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 10px 10px" }}>
-          <LangToggle />
-          <SmartGuideSidebarButton activeTab={activeTab} />
-        </div>
+        <SidebarUtilities activeTab={activeTab} helpHref={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${activeTab}`)}`} />
 
         <div style={{ padding: "10px 10px 0" }}>
           <div className="sidebar-project">

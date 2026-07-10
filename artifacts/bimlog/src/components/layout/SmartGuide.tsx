@@ -217,24 +217,9 @@ export function SmartGuideSidebarButton({ activeTab }: { activeTab: string }) {
     <>
       <button
         type="button"
+        className="sidebar-utility-button"
         onClick={() => setIsOpen(true)}
         aria-label="Open guide"
-        style={{
-          width: "100%",
-          height: 30,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          padding: "0 10px",
-          borderRadius: 7,
-          fontSize: 11,
-          fontWeight: 700,
-          cursor: "pointer",
-          background: "rgba(255,255,255,0.06)",
-          color: "white",
-          border: "1px solid rgba(255,255,255,0.12)",
-        }}
       >
         <HelpCircle style={{ width: 13, height: 13 }} />
         Guide

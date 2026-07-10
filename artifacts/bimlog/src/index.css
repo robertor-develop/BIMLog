@@ -96,6 +96,43 @@ iframe[aria-label*="Replit" i],
 .app-topbar { position: relative; z-index: 30; }
 .project-context-bar { min-height: 48px; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border)); display: flex; align-items: center; gap: 12px; padding: 8px 24px; flex-shrink: 0; }
 .project-context-actions { margin-left: auto; display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  max-width: 100%;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: #F8FAFC;
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.context-chip-mono { font-family: var(--font-mono); font-size: 10px; }
+.context-chip-wide { max-width: 430px; padding: 0 12px; }
+.context-chip-label {
+  color: #64748B;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.context-chip-strong,
+.context-chip-muted,
+.context-chip-link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.context-chip-strong { font-weight: 800; }
+.context-chip-muted { color: #64748B; font-weight: 600; }
+.context-chip-link { color: #1D4ED8; font-weight: 600; text-decoration: none; }
+.context-chip-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 980px) {
   .project-context-bar { align-items: flex-start; flex-direction: column; }
   .project-context-actions { margin-left: 0; justify-content: flex-start; }
@@ -105,6 +142,71 @@ iframe[aria-label*="Replit" i],
 .sidebar-logo-mark { width: 30px; height: 30px; background: #2563EB; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; color: #fff; flex-shrink: 0; }
 .sidebar-logo-name { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: #fff; line-height: 1.2; }
 .sidebar-logo-by { font-size: 9px; color: rgba(255,255,255,0.7); line-height: 1; }
+.sidebar-utilities {
+  padding: 12px 10px 8px;
+  border-bottom: 1px solid var(--sidebar-border);
+  flex-shrink: 0;
+}
+.sidebar-utility-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.sidebar-utility-button {
+  width: 100%;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.88);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sidebar-utility-button:hover {
+  background: rgba(255,255,255,0.1);
+  color: #FFFFFF;
+}
+.sidebar-info-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1200;
+  width: 200px;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  box-shadow: 0 12px 28px rgba(15,23,42,0.18);
+}
+.sidebar-info-menu-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 11px;
+  border-bottom: 1px solid #E2E8F0;
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 800;
+}
+.sidebar-info-menu-item {
+  display: block;
+  padding: 9px 11px;
+  border-bottom: 1px solid #F1F5F9;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sidebar-info-menu-item:hover { background: #F8FAFC; color: #0F172A; }
 .sidebar-project { margin: 10px 10px 0; padding: 10px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
 .sidebar-project-code { font-size: 9px; font-weight: 700; color: #F59E0B; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
 .sidebar-project-name { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }

@@ -33,9 +33,10 @@ export function LangToggle({ floating = false }: { floating?: boolean }) {
   return (
     <button
       type="button"
+      className={floating ? undefined : "sidebar-utility-button"}
       aria-label="Toggle language"
       onClick={() => setLanguage(language === "en" ? "es" : "en")}
-      style={{ ...baseStyle, ...floatStyle }}
+      style={floating ? { ...baseStyle, ...floatStyle } : undefined}
     >
       <Globe style={{ width: 13, height: 13 }} />
       {language.toUpperCase()}

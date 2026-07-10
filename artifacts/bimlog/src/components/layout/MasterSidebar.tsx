@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { LangToggle } from "@/components/layout/LangToggle";
-import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
+import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import { Bell, Search, X, Building2 } from "lucide-react";
@@ -158,18 +157,7 @@ export function MasterSidebar() {
 
   return (
     <div className="sidebar">
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-mark">B</div>
-        <div>
-          <div className="sidebar-logo-name">BIMLog</div>
-          <div className="sidebar-logo-by">by IgniteSmart</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 10px 10px" }}>
-        <LangToggle />
-        <SmartGuideSidebarButton activeTab="dashboard" />
-      </div>
+      <SidebarUtilities activeTab="dashboard" />
 
       <div ref={searchRef} style={{ position: "relative", padding: "0 10px 10px" }}>
         <button onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
