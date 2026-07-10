@@ -743,6 +743,10 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
   const [aiDesc, setAiDesc] = useState("");
   const [showAi, setShowAi] = useState(false);
+  const [emailDescription, setEmailDescription] = useState("");
+  const [emailDraft, setEmailDraft] = useState("");
+  const [emailDraftLoading, setEmailDraftLoading] = useState(false);
+  const [emailDraftError, setEmailDraftError] = useState("");
 
   // AI document import: read an existing PDF/Word/Excel and prefill this form.
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -862,6 +866,38 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     },
   });
 
+  const generateCreateEmailDraft = async () => {
+    setEmailDraftLoading(true);
+    setEmailDraftError("");
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/generate-email-draft`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          question,
+          userContext: emailDescription.trim() || undefined,
+          submittedToPerson: sToPerson,
+          submittedToCompany: sToCompany,
+          submittedByContact: sByContact,
+          submittedByCompany: sByCompany,
+          dateRequired,
+        }),
+      });
+      const data = await resp.json().catch(() => ({})) as { email?: string; error?: string };
+      if (!resp.ok || !data.email?.trim()) throw new Error(data.error || "AI email draft failed");
+      setEmailDraft(data.email);
+      toast({ title: w("Email draft created from text fields only", "Borrador de correo creado solo con campos de texto", lang) });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : w("AI email draft failed", "Falló el borrador de email IA", lang);
+      setEmailDraftError(message);
+      toast({ title: message, variant: "destructive" });
+    } finally {
+      setEmailDraftLoading(false);
+    }
+  };
+
   // Fix 2 — save external person
   const handleAddExtPerson = () => {
     if (!extPersonName.trim() || !extPersonEmail.trim()) return;
@@ -909,7 +945,9 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       locationDescription: location || undefined,
       question: question || undefined,
       costImpact: costImpact || undefined,
+      costImpactAmount: costImpact === "Cost Increase Known" ? costAmount : undefined,
       scheduleImpact: schedImpact || undefined,
+      scheduleImpactDays: schedDays ? parseInt(schedDays) : undefined,
       distributionList: distList.length > 0 ? distList : undefined,
       attachmentsJson: attachments.length > 0 ? attachments : undefined,
     };
@@ -1189,6 +1227,34 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             </FormField>
           </div>
 
+          <div style={{ marginTop: 12 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL...", "Pegar nombre de archivo o URL...", lang)} style={{ fontSize: 12, flex: "1 1 260px" }}
+                onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
+              <Button size="sm" variant="outline" onClick={() => { if (attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); } }} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
+              <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
+              <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
+                {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingAtt ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
+              </Button>
+              {connectedFileSourcesCreate.map(provider => (
+                <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerCreate(provider)} style={{ fontSize: 11, gap: 4 }}>
+                  <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
+                </Button>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 5 }}>
+              {w("Files, images, PDFs, and project references attached here are saved with the RFI question.", "Los archivos, imagenes, PDFs y referencias del proyecto adjuntos aqui se guardan con la pregunta del RFI.", lang)}
+            </div>
+            {attachments.map((a, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
+                <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
+                {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
+                <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
+              </div>
+            ))}
+          </div>
+
           {/* Section 5 — Question */}
           <SectionHeader title={w("5. Description of Question", "5. Descripción de la Pregunta", lang)} />
           <div style={{ marginTop: 10 }}>
@@ -1225,32 +1291,6 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 </div>
               )}
             </div>
-
-            {/* Attachments */}
-            <div style={{ marginTop: 12 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</label>
-              <div style={{ display: "flex", gap: 6 }}>
-                <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL…", "Pegar nombre de archivo o URL…", lang)} style={{ fontSize: 12, flex: 1 }}
-                  onKeyDown={e => { if (e.key === "Enter" && attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); e.preventDefault(); } }} />
-                <Button size="sm" variant="outline" onClick={() => { if (attachInput.trim()) { setAttachments(prev => [...prev, attachInput.trim()]); setAttachInput(""); } }} style={{ fontSize: 11 }}>{w("Add", "Agregar", lang)}</Button>
-                <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
-                <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
-                  {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
-                </Button>
-                {connectedFileSourcesCreate.map(provider => (
-                  <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerCreate(provider)} style={{ fontSize: 11, gap: 4 }}>
-                    <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
-                  </Button>
-                ))}
-              </div>
-              {attachments.map((a, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
-                  <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                  {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
-                  <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Section 6 — Impact */}
@@ -1284,7 +1324,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
           {/* Section 7 — Distribution */}
           {/* Fix 4 — external contacts */}
-          <SectionHeader title={w("7. Distribution List", "7. Lista de Distribución", lang)} />
+          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
           <div style={{ marginTop: 10 }}>
             {members.map(m => (
               <label key={m.userEmail} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
@@ -1346,6 +1386,34 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 </div>
               </div>
             )}
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>{w("Email / Question Description", "Email / Descripción de la Pregunta", lang)}</div>
+              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
+                {w("Draft the cover email here. This text-only AI assist uses AI credits and does not read attached files unless you explicitly use a file-reading AI tool.", "Redacte aqui el correo de portada. Esta asistencia IA solo usa texto, consume creditos IA y no lee archivos adjuntos salvo que use explicitamente una herramienta IA de lectura de archivos.", lang)}
+              </div>
+              <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Description of Email", "Descripción de Email", lang)}</label>
+              <textarea
+                value={emailDescription}
+                onChange={e => setEmailDescription(e.target.value)}
+                placeholder={w("Describe the message you want to send with this RFI...", "Describa el mensaje que desea enviar con este RFI...", lang)}
+                style={{ width: "100%", minHeight: 72, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+              />
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+                <Button size="sm" variant="outline" onClick={generateCreateEmailDraft} disabled={emailDraftLoading || (!question.trim() && !emailDescription.trim())} title={w("Text-only draft. Does not read attachments. Uses configured AI credits.", "Borrador solo con texto. No lee adjuntos. Usa creditos IA configurados.", lang)} style={{ fontSize: 11, gap: 5 }}>
+                  {emailDraftLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Sparkles style={{ width: 12, height: 12 }} />}
+                  {w("Generate Email with AI", "Generar Email con IA", lang)}
+                </Button>
+                <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Click-driven only. No AI runs automatically.", "Solo por clic. La IA no se ejecuta automaticamente.", lang)}</span>
+              </div>
+              {emailDraftError && <div style={{ fontSize: 11, color: "#B45309", marginTop: 6 }}>{emailDraftError}</div>}
+              {emailDraft && (
+                <textarea
+                  value={emailDraft}
+                  onChange={e => setEmailDraft(e.target.value)}
+                  style={{ width: "100%", minHeight: 120, marginTop: 8, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                />
+              )}
+            </div>
           </div>
         </div>
 
@@ -1573,13 +1641,15 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ userContext: userContext.trim() || undefined }),
       });
-      if (!resp.ok) throw new Error("generate failed");
-      const data = await resp.json() as { email?: string };
+      const data = await resp.json().catch(() => ({})) as { email?: string; error?: string };
+      if (!resp.ok) throw new Error(data.error || "generate failed");
       if (!data.email || !data.email.trim()) throw new Error("empty draft");
       setAiPreview(data.email);
-    } catch {
+      toast({ title: w("Email draft created from text fields only", "Borrador de correo creado solo con campos de texto", lang) });
+    } catch (error) {
       setAiPreview(null);
       setPreviewFailed(true);
+      toast({ title: error instanceof Error ? error.message : w("AI draft unavailable", "Borrador IA no disponible", lang), variant: "destructive" });
     } finally {
       setPreviewLoading(false);
     }
@@ -2011,6 +2081,7 @@ ${hasResp ? `
   // The single impact block shows what the asker flagged plus what the latest response confirmed.
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
+  const storedQuestionDocs = (rfi.attachmentsJson as string[] | null) || [];
   const timeline = [
     { label: w("Created", "Creado", lang), date: rfi.createdAt as string | Date | null, by: rfi.createdByName || undefined },
     ...(rfi.sentAt ? [{ label: w("Sent to reviewer", "Enviado al revisor", lang), date: rfi.sentAt as string | Date | null, by: undefined as string | undefined }] : []),
@@ -2103,13 +2174,13 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />{w("RFI PDF", "RFI PDF", lang)}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#C4B5FD" }}>
+            <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />{w("RFI DOCX", "RFI DOCX", lang)}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11, color: "#6D28D9", borderColor: "#C4B5FD", background: "#F5F3FF" }}>
+            <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11 }}>
               <Shield style={{ width: 12, height: 12 }} />{w("RFI Audit PDF", "PDF Auditoria RFI", lang)}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} style={{ gap: 5, fontSize: 11, color: "#0369A1", borderColor: "#BAE6FD", background: "#F0F9FF" }}>
+            <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} title={w("Show who viewed this RFI", "Mostrar quien vio este RFI", lang)} style={{ gap: 5, fontSize: 11 }}>
               <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
             </Button>
             {isProjectAdmin && rfi.status !== "closed" && (
@@ -2118,12 +2189,12 @@ ${hasResp ? `
               </Button>
             )}
             {rfi.status === "closed" && canWrite && (
-              <Button variant="outline" size="sm" onClick={() => reviseRfi({ projectId, rfiId: rfi.id, data: {} })} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
+              <Button variant="outline" size="sm" onClick={() => reviseRfi({ projectId, rfiId: rfi.id, data: {} })} style={{ gap: 5, fontSize: 11 }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
               </Button>
             )}
             {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && !infoEdit && (
-              <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#7C3AED" }}>
+              <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11 }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
               </Button>
             )}
@@ -2344,7 +2415,7 @@ ${hasResp ? `
 
 
           {/* Reference info */}
-          {(rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription) && (
+          {(infoEdit || rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription || storedQuestionDocs.length > 0) && (
             <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10 }}>{w("Reference Information", "Información de Referencia", lang)}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
@@ -2355,6 +2426,40 @@ ${hasResp ? `
                 <InfoRow label={w("Note #", "Nota #", lang)} value={rfi.noteNumber} />
                 <InfoRow label={w("Location", "Ubicación", lang)} value={rfi.locationDescription} />
               </div>
+              {infoEdit ? (
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <input value={questionDocInput} onChange={e => setQuestionDocInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); e.preventDefault(); } }} placeholder={w("Paste a URL or file name, e.g. SK-105 Rev2.pdf", "Pegue URL o nombre de archivo, ej. SK-105 Rev2.pdf", lang)} style={{ ...infoInput, flex: "1 1 260px" }} />
+                    <Button type="button" size="sm" variant="outline" onClick={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
+                    <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
+                    <Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
+                      {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
+                    </Button>
+                    {connectedFileSources.map(provider => (
+                      <Button key={provider.key} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "question", provider })} style={{ fontSize: 11, gap: 4 }}>
+                        <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
+                      </Button>
+                    ))}
+                  </div>
+                  {questionDocs.map((a, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
+                      <ExternalLink style={{ width: 12, height: 12 }} />
+                      {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
+                      <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
+                    </div>
+                  ))}
+                </div>
+              ) : storedQuestionDocs.length > 0 ? (
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</div>
+                  {storedQuestionDocs.map((a, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
+                      <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(a)}</a> : attachLabel(a)}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           )}
 
@@ -2404,40 +2509,6 @@ ${hasResp ? `
             ) : (
               <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
             )}
-            {infoEdit ? (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments (sketches, markups, references)", "Adjuntos (croquis, marcados, referencias)", lang)}</div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <input value={questionDocInput} onChange={e => setQuestionDocInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); e.preventDefault(); } }} placeholder={w("Paste a URL or file name, e.g. SK-105 Rev2.pdf", "Pegue URL o nombre de archivo, ej. SK-105 Rev2.pdf", lang)} style={{ ...infoInput, flex: 1 }} />
-                  <button type="button" onClick={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Add", "Agregar", lang)}</button>
-                  <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
-                  <button type="button" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                    {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
-                  </button>
-                  {connectedFileSources.map(provider => (
-                    <button key={provider.key} type="button" onClick={() => setCloudPickerTarget({ target: "question", provider })} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                      <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
-                    </button>
-                  ))}
-                </div>
-                {questionDocs.map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
-                    <ExternalLink style={{ width: 12, height: 12 }} />
-                    {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{a}</span>}
-                    <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
-                  </div>
-                ))}
-              </div>
-            ) : (rfi.attachmentsJson as string[] | null)?.length ? (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments", "Adjuntos", lang)}</div>
-                {(rfi.attachmentsJson as string[]).map((a, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                    <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(a)}</a> : a}
-                  </div>
-                ))}
-              </div>
-            ) : null}
           </div>
 
           {/* Impact */}
@@ -2565,7 +2636,7 @@ ${hasResp ? `
                 )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <label style={{ fontSize: 12, fontWeight: 700 }}>
-                    {w("Official Response", "Respuesta Oficial", lang)}
+                    {w("Official Response / Reason", "Respuesta Oficial / Razón", lang)}
                     <span style={{ fontSize: 10, color: "#DC2626", marginLeft: 4 }}>*</span>
                     <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400, marginLeft: 6 }}>{w("Required to set status to Responded", "Requerido para marcar como Respondido", lang)}</span>
                   </label>
@@ -2685,6 +2756,8 @@ ${hasResp ? `
             </div>
           )}
 
+          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
+
           {/* Distribution list (CC) */}
           {(infoEdit || (rfi.distributionList as string[] | null)?.length) ? (
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, marginBottom: 16 }}>
@@ -2719,10 +2792,10 @@ ${hasResp ? `
               )}
             </div>
           ) : null}
-          {/* Sending & accountability */}
+          {/* Email sending and accountability */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-              <Send style={{ width: 12, height: 12 }} />{w("Sending", "Envío", lang)}
+              <Send style={{ width: 12, height: 12 }} />{w("Email / Sending", "Email / Envío", lang)}
             </div>
 
             {rfi.sendStatus === "sent" ? (
@@ -2737,7 +2810,10 @@ ${hasResp ? `
             ) : (
               <div>
                 <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
-                  {w("Not sent yet. Compose the email: type what you want to say, then click Generate with AI to turn it into a professional message. Copy it into your email client and mark it as sent to start the response clock.", "Aún no enviado. Redacte el correo: escriba lo que quiere decir, luego pulse Generar con IA para convertirlo en un mensaje profesional. Cópielo a su cliente de correo y márquelo como enviado para iniciar el reloj de respuesta.", lang)}
+                  {w("Not sent yet. Compose the email here, then send through your connected SendGrid account or copy it into your email client and mark it as sent to start the response clock.", "Aún no enviado. Redacte el correo aqui, luego envielo con su cuenta SendGrid conectada o copielo a su cliente de correo y marquelo como enviado para iniciar el reloj de respuesta.", lang)}
+                  <div style={{ marginTop: 4, fontSize: 11, color: "#B45309" }}>
+                    {w("AI text assist uses AI credits and does not read attached files unless you explicitly use file AI.", "La asistencia IA de texto usa creditos IA y no lee adjuntos salvo que use explicitamente IA de archivos.", lang)}
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: showSendPreview ? 10 : 0 }}>
                   <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) setShowContextInput(true); }} style={{ gap: 5, fontSize: 11 }}>
@@ -2782,15 +2858,15 @@ ${hasResp ? `
                       <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: 5 }}>
                         {aiPreview
                           ? <><Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}</>
-                          : <><Mail style={{ width: 12, height: 12 }} />{w("Draft email — type your context, then Generate with AI", "Borrador de correo — escriba su contexto, luego Generar con IA", lang)}</>}
+                          : <><Mail style={{ width: 12, height: 12 }} />{w("Draft email — type your description, then Generate Email with AI", "Borrador de correo — escriba su descripcion, luego Generar Email con IA", lang)}</>}
                       </span>
                       <div style={{ display: "flex", gap: 6 }}>
                         <Button variant="outline" size="sm" onClick={() => setShowContextInput(v => !v)} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide context", "Ocultar contexto", lang) : w("Add context", "Agregar contexto", lang)}
+                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide Email Description", "Ocultar Descripción", lang) : w("Description of Email", "Descripción de Email", lang)}
                         </Button>
                         <Button size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
                           {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Sparkles style={{ width: 12, height: 12 }} />}
-                          {aiPreview ? w("Regenerate", "Regenerar", lang) : w("Generate with AI", "Generar con IA", lang)}
+                          {aiPreview ? w("Regenerate Email with AI", "Regenerar Email con IA", lang) : w("Generate Email with AI", "Generar Email con IA", lang)}
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleCopyPreview} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
                           {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
@@ -2800,11 +2876,11 @@ ${hasResp ? `
                     </div>
                     {showContextInput && (
                       <div style={{ padding: "8px 10px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.2)" }}>
-                        <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("What do you want to say?", "¿Qué quiere decir?", lang)}</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Description of Email", "Descripción de Email", lang)}</label>
                         <textarea
                           value={userContext}
                           onChange={e => setUserContext(e.target.value)}
-                          placeholder={w("Type your message or context here, then click Generate with AI…", "Escriba su mensaje o contexto aquí, luego pulse Generar con IA…", lang)}
+                          placeholder={w("Type your message or context here, then click Generate Email with AI...", "Escriba su mensaje o contexto aqui, luego pulse Generar Email con IA...", lang)}
                           style={{ width: "100%", minHeight: 72, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
                         />
                       </div>
@@ -2822,7 +2898,7 @@ ${hasResp ? `
                       <>
                         {!aiPreview && (
                           <div style={{ padding: "6px 12px", fontSize: 11, color: "hsl(var(--muted-foreground))", background: "hsl(var(--muted) / 0.2)", borderBottom: "1px solid hsl(var(--border))" }}>
-                            {w("Basic template shown below. Type your context above and click Generate with AI to improve it.", "Plantilla básica abajo. Escriba su contexto arriba y pulse Generar con IA para mejorarla.", lang)}
+                            {w("Basic template shown below. Type your email description above and click Generate Email with AI to improve it.", "Plantilla basica abajo. Escriba la descripcion del email arriba y pulse Generar Email con IA para mejorarla.", lang)}
                           </div>
                         )}
                         <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{previewText}</pre>

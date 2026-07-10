@@ -2064,6 +2064,88 @@ Reply with either the finished RFI question text, or a single NEED_MORE_INFO lin
   }
 });
 
+router.post("/projects/:projectId/rfis/generate-email-draft", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parseInt(req.params["projectId"] as string);
+    const {
+      subject,
+      question,
+      userContext,
+      submittedToPerson,
+      submittedToCompany,
+      submittedByContact,
+      submittedByCompany,
+      dateRequired,
+    } = req.body as {
+      subject?: string;
+      question?: string;
+      userContext?: string;
+      submittedToPerson?: string;
+      submittedToCompany?: string;
+      submittedByContact?: string;
+      submittedByCompany?: string;
+      dateRequired?: string;
+    };
+
+    const cleanQuestion = stripMarkdown(question || "");
+    const cleanContext = String(userContext || "").trim();
+    if (!cleanQuestion && !cleanContext && !subject) {
+      res.status(400).json({ error: "Add a question or email description before generating an email draft." });
+      return;
+    }
+
+    const anthropic = await getAnthropicClientForUser({
+      userId: req.user!.userId,
+      projectId,
+      feature: "rfis.generate_email_draft",
+    });
+
+    const recipient = submittedToPerson || submittedToCompany || "the recipient";
+    const sender = submittedByContact || "the project team";
+    const senderCompany = submittedByCompany || "";
+    const dueDate = dateRequired ? new Date(dateRequired).toISOString().slice(0, 10) : "";
+
+    const prompt = `You are a construction project manager writing a cover email for a new RFI draft.
+
+Write a complete, natural professional email that:
+- Opens with an appropriate greeting to the recipient
+- Frames the RFI briefly and professionally
+- Includes the formal RFI question/request when provided
+- States the response due date when provided
+- Closes with the sender name and company when provided
+
+Use ONLY these text fields. Do not claim you reviewed files, images, PDFs, drawings, or attachments.
+
+RFI Subject: ${subject || ""}
+Recipient: ${recipient}
+Sender: ${sender}${senderCompany ? `, ${senderCompany}` : ""}
+${dueDate ? `Response Required By: ${dueDate}` : ""}
+RFI Question:
+${cleanQuestion}
+${cleanContext ? `\nDescription of Email from user: ${cleanContext}\n` : ""}
+Write only the email body. Do not include "To:" or "Subject:" header lines.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const block = message.content[0];
+    const email = block.type === "text" ? block.text : "";
+    if (!email.trim()) {
+      res.status(502).json({ error: "AI returned an empty email draft" });
+      return;
+    }
+
+    res.json({ email });
+  } catch (error) {
+    if (sendAiUsageError(res, error)) return;
+    const message = error instanceof Error ? error.message : "Failed to generate email draft";
+    res.status(500).json({ error: message });
+  }
+});
+
 // ─── POST /projects/:projectId/rfis/attachments/from-google-drive ────────────
 // Downloads a file from the user's connected Google Drive and stores it as a
 // downloadable attachment (same file-record shape as a local upload).
