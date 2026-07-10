@@ -39,7 +39,14 @@ const PRIORITY_BADGE: Record<string, string> = {
   low: "badge-gray", medium: "badge-amber", high: "badge-red", critical: "badge-red",
 };
 
-const RFI_TYPES = ["Coordination", "General", "Drawing", "Spec", "Submittal", "Safety Data Sheet", "Change", "Other"];
+const DEFAULT_RFI_TYPES = ["Coordination", "General", "Drawing", "Spec", "Submittal", "Safety Data Sheet", "Change", "Other"];
+const FILE_SOURCE_PROVIDERS = [
+  { key: "google_drive", param: "google-drive", label: "Google Drive" },
+  { key: "dropbox", param: "dropbox", label: "Dropbox" },
+  { key: "bim360", param: "bim360", label: "BIM 360" },
+  { key: "procore", param: "procore", label: "Procore" },
+] as const;
+type FileSourceProvider = typeof FILE_SOURCE_PROVIDERS[number];
 
 // Attachments are plain strings (a URL, a file name, or an uploaded-file
 // download URL carrying ?name=). These render them nicely + clickably.
@@ -47,6 +54,14 @@ const isUrlAttach = (v: string) => /^https?:\/\//.test(v) || v.startsWith("/api/
 const attachLabel = (v: string) => {
   const m = v.match(/[?&]name=([^&]+)/);
   if (m) { try { return decodeURIComponent(m[1]); } catch { return m[1]; } }
+  try {
+    if (/^https?:\/\//i.test(v) || v.startsWith("/api/")) {
+      const path = new URL(v, window.location.origin).pathname;
+      return decodeURIComponent(path.split("/").filter(Boolean).pop() || v);
+    }
+  } catch {
+    return v;
+  }
   return v;
 };
 
@@ -526,17 +541,17 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                     </td>
                     <td style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
-                        <button title="Export PDF"
+                        <button title="Export RFI PDF"
                           style={{ padding: "3px 6px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3 }}
                           onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
                         >
-                          <FileText style={{ width: 10, height: 10 }} />PDF
+                          <FileText style={{ width: 10, height: 10 }} />RFI PDF
                         </button>
-                        <button title="Export Word"
+                        <button title="Export RFI DOCX"
                           style={{ padding: "3px 6px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3 }}
                           onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
                         >
-                          <FileText style={{ width: 10, height: 10 }} />Doc
+                          <FileText style={{ width: 10, height: 10 }} />RFI DOCX
                         </button>
                         {canWrite && (
                           <button
@@ -600,17 +615,17 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                   </td>
                   <td style={{ textAlign: "right", position: "sticky", right: 0, background: "hsl(var(--card))", zIndex: 1, boxShadow: "-2px 0 4px rgba(0,0,0,0.05)" }} onClick={e => e.stopPropagation()}>
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
-                      <button title="Export PDF"
+                      <button title="Export RFI PDF"
                         style={{ padding: "3px 7px", fontSize: 10, border: "1px solid hsl(var(--border))", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#2563EB", display: "flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}
                         onClick={e => { e.stopPropagation(); handleExportPdf(rfi); }}
                       >
-                        <FileText style={{ width: 10, height: 10 }} />PDF
+                        <FileText style={{ width: 10, height: 10 }} />RFI PDF
                       </button>
-                      <button title="Export Word"
+                      <button title="Export RFI DOCX"
                         style={{ padding: "3px 7px", fontSize: 10, border: "1px solid #C4B5FD", borderRadius: 4, background: "transparent", cursor: "pointer", color: "#7C3AED", display: "flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}
                         onClick={e => { e.stopPropagation(); handleExportWordRfi(rfi); }}
                       >
-                        <FileText style={{ width: 10, height: 10 }} />Doc
+                        <FileText style={{ width: 10, height: 10 }} />RFI DOCX
                       </button>
                     </div>
                   </td>
@@ -655,6 +670,10 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const { toast } = useToast();
   const { getOptions } = useConfig();
   const priorityOptions = getOptions("rfi_priority");
+  const configuredRfiTypes = getOptions("rfi_type");
+  const rfiTypeOptions = configuredRfiTypes.length
+    ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
+    : DEFAULT_RFI_TYPES.map(t => ({ value: t, label: t }));
   const { data: files } = useListFiles(projectId);
 
   const isRevision = !!preload;
@@ -667,6 +686,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   }, [existingRfis, preload]);
 
   const [subject, setSubject] = useState(preload?.subject || prefill?.subject || "");
+  const [rfiType, setRfiType] = useState(preload?.rfiType || rfiTypeOptions[0]?.value || "");
   const [priority, setPriority] = useState(preload?.priority || priorityOptions[0]?.value || "medium");
   const [dateRequested, setDateRequested] = useState(format(new Date(), "yyyy-MM-dd"));
   const [dateRequired, setDateRequired] = useState(preload?.dateRequired ? format(parseISO(preload.dateRequired), "yyyy-MM-dd") : "");
@@ -789,14 +809,17 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
   };
 
-  const [gdConnectedCreate, setGdConnectedCreate] = useState(false);
-  const [showGdPicker, setShowGdPicker] = useState(false);
+  const [connectedFileSourcesCreate, setConnectedFileSourcesCreate] = useState<FileSourceProvider[]>([]);
+  const [cloudPickerCreate, setCloudPickerCreate] = useState<FileSourceProvider | null>(null);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : [])
-      .then((d) => { const gd = Array.isArray(d) ? (d as { provider: string; status: string }[]).find(c => c.provider === "google_drive") : null; setGdConnectedCreate(!!gd && gd.status === "connected"); })
-      .catch((error) => logClientError("RFI create Google Drive connection load", error));
+      .then((d) => {
+        const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
+        setConnectedFileSourcesCreate(FILE_SOURCE_PROVIDERS.filter(p => list.some(c => c.provider === p.key && c.status === "connected")));
+      })
+      .catch((error) => logClientError("RFI create file source connection load", error));
   }, []);
 
   const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
@@ -866,6 +889,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
     lastRfiData.current = {
       subject, priority,
+      rfiType: rfiType || undefined,
       dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
       dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
       projectAddress: projectAddress || undefined,
@@ -893,6 +917,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       projectId,
       data: {
         subject, priority,
+        rfiType: rfiType || undefined,
         dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
         dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
         projectAddress: projectAddress || undefined,
@@ -978,6 +1003,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             <FormField label={w("Priority", "Prioridad", lang)}>
               <select value={priority} onChange={e => setPriority(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
                 {priorityOptions.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
+              </select>
+            </FormField>
+            <FormField label={w("RFI Type", "Tipo de RFI", lang)}>
+              <select value={rfiType} onChange={e => setRfiType(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
+                {rfiTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </FormField>
             <FormField label={w("Project Address", "Dirección del Proyecto", lang)}>
@@ -1207,11 +1237,11 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                   {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                 </Button>
-                {gdConnectedCreate && (
-                  <Button size="sm" variant="outline" onClick={() => setShowGdPicker(true)} style={{ fontSize: 11, gap: 4 }}>
-                    <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                {connectedFileSourcesCreate.map(provider => (
+                  <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerCreate(provider)} style={{ fontSize: 11, gap: 4 }}>
+                    <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
                   </Button>
-                )}
+                ))}
               </div>
               {attachments.map((a, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
@@ -1326,12 +1356,13 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </Button>
         </div>
       </div>
-      {showGdPicker && (
-        <GoogleDrivePicker
+      {cloudPickerCreate && (
+        <CloudPicker
+          provider={cloudPickerCreate}
           projectId={projectId}
           lang={lang}
           onAttached={url => setAttachments(prev => [...prev, url])}
-          onClose={() => setShowGdPicker(false)}
+          onClose={() => setCloudPickerCreate(null)}
         />
       )}
     </div>
@@ -1355,6 +1386,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const { toast } = useToast();
   const { getLabel, getOptions } = useConfig();
   const { data: files } = useListFiles(projectId);
+  const configuredRfiTypes = getOptions("rfi_type");
+  const rfiTypeOptions = configuredRfiTypes.length
+    ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
+    : DEFAULT_RFI_TYPES.map(t => ({ value: t, label: t }));
 
   const [answer, setAnswer] = useState(rfi.answer || rfi.response || "");
   const [answeredBy, setAnsweredBy] = useState(rfi.answeredBy || user?.fullName || "");
@@ -1453,6 +1488,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // view tracking
   const [viewEvents, setViewEvents] = useState<{ id: number; userFullName: string; userCompanyName: string; viewedAt: string }[]>([]);
   const [showViewedBy, setShowViewedBy] = useState(false);
+  const [ballHistory, setBallHistory] = useState<Array<{ id: number; heldBy: string; heldByCompany: string; fromDate: string; toDate: string | null; daysHeld: number | null }>>([]);
 
   // Track view event on panel open, and load viewed-by list
   useEffect(() => {
@@ -1469,6 +1505,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         if (Array.isArray(data)) setViewEvents(data);
       })
       .catch((error) => logClientError("RFI viewed-by load", error));
+    fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/ball-in-court-history`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { if (Array.isArray(data)) setBallHistory(data); })
+      .catch((error) => logClientError("RFI ball-in-court history load", error));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1569,8 +1611,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // Does THIS user have their own SendGrid connected? Drives the real Send
   // button vs. the copy-paste + "connect" nudge.
   const [sgConnected, setSgConnected] = useState<boolean | null>(null);
-  const [gdConnected, setGdConnected] = useState(false);
-  const [gdPickerTarget, setGdPickerTarget] = useState<null | "question" | "response">(null);
+  const [connectedFileSources, setConnectedFileSources] = useState<FileSourceProvider[]>([]);
+  const [cloudPickerTarget, setCloudPickerTarget] = useState<null | { target: "question" | "response"; provider: FileSourceProvider }>(null);
   const [hideSgNudge, setHideSgNudge] = useState(() => localStorage.getItem("bimlog-hide-sendgrid-nudge") === "1");
   const [sending, setSending] = useState(false);
   useEffect(() => {
@@ -1581,8 +1623,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
         const sg = list.find(c => c.provider === "sendgrid");
         setSgConnected(!!sg && sg.status === "connected");
-        const gd = list.find(c => c.provider === "google_drive");
-        setGdConnected(!!gd && gd.status === "connected");
+        setConnectedFileSources(FILE_SOURCE_PROVIDERS.filter(p => list.some(c => c.provider === p.key && c.status === "connected")));
       })
       .catch(() => setSgConnected(false));
   }, []);
@@ -2039,7 +2080,7 @@ ${hasResp ? `
               {infoEdit ? (
                 <select value={infoType} onChange={e => setInfoType(e.target.value)} style={{ fontSize: 11, padding: "2px 6px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit" }}>
                   <option value="">{w("Type…", "Tipo…", lang)}</option>
-                  {RFI_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  {rfiTypeOptions.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               ) : rfi.rfiType ? (
                 <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#EEF2FF", color: "#4338CA" }}>{rfi.rfiType}</span>
@@ -2060,13 +2101,13 @@ ${hasResp ? `
           </div>
           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
             <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("PDF", "PDF", lang)}
+              <FileText style={{ width: 12, height: 12 }} />{w("RFI PDF", "RFI PDF", lang)}
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11, color: "#7C3AED", borderColor: "#C4B5FD" }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("Word", "Word", lang)}
+              <FileText style={{ width: 12, height: 12 }} />{w("RFI DOCX", "RFI DOCX", lang)}
             </Button>
             <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11, color: "#6D28D9", borderColor: "#C4B5FD", background: "#F5F3FF" }}>
-              <Shield style={{ width: 12, height: 12 }} />{w("Audit Cert", "Cert. Auditoría", lang)}
+              <Shield style={{ width: 12, height: 12 }} />{w("RFI Audit PDF", "PDF Auditoria RFI", lang)}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} style={{ gap: 5, fontSize: 11, color: "#0369A1", borderColor: "#BAE6FD", background: "#F0F9FF" }}>
               <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
@@ -2149,6 +2190,30 @@ ${hasResp ? `
               )}
             </div>
           )}
+
+          <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.25)" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+              <Clock style={{ width: 13, height: 13 }} />
+              {w("Ball-in-Court History", "Historial de Responsable", lang)}
+            </div>
+            {ballHistory.length === 0 ? (
+              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                {rfi.sendStatus === "sent"
+                  ? w("No custody rows have been logged yet.", "Aun no hay filas de custodia registradas.", lang)
+                  : w("Not sent yet. The author holds the RFI until it is sent.", "Aun no enviado. El autor conserva el RFI hasta enviarlo.", lang)}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {ballHistory.map(row => (
+                  <div key={row.id} style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 8, fontSize: 11, padding: "4px 0", borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
+                    <span style={{ fontWeight: 600 }}>{row.heldBy} <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>- {row.heldByCompany}</span></span>
+                    <span>{fmt(row.fromDate)} - {row.toDate ? fmt(row.toDate) : w("Current", "Actual", lang)}</span>
+                    <span style={{ color: "hsl(var(--muted-foreground))" }}>{row.toDate ? `${row.daysHeld ?? differenceInDays(new Date(row.toDate), new Date(row.fromDate))} ${w("days", "dias", lang)}` : w("Open", "Abierto", lang)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Generated Response Documents */}
           {files && files.filter(f => f.source === "system-generated" && f.linkedRfiId === rfi.id).length > 0 && (
@@ -2349,11 +2414,11 @@ ${hasResp ? `
                   <button type="button" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
                     {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                   </button>
-                  {gdConnected && (
-                    <button type="button" onClick={() => setGdPickerTarget("question")} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                      <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                  {connectedFileSources.map(provider => (
+                    <button key={provider.key} type="button" onClick={() => setCloudPickerTarget({ target: "question", provider })} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
                     </button>
-                  )}
+                  ))}
                 </div>
                 {questionDocs.map((a, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
@@ -2555,11 +2620,11 @@ ${hasResp ? `
                     <Button size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                       {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
                     </Button>
-                    {gdConnected && (
-                      <Button size="sm" variant="outline" onClick={() => setGdPickerTarget("response")} style={{ fontSize: 11, gap: 4 }}>
-                        <FolderOpen style={{ width: 11, height: 11 }} />{w("From Drive", "Desde Drive", lang)}
+                    {connectedFileSources.map(provider => (
+                      <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })} style={{ fontSize: 11, gap: 4 }}>
+                        <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
                       </Button>
-                    )}
+                    ))}
                   </div>
                   {showFileSearch && (
                     <div style={{ position: "relative" }}>
@@ -2785,13 +2850,14 @@ ${hasResp ? `
           )}
         </div>
       </div>
-      {gdPickerTarget && (
-        <GoogleDrivePicker
+      {cloudPickerTarget && (
+        <CloudPicker
+          provider={cloudPickerTarget.provider}
           projectId={projectId}
           rfiId={rfi.id}
           lang={lang}
-          onAttached={url => { if (gdPickerTarget === "question") setQuestionDocs(prev => [...prev, url]); else setResponseDocs(prev => [...prev, url]); }}
-          onClose={() => setGdPickerTarget(null)}
+          onAttached={url => { if (cloudPickerTarget.target === "question") setQuestionDocs(prev => [...prev, url]); else setResponseDocs(prev => [...prev, url]); }}
+          onClose={() => setCloudPickerTarget(null)}
         />
       )}
     </div>
@@ -2826,70 +2892,90 @@ function FormField({ label, children, full }: { label: string; children: React.R
 
 // Google Drive file picker — browse the user's connected Drive and import a file
 // as an RFI attachment. A transient modal (the RFI itself stays a full page).
-function GoogleDrivePicker({ projectId, rfiId, lang, onAttached, onClose }: {
-  projectId: number; rfiId?: number; lang: string;
+type CloudItem = { name: string; type: "file" | "folder"; ref: string; mimeType?: string; size?: number };
+
+function CloudPicker({ provider, projectId, rfiId, lang, onAttached, onClose }: {
+  provider: FileSourceProvider; projectId: number; rfiId?: number; lang: string;
   onAttached: (url: string) => void; onClose: () => void;
 }) {
   const { toast } = useToast();
   const [q, setQ] = useState("");
-  const [files, setFiles] = useState<{ id: string; name: string; mimeType: string; size?: string }[]>([]);
+  const [items, setItems] = useState<CloudItem[]>([]);
+  const [crumbs, setCrumbs] = useState<Array<{ name: string; ref: string }>>([{ name: provider.label, ref: "" }]);
   const [loading, setLoading] = useState(false);
-  const [importingId, setImportingId] = useState<string | null>(null);
+  const [importingRef, setImportingRef] = useState<string | null>(null);
   const tok = () => JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+  const current = crumbs[crumbs.length - 1];
 
-  const load = async (query: string) => {
+  const load = async (ref = current.ref, query = q) => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/v1/me/connections/google-drive/files?q=${encodeURIComponent(query)}`, { headers: { Authorization: `Bearer ${tok()}` } });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Failed to load Drive"); }
-      const d = await r.json() as { files?: typeof files };
-      setFiles(d.files || []);
+      const params = new URLSearchParams({ ref, q: query });
+      const r = await fetch(`/api/v1/me/connections/${provider.param}/browse?${params.toString()}`, { headers: { Authorization: `Bearer ${tok()}` } });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Failed to load files"); }
+      const d = await r.json() as { items?: CloudItem[] };
+      setItems(d.items || []);
     } catch (e) {
-      toast({ title: e instanceof Error ? e.message : w("Failed to load Drive", "Error al cargar Drive", lang), variant: "destructive" });
-      setFiles([]);
+      toast({ title: e instanceof Error ? e.message : w("Failed to load files", "Error al cargar archivos", lang), variant: "destructive" });
+      setItems([]);
     } finally { setLoading(false); }
   };
-  useEffect(() => { load(""); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { load("", ""); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [provider.param]);
 
-  const pick = async (f: { id: string; name: string; mimeType: string }) => {
-    setImportingId(f.id);
+  const openFolder = async (item: CloudItem) => {
+    const next = [...crumbs, { name: item.name, ref: item.ref }];
+    setCrumbs(next);
+    setQ("");
+    await load(item.ref, "");
+  };
+
+  const pick = async (item: CloudItem) => {
+    setImportingRef(item.ref);
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/from-google-drive`, {
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/from-cloud`, {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ fileId: f.id, fileName: f.name, mimeType: f.mimeType, rfiId }),
+        body: JSON.stringify({ provider: provider.param, ref: item.ref, fileName: item.name, mimeType: item.mimeType, rfiId }),
       });
       if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error((d as { error?: string }).error || "Import failed"); }
       const { downloadUrl } = await r.json() as { downloadUrl: string };
       onAttached(downloadUrl);
-      toast({ title: w("Attached from Google Drive", "Adjuntado desde Google Drive", lang) });
+      toast({ title: w(`Attached from ${provider.label}`, `Adjuntado desde ${provider.label}`, lang) });
       onClose();
     } catch (e) {
       toast({ title: e instanceof Error ? e.message : w("Import failed", "Error al importar", lang), variant: "destructive" });
-    } finally { setImportingId(null); }
+    } finally { setImportingRef(null); }
   };
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }}>
       <div onClick={e => e.stopPropagation()} style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", width: "100%", maxWidth: 560, maxHeight: "80vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>{w("Attach from Google Drive", "Adjuntar desde Google Drive", lang)}</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{w(`Attach from ${provider.label}`, `Adjuntar desde ${provider.label}`, lang)}</div>
           <button onClick={onClose} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 16, height: 16 }} /></button>
         </div>
+        <div style={{ padding: "8px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+          {crumbs.map((c, i) => (
+            <button key={`${c.ref}-${i}`} type="button" onClick={() => { const next = crumbs.slice(0, i + 1); setCrumbs(next); setQ(""); void load(c.ref, ""); }}
+              style={{ border: "none", background: "transparent", color: i === crumbs.length - 1 ? "hsl(var(--foreground))" : "#1D4ED8", fontSize: 11, fontWeight: i === crumbs.length - 1 ? 700 : 600, cursor: "pointer", padding: 0 }}>
+              {i > 0 ? " / " : ""}{c.name}
+            </button>
+          ))}
+        </div>
         <div style={{ padding: "12px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 6 }}>
-          <Input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === "Enter") load(q); }} placeholder={w("Search your Drive…", "Buscar en tu Drive…", lang)} style={{ fontSize: 12, flex: 1 }} />
-          <Button size="sm" onClick={() => load(q)} disabled={loading} style={{ fontSize: 11, gap: 4 }}>
+          <Input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === "Enter") load(current.ref, q); }} placeholder={w("Search files...", "Buscar archivos...", lang)} style={{ fontSize: 12, flex: 1 }} />
+          <Button size="sm" onClick={() => load(current.ref, q)} disabled={loading} style={{ fontSize: 11, gap: 4 }}>
             {loading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Search style={{ width: 12, height: 12 }} />}{w("Search", "Buscar", lang)}
           </Button>
         </div>
         <div style={{ overflowY: "auto", padding: "8px 10px" }}>
-          {loading && files.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Loading…", "Cargando…", lang)}</div>}
-          {!loading && files.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No files found.", "No se encontraron archivos.", lang)}</div>}
-          {files.map(f => (
-            <button key={f.id} onClick={() => pick(f)} disabled={!!importingId} style={{ width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", fontSize: 12 }}
+          {loading && items.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Loading...", "Cargando...", lang)}</div>}
+          {!loading && items.length === 0 && <div style={{ padding: 16, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No files found.", "No se encontraron archivos.", lang)}</div>}
+          {items.map(item => (
+            <button key={item.ref} onClick={() => item.type === "folder" ? void openFolder(item) : void pick(item)} disabled={!!importingRef} style={{ width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", border: "none", borderRadius: 6, background: "transparent", cursor: "pointer", fontSize: 12 }}
               onMouseEnter={e => (e.currentTarget.style.background = "hsl(var(--muted) / 0.5)")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-              <FileText style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} />
-              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</span>
-              {importingId === f.id && <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />}
+              {item.type === "folder" ? <FolderOpen style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} /> : <FileText style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} />}
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</span>
+              {importingRef === item.ref && <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />}
             </button>
           ))}
         </div>

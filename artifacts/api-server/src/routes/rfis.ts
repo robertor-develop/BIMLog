@@ -11,7 +11,8 @@ import multer from "multer";
 import { createPdfDocument } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
-import { getValidAccessToken } from "../lib/oauth";
+import { getValidAccessToken, providerFromParam } from "../lib/oauth";
+import { downloadCloud } from "../lib/cloud-files";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 const router: IRouter = Router();
@@ -31,6 +32,23 @@ function stripMarkdown(text: string): string {
     .map(line => line.trim())
     .join("\n")
     .trim();
+}
+
+function attachmentLabel(value: string): string {
+  const nameMatch = value.match(/[?&]name=([^&]+)/);
+  if (nameMatch) {
+    try { return decodeURIComponent(nameMatch[1]); } catch { return nameMatch[1]; }
+  }
+  try {
+    if (/^https?:\/\//i.test(value) || value.startsWith("/api/")) {
+      const url = new URL(value, "https://bimlog.local");
+      const last = url.pathname.split("/").filter(Boolean).pop();
+      return last ? decodeURIComponent(last) : value;
+    }
+  } catch {
+    return value;
+  }
+  return value;
 }
 
 // PDF checkbox characters: unchecked (\u2610), checked (\u2611)
@@ -340,7 +358,7 @@ function makeRfiPdf(
 
   // ── Section 7: Attachments / references (actual list from the RFI) ──────────
   const attList = (rfi.attachmentsJson as unknown as string[] | null) || [];
-  const attLines = attList.length > 0 ? attList : ["None"];
+  const attLines = attList.length > 0 ? attList.map(attachmentLabel) : ["None"];
   checkPage(20 + attLines.length * 14);
   doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
@@ -1309,7 +1327,8 @@ function buildRfiDocxDocument(
     return checkRow(label, isChecked);
   });
 
-  const attachOpts = ["See marked up drawings", "See attached specifications", "See attached schedules", "None"];
+  const actualAttachments = ((rfi.attachmentsJson as unknown as string[] | null) || []).map(attachmentLabel);
+  const attachOpts = actualAttachments.length > 0 ? actualAttachments : ["None"];
   const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
 
   return new Document({
@@ -1380,7 +1399,7 @@ function buildRfiDocxDocument(
                         new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: respText, size: 20 })] }),
                         ...(respAtts.length > 0 ? [
                           new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
-                          ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `• ${a}`, size: 18 })] })),
+                          ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `- ${attachmentLabel(a)}`, size: 18 })] })),
                         ] : []),
                         ...(resp.isConflictOfInterest ? [
                           new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun({ text: "CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })] }),
@@ -1809,6 +1828,25 @@ router.get("/projects/:projectId/rfis/:rfiId/viewed-by", authMiddleware, require
   }
 });
 
+router.get("/projects/:projectId/rfis/:rfiId/ball-in-court-history", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const [rfi] = await db.select({ id: rfisTable.id }).from(rfisTable)
+      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+    const rows = await db.select().from(rfiBallInCourtHistoryTable)
+      .where(eq(rfiBallInCourtHistoryTable.rfiId, rfiId))
+      .orderBy(rfiBallInCourtHistoryTable.fromDate);
+    res.json(rows.map(row => ({
+      ...row,
+      fromDate: row.fromDate.toISOString(),
+      toDate: row.toDate?.toISOString() ?? null,
+    })));
+  } catch (error) {
+    res.status(400).json({ error: "Could not load ball-in-court history" });
+  }
+});
+
 // ─── GET /projects/:projectId/rfis/:rfiId/audit-certificate ──────────────────
 router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
@@ -2062,6 +2100,49 @@ router.post("/projects/:projectId/rfis/attachments/from-google-drive",
   }
 );
 
+router.post("/projects/:projectId/rfis/attachments/from-cloud",
+  authMiddleware, requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const { provider, ref, fileName, mimeType, rfiId } = req.body as {
+      provider?: string; ref?: string; fileName?: string; mimeType?: string; rfiId?: number;
+    };
+    const key = provider ? providerFromParam(provider) : null;
+    if (!key || !ref || !fileName) {
+      res.status(400).json({ error: "provider, ref and fileName are required" });
+      return;
+    }
+    try {
+      const { buffer, exportedPdf } = await downloadCloud(req.user!.userId, key, ref, mimeType);
+      const finalName = exportedPdf && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
+      const ext = (finalName.split(".").pop() || "").toLowerCase();
+      const storagePath = await storage.upload(buffer, projectId, `rfi-attach-${Date.now()}-${finalName}`);
+      const defaultFileStatus = await getDefaultValue("file_status");
+      const [row] = await db.insert(filesTable).values({
+        projectId,
+        fileName: finalName,
+        fileSize: buffer.length,
+        fileType: ext || "bin",
+        status: defaultFileStatus,
+        uploadedById: req.user!.userId,
+        source: "rfi-attachment",
+        storagePath,
+        linkedRfiId: rfiId ? Number(rfiId) : null,
+      }).returning();
+      res.json({
+        fileId: row.id,
+        fileName: finalName,
+        downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(finalName)}`,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Import failed";
+      res.status(msg === "not_connected" ? 428 : 500).json({
+        error: msg === "not_connected" ? "Connect this file source before importing." : "Could not import that file.",
+      });
+    }
+  }
+);
+
 // ─── POST /projects/:projectId/rfis/import-prefill ───────────────────────────
 // Reads ONE uploaded document (PDF/Word/Excel/image-of-text) and returns a
 // single set of proposed RFI fields for the user to REVIEW in the create form.
@@ -2210,11 +2291,12 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     );
 
     // Compute next response_number for this RFI
-    const [{ maxNum }] = await db.select({ maxNum: max(rfiResponsesTable.responseNumber) })
+    const newResponse = await db.transaction(async (tx) => {
+      const [{ maxNum }] = await tx.select({ maxNum: max(rfiResponsesTable.responseNumber) })
       .from(rfiResponsesTable).where(eq(rfiResponsesTable.rfiId, rfiId));
-    const responseNumber = (maxNum ?? 0) + 1;
+      const responseNumber = (maxNum ?? 0) + 1;
 
-    const [newResponse] = await db.insert(rfiResponsesTable).values({
+      const [inserted] = await tx.insert(rfiResponsesTable).values({
       rfiId,
       projectId,
       responseNumber,
@@ -2229,23 +2311,47 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       isConflictOfInterest: isCoi,
     }).returning();
 
-    // Update legacy rfi.answer for backward compat with PDF/Word export
-    await db.update(rfisTable).set({
+      const answeredAt = new Date();
+      const closesRfi = body.closingStatus === "closed";
+      const submitterCompany = rfi.submittedByCompany || rfi.submittedByContact || "Submitter";
+      const submitterPerson = rfi.submittedByContact || rfi.submittedByEmail || submitterCompany;
+      await tx.update(rfisTable).set({
       answer: body.responseText.trim(),
       answeredBy: body.answeredBy || undefined,
-      dateAnswered: new Date(),
+      dateAnswered: answeredAt,
       costImpact: body.costImpact || undefined,
       costImpactAmount: body.costImpactAmount || undefined,
       scheduleImpact: body.scheduleImpact || undefined,
       scheduleImpactDays: body.scheduleImpactDays || undefined,
       responseAttachmentsJson: body.responseAttachmentsJson || [],
-      ...(body.closingStatus ? { status: body.closingStatus } : {}),
-      updatedAt: new Date(),
+      ballInCourt: closesRfi ? null : submitterCompany,
+      ...(body.closingStatus ? { status: body.closingStatus } : { status: "responded" }),
+      updatedAt: answeredAt,
     }).where(eq(rfisTable.id, rfiId));
+
+      const [openCustody] = await tx.select().from(rfiBallInCourtHistoryTable)
+        .where(and(eq(rfiBallInCourtHistoryTable.rfiId, rfiId), isNull(rfiBallInCourtHistoryTable.toDate)))
+        .limit(1);
+      if (openCustody) {
+        await tx.update(rfiBallInCourtHistoryTable).set({
+          toDate: answeredAt,
+          daysHeld: Math.max(0, daysSince(openCustody.fromDate)),
+        }).where(eq(rfiBallInCourtHistoryTable.id, openCustody.id));
+      }
+      if (!closesRfi) {
+        await tx.insert(rfiBallInCourtHistoryTable).values({
+          rfiId,
+          heldBy: submitterPerson,
+          heldByCompany: submitterCompany,
+          fromDate: answeredAt,
+          toDate: null,
+          daysHeld: null,
+        });
+      }
 
     // Log COI in activity trail if applicable
     if (isCoi) {
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId,
         userFullName: req.user!.fullName,
@@ -2259,7 +2365,7 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     }
 
     // Log normal activity
-    await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
       projectId,
       userId,
       userFullName: req.user!.fullName,
@@ -2269,6 +2375,9 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       entityId: rfiId,
       fileNameAfter: rfi.number,
       details: `RFI ${rfi.number} received official response from ${body.answeredBy || responderEmail || "Unknown"}`,
+      });
+
+      return inserted;
     });
 
     res.json({ ...newResponse, createdAt: newResponse.createdAt.toISOString(), isConflictOfInterest: isCoi });
