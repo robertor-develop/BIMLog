@@ -16,7 +16,7 @@ import PDFDocument from "pdfkit";
 type Doc = PDFKit.PDFDocument;
 type PdfDocumentOptions = ConstructorParameters<typeof PDFDocument>[0];
 
-export type ReportModule = "rfi" | "schedule" | "lens" | "submittal" | "transmittal" | "change_order" | "meeting" | "files" | "platform";
+export type ReportModule = "rfi" | "schedule" | "lens" | "clash" | "submittal" | "transmittal" | "change_order" | "meeting" | "files" | "platform";
 
 export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFDocument {
   return new PDFDocument(options);
@@ -54,6 +54,7 @@ const family = (module: ReportModule, primary: string, dark: string, light: stri
 const rfi = family("rfi", "#2563A6", "#173F6B", "#EAF2FA");
 const schedule = family("schedule", "#277DA1", "#164E63", "#E7F3F7");
 const lens = family("lens", "#315C9B", "#1E3A5F", "#EBF0F8");
+const clash = family("clash", "#2F648F", "#183F5B", "#E9F2F7");
 const submittal = family("submittal", "#3B6EA8", "#234B78", "#ECF3FA");
 const reserved = (module: ReportModule, primary: string) => family(module, primary, PALETTE.NAVY, "#EEF4FA");
 
@@ -62,12 +63,18 @@ export const REPORT_THEMES = {
   rfi: { detail: rfi("RFI PDF", "solid"), word: rfi("RFI DOCX", "rule"), audit: rfi("RFI Audit", "double-rule"), log: rfi("RFI Log", "grid") },
   schedule: { calendar: schedule("Schedule Calendar", "grid"), board: schedule("Schedule Board", "dots"), list: schedule("Schedule List", "rule") },
   lens: { coordination: lens("Lens Coordination", "solid"), register: lens("Lens Register", "grid"), audit: lens("Lens Audit", "double-rule") },
+  clash: { coordination: clash("Clash Coordination", "solid"), register: clash("Clash Register", "grid") },
   submittal: { detail: submittal("Submittal PDF", "solid"), log: submittal("Submittal Log", "rule"), tracker: submittal("Shop Drawing Control", "grid"), audit: submittal("Submittal Audit", "double-rule") },
-  transmittal: { detail: reserved("transmittal", "#356FA3")("Transmittal", "rule") },
-  changeOrder: { detail: reserved("change_order", "#2F6690")("Change Order", "double-rule") },
-  meeting: { minutes: reserved("meeting", "#4078A8")("Meeting Minutes", "dots") },
-  files: { register: reserved("files", "#4A6FA5")("Files Register", "grid") },
-  platform: { standard: reserved("platform", PALETTE.NAVY)("Platform Report", "solid") },
+  transmittal: { detail: reserved("transmittal", "#356FA3")("Transmittal", "rule"), log: reserved("transmittal", "#356FA3")("Transmittal Log", "grid") },
+  changeOrder: { detail: reserved("change_order", "#2F6690")("Change Order", "double-rule"), log: reserved("change_order", "#2F6690")("Change Order Log", "grid") },
+  meeting: { minutes: reserved("meeting", "#4078A8")("Meeting Minutes", "dots"), log: reserved("meeting", "#4078A8")("Meeting Minutes Log", "grid") },
+  files: { register: reserved("files", "#4A6FA5")("Files Register", "grid"), response: reserved("files", "#4A6FA5")("Official Response", "rule"), compliance: reserved("files", "#4A6FA5")("Naming Compliance", "double-rule"), cvr: reserved("files", "#4A6FA5")("Content Verification", "grid"), audit: reserved("files", "#4A6FA5")("Document Audit", "double-rule") },
+  platform: {
+    standard: reserved("platform", PALETTE.NAVY)("Platform Report", "solid"),
+    health: reserved("platform", "#365F8D")("Project Health", "solid"),
+    performance: reserved("platform", "#365F8D")("Project Performance", "rule"),
+    dispute: reserved("platform", "#365F8D")("Dispute Evidence", "double-rule"),
+  },
 } as const;
 
 export function reportFileName(title: string): string {

@@ -8,7 +8,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import { createPdfDocument } from "../lib/pdf-kit";
+import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import jwt from "jsonwebtoken";
 import { extractFileText } from "../lib/extract-file-text";
 
@@ -409,8 +409,10 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
       .where(eq(submittalItemsTable.reportId, reportId));
 
     const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
+    const title = `${report.reportNumber || `Submittal-${reportId}`} - Submittal Tracking Report`;
+    const reportTheme = REPORT_THEMES.submittal.tracker;
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="submittal-tracker-${project.code}-${reportId}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
 
     const W = doc.page.width;
@@ -418,7 +420,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
     const CW = W - M * 2;
 
     // Header
-    doc.rect(0, 0, W, 120).fill("#1E3A5F");
+    doc.rect(0, 0, W, 120).fill(reportTheme.dark);
     if (logoBase64 && logoType) {
       try {
         doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
@@ -432,7 +434,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
       doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
         .text(user?.companyName ?? "Company", M, 22);
     }
-    doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text("SUBMITTAL TRACKING REPORT", M, 22, { align: "right", width: CW });
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("white").text(title, M, 22, { align: "right", width: CW });
     doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
     doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
     doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE").text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
@@ -440,7 +442,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
     doc.fontSize(8).font("Helvetica-Bold").fillColor("#BFDBFE").text("Powered by BIMLog by IgniteSmart", M, 98, { align: "right", width: CW });
 
     doc.rect(0, 120, W, 45).fill("#F0F4F8");
-    doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F").text(project.name, M, 130);
+    doc.fontSize(18).font("Helvetica-Bold").fillColor(reportTheme.dark).text(project.name, M, 130);
     doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
       .text(`${report.reportNumber ? `Report: ${report.reportNumber}  |  ` : ""}Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Items: ${report.totalItems}`, M, 152);
 
@@ -465,7 +467,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
 
     const drawHeader = () => {
       const hY = doc.y;
-      doc.rect(M, hY, CW, 18).fill("#1E3A5F");
+      doc.rect(M, hY, CW, 18).fill(reportTheme.primary);
       let x = M;
       cols.forEach(col => {
         doc.fontSize(7).font("Helvetica-Bold").fillColor("white")
@@ -481,7 +483,7 @@ router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, r
       const rowH = 22;
       if (doc.y + rowH > doc.page.height - 50) {
         doc.addPage();
-        doc.rect(0, 0, W, 25).fill("#1E3A5F");
+        doc.rect(0, 0, W, 25).fill(reportTheme.dark);
         doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
           .text(`${user?.companyName ?? ""} | ${project.name} — Submittal Tracking Report`, M, 8, { width: CW });
         doc.y = 35;

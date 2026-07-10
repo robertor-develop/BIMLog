@@ -344,10 +344,6 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     } finally { setAiLoading(false); }
   };
 
-  const exportPDF = (meeting: Meeting) => {
-    window.open(`${API}/projects/${projectId}/meetings/${meeting.id}/export-pdf?token=${token}`, "_blank");
-  };
-
   const updateActionItem = async (id: number, status: string) => {
     await fetch(`${API}/projects/${projectId}/action-items/${id}`, {
       method: "PATCH", headers, body: JSON.stringify({ status }),
@@ -440,10 +436,6 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button className="btn btn-sm btn-outline" onClick={() => exportPDF(m)}
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <Download size={12} /> PDF
-                    </button>
                     {canWrite && (
                       <button
                         title={t("Delete meeting", "Eliminar reunión")}

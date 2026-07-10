@@ -10,7 +10,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import { PDFParse as PDFParseClass } from "pdf-parse";
-import { createPdfDocument } from "../lib/pdf-kit";
+import { createPdfDocument, REPORT_THEMES } from "../lib/pdf-kit";
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 async function pdfParse(buffer: Buffer) {
@@ -537,11 +537,12 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 
     let y = MARGIN;
     const contentW = LETTER_WIDTH - MARGIN * 2;
+    const reportTitle = file.fileName.replace(/\.pdf$/i, "");
 
     // Header bar
-    doc.rect(MARGIN, y, contentW, 36).fill("#0F4C75");
+    doc.rect(MARGIN, y, contentW, 36).fill(REPORT_THEMES.files.response.dark);
     doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
-      .text("OFFICIAL RESPONSE DOCUMENT", MARGIN + 10, y + 6, { lineBreak: false });
+      .text(reportTitle, MARGIN + 10, y + 6, { lineBreak: false });
     doc.fontSize(9).font("Helvetica")
       .text(`${rfi.number}  |  ${project?.name || ""}`, MARGIN + 10, y + 23, { lineBreak: false });
     doc.fillColor("black");
@@ -575,7 +576,7 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
     y += questionH + 8;
 
     // Response
-    doc.rect(MARGIN, y, contentW, 14).fill("#0F4C75");
+    doc.rect(MARGIN, y, contentW, 14).fill(REPORT_THEMES.files.response.primary);
     doc.fillColor("white").fontSize(7.5).font("Helvetica-Bold").text("OFFICIAL RESPONSE", MARGIN + 6, y + 3.5);
     y += 14;
     const respText = rfi.answer || rfi.response || "";

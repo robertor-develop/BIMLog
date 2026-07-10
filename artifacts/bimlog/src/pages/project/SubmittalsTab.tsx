@@ -243,7 +243,7 @@ async function downloadSubmittalTracker(projectId: number, format: "pdf" | "exce
   const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
   if (!response.ok) throw new Error("Shop Drawing Control export failed");
   const blob = await response.blob();
-  downloadBlob(blob, format === "pdf" ? `Shop-Drawing-Control-Project${projectId}.pdf` : `Shop-Drawing-Control-Project${projectId}.xlsx`);
+  downloadBlob(blob, format === "pdf" ? "Shop-Drawing-Control-Report.pdf" : `Shop-Drawing-Control-Project${projectId}.xlsx`);
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -1084,7 +1084,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
     if (r.ok) {
       const blob = await r.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `Submittal-Log-Project${projectId}.pdf`; a.click();
+      const a = document.createElement("a"); a.href = url; a.download = "Submittal-Log.pdf"; a.click();
       URL.revokeObjectURL(url);
     } else {
       toast({ title: w("PDF export failed", "Error al exportar PDF", lang), variant: "destructive" });
@@ -2354,13 +2354,13 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         <Button
           variant="outline"
           size="sm"
-          title={w("Export the current Shop Drawing Control view as PDF", "Exportar la vista actual de Shop Drawing Control como PDF", lang)}
+          title={w("Download this submittal report as PDF", "Descargar este reporte de entregable en PDF", lang)}
           style={{ fontSize: 11, gap: 5 }}
           onClick={handleExportPdf}
           disabled={exportLoading}
         >
           {exportLoading ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Download style={{ width: 12, height: 12 }} />}
-          {w("Export PDF", "Exportar PDF", lang)}
+          {w("Submittal Report PDF", "PDF del reporte de entregable", lang)}
         </Button>
         <Button variant="outline" size="sm" style={{ fontSize: 11, gap: 5 }} onClick={handleAuditCert} disabled={auditLoading}>
           {auditLoading ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Shield style={{ width: 12, height: 12 }} />}

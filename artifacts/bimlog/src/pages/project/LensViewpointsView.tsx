@@ -895,7 +895,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
           <button className="btn btn-sm btn-outline" onClick={exportExcel}
             title={t("Download the current Lens table as an Excel register", "Descargar la tabla Lens actual como registro Excel")}
             style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Download size={14} /> {t("Export Excel", "Exportar Excel")}
+            <Download size={14} /> {t("Lens Register Excel", "Excel del registro Lens")}
           </button>
           <button
             className="btn btn-sm btn-primary"
@@ -903,7 +903,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             title={t("Create a formatted coordination PDF report from the current Lens filters", "Crear un reporte PDF de coordinacion con los filtros Lens actuales")}
             style={{ display: "flex", alignItems: "center", gap: 6 }}
           >
-            <FileDown size={14} /> {t("Export PDF", "Exportar PDF")}
+            <FileDown size={14} /> {t("Lens Coordination PDF", "PDF de coordinación Lens")}
           </button>
           {canWrite && (
             <button

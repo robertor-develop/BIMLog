@@ -286,7 +286,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
                   {tx.status === "sent" && canWrite && (
                     <button className="btn btn-sm btn-outline" onClick={() => acknowledge(tx.id)}>{t("Acknowledge", "Acusar")}</button>
                   )}
-                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(tx.id)}>PDF</button>
+                  <button className="btn btn-sm btn-outline" title={t("Download this transmittal report as PDF", "Descargar este reporte de transmisión en PDF")} onClick={() => exportPdf(tx.id)}>{t("Transmittal PDF", "PDF de transmisión")}</button>
                   {canWrite && (
                     <button
                       title={t("Delete", "Eliminar")}

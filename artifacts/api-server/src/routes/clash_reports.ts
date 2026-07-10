@@ -2708,8 +2708,10 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         return (order[a.priority ?? ""] ?? 4) - (order[b.priority ?? ""] ?? 4);
       });
       const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      const title = `${report.reportNumber || `Clash-${reportId}`} - Clash Coordination Report`;
+      const reportTheme = REPORT_THEMES.clash.coordination;
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="clash-report-${project.code}-${reportId}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
       doc.pipe(res);
 
       const W = doc.page.width;
@@ -2718,7 +2720,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       // -- COVER PAGE ------------------------------------------------------
       // Dark header bar
-      doc.rect(0, 0, W, 135).fill("#1E3A5F");
+      doc.rect(0, 0, W, 135).fill(reportTheme.dark);
 
       // Company logo if available
       if (logoBase64 && logoType) {
@@ -2737,7 +2739,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       // Report title top right
       doc.fontSize(12).font("Helvetica-Bold").fillColor("white")
-        .text("CLASH COORDINATION REPORT", M, 20, { align: "right", width: CW });
+        .text(title, M, 20, { align: "right", width: CW });
 
       // Separator line
       doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
@@ -2758,7 +2760,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       doc.rect(0, 135, W, 45).fill("#F0F4F8");
 
       // Project info section
-      doc.fontSize(18).font("Helvetica-Bold").fillColor("#1E3A5F")
+      doc.fontSize(18).font("Helvetica-Bold").fillColor(reportTheme.dark)
         .text(project.name, M, 143);
       doc.fontSize(10).font("Helvetica").fillColor("#6B7280")
         .text(`Project Code: ${project.code}  |  Source: ${report.fileName}  |  Total Clashes: ${report.totalClashes}`, M, 165);
@@ -2819,7 +2821,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       const drawTableHeader = () => {
         const hY = doc.y;
-        doc.rect(M, hY, CW, 18).fill("#1E3A5F");
+        doc.rect(M, hY, CW, 18).fill(reportTheme.primary);
         let x = M;
         cols.forEach(col => {
           doc.fontSize(7).font("Helvetica-Bold").fillColor("white")
@@ -2842,7 +2844,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         const rowH = 26;
         if (doc.y + rowH > 530) {
           doc.addPage();
-          doc.rect(0, 0, W, 25).fill("#1E3A5F");
+          doc.rect(0, 0, W, 25).fill(reportTheme.dark);
           const pageDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
           doc.fontSize(8).font("Helvetica-Bold").fillColor("white")
             .text(`${user?.companyName ?? ""} | ${project.name} (${project.code}) - Clash Coordination Report`, M, 8, { width: CW - 100 });

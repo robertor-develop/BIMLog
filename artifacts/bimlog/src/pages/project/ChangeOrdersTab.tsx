@@ -288,7 +288,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                       <button className="btn btn-sm btn-danger-outline" onClick={() => action(co.id, "reject")}>{t("Reject", "Rechazar")}</button>
                     </>
                   )}
-                  <button className="btn btn-sm btn-outline" onClick={() => exportPdf(co.id)}>PDF</button>
+                  <button className="btn btn-sm btn-outline" title={t("Download this change order report as PDF", "Descargar este reporte de orden de cambio en PDF")} onClick={() => exportPdf(co.id)}>{t("Change Order PDF", "PDF de orden de cambio")}</button>
                   {canWrite && (
                     <button
                       title={t("Delete", "Eliminar")}

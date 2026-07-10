@@ -549,6 +549,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           {PDF_REPORTS.map(r => (
             <button
               key={r.key}
+              title={tl(`Download ${r.labelEn} PDF`, `Descargar PDF: ${r.labelEs}`)}
               onClick={() => window.open(`/api/v1/projects/${projectId}/reports/${r.key}/pdf?token=${token}`, "_blank")}
               style={{
                 display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",

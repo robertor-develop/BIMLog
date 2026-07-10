@@ -536,7 +536,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     doc.on("end", () => {
       const buf = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="Submittal-Log-${project?.name || projectId}.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Submittal Log")}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -544,7 +544,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     let y = LOG_MARGIN;
 
     // Header band
-    doc.rect(0, 0, LOG_W, 52).fill("#1E3A5F");
+    doc.rect(0, 0, LOG_W, 52).fill(REPORT_THEMES.submittal.log.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
       .text("SUBMITTAL LOG", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
@@ -733,7 +733,7 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
       const buf = Buffer.concat(chunks);
       const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-Shop-Drawing-Control.pdf"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Shop Drawing Control Report")}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -747,9 +747,9 @@ router.get("/projects/:projectId/submittals/tracker-pdf", authMiddleware, requir
     ].join(" | ");
 
     let y = LOG_MARGIN;
-    doc.rect(0, 0, LOG_W, 62).fill("#1E3A5F");
+    doc.rect(0, 0, LOG_W, 62).fill(REPORT_THEMES.submittal.tracker.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text("SHOP DRAWING CONTROL", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
+      .text("Shop Drawing Control Report", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("#BFDBFE").fontSize(9).font("Helvetica")
       .text(`${project?.name || "Project"} | ${rows.length} shown of ${subs.length} submittals | Generated ${new Date().toLocaleDateString("en-US")}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(7).font("Helvetica")

@@ -1,6 +1,6 @@
 # BIMLog Report Design System Audit
 
-Audit date: 2026-07-10
+Audit date: 2026-07-10 (Phase 2)
 
 ## Central system
 
@@ -66,3 +66,36 @@ Audit date: 2026-07-10
 - Reserved central families: Transmittals, Change Orders, Meetings, Files, and platform/future reports.
 
 Business queries, filters, database schema, and record mutation behavior were not changed.
+
+## Phase 2 implementation
+
+- Added central Clash, Transmittal, Change Order, Meeting, Files/Document Control, and platform-report families.
+- Applied named variants to Project Health, Naming Compliance, RFI Aging, Submittal Status, Project Performance, Dispute, Document Audit, Meeting Minutes, Change Order Log, Transmittal Log, and Content Verification reports.
+- Applied the central system to individual Transmittal and Change Order PDFs, Clash Coordination PDFs, imported Submittal Tracking PDFs, Submittal Log, Shop Drawing Control, and system-generated official response PDFs.
+- Report titles and response filenames now use the same canonical report-type name for changed outputs.
+- Individual Transmittal and Change Order controls now identify their PDF scope.
+- Lens controls distinguish the Lens Register Excel workbook from the Lens Coordination PDF.
+- Removed the Meetings-page PDF control because it targeted a nonexistent backend route. The valid project-wide Meeting Minutes Report remains in the Reports catalog.
+- Existing Schedule, RFI, Lens, and Submittal Phase 1 families remain unchanged except where a deferred log/tracker variant was activated.
+
+### Canonical changed PDF titles
+
+- Project Health Report
+- Naming Compliance Report
+- RFI Aging Report
+- Submittal Status Report
+- Project Performance Report
+- Dispute Report - `{MODULE} {ID}`
+- Document Audit Certificate
+- Meeting Minutes Report
+- Change Order Log
+- Transmittal Log
+- Content Verification Report
+- `{NUMBER}` - Transmittal Report
+- `{NUMBER}` - Change Order Report
+- `{REPORT NUMBER}` - Clash Coordination Report
+- `{REPORT NUMBER}` - Submittal Tracking Report
+- Submittal Log
+- Shop Drawing Control Report
+
+Phase 2 did not change database schema, filters, report record selection, or module business logic.

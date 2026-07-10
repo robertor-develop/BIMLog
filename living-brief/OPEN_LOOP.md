@@ -44,9 +44,10 @@ Shipped first implementation scope on 2026-07-10:
 - Full route/control inventory recorded in `living-brief/REPORT_DESIGN_SYSTEM.md`.
 
 Intentionally deferred to the next report-standardization round:
-- Apply reserved families to Transmittals, Change Orders, Meetings, Files/CVR, Clash Reports, and the general Reports catalog.
-- Migrate remaining hand-rolled RFI/Submittal log and tracker chrome onto all shared header/footer primitives.
-- Full production-data visual regression fixtures for authenticated export routes; this round used deterministic multi-page PDF fixtures plus typecheck/build verification.
+- Shipped in Phase 2: reserved families are now active for Transmittals, Change Orders, Meetings, Files/CVR, Clash Reports, the general Reports catalog, Submittal Log, Shop Drawing Control, and imported Submittal Tracking reports.
+- Shipped in Phase 2: removed the broken individual Meeting PDF control; clarified individual Transmittal/Change Order and Lens PDF/Excel labels.
+- Remaining: migrate the longest legacy detail/audit layouts onto shared table/page-break primitives where they still require route-specific construction-document sections.
+- Remaining: add authenticated production-data visual regression fixtures for every export route; Phase 2 uses deterministic multi-page fixtures plus typecheck/build verification.
 
 ### Submittals / Shop Drawing Control Field Test
 Shipped baseline: commit 94c9c4b - Unify submittals shop drawing control.
