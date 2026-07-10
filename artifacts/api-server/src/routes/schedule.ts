@@ -47,6 +47,8 @@ type LiveScheduleEvent = {
   rolloverCount: number;
   daysOverdue: number;
   isOverdue: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
 };
 
 function isDone(status: string | null | undefined) {
@@ -193,11 +195,19 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
     const milestoneRoute = (linkedModule: string | null, linkedId: number | null) => {
       if (linkedModule === "rfi" && linkedId) return `/projects/${projectId}/rfis?rfi=${linkedId}`;
       if (linkedModule === "submittal" && linkedId) return `/projects/${projectId}/submittals`;
+      if (linkedModule === "change_order" && linkedId) return `/projects/${projectId}/change-orders`;
+      if (linkedModule === "meeting" && linkedId) return `/projects/${projectId}/meetings`;
       return null;
     };
 
     events.push(...milestones.map((m) => {
-      const sourceLabel = m.itemType === "3d_model" || m.linkedModule === "3d_model" ? "3D Model" : "Milestone";
+      const sourceLabel =
+        m.itemType === "3d_model" || m.linkedModule === "3d_model" ? "3D Model" :
+        m.itemType === "change_order" || m.linkedModule === "change_order" ? "Change Order" :
+        m.itemType === "meeting" || m.linkedModule === "meeting" ? "Meeting" :
+        m.itemType === "rfi" || m.linkedModule === "rfi" ? "RFI Milestone" :
+        m.itemType === "submittal" || m.linkedModule === "submittal" ? "Submittal Milestone" :
+        "Milestone";
       const overdueDays = daysOverdue(m.dueDate, m.status);
       return attachPlanner({
         id: m.id,
@@ -219,6 +229,8 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         linkedId: m.linkedId,
         isOverdue: overdueDays > 0,
         daysOverdue: overdueDays,
+        createdAt: toIso(m.createdAt),
+        updatedAt: toIso(m.updatedAt),
       });
     }));
 
@@ -246,6 +258,8 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         linkedId: r.id,
         isOverdue: overdueDays > 0,
         daysOverdue: overdueDays,
+        createdAt: r.createdAt ? toIso(r.createdAt) : null,
+        updatedAt: r.updatedAt ? toIso(r.updatedAt) : null,
       }));
     }
 
@@ -274,6 +288,8 @@ router.get("/projects/:projectId/schedule/live", authMiddleware, requireProjectM
         linkedId: s.id,
         isOverdue: overdueDays > 0,
         daysOverdue: overdueDays,
+        createdAt: s.createdAt ? toIso(s.createdAt) : null,
+        updatedAt: s.updatedAt ? toIso(s.updatedAt) : null,
       }));
     }
 
@@ -474,6 +490,7 @@ router.post("/projects/:projectId/milestones", authMiddleware, requirePermission
     responsible_company?: string;
     assigned_user_id?: number;
     notes?: string;
+    status?: string;
     bucket_id?: number;
   };
   if (!body.title || !body.due_date) { res.status(400).json({ error: "title and due_date required" }); return; }
@@ -491,7 +508,7 @@ router.post("/projects/:projectId/milestones", authMiddleware, requirePermission
       linkedModule: body.linked_module ?? null,
       linkedId: body.linked_id ?? null,
       createdById: req.user!.userId,
-      status: "pending",
+      status: body.status || "pending",
     }).returning();
 
     if (body.bucket_id) {
@@ -548,6 +565,18 @@ router.patch("/projects/:projectId/milestones/:milestoneId", authMiddleware, req
     const [updated] = await db.update(projectMilestonesTable).set(updates as any)
       .where(and(eq(projectMilestonesTable.id, msId), eq(projectMilestonesTable.projectId, projectId))).returning();
     if (!updated) { res.status(404).json({ error: "Not found" }); return; }
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName,
+      userCompanyName: req.user!.companyName,
+      actionType: "update",
+      entityType: "milestone",
+      entityId: msId,
+      fileNameBefore: null,
+      fileNameAfter: null,
+      details: `Updated schedule item ${updated.title}: ${Object.keys(updates).filter(k => k !== "updatedAt").join(", ") || "metadata"}`,
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });

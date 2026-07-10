@@ -31,6 +31,8 @@ interface ScheduleItem {
   rolloverCount: number;
   daysOverdue: number;
   isOverdue?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 type Bucket = { id: number; name: string; bucketType: string; sortOrder: number };
@@ -57,10 +59,20 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const MODULE_OPTIONS = [
-  { value: "", label: "Manual Milestone", labelEs: "Hito Manual" },
+  { value: "", label: "General Milestone", labelEs: "Hito General" },
+  { value: "rfi", label: "Linked RFI", labelEs: "RFI Vinculado" },
+  { value: "submittal", label: "Linked Submittal", labelEs: "Entregable Vinculado" },
+  { value: "change_order", label: "Change Order", labelEs: "Orden de Cambio" },
+  { value: "meeting", label: "Meeting", labelEs: "Reunion" },
   { value: "3d_model", label: "3D Model", labelEs: "Modelo 3D" },
-  { value: "rfi", label: "Linked RFI Milestone", labelEs: "Hito RFI Vinculado" },
-  { value: "submittal", label: "Linked Submittal Milestone", labelEs: "Hito Entregable Vinculado" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "pending", label: "Pending", labelEs: "Pendiente" },
+  { value: "in_progress", label: "In Progress", labelEs: "En Progreso" },
+  { value: "completed", label: "Completed", labelEs: "Completado" },
+  { value: "delayed", label: "Delayed", labelEs: "Retrasado" },
+  { value: "cancelled", label: "Cancelled", labelEs: "Cancelado" },
 ];
 
 const LEGACY_EXAMPLE_BUCKETS = new Set(["Sprint 32", "Sprint 33"]);
@@ -75,6 +87,8 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [rfis, setRfis] = useState<LinkOption[]>([]);
   const [submittals, setSubmittals] = useState<LinkOption[]>([]);
+  const [changeOrders, setChangeOrders] = useState<LinkOption[]>([]);
+  const [meetings, setMeetings] = useState<LinkOption[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
@@ -87,6 +101,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [filter, setFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"calendar" | "board" | "list">("board");
   const [selected, setSelected] = useState<ScheduleItem | null>(null);
+  const [editingDetail, setEditingDetail] = useState(false);
   const [historyRows, setHistoryRows] = useState<RolloverRow[]>([]);
   const [bucketName, setBucketName] = useState("");
   const [editingBucket, setEditingBucket] = useState<Bucket | null>(null);
@@ -104,8 +119,19 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     company_email: "",
     company_role: "",
     assigned_user_id: "",
+    status: "pending",
     notes: "",
     bucket_id: "",
+  });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    due_date: "",
+    level: "",
+    trade: "",
+    company: "",
+    assigned_user_id: "",
+    status: "pending",
+    notes: "",
   });
 
   const authHeader = { Authorization: `Bearer ${token}` };
@@ -113,16 +139,33 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
   const load = async () => {
     setLoading(true);
+    setActionError("");
     try {
-      const [scheduleRes, bucketRes, rfiRes, submittalRes, levelsRes, membersRes, directoryRes] = await Promise.all([
+      const [scheduleRes, bucketRes, rfiRes, submittalRes, changeOrderRes, meetingRes, levelsRes, membersRes, directoryRes] = await Promise.all([
         fetch(`${API}/projects/${projectId}/schedule/live`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/schedule/buckets`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/rfis`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/submittals`, { headers: authHeader }),
+        fetch(`${API}/projects/${projectId}/change-orders`, { headers: authHeader }),
+        fetch(`${API}/projects/${projectId}/meetings`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/levels`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/members`, { headers: authHeader }),
         fetch(`${API}/projects/${projectId}/directory`, { headers: authHeader }),
       ]);
+      const failedLoads = [
+        [scheduleRes, "schedule"],
+        [bucketRes, "buckets"],
+        [rfiRes, "RFIs"],
+        [submittalRes, "submittals"],
+        [changeOrderRes, "change orders"],
+        [meetingRes, "meetings"],
+        [levelsRes, "levels"],
+        [membersRes, "members"],
+        [directoryRes, "directory"],
+      ].filter(([res]) => !(res as Response).ok).map(([, label]) => label as string);
+      if (failedLoads.length > 0) {
+        setActionError(t(`Could not load connected Schedule data: ${failedLoads.join(", ")}.`, `No se pudo cargar data conectada del cronograma: ${failedLoads.join(", ")}.`));
+      }
       if (scheduleRes.ok) setItems(await scheduleRes.json());
       if (bucketRes.ok) setBuckets(await bucketRes.json());
       if (rfiRes.ok) {
@@ -145,6 +188,26 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           route: `/projects/${projectId}/submittals`,
         })));
         setTrades(uniq(rows.map((s: any) => s.trade || s.submittalCategory || s.submittalType).filter(Boolean)));
+      }
+      if (changeOrderRes.ok) {
+        const rows = await changeOrderRes.json();
+        setChangeOrders(rows.map((co: any) => ({
+          id: co.id,
+          label: co.number || `CO-${co.id}`,
+          title: co.title || "Untitled change order",
+          dueDate: null,
+          route: `/projects/${projectId}/change-orders`,
+        })));
+      }
+      if (meetingRes.ok) {
+        const rows = await meetingRes.json();
+        setMeetings(rows.map((m: any) => ({
+          id: m.id,
+          label: m.meetingNumber || `MTG-${m.id}`,
+          title: m.title || "Untitled meeting",
+          dueDate: m.meetingDate || null,
+          route: `/projects/${projectId}/meetings`,
+        })));
       }
       if (levelsRes.ok) {
         const data = await levelsRes.json();
@@ -171,7 +234,12 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     void load();
   }, [projectId, token]);
 
-  const linkOptions = form.linked_module === "rfi" ? rfis : form.linked_module === "submittal" ? submittals : [];
+  const linkOptions =
+    form.linked_module === "rfi" ? rfis :
+    form.linked_module === "submittal" ? submittals :
+    form.linked_module === "change_order" ? changeOrders :
+    form.linked_module === "meeting" ? meetings :
+    [];
   const defaultBucketId = buckets.find(b => b.name === "This Week")?.id ?? buckets[0]?.id ?? "";
 
   const applyLinkedItem = (id: string) => {
@@ -216,11 +284,12 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       const body = {
         title: form.title.trim() || modelTitle,
         due_date: form.due_date,
-        item_type: isModelItem ? "3d_model" : "milestone",
+        item_type: isModelItem ? "3d_model" : (form.linked_module || "milestone"),
         building_level: form.level || undefined,
         trade: form.trade || undefined,
         responsible_company: form.company || undefined,
         assigned_user_id: form.assigned_user_id ? Number(form.assigned_user_id) : undefined,
+        status: form.status || "pending",
         notes: form.notes || undefined,
         linked_module: form.linked_module || undefined,
         linked_id: form.linked_id ? Number(form.linked_id) : undefined,
@@ -237,7 +306,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         return;
       }
       setShowForm(false);
-      setForm({ title: "", due_date: "", linked_module: "", linked_id: "", level: "", trade: "", company: "", add_company_to_directory: false, company_contact: "", company_email: "", company_role: "", assigned_user_id: "", notes: "", bucket_id: "" });
+      setForm({ title: "", due_date: "", linked_module: "", linked_id: "", level: "", trade: "", company: "", add_company_to_directory: false, company_contact: "", company_email: "", company_role: "", assigned_user_id: "", status: "pending", notes: "", bucket_id: "" });
       await load();
       setViewMode("board");
       toast({ title: t("Schedule item added", "Fecha agregada al cronograma") });
@@ -258,6 +327,71 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     }
     setSelected(prev => prev && prev.source === "milestone" && prev.id === id ? { ...prev, status } : prev);
     await load();
+  };
+
+  const startDetailEdit = (item: ScheduleItem) => {
+    setEditForm({
+      title: item.title || "",
+      due_date: item.dueDate ? dayKey(new Date(item.dueDate)) : "",
+      level: item.buildingLevel || "",
+      trade: item.trade || "",
+      company: item.responsibleCompany || item.company || "",
+      assigned_user_id: item.assignedUserId ? String(item.assignedUserId) : "",
+      status: item.status || "pending",
+      notes: item.notes || "",
+    });
+    setEditingDetail(true);
+  };
+
+  const saveDetailEdit = async () => {
+    if (!selected || selected.source !== "milestone") return;
+    if (!editForm.title.trim() || !editForm.due_date) {
+      setError(t("Title and due date are required.", "Titulo y fecha limite son requeridos."));
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const r = await fetch(`${API}/projects/${projectId}/milestones/${selected.id}`, {
+        method: "PATCH",
+        headers: jsonHeaders,
+        body: JSON.stringify({
+          title: editForm.title.trim(),
+          due_date: editForm.due_date,
+          status: editForm.status,
+          building_level: editForm.level,
+          trade: editForm.trade,
+          responsible_company: editForm.company,
+          assigned_user_id: editForm.assigned_user_id ? Number(editForm.assigned_user_id) : null,
+          notes: editForm.notes,
+        }),
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setError(d.error || t("Could not update schedule item.", "No se pudo actualizar el item."));
+        return;
+      }
+      const updated = await r.json();
+      setSelected(prev => prev ? {
+        ...prev,
+        title: updated.title,
+        dueDate: new Date(updated.dueDate).toISOString(),
+        status: updated.status,
+        buildingLevel: updated.buildingLevel,
+        trade: updated.trade,
+        responsibleCompany: updated.responsibleCompany,
+        company: updated.responsibleCompany,
+        assignedUserId: updated.assignedUserId,
+        assignedUserName: updated.assignedUserId ? members.find(m => m.userId === updated.assignedUserId)?.userFullName || prev.assignedUserName : null,
+        notes: updated.notes,
+        updatedAt: updated.updatedAt ? new Date(updated.updatedAt).toISOString() : prev.updatedAt,
+      } : prev);
+      setEditingDetail(false);
+      await load();
+      toast({ title: t("Schedule item updated", "Item de cronograma actualizado") });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const moveItem = async (item: ScheduleItem, bucketId: number, rollover = false) => {
@@ -341,6 +475,8 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
 
   const openItem = (item: ScheduleItem) => {
     setSelected(item);
+    setEditingDetail(false);
+    setError("");
     void loadHistory(item);
   };
 
@@ -377,7 +513,13 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   };
 
   const sourceBadge = (item: ScheduleItem) => {
-    const color = item.source === "rfi" ? "#7C3AED" : item.source === "submittal" ? "#2563EB" : item.label === "3D Model" ? "#0F766E" : "#16A34A";
+    const color =
+      item.source === "rfi" || item.label.includes("RFI") ? "#7C3AED" :
+      item.source === "submittal" || item.label.includes("Submittal") ? "#2563EB" :
+      item.label === "3D Model" ? "#0F766E" :
+      item.label === "Change Order" ? "#B45309" :
+      item.label === "Meeting" ? "#0891B2" :
+      "#16A34A";
     return (
       <span style={{
         display: "inline-flex", padding: "3px 7px", borderRadius: 4,
@@ -504,6 +646,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         {t("Calendar is for due dates. Board is for weekly coordination and sprints. List is the complete control register. Roll unfinished sprint work forward instead of recreating it.",
           "Calendario para fechas limite. Tablero para coordinacion semanal y sprints. Lista como registro completo. Transfiere el trabajo pendiente al siguiente sprint sin recrearlo.")}
       </div>
+      {actionError && <div className="alert alert-danger" style={{ marginBottom: 14 }}>{actionError}</div>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(140px, 1fr))", gap: 10, marginBottom: 14 }}>
         {[
@@ -564,8 +707,15 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             <div style={{ minWidth: 260, flex: "0 1 320px" }}>
               <label className="label">{editingBucket ? t("Edit Bucket", "Editar Bucket") : t("Create Bucket or Sprint", "Crear Bucket o Sprint")}</label>
               <input className="input" value={bucketName} onChange={e => setBucketName(e.target.value)} placeholder={t("New sprint or bucket name", "Nombre nuevo de sprint o bucket")} />
+              {!bucketName.trim() && (
+                <div style={{ marginTop: 5, color: "#64748B", fontSize: 11, fontWeight: 700 }}>
+                  {t("Enter a name to enable this action.", "Escribe un nombre para activar esta accion.")}
+                </div>
+              )}
             </div>
-            <button className="btn btn-primary" type="button" onClick={saveBucket}>{editingBucket ? t("Save Bucket", "Guardar Bucket") : t("Add Bucket", "Agregar Bucket")}</button>
+            <button className="btn btn-primary" type="button" disabled={!bucketName.trim()} title={!bucketName.trim() ? t("Enter a bucket or sprint name first.", "Escribe primero el nombre del bucket o sprint.") : undefined} onClick={saveBucket}>
+              {editingBucket ? t("Save Bucket", "Guardar Bucket") : t("Add Bucket", "Agregar Bucket")}
+            </button>
             {editingBucket && <button className="btn btn-outline" type="button" onClick={() => { setEditingBucket(null); setBucketName(""); setActionError(""); }}>{t("Cancel", "Cancelar")}</button>}
           </div>
           {actionError && <div style={{ marginTop: 8, color: "#B91C1C", fontSize: 12, fontWeight: 700 }}>{actionError}</div>}
@@ -592,8 +742,13 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                 {visibleBuckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </Field>
-            {(form.linked_module === "rfi" || form.linked_module === "submittal") && (
-              <Field label={form.linked_module === "rfi" ? "RFI" : t("Submittal", "Entregable")}>
+            {linkOptions.length > 0 && (
+              <Field label={
+                form.linked_module === "rfi" ? "RFI" :
+                form.linked_module === "submittal" ? t("Submittal", "Entregable") :
+                form.linked_module === "change_order" ? t("Change Order", "Orden de Cambio") :
+                t("Meeting", "Reunion")
+              }>
                 <select className="input" value={form.linked_id} onChange={e => applyLinkedItem(e.target.value)}>
                   <option value="">{t("Select item", "Seleccionar item")}</option>
                   {linkOptions.map(o => <option key={o.id} value={String(o.id)}>{o.label}: {o.title}</option>)}
@@ -643,6 +798,11 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               <select className="input" value={form.assigned_user_id} onChange={e => setForm(f => ({ ...f, assigned_user_id: e.target.value }))}>
                 <option value="">{t("Unassigned", "Sin asignar")}</option>
                 {members.map(m => <option key={m.userId} value={m.userId}>{m.userFullName} - {m.userCompanyName || m.userEmail}</option>)}
+              </select>
+            </Field>
+            <Field label={t("Status", "Estado")}>
+              <select className="input" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
               </select>
             </Field>
             <div style={{ gridColumn: "1 / -1" }}>
@@ -780,7 +940,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1E3A5F", color: "white" }}>
-                {["Type", "Title", "Bucket", "Level", "Trade", "Due Date", "Company", "Assigned", "Status", "Overdue", "Rollovers", "Actions"].map(h => (
+                {["Type", "Title", "Bucket", "Level", "Trade", "Due Date", "Company", "Assigned", "Status", "Overdue", "Rollovers", "Updated", "Actions"].map(h => (
                   <th key={h} style={{ padding: "9px 10px", fontSize: 11, textTransform: "uppercase", textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -799,6 +959,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
                   <td style={{ padding: 10 }}>{statusBadge(item.status, item.isOverdue)}</td>
                   <td style={{ padding: 10, fontSize: 12 }}>{item.daysOverdue || 0}</td>
                   <td style={{ padding: 10, fontSize: 12 }}>{item.rolloverCount || 0}</td>
+                  <td style={{ padding: 10, fontSize: 12, whiteSpace: "nowrap" }}>{item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "-"}</td>
                   <td style={{ padding: 10, whiteSpace: "nowrap" }}>
                     <button style={smallButtonStyle} onClick={() => openItem(item)}>
                       <ExternalLink size={12} /> {t("Details", "Detalle")}
@@ -821,18 +982,78 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               </div>
               <button className="btn btn-sm btn-outline" onClick={() => setSelected(null)}>Close</button>
             </div>
-            <div style={{ display: "grid", gap: 10, fontSize: 13 }}>
-              <Detail label={t("Due Date", "Fecha Limite")} value={new Date(selected.dueDate).toLocaleDateString()} />
-              <Detail label={t("Bucket / Sprint", "Bucket / Sprint")} value={selected.bucketName || "-"} />
-              <Detail label={t("Building Level", "Nivel")} value={selected.buildingLevel || "-"} />
-              <Detail label={t("Trade", "Disciplina")} value={selected.trade || "-"} />
-              <Detail label={t("Responsible Company", "Empresa Responsable")} value={selected.responsibleCompany || selected.company || "-"} />
-              <Detail label={t("Assigned User", "Usuario Asignado")} value={selected.assignedUserName || "-"} />
-              <Detail label={t("Status", "Estado")} value={selected.isOverdue && !isDone(selected.status) ? t("Overdue", "Vencido") : selected.status.replace(/_/g, " ")} />
-              <Detail label={t("Days Overdue", "Dias Vencidos")} value={String(selected.daysOverdue || 0)} />
-              <Detail label={t("Rollovers", "Transferencias")} value={String(selected.rolloverCount || 0)} />
-              <Detail label={t("Notes", "Notas")} value={selected.notes || "-"} />
-            </div>
+            {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
+            {editingDetail && selected.source === "milestone" ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 13 }}>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label className="label">{t("Title", "Titulo")}</label>
+                  <input className="input" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                </div>
+                <Field label={t("Due Date", "Fecha Limite")}>
+                  <input className="input" type="date" value={editForm.due_date} onChange={e => setEditForm(f => ({ ...f, due_date: e.target.value }))} />
+                </Field>
+                <Field label={t("Status", "Estado")}>
+                  <select className="input" value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}>
+                    {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label={t("Building Level", "Nivel")}>
+                  <select className="input" value={editForm.level} onChange={e => setEditForm(f => ({ ...f, level: e.target.value }))}>
+                    <option value="">{t("Select level", "Seleccionar nivel")}</option>
+                    {levels.map(level => <option key={level} value={level}>{level}</option>)}
+                  </select>
+                </Field>
+                <Field label={t("Trade", "Disciplina")}>
+                  <input className="input" list="schedule-trades" value={editForm.trade} onChange={e => setEditForm(f => ({ ...f, trade: e.target.value }))} />
+                </Field>
+                <Field label={t("Responsible Company", "Empresa Responsable")}>
+                  <input className="input" list="schedule-companies" value={editForm.company} onChange={e => setEditForm(f => ({ ...f, company: e.target.value }))} />
+                </Field>
+                <Field label={t("Assigned User", "Usuario Asignado")}>
+                  <select className="input" value={editForm.assigned_user_id} onChange={e => setEditForm(f => ({ ...f, assigned_user_id: e.target.value }))}>
+                    <option value="">{t("Unassigned", "Sin asignar")}</option>
+                    {members.map(m => <option key={m.userId} value={m.userId}>{m.userFullName} - {m.userCompanyName || m.userEmail}</option>)}
+                  </select>
+                </Field>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label className="label">{t("Notes", "Notas")}</label>
+                  <textarea className="input" rows={3} value={editForm.notes} onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))} />
+                </div>
+                <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button className="btn btn-primary" type="button" disabled={saving || !editForm.title.trim() || !editForm.due_date} onClick={saveDetailEdit}>
+                    {saving ? t("Saving...", "Guardando...") : t("Save Changes", "Guardar Cambios")}
+                  </button>
+                  <button className="btn btn-outline" type="button" onClick={() => { setEditingDetail(false); setError(""); }}>{t("Cancel", "Cancelar")}</button>
+                  {(!editForm.title.trim() || !editForm.due_date) && (
+                    <div style={{ color: "#64748B", fontSize: 12, fontWeight: 700, alignSelf: "center" }}>
+                      {t("Title and due date are required to save.", "Titulo y fecha limite son requeridos para guardar.")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: 10, fontSize: 13 }}>
+                <Detail label={t("Due Date", "Fecha Limite")} value={new Date(selected.dueDate).toLocaleDateString()} />
+                <Detail label={t("Bucket / Sprint", "Bucket / Sprint")} value={selected.bucketName || "-"} />
+                <Detail label={t("Building Level", "Nivel")} value={selected.buildingLevel || "-"} />
+                <Detail label={t("Trade", "Disciplina")} value={selected.trade || "-"} />
+                <Detail label={t("Responsible Company", "Empresa Responsable")} value={selected.responsibleCompany || selected.company || "-"} />
+                <Detail label={t("Assigned User", "Usuario Asignado")} value={selected.assignedUserName || "-"} />
+                <Detail label={t("Status", "Estado")} value={selected.isOverdue && !isDone(selected.status) ? t("Overdue", "Vencido") : selected.status.replace(/_/g, " ")} />
+                <Detail label={t("Days Overdue", "Dias Vencidos")} value={String(selected.daysOverdue || 0)} />
+                <Detail label={t("Rollovers", "Transferencias")} value={String(selected.rolloverCount || 0)} />
+                <Detail label={t("Created", "Creado")} value={selected.createdAt ? new Date(selected.createdAt).toLocaleString() : "-"} />
+                <Detail label={t("Last Updated", "Ultima Actualizacion")} value={selected.updatedAt ? new Date(selected.updatedAt).toLocaleString() : "-"} />
+                <Detail label={t("Notes", "Notas")} value={selected.notes || "-"} />
+              </div>
+            )}
+            {canWrite && selected.source === "milestone" && !editingDetail && (
+              <div style={{ marginTop: 12 }}>
+                <button className="btn btn-primary" type="button" onClick={() => startDetailEdit(selected)}>
+                  {t("Edit Schedule Item", "Editar Item de Cronograma")}
+                </button>
+              </div>
+            )}
             {canWrite && (
               <div style={{ marginTop: 16, padding: 12, border: "1px solid #E5E7EB", borderRadius: 8 }}>
                 <label className="label">{t("Move to Bucket", "Mover a Bucket")}</label>
