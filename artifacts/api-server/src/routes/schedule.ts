@@ -553,13 +553,12 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     res.setHeader("Content-Disposition", `attachment; filename="schedule-${view}-${project.code}.pdf"`);
     doc.pipe(res);
 
-    let y = drawCoverPage(doc, {
+    drawCoverPage(doc, {
       margin: 40,
       logoBase64,
       logoType,
       companyName,
       reportTitle: "Schedule - Coordination Planner",
-      reportSubtitle: reportTitle,
       reportNumber,
       reportDate,
       preparedBy: req.user!.fullName,
@@ -567,7 +566,16 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       projectAddress: project.location || undefined,
       projectMeta: `Project Code: ${project.code} | Items: ${filtered.length} | View: ${view.toUpperCase()}`,
       isoStamp: false,
-    }) + 20;
+    });
+
+    let y = addReportPage(doc, {
+      companyName,
+      title: reportTitle,
+      projectName: project.name,
+      projectCode: project.code,
+      reportNumber,
+      reportDate,
+    }) + 10;
 
     const filterLines = [
       `Date Range: ${startDate ? formatDate(startDate) : "All"} to ${endDate ? formatDate(endDate) : "All"}`,
@@ -576,7 +584,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       view === "board" && bucketFilter ? `Bucket/Sprint: ${buckets.find(b => b.id === bucketFilter)?.name || bucketFilter}` : "",
     ].filter(Boolean);
     doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(filterLines.join(" | "), 40, y, { width: 712 });
-    y += 24;
+    y = doc.y + 14;
 
     if (options.includeKpis) {
       y = sectionBar(doc, "KPI Summary", y);
@@ -597,16 +605,6 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       y += 36;
     }
 
-    const header = () => drawBrandedHeader(doc, {
-      margin: 40,
-      companyName,
-      title: "Schedule - Coordination Planner",
-      projectName: project.name,
-      projectCode: project.code,
-      reportNumber,
-      reportDate,
-    });
-
     const baseColumns: TableColumn[] = [
       { label: "Type", width: 50, format: r => r.label },
       { label: "Item / Record", width: 145, wrap: true, bold: true, format: r => r.title },
@@ -624,11 +622,6 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     const tableColumns = options.includeOwnershipColumns
       ? [baseColumns[0], baseColumns[1], baseColumns[2], ...ownershipColumns, baseColumns[3], baseColumns[4], baseColumns[5], baseColumns[6]]
       : baseColumns;
-
-    if (doc.y > 0) {
-      doc.addPage();
-      y = header();
-    }
 
     if (view === "calendar") {
       y = sectionBar(doc, "Calendar View", y);
