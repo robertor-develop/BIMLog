@@ -40,6 +40,7 @@ type Member = { userId: number; userFullName: string; userEmail: string; userCom
 type DirectoryEntry = { id: number; companyName?: string | null; role?: string | null };
 type LinkOption = { id: number; label: string; title: string; dueDate?: string | null; route: string };
 type RolloverRow = { id: number; fromBucketName: string; toBucketName: string; movedByName?: string | null; movedAt: string };
+type ScheduleViewMode = "calendar" | "board" | "list";
 
 const API = "/api/v1";
 
@@ -102,7 +103,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState("all");
-  const [viewMode, setViewMode] = useState<"calendar" | "board" | "list">("board");
+  const [viewMode, setViewMode] = useState<ScheduleViewMode>("board");
   const [selected, setSelected] = useState<ScheduleItem | null>(null);
   const [editingDetail, setEditingDetail] = useState(false);
   const [historyRows, setHistoryRows] = useState<RolloverRow[]>([]);
@@ -137,7 +138,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     notes: "",
   });
   const [exportOptions, setExportOptions] = useState({
-    view: "list",
+    view: viewMode,
     start_date: "",
     end_date: "",
     status: "all",
@@ -479,12 +480,23 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     toast({ title: editingBucket ? t("Bucket updated", "Bucket actualizado") : t("Bucket created", "Bucket creado") });
   };
 
+  const openExportModal = () => {
+    setError("");
+    setExportOptions(o => ({
+      ...o,
+      view: viewMode,
+      bucket_id: viewMode === "board" ? o.bucket_id : "",
+    }));
+    setShowExportModal(true);
+  };
+
   const exportSchedulePdf = async () => {
     setExporting(true);
     setError("");
     try {
       const params = new URLSearchParams();
-      Object.entries(exportOptions).forEach(([key, value]) => {
+      const options = { ...exportOptions, view: exportOptions.view || viewMode };
+      Object.entries(options).forEach(([key, value]) => {
         if (value === "" || value === null || value === undefined) return;
         params.set(key, String(value));
       });
@@ -498,7 +510,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `schedule-${exportOptions.view}.pdf`;
+      a.download = `schedule-${options.view}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -683,7 +695,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <button className="btn btn-outline" onClick={() => { setError(""); setShowExportModal(true); }} type="button" title={t("Export the current coordination schedule to PDF", "Exportar el cronograma de coordinacion a PDF")}>
+          <button className="btn btn-outline" onClick={openExportModal} type="button" title={t("Export the current coordination schedule to PDF", "Exportar el cronograma de coordinacion a PDF")}>
             <FileDown size={14} />
             {t("Export PDF", "Exportar PDF")}
           </button>
@@ -748,7 +760,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             ["calendar", t("Calendar", "Calendario"), Calendar],
             ["list", t("List", "Lista"), List],
           ].map(([key, label, Icon]) => (
-            <button key={String(key)} type="button" className={`btn btn-sm ${viewMode === key ? "btn-primary" : "btn-outline"}`} onClick={() => setViewMode(key as "calendar" | "board" | "list")}>
+            <button key={String(key)} type="button" className={`btn btn-sm ${viewMode === key ? "btn-primary" : "btn-outline"}`} onClick={() => setViewMode(key as ScheduleViewMode)}>
               <Icon size={13} style={{ marginRight: 4 }} />
               {label as string}
             </button>
@@ -901,7 +913,10 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <Field label={t("Report View", "Vista del Reporte")}>
-                <select className="input" value={exportOptions.view} onChange={e => setExportOptions(o => ({ ...o, view: e.target.value, bucket_id: e.target.value === "board" ? o.bucket_id : "" }))}>
+                <select className="input" value={exportOptions.view} onChange={e => {
+                  const nextView = e.target.value as ScheduleViewMode;
+                  setExportOptions(o => ({ ...o, view: nextView, bucket_id: nextView === "board" ? o.bucket_id : "" }));
+                }}>
                   <option value="calendar">{t("Calendar", "Calendario")}</option>
                   <option value="board">{t("Board / Sprint", "Tablero / Sprint")}</option>
                   <option value="list">{t("List / Register", "Lista / Registro")}</option>

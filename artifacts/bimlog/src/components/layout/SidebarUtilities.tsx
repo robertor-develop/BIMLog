@@ -41,12 +41,6 @@ export function SidebarUtilities({
   return (
     <div className="sidebar-utilities" aria-label="Sidebar utilities">
       <div className="sidebar-utility-grid">
-        <SmartGuideSidebarButton activeTab={activeTab} />
-        <LangToggle />
-        <Link href={helpHref} className="sidebar-utility-button">
-          <HelpCircle style={{ width: 13, height: 13 }} />
-          {label("Help", "Ayuda")}
-        </Link>
         <div ref={infoRef} style={{ position: "relative" }}>
           <button
             type="button"
@@ -84,6 +78,12 @@ export function SidebarUtilities({
             </div>
           )}
         </div>
+        <Link href={helpHref} className="sidebar-utility-button">
+          <HelpCircle style={{ width: 13, height: 13 }} />
+          {label("Help", "Ayuda")}
+        </Link>
+        <SmartGuideSidebarButton activeTab={activeTab} />
+        <LangToggle />
       </div>
     </div>
   );

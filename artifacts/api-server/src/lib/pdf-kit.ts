@@ -339,6 +339,7 @@ export function addPageNumbers(doc: Doc, o: PageNumberOptions = {}): void {
       pageLabel: `Page ${i + 1} of ${range.count}`,
     });
   }
+  doc.flushPages();
 }
 
 // ── Table (the workhorse) ──

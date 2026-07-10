@@ -546,11 +546,11 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     const contentHash = computeContentHash(snapshot);
     const { logoBase64, logoType } = await getCompanyLogo(req.user!.userId);
     const companyName = req.user!.companyName || "BIMLog";
-    const reportTitle = view === "calendar" ? "Schedule Calendar Export" : view === "board" ? "Coordination Board Export" : "Schedule Register Export";
+    const reportTitle = view === "calendar" ? "Schedule Calendar Report" : view === "board" ? "Schedule Board Report" : "Schedule List Report";
 
     const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true });
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="schedule-${view}-${project.code}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="schedule-${view}.pdf"`);
     doc.pipe(res);
 
     drawCoverPage(doc, {
@@ -558,7 +558,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       logoBase64,
       logoType,
       companyName,
-      reportTitle: "Schedule - Coordination Planner",
+      reportTitle,
       reportNumber,
       reportDate,
       preparedBy: req.user!.fullName,
@@ -633,7 +633,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       });
       if (byMonth.size === 0) byMonth.set("empty", []);
       for (const [monthKey, rows] of byMonth) {
-        if (y > 420) y = addReportPage(doc, { companyName, title: "Schedule Calendar", projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+        if (y > 420) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
         const monthDate = monthKey === "empty" ? reportDate : new Date(`${monthKey}-01T00:00:00`);
         doc.fontSize(11).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT)
           .text(monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" }), 40, y);
@@ -652,7 +652,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
           return acc;
         }, {});
         for (let week = 0; week < 6; week++) {
-          if (y + cellH > 540) y = addReportPage(doc, { companyName, title: "Schedule Calendar", projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+          if (y + cellH > 540) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
           for (let day = 0; day < 7; day++) {
             const d = new Date(start);
             d.setDate(start.getDate() + week * 7 + day);
@@ -679,16 +679,16 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       const grouped = new Map<string, LiveScheduleEvent[]>();
       filtered.forEach(item => grouped.set(item.bucketName || "Unassigned", [...(grouped.get(item.bucketName || "Unassigned") || []), item]));
       for (const [bucket, rows] of grouped) {
-        if (y > 500) y = addReportPage(doc, { companyName, title: "Coordination Board", projectName: project.name, projectCode: project.code, reportNumber, reportDate });
+        if (y > 500) y = addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate });
         doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT).text(`${bucket} (${rows.length})`, 40, y);
         y += 14;
-        y = drawScheduleTable(doc, rows, y, tableColumns, () => addReportPage(doc, { companyName, title: `Coordination Board - ${bucket}`, projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
+        y = drawScheduleTable(doc, rows, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
         y += 14;
       }
       if (grouped.size === 0) doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text("No schedule items match the selected filters.", 40, y);
     } else {
       y = sectionBar(doc, "List / Register View", y);
-      y = drawScheduleTable(doc, filtered, y, tableColumns, () => addReportPage(doc, { companyName, title: "Schedule Register", projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
+      y = drawScheduleTable(doc, filtered, y, tableColumns, () => addReportPage(doc, { companyName, title: reportTitle, projectName: project.name, projectCode: project.code, reportNumber, reportDate }));
       if (filtered.length === 0) doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text("No schedule items match the selected filters.", 40, y);
     }
 
@@ -724,14 +724,14 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       entityType: "schedule_pdf",
       entityId: projectId,
       fileNameBefore: null,
-      fileNameAfter: `schedule-${view}-${project.code}.pdf`,
+      fileNameAfter: `schedule-${view}.pdf`,
       details: `Exported Schedule PDF ${reportNumber} (${view}, ${filtered.length} item(s))`,
     });
 
     addPageNumbers(doc, {
       margin: 40,
-      footerY: 575,
-      fingerprintY: 560,
+      footerY: 558,
+      fingerprintY: 544,
       contentHash,
       companyName,
       projectName: project.name,

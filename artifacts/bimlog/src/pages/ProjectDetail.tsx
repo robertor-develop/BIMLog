@@ -124,9 +124,6 @@ export function ProjectDetail() {
                 className="context-chip context-chip-wide"
                 title={adminMember.userEmail ? `Project Admin: ${adminMember.userEmail}` : "Project Admin"}
               >
-                <span className="context-chip-label">
-                  Admin
-                </span>
                 <span className="context-chip-strong">{adminMember.userFullName}</span>
                 {adminMember.userCompanyName && (
                   <span className="context-chip-muted">- {adminMember.userCompanyName}</span>
