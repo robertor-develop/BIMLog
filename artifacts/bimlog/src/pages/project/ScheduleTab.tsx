@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle, Calendar, CheckCircle2, Clock, ExternalLink, History,
-  LayoutGrid, List, Loader2, MoveRight, Plus, Trash2,
+  FileDown, LayoutGrid, List, Loader2, MoveRight, Plus, Trash2,
 } from "lucide-react";
 
 interface ScheduleItem {
@@ -96,7 +96,9 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [trades, setTrades] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [filter, setFilter] = useState("all");
@@ -133,6 +135,21 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     assigned_user_id: "",
     status: "pending",
     notes: "",
+  });
+  const [exportOptions, setExportOptions] = useState({
+    view: "list",
+    start_date: "",
+    end_date: "",
+    status: "all",
+    item_type: "all",
+    bucket_id: "",
+    include_progress: true,
+    include_kpis: true,
+    include_action_needed: true,
+    include_completed: true,
+    include_overdue: true,
+    include_rollover_history: false,
+    include_ownership_columns: true,
   });
 
   const authHeader = { Authorization: `Bearer ${token}` };
@@ -462,6 +479,37 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     toast({ title: editingBucket ? t("Bucket updated", "Bucket actualizado") : t("Bucket created", "Bucket creado") });
   };
 
+  const exportSchedulePdf = async () => {
+    setExporting(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      Object.entries(exportOptions).forEach(([key, value]) => {
+        if (value === "" || value === null || value === undefined) return;
+        params.set(key, String(value));
+      });
+      const r = await fetch(`${API}/projects/${projectId}/schedule/export-pdf?${params.toString()}`, { headers: authHeader });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setError(d.error || t("Could not export Schedule PDF.", "No se pudo exportar el PDF del cronograma."));
+        return;
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `schedule-${exportOptions.view}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setShowExportModal(false);
+      toast({ title: t("Schedule PDF exported", "PDF de cronograma exportado") });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const deleteMilestone = async (id: number) => {
     if (!window.confirm(t("Delete this milestone?", "Eliminar este hito?"))) return;
     await fetch(`${API}/projects/${projectId}/milestones/${id}`, { method: "DELETE", headers: jsonHeaders });
@@ -634,12 +682,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               "Calendario, tablero sprint y registro para RFIs, entregables, modelos 3D e hitos manuales.")}
           </p>
         </div>
-        {canWrite && (
-          <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} type="button">
-            <Plus size={14} />
-            {t("Add Schedule Item", "Agregar Fecha")}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button className="btn btn-outline" onClick={() => { setError(""); setShowExportModal(true); }} type="button" title={t("Export the current coordination schedule to PDF", "Exportar el cronograma de coordinacion a PDF")}>
+            <FileDown size={14} />
+            {t("Export PDF", "Exportar PDF")}
           </button>
-        )}
+          {canWrite && (
+            <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} type="button">
+              <Plus size={14} />
+              {t("Add Schedule Item", "Agregar Fecha")}
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 8, padding: "10px 12px", marginBottom: 14, color: "#1E3A5F", fontSize: 12 }}>
@@ -829,6 +883,97 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </form>
           <datalist id="schedule-trades">{trades.map(v => <option key={v} value={v} />)}</datalist>
           <datalist id="schedule-companies">{companies.map(v => <option key={v} value={v} />)}</datalist>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.35)", zIndex: 1100 }} onClick={() => setShowExportModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="card" style={{ position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "min(760px, calc(100vw - 32px))", maxHeight: "calc(100vh - 48px)", overflowY: "auto", padding: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", marginBottom: 14 }}>
+              <div>
+                <h3 style={{ margin: 0, color: "#0F172A", fontWeight: 900 }}>{t("Export Schedule PDF", "Exportar PDF de Cronograma")}</h3>
+                <p style={{ margin: "4px 0 0", color: "#64748B", fontSize: 12 }}>
+                  {t("Generate a formal BIMLog PDF for calendar, board, or register sharing.", "Genera un PDF formal BIMLog para calendario, tablero o registro.")}
+                </p>
+              </div>
+              <button className="btn btn-sm btn-outline" type="button" onClick={() => setShowExportModal(false)}>{t("Close", "Cerrar")}</button>
+            </div>
+            {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Field label={t("Report View", "Vista del Reporte")}>
+                <select className="input" value={exportOptions.view} onChange={e => setExportOptions(o => ({ ...o, view: e.target.value, bucket_id: e.target.value === "board" ? o.bucket_id : "" }))}>
+                  <option value="calendar">{t("Calendar", "Calendario")}</option>
+                  <option value="board">{t("Board / Sprint", "Tablero / Sprint")}</option>
+                  <option value="list">{t("List / Register", "Lista / Registro")}</option>
+                </select>
+              </Field>
+              <Field label={t("Status Filter", "Filtro de Estado")}>
+                <select className="input" value={exportOptions.status} onChange={e => setExportOptions(o => ({ ...o, status: e.target.value }))}>
+                  <option value="all">{t("All", "Todos")}</option>
+                  <option value="action">{t("Action Needed", "Requiere Accion")}</option>
+                  <option value="pending">{t("Pending", "Pendiente")}</option>
+                  <option value="in_progress">{t("In Progress", "En Progreso")}</option>
+                  <option value="completed">{t("Completed", "Completado")}</option>
+                  <option value="overdue">{t("Overdue", "Vencidos")}</option>
+                </select>
+              </Field>
+              <Field label={t("Start Date", "Fecha Inicial")}>
+                <input className="input" type="date" value={exportOptions.start_date} onChange={e => setExportOptions(o => ({ ...o, start_date: e.target.value }))} />
+              </Field>
+              <Field label={t("End Date", "Fecha Final")}>
+                <input className="input" type="date" value={exportOptions.end_date} onChange={e => setExportOptions(o => ({ ...o, end_date: e.target.value }))} />
+              </Field>
+              <Field label={t("Item Type Filter", "Filtro de Tipo")}>
+                <select className="input" value={exportOptions.item_type} onChange={e => setExportOptions(o => ({ ...o, item_type: e.target.value }))}>
+                  <option value="all">{t("All", "Todos")}</option>
+                  <option value="milestone">{t("Milestone", "Hito")}</option>
+                  <option value="rfi">RFI</option>
+                  <option value="submittal">{t("Submittal", "Entregable")}</option>
+                  <option value="change_order">{t("Change Order", "Orden de Cambio")}</option>
+                  <option value="meeting">{t("Meeting", "Reunion")}</option>
+                  <option value="3d_model">{t("3D Model", "Modelo 3D")}</option>
+                </select>
+              </Field>
+              {exportOptions.view === "board" && (
+                <Field label={t("Bucket / Sprint Filter", "Filtro Bucket / Sprint")}>
+                  <select className="input" value={exportOptions.bucket_id} onChange={e => setExportOptions(o => ({ ...o, bucket_id: e.target.value }))}>
+                    <option value="">{t("All buckets", "Todos los buckets")}</option>
+                    {visibleBuckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </Field>
+              )}
+            </div>
+            <div style={{ marginTop: 14, borderTop: "1px solid #E5E7EB", paddingTop: 14 }}>
+              <div className="label">{t("Include", "Incluir")}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {[
+                  ["include_progress", t("Overall progress", "Progreso general")],
+                  ["include_kpis", t("KPI summary cards", "Tarjetas KPI")],
+                  ["include_action_needed", t("Open/action-needed items", "Items abiertos/requieren accion")],
+                  ["include_completed", t("Completed items", "Items completados")],
+                  ["include_overdue", t("Overdue items", "Items vencidos")],
+                  ["include_rollover_history", t("Rollover history", "Historial de transferencias")],
+                  ["include_ownership_columns", t("Assigned user/company/trade/level columns", "Columnas usuario/empresa/disciplina/nivel")],
+                ].map(([key, label]) => (
+                  <label key={key} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean((exportOptions as any)[key])}
+                      onChange={e => setExportOptions(o => ({ ...o, [key]: e.target.checked }))}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-outline" type="button" onClick={() => setShowExportModal(false)}>{t("Cancel", "Cancelar")}</button>
+              <button className="btn btn-primary" type="button" disabled={exporting} onClick={exportSchedulePdf}>
+                {exporting ? <Loader2 size={13} style={{ marginRight: 4, animation: "spin 1s linear infinite" }} /> : <FileDown size={13} />}
+                {exporting ? t("Exporting...", "Exportando...") : t("Export PDF", "Exportar PDF")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
