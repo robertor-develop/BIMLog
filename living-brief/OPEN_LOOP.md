@@ -256,11 +256,25 @@ What changed in this pass:
 - Complete RFI PDF converts image attachments to PDF pages with aspect ratio preserved.
 - Complete RFI PDF fails explicitly when a DOC/DOCX/XLS/XLSX or unsupported attachment needs a converter that is unavailable in the runtime.
 
+Local proof completed:
+- River Avenue source PDF was copied into a package after BIMLog-generated cover pages and before a manifest page.
+- River Avenue source page MediaBox, CropBox, rotation, native width/height, and displayed orientation matched the merged package pages.
+- River Avenue source file size and modification timestamp were unchanged after the native-copy test.
+
+Continuation added after f1ad6f7:
+- RFI records now persist `attachment_package_json` and `image_presentation_json`.
+- Existing RFI Section 4 can include/exclude package attachments and reorder the Complete RFI PDF package.
+- Viewpoint/image presentation state supports include/exclude, replacement image, crop metadata, reset crop, paste image, upload image, and browser screen capture controls.
+- Server-side image crop bounds are normalized and validated before save/export.
+- Complete RFI PDF follows saved package order instead of database order.
+- Complete RFI PDF uses Replit-supported `libreoffice`/`soffice` runtime detection for DOC/DOCX/XLS/XLSX conversion, with timeout, temp directory isolation, cleanup, and explicit attachment-level failure.
+
 Watch after publish:
 - Roberto should run authenticated Replit acceptance for create/edit/reload/export with real project data.
-- Verify River Avenue PDF page boxes and rotations in the generated Complete RFI PDF package.
-- Decide whether production will support Office-to-PDF conversion through a deployed converter service/runtime capability.
-- Viewpoint screenshot crop/replace/reset controls still need product-backed persistence before they should be treated as complete.
+- Verify persisted package selection/order after create, edit, sent, closed, and reopened states.
+- Verify image include/exclude, replacement, crop, reset, and re-crop in the deployed browser flow.
+- Verify DOC, DOCX, XLS, and XLSX conversion in Replit where `.replit` provides `libreoffice`; local Windows test could not find `soffice` on PATH.
+- Verify corrupted/unsupported attachment failure returns an explicit failed Complete RFI PDF response.
 
 ### Schedule / Coordination Planner
 Shipped commit: 2f9093b - Build coordination planner schedule.

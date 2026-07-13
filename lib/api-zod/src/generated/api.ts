@@ -263,6 +263,8 @@ export const CreateRfiBody = zod.object({
   scheduleImpactReason: zod.string().nullable().optional(),
   distributionList: zod.array(zod.string()).optional(),
   attachmentsJson: zod.array(zod.string()).optional(),
+  attachmentPackageJson: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
+  imagePresentationJson: zod.record(zod.string(), zod.unknown()).nullable().optional(),
   projectAddress: zod.string().optional(),
   responseAttachmentsJson: zod.array(zod.string()).optional(),
 });
@@ -313,6 +315,8 @@ export const UpdateRfiBody = zod.object({
   dateAnswered: zod.string().optional(),
   distributionList: zod.array(zod.string()).optional(),
   attachmentsJson: zod.array(zod.string()).optional(),
+  attachmentPackageJson: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
+  imagePresentationJson: zod.record(zod.string(), zod.unknown()).nullable().optional(),
   projectAddress: zod.string().optional(),
   responseAttachmentsJson: zod.array(zod.string()).optional(),
 });

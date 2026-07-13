@@ -55,6 +55,21 @@ export const rfisTable = pgTable("rfis", {
 
   distributionList: json("distribution_list").$type<string[]>().default([]),
   attachmentsJson: json("attachments_json").$type<string[]>().default([]),
+  attachmentPackageJson: json("attachment_package_json").$type<Array<{
+    key: string;
+    label: string;
+    fileId?: number | null;
+    attachment?: string | null;
+    source?: string | null;
+    include: boolean;
+    order: number;
+  }>>().default([]),
+  imagePresentationJson: json("image_presentation_json").$type<{
+    sourceFileId?: number | null;
+    replacementFileId?: number | null;
+    includeInCompletePdf?: boolean;
+    crop?: { x: number; y: number; width: number; height: number } | null;
+  } | null>().default(null),
   responseAttachmentsJson: json("response_attachments_json").$type<string[]>().default([]),
 
   parentRfiId: integer("parent_rfi_id"),

@@ -19,6 +19,7 @@ import {
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
   Send, Copy, Check, PenLine, Navigation, ChevronLeft, FolderOpen,
+  Upload, Camera, Clipboard, Crop, RotateCcw, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { logClientError } from "@/lib/client-log";
@@ -64,6 +65,72 @@ const attachLabel = (v: string) => {
   }
   return v;
 };
+
+type RfiPackageItem = {
+  key: string;
+  label: string;
+  fileId?: number | null;
+  attachment?: string | null;
+  source?: string | null;
+  include: boolean;
+  order: number;
+};
+
+type RfiImagePresentation = {
+  sourceFileId?: number | null;
+  replacementFileId?: number | null;
+  includeInCompletePdf?: boolean;
+  crop?: { x: number; y: number; width: number; height: number } | null;
+} | null;
+
+function fileIdFromAttachment(value: string): number | null {
+  const match = value.match(/\/files\/(\d+)\/download\b/i);
+  if (!match) return null;
+  const id = Number(match[1]);
+  return Number.isFinite(id) ? id : null;
+}
+
+function attachmentExt(label: string) {
+  const ext = label.split(".").pop();
+  return ext && ext !== label ? ext.toUpperCase() : "REF";
+}
+
+function packageItemsFromAttachments(attachments: string[], files: ProjectFile[] = []): RfiPackageItem[] {
+  return attachments.map((attachment, order) => {
+    const fileId = fileIdFromAttachment(attachment);
+    const file = fileId ? files.find(f => f.id === fileId) : files.find(f => f.fileName === attachment);
+    const label = file?.fileName || attachLabel(attachment);
+    return {
+      key: file ? `file:${file.id}` : `ref:${order}:${label}`,
+      label,
+      fileId: file?.id ?? fileId,
+      attachment,
+      source: file?.source || null,
+      include: true,
+      order,
+    };
+  });
+}
+
+function normalizePackageItems(value: unknown, attachments: string[], files: ProjectFile[] = []): RfiPackageItem[] {
+  if (!Array.isArray(value) || value.length === 0) return packageItemsFromAttachments(attachments, files);
+  return value.map((raw, order) => {
+    const item = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+    const fileId = typeof item.fileId === "number" ? item.fileId : null;
+    const attachment = typeof item.attachment === "string" ? item.attachment : null;
+    const file = fileId ? files.find(f => f.id === fileId) : attachment ? files.find(f => f.fileName === attachment) : undefined;
+    const label = typeof item.label === "string" && item.label.trim() ? item.label.trim() : file?.fileName || (attachment ? attachLabel(attachment) : `Package item ${order + 1}`);
+    return {
+      key: typeof item.key === "string" && item.key.trim() ? item.key.trim() : file ? `file:${file.id}` : `ref:${order}:${label}`,
+      label,
+      fileId: file?.id ?? fileId,
+      attachment,
+      source: typeof item.source === "string" ? item.source : file?.source || null,
+      include: item.include !== false,
+      order: typeof item.order === "number" ? item.order : order,
+    };
+  }).sort((a, b) => a.order - b.order).map((item, order) => ({ ...item, order }));
+}
 
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
   if (rfi.status === "closed") return null;
@@ -747,6 +814,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
   const [question, setQuestion] = useState(preload?.question || prefill?.question || "");
   const [attachments, setAttachments] = useState<string[]>(preload?.attachmentsJson || []);
+  const [packageItems, setPackageItems] = useState<RfiPackageItem[]>(() => normalizePackageItems((preload as Rfi & { attachmentPackageJson?: unknown })?.attachmentPackageJson, preload?.attachmentsJson || [], []));
   const [attachInput, setAttachInput] = useState("");
 
   const [costImpact, setCostImpact] = useState(preload?.costImpact || "No Cost Impact");
@@ -778,8 +846,20 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     const value = attachInput.trim();
     if (!value) return;
     setAttachments(prev => prev.includes(value) ? prev : [...prev, value]);
+    setPackageItems(prev => prev.some(item => item.attachment === value) ? prev : [...prev, ...packageItemsFromAttachments([value], files || []).map(item => ({ ...item, order: prev.length }))]);
     setAttachInput("");
   };
+  useEffect(() => {
+    setPackageItems(prev => {
+      const next = [...prev];
+      for (const item of packageItemsFromAttachments(attachments, files || [])) {
+        if (!next.some(existing => existing.attachment === item.attachment || (existing.fileId && existing.fileId === item.fileId))) {
+          next.push({ ...item, order: next.length });
+        }
+      }
+      return next.filter(item => !item.attachment || attachments.includes(item.attachment)).map((item, order) => ({ ...item, order }));
+    });
+  }, [attachments, files]);
 
   // AI document import: read an existing PDF/Word/Excel and prefill this form.
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -996,6 +1076,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
       distributionList: distList.length > 0 ? distList : undefined,
       attachmentsJson: attachments.length > 0 ? attachments : undefined,
+      attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
     };
     createRfi({
       projectId,
@@ -1028,6 +1109,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
         distributionList: distList.length > 0 ? distList : undefined,
         attachmentsJson: attachments.length > 0 ? attachments : undefined,
+        attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
       },
     });
   };
@@ -1301,6 +1383,19 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
               </div>
             ))}
+            {packageItems.length > 0 && (
+              <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Complete RFI PDF Package Order", "Orden del Paquete PDF Completo RFI", lang)}</div>
+                {packageItems.map((item, i) => (
+                  <div key={item.key} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto auto", gap: 6, alignItems: "center", fontSize: 11, padding: "4px 0", borderTop: i === 0 ? "none" : "1px solid hsl(var(--border) / 0.5)" }}>
+                    <input type="checkbox" checked={item.include} onChange={e => setPackageItems(prev => prev.map(p => p.key === item.key ? { ...p, include: e.target.checked } : p))} />
+                    <span><FileText style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />{item.label} <span style={{ color: "hsl(var(--muted-foreground))" }}>({attachmentExt(item.label)})</span></span>
+                    <Button type="button" size="sm" variant="outline" disabled={i === 0} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowUp style={{ width: 10, height: 10 }} /></Button>
+                    <Button type="button" size="sm" variant="outline" disabled={i === packageItems.length - 1} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowDown style={{ width: 10, height: 10 }} /></Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Section 5 — Question */}
@@ -1554,6 +1649,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoFromEmail, setInfoFromEmail] = useState("");
   const [infoDateRequired, setInfoDateRequired] = useState("");
   const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
+  const [packageItems, setPackageItems] = useState<RfiPackageItem[]>(() => normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], []));
+  const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(() => ((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null));
   const [questionDocInput, setQuestionDocInput] = useState("");
   const [infoSubject, setInfoSubject] = useState("");
   const [infoType, setInfoType] = useState("");
@@ -1562,6 +1659,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [distInput, setDistInput] = useState("");
   const startInfoEdit = () => {
     setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
+    setPackageItems(normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], files || []));
+    setImagePresentation((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null);
     setQuestionDocInput("");
     setInfoSubject(rfi.subject || "");
     setInfoType(rfi.rfiType || "");
@@ -1599,10 +1698,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       .catch((error) => logClientError("RFI directory load", error));
   }, [projectId]);
 
+  const viewpointFile = useMemo(() => (files || []).find(f => f.source === "lens-viewpoint" && f.linkedRfiId === rfi.id), [files, rfi.id]);
+
   // Load the source viewpoint screenshot (stored as a lens-viewpoint file) for inline display.
   const [vpImageUrl, setVpImageUrl] = useState<string | null>(null);
   useEffect(() => {
-    const vpFile = (files || []).find(f => f.source === "lens-viewpoint" && f.linkedRfiId === rfi.id);
+    const vpFile = viewpointFile;
     if (!vpFile) { setVpImageUrl(null); return; }
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     let url: string | null = null;
@@ -1611,7 +1712,28 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       .then(b => { if (b) { url = URL.createObjectURL(b); setVpImageUrl(url); } })
       .catch((error) => logClientError("RFI viewpoint image load", error));
     return () => { if (url) URL.revokeObjectURL(url); };
-  }, [files, rfi.id, projectId]);
+  }, [viewpointFile, rfi.id, projectId]);
+
+  useEffect(() => {
+    setPackageItems(prev => {
+      const base = normalizePackageItems(prev.length ? prev : (rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, questionDocs, files || []);
+      const next = [...base];
+      for (const docItem of packageItemsFromAttachments(questionDocs, files || [])) {
+        if (!next.some(item => item.attachment === docItem.attachment || (item.fileId && item.fileId === docItem.fileId))) {
+          next.push({ ...docItem, order: next.length });
+        }
+      }
+      for (const file of (files || []).filter(f => f.linkedRfiId === rfi.id && f.source !== "system-generated")) {
+        if (!next.some(item => item.fileId === file.id)) {
+          next.push({ key: `file:${file.id}`, label: file.fileName, fileId: file.id, attachment: `/api/v1/projects/${projectId}/files/${file.id}/download?name=${encodeURIComponent(file.fileName)}`, source: file.source || null, include: true, order: next.length });
+        }
+      }
+      return next.filter(item => !item.attachment || questionDocs.includes(item.attachment) || item.fileId).map((item, order) => ({ ...item, order }));
+    });
+    if (viewpointFile && !imagePresentation?.sourceFileId) {
+      setImagePresentation({ sourceFileId: viewpointFile.id, includeInCompletePdf: true, crop: null });
+    }
+  }, [files, questionDocs, rfi.id, projectId, viewpointFile, imagePresentation?.sourceFileId]);
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
@@ -1808,6 +1930,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // Upload attachments from the user's computer (question + response docs).
   const qAttachFileRef = useRef<HTMLInputElement>(null);
   const rAttachFileRef = useRef<HTMLInputElement>(null);
+  const imageEvidenceInputRef = useRef<HTMLInputElement>(null);
+  const imageReplacementInputRef = useRef<HTMLInputElement>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const uploadDoc = async (file: File, onUploaded: (url: string) => void) => {
     setUploadingDoc(true);
@@ -2115,6 +2239,84 @@ ${hasResp ? `
       onUpdate(updated);
     } catch (err) {
       toast({ title: err instanceof Error ? err.message : w("Close failed", "Error al cerrar", lang), variant: "destructive" });
+    }
+  };
+
+  const uploadImageEvidence = async (file: File, mode: "source" | "replacement") => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: w("Select an image file.", "Seleccione un archivo de imagen.", lang), variant: "destructive" });
+      return;
+    }
+    setUploadingDoc(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("rfiId", String(rfi.id));
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      if (!resp.ok) throw new Error("Upload failed");
+      const data = await resp.json() as { fileId: number; fileName: string; downloadUrl: string };
+      setQuestionDocs(prev => prev.includes(data.downloadUrl) ? prev : [...prev, data.downloadUrl]);
+      setPackageItems(prev => {
+        const sourceId = imagePresentation?.sourceFileId ?? viewpointFile?.id ?? null;
+        const adjusted = mode === "replacement" && sourceId
+          ? prev.map(item => item.fileId === sourceId ? { ...item, include: false } : item)
+          : prev;
+        return [...adjusted, { key: `file:${data.fileId}`, label: data.fileName, fileId: data.fileId, attachment: data.downloadUrl, source: "rfi-attachment", include: true, order: adjusted.length }];
+      });
+      setImagePresentation(prev => ({
+        sourceFileId: mode === "source" ? data.fileId : prev?.sourceFileId ?? viewpointFile?.id ?? data.fileId,
+        replacementFileId: mode === "replacement" ? data.fileId : prev?.replacementFileId ?? null,
+        includeInCompletePdf: prev?.includeInCompletePdf !== false,
+        crop: prev?.crop ?? null,
+      }));
+      toast({ title: mode === "replacement" ? w("Replacement image attached. Original evidence preserved.", "Imagen de reemplazo adjuntada. Evidencia original preservada.", lang) : w("Image attached.", "Imagen adjuntada.", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Image upload failed", "Error al subir imagen", lang), variant: "destructive" });
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const pasteImageEvidence = async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const type = item.types.find(t => t.startsWith("image/"));
+        if (type) {
+          const blob = await item.getType(type);
+          await uploadImageEvidence(new File([blob], `clipboard-rfi-${rfi.id}.png`, { type }), "replacement");
+          return;
+        }
+      }
+      toast({ title: w("Clipboard does not contain an image.", "El portapapeles no contiene una imagen.", lang), variant: "destructive" });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Clipboard image access was denied.", "Acceso a imagen del portapapeles denegado.", lang), variant: "destructive" });
+    }
+  };
+
+  const captureScreenImage = async () => {
+    try {
+      if (!navigator.mediaDevices?.getDisplayMedia) {
+        toast({ title: w("Screen capture is not supported in this browser.", "La captura de pantalla no es compatible con este navegador.", lang), variant: "destructive" });
+        return;
+      }
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      await video.play();
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      stream.getTracks().forEach(track => track.stop());
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Could not capture image");
+      await uploadImageEvidence(new File([blob], `screen-capture-rfi-${rfi.id}.png`, { type: "image/png" }), "replacement");
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Screen capture unavailable or denied.", "Captura de pantalla no disponible o denegada.", lang), variant: "destructive" });
     }
   };
 
@@ -2598,6 +2800,51 @@ ${hasResp ? `
                 <img src={vpImageUrl} alt={w("Viewpoint screenshot", "Captura del punto de vista", lang)} style={{ maxWidth: "100%", borderRadius: 8, border: "1px solid hsl(var(--border))", display: "block" }} />
               </div>
             )}
+            {infoEdit && (
+              <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 8 }}>{w("Image Presentation", "Presentacion de Imagen", lang)}</div>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, marginBottom: 8 }}>
+                  <input type="checkbox" checked={imagePresentation?.includeInCompletePdf !== false} onChange={e => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: e.target.checked }))} />
+                  {w("Show image in Complete RFI PDF", "Mostrar imagen en PDF Completo RFI", lang)}
+                </label>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageEvidence(f, "source"); e.target.value = ""; }} />
+                  <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageEvidence(f, "replacement"); e.target.value = ""; }} />
+                  <Button type="button" size="sm" variant="outline" onClick={() => imageEvidenceInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Upload Image", "Subir Imagen", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => imageReplacementInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><RefreshCw style={{ width: 11, height: 11 }} />{w("Replace Image", "Reemplazar Imagen", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={pasteImageEvidence} style={{ fontSize: 11, gap: 4 }}><Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={captureScreenImage} style={{ fontSize: 11, gap: 4 }}><Camera style={{ width: 11, height: 11 }} />{w("Capture Screen", "Capturar Pantalla", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }))} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{imagePresentation?.crop ? w("Re-crop", "Recortar de Nuevo", lang) : w("Crop Image", "Recortar Imagen", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: null }))} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                </div>
+                {imagePresentation?.crop && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                    {(["x", "y", "width", "height"] as const).map(key => (
+                      <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                        {key.toUpperCase()}
+                        <input type="number" min="0" max="1" step="0.01" value={imagePresentation.crop?.[key] ?? 0} onChange={e => {
+                          const value = Math.max(0, Math.min(1, Number(e.target.value)));
+                          setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: { x: prev?.crop?.x ?? 0, y: prev?.crop?.y ?? 0, width: prev?.crop?.width ?? 1, height: prev?.crop?.height ?? 1, [key]: value } }));
+                        }} style={{ ...infoInput, marginTop: 2 }} />
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {infoEdit && packageItems.length > 0 && (
+              <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Complete RFI PDF Package Order", "Orden del Paquete PDF Completo RFI", lang)}</div>
+                {packageItems.map((item, i) => (
+                  <div key={item.key} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto auto", gap: 6, alignItems: "center", fontSize: 11, padding: "4px 0", borderTop: i === 0 ? "none" : "1px solid hsl(var(--border) / 0.5)" }}>
+                    <input type="checkbox" checked={item.include} onChange={e => setPackageItems(prev => prev.map(p => p.key === item.key ? { ...p, include: e.target.checked } : p))} />
+                    <span><FileText style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />{item.label} <span style={{ color: "hsl(var(--muted-foreground))" }}>({attachmentExt(item.label)})</span></span>
+                    <Button type="button" size="sm" variant="outline" disabled={i === 0} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowUp style={{ width: 10, height: 10 }} /></Button>
+                    <Button type="button" size="sm" variant="outline" disabled={i === packageItems.length - 1} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowDown style={{ width: 10, height: 10 }} /></Button>
+                  </div>
+                ))}
+              </div>
+            )}
             <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
           </div>
 
@@ -2705,6 +2952,8 @@ ${hasResp ? `
                 submittedToPerson: infoToPerson,
                 submittedToEmail: infoToEmail,
                 attachmentsJson: questionDocs,
+                attachmentPackageJson: packageItems,
+                imagePresentationJson: imagePresentation,
               } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save RFI", "Guardar RFI", lang)}</button>
             </div>
           )}

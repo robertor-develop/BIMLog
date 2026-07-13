@@ -185,6 +185,8 @@ export interface Rfi {
   dateAnswered?: string;
   distributionList?: string[];
   attachmentsJson?: string[];
+  attachmentPackageJson?: Record<string, unknown>[];
+  imagePresentationJson?: Record<string, unknown> | null;
   responseAttachmentsJson?: string[];
   parentRfiId?: number;
   revisionNumber?: number;
@@ -227,6 +229,8 @@ export interface CreateRfiRequest {
   scheduleImpactReason?: string | null;
   distributionList?: string[];
   attachmentsJson?: string[];
+  attachmentPackageJson?: Record<string, unknown>[];
+  imagePresentationJson?: Record<string, unknown> | null;
   responseAttachmentsJson?: string[];
   projectAddress?: string;
 }
@@ -269,6 +273,8 @@ export interface UpdateRfiRequest {
   dateAnswered?: string;
   distributionList?: string[];
   attachmentsJson?: string[];
+  attachmentPackageJson?: Record<string, unknown>[];
+  imagePresentationJson?: Record<string, unknown> | null;
   responseAttachmentsJson?: string[];
   projectAddress?: string;
 }

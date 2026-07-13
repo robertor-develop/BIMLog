@@ -161,6 +161,8 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_label text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS attachment_package_json json DEFAULT '[]'::json`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS image_presentation_json json DEFAULT NULL`);
     await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
     await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
     await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);

@@ -52,6 +52,8 @@ export interface Rfi {
   dateAnswered?: string;
   distributionList?: string[];
   attachmentsJson?: string[];
+  attachmentPackageJson?: Record<string, unknown>[];
+  imagePresentationJson?: Record<string, unknown> | null;
   parentRfiId?: number;
   revisionNumber?: number;
   projectAddress?: string;

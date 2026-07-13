@@ -9,6 +9,10 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
 import crypto from "crypto";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { spawnSync } from "child_process";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
@@ -18,6 +22,23 @@ import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 import { PDFDocument as PdfLibDocument } from "pdf-lib";
 const router: IRouter = Router();
+
+type RfiPackageItem = {
+  key: string;
+  label: string;
+  fileId?: number | null;
+  attachment?: string | null;
+  source?: string | null;
+  include: boolean;
+  order: number;
+};
+
+type RfiImagePresentation = {
+  sourceFileId?: number | null;
+  replacementFileId?: number | null;
+  includeInCompletePdf?: boolean;
+  crop?: { x: number; y: number; width: number; height: number } | null;
+} | null;
 
 function daysSince(d: Date | string): number {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000);
@@ -51,6 +72,49 @@ function attachmentLabel(value: string): string {
     return value;
   }
   return value;
+}
+
+function normalizePackageConfig(value: unknown): RfiPackageItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((raw, index) => {
+    const item = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+    const fileId = typeof item.fileId === "number" && Number.isFinite(item.fileId) ? item.fileId : null;
+    const attachment = typeof item.attachment === "string" ? item.attachment : null;
+    const label = typeof item.label === "string" && item.label.trim()
+      ? item.label.trim()
+      : attachment ? attachmentLabel(attachment) : fileId ? `File ${fileId}` : `Package item ${index + 1}`;
+    return {
+      key: typeof item.key === "string" && item.key.trim() ? item.key.trim() : fileId ? `file:${fileId}` : `ref:${index}`,
+      label,
+      fileId,
+      attachment,
+      source: typeof item.source === "string" ? item.source : null,
+      include: item.include !== false,
+      order: typeof item.order === "number" && Number.isFinite(item.order) ? item.order : index,
+    };
+  }).sort((a, b) => a.order - b.order);
+}
+
+function normalizeImagePresentation(value: unknown): RfiImagePresentation {
+  if (value == null || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const sourceFileId = typeof raw.sourceFileId === "number" && Number.isFinite(raw.sourceFileId) ? raw.sourceFileId : null;
+  const replacementFileId = typeof raw.replacementFileId === "number" && Number.isFinite(raw.replacementFileId) ? raw.replacementFileId : null;
+  let crop: { x: number; y: number; width: number; height: number } | null = null;
+  if (raw.crop && typeof raw.crop === "object") {
+    const c = raw.crop as Record<string, unknown>;
+    const x = Number(c.x), y = Number(c.y), width = Number(c.width), height = Number(c.height);
+    if (![x, y, width, height].every(Number.isFinite) || x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 1 || y + height > 1) {
+      throw new Error("Image crop bounds must be normalized values within 0..1.");
+    }
+    crop = { x, y, width, height };
+  }
+  return {
+    sourceFileId,
+    replacementFileId,
+    includeInCompletePdf: raw.includeInCompletePdf !== false,
+    crop,
+  };
 }
 
 // PDF checkbox characters: unchecked (\u2610), checked (\u2611)
@@ -109,6 +173,8 @@ type CreateRfiInput = {
   scheduleImpactReason?: string | null;
   distributionList?: string[] | null;
   attachmentsJson?: string[] | null;
+  attachmentPackageJson?: unknown;
+  imagePresentationJson?: unknown;
   projectAddress?: string | null;
   number?: string;
   forceNumber?: boolean;
@@ -183,6 +249,8 @@ async function createRfiForProject(
     scheduleImpactReason: input.scheduleImpactReason || null,
     distributionList: input.distributionList || [],
     attachmentsJson: input.attachmentsJson || [],
+    attachmentPackageJson: normalizePackageConfig(input.attachmentPackageJson),
+    imagePresentationJson: normalizeImagePresentation(input.imagePresentationJson),
     projectAddress: input.projectAddress || null,
     sourceViewpointId: input.sourceViewpointId || null,
     revisionNumber: 0,
@@ -1114,6 +1182,8 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     if (body.dateAnswered !== undefined) updates.dateAnswered = body.dateAnswered ? new Date(body.dateAnswered) : null;
     if (body.distributionList !== undefined) updates.distributionList = body.distributionList;
     if (body.attachmentsJson !== undefined) updates.attachmentsJson = body.attachmentsJson;
+    if ((body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) updates.attachmentPackageJson = normalizePackageConfig((body as { attachmentPackageJson?: unknown }).attachmentPackageJson);
+    if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) updates.imagePresentationJson = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
     if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
     if (body.projectAddress !== undefined) updates.projectAddress = body.projectAddress;
 
@@ -1127,7 +1197,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       actionType: "update",
       entityType: "rfi",
       entityId: rfiId,
-      details: `Updated RFI ${updated.number}${body.status ? ` → status: ${body.status}` : ""}${body.answer ? " (answered)" : ""}${body.costImpact !== undefined ? ` | Cost: ${body.costImpact || "cleared"}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact !== undefined ? ` | Schedule: ${body.scheduleImpact || "cleared"}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}`,
+      details: `Updated RFI ${updated.number}${body.status ? ` → status: ${body.status}` : ""}${body.answer ? " (answered)" : ""}${body.costImpact !== undefined ? ` | Cost: ${body.costImpact || "cleared"}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact !== undefined ? ` | Schedule: ${body.scheduleImpact || "cleared"}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}${(body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined ? " | Complete PDF package configuration changed" : ""}${(body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined ? " | RFI image presentation changed" : ""}`,
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));
@@ -1258,6 +1328,8 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
       scheduleImpactReason: orig.scheduleImpactReason,
       distributionList: orig.distributionList as string[],
       attachmentsJson: orig.attachmentsJson as string[],
+      attachmentPackageJson: normalizePackageConfig(orig.attachmentPackageJson),
+      imagePresentationJson: normalizeImagePresentation(orig.imagePresentationJson),
       projectAddress: orig.projectAddress,
       parentRfiId: parentId,
       revisionNumber: revNum,
@@ -1545,25 +1617,59 @@ function fileExtension(fileName: string): string {
 function isImageAttachment(fileName: string, fileType: string | null | undefined): boolean {
   const ext = fileExtension(fileName);
   const type = (fileType || "").toLowerCase();
-  return ["png", "jpg", "jpeg", "gif", "webp"].includes(ext) || type.startsWith("image/");
+  return ["png", "jpg", "jpeg"].includes(ext) || type === "image/png" || type === "image/jpeg" || type === "image/jpg";
 }
 
-async function renderImageAttachmentPdf(fileName: string, buffer: Buffer): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = createPdfDocument({ margin: 36, size: "LETTER", autoFirstPage: true });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("error", reject);
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.fontSize(9).fillColor("#475569").text(fileName, 36, 24, { width: 540, align: "center" });
-    try {
-      doc.image(buffer, 36, 54, { fit: [540, 684], align: "center", valign: "center" });
-    } catch (error) {
-      reject(error);
-      return;
+async function renderImageAttachmentPdf(fileName: string, buffer: Buffer, crop?: { x: number; y: number; width: number; height: number } | null): Promise<Buffer> {
+  const pdf = await PdfLibDocument.create();
+  const ext = fileExtension(fileName);
+  const image = ext === "jpg" || ext === "jpeg" ? await pdf.embedJpg(buffer) : await pdf.embedPng(buffer);
+  const c = crop || { x: 0, y: 0, width: 1, height: 1 };
+  const pageWidth = 612;
+  const pageHeight = Math.max(72, pageWidth * ((image.height * c.height) / (image.width * c.width)));
+  const page = pdf.addPage([pageWidth, pageHeight]);
+  const drawWidth = pageWidth / c.width;
+  const drawHeight = drawWidth * (image.height / image.width);
+  const x = -c.x * drawWidth;
+  const bottomCrop = 1 - c.y - c.height;
+  const y = -bottomCrop * drawHeight;
+  page.drawImage(image, { x, y, width: drawWidth, height: drawHeight });
+  return Buffer.from(await pdf.save({ useObjectStreams: false }));
+}
+
+function libreOfficeExecutable(): string {
+  return process.env.LIBREOFFICE_PATH || process.env.SOFFICE_PATH || "soffice";
+}
+
+function convertOfficeToPdf(fileName: string, buffer: Buffer): Buffer {
+  const ext = fileExtension(fileName);
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-rfi-office-"));
+  try {
+    const inputPath = path.join(tempDir, `input.${ext}`);
+    fs.writeFileSync(inputPath, buffer);
+    const exe = libreOfficeExecutable();
+    const result = spawnSync(exe, [
+      "--headless",
+      "--nologo",
+      "--nofirststartwizard",
+      "--convert-to",
+      "pdf",
+      "--outdir",
+      tempDir,
+      inputPath,
+    ], { timeout: 60_000, encoding: "utf8", windowsHide: true });
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      throw new Error((result.stderr || result.stdout || `LibreOffice exited with ${result.status}`).trim());
     }
-    doc.end();
-  });
+    const outputPath = path.join(tempDir, "input.pdf");
+    if (!fs.existsSync(outputPath)) {
+      throw new Error("LibreOffice did not produce a PDF output file");
+    }
+    return fs.readFileSync(outputPath);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 }
 
 async function renderCompleteManifestPdf(args: {
@@ -1612,25 +1718,45 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
 
     const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
     const filesById = new Map(allFiles.map(file => [file.id, file]));
-    const selectedFiles: typeof allFiles = [];
+    const imagePresentation = normalizeImagePresentation(rfi.imagePresentationJson);
+    const packageItems = normalizePackageConfig(rfi.attachmentPackageJson);
+    const selectedItems: Array<{ label: string; file: typeof allFiles[number] | null }> = [];
     const referencesOnly: string[] = [];
     const seen = new Set<number>();
-    for (const attachment of ((rfi.attachmentsJson as unknown as string[] | null) || [])) {
-      const id = attachmentFileId(attachment);
-      const file = id ? filesById.get(id) : allFiles.find(candidate => candidate.fileName === attachment);
+
+    const addFileItem = (label: string, file: typeof allFiles[number] | undefined | null, include: boolean) => {
+      if (!include) return;
       if (file) {
+        selectedItems.push({ label: label || file.fileName, file });
+      } else {
+        referencesOnly.push(label);
+      }
+    };
+
+    if (packageItems.length > 0) {
+      for (const item of packageItems.filter(item => item.include).sort((a, b) => a.order - b.order)) {
+        const file = item.fileId ? filesById.get(item.fileId) : item.attachment ? allFiles.find(candidate => candidate.fileName === item.attachment) : null;
+        addFileItem(item.label, file, true);
+      }
+    } else {
+      for (const attachment of ((rfi.attachmentsJson as unknown as string[] | null) || [])) {
+        const id = attachmentFileId(attachment);
+        const file = id ? filesById.get(id) : allFiles.find(candidate => candidate.fileName === attachment);
+        if (file) {
+          if (!seen.has(file.id)) {
+            selectedItems.push({ label: file.fileName, file });
+            seen.add(file.id);
+          }
+        } else {
+          referencesOnly.push(attachmentLabel(attachment));
+        }
+      }
+      for (const file of allFiles.filter(candidate => candidate.linkedRfiId === rfiId && candidate.source !== "system-generated")) {
+        if (imagePresentation?.includeInCompletePdf === false && (file.id === imagePresentation.sourceFileId || file.source === "lens-viewpoint")) continue;
         if (!seen.has(file.id)) {
-          selectedFiles.push(file);
+          selectedItems.push({ label: file.fileName, file });
           seen.add(file.id);
         }
-      } else {
-        referencesOnly.push(attachmentLabel(attachment));
-      }
-    }
-    for (const file of allFiles.filter(candidate => candidate.linkedRfiId === rfiId && candidate.source !== "system-generated")) {
-      if (!seen.has(file.id)) {
-        selectedFiles.push(file);
-        seen.add(file.id);
       }
     }
 
@@ -1646,7 +1772,9 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
     await appendPdf(await renderRfiPdfBuffer(rfi, responses, project), "BIMLog RFI record");
 
     const failures: string[] = [];
-    for (const file of selectedFiles) {
+    for (const item of selectedItems) {
+      const file = item.file;
+      if (!file) continue;
       const ext = fileExtension(file.fileName);
       if (!file.storagePath) {
         failures.push(`${file.fileName}: no stored binary is available`);
@@ -1657,9 +1785,12 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
         if (ext === "pdf" || (file.fileType || "").toLowerCase() === "application/pdf") {
           await appendPdf(buffer, file.fileName);
         } else if (isImageAttachment(file.fileName, file.fileType)) {
-          await appendPdf(await renderImageAttachmentPdf(file.fileName, buffer), file.fileName);
+          const crop = imagePresentation && (file.id === imagePresentation.replacementFileId || file.id === imagePresentation.sourceFileId)
+            ? imagePresentation.crop
+            : null;
+          await appendPdf(await renderImageAttachmentPdf(file.fileName, buffer, crop), file.fileName);
         } else if (["doc", "docx", "xls", "xlsx"].includes(ext)) {
-          failures.push(`${file.fileName}: DOC/DOCX/XLS/XLSX conversion requires a server-side Office-to-PDF converter that is not available in this runtime`);
+          await appendPdf(convertOfficeToPdf(file.fileName, buffer), file.fileName);
         } else {
           failures.push(`${file.fileName}: unsupported Complete RFI PDF attachment type`);
         }
