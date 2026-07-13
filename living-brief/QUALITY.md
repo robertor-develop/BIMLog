@@ -217,6 +217,63 @@ Before calling a feature done, verify:
 - It does not create duplicate, contradictory counters.
 - It does not create dirty historical report data.
 
+## Evidence and Release Quality Gate
+Evidence-based decision-making is part of Quality 4.0, not a reporting formality. Synthetic
+evidence is itself a quality failure because it hides the actual condition of the product and
+prevents sound corrective action. Human oversight remains mandatory: the builder supplies
+evidence, while Roberto or the master coordinator independently decides whether acceptance passed.
+
+Four evidence outcomes are required and remain independent:
+
+1. **Source Gate:** inspect the real diff and exact files, prove the intended architecture in
+   source, search for duplicate implementations, exclude unrelated changes, mock production
+   behavior, silent fallbacks, and deferred required work, and run relevant typecheck/build checks.
+   Compilation and buildability are not behavioral acceptance.
+2. **UI/Behavior Gate:** exercise the real workflow, including persistence and reload where
+   applicable. Handcrafted HTML, production-lookalike static pages, synthetic screenshots,
+   invented controls, grep-as-interaction, and duplicated component markup are not acceptance
+   evidence. A test harness may support diagnosis only when it imports the production component,
+   stays outside production, identifies its fixtures, and states its limitations.
+3. **Artifact Gate:** open and inspect every generated output. PDFs require page-box, rendered-page,
+   text, image, numbering, header/footer, fingerprint, and attachment checks where applicable.
+   DOCX requires package and section/media inspection plus Office-compatible rendering and full
+   visual review. Spreadsheets require every sheet, relevant values/formulas, print setup, and
+   orientation review. Shared plugin work requires both documented 2021/2025 builds and package
+   inspection; compilation alone is not field verification.
+4. **Deployment/Field Gate:** record committed, pushed, present in Replit, Replit-built, published,
+   live-verified, and customer/field-verified states separately. Report the highest state actually
+   achieved. A successful response, download, build, or file existing is not proof of professional,
+   complete output.
+
+Professional outputs must be traceable from source record through displayed behavior, generated
+artifact, release state, and field result. If the required environment is unavailable, record the
+missing evidence; do not manufacture a proxy. Implementation-complete and validation-pending is a
+valid, necessary distinction.
+
+Release activity also requires authorization and human oversight. No publish, production access or
+data mutation, production migration, external deployment, DLL installation, new environment,
+database, service, system dependency, elevated operation, network exposure, process termination,
+paid external service, or task creation/management may be treated as implicit implementation work.
+Roberto must explicitly approve it. Destructive schema actions (`DROP TABLE`, `DROP COLUMN`, and
+`DROP INDEX`) and force-push are never approved.
+
+External blockers must not erase learning or implementation. Preserve the binary diff in an
+approved recovery location before cleanup, report the location, retain completed source work, and
+record what remains validation-pending. This provides corrective-action traceability even when a
+runtime, converter, permission, server, or field environment is unavailable.
+
+Recurring customer complaints are quality records and must produce:
+- a verified defect,
+- a documented root cause,
+- corrective action,
+- acceptance evidence,
+- the affected Living Brief update, and
+- an explicit field-verification status.
+
+This closed loop connects customer feedback, corrective action, traceability, professional output,
+human oversight, and continuous improvement. A builder may not self-certify it; acceptance remains
+provisional until independently reviewed.
+
 ## Where This Changes BIMLog
 Calidad 4.0 turns BIMLog from a collection of coordination modules into a quality operating
 system for construction.

@@ -20,14 +20,44 @@ independently verified steps. Read the real current code before editing it. Neve
 from memory of what a file "should" contain. Verify every change landed with grep,
 typecheck, build output, or a focused runtime test before moving to the next change.
 
+Every focused directive must begin with this operating sentence:
+`Stop any unrelated prior work. Verify the real repository and governing documents before editing, then proceed directly with the authorized scope.`
+
+"Stop unrelated work" does not terminate the authorized task. A task with authorized
+implementation must not create a plan and wait: verify first, report the baseline briefly,
+and continue. A read-only request must remain read-only. An implementation request must
+proceed after verification. A genuine authorization boundary stops the task and requires
+Roberto's decision.
+
+## Owner authority and document precedence
+Development governance follows this provisional hierarchy:
+1. Roberto's explicit current instruction.
+2. Living Brief governing doctrine.
+3. CLAUDE.md / future AI_DEV.md execution rules.
+4. QUALITY.md acceptance requirements.
+5. Module-specific documents such as PLUGIN.md and REPORT_DESIGN_SYSTEM.md.
+6. STATUS.md and OPEN_LOOP.md current-state registers.
+7. AUDIT.md append-only history.
+
+ECOSYSTEM_DOCTRINE.md will be added in Step 2 and will then become the permanent
+product-doctrine authority beneath Roberto's explicit decisions.
+
+Agents may not override the Living Brief with invented restrictions or assumptions. Ask
+Roberto when governing documents genuinely conflict. A newer explicit Roberto decision
+requires the affected Living Brief document to be updated. Technical implementation details
+remain governed by the relevant module document when they do not conflict with higher
+doctrine. The Living Brief exists specifically to prevent repeated instructions and agent
+assumptions.
+
 ## Master Codex / focused task-chat operating rule
-- When Roberto designates the current Codex task as the master coordinator, this task does
-  not implement feature code. It verifies the real repositories, reconciles the Living Brief,
-  defines source-of-truth behavior, and gives exact paste-ready directives to focused task chats.
+- When Roberto designates the current Codex task as the master coordinator, it verifies the
+  real repositories and governing documents, reconciles requirements, and produces focused-task
+  instructions on screen. It does not implement feature source code while designated as master.
+- The master does not create, send to, archive, rename, or otherwise manage tasks unless Roberto
+  explicitly requests that action. It independently reviews focused-task evidence, does not
+  accept a builder's report as proof, and declares whether each acceptance gate passed or failed.
 - Every focused-task directive must name the real repository explicitly. The BIMLog platform
   repository is `C:\Dev\bimlog`; never assume the task chat's mounted folder is the repository.
-- Every directive must begin exactly:
-  `STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.`
 - The directive must require the task chat to verify `git status`, recent commits, and the
   complete current implementation before editing. It must list the exact files that must be
   read first, define files/modules that are out of scope, define required behavior and
@@ -37,6 +67,109 @@ typecheck, build output, or a focused runtime test before moving to the next cha
   rather than creating a duplicate control or alternate workflow.
 - The master task records every discovered, completed, or deferred product item in
   `OPEN_LOOP.md` so Roberto does not have to repeat cross-task instructions.
+
+A focused builder reads the real implementation, changes only the authorized scope, preserves
+unrelated work, and produces evidence. Its report must distinguish implemented, locally
+verified, deployed, and customer-verified states. The builder cannot approve its own acceptance
+gate or declare the overall feature complete until independent review and every required gate
+passes.
+
+## Evidence and Release Gate - mandatory
+Every change is evaluated through four independent gates. The task must name the highest gate
+actually achieved and must not collapse implementation, verification, release, and field use
+into "complete."
+
+### 1. Source Gate
+Requires actual diff inspection, an exact changed-file list, proof of architectural requirements
+in source, a duplicate-implementation search, and confirmation of no unrelated changes. Production
+behavior must contain no mock behavior, silent fallback, or TODO/FIXME that defers required work.
+Run typecheck and build where relevant. Typecheck and build prove only compilation and
+buildability; they do not prove correct behavior.
+
+### 2. UI/Behavior Gate
+Requires evidence from the real behavior. Static HTML recreations, handcrafted pages imitating
+the production UI, synthetic acceptance screenshots that do not render production components,
+screenshots with invented fields or controls, grep output presented as interaction proof, and
+component fixtures that duplicate production markup are prohibited.
+
+A test-only harness is permitted only when it imports the actual production component, does not
+duplicate its markup, keeps fixtures outside production behavior, and is excluded from production.
+The evidence report must identify the imported production component and fixture location and state
+the limits of fixture testing.
+
+Behavioral proof must match the workflow. Examples include: Add Reference add/display/save/reload/
+remove; edit/change/save/reload/compare; crop visual manipulation/save/reload/export; close/reopen
+with state and audit verification; multiple same-viewpoint RFIs with separate requests, IDs,
+numbers, and files; and Copy Email clipboard output plus visible success/failure state.
+
+### 3. Artifact Gate
+Generated files must be opened and inspected. An HTTP 200, successful download, or file existence
+does not prove that an artifact is useful or complete.
+
+- PDF: inspect page count, dimensions, MediaBox/CropBox/rotation where relevant, every rendered
+  page, extracted text, embedded images, page numbering, headers/footers, fingerprint, and
+  attachment completeness.
+- DOCX: validate the package; inspect page size, sections, and embedded media; render with an
+  Office-compatible converter; visually inspect every page; verify headers, footers, tables,
+  numbering, images, and content.
+- Spreadsheet: open or render every sheet; verify relevant formulas/values, printable sheets,
+  page setup, and orientation.
+- Plugin: when shared code changes, build both documented physical versions at
+  `C:\Dev\BIMLogPlugin\BIMLogNavisPlugin` and `H:\BIMLogPlugin2025`; preserve intentional
+  project/reference differences; verify framework, AnyCPU target, version, DLL, PDB, and package
+  ZIP. Compilation is not live Navisworks verification.
+
+### 4. Deployment/Field Gate
+Report these states separately: committed, pushed, available in the Replit workspace, built in
+Replit, published, live verified, and customer/field verified. Never collapse them into
+"complete." Publishing, production migration, DLL installation, external deployment, and
+production-data mutation require Roberto's explicit approval.
+
+### Builder self-certification and prohibited proxies
+The task that implements a change may report evidence but may not approve its own acceptance
+gate. The master coordinator or Roberto must independently inspect the evidence. A builder's
+claim that work is "complete," "verified," or "passed" remains provisional until independent
+review.
+
+Prohibited proxy substitutions include similar headings instead of shared components; code
+presence instead of behavior; grep instead of interaction; static mockups instead of real UI;
+typecheck instead of persistence; build instead of artifact inspection; local fixtures instead
+of deployed acceptance; file existence instead of a useful complete artifact; and explicit error
+reporting instead of support for the required workflow. If the real acceptance environment is
+unavailable, report the missing evidence honestly. Never manufacture substitute evidence.
+
+## Blockers and work preservation
+- An external blocker does not authorize discarding source work.
+- Before any cleanup, preserve `git diff --binary` in a Roberto-approved recovery location and
+  report that path.
+- Do not reset, restore, or remove work merely because a server, port, permission, converter, or
+  runtime is unavailable.
+- Work may be implementation-complete but validation-pending; label that distinction accurately.
+- "Blocked" does not mean "nothing completed."
+
+## Explicit authorization boundaries
+Roberto must explicitly approve before directing system/global dependency installation, Windows
+service creation or modification, database creation, a new test environment or harness,
+administrator/elevated operation, process termination, firewall or network exposure,
+production/Neon access, production-data mutation, Replit publish, DLL deployment/installation,
+an external paid service, or new Codex task creation or task management by the master.
+
+Repository-local implementation dependencies may be added only when directly required by the
+authorized feature, with the exact package and reason reported. Never approve `DROP TABLE`,
+`DROP COLUMN`, `DROP INDEX`, or force-push.
+
+## Focused scope and plugin synchronization
+- One focused behavioral slice per build, with explicit in-scope and out-of-scope files and an
+  acceptance matrix. The next build starts only after independent review of the current gate.
+- Divide large features into separately verifiable commits. Do not use "complete" in a commit
+  title unless the complete acceptance matrix passed.
+- Shared plugin changes require review and synchronization of both 2021 and 2025 physical source
+  locations. PLUGIN.md governs build and packaging requirements, including intentional
+  differences. Absence of Git history in the physical plugin source folders is not automatically
+  a blocker.
+- Source synchronization, build, and packaging are separate from live DLL installation. Live
+  installation requires explicit approval. Agents must not invent a restriction that contradicts
+  PLUGIN.md.
 
 ## Standing Rule - never dictate implementation to Replit
 When writing instructions for Replit, give the goal and real constraints, not exact code,
@@ -224,7 +357,8 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 ## Replit instruction format - mandatory every time
 When writing an instruction for Roberto to paste into Replit:
 - Single code block so Roberto can click the copy icon.
-- Opens with: STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.
+- Opens with: Stop any unrelated prior work. Verify the real repository and governing documents
+  before editing, then proceed directly with the authorized scope.
 - Plain English, file by file. No numbered steps and no markdown headers inside the block.
 - Checks using grep/find at the end.
 - Mandatory mojibake check: `pnpm run check:mojibake`.
