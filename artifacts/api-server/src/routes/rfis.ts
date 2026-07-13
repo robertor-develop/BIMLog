@@ -8,6 +8,7 @@ import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
+import crypto from "crypto";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
@@ -15,6 +16,7 @@ import { getValidAccessToken, providerFromParam } from "../lib/oauth";
 import { downloadCloud } from "../lib/cloud-files";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
+import { PDFDocument as PdfLibDocument } from "pdf-lib";
 const router: IRouter = Router();
 
 function daysSince(d: Date | string): number {
@@ -1505,6 +1507,204 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       details: `PDF exported: ${rfi.number}`,
     }).catch((activityError) => {
       console.error("[rfis] Failed to log PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+});
+
+// ─── Complete RFI PDF package helpers ───────────────────────────────────────
+async function renderRfiPdfBuffer(
+  rfi: typeof rfisTable.$inferSelect,
+  responses: (typeof rfiResponsesTable.$inferSelect)[],
+  project: { name: string } | undefined,
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("error", reject);
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    makeRfiPdf(doc, rfi, responses, project);
+    doc.end();
+  });
+}
+
+function attachmentFileId(value: string): number | null {
+  const match = value.match(/\/files\/(\d+)\/download\b/i);
+  if (!match) return null;
+  const id = Number(match[1]);
+  return Number.isFinite(id) ? id : null;
+}
+
+function fileExtension(fileName: string): string {
+  return (fileName.split(".").pop() || "").toLowerCase();
+}
+
+function isImageAttachment(fileName: string, fileType: string | null | undefined): boolean {
+  const ext = fileExtension(fileName);
+  const type = (fileType || "").toLowerCase();
+  return ["png", "jpg", "jpeg", "gif", "webp"].includes(ext) || type.startsWith("image/");
+}
+
+async function renderImageAttachmentPdf(fileName: string, buffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = createPdfDocument({ margin: 36, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("error", reject);
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.fontSize(9).fillColor("#475569").text(fileName, 36, 24, { width: 540, align: "center" });
+    try {
+      doc.image(buffer, 36, 54, { fit: [540, 684], align: "center", valign: "center" });
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    doc.end();
+  });
+}
+
+async function renderCompleteManifestPdf(args: {
+  rfiNumber: string;
+  projectName: string;
+  packageHash: string;
+  included: string[];
+  referencesOnly: string[];
+}): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const doc = createPdfDocument({ margin: 50, size: "LETTER", autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    doc.on("error", reject);
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.fontSize(16).fillColor("#0F172A").font("Helvetica-Bold").text("Complete RFI PDF Manifest");
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor("#334155").font("Helvetica")
+      .text(`RFI: ${args.rfiNumber}`)
+      .text(`Project: ${args.projectName}`)
+      .text(`Generated: ${new Date().toISOString()}`)
+      .text(`Report fingerprint: ${args.packageHash}`);
+    doc.moveDown();
+    doc.font("Helvetica-Bold").text("Included package pages");
+    doc.font("Helvetica");
+    args.included.forEach((item, i) => doc.text(`${i + 1}. ${item}`));
+    if (args.referencesOnly.length > 0) {
+      doc.moveDown();
+      doc.font("Helvetica-Bold").text("References listed on the RFI record");
+      doc.font("Helvetica");
+      args.referencesOnly.forEach((item, i) => doc.text(`${i + 1}. ${item}`));
+    }
+    doc.end();
+  });
+}
+
+router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const responses = await db.select().from(rfiResponsesTable)
+      .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
+      .orderBy(rfiResponsesTable.responseNumber);
+
+    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const filesById = new Map(allFiles.map(file => [file.id, file]));
+    const selectedFiles: typeof allFiles = [];
+    const referencesOnly: string[] = [];
+    const seen = new Set<number>();
+    for (const attachment of ((rfi.attachmentsJson as unknown as string[] | null) || [])) {
+      const id = attachmentFileId(attachment);
+      const file = id ? filesById.get(id) : allFiles.find(candidate => candidate.fileName === attachment);
+      if (file) {
+        if (!seen.has(file.id)) {
+          selectedFiles.push(file);
+          seen.add(file.id);
+        }
+      } else {
+        referencesOnly.push(attachmentLabel(attachment));
+      }
+    }
+    for (const file of allFiles.filter(candidate => candidate.linkedRfiId === rfiId && candidate.source !== "system-generated")) {
+      if (!seen.has(file.id)) {
+        selectedFiles.push(file);
+        seen.add(file.id);
+      }
+    }
+
+    const finalPdf = await PdfLibDocument.create();
+    const included: string[] = [];
+    const appendPdf = async (buffer: Buffer, label: string) => {
+      const sourcePdf = await PdfLibDocument.load(buffer, { ignoreEncryption: true });
+      const copied = await finalPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
+      copied.forEach(page => finalPdf.addPage(page));
+      included.push(`${label} (${copied.length} page${copied.length === 1 ? "" : "s"})`);
+    };
+
+    await appendPdf(await renderRfiPdfBuffer(rfi, responses, project), "BIMLog RFI record");
+
+    const failures: string[] = [];
+    for (const file of selectedFiles) {
+      const ext = fileExtension(file.fileName);
+      if (!file.storagePath) {
+        failures.push(`${file.fileName}: no stored binary is available`);
+        continue;
+      }
+      try {
+        const buffer = await storage.download(file.storagePath);
+        if (ext === "pdf" || (file.fileType || "").toLowerCase() === "application/pdf") {
+          await appendPdf(buffer, file.fileName);
+        } else if (isImageAttachment(file.fileName, file.fileType)) {
+          await appendPdf(await renderImageAttachmentPdf(file.fileName, buffer), file.fileName);
+        } else if (["doc", "docx", "xls", "xlsx"].includes(ext)) {
+          failures.push(`${file.fileName}: DOC/DOCX/XLS/XLSX conversion requires a server-side Office-to-PDF converter that is not available in this runtime`);
+        } else {
+          failures.push(`${file.fileName}: unsupported Complete RFI PDF attachment type`);
+        }
+      } catch (error) {
+        failures.push(`${file.fileName}: ${error instanceof Error ? error.message : "conversion failed"}`);
+      }
+    }
+
+    if (failures.length > 0) {
+      res.status(422).json({
+        error: "Complete RFI PDF could not be generated because one or more attachments could not be included.",
+        details: failures,
+      });
+      return;
+    }
+
+    const packageHash = crypto
+      .createHash("sha256")
+      .update(JSON.stringify({ rfiId, included, referencesOnly, generatedAt: new Date().toISOString() }))
+      .digest("hex");
+    await appendPdf(await renderCompleteManifestPdf({
+      rfiNumber: rfi.number,
+      projectName: project?.name || `Project ${projectId}`,
+      packageHash,
+      included,
+      referencesOnly,
+    }), "Attachment manifest and report fingerprint");
+
+    const pdfBuffer = Buffer.from(await finalPdf.save({ useObjectStreams: false }));
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - Complete RFI Package`)}"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.send(pdfBuffer);
+
+    db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName || "User",
+      userCompanyName: req.user!.companyName || "",
+      actionType: "export",
+      entityType: "rfi",
+      entityId: rfiId,
+      details: `Complete RFI PDF exported: ${rfi.number} | ${included.join("; ")}`,
+    }).catch((activityError) => {
+      console.error("[rfis] Failed to log Complete RFI PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";

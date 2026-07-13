@@ -329,6 +329,26 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     URL.revokeObjectURL(url);
   };
 
+  const handleExportCompletePdf = async (rfi: Rfi) => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-complete`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({})) as { error?: string; details?: string[] };
+      toast({
+        title: data.error || "Complete RFI PDF failed",
+        description: data.details?.join("; "),
+        variant: "destructive",
+      });
+      return;
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-Complete-RFI-Package.pdf`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportWordRfi = async (rfi: Rfi) => {
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -364,6 +384,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         onClose={() => setSelectedRfi(null)}
         onRevise={(rfi) => { setSelectedRfi(null); setRevising(rfi); }}
         onExportPdf={handleExportPdf}
+        onExportCompletePdf={handleExportCompletePdf}
         onUpdate={(updated) => setSelectedRfi(updated)}
       />
     );
@@ -1479,7 +1500,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 }
 
 // ─── RFI Detail Panel ─────────────────────────────────────────────────────────
-function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose, onRevise, onExportPdf, onUpdate }: {
+function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose, onRevise, onExportPdf, onExportCompletePdf, onUpdate }: {
   projectId: number;
   rfi: Rfi;
   canWrite: boolean;
@@ -1489,6 +1510,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   onClose: () => void;
   onRevise: (rfi: Rfi) => void;
   onExportPdf: (rfi: Rfi) => void;
+  onExportCompletePdf: (rfi: Rfi) => void;
   onUpdate: (rfi: Rfi) => void;
 }) {
   const queryClient = useQueryClient();
@@ -1527,7 +1549,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoToEmail, setInfoToEmail] = useState("");
   const [infoFromCompany, setInfoFromCompany] = useState("");
   const [infoFromContact, setInfoFromContact] = useState("");
+  const [infoFromAddress, setInfoFromAddress] = useState("");
+  const [infoFromPhone, setInfoFromPhone] = useState("");
   const [infoFromEmail, setInfoFromEmail] = useState("");
+  const [infoDateRequired, setInfoDateRequired] = useState("");
   const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
   const [questionDocInput, setQuestionDocInput] = useState("");
   const [infoSubject, setInfoSubject] = useState("");
@@ -1541,6 +1566,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoSubject(rfi.subject || "");
     setInfoType(rfi.rfiType || "");
     setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
+    setInfoDateRequired(rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
@@ -1555,6 +1581,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoToEmail(rfi.submittedToEmail || "");
     setInfoFromCompany(rfi.submittedByCompany || "");
     setInfoFromContact(rfi.submittedByContact || rfi.createdByName || "");
+    setInfoFromAddress(rfi.submittedByAddress || "");
+    setInfoFromPhone(rfi.submittedByPhone || "");
     setInfoFromEmail(rfi.submittedByEmail || "");
     setInfoEdit(true);
   };
@@ -2090,10 +2118,28 @@ ${hasResp ? `
     }
   };
 
+  const handleReopenRfi = async () => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: "open" }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})) as { error?: string }; throw new Error(d.error || "Failed"); }
+      const updated = await r.json() as typeof rfi;
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
+      toast({ title: w("RFI reopened.", "RFI reabierto.", lang) });
+      onUpdate(updated);
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : w("Reopen failed", "Error al reabrir", lang), variant: "destructive" });
+    }
+  };
+
   const allStatusOptions = [...new Map(getOptions("rfi_status").map(o => [o.value, o])).values()];
   // Only project_admin can close an RFI
   const currentMember = members.find(m => m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase());
-  const isProjectAdmin = currentMember?.role === "project_admin";
+  const isProjectAdmin = currentMember?.role === "project_admin" || Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
   const statusOptions = isProjectAdmin
     ? allStatusOptions
     : allStatusOptions.filter(o => o.value !== "closed");
@@ -2233,6 +2279,9 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />{w("RFI PDF", "RFI PDF", lang)}
             </Button>
+            <Button variant="outline" size="sm" onClick={() => onExportCompletePdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
+              <FileText style={{ width: 12, height: 12 }} />{w("Complete RFI PDF", "PDF Completo RFI", lang)}
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />{w("RFI DOCX", "RFI DOCX", lang)}
             </Button>
@@ -2248,13 +2297,13 @@ ${hasResp ? `
               </Button>
             )}
             {rfi.status === "closed" && canWrite && (
-              <Button variant="outline" size="sm" onClick={() => reviseRfi({ projectId, rfiId: rfi.id, data: {} })} style={{ gap: 5, fontSize: 11 }}>
-                <RefreshCw style={{ width: 12, height: 12 }} />{w("Revise RFI", "Revisar RFI", lang)}
+              <Button variant="outline" size="sm" onClick={handleReopenRfi} style={{ gap: 5, fontSize: 11 }}>
+                <RefreshCw style={{ width: 12, height: 12 }} />{w("Reopen RFI", "Reabrir RFI", lang)}
               </Button>
             )}
-            {rfi.status !== "closed" && rfi.sendStatus !== "sent" && canWrite && !infoEdit && (
+            {canWrite && !infoEdit && (
               <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11 }}>
-                <RefreshCw style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
+                <PenLine style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
               </Button>
             )}
             {canWrite && (
@@ -2385,11 +2434,11 @@ ${hasResp ? `
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
             {[
               [w("Date Requested", "Fecha Solicitada", lang), fmt(rfi.dateRequested || rfi.createdAt)],
-              [w("Date Required", "Fecha Requerida", lang), fmt(rfi.dateRequired || rfi.dueDate)],
+              [w("Date Required", "Fecha Requerida", lang), infoEdit ? <input type="date" value={infoDateRequired} onChange={e => setInfoDateRequired(e.target.value)} style={{ ...infoInput, textAlign: "center", fontWeight: 700 }} /> : fmt(rfi.dateRequired || rfi.dueDate)],
               [w("Days Outstanding", "Días en Espera", lang), `${days}d`],
               [w("Date Answered", "Fecha Respondido", lang), fmt(rfi.dateAnswered || rfi.respondedAt)],
             ].map(([label, value]) => (
-              <div key={label} style={{ padding: "8px 12px", background: "hsl(var(--secondary) / 0.4)", borderRadius: 8, textAlign: "center" }}>
+              <div key={String(label)} style={{ padding: "8px 12px", background: "hsl(var(--secondary) / 0.4)", borderRadius: 8, textAlign: "center" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: label === w("Days Outstanding", "Días en Espera", lang) ? daysColor(days, isOverdue) : "hsl(var(--foreground))" }}>{value}</div>
               </div>
@@ -2426,6 +2475,8 @@ ${hasResp ? `
                 <>
                   <input value={infoFromCompany} onChange={e => setInfoFromCompany(e.target.value)} placeholder={w("Company (you / asker)", "Empresa (usted / solicitante)", lang)} style={infoInput} />
                   <input value={infoFromContact} onChange={e => setInfoFromContact(e.target.value)} placeholder={w("Contact name", "Nombre de contacto", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  <input value={infoFromAddress} onChange={e => setInfoFromAddress(e.target.value)} placeholder={w("Address", "Direccion", lang)} style={{ ...infoInput, marginTop: 6 }} />
+                  <input value={infoFromPhone} onChange={e => setInfoFromPhone(e.target.value)} placeholder={w("Phone", "Telefono", lang)} style={{ ...infoInput, marginTop: 6 }} />
                   <input value={infoFromEmail} onChange={e => setInfoFromEmail(e.target.value)} placeholder={w("Email", "Correo", lang)} style={{ ...infoInput, marginTop: 6 }} />
                 </>
               ) : (
@@ -2632,7 +2683,29 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmountRequired ? infoCostAmt : null, costImpactReason: infoCostReasonRequired ? infoCostReason : null, scheduleImpact: infoSched, scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: {
+                subject: infoSubject,
+                rfiType: infoType,
+                sourceViewpointLabel: infoVpLabel,
+                dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : undefined,
+                question: infoQuestion,
+                costImpact: infoCost,
+                costImpactAmount: infoCostAmountRequired ? infoCostAmt : null,
+                costImpactReason: infoCostReasonRequired ? infoCostReason : null,
+                scheduleImpact: infoSched,
+                scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null,
+                scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null,
+                distributionList: infoDist,
+                submittedByCompany: infoFromCompany,
+                submittedByContact: infoFromContact,
+                submittedByAddress: infoFromAddress,
+                submittedByPhone: infoFromPhone,
+                submittedByEmail: infoFromEmail,
+                submittedToCompany: infoToCompany,
+                submittedToPerson: infoToPerson,
+                submittedToEmail: infoToEmail,
+                attachmentsJson: questionDocs,
+              } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save RFI", "Guardar RFI", lang)}</button>
             </div>
           )}
 

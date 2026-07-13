@@ -243,6 +243,25 @@ Current policy direction:
 
 ## Watching
 
+### RFI Create/Detail UX + Complete PDF Package
+Shipped commit: this RFI quality-pass commit - Finish RFI detail UX and complete PDF export.
+
+What changed in this pass:
+- Existing RFIs now expose the same numbered 1-7 structure as New RFI.
+- Sent and closed RFIs remain editable for authorized users.
+- Closed RFIs use an explicit Reopen RFI action instead of masquerading as a revision.
+- Existing RFI edit now persists Date Required and Submitted By address/phone with the rest of the canonical RFI fields.
+- Complete RFI PDF export is a distinct action and route.
+- Complete RFI PDF copies uploaded PDF attachment pages as native PDF pages via pdf-lib, preserving page boxes/rotation/vector/text as provided by the source PDF.
+- Complete RFI PDF converts image attachments to PDF pages with aspect ratio preserved.
+- Complete RFI PDF fails explicitly when a DOC/DOCX/XLS/XLSX or unsupported attachment needs a converter that is unavailable in the runtime.
+
+Watch after publish:
+- Roberto should run authenticated Replit acceptance for create/edit/reload/export with real project data.
+- Verify River Avenue PDF page boxes and rotations in the generated Complete RFI PDF package.
+- Decide whether production will support Office-to-PDF conversion through a deployed converter service/runtime capability.
+- Viewpoint screenshot crop/replace/reset controls still need product-backed persistence before they should be treated as complete.
+
 ### Schedule / Coordination Planner
 Shipped commit: 2f9093b - Build coordination planner schedule.
 
