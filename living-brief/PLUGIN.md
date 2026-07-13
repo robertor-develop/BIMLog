@@ -3,9 +3,21 @@
 Owned/hand-edited. This disk copy is the seed; the in-app Living Brief serves PLUGIN.md from
 the DB, so after editing here also "Paste to Update" in-app to refresh the shown version.
 
+## Governance and acceptance
+
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine authority
+beneath Roberto's explicit current instruction. This document owns Navisworks plugin architecture,
+2021/2025 source synchronization, build, packaging, and field-verification rules. Apply
+[QUALITY.md's Evidence and Release Quality Gate](./QUALITY.md#evidence-and-release-quality-gate),
+including separate source, build, package, installation, live, and field-verification states.
+When a plugin decision implicates standards metadata, applicability, evidence expectations, or
+claims, use [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md); do not infer compliance from similar
+behavior.
+
 ## Build + versioning + packaging
-- Two physical builds, same `.cs` source EXCEPT `BIMLogLensPanel.cs` must be kept in sync
-  (only file that diverges) and the `.csproj` DLL refs differ:
+- Two physical builds must be reviewed and synchronized together. Preserve the documented,
+  intentional `BIMLogLensPanel.cs` differences and the different `.csproj` DLL references while
+  keeping shared behavior aligned:
   - Navisworks 2021: `C:\Dev\BIMLogPlugin\BIMLogNavisPlugin` (Roberto's machine). Deploy:
     close all `*Navis*`/`*Roamer*` processes, then copy `bin\Debug\net48\*.dll/.pdb` into
     `C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\`.
@@ -15,7 +27,8 @@ the DB, so after editing here also "Paste to Update" in-app to refresh the shown
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
   README revision + write a per-revision update .txt covering the delta. Current: v1.6.3.
-  Shared source is `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` (keep both in sync 2021/2025).
+  Shared logic in `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` must be reviewed in both physical
+  copies for every shared change; preserve intentional version-specific differences.
 
 ## The shared display contract (DONE — was the big open item)
 Plugin viewpoint DisplayName and the platform table use the SAME clean field set. Plugin name:

@@ -3,6 +3,10 @@
 This file is the operating manual for any AI development partner (Codex / Claude / Replit Agent)
 working on BIMLog. Read it at the start of every session before making changes.
 
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine authority
+beneath Roberto's explicit current instruction. This manual owns agent execution rules; it does
+not redefine ecosystem identity, permanent product laws, standards metadata, or acceptance rules.
+
 Preferred future filename: AI_DEV.md. Keep CLAUDE.md as a compatibility alias until the
 Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
@@ -32,12 +36,14 @@ Roberto's decision.
 ## Owner authority and document precedence
 Development governance follows this hierarchy:
 1. Roberto's explicit current instruction.
-2. ECOSYSTEM_DOCTRINE.md.
-3. CLAUDE.md / future AI_DEV.md execution rules.
-4. QUALITY.md acceptance requirements.
-5. Module-specific documents such as PLUGIN.md and REPORT_DESIGN_SYSTEM.md.
-6. STATUS.md and OPEN_LOOP.md current-state registers.
-7. AUDIT.md append-only history.
+2. [ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md).
+3. [CLAUDE.md](./CLAUDE.md) / future AI_DEV.md execution rules.
+4. [QUALITY.md](./QUALITY.md) acceptance requirements.
+5. Relevant module documents such as [PLUGIN.md](./PLUGIN.md) and
+   [REPORT_DESIGN_SYSTEM.md](./REPORT_DESIGN_SYSTEM.md).
+6. [STATUS.md](./STATUS.md) current implementation state and
+   [OPEN_LOOP.md](./OPEN_LOOP.md) unfinished work.
+7. [AUDIT.md](./AUDIT.md) append-only history.
 
 Agents may not override the Living Brief with invented restrictions or assumptions. Ask
 Roberto when governing documents genuinely conflict. A newer explicit Roberto decision
@@ -45,6 +51,22 @@ requires the affected Living Brief document to be updated. Technical implementat
 remain governed by the relevant module document when they do not conflict with higher
 doctrine. The Living Brief exists specifically to prevent repeated instructions and agent
 assumptions.
+
+### Mandatory reading order
+
+Before making changes, read in this order:
+
+1. [ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md)
+2. [CLAUDE.md](./CLAUDE.md)
+3. [QUALITY.md](./QUALITY.md)
+4. Relevant module documents
+5. [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md) when standards are implicated
+6. [STATUS.md](./STATUS.md)
+7. [OPEN_LOOP.md](./OPEN_LOOP.md)
+8. [AUDIT.md](./AUDIT.md) when historical evidence is required
+
+`STANDARDS_REGISTER.md` owns verified standards titles, editions, applicability, evidence
+expectations, and claim restrictions. Do not duplicate or infer that metadata here.
 
 ## Master Codex / focused task-chat operating rule
 - When Roberto designates the current Codex task as the master coordinator, it verifies the
@@ -122,7 +144,7 @@ Replit, published, live verified, and customer/field verified. Never collapse th
 "complete." Publishing, production migration, DLL installation, external deployment, and
 production-data mutation require Roberto's explicit approval.
 
-### Builder self-certification and prohibited proxies
+### Builder evidence and prohibited proxies
 The task that implements a change may report evidence but may not approve its own acceptance
 gate. The master coordinator or Roberto must independently inspect the evidence. A builder's
 claim that work is "complete," "verified," or "passed" remains provisional until independent

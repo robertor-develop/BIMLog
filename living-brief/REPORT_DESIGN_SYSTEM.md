@@ -2,6 +2,15 @@
 
 Audit date: 2026-07-10 (Phase 2)
 
+## Governance and ownership
+
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine authority
+beneath Roberto's explicit current instruction. This document owns report inventory, visual
+specifications, and presentation requirements. All formal outputs must follow the doctrine's
+[native-document-fidelity requirement](./ECOSYSTEM_DOCTRINE.md#bimlogs-permanent-product-laws)
+and pass [QUALITY.md's Artifact Gate](./QUALITY.md#evidence-and-release-quality-gate). A generated
+file, successful download, or build does not by itself prove artifact quality or field acceptance.
+
 ## Central system
 
 - Theme registry and shared PDF primitives: `artifacts/api-server/src/lib/pdf-kit.ts`

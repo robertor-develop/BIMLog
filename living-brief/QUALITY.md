@@ -5,6 +5,12 @@ The original PDFs are Spanish scanned source documents; this Living Brief entry 
 English operational version for BIMLog, IgniteSmart, BIMCapital, and all AI development
 partners.
 
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine authority
+beneath Roberto's explicit current instruction and owns BIMLog's permanent product laws. This
+document owns operational Quality 4.0 acceptance requirements and evidence outcomes. Verified
+standards titles, editions, applicability, evidence expectations, and claim restrictions belong
+only in [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md).
+
 ## Source
 - Calidad 4.0 Part 1.pdf: 120 scanned pages.
 - Calidad 4.0 Part 2.pdf: 36 scanned pages.
@@ -28,6 +34,9 @@ auditable construction data.
 ## BIMLog Quality Law
 BIMLog must stay spreadsheet-simple for field users while quietly producing data that is
 twin-ready, audit-ready, report-ready, and AI-ready.
+
+This is an operational quality requirement under the permanent product laws in
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md), not a replacement authority.
 
 Every feature must answer:
 - What is the record?
@@ -302,7 +311,9 @@ clearer, and with less risk.
 ## Open Loop Control - Mandatory Quality Gate
 
 Customer feedback is now treated as a quality record, not as chat memory.
-Every request, bug, complaint, or workflow gap that changes product behavior must be captured in STATUS.md under the Open Loop Register until closed.
+Every request, bug, complaint, or workflow gap that changes product behavior must be captured in
+[OPEN_LOOP.md](./OPEN_LOOP.md) until closed. [STATUS.md](./STATUS.md) records current
+implementation state; it does not own unfinished work.
 
 Allowed states:
 - Shipped: code/docs/package were built and committed.
@@ -332,6 +343,6 @@ Customer feedback closeout checklist:
 
 This is the prevention mechanism for limbo work: no invisible backlog, no forgotten widget, no orphaned feature, no duplicate workflow.
 Additional enforcement:
-- The Open Loop Register in STATUS.md is the source of truth for unfinished customer feedback.
+- [OPEN_LOOP.md](./OPEN_LOOP.md) is the source of truth for unfinished customer feedback.
 - A feature is not ready for customer retest until code, exports/reports, guidance, release note, commit/push, publish/package status, and real workflow verification are accounted for.
 - If a request includes multiple examples, extract the underlying category and audit the whole category, not only the first example.

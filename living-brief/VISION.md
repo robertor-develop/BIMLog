@@ -1,5 +1,13 @@
 # VISION.md - Product Vision and Agent Architecture
 
+## Governance and ownership
+
+This document owns BIMLog's roadmap, markets, agent architecture, future products, and long-term
+direction. [ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine
+authority beneath Roberto's explicit current instruction and governs current ecosystem identity
+and permanent product laws. Vision statements do not amend that doctrine or prove current
+implementation.
+
 ## The big idea
 BIMLog should run itself like a company. It is not just a coordination tool; it is the
 operating system for construction coordination, with an agent organization that watches,
@@ -13,7 +21,7 @@ coordination, document, RFI, submittal, field, and handover data is messy. BIMLo
 making that data clean, traceable, simple to use, and useful before the owner ever asks for
 a full digital twin.
 
-## Product law: spreadsheet-simple, twin-ready
+## Roadmap design principle: spreadsheet-simple, twin-ready
 BIMLog must stay as easy to understand as a spreadsheet with a matching folder of PDFs, while
 quietly producing structured data that can power advanced BIM, AI, and owner operations.
 
@@ -28,9 +36,10 @@ quietly producing structured data that can power advanced BIM, AI, and owner ope
   transmittals, change orders, viewpoints, clashes, companies, contacts, floors, trades,
   systems, documents, photos, reports, and audit history.
 
-## Quality 4.0 doctrine
+## Quality 4.0 direction
 The Calidad 4.0 source material is now part of BIMLog's product doctrine, documented in
-QUALITY.md. Its practical meaning for BIMLog is:
+[QUALITY.md](./QUALITY.md) as operational quality requirements beneath
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md). Its practical meaning for BIMLog is:
 
 - Quality is not inspection at the end. Quality is a live operating system of people,
   process, data, technology, ethics, and continuous improvement.
@@ -79,7 +88,12 @@ records, field verification, IoT, GIS, energy, sustainability, and operations.
 4. Build handover packages from verified construction records.
 5. Expand into digital twin operations once the data foundation is trusted.
 
-## The ecosystem - BIMCapital Partners INC
+## Ecosystem roadmap context
+
+Current ecosystem identity and entity boundaries are governed by
+[ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md). The summary below provides roadmap context
+only and must be reconciled to that doctrine when identity changes.
+
 - BIMCapital Partners INC (USA) is the holding company that receives all revenue.
 - IgniteSmart is the commercial brand. It sells BIMLog and ACCA software in Bolivia.
 - BIMInvest IBC (Panama) owns UrbanInvest, a real estate tokenization platform with 51 active
@@ -166,7 +180,8 @@ BIMLog runs itself like a company. Agents operate at five layers continuously.
 19. Offline Mode: queues locally, syncs on reconnect.
 20. Subcontractor Portal: each trade sees only their issues.
 21. Clash Report Watermarking: branded, timestamped PDFs.
-22. ISO 19650 Compliance Agent: continuous monitoring.
+22. Standards Alignment Agent: evaluates scoped alignment using the verified metadata, evidence
+    expectations, and claim restrictions in [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md).
 23. Digital Twin Handover: coordination decisions become owner-ready building memory.
 24. BIMLog Mobile: field access, photo attach, mark resolved on site.
 25. Auto-Update: plugin checks for updates on startup.
