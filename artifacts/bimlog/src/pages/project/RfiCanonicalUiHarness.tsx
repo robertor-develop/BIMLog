@@ -1,121 +1,92 @@
-import {
-  RfiSectionDistributionResponses,
-  RfiSectionHeaderStatus,
-  RfiSectionImpact,
-  RfiSectionQuestion,
-  RfiSectionReferencesAttachments,
-  RfiSectionSubmittedBy,
-  RfiSectionSubmittedTo,
-} from "./RfisTab";
+import { RfiCanonicalForm } from "./RfisTab";
 
 type HarnessState = {
   slug: string;
-  title: string;
   mode: "create" | "view" | "edit";
-  state: string;
+  recordState: "new" | "draft" | "sent" | "closed" | "reopened" | "revised";
+  subject: string;
   status: string;
-  primaryAction: string;
-  secondaryActions: string[];
   hasViewpoint?: boolean;
-  cost: "No Cost Impact" | "Cost Increase TBD" | "Cost Increase Known" | "Cost Decrease";
-  schedule: "No Schedule Impact" | "Increase in Calendar Days" | "Decrease in Calendar Days";
-  responseAllowed: boolean;
+  canRespond?: boolean;
+  costImpact: string;
+  scheduleImpact: string;
 };
 
 export const rfiCanonicalUiHarnessStates: HarnessState[] = [
-  { slug: "new-rfi", title: "New RFI", mode: "create", state: "New RFI", status: "Draft", primaryAction: "Submit RFI", secondaryActions: ["Cancel"], cost: "Cost Increase TBD", schedule: "Increase in Calendar Days", responseAllowed: false },
-  { slug: "viewpoint-created-rfi", title: "Viewpoint-created RFI", mode: "create", state: "New RFI from Viewpoint", status: "Draft", primaryAction: "Submit RFI", secondaryActions: ["Cancel", "Jump to Viewpoint"], hasViewpoint: true, cost: "Cost Increase Known", schedule: "Increase in Calendar Days", responseAllowed: false },
-  { slug: "existing-draft-rfi", title: "Existing draft RFI", mode: "view", state: "Existing RFI / Not sent", status: "Open", primaryAction: "Edit RFI", secondaryActions: ["RFI PDF", "Complete RFI PDF", "RFI DOCX", "RFI Audit PDF", "Close RFI", "Raise Change Order"], cost: "No Cost Impact", schedule: "No Schedule Impact", responseAllowed: false },
-  { slug: "sent-rfi", title: "Sent RFI", mode: "view", state: "Existing RFI / Sent RFI", status: "Open", primaryAction: "Edit RFI", secondaryActions: ["RFI PDF", "Complete RFI PDF", "RFI DOCX", "RFI Audit PDF", "Close RFI", "Save Response", "Jump to Viewpoint", "Raise Change Order"], hasViewpoint: true, cost: "Cost Decrease", schedule: "Decrease in Calendar Days", responseAllowed: true },
-  { slug: "closed-rfi", title: "Closed RFI", mode: "view", state: "Closed RFI", status: "Closed", primaryAction: "Reopen RFI", secondaryActions: ["Edit RFI", "RFI PDF", "Complete RFI PDF", "RFI DOCX", "RFI Audit PDF", "Jump to Viewpoint", "Raise Change Order"], hasViewpoint: true, cost: "Cost Increase Known", schedule: "No Schedule Impact", responseAllowed: false },
-  { slug: "reopened-rfi", title: "Reopened RFI", mode: "view", state: "Reopened RFI", status: "Open", primaryAction: "Close RFI", secondaryActions: ["Edit RFI", "RFI PDF", "Complete RFI PDF", "RFI DOCX", "RFI Audit PDF", "Save Response", "Raise Change Order"], cost: "Cost Increase TBD", schedule: "Increase in Calendar Days", responseAllowed: true },
-  { slug: "existing-edit-rfi", title: "Existing draft RFI - Edit", mode: "edit", state: "Existing RFI / Edit mode", status: "Open", primaryAction: "Save RFI", secondaryActions: ["Cancel"], cost: "Cost Increase Known", schedule: "Increase in Calendar Days", responseAllowed: false },
-  { slug: "sent-edit-rfi", title: "Sent RFI - Edit", mode: "edit", state: "Sent RFI / Edit mode", status: "Open", primaryAction: "Save RFI", secondaryActions: ["Cancel", "Save Response"], hasViewpoint: true, cost: "Cost Decrease", schedule: "Decrease in Calendar Days", responseAllowed: true },
-  { slug: "closed-edit-rfi", title: "Closed RFI - Edit", mode: "edit", state: "Closed RFI / Edit mode", status: "Closed", primaryAction: "Save RFI", secondaryActions: ["Cancel", "Reopen RFI"], hasViewpoint: true, cost: "Cost Increase TBD", schedule: "No Schedule Impact", responseAllowed: false },
+  { slug: "new-rfi", mode: "create", recordState: "new", subject: "New RFI", status: "draft", costImpact: "Cost Increase TBD", scheduleImpact: "Increase in Calendar Days" },
+  { slug: "viewpoint-created-rfi", mode: "create", recordState: "new", subject: "Viewpoint-created RFI", status: "draft", hasViewpoint: true, costImpact: "Cost Increase Known", scheduleImpact: "Increase in Calendar Days" },
+  { slug: "existing-draft-rfi", mode: "view", recordState: "draft", subject: "Existing draft RFI", status: "open", costImpact: "No Cost Impact", scheduleImpact: "No Schedule Impact" },
+  { slug: "existing-draft-edit-rfi", mode: "edit", recordState: "draft", subject: "Existing draft RFI - Edit", status: "open", costImpact: "Cost Increase Known", scheduleImpact: "Increase in Calendar Days" },
+  { slug: "sent-rfi", mode: "view", recordState: "sent", subject: "Sent RFI", status: "open", hasViewpoint: true, canRespond: true, costImpact: "Cost Decrease", scheduleImpact: "Decrease in Calendar Days" },
+  { slug: "sent-edit-rfi", mode: "edit", recordState: "sent", subject: "Sent RFI - Edit", status: "open", hasViewpoint: true, canRespond: true, costImpact: "Cost Decrease", scheduleImpact: "Decrease in Calendar Days" },
+  { slug: "closed-rfi", mode: "view", recordState: "closed", subject: "Closed RFI", status: "closed", hasViewpoint: true, costImpact: "Cost Increase Known", scheduleImpact: "No Schedule Impact" },
+  { slug: "closed-edit-rfi", mode: "edit", recordState: "closed", subject: "Closed RFI - Edit", status: "closed", hasViewpoint: true, costImpact: "Cost Increase TBD", scheduleImpact: "No Schedule Impact" },
+  { slug: "reopened-rfi", mode: "view", recordState: "reopened", subject: "Reopened RFI", status: "open", canRespond: true, costImpact: "Cost Increase TBD", scheduleImpact: "Increase in Calendar Days" },
+  { slug: "reopened-edit-rfi", mode: "edit", recordState: "reopened", subject: "Reopened RFI - Edit", status: "open", canRespond: true, costImpact: "Cost Increase TBD", scheduleImpact: "Increase in Calendar Days" },
 ];
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
-  return <div className={full ? "rfi-field full" : "rfi-field"}><span>{label}</span>{children}</div>;
-}
-
-function ImpactFields({ state }: { state: HarnessState }) {
-  const costReason = state.cost !== "No Cost Impact";
-  const costAmount = state.cost === "Cost Increase Known" || state.cost === "Cost Decrease";
-  const scheduleFields = state.schedule !== "No Schedule Impact";
-  return (
-    <div className="rfi-two">
-      <div className="rfi-panel">
-        <strong>Cost Impact</strong>
-        <div>{state.cost}</div>
-        {costAmount && <Field label="Cost Amount">$12,500</Field>}
-        {costReason && <Field label="Cost Reason / Explanation" full>Coordination change under review.</Field>}
-      </div>
-      <div className="rfi-panel">
-        <strong>Schedule Impact</strong>
-        <div>{state.schedule}</div>
-        {scheduleFields && <Field label="Calendar Days">5</Field>}
-        {scheduleFields && <Field label="Schedule Reason / Explanation" full>Lead time and resequencing.</Field>}
-      </div>
-    </div>
-  );
-}
+const noop = () => {};
 
 export function RfiCanonicalUiHarness({ state }: { state: HarnessState }) {
-  const mode = state.mode;
   return (
-    <div className="rfi-harness">
-      <div className="rfi-shell">
-        <div className="rfi-top">
-          <div>
-            <div className="rfi-state">{state.state}</div>
-            <h1>{state.title}</h1>
-            <span className="rfi-chip">{state.status}</span>
-            <span className="rfi-chip">P2 High</span>
-            <span className="rfi-chip">Coordination</span>
-          </div>
-          <div className="rfi-actions">
-            <button className="primary">{state.primaryAction}</button>
-            {state.secondaryActions.map(action => <button key={action} className={action === "Close RFI" ? "danger" : ""}>{action}</button>)}
-          </div>
-        </div>
-        <div className="rfi-content">
-          <RfiSectionHeaderStatus lang="en" mode={mode}>
-            <div className="rfi-grid">
-              <Field label="RFI number">{mode === "create" ? "Assigned after save" : "RFI-0081"}</Field>
-              <Field label="Project">River Avenue East</Field>
-              <Field label="Subject/title" full>{state.title}</Field>
-              <Field label="Status / Priority / Type">{state.status} / P2 High / Coordination</Field>
-              <Field label="Date Requested">Jul 13, 2026</Field>
-              <Field label="Date Required">Jul 20, 2026</Field>
-              <Field label="Days Outstanding">{mode === "create" ? "After save" : "4d"}</Field>
-              <Field label="Date Answered">{state.status === "Closed" ? "Jul 18, 2026" : "-"}</Field>
-            </div>
-          </RfiSectionHeaderStatus>
-          <RfiSectionSubmittedBy lang="en" mode={mode}>
-            <div className="rfi-grid"><Field label="Company">BIMCorp Inc</Field><Field label="Contact/person">Roberto Test 1</Field><Field label="Address" full>123 Project Office, New York, NY</Field><Field label="Phone">+1 555 0100</Field><Field label="Email">roberto@bimcorpinc.com</Field></div>
-          </RfiSectionSubmittedBy>
-          <RfiSectionSubmittedTo lang="en" mode={mode}>
-            <div className="rfi-grid"><Field label="Company">Design Partner LLC</Field><Field label="Contact/person">Jane Reviewer</Field><Field label="Address" full>Project directory address</Field><Field label="Phone">+1 555 0200</Field><Field label="Email">jane@design.example</Field></div>
-          </RfiSectionSubmittedTo>
-          <RfiSectionReferencesAttachments lang="en" mode={mode}>
-            <div className="rfi-grid"><Field label="Drawing number">A-401</Field><Field label="Drawing title">B1 Fire Protection</Field><Field label="Spec section">05 12 00</Field><Field label="Detail number">5/A-301</Field><Field label="Note number">Note 3</Field><Field label="Location" full>B1 Fire Protection, Grid B2</Field><Field label="References / attachments" full>SK-105 Rev2.pdf | Grid B2 Field Photo.jpg | Add Reference | Upload File</Field>{state.hasViewpoint && <Field label="Viewpoint image" full>Viewpoint preview shown here. Include/exclude and order controls available when editable.</Field>}<Field label="Package selection/order" full>Human-readable attachment names only. No numeric crop controls.</Field></div>
-          </RfiSectionReferencesAttachments>
-          <RfiSectionQuestion lang="en" mode={mode}>
-            <Field label="Question" full>Clarify the fire protection coordination conflict at B1 before fabrication.</Field>
-            <button>Generate Question with AI</button>
-            <p>Text-only AI uses credits and does not read attachments unless file-reading AI is explicitly used.</p>
-          </RfiSectionQuestion>
-          <RfiSectionImpact lang="en" mode={mode}><ImpactFields state={state} /></RfiSectionImpact>
-          <RfiSectionDistributionResponses lang="en" mode={mode}>
-            <Field label="Distribution" full>Jane Reviewer, PM Team, BIM Coordinator</Field>
-            <Field label="Description of Email" full>Please respond with detail SK and impact confirmation.</Field>
-            <button>Generate Email with AI</button>
-            <button>Copy Email</button>
-            <Field label="Responses" full>{state.responseAllowed ? "Official response controls visible. Save Response when permitted." : "Responses are view-only or unavailable in this state."}</Field>
-            {state.responseAllowed && <button className="primary">Save Response</button>}
-          </RfiSectionDistributionResponses>
-        </div>
-      </div>
-    </div>
+    <RfiCanonicalForm
+      lang="en"
+      mode={state.mode}
+      recordState={state.recordState}
+      values={{
+        number: state.recordState === "new" ? undefined : "RFI-0081",
+        projectName: "River Avenue East",
+        subject: state.subject,
+        status: state.status,
+        priority: "high",
+        rfiType: "Coordination",
+        dateRequested: "2026-07-13",
+        dateRequired: "2026-07-20",
+        daysOutstanding: state.recordState === "new" ? "" : "4d",
+        dateAnswered: state.recordState === "closed" ? "2026-07-18" : "",
+        submittedByCompany: "BIMCorp Inc",
+        submittedByContact: "Roberto Test 1",
+        submittedByAddress: "123 Project Office, New York, NY",
+        submittedByPhone: "+1 555 0100",
+        submittedByEmail: "roberto@bimcorpinc.com",
+        submittedToCompany: "Design Partner LLC",
+        submittedToPerson: "Jane Reviewer",
+        submittedToAddress: "Project directory address",
+        submittedToPhone: "+1 555 0200",
+        submittedToEmail: "jane@design.example",
+        drawingNumber: "A-401",
+        drawingTitle: "B1 Fire Protection",
+        specSection: "05 12 00",
+        detailNumber: "5/A-301",
+        noteNumber: "Note 3",
+        locationDescription: "B1 Fire Protection, Grid B2",
+        referenceInput: "",
+        question: "Clarify the fire protection coordination conflict at B1 before fabrication.",
+        costImpact: state.costImpact,
+        costImpactAmount: state.costImpact === "No Cost Impact" || state.costImpact === "Cost Increase TBD" ? "" : "$12,500",
+        costImpactReason: state.costImpact === "No Cost Impact" ? "" : "Coordination change under review.",
+        scheduleImpact: state.scheduleImpact,
+        scheduleImpactDays: state.scheduleImpact === "No Schedule Impact" ? "" : "5",
+        scheduleImpactReason: state.scheduleImpact === "No Schedule Impact" ? "" : "Lead time and resequencing.",
+        distributionList: ["Jane Reviewer", "PM Team", "BIM Coordinator"],
+        emailDescription: "Please respond with detail SK and impact confirmation.",
+        emailDraft: "Please review the RFI question and provide a coordinated response.",
+        responseText: "",
+      }}
+      permissions={{ canEdit: true, canRespond: !!state.canRespond, canClose: state.recordState !== "closed", canReopen: state.recordState === "closed", canExport: state.recordState !== "new", canRaiseChangeOrder: state.recordState !== "new", canJumpViewpoint: !!state.hasViewpoint }}
+      references={["SK-105 Rev2.pdf"]}
+      attachments={["Grid B2 Field Photo.jpg"]}
+      imagePresentation={state.hasViewpoint ? { sourceFileId: 99, includeInCompletePdf: true, crop: null } : null}
+      packageItems={[{ key: "fixture:1", label: "SK-105 Rev2.pdf", include: true, order: 0 }]}
+      responses={state.canRespond ? [{ text: "Official response controls visible when permitted.", by: "Reviewer" }] : []}
+      actions={{ submit: noop, cancel: noop, "save-rfi": noop, "save-response": noop, edit: noop, close: noop, reopen: noop, "export-pdf": noop, "export-complete-pdf": noop, "export-docx": noop, "export-audit-pdf": noop, "jump-viewpoint": noop, "raise-change-order": noop }}
+      onChange={noop}
+      onAddReference={noop}
+      onRemoveReference={noop}
+      onUploadFile={noop}
+      onGenerateQuestionAi={noop}
+      onGenerateEmailAi={noop}
+      onCopyEmail={noop}
+    />
   );
 }

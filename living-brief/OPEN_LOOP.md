@@ -368,6 +368,17 @@ Evidence note:
 - PNG screenshot capture was attempted with Playwright, but this machine has neither Playwright's browser payload nor a local Chrome/Edge executable available. No browser was installed because the correction request forbids system installation.
 - Do not mark Build 1 accepted until Roberto captures/reviews the nine required harness or production screenshots with a browser available.
 
+Correction 2:
+- Starting commit: dff68daae9a8b023c3ac92d9f2569f4575cd9c4d.
+- The prior heading-wrapper pattern was rejected because it still allowed separate create/detail/harness field markup.
+- `RfiCanonicalForm` now owns the canonical seven-section field markup and renders through `RfiActionBar`.
+- `RfiCreatePanel`, `RfiDetailPanel`, and `RfiCanonicalUiHarness` all render `RfiCanonicalForm`.
+- The `RfiSection...children` wrapper components were removed.
+- The harness no longer defines its own `Field`, `ImpactFields`, section wrappers, or action labels; it supplies fixture values and no-op callbacks only.
+- Source proof searches passed for the three `RfiCanonicalForm` call sites and absence of the rejected wrapper/field helper patterns.
+- Screenshot capture was retried with the requested existing Chrome executable path (`C:\Program Files\Google\Chrome\Application\chrome.exe`). Chrome launched through Playwright, but localhost Vite startup could not be kept running in this sandbox: direct background process launch hit Windows PATH/environment issues, PowerShell job launch required escalation for Vite temp files, then Vite required `PORT`, and the final `Start-Process -UseNewEnvironment` path caused Node CSPRNG initialization failure. No browser or system package was installed.
+- Do not mark Build 1 accepted until the ten requested screenshots are captured from `artifacts/bimlog/rfi-canonical-harness.html` or the live app with Vite bound to `127.0.0.1`.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings
