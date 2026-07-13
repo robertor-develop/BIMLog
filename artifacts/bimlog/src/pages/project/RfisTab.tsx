@@ -19,7 +19,7 @@ import {
   RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
   Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
   Send, Copy, Check, PenLine, Navigation, ChevronLeft, FolderOpen,
-  Upload, Camera, Clipboard, Crop, RotateCcw, ArrowUp, ArrowDown,
+  Upload, Camera, Clipboard, RotateCcw, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { logClientError } from "@/lib/client-log";
@@ -87,7 +87,6 @@ type PendingImage = {
   file: File;
   url: string;
   mode: "source" | "replacement";
-  crop: { x: number; y: number; width: number; height: number };
 };
 
 function fileIdFromAttachment(value: string): number | null {
@@ -947,7 +946,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     }
     setPendingImage(prev => {
       if (prev?.url) URL.revokeObjectURL(prev.url);
-      return { file, url: URL.createObjectURL(file), mode: "source", crop: { x: 0, y: 0, width: 1, height: 1 } };
+      return { file, url: URL.createObjectURL(file), mode: "source" };
     });
   };
 
@@ -1182,7 +1181,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
         <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
       </button>
@@ -1462,22 +1461,13 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             ))}
             {pendingImage && (
               <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review and crop image before attaching", "Revise y recorte la imagen antes de adjuntar", lang)}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div>
                 <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                  {(["x", "y", "width", "height"] as const).map(key => (
-                    <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                      {key.toUpperCase()}
-                      <input type="number" min="0" max="1" step="0.01" value={pendingImage.crop[key]} onChange={e => {
-                        const value = Math.max(0, Math.min(1, Number(e.target.value)));
-                        setPendingImage(prev => prev ? { ...prev, crop: { ...prev.crop, [key]: value } } : prev);
-                      }} style={{ width: "100%", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "5px 8px", background: "hsl(var(--background))" }} />
-                    </label>
-                  ))}
+                  <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div>
                 </div>
                 <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <Button type="button" size="sm" onClick={async () => { await uploadAttachment(pendingImage.file, pendingImage.crop); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingAtt} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{w("Attach Cropped Image", "Adjuntar Imagen Recortada", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setPendingImage(prev => prev ? { ...prev, crop: { x: 0, y: 0, width: 1, height: 1 } } : prev)} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                  <Button type="button" size="sm" onClick={async () => { await uploadAttachment(pendingImage.file, null); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingAtt} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button>
                   <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
                 </div>
               </div>
@@ -2388,7 +2378,7 @@ ${hasResp ? `
     }
     setPendingImage(prev => {
       if (prev?.url) URL.revokeObjectURL(prev.url);
-      return { file, url: URL.createObjectURL(file), mode, crop: imagePresentation?.crop || { x: 0, y: 0, width: 1, height: 1 } };
+      return { file, url: URL.createObjectURL(file), mode };
     });
   };
 
@@ -2552,7 +2542,7 @@ ${hasResp ? `
   );
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
         <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
       </button>
@@ -2777,7 +2767,7 @@ ${hasResp ? `
           )}
 
           <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted By", "Enviado Por", lang)}</div>
@@ -2803,9 +2793,10 @@ ${hasResp ? `
                 </>
               )}
             </div>
+            <SectionHeader title={w("3. Submitted To", "3. Enviado A", lang)} />
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("3. Submitted To", "3. Enviado A", lang)}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted To", "Enviado A", lang)}</div>
                 {canWrite && !infoEdit && (
                   <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
                 )}
@@ -2931,40 +2922,22 @@ ${hasResp ? `
                   <Button type="button" size="sm" variant="outline" onClick={() => imageReplacementInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><RefreshCw style={{ width: 11, height: 11 }} />{w("Replace Image", "Reemplazar Imagen", lang)}</Button>
                   <Button type="button" size="sm" variant="outline" onClick={pasteImageEvidence} style={{ fontSize: 11, gap: 4 }}><Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}</Button>
                   <Button type="button" size="sm" variant="outline" onClick={captureScreenImage} style={{ fontSize: 11, gap: 4 }}><Camera style={{ width: 11, height: 11 }} />{w("Capture Screen", "Capturar Pantalla", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }))} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{imagePresentation?.crop ? w("Re-crop", "Recortar de Nuevo", lang) : w("Crop Image", "Recortar Imagen", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: null }))} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                  {imagePresentation?.crop && (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: null }))} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Clear Saved Crop", "Borrar Recorte Guardado", lang)}</Button>
+                  )}
                 </div>
                 {imagePresentation?.crop && (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                    {(["x", "y", "width", "height"] as const).map(key => (
-                      <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                        {key.toUpperCase()}
-                        <input type="number" min="0" max="1" step="0.01" value={imagePresentation.crop?.[key] ?? 0} onChange={e => {
-                          const value = Math.max(0, Math.min(1, Number(e.target.value)));
-                          setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: { x: prev?.crop?.x ?? 0, y: prev?.crop?.y ?? 0, width: prev?.crop?.width ?? 1, height: prev?.crop?.height ?? 1, [key]: value } }));
-                        }} style={{ ...infoInput, marginTop: 2 }} />
-                      </label>
-                    ))}
+                  <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                    {w("This RFI has saved crop metadata. It will be preserved for exports until you clear it or the dedicated visual crop tool ships.", "Este RFI tiene datos de recorte guardados. Se conservaran para exportaciones hasta que los borre o se publique la herramienta visual dedicada.", lang)}
                   </div>
                 )}
                 {pendingImage && (
                   <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review and crop image before attaching", "Revise y recorte la imagen antes de adjuntar", lang)}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div>
                     <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                      {(["x", "y", "width", "height"] as const).map(key => (
-                        <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                          {key.toUpperCase()}
-                          <input type="number" min="0" max="1" step="0.01" value={pendingImage.crop[key]} onChange={e => {
-                            const value = Math.max(0, Math.min(1, Number(e.target.value)));
-                            setPendingImage(prev => prev ? { ...prev, crop: { ...prev.crop, [key]: value } } : prev);
-                          }} style={infoInput} />
-                        </label>
-                      ))}
-                    </div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div>
                     <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      <Button type="button" size="sm" onClick={async () => { await uploadImageEvidence(pendingImage.file, pendingImage.mode); setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: pendingImage.crop })); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingDoc} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{w("Attach Cropped Image", "Adjuntar Imagen Recortada", lang)}</Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => setPendingImage(prev => prev ? { ...prev, crop: { x: 0, y: 0, width: 1, height: 1 } } : prev)} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                      <Button type="button" size="sm" onClick={async () => { await uploadImageEvidence(pendingImage.file, pendingImage.mode); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingDoc} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button>
                       <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
                     </div>
                   </div>

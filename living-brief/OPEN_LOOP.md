@@ -122,6 +122,33 @@ Verification required before customer retest:
   environment during this pass, so River Avenue page boxes were not programmatically recorded here.
 - Publish status: not published.
 
+2026-07-13 Build 1 - Canonical RFI UI:
+- Scope: browser UI only for the canonical RFI 1-7 structure. No export routes, PDF/DOCX/Audit
+  PDF/Complete PDF generation, Office conversion, plugin code, production data, environment,
+  services, or database behavior were changed.
+- Completed: widened the RFI create/detail containers to use desktop content width more
+  responsibly and removed the narrow floating form presentation shown in rejection screenshots.
+- Completed: existing RFI detail now separates Section 3 Submitted To from Section 2 Submitted By
+  with its own visible section header instead of rendering "3. Submitted To" inside the Section 2
+  card.
+- Completed: removed the fake numeric crop UI and the predetermined 10 percent crop action from
+  browser RFI controls. Existing saved crop metadata is preserved and can be cleared, but real
+  visual crop tooling remains a later gated build.
+- Completed: Section 4 keeps references, attachments, viewpoint preview, package include/exclude,
+  and package order controls together. Section 5 remains question and AI question assist. Section 6
+  keeps cost/schedule conditionals with their related fields. Section 7 keeps distribution, email,
+  Copy Email, and responses together.
+- Screenshot evidence generated at desktop viewport:
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\new-rfi.png`
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\viewpoint-created-rfi.png`
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\existing-draft-rfi.png`
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\sent-rfi.png`
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\closed-rfi.png`
+  - `C:\Users\soporte\AppData\Local\Temp\rfi-ui-acceptance-build1\reopened-rfi.png`
+- Deferred: export quality changes and real snipping-tool-style visual crop implementation remain
+  for later gated builds. The screenshots are deterministic UI acceptance evidence, not a publish
+  or production-data verification.
+
 ### Platform-Wide Report Design System
 
 Shipped first implementation scope on 2026-07-10:
