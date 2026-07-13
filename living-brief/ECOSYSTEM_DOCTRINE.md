@@ -152,7 +152,7 @@ QUALITY.md, PLUGIN.md, and REPORT_DESIGN_SYSTEM.md.
 ## Standards-alignment policy
 
 BIMLog is standards-aligned by deliberate, evidence-based design; alignment is not a marketing
-shortcut. `STANDARDS_REGISTER.md` will be the maintained source for exact standard titles,
+shortcut. `STANDARDS_REGISTER.md` is the maintained source for exact standard titles,
 editions, verification dates, applicability, evidence requirements, and restrictions on
 compliance or certification claims. Exact standards research belongs there, not in this doctrine.
 
