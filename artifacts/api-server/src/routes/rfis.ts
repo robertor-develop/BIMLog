@@ -1638,11 +1638,27 @@ async function renderImageAttachmentPdf(fileName: string, buffer: Buffer, crop?:
 }
 
 function libreOfficeExecutable(): string {
-  return process.env.LIBREOFFICE_PATH || process.env.SOFFICE_PATH || "soffice";
+  if (process.env.LIBREOFFICE_PATH) return process.env.LIBREOFFICE_PATH;
+  if (process.env.SOFFICE_PATH) return process.env.SOFFICE_PATH;
+  const windowsCandidates = [
+    "C:\\Program Files\\LibreOffice\\program\\soffice.com",
+    "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+  ];
+  const found = windowsCandidates.find(candidate => fs.existsSync(candidate));
+  return found || "soffice";
 }
 
 function convertOfficeToPdf(fileName: string, buffer: Buffer): Buffer {
   const ext = fileExtension(fileName);
+  if ((ext === "docx" || ext === "xlsx") && !buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
+    throw new Error(`${ext.toUpperCase()} file is corrupt or not a valid Office Open XML package`);
+  }
+  if (ext === "docx" && !buffer.includes(Buffer.from("word/"))) {
+    throw new Error("DOCX file is missing Word document parts");
+  }
+  if (ext === "xlsx" && !buffer.includes(Buffer.from("xl/workbook"))) {
+    throw new Error("XLSX file is missing workbook parts");
+  }
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-rfi-office-"));
   try {
     const inputPath = path.join(tempDir, `input.${ext}`);
@@ -1736,6 +1752,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
     if (packageItems.length > 0) {
       for (const item of packageItems.filter(item => item.include).sort((a, b) => a.order - b.order)) {
         const file = item.fileId ? filesById.get(item.fileId) : item.attachment ? allFiles.find(candidate => candidate.fileName === item.attachment) : null;
+        if (imagePresentation?.includeInCompletePdf === false && file && (file.id === imagePresentation.sourceFileId || file.id === imagePresentation.replacementFileId || file.source === "lens-viewpoint")) continue;
         addFileItem(item.label, file, true);
       }
     } else {

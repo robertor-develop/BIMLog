@@ -83,6 +83,13 @@ type RfiImagePresentation = {
   crop?: { x: number; y: number; width: number; height: number } | null;
 } | null;
 
+type PendingImage = {
+  file: File;
+  url: string;
+  mode: "source" | "replacement";
+  crop: { x: number; y: number; width: number; height: number };
+};
+
 function fileIdFromAttachment(value: string): number | null {
   const match = value.match(/\/files\/(\d+)\/download\b/i);
   if (!match) return null;
@@ -815,6 +822,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const [question, setQuestion] = useState(preload?.question || prefill?.question || "");
   const [attachments, setAttachments] = useState<string[]>(preload?.attachmentsJson || []);
   const [packageItems, setPackageItems] = useState<RfiPackageItem[]>(() => normalizePackageItems((preload as Rfi & { attachmentPackageJson?: unknown })?.attachmentPackageJson, preload?.attachmentsJson || [], []));
+  const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(() => (preload as Rfi & { imagePresentationJson?: RfiImagePresentation })?.imagePresentationJson || null);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [attachInput, setAttachInput] = useState("");
 
   const [costImpact, setCostImpact] = useState(preload?.costImpact || "No Cost Impact");
@@ -905,8 +914,9 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
   // Upload an attachment from the user's computer, then add its download URL.
   const attachFileRef = useRef<HTMLInputElement>(null);
+  const imageFileRef = useRef<HTMLInputElement>(null);
   const [uploadingAtt, setUploadingAtt] = useState(false);
-  const uploadAttachment = async (file: File) => {
+  const uploadAttachment = async (file: File, imageCrop?: { x: number; y: number; width: number; height: number } | null) => {
     setUploadingAtt(true);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -916,13 +926,68 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
       });
       if (!resp.ok) throw new Error("Upload failed");
-      const { downloadUrl } = await resp.json() as { downloadUrl: string };
+      const { downloadUrl, fileId, fileName } = await resp.json() as { downloadUrl: string; fileId: number; fileName: string };
       setAttachments(prev => [...prev, downloadUrl]);
+      if (file.type.startsWith("image/")) {
+        setImagePresentation({ sourceFileId: fileId, includeInCompletePdf: true, crop: imageCrop || null });
+        setPackageItems(prev => [...prev, { key: `file:${fileId}`, label: fileName, fileId, attachment: downloadUrl, source: "rfi-attachment", include: true, order: prev.length }]);
+      }
       toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
     } catch {
       toast({ title: w("Upload failed", "Error al subir", lang), variant: "destructive" });
     } finally {
       setUploadingAtt(false);
+    }
+  };
+
+  const beginPendingImage = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: w("Select an image file.", "Seleccione un archivo de imagen.", lang), variant: "destructive" });
+      return;
+    }
+    setPendingImage(prev => {
+      if (prev?.url) URL.revokeObjectURL(prev.url);
+      return { file, url: URL.createObjectURL(file), mode: "source", crop: { x: 0, y: 0, width: 1, height: 1 } };
+    });
+  };
+
+  const pasteCreateImage = async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const type = item.types.find(t => t.startsWith("image/"));
+        if (type) {
+          const blob = await item.getType(type);
+          beginPendingImage(new File([blob], "clipboard-rfi-image.png", { type }));
+          return;
+        }
+      }
+      toast({ title: w("Clipboard does not contain an image.", "El portapapeles no contiene una imagen.", lang), variant: "destructive" });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Clipboard image access was denied.", "Acceso a imagen del portapapeles denegado.", lang), variant: "destructive" });
+    }
+  };
+
+  const captureCreateImage = async () => {
+    try {
+      if (!navigator.mediaDevices?.getDisplayMedia) {
+        toast({ title: w("Screen capture is not supported in this browser.", "La captura de pantalla no es compatible con este navegador.", lang), variant: "destructive" });
+        return;
+      }
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      await video.play();
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      stream.getTracks().forEach(track => track.stop());
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Could not capture image");
+      beginPendingImage(new File([blob], "screen-capture-rfi-image.png", { type: "image/png" }));
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Screen capture unavailable or denied.", "Captura de pantalla no disponible o denegada.", lang), variant: "destructive" });
     }
   };
 
@@ -1077,6 +1142,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       distributionList: distList.length > 0 ? distList : undefined,
       attachmentsJson: attachments.length > 0 ? attachments : undefined,
       attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
+      imagePresentationJson: imagePresentation,
     };
     createRfi({
       projectId,
@@ -1110,6 +1176,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         distributionList: distList.length > 0 ? distList : undefined,
         attachmentsJson: attachments.length > 0 ? attachments : undefined,
         attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
+        imagePresentationJson: imagePresentation,
       },
     });
   };
@@ -1367,6 +1434,16 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
               <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
                 {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingAtt ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
               </Button>
+              <input ref={imageFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f); e.target.value = ""; }} />
+              <Button type="button" size="sm" variant="outline" onClick={() => imageFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
+                <Upload style={{ width: 11, height: 11 }} />{w("Upload Image", "Subir Imagen", lang)}
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={pasteCreateImage} style={{ fontSize: 11, gap: 4 }}>
+                <Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={captureCreateImage} style={{ fontSize: 11, gap: 4 }}>
+                <Camera style={{ width: 11, height: 11 }} />{w("Capture Screen", "Capturar Pantalla", lang)}
+              </Button>
               {connectedFileSourcesCreate.map(provider => (
                 <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerCreate(provider)} style={{ fontSize: 11, gap: 4 }}>
                   <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
@@ -1383,6 +1460,28 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                 <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
               </div>
             ))}
+            {pendingImage && (
+              <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review and crop image before attaching", "Revise y recorte la imagen antes de adjuntar", lang)}</div>
+                <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                  {(["x", "y", "width", "height"] as const).map(key => (
+                    <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                      {key.toUpperCase()}
+                      <input type="number" min="0" max="1" step="0.01" value={pendingImage.crop[key]} onChange={e => {
+                        const value = Math.max(0, Math.min(1, Number(e.target.value)));
+                        setPendingImage(prev => prev ? { ...prev, crop: { ...prev.crop, [key]: value } } : prev);
+                      }} style={{ width: "100%", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "5px 8px", background: "hsl(var(--background))" }} />
+                    </label>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                  <Button type="button" size="sm" onClick={async () => { await uploadAttachment(pendingImage.file, pendingImage.crop); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingAtt} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{w("Attach Cropped Image", "Adjuntar Imagen Recortada", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setPendingImage(prev => prev ? { ...prev, crop: { x: 0, y: 0, width: 1, height: 1 } } : prev)} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
+                </div>
+              </div>
+            )}
             {packageItems.length > 0 && (
               <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Complete RFI PDF Package Order", "Orden del Paquete PDF Completo RFI", lang)}</div>
@@ -1685,6 +1784,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoFromEmail(rfi.submittedByEmail || "");
     setInfoEdit(true);
   };
+
   const infoInput = { width: "100%", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontFamily: "inherit", background: "transparent", color: "inherit" } as const;
 
   // Project Directory for the recipient picker: pick an existing company/person (auto-fills
@@ -1933,6 +2033,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const imageEvidenceInputRef = useRef<HTMLInputElement>(null);
   const imageReplacementInputRef = useRef<HTMLInputElement>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const uploadDoc = async (file: File, onUploaded: (url: string) => void) => {
     setUploadingDoc(true);
     try {
@@ -2280,6 +2381,17 @@ ${hasResp ? `
     }
   };
 
+  const beginPendingImage = (file: File, mode: "source" | "replacement") => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: w("Select an image file.", "Seleccione un archivo de imagen.", lang), variant: "destructive" });
+      return;
+    }
+    setPendingImage(prev => {
+      if (prev?.url) URL.revokeObjectURL(prev.url);
+      return { file, url: URL.createObjectURL(file), mode, crop: imagePresentation?.crop || { x: 0, y: 0, width: 1, height: 1 } };
+    });
+  };
+
   const pasteImageEvidence = async () => {
     try {
       const items = await navigator.clipboard.read();
@@ -2287,7 +2399,7 @@ ${hasResp ? `
         const type = item.types.find(t => t.startsWith("image/"));
         if (type) {
           const blob = await item.getType(type);
-          await uploadImageEvidence(new File([blob], `clipboard-rfi-${rfi.id}.png`, { type }), "replacement");
+          beginPendingImage(new File([blob], `clipboard-rfi-${rfi.id}.png`, { type }), "replacement");
           return;
         }
       }
@@ -2314,7 +2426,7 @@ ${hasResp ? `
       stream.getTracks().forEach(track => track.stop());
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("Could not capture image");
-      await uploadImageEvidence(new File([blob], `screen-capture-rfi-${rfi.id}.png`, { type: "image/png" }), "replacement");
+      beginPendingImage(new File([blob], `screen-capture-rfi-${rfi.id}.png`, { type: "image/png" }), "replacement");
     } catch (error) {
       toast({ title: error instanceof Error ? error.message : w("Screen capture unavailable or denied.", "Captura de pantalla no disponible o denegada.", lang), variant: "destructive" });
     }
@@ -2804,12 +2916,17 @@ ${hasResp ? `
               <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 8 }}>{w("Image Presentation", "Presentacion de Imagen", lang)}</div>
                 <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, marginBottom: 8 }}>
-                  <input type="checkbox" checked={imagePresentation?.includeInCompletePdf !== false} onChange={e => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: e.target.checked }))} />
+                  <input type="checkbox" checked={imagePresentation?.includeInCompletePdf !== false} onChange={e => {
+                    const include = e.target.checked;
+                    const sourceId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? viewpointFile?.id ?? null;
+                    setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: include }));
+                    if (sourceId) setPackageItems(prev => prev.map(item => item.fileId === sourceId ? { ...item, include } : item));
+                  }} />
                   {w("Show image in Complete RFI PDF", "Mostrar imagen en PDF Completo RFI", lang)}
                 </label>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-                  <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageEvidence(f, "source"); e.target.value = ""; }} />
-                  <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageEvidence(f, "replacement"); e.target.value = ""; }} />
+                  <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "source"); e.target.value = ""; }} />
+                  <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "replacement"); e.target.value = ""; }} />
                   <Button type="button" size="sm" variant="outline" onClick={() => imageEvidenceInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Upload Image", "Subir Imagen", lang)}</Button>
                   <Button type="button" size="sm" variant="outline" onClick={() => imageReplacementInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><RefreshCw style={{ width: 11, height: 11 }} />{w("Replace Image", "Reemplazar Imagen", lang)}</Button>
                   <Button type="button" size="sm" variant="outline" onClick={pasteImageEvidence} style={{ fontSize: 11, gap: 4 }}><Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}</Button>
@@ -2828,6 +2945,28 @@ ${hasResp ? `
                         }} style={{ ...infoInput, marginTop: 2 }} />
                       </label>
                     ))}
+                  </div>
+                )}
+                {pendingImage && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review and crop image before attaching", "Revise y recorte la imagen antes de adjuntar", lang)}</div>
+                    <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                      {(["x", "y", "width", "height"] as const).map(key => (
+                        <label key={key} style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                          {key.toUpperCase()}
+                          <input type="number" min="0" max="1" step="0.01" value={pendingImage.crop[key]} onChange={e => {
+                            const value = Math.max(0, Math.min(1, Number(e.target.value)));
+                            setPendingImage(prev => prev ? { ...prev, crop: { ...prev.crop, [key]: value } } : prev);
+                          }} style={infoInput} />
+                        </label>
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                      <Button type="button" size="sm" onClick={async () => { await uploadImageEvidence(pendingImage.file, pendingImage.mode); setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: pendingImage.crop })); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingDoc} style={{ fontSize: 11, gap: 4 }}><Crop style={{ width: 11, height: 11 }} />{w("Attach Cropped Image", "Adjuntar Imagen Recortada", lang)}</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => setPendingImage(prev => prev ? { ...prev, crop: { x: 0, y: 0, width: 1, height: 1 } } : prev)} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Reset Crop", "Restablecer Recorte", lang)}</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
+                    </div>
                   </div>
                 )}
               </div>
