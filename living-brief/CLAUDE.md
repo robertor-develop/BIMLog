@@ -30,17 +30,14 @@ proceed after verification. A genuine authorization boundary stops the task and 
 Roberto's decision.
 
 ## Owner authority and document precedence
-Development governance follows this provisional hierarchy:
+Development governance follows this hierarchy:
 1. Roberto's explicit current instruction.
-2. Living Brief governing doctrine.
+2. ECOSYSTEM_DOCTRINE.md.
 3. CLAUDE.md / future AI_DEV.md execution rules.
 4. QUALITY.md acceptance requirements.
 5. Module-specific documents such as PLUGIN.md and REPORT_DESIGN_SYSTEM.md.
 6. STATUS.md and OPEN_LOOP.md current-state registers.
 7. AUDIT.md append-only history.
-
-ECOSYSTEM_DOCTRINE.md will be added in Step 2 and will then become the permanent
-product-doctrine authority beneath Roberto's explicit decisions.
 
 Agents may not override the Living Brief with invented restrictions or assumptions. Ask
 Roberto when governing documents genuinely conflict. A newer explicit Roberto decision
