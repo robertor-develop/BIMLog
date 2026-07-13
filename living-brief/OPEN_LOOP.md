@@ -347,6 +347,27 @@ Active enforcement needed:
 - Keep UI spreadsheet-simple.
 - Every feature must answer record, location, owner, responsibility, change, reason, date, state, proof, and next decision.
 
+### RFI Build 1 Correction
+Correction started from commit f9793e1ff230632c59ac6dca5ace99b78f87bc9a after the first Build 1 screenshot evidence was rejected as synthetic.
+
+What changed:
+- `artifacts/bimlog/src/pages/project/RfisTab.tsx` now defines the canonical RFI section components:
+  `RfiSectionHeaderStatus`, `RfiSectionSubmittedBy`, `RfiSectionSubmittedTo`,
+  `RfiSectionReferencesAttachments`, `RfiSectionQuestion`, `RfiSectionImpact`, and
+  `RfiSectionDistributionResponses`.
+- The New RFI create flow renders all seven production sections through those shared components.
+- The existing RFI detail/edit flow renders the same seven section component names in view/edit context.
+- Saved RFI header state actions are centralized through `getSavedRfiActionMatrix`.
+- Test-only harness files were added for real-component evidence:
+  `artifacts/bimlog/src/pages/project/RfiCanonicalUiHarness.tsx` and
+  `artifacts/bimlog/rfi-canonical-harness.html`.
+
+Evidence note:
+- The correction harness imports `RfiCanonicalUiHarness`, which imports the production section components from `RfisTab.tsx`.
+- The harness is a Vite-served test fixture and is not linked from production routes.
+- PNG screenshot capture was attempted with Playwright, but this machine has neither Playwright's browser payload nor a local Chrome/Edge executable available. No browser was installed because the correction request forbids system installation.
+- Do not mark Build 1 accepted until Roberto captures/reviews the nine required harness or production screenshots with a browser available.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings

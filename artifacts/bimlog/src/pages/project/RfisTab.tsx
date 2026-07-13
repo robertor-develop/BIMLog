@@ -89,6 +89,53 @@ type PendingImage = {
   mode: "source" | "replacement";
 };
 
+type RfiUiMode = "create" | "view" | "edit";
+
+type RfiActionKey =
+  | "export-pdf"
+  | "export-complete-pdf"
+  | "export-docx"
+  | "export-audit-pdf"
+  | "viewed-by"
+  | "edit"
+  | "close"
+  | "reopen"
+  | "raise-change-order"
+  | "jump-viewpoint";
+
+type RfiActionDefinition = {
+  key: RfiActionKey;
+  label: string;
+  variant: "primary" | "secondary" | "danger";
+};
+
+function getSavedRfiActionMatrix(params: {
+  rfi: Rfi;
+  canWrite: boolean;
+  isProjectAdmin: boolean;
+  hasViewpoint: boolean;
+  isEditing: boolean;
+  lang: string;
+}): RfiActionDefinition[] {
+  const { rfi, canWrite, isProjectAdmin, hasViewpoint, isEditing, lang } = params;
+  const actions: RfiActionDefinition[] = [
+    { key: "export-pdf", label: w("RFI PDF", "RFI PDF", lang), variant: "secondary" },
+    { key: "export-complete-pdf", label: w("Complete RFI PDF", "PDF Completo RFI", lang), variant: "secondary" },
+    { key: "export-docx", label: w("RFI DOCX", "RFI DOCX", lang), variant: "secondary" },
+    { key: "export-audit-pdf", label: w("RFI Audit PDF", "PDF Auditoria RFI", lang), variant: "secondary" },
+    { key: "viewed-by", label: w("Viewed By", "Visto Por", lang), variant: "secondary" },
+  ];
+  if (canWrite && !isEditing) actions.push({ key: "edit", label: w("Edit RFI", "Editar RFI", lang), variant: "secondary" });
+  if (rfi.status === "closed") {
+    if (canWrite) actions.push({ key: "reopen", label: w("Reopen RFI", "Reabrir RFI", lang), variant: "secondary" });
+  } else if (isProjectAdmin) {
+    actions.push({ key: "close", label: w("Close RFI", "Cerrar RFI", lang), variant: "danger" });
+  }
+  if (canWrite) actions.push({ key: "raise-change-order", label: w("Raise Change Order", "Crear Orden de Cambio", lang), variant: "secondary" });
+  if (hasViewpoint) actions.push({ key: "jump-viewpoint", label: w("Jump to Viewpoint", "Ir al Punto de Vista", lang), variant: "secondary" });
+  return actions;
+}
+
 function fileIdFromAttachment(value: string): number | null {
   const match = value.match(/\/files\/(\d+)\/download\b/i);
   if (!match) return null;
@@ -1217,7 +1264,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
             </div>
           )}
           {/* Section 1 — Header */}
-          <SectionHeader title={w("1. Header Information", "1. Información del Encabezado", lang)} />
+          <RfiSectionHeaderStatus lang={lang} mode="create">
           <FormGrid>
             <FormField label={w("Date Requested", "Fecha Solicitada", lang)} full>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -1250,7 +1297,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </FormGrid>
 
           {/* Section 2 — Submitted By */}
-          <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
+          </RfiSectionHeaderStatus>
+          <RfiSectionSubmittedBy lang={lang} mode="create">
           <FormGrid>
             <FormField label={w("Company Name", "Nombre de Empresa", lang)}>
               <Input value={sByCompany} onChange={e => setsByCompany(e.target.value)} style={{ fontSize: 12 }} />
@@ -1270,7 +1318,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </FormGrid>
 
           {/* Section 3 — Submitted To */}
-          <SectionHeader title={w("3. Submitted To", "3. Enviado A", lang)} />
+          </RfiSectionSubmittedBy>
+          <RfiSectionSubmittedTo lang={lang} mode="create">
           <FormGrid>
             <FormField label={w("Company Name", "Nombre de Empresa", lang)}>
               <select value={sToCompany} onChange={e => {
@@ -1411,7 +1460,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
           {/* Section 4 — Reference Information */}
           {/* Fix 3 — meaningful placeholders + file search buttons */}
-          <SectionHeader title={w("4. Reference Information", "4. Información de Referencia", lang)} />
+          </RfiSectionSubmittedTo>
+          <RfiSectionReferencesAttachments lang={lang} mode="create">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px", marginTop: 10 }}>
             <RefFieldWithSearch label={w("Drawing Number", "Número de Plano", lang)} value={drawingNum} onChange={setDrawingNum} placeholder="e.g. A-101" fieldKey="drawingNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
             <RefFieldWithSearch label={w("Drawing Title", "Título del Plano", lang)} value={drawingTitle} onChange={setDrawingTitle} placeholder="e.g. Floor Plan Level 3" fieldKey="drawingTitle" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
@@ -1488,7 +1538,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </div>
 
           {/* Section 5 — Question */}
-          <SectionHeader title={w("5. Description of Question", "5. Descripción de la Pregunta", lang)} />
+          </RfiSectionReferencesAttachments>
+          <RfiSectionQuestion lang={lang} mode="create">
           <div style={{ marginTop: 10 }}>
             <textarea
               value={question}
@@ -1526,7 +1577,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           </div>
 
           {/* Section 6 — Impact */}
-          <SectionHeader title={w("6. Impact Assessment", "6. Evaluación de Impacto", lang)} />
+          </RfiSectionQuestion>
+          <RfiSectionImpact lang={lang} mode="create">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 10 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</label>
@@ -1562,7 +1614,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
           {/* Section 7 — Distribution */}
           {/* Fix 4 — external contacts */}
-          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
+          </RfiSectionImpact>
+          <RfiSectionDistributionResponses lang={lang} mode="create">
           <div style={{ marginTop: 10 }}>
             {members.map(m => (
               <label key={m.userEmail} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
@@ -1661,6 +1714,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
               )}
             </div>
           </div>
+          </RfiSectionDistributionResponses>
         </div>
 
         <div style={{ padding: "14px 24px", borderTop: "1px solid hsl(var(--border))", display: "flex", justifyContent: "flex-end", gap: 8, flexShrink: 0 }}>
@@ -2541,6 +2595,15 @@ ${hasResp ? `
     ) : null
   );
 
+  const savedRfiActions = getSavedRfiActionMatrix({
+    rfi,
+    canWrite,
+    isProjectAdmin,
+    hasViewpoint: !!(rfi as { sourceViewpointId?: string | null }).sourceViewpointId,
+    isEditing: infoEdit,
+    lang,
+  });
+
   return (
     <div style={{ maxWidth: 1180, margin: "0 auto" }}>
       <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
@@ -2595,27 +2658,27 @@ ${hasResp ? `
             <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} title={w("Show who viewed this RFI", "Mostrar quien vio este RFI", lang)} style={{ gap: 5, fontSize: 11 }}>
               <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
             </Button>
-            {isProjectAdmin && rfi.status !== "closed" && (
+            {savedRfiActions.some(action => action.key === "close") && (
               <Button variant="outline" size="sm" onClick={handleCloseRfi} style={{ gap: 5, fontSize: 11, color: "#DC2626", borderColor: "#FCA5A5" }}>
                 <X style={{ width: 12, height: 12 }} />{w("Close RFI", "Cerrar RFI", lang)}
               </Button>
             )}
-            {rfi.status === "closed" && canWrite && (
+            {savedRfiActions.some(action => action.key === "reopen") && (
               <Button variant="outline" size="sm" onClick={handleReopenRfi} style={{ gap: 5, fontSize: 11 }}>
                 <RefreshCw style={{ width: 12, height: 12 }} />{w("Reopen RFI", "Reabrir RFI", lang)}
               </Button>
             )}
-            {canWrite && !infoEdit && (
+            {savedRfiActions.some(action => action.key === "edit") && (
               <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11 }}>
                 <PenLine style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
               </Button>
             )}
-            {canWrite && (
+            {savedRfiActions.some(action => action.key === "raise-change-order") && (
               <Button variant="outline" size="sm" disabled={raisingCo} onClick={handleRaiseChangeOrder} style={{ gap: 5, fontSize: 11, opacity: raisingCo ? 0.6 : 1 }}>
                 <FileText style={{ width: 12, height: 12 }} />{w("Raise Change Order", "Crear Orden de Cambio", lang)}
               </Button>
             )}
-            {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
+            {savedRfiActions.some(action => action.key === "jump-viewpoint") && (
               <Button
                 variant="outline"
                 size="sm"
@@ -2734,6 +2797,7 @@ ${hasResp ? `
             </div>
           )}
 
+          <RfiSectionHeaderStatus lang={lang} mode={infoEdit ? "edit" : "view"}>
           {/* Dates */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
             {[
@@ -2766,7 +2830,8 @@ ${hasResp ? `
             </div>
           )}
 
-          <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
+          </RfiSectionHeaderStatus>
+          <RfiSectionSubmittedBy lang={lang} mode={infoEdit ? "edit" : "view"} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -2793,7 +2858,7 @@ ${hasResp ? `
                 </>
               )}
             </div>
-            <SectionHeader title={w("3. Submitted To", "3. Enviado A", lang)} />
+            <RfiSectionSubmittedTo lang={lang} mode={infoEdit ? "edit" : "view"} />
             <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted To", "Enviado A", lang)}</div>
@@ -2828,7 +2893,7 @@ ${hasResp ? `
             </div>
           </div>
 
-          <SectionHeader title={w("4. Reference Information / Attachments", "4. Informacion de Referencia / Adjuntos", lang)} />
+          <RfiSectionReferencesAttachments lang={lang} mode={infoEdit ? "edit" : "view"}>
 
           {/* Reference info */}
           {(infoEdit || rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription || storedQuestionDocs.length > 0) && (
@@ -2960,7 +3025,8 @@ ${hasResp ? `
             <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
           </div>
 
-          <SectionHeader title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)} />
+          </RfiSectionReferencesAttachments>
+          <RfiSectionQuestion lang={lang} mode={infoEdit ? "edit" : "view"}>
 
           {/* Question */}
           <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
@@ -2983,7 +3049,8 @@ ${hasResp ? `
             )}
           </div>
 
-          <SectionHeader title={w("6. Impact Assessment", "6. Evaluacion de Impacto", lang)} />
+          </RfiSectionQuestion>
+          <RfiSectionImpact lang={lang} mode={infoEdit ? "edit" : "view"}>
           <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Flagged by asker and confirmed in response.", "Senalado por el solicitante y confirmado en la respuesta.", lang)}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
             <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
@@ -3280,7 +3347,8 @@ ${hasResp ? `
             </div>
           )}
 
-          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
+          </RfiSectionImpact>
+          <RfiSectionDistributionResponses lang={lang} mode={infoEdit ? "edit" : "view"}>
 
           {/* Distribution list (CC) */}
           {(infoEdit || (rfi.distributionList as string[] | null)?.length) ? (
@@ -3448,6 +3516,7 @@ ${hasResp ? `
               </Button>
             </div>
           )}
+          </RfiSectionDistributionResponses>
         </div>
       </div>
       {cloudPickerTarget && (
@@ -3471,6 +3540,43 @@ function SectionHeader({ title }: { title: string }) {
       <span style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em" }}>{title}</span>
     </div>
   );
+}
+
+function RfiCanonicalSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section data-rfi-canonical-section={title} style={{ marginTop: 0 }}>
+      <SectionHeader title={title} />
+      {children}
+    </section>
+  );
+}
+
+export function RfiSectionHeaderStatus({ lang, children }: { lang: string; mode: RfiUiMode; stateLabel?: string; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("1. Header / RFI Status", "1. Encabezado / Estado RFI", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionSubmittedBy({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("2. Submitted By", "2. Enviado Por", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionSubmittedTo({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("3. Submitted To", "3. Enviado A", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionReferencesAttachments({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("4. Reference Information / Attachments", "4. Informacion de Referencia / Adjuntos", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionQuestion({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionImpact({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("6. Impact Assessment", "6. Evaluacion de Impacto", lang)}>{children}</RfiCanonicalSection>;
+}
+
+export function RfiSectionDistributionResponses({ lang, children }: { lang: string; mode: RfiUiMode; children?: React.ReactNode }) {
+  return <RfiCanonicalSection title={w("7. Distribution / Email / Responses", "7. Distribucion / Email / Respuestas", lang)}>{children}</RfiCanonicalSection>;
 }
 
 function FormGrid({ children }: { children: React.ReactNode }) {

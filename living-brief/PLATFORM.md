@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-13T22:09:13.227Z
+> Last generated: 2026-07-13T22:40:56.677Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -196,6 +196,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\bimlog\src\pages\project\MeetingsTab.tsx
 - artifacts\bimlog\src\pages\project\NameGenerator.tsx
 - artifacts\bimlog\src\pages\project\ReportsTab.tsx
+- artifacts\bimlog\src\pages\project\RfiCanonicalUiHarness.tsx
 - artifacts\bimlog\src\pages\project\RfisTab.tsx
 - artifacts\bimlog\src\pages\project\ScheduleTab.tsx
 - artifacts\bimlog\src\pages\project\SubmittalsTab.tsx
