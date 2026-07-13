@@ -20,6 +20,24 @@ independently verified steps. Read the real current code before editing it. Neve
 from memory of what a file "should" contain. Verify every change landed with grep,
 typecheck, build output, or a focused runtime test before moving to the next change.
 
+## Master Codex / focused task-chat operating rule
+- When Roberto designates the current Codex task as the master coordinator, this task does
+  not implement feature code. It verifies the real repositories, reconciles the Living Brief,
+  defines source-of-truth behavior, and gives exact paste-ready directives to focused task chats.
+- Every focused-task directive must name the real repository explicitly. The BIMLog platform
+  repository is `C:\Dev\bimlog`; never assume the task chat's mounted folder is the repository.
+- Every directive must begin exactly:
+  `STOP. DO NOT TOUCH ANYTHING. DO NOT START ANY PLAN.`
+- The directive must require the task chat to verify `git status`, recent commits, and the
+  complete current implementation before editing. It must list the exact files that must be
+  read first, define files/modules that are out of scope, define required behavior and
+  non-regression constraints, and finish with exact verification and final-report requirements.
+- Focused task chats must verify against the repository and current runtime evidence, never
+  compressed chat memory. If a claimed defect is not reproduced, they must report the evidence
+  rather than creating a duplicate control or alternate workflow.
+- The master task records every discovered, completed, or deferred product item in
+  `OPEN_LOOP.md` so Roberto does not have to repeat cross-task instructions.
+
 ## Standing Rule - never dictate implementation to Replit
 When writing instructions for Replit, give the goal and real constraints, not exact code,
 column names, or transaction patterns to follow verbatim. Replit may know the running

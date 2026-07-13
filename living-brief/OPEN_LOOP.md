@@ -32,6 +32,71 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Canonical RFI Workflow and Complete Issued RFI Package
+
+Purpose: eliminate the divergent New RFI, viewpoint-created RFI, existing RFI, sent RFI,
+closed RFI, and reopened RFI experiences. BIMLog records and audits human decisions; it must
+not impose one-RFI-per-viewpoint behavior or block authorized users from editing/reopening a
+record merely because its status changed.
+
+Canonical platform requirements:
+- One numbered 1-7 field structure and one field contract across every RFI state and entry path.
+- New, viewpoint-created, existing, sent, closed, revised, and reopened RFIs expose the same
+  applicable fields. Titles and state styling may differ; field meaning and edit behavior may not.
+- Authorized users can edit every RFI state. Close/reopen/edit actions must be explicit and logged.
+- Date Required must be editable and persist in every applicable state.
+- Section 4 is always Reference Information / Attachments. Add Reference must immediately show
+  the value, allow removal, preserve human-readable names, and save through every create/edit path.
+- A viewpoint screenshot is an attachment, not a special alternate RFI layout. The user can
+  show/hide it in the issued RFI, replace it, and crop it non-destructively while preserving the
+  original evidence file.
+- Users can capture or paste a screenshot and crop it with a snipping-tool-style workflow before
+  attaching it to the RFI.
+- Section 5 is question-only. AI question assistance is click-driven, credit-visible, and never
+  reads attachments unless the user explicitly invokes file-reading AI.
+- Section 6 keeps each impact choice directly beside its dependent fields. Cost Amount and Cost
+  Reason belong with Cost Impact. Calendar Days and Schedule Reason belong with Schedule Impact.
+  The same values must persist through create, duplicate-number retry, edit, response, PDF, DOCX,
+  Excel/log output, activity history, and audit output.
+- Section 7 contains distribution, email, and responses. Generated email has an explicit Copy
+  action with visible success feedback. Text-only email AI remains click-driven and does not read files.
+- Existing/sent/closed/reopened state must be unmistakable without turning informational labels
+  into buttons. Use the shared primary/secondary/danger button hierarchy and remove duplicate controls.
+- Preserve attachments, linked items, ball-in-court history, responses, Jump to Viewpoint, Raise
+  Change Order, exports, audit, and AI text assistance while unifying the presentation.
+
+Viewpoint relationship and plugin-facing requirements:
+- One viewpoint may source any number of RFIs for different questions, disciplines, companies,
+  or recipients. `source_viewpoint_id` is lineage, not a uniqueness key.
+- Repeated POSTs to the existing `.../rfis/from-viewpoint` contract with the same viewpoint ID
+  must create separate RFI records, separate sequential RFI numbers, and separately linked evidence.
+- Diagnose the current plugin failure from the exact HTTP status/body and plugin debug log. Do not
+  invent a second RFI endpoint or remove the project-mismatch guard.
+- The platform endpoint and plugin must show actionable errors instead of `Failed to create RFI.
+  Check connection.` when the server returned a more specific cause.
+
+Complete issued-RFI PDF package:
+- The final RFI export is one complete PDF containing the BIMLog RFI pages followed by all selected
+  supporting documents in deliberate user-controlled order.
+- Original PDF attachments must be copied as native PDF pages. Preserve MediaBox, CropBox, page
+  rotation/orientation, vector content, and native sizes including 36x48, 24x36, and 11x17.
+- Mixed page sizes inside one RFI package are valid. Never shrink drawings to Letter, stretch them,
+  crop them, or rasterize them.
+- Word, DOCX, Excel, and image attachments require an explicit conversion path that preserves the
+  original page/sheet presentation as closely as the source format allows. Conversion failure must
+  be visible and must not silently omit an attachment.
+- The user selects which attachments appear in the issued package and whether the viewpoint image
+  appears. The export must clearly report any attachment that cannot be converted or merged.
+
+Verification required before customer retest:
+- Compare all RFI entry/state variants side by side and prove the 1-7 structure and field contract match.
+- Create at least two RFIs from the same viewpoint and prove both remain independently editable.
+- Verify show/hide/crop screenshot behavior and preservation of the original image.
+- Generate a mixed-size PDF package and inspect page boxes and vector preservation, including the
+  supplied real River Avenue RFI PDF when available.
+- Run behavior checks, `pnpm run check:mojibake`, `pnpm run typecheck`, and the production build.
+- Update this register with commit, push, publish, package, and Roberto/customer verification status.
+
 ### Platform-Wide Report Design System
 
 Shipped first implementation scope on 2026-07-10:
