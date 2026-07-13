@@ -152,6 +152,7 @@ type RfiCanonicalValues = {
   distributionList: string[];
   emailDescription?: string;
   emailDraft?: string;
+  questionAssistDescription?: string;
   responseText?: string;
   answeredBy?: string;
 };
@@ -167,6 +168,8 @@ type RfiCanonicalPermissions = {
 };
 
 type RfiCanonicalActions = Partial<Record<RfiActionKey, () => void>>;
+type RfiCanonicalOption = { value: string; label: string };
+type RfiCanonicalPickerAction = { key: string; label: string; icon?: "cloud" | "upload" | "paste" | "capture" | "replace"; onClick: () => void };
 
 type RfiCanonicalFormProps = {
   lang: string;
@@ -181,6 +184,17 @@ type RfiCanonicalFormProps = {
   packageItems: RfiPackageItem[];
   responses: Array<{ id?: number; text: string; by?: string; date?: string }>;
   loading?: Partial<Record<"saving" | "uploading" | "questionAi" | "emailAi" | "response", boolean>>;
+  options?: {
+    priorities?: RfiCanonicalOption[];
+    rfiTypes?: RfiCanonicalOption[];
+    costImpact?: RfiCanonicalOption[];
+    scheduleImpact?: RfiCanonicalOption[];
+  };
+  cloudAttachmentActions?: RfiCanonicalPickerAction[];
+  imageAttachmentActions?: RfiCanonicalPickerAction[];
+  pendingImagePreview?: { url: string; mode?: "source" | "replacement" } | null;
+  onAttachPendingImage?: () => void;
+  onCancelPendingImage?: () => void;
   actions: RfiCanonicalActions;
   onChange: (field: keyof RfiCanonicalValues, value: string) => void;
   onAddReference: () => void;
@@ -1019,7 +1033,6 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const [extContactPhone, setExtContactPhone] = useState("");
 
   const [aiDesc, setAiDesc] = useState("");
-  const [showAi, setShowAi] = useState(false);
   const [emailDescription, setEmailDescription] = useState("");
   const [emailDraft, setEmailDraft] = useState("");
   const [emailDraftLoading, setEmailDraftLoading] = useState(false);
@@ -1216,7 +1229,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
 
   const { mutate: generateQ, isPending: isGenerating } = useGenerateRfiQuestion({
     mutation: {
-      onSuccess: (data) => { setQuestion(data.question); setShowAi(false); setAiDesc(""); },
+      onSuccess: (data) => { setQuestion(data.question); setAiDesc(""); },
       onError: () => toast({ title: w("AI generation failed", "Generación IA falló", lang), variant: "destructive" }),
     },
   });
@@ -1389,557 +1402,83 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       case "scheduleImpactReason": setSchedReason(value); break;
       case "distributionList": setDistList(value.split(",").map(v => v.trim()).filter(Boolean)); break;
       case "emailDescription": setEmailDescription(value); break;
+      case "questionAssistDescription": setAiDesc(value); break;
       default: break;
     }
   };
 
-  if (Date.now() >= 0) return (
-    <RfiCanonicalForm
-      lang={lang}
-      mode="create"
-      recordState="new"
-      values={{
-        projectName: "",
-        subject,
-        status: "draft",
-        priority,
-        rfiType,
-        dateRequested,
-        dateRequired,
-        submittedByCompany: sByCompany,
-        submittedByContact: sByContact,
-        submittedByAddress: sByAddress,
-        submittedByPhone: sByPhone,
-        submittedByEmail: sByEmail,
-        submittedToCompany: sToCompany,
-        submittedToPerson: sToPerson,
-        submittedToEmail: sToEmail,
-        drawingNumber: drawingNum,
-        drawingTitle,
-        specSection,
-        detailNumber: detailNum,
-        noteNumber: noteNum,
-        locationDescription: location,
-        referenceInput: attachInput,
-        question,
-        costImpact,
-        costImpactAmount: costAmount,
-        costImpactReason: costReason,
-        scheduleImpact: schedImpact,
-        scheduleImpactDays: schedDays,
-        scheduleImpactReason: schedReason,
-        distributionList: distList,
-        emailDescription,
-        emailDraft,
-      }}
-      permissions={{ canEdit: true, canRespond: false, canClose: false, canReopen: false, canExport: false, canRaiseChangeOrder: false, canJumpViewpoint: !!(preload as { sourceViewpointId?: string | null } | undefined)?.sourceViewpointId }}
-      references={[]}
-      attachments={attachments}
-      imagePresentation={imagePresentation}
-      packageItems={packageItems}
-      responses={[]}
-      loading={{ saving: isPending, uploading: uploadingAtt, questionAi: isGenerating, emailAi: emailDraftLoading }}
-      actions={{ submit: handleSubmit, cancel: onClose }}
-      onChange={handleCanonicalCreateChange}
-      onAddReference={addReference}
-      onRemoveReference={index => setAttachments(prev => prev.filter((_, i) => i !== index))}
-      onUploadFile={() => attachFileRef.current?.click()}
-      onGenerateQuestionAi={() => setShowAi(true)}
-      onGenerateEmailAi={generateCreateEmailDraft}
-      onCopyEmail={copyCreateEmailDraft}
-    />
-  );
-
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
-        <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
-      </button>
-      <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>{w(isRevision ? "Revise RFI" : "New RFI", isRevision ? "Revisar RFI" : "Nuevo RFI", lang)}</div>
-            {isRevision && <div style={{ fontSize: 12, color: "#7C3AED", marginTop: 2 }}>Revision of {preload?.number}</div>}
-          </div>
-          <button onClick={onClose} style={{ padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 6 }}>
-            <X style={{ width: 16, height: 16 }} />
-          </button>
-        </div>
-
-        <div style={{ padding: "0 24px 24px" }}>
-          {!isRevision && (
-            <div style={{ margin: "16px 0 4px", padding: "12px 14px", border: "1px dashed #C4B5FD", borderRadius: 8, background: "#FAF5FF", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <Sparkles style={{ width: 16, height: 16, color: "#7C3AED", flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#6D28D9" }}>{w("Start from an existing document", "Comenzar desde un documento existente", lang)}</div>
-                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                  {importedFrom
-                    ? w(`Filled from ${importedFrom} — review the fields below.`, `Completado desde ${importedFrom} — revise los campos abajo.`, lang)
-                    : w("Upload a PDF, Word, Excel or image — AI reads it and fills the fields for you to review.", "Suba un PDF, Word, Excel o imagen — la IA lo lee y completa los campos para su revisión.", lang)}
-                </div>
-              </div>
-              <input ref={importInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" style={{ display: "none" }}
-                onChange={e => { const f = e.target.files?.[0]; if (f) handleImportPrefill(f); e.target.value = ""; }} />
-              <Button size="sm" variant="outline" disabled={importing} onClick={() => importInputRef.current?.click()} style={{ gap: 5, fontSize: 11, flexShrink: 0 }}>
-                {importing ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <FileText style={{ width: 12, height: 12 }} />}
-                {importing ? w("Reading…", "Leyendo…", lang) : w("Import document", "Importar documento", lang)}
-              </Button>
-            </div>
-          )}
-          {/* Section 1 — Header */}
-          <SectionHeader title={w("1. Header Information", "1. Información del Encabezado", lang)} />
-          <FormGrid>
-            <FormField label={w("Date Requested", "Fecha Solicitada", lang)} full>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                <div>
-                  <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Date Requested", "Fecha Solicitada", lang)}</label>
-                  <Input type="date" value={dateRequested} onChange={e => setDateRequested(e.target.value)} style={{ fontSize: 12 }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Date Required (response by)", "Fecha Requerida", lang)}</label>
-                  <Input type="date" value={dateRequired} onChange={e => setDateRequired(e.target.value)} style={{ fontSize: 12 }} />
-                </div>
-              </div>
-            </FormField>
-            <FormField label={w("Subject *", "Asunto *", lang)} full>
-              <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder={w("Brief subject of this RFI", "Asunto breve de este RFI", lang)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Priority", "Prioridad", lang)}>
-              <select value={priority} onChange={e => setPriority(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                {priorityOptions.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
-              </select>
-            </FormField>
-            <FormField label={w("RFI Type", "Tipo de RFI", lang)}>
-              <select value={rfiType} onChange={e => setRfiType(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                {rfiTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </FormField>
-            <FormField label={w("Project Address", "Dirección del Proyecto", lang)}>
-              <Input value={projectAddress} onChange={e => setProjectAddress(e.target.value)} placeholder={w("Auto-filled from project history", "Auto-llenado del historial del proyecto", lang)} style={{ fontSize: 12 }} />
-            </FormField>
-          </FormGrid>
-
-          {/* Section 2 — Submitted By */}
-          <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
-          <FormGrid>
-            <FormField label={w("Company Name", "Nombre de Empresa", lang)}>
-              <Input value={sByCompany} onChange={e => setsByCompany(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
-              <Input value={sByContact} onChange={e => setsByContact(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Address", "Dirección", lang)} full>
-              <Input value={sByAddress} onChange={e => setsByAddress(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Phone", "Teléfono", lang)}>
-              <Input value={sByPhone} onChange={e => setsByPhone(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-            <FormField label={w("Email", "Correo", lang)}>
-              <Input value={sByEmail} onChange={e => setsByEmail(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-          </FormGrid>
-
-          {/* Section 3 — Submitted To */}
-          <SectionHeader title={w("3. Submitted To", "3. Enviado A", lang)} />
-          <FormGrid>
-            <FormField label={w("Company Name", "Nombre de Empresa", lang)}>
-              <select value={sToCompany} onChange={e => {
-                setsToCompany(e.target.value);
-                setsToPerson(""); setsToEmail("");
-                setShowAddExtPerson(false);
-              }} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                <option value="">{w("— Select company —", "— Seleccionar empresa —", lang)}</option>
-                {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <button type="button" onClick={() => setShowAddCompany(!showAddCompany)}
-                style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddCompany ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content", marginTop: 4 }}>
-                <Plus style={{ width: 12, height: 12 }} />
-                {w("Add company not in list", "Agregar empresa fuera de lista", lang)}
-              </button>
-              {showAddCompany && (
-                <div style={{ marginTop: 6, padding: "12px 14px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 10 }}>
-                    {w("New Company Details", "Detalles de Nueva Empresa", lang)}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
-                    <div>
-                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Company Name *", "Nombre *", lang)}</div>
-                      <input value={newCompanyName} onChange={e => setNewCompanyName(e.target.value)}
-                        placeholder={w("e.g. VOREA Group", "ej. VOREA Group", lang)}
-                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Contact Person", "Persona de Contacto", lang)}</div>
-                      <input value={newContactPerson} onChange={e => setNewContactPerson(e.target.value)}
-                        placeholder={w("e.g. John Smith", "ej. Juan García", lang)}
-                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Email", "Correo", lang)}</div>
-                      <input value={newCompanyEmail} onChange={e => setNewCompanyEmail(e.target.value)}
-                        placeholder="email@company.com"
-                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Phone", "Teléfono", lang)}</div>
-                      <input value={newCompanyPhone} onChange={e => setNewCompanyPhone(e.target.value)}
-                        placeholder="+1 (555) 000-0000"
-                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
-                    </div>
-                    <div style={{ gridColumn: "1 / -1" }}>
-                      <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, marginBottom: 3 }}>{w("Address", "Dirección", lang)}</div>
-                      <input value={newCompanyAddress} onChange={e => setNewCompanyAddress(e.target.value)}
-                        placeholder={w("Street address, City, State", "Calle, Ciudad, Estado", lang)}
-                        style={{ width: "100%", fontSize: 12, border: "1px solid #BFDBFE", borderRadius: 6, padding: "5px 8px" }} />
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                    <button type="button" onClick={() => { setShowAddCompany(false); setNewCompanyName(""); setNewCompanyEmail(""); setNewCompanyPhone(""); setNewCompanyAddress(""); setNewContactPerson(""); }}
-                      style={{ padding: "5px 12px", fontSize: 11, borderRadius: 6, border: "1px solid #D1D5DB", background: "white", cursor: "pointer" }}>
-                      {w("Cancel", "Cancelar", lang)}
-                    </button>
-                    <button type="button"
-                      onClick={async () => {
-                        if (!newCompanyName.trim()) return;
-                        const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-                        await fetch(`/api/v1/projects/${projectId}/directory`, {
-                          method: "POST",
-                          headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            full_name: newContactPerson.trim() || newCompanyName.trim(),
-                            email: newCompanyEmail.trim() || `contact@bimlog.io`,
-                            company_name: newCompanyName.trim(),
-                            role: "External Company",
-                            notes: `Phone: ${newCompanyPhone} | Address: ${newCompanyAddress}`,
-                          }),
-                        });
-                        setsToCompany(newCompanyName.trim());
-                        setNewCompanyName(""); setNewCompanyEmail(""); setNewCompanyPhone(""); setNewCompanyAddress(""); setNewContactPerson("");
-                        setShowAddCompany(false);
-                      }}
-                      style={{ padding: "5px 14px", fontSize: 11, borderRadius: 6, background: "#2563EB", color: "white", border: "none", cursor: "pointer", fontWeight: 700 }}>
-                      {w("Add Company", "Agregar Empresa", lang)}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </FormField>
-            <FormField label={w("Contact Person", "Persona de Contacto", lang)}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <select value={sToPerson} onChange={e => {
-                  const sel = companyPeople(sToCompany).find(m => m.userFullName === e.target.value);
-                  setsToPerson(e.target.value);
-                  if (sel) setsToEmail(sel.userEmail);
-                }} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                  <option value="">{w("— Select person —", "— Seleccionar persona —", lang)}</option>
-                  {companyPeople(sToCompany).map(m => <option key={m.userEmail} value={m.userFullName}>{m.userFullName}</option>)}
-                </select>
-                {/* Fix 2 — Add person button */}
-                {sToCompany && (
-                  <button type="button" onClick={() => setShowAddExtPerson(!showAddExtPerson)}
-                    style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", fontSize: 11, borderRadius: 5, border: "1px dashed #2563EB", background: showAddExtPerson ? "#EFF6FF" : "transparent", cursor: "pointer", color: "#2563EB", width: "fit-content" }}>
-                    <UserPlus style={{ width: 12, height: 12 }} />
-                    {w("Add person not in list", "Agregar persona fuera de lista", lang)}
-                  </button>
-                )}
-              </div>
-            </FormField>
-            {/* Fix 2 — Inline add external person form */}
-            {showAddExtPerson && (
-              <div style={{ gridColumn: "span 2", padding: "10px 12px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", marginBottom: 8 }}>
-                  {w("Add external person (RFI only — not added as project member)", "Agregar persona externa (solo RFI — no se agrega como miembro)", lang)}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Name *</label>
-                    <Input value={extPersonName} onChange={e => setExtPersonName(e.target.value)} placeholder="John Smith" style={{ fontSize: 12 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Email *</label>
-                    <Input value={extPersonEmail} onChange={e => setExtPersonEmail(e.target.value)} placeholder="j.smith@firm.com" style={{ fontSize: 12 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Phone</label>
-                    <Input value={extPersonPhone} onChange={e => setExtPersonPhone(e.target.value)} placeholder="+1 555 0100" style={{ fontSize: 12 }} />
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <Button size="sm" onClick={handleAddExtPerson} disabled={!extPersonName.trim() || !extPersonEmail.trim()} style={{ fontSize: 11 }}>
-                    {w("Add & Select", "Agregar y Seleccionar", lang)}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowAddExtPerson(false)} style={{ fontSize: 11 }}>
-                    {w("Cancel", "Cancelar", lang)}
-                  </Button>
-                </div>
-              </div>
-            )}
-            <FormField label={w("Email", "Correo", lang)}>
-              <Input value={sToEmail} onChange={e => setsToEmail(e.target.value)} style={{ fontSize: 12 }} />
-            </FormField>
-          </FormGrid>
-
-          {/* Section 4 — Reference Information */}
-          {/* Fix 3 — meaningful placeholders + file search buttons */}
-          <SectionHeader title={w("4. Reference Information", "4. Información de Referencia", lang)} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px", marginTop: 10 }}>
-            <RefFieldWithSearch label={w("Drawing Number", "Número de Plano", lang)} value={drawingNum} onChange={setDrawingNum} placeholder="e.g. A-101" fieldKey="drawingNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
-            <RefFieldWithSearch label={w("Drawing Title", "Título del Plano", lang)} value={drawingTitle} onChange={setDrawingTitle} placeholder="e.g. Floor Plan Level 3" fieldKey="drawingTitle" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
-            <RefFieldWithSearch label={w("Spec Section", "Sección de Especificación", lang)} value={specSection} onChange={setSpecSection} placeholder="e.g. 23 00 00" fieldKey="specSection" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
-            <RefFieldWithSearch label={w("Detail Number", "Número de Detalle", lang)} value={detailNum} onChange={setDetailNum} placeholder="e.g. 5/A-301" fieldKey="detailNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
-            <RefFieldWithSearch label={w("Note Number", "Número de Nota", lang)} value={noteNum} onChange={setNoteNum} placeholder="e.g. NOTE 3" fieldKey="noteNum" fileSearch={fileSearch} setFileSearch={setFileSearch} files={files || []} lang={lang} />
-            <FormField label={w("Location Description", "Descripción de Ubicación", lang)} full>
-              <Input value={location} onChange={e => setLocation(e.target.value)} placeholder={w("e.g. Level 2 North Wing, Grid B-C/3-4", "ej. Nivel 2 Ala Norte, Cuadrícula B-C/3-4", lang)} style={{ fontSize: 12 }} />
-            </FormField>
-          </div>
-
-          <div style={{ marginTop: 12 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</label>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <Input value={attachInput} onChange={e => setAttachInput(e.target.value)} placeholder={w("Paste file name or URL...", "Pegar nombre de archivo o URL...", lang)} style={{ fontSize: 12, flex: "1 1 260px" }}
-                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addReference(); } }} />
-              <Button type="button" size="sm" variant="outline" onClick={addReference} disabled={!attachInput.trim()} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
-              <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
-              <Button size="sm" variant="outline" disabled={uploadingAtt} onClick={() => attachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
-                {uploadingAtt ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingAtt ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
-              </Button>
-              <input ref={imageFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f); e.target.value = ""; }} />
-              <Button type="button" size="sm" variant="outline" onClick={() => imageFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
-                <Upload style={{ width: 11, height: 11 }} />{w("Upload Image", "Subir Imagen", lang)}
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={pasteCreateImage} style={{ fontSize: 11, gap: 4 }}>
-                <Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={captureCreateImage} style={{ fontSize: 11, gap: 4 }}>
-                <Camera style={{ width: 11, height: 11 }} />{w("Capture Screen", "Capturar Pantalla", lang)}
-              </Button>
-              {connectedFileSourcesCreate.map(provider => (
-                <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerCreate(provider)} style={{ fontSize: 11, gap: 4 }}>
-                  <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
-                </Button>
-              ))}
-            </div>
-            <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 5 }}>
-              {w("Files, images, PDFs, and project references attached here are saved with the RFI question.", "Los archivos, imagenes, PDFs y referencias del proyecto adjuntos aqui se guardan con la pregunta del RFI.", lang)}
-            </div>
-            {attachments.map((a, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
-                <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{attachLabel(a)}</span>}
-                <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
-              </div>
-            ))}
-            {pendingImage && (
-              <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div>
-                <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                  <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div>
-                </div>
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <Button type="button" size="sm" onClick={async () => { await uploadAttachment(pendingImage.file, null); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingAtt} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
-                </div>
-              </div>
-            )}
-            {packageItems.length > 0 && (
-              <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Complete RFI PDF Package Order", "Orden del Paquete PDF Completo RFI", lang)}</div>
-                {packageItems.map((item, i) => (
-                  <div key={item.key} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto auto", gap: 6, alignItems: "center", fontSize: 11, padding: "4px 0", borderTop: i === 0 ? "none" : "1px solid hsl(var(--border) / 0.5)" }}>
-                    <input type="checkbox" checked={item.include} onChange={e => setPackageItems(prev => prev.map(p => p.key === item.key ? { ...p, include: e.target.checked } : p))} />
-                    <span><FileText style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />{item.label} <span style={{ color: "hsl(var(--muted-foreground))" }}>({attachmentExt(item.label)})</span></span>
-                    <Button type="button" size="sm" variant="outline" disabled={i === 0} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowUp style={{ width: 10, height: 10 }} /></Button>
-                    <Button type="button" size="sm" variant="outline" disabled={i === packageItems.length - 1} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowDown style={{ width: 10, height: 10 }} /></Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Section 5 — Question */}
-          <SectionHeader title={w("5. Description of Question", "5. Descripción de la Pregunta", lang)} />
-          <div style={{ marginTop: 10 }}>
-            <textarea
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              placeholder={w("Provide a clear, detailed description of the information requested…", "Proporcione una descripción clara y detallada de la información solicitada…", lang)}
-              style={{ width: "100%", minHeight: 100, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-            />
-            <div style={{ marginTop: 8 }}>
-              <button
-                onClick={() => setShowAi(!showAi)}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 6, border: "1px solid #7C3AED", background: showAi ? "#7C3AED" : "transparent", color: showAi ? "white" : "#7C3AED", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
-              >
-                <Sparkles style={{ width: 13, height: 13 }} />
-                {w("Generate question with AI", "Generar pregunta con IA", lang)}
-              </button>
-              {showAi && (
-                <div style={{ marginTop: 8, padding: 12, background: "hsl(var(--secondary) / 0.5)", borderRadius: 8, border: "1px solid #7C3AED44" }}>
-                  <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
-                    {w("Text-only AI assist uses AI credits. It does not read attached files unless you explicitly use file-reading AI.", "La asistencia IA solo de texto usa creditos IA. No lee archivos adjuntos salvo que use explicitamente IA de lectura de archivos.", lang)}
-                  </p>
-                  <textarea
-                    value={aiDesc}
-                    onChange={e => setAiDesc(e.target.value)}
-                    placeholder={w("e.g. The drawing shows a beam but the spec says something different…", "ej. El plano muestra una viga pero la especificación dice algo diferente…", lang)}
-                    style={{ width: "100%", minHeight: 60, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                  />
-                  <Button size="sm" disabled={!aiDesc.trim() || isGenerating}
-                    onClick={() => generateQ({ data: { description: aiDesc, subject, projectName: undefined } })}
-                    style={{ marginTop: 8, fontSize: 12, background: "#7C3AED", gap: 5 }}>
-                    {isGenerating ? <><Loader2 style={{ width: 12, height: 12 }} className="animate-spin" />{w("Generating…", "Generando…", lang)}</> : <><Sparkles style={{ width: 12, height: 12 }} />{w("Generate", "Generar", lang)}</>}
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Section 6 — Impact */}
-          <SectionHeader title={w("6. Impact Assessment", "6. Evaluación de Impacto", lang)} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 10 }}>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</label>
-              {["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].map(opt => (
-                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
-                  <input type="radio" name="cost_impact" checked={costImpact === opt} onChange={() => setCostImpact(opt)} />
-                  {opt}
-                </label>
-              ))}
-              {costReasonRequired && (
-                <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                  {costAmountRequired && <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 12 }} />}
-                  <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 64, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
-                </div>
-              )}
-            </div>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</label>
-              {["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"].map(opt => (
-                <label key={opt} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
-                  <input type="radio" name="sched_impact" checked={schedImpact === opt} onChange={() => setSchedImpact(opt)} />
-                  {opt}
-                </label>
-              ))}
-              {scheduleDaysRequired && (
-                <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                  <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Calendar Days", "Dias Calendario", lang)} style={{ fontSize: 12 }} />
-                  <textarea value={schedReason} onChange={e => setSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ width: "100%", minHeight: 64, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Section 7 — Distribution */}
-          {/* Fix 4 — external contacts */}
-          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
-          <div style={{ marginTop: 10 }}>
-            {members.map(m => (
-              <label key={m.userEmail} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer", fontSize: 12 }}>
-                <input type="checkbox" checked={distList.includes(m.userEmail)}
-                  onChange={e => {
-                    if (e.target.checked) setDistList(prev => [...prev, m.userEmail]);
-                    else setDistList(prev => prev.filter(x => x !== m.userEmail));
-                  }} />
-                <span>{m.userFullName}</span>
-                {m.userCompanyName && <span style={{ color: "hsl(var(--muted-foreground))" }}>· {m.userCompanyName}</span>}
-                <span style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{m.userEmail}</span>
-              </label>
-            ))}
-            {/* Show external contacts already added */}
-            {distList.filter(e => e.startsWith("EXT:")).map((entry, i) => {
-              const parsed = parseDistEntry(entry);
-              return (
-                <div key={entry} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: 12, padding: "3px 6px", background: "#F0F9FF", borderRadius: 5, border: "1px solid #BAE6FD" }}>
-                  <UserPlus style={{ width: 12, height: 12, color: "#0369A1", flexShrink: 0 }} />
-                  <span style={{ flex: 1 }}>{parsed.display}</span>
-                  <button onClick={() => setDistList(prev => prev.filter(x => x !== entry))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 2 }}><X style={{ width: 11, height: 11 }} /></button>
-                </div>
-              );
-            })}
-            {members.length === 0 && distList.filter(e => !e.startsWith("EXT:")).length === 0 && (
-              <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>{w("No team members found.", "No se encontraron miembros del equipo.", lang)}</p>
-            )}
-
-            {/* Fix 4 — Add external contact */}
-            <button type="button" onClick={() => setShowAddExtContact(!showAddExtContact)}
-              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 11, borderRadius: 5, border: "1px dashed #0369A1", background: showAddExtContact ? "#E0F2FE" : "transparent", cursor: "pointer", color: "#0369A1", marginTop: 8 }}>
-              <UserPlus style={{ width: 12, height: 12 }} />
-              {w("Add external contact", "Agregar contacto externo", lang)}
-            </button>
-            {showAddExtContact && (
-              <div style={{ marginTop: 8, padding: "10px 12px", background: "#E0F2FE", borderRadius: 8, border: "1px solid #BAE6FD" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#0369A1", marginBottom: 8 }}>
-                  {w("External contact (RFI notifications only — not a project member)", "Contacto externo (solo notificaciones RFI — no es miembro del proyecto)", lang)}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Name *</label>
-                    <Input value={extContactName} onChange={e => setExtContactName(e.target.value)} placeholder="Jane Doe" style={{ fontSize: 12 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Email *</label>
-                    <Input value={extContactEmail} onChange={e => setExtContactEmail(e.target.value)} placeholder="jane@company.com" style={{ fontSize: 12 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>Phone (optional)</label>
-                    <Input value={extContactPhone} onChange={e => setExtContactPhone(e.target.value)} placeholder="+1 555 0200" style={{ fontSize: 12 }} />
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <Button size="sm" onClick={handleAddExtContact} disabled={!extContactName.trim() || !extContactEmail.trim()} style={{ fontSize: 11 }}>
-                    {w("Add to Distribution", "Agregar a Distribución", lang)}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowAddExtContact(false)} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
-                </div>
-              </div>
-            )}
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>{w("Email / Question Description", "Email / Descripción de la Pregunta", lang)}</div>
-              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
-                {w("Draft the cover email here. This text-only AI assist uses AI credits and does not read attached files unless you explicitly use a file-reading AI tool.", "Redacte aqui el correo de portada. Esta asistencia IA solo usa texto, consume creditos IA y no lee archivos adjuntos salvo que use explicitamente una herramienta IA de lectura de archivos.", lang)}
-              </div>
-              <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Description of Email", "Descripción de Email", lang)}</label>
-              <textarea
-                value={emailDescription}
-                onChange={e => setEmailDescription(e.target.value)}
-                placeholder={w("Describe the message you want to send with this RFI...", "Describa el mensaje que desea enviar con este RFI...", lang)}
-                style={{ width: "100%", minHeight: 72, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-              />
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
-                <Button size="sm" variant="outline" onClick={generateCreateEmailDraft} disabled={emailDraftLoading || (!question.trim() && !emailDescription.trim())} title={w("Text-only draft. Does not read attachments. Uses configured AI credits.", "Borrador solo con texto. No lee adjuntos. Usa creditos IA configurados.", lang)} style={{ fontSize: 11, gap: 5 }}>
-                  {emailDraftLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Sparkles style={{ width: 12, height: 12 }} />}
-                  {w("Generate Email with AI", "Generar Email con IA", lang)}
-                </Button>
-                <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Click-driven only. No AI runs automatically.", "Solo por clic. La IA no se ejecuta automaticamente.", lang)}</span>
-              </div>
-              {emailDraftError && <div style={{ fontSize: 11, color: "#B45309", marginTop: 6 }}>{emailDraftError}</div>}
-              {emailDraft && (
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
-                    <Button type="button" size="sm" variant="outline" onClick={copyCreateEmailDraft} style={{ fontSize: 11, gap: 5 }}>
-                      {emailCopied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-                      {emailCopied ? w("Copied", "Copiado", lang) : w("Copy Email", "Copiar Email", lang)}
-                    </Button>
-                  </div>
-                  <textarea
-                    value={emailDraft}
-                    onChange={e => setEmailDraft(e.target.value)}
-                    style={{ width: "100%", minHeight: 120, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ padding: "14px 24px", borderTop: "1px solid hsl(var(--border))", display: "flex", justifyContent: "flex-end", gap: 8, flexShrink: 0 }}>
-          <Button variant="outline" onClick={onClose} style={{ fontSize: 12 }}>{w("Cancel", "Cancelar", lang)}</Button>
-          <Button onClick={handleSubmit} disabled={isPending} style={{ fontSize: 12, gap: 5 }}>
-            {isPending ? <><Loader2 style={{ width: 13, height: 13 }} className="animate-spin" />{w("Submitting…", "Enviando…", lang)}</> : w(isRevision ? "Submit Revision" : "Submit RFI", isRevision ? "Enviar Revisión" : "Enviar RFI", lang)}
-          </Button>
-        </div>
-      </div>
+    <>
+      <RfiCanonicalForm
+        lang={lang}
+        mode="create"
+        recordState="new"
+        values={{
+          subject,
+          status: "draft",
+          priority,
+          rfiType,
+          dateRequested,
+          dateRequired,
+          submittedByCompany: sByCompany,
+          submittedByContact: sByContact,
+          submittedByAddress: sByAddress,
+          submittedByPhone: sByPhone,
+          submittedByEmail: sByEmail,
+          submittedToCompany: sToCompany,
+          submittedToPerson: sToPerson,
+          submittedToEmail: sToEmail,
+          drawingNumber: drawingNum,
+          drawingTitle,
+          specSection,
+          detailNumber: detailNum,
+          noteNumber: noteNum,
+          locationDescription: location,
+          referenceInput: attachInput,
+          question,
+          costImpact,
+          costImpactAmount: costAmount,
+          costImpactReason: costReason,
+          scheduleImpact: schedImpact,
+          scheduleImpactDays: schedDays,
+          scheduleImpactReason: schedReason,
+          distributionList: distList,
+          emailDescription,
+          emailDraft,
+          questionAssistDescription: aiDesc,
+        }}
+        permissions={{ canEdit: true, canRespond: false, canClose: false, canReopen: false, canExport: false, canRaiseChangeOrder: false, canJumpViewpoint: !!(preload as { sourceViewpointId?: string | null } | undefined)?.sourceViewpointId }}
+        references={[]}
+        attachments={attachments}
+        imagePresentation={imagePresentation}
+        packageItems={packageItems}
+        responses={[]}
+        loading={{ saving: isPending, uploading: uploadingAtt, questionAi: isGenerating, emailAi: emailDraftLoading }}
+        options={{ priorities: priorityOptions.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label })), rfiTypes: rfiTypeOptions }}
+        cloudAttachmentActions={connectedFileSourcesCreate.map(provider => ({ key: provider.key, label: w(`From ${provider.label}`, `Desde ${provider.label}`, lang), icon: "cloud" as const, onClick: () => setCloudPickerCreate(provider) }))}
+        imageAttachmentActions={[
+          { key: "upload-image", label: w("Upload Image", "Subir Imagen", lang), icon: "upload", onClick: () => imageFileRef.current?.click() },
+          { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteCreateImage },
+          { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureCreateImage },
+        ]}
+        pendingImagePreview={pendingImage ? { url: pendingImage.url, mode: pendingImage.mode } : null}
+        onAttachPendingImage={async () => { if (!pendingImage) return; await uploadAttachment(pendingImage.file, null); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
+        onCancelPendingImage={() => { if (pendingImage) URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
+        actions={{ submit: handleSubmit, cancel: onClose }}
+        onChange={handleCanonicalCreateChange}
+        onAddReference={addReference}
+        onRemoveReference={index => setAttachments(prev => prev.filter((_, i) => i !== index))}
+        onUploadFile={() => attachFileRef.current?.click()}
+        onGenerateQuestionAi={() => {
+          const description = aiDesc.trim() || question.trim() || subject.trim();
+          if (!description) { toast({ title: w("Add a description before using AI assist.", "Agregue una descripcion antes de usar asistencia IA.", lang), variant: "destructive" }); return; }
+          generateQ({ data: { description, subject, projectName: undefined } });
+        }}
+        onGenerateEmailAi={generateCreateEmailDraft}
+        onCopyEmail={copyCreateEmailDraft}
+      />
+      <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
+      <input ref={imageFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f); e.target.value = ""; }} />
       {cloudPickerCreate && (
         <CloudPicker
           provider={cloudPickerCreate}
@@ -1949,8 +1488,9 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           onClose={() => setCloudPickerCreate(null)}
         />
       )}
-    </div>
+    </>
   );
+
 }
 
 // ─── RFI Detail Panel ─────────────────────────────────────────────────────────
@@ -1971,6 +1511,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const { toast } = useToast();
   const { getLabel, getOptions } = useConfig();
   const { data: files } = useListFiles(projectId);
+  const priorityOptions = getOptions("rfi_priority").map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }));
   const configuredRfiTypes = getOptions("rfi_type");
   const rfiTypeOptions = configuredRfiTypes.length
     ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
@@ -1992,6 +1533,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // both fit.
   const [infoEdit, setInfoEdit] = useState(false);
   const [infoQuestion, setInfoQuestion] = useState("");
+  const [questionAiDescription, setQuestionAiDescription] = useState("");
   const [infoCost, setInfoCost] = useState("");
   const [infoCostAmt, setInfoCostAmt] = useState("");
   const [infoCostReason, setInfoCostReason] = useState("");
@@ -2012,7 +1554,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(() => ((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null));
   const [questionDocInput, setQuestionDocInput] = useState("");
   const [infoSubject, setInfoSubject] = useState("");
+  const [infoPriority, setInfoPriority] = useState(rfi.priority || "medium");
   const [infoType, setInfoType] = useState("");
+  const [infoDrawingNumber, setInfoDrawingNumber] = useState(rfi.drawingNumber || "");
+  const [infoDrawingTitle, setInfoDrawingTitle] = useState(rfi.drawingTitle || "");
+  const [infoSpecSection, setInfoSpecSection] = useState(rfi.specSection || "");
+  const [infoDetailNumber, setInfoDetailNumber] = useState(rfi.detailNumber || "");
+  const [infoNoteNumber, setInfoNoteNumber] = useState(rfi.noteNumber || "");
+  const [infoLocationDescription, setInfoLocationDescription] = useState(rfi.locationDescription || "");
   const [infoVpLabel, setInfoVpLabel] = useState("");
   const [infoDist, setInfoDist] = useState<string[]>((rfi.distributionList as string[] | null) || []);
   const [distInput, setDistInput] = useState("");
@@ -2022,12 +1571,20 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setImagePresentation((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null);
     setQuestionDocInput("");
     setInfoSubject(rfi.subject || "");
+    setInfoPriority(rfi.priority || "medium");
     setInfoType(rfi.rfiType || "");
+    setInfoDrawingNumber(rfi.drawingNumber || "");
+    setInfoDrawingTitle(rfi.drawingTitle || "");
+    setInfoSpecSection(rfi.specSection || "");
+    setInfoDetailNumber(rfi.detailNumber || "");
+    setInfoNoteNumber(rfi.noteNumber || "");
+    setInfoLocationDescription(rfi.locationDescription || "");
     setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
     setInfoDateRequired(rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
+    setQuestionAiDescription("");
     setInfoCost(rfi.costImpact || "No Cost Impact");
     setInfoCostAmt(rfi.costImpactAmount || "");
     setInfoCostReason((rfi as Rfi & { costImpactReason?: string }).costImpactReason || "");
@@ -2842,7 +2399,14 @@ ${hasResp ? `
       rfiId: rfi.id,
       data: {
         subject: infoSubject,
+        priority: infoPriority,
         rfiType: infoType,
+        drawingNumber: infoDrawingNumber || undefined,
+        drawingTitle: infoDrawingTitle || undefined,
+        specSection: infoSpecSection || undefined,
+        detailNumber: infoDetailNumber || undefined,
+        noteNumber: infoNoteNumber || undefined,
+        locationDescription: infoLocationDescription || undefined,
         sourceViewpointLabel: infoVpLabel,
         dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : undefined,
         question: infoQuestion,
@@ -2871,7 +2435,7 @@ ${hasResp ? `
   const handleCanonicalDetailChange = (field: keyof RfiCanonicalValues, value: string) => {
     switch (field) {
       case "subject": setInfoSubject(value); break;
-      case "priority": break;
+      case "priority": setInfoPriority(value); break;
       case "rfiType": setInfoType(value); break;
       case "dateRequired": setInfoDateRequired(value); break;
       case "submittedByCompany": setInfoFromCompany(value); break;
@@ -2882,14 +2446,15 @@ ${hasResp ? `
       case "submittedToCompany": setInfoToCompany(value); break;
       case "submittedToPerson": setInfoToPerson(value); break;
       case "submittedToEmail": setInfoToEmail(value); break;
-      case "drawingNumber": break;
-      case "drawingTitle": break;
-      case "specSection": break;
-      case "detailNumber": break;
-      case "noteNumber": break;
-      case "locationDescription": break;
+      case "drawingNumber": setInfoDrawingNumber(value); break;
+      case "drawingTitle": setInfoDrawingTitle(value); break;
+      case "specSection": setInfoSpecSection(value); break;
+      case "detailNumber": setInfoDetailNumber(value); break;
+      case "noteNumber": setInfoNoteNumber(value); break;
+      case "locationDescription": setInfoLocationDescription(value); break;
       case "referenceInput": setQuestionDocInput(value); break;
       case "question": setInfoQuestion(value); break;
+      case "questionAssistDescription": setQuestionAiDescription(value); break;
       case "costImpact": setInfoCost(value); break;
       case "costImpactAmount": setInfoCostAmt(value); break;
       case "costImpactReason": setInfoCostReason(value); break;
@@ -2898,993 +2463,106 @@ ${hasResp ? `
       case "scheduleImpactReason": setInfoSchedReason(value); break;
       case "distributionList": setInfoDist(value.split(",").map(v => v.trim()).filter(Boolean)); break;
       case "responseText": setAnswer(value); break;
+      case "emailDescription": setUserContext(value); break;
       default: break;
     }
   };
 
-  if (Date.now() >= 0) return (
-    <RfiCanonicalForm
-      lang={lang}
-      mode={infoEdit ? "edit" : "view"}
-      recordState={recordState}
-      values={{
-        number: rfi.number,
-        projectName: "",
-        subject: infoEdit ? infoSubject : rfi.subject,
-        status: rfi.status,
-        priority: rfi.priority,
-        rfiType: infoEdit ? infoType : (rfi.rfiType || ""),
-        dateRequested: fmt(rfi.dateRequested || rfi.createdAt),
-        dateRequired: infoEdit ? infoDateRequired : fmt(rfi.dateRequired || rfi.dueDate),
-        daysOutstanding: `${days}d`,
-        dateAnswered: fmt(rfi.dateAnswered || rfi.respondedAt),
-        submittedByCompany: infoEdit ? infoFromCompany : (rfi.submittedByCompany || ""),
-        submittedByContact: infoEdit ? infoFromContact : (rfi.submittedByContact || rfi.createdByName || ""),
-        submittedByAddress: infoEdit ? infoFromAddress : (rfi.submittedByAddress || ""),
-        submittedByPhone: infoEdit ? infoFromPhone : (rfi.submittedByPhone || ""),
-        submittedByEmail: infoEdit ? infoFromEmail : (rfi.submittedByEmail || ""),
-        submittedToCompany: infoEdit ? infoToCompany : (rfi.submittedToCompany || ""),
-        submittedToPerson: infoEdit ? infoToPerson : (rfi.submittedToPerson || ""),
-        submittedToEmail: infoEdit ? infoToEmail : (rfi.submittedToEmail || ""),
-        drawingNumber: rfi.drawingNumber || "",
-        drawingTitle: rfi.drawingTitle || "",
-        specSection: rfi.specSection || "",
-        detailNumber: rfi.detailNumber || "",
-        noteNumber: rfi.noteNumber || "",
-        locationDescription: rfi.locationDescription || "",
-        referenceInput: questionDocInput,
-        question: infoEdit ? infoQuestion : (rfi.question || rfi.description || ""),
-        costImpact: infoEdit ? infoCost : (rfi.costImpact || ""),
-        costImpactAmount: infoEdit ? infoCostAmt : (rfi.costImpactAmount || ""),
-        costImpactReason: infoEdit ? infoCostReason : ((rfi as Rfi & { costImpactReason?: string }).costImpactReason || ""),
-        scheduleImpact: infoEdit ? infoSched : (rfi.scheduleImpact || ""),
-        scheduleImpactDays: infoEdit ? infoSchedDays : (rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : ""),
-        scheduleImpactReason: infoEdit ? infoSchedReason : ((rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason || ""),
-        distributionList: infoEdit ? infoDist : ((rfi.distributionList as string[] | null) || []),
-        responseText: answer,
-      }}
-      permissions={detailPermissions}
-      references={questionDocs}
-      attachments={[]}
-      imagePresentation={imagePresentation}
-      packageItems={packageItems}
-      responses={rfiResponses.map(resp => ({ id: resp.id, text: resp.responseText, by: resp.answeredBy || undefined, date: resp.createdAt }))}
-      loading={{ saving: isUpdating, uploading: uploadingDoc, response: isUpdating }}
-      actions={{
-        "export-pdf": () => onExportPdf(rfi),
-        "export-complete-pdf": () => onExportCompletePdf(rfi),
-        "export-docx": handleExportWord,
-        "export-audit-pdf": handleDownloadAuditCert,
-        "viewed-by": () => setShowViewedBy(!showViewedBy),
-        edit: startInfoEdit,
-        close: handleCloseRfi,
-        reopen: handleReopenRfi,
-        "raise-change-order": handleRaiseChangeOrder,
-        "jump-viewpoint": () => { void fetch(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "")}`, { mode: "no-cors" }); },
-        "save-rfi": saveCanonicalRfi,
-        cancel: () => setInfoEdit(false),
-        "save-response": handleSaveResponse,
-      }}
-      onChange={handleCanonicalDetailChange}
-      onAddReference={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }}
-      onRemoveReference={index => setQuestionDocs(prev => prev.filter((_, i) => i !== index))}
-      onUploadFile={() => qAttachFileRef.current?.click()}
-      onGenerateQuestionAi={handleQuestionAi}
-      onGenerateEmailAi={() => void generatePreview()}
-      onCopyEmail={handleCopyPreview}
-    />
-  );
-
   return (
-    <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-      <button onClick={onClose} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "hsl(var(--muted-foreground))", background: "transparent", border: "none", cursor: "pointer", padding: "4px 0 14px" }}>
-        <ChevronLeft style={{ width: 16, height: 16 }} />{w("Back to RFIs", "Volver a RFIs", lang)}
-      </button>
-      <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {/* Header */}
-        <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
-              {w(rfi.sendStatus === "sent" || rfi.sentAt ? "1. Header / RFI Status - Existing RFI / Sent RFI" : "1. Header / RFI Status - Existing RFI / Not Sent", rfi.sendStatus === "sent" || rfi.sentAt ? "1. Encabezado / Estado RFI - RFI Existente / Enviado" : "1. Encabezado / Estado RFI - RFI Existente / No Enviado", lang)}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{rfi.number}</span>
-              <span className={`badge ${STATUS_BADGE[rfi.status] ?? "badge-gray"}`}>{getLabel("rfi_status", rfi.status)}</span>
-              <span className={`badge ${PRIORITY_BADGE[rfi.priority] ?? "badge-gray"}`}>{getLabel("rfi_priority", rfi.priority)}</span>
-              {infoEdit ? (
-                <select value={infoType} onChange={e => setInfoType(e.target.value)} style={{ fontSize: 11, padding: "2px 6px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit" }}>
-                  <option value="">{w("Type…", "Tipo…", lang)}</option>
-                  {rfiTypeOptions.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              ) : rfi.rfiType ? (
-                <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#EEF2FF", color: "#4338CA" }}>{rfi.rfiType}</span>
-              ) : null}
-              {(rfi.revisionNumber ?? 0) > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", padding: "2px 6px", borderRadius: 4, background: "#EDE9FE" }}>Rev {rfi.revisionNumber}</span>}
-            </div>
-            {infoEdit ? (
-              <input value={infoSubject} onChange={e => setInfoSubject(e.target.value)} placeholder={w("RFI title / subject", "Título / asunto del RFI", lang)} style={{ ...infoInput, fontSize: 16, fontWeight: 700, marginTop: 4 }} />
-            ) : (
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>{rfi.subject}</div>
-            )}
-            {bic && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, padding: "4px 10px", borderRadius: 20, background: bic.color + "15", border: `1px solid ${bic.color}44`, width: "fit-content" }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: bic.color }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: bic.color }}>{w("Ball in court:", "Responsable:", lang)} {bic.label}</span>
-              </div>
-            )}
-          </div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-            <Button variant="outline" size="sm" onClick={() => onExportPdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("RFI PDF", "RFI PDF", lang)}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onExportCompletePdf(rfi)} style={{ gap: 5, fontSize: 11 }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("Complete RFI PDF", "PDF Completo RFI", lang)}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportWord} style={{ gap: 5, fontSize: 11 }}>
-              <FileText style={{ width: 12, height: 12 }} />{w("RFI DOCX", "RFI DOCX", lang)}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleDownloadAuditCert} style={{ gap: 5, fontSize: 11 }}>
-              <Shield style={{ width: 12, height: 12 }} />{w("RFI Audit PDF", "PDF Auditoria RFI", lang)}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowViewedBy(!showViewedBy)} title={w("Show who viewed this RFI", "Mostrar quien vio este RFI", lang)} style={{ gap: 5, fontSize: 11 }}>
-              <Eye style={{ width: 12, height: 12 }} />{viewEvents.length}
-            </Button>
-            {savedRfiActions.some(action => action.key === "close") && (
-              <Button variant="outline" size="sm" onClick={handleCloseRfi} style={{ gap: 5, fontSize: 11, color: "#DC2626", borderColor: "#FCA5A5" }}>
-                <X style={{ width: 12, height: 12 }} />{w("Close RFI", "Cerrar RFI", lang)}
-              </Button>
-            )}
-            {savedRfiActions.some(action => action.key === "reopen") && (
-              <Button variant="outline" size="sm" onClick={handleReopenRfi} style={{ gap: 5, fontSize: 11 }}>
-                <RefreshCw style={{ width: 12, height: 12 }} />{w("Reopen RFI", "Reabrir RFI", lang)}
-              </Button>
-            )}
-            {savedRfiActions.some(action => action.key === "edit") && (
-              <Button variant="outline" size="sm" onClick={startInfoEdit} style={{ gap: 5, fontSize: 11 }}>
-                <PenLine style={{ width: 12, height: 12 }} />{w("Edit RFI", "Editar RFI", lang)}
-              </Button>
-            )}
-            {savedRfiActions.some(action => action.key === "raise-change-order") && (
-              <Button variant="outline" size="sm" disabled={raisingCo} onClick={handleRaiseChangeOrder} style={{ gap: 5, fontSize: 11, opacity: raisingCo ? 0.6 : 1 }}>
-                <FileText style={{ width: 12, height: 12 }} />{w("Raise Change Order", "Crear Orden de Cambio", lang)}
-              </Button>
-            )}
-            {savedRfiActions.some(action => action.key === "jump-viewpoint") && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  const code = (rfi as { sourceViewpointId?: string | null }).sourceViewpointId!;
-                  const ctrl = new AbortController();
-                  const timer = setTimeout(() => ctrl.abort(), 2000);
-                  try {
-                    await fetch(`http://localhost:8765/jump?code=${encodeURIComponent(code)}`, { mode: "no-cors", signal: ctrl.signal });
-                    clearTimeout(timer);
-                    toast({ title: w("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks", lang) });
-                  } catch {
-                    clearTimeout(timer);
-                    toast({ title: w("Navisworks plugin not reachable — open the model in Navisworks and try again.", "Plugin de Navisworks no disponible — abra el modelo en Navisworks e intente de nuevo.", lang), variant: "destructive" });
-                  }
-                }}
-                style={{ gap: 5, fontSize: 11 }}
-              >
-                <Navigation style={{ width: 12, height: 12 }} />{w("Jump to Viewpoint", "Ir al Punto de Vista", lang)}
-              </Button>
-            )}
-            <button onClick={onClose} style={{ padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", borderRadius: 6 }}>
-              <X style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+    <>
+      <RfiCanonicalForm
+        lang={lang}
+        mode={infoEdit ? "edit" : "view"}
+        recordState={recordState}
+        values={{
+          number: rfi.number,
+          subject: infoEdit ? infoSubject : rfi.subject,
+          status: rfi.status,
+          priority: infoEdit ? infoPriority : (rfi.priority || "medium"),
+          rfiType: infoEdit ? infoType : (rfi.rfiType || ""),
+          dateRequested: rfi.dateRequested ? format(parseISO(String(rfi.dateRequested)), "yyyy-MM-dd") : (rfi.createdAt ? format(parseISO(String(rfi.createdAt)), "yyyy-MM-dd") : ""),
+          dateRequired: infoEdit ? infoDateRequired : (rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : (rfi.dueDate ? format(parseISO(String(rfi.dueDate)), "yyyy-MM-dd") : "")),
+          daysOutstanding: `${days}d`,
+          dateAnswered: fmt(rfi.dateAnswered || rfi.respondedAt),
+          submittedByCompany: infoEdit ? infoFromCompany : (rfi.submittedByCompany || ""),
+          submittedByContact: infoEdit ? infoFromContact : (rfi.submittedByContact || rfi.createdByName || ""),
+          submittedByAddress: infoEdit ? infoFromAddress : (rfi.submittedByAddress || ""),
+          submittedByPhone: infoEdit ? infoFromPhone : (rfi.submittedByPhone || ""),
+          submittedByEmail: infoEdit ? infoFromEmail : (rfi.submittedByEmail || ""),
+          submittedToCompany: infoEdit ? infoToCompany : (rfi.submittedToCompany || ""),
+          submittedToPerson: infoEdit ? infoToPerson : (rfi.submittedToPerson || ""),
+          submittedToEmail: infoEdit ? infoToEmail : (rfi.submittedToEmail || ""),
+          drawingNumber: infoEdit ? infoDrawingNumber : (rfi.drawingNumber || ""),
+          drawingTitle: infoEdit ? infoDrawingTitle : (rfi.drawingTitle || ""),
+          specSection: infoEdit ? infoSpecSection : (rfi.specSection || ""),
+          detailNumber: infoEdit ? infoDetailNumber : (rfi.detailNumber || ""),
+          noteNumber: infoEdit ? infoNoteNumber : (rfi.noteNumber || ""),
+          locationDescription: infoEdit ? infoLocationDescription : (rfi.locationDescription || ""),
+          referenceInput: questionDocInput,
+          question: infoEdit ? infoQuestion : (rfi.question || rfi.description || ""),
+          costImpact: infoEdit ? infoCost : (rfi.costImpact || "No Cost Impact"),
+          costImpactAmount: infoEdit ? infoCostAmt : (rfi.costImpactAmount || ""),
+          costImpactReason: infoEdit ? infoCostReason : ((rfi as Rfi & { costImpactReason?: string }).costImpactReason || ""),
+          scheduleImpact: infoEdit ? infoSched : (rfi.scheduleImpact || "No Schedule Impact"),
+          scheduleImpactDays: infoEdit ? infoSchedDays : (rfi.scheduleImpactDays != null ? String(rfi.scheduleImpactDays) : ""),
+          scheduleImpactReason: infoEdit ? infoSchedReason : ((rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason || ""),
+          distributionList: infoEdit ? infoDist : ((rfi.distributionList as string[] | null) || []),
+          emailDescription: userContext,
+          emailDraft: previewText,
+          questionAssistDescription: questionAiDescription,
+          responseText: answer,
+        }}
+        permissions={detailPermissions}
+        references={questionDocs}
+        attachments={[]}
+        imagePresentation={imagePresentation}
+        packageItems={packageItems}
+        responses={rfiResponses.map(resp => ({ id: resp.id, text: resp.responseText, by: resp.answeredBy || undefined, date: resp.createdAt }))}
+        loading={{ saving: isUpdating, uploading: uploadingDoc, questionAi: qAiLoading, emailAi: previewLoading, response: isUpdating }}
+        options={{ priorities: priorityOptions, rfiTypes: rfiTypeOptions }}
+        cloudAttachmentActions={infoEdit ? connectedFileSources.map(provider => ({ key: provider.key, label: w(`From ${provider.label}`, `Desde ${provider.label}`, lang), icon: "cloud" as const, onClick: () => setCloudPickerTarget({ target: "question", provider }) })) : []}
+        imageAttachmentActions={infoEdit ? [
+          { key: "upload-image", label: w("Upload Image", "Subir Imagen", lang), icon: "upload", onClick: () => imageEvidenceInputRef.current?.click() },
+          { key: "replace-image", label: w("Replace Image", "Reemplazar Imagen", lang), icon: "replace", onClick: () => imageReplacementInputRef.current?.click() },
+          { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteImageEvidence },
+          { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureScreenImage },
+        ] : []}
+        pendingImagePreview={pendingImage ? { url: pendingImage.url, mode: pendingImage.mode } : null}
+        onAttachPendingImage={async () => { if (!pendingImage) return; await uploadImageEvidence(pendingImage.file, pendingImage.mode); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
+        onCancelPendingImage={() => { if (pendingImage) URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
+        actions={{
+          "export-pdf": () => onExportPdf(rfi),
+          "export-complete-pdf": () => onExportCompletePdf(rfi),
+          "export-docx": handleExportWord,
+          "export-audit-pdf": handleDownloadAuditCert,
+          "viewed-by": () => setShowViewedBy(!showViewedBy),
+          edit: startInfoEdit,
+          close: handleCloseRfi,
+          reopen: handleReopenRfi,
+          "raise-change-order": handleRaiseChangeOrder,
+          "jump-viewpoint": () => { void fetch(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "")}`, { mode: "no-cors" }); },
+          "save-rfi": saveCanonicalRfi,
+          cancel: () => setInfoEdit(false),
+          "save-response": handleSaveResponse,
+        }}
+        onChange={handleCanonicalDetailChange}
+        onAddReference={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }}
+        onRemoveReference={index => setQuestionDocs(prev => prev.filter((_, i) => i !== index))}
+        onUploadFile={() => qAttachFileRef.current?.click()}
+        onGenerateQuestionAi={() => handleQuestionAi(questionAiDescription)}
+        onGenerateEmailAi={() => void generatePreview()}
+        onCopyEmail={handleCopyPreview}
+      />
+      {showViewedBy && viewEvents.length > 0 && (
+        <div style={{ maxWidth: 1180, margin: "10px auto", padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+          <strong>{w("Viewed By", "Visto Por", lang)}</strong>
+          <div style={{ marginTop: 6 }}>{viewEvents.map(v => `${v.userFullName || v.userCompanyName} (${fmt(v.viewedAt)})`).join(", ")}</div>
         </div>
-
-        {/* Content */}
-        <div style={{ padding: "20px 24px 24px" }}>
-          {isOverdue && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
-              <AlertTriangle style={{ width: 14, height: 14 }} />
-              {w("This RFI is overdue. Response was required by", "Este RFI está vencido. La respuesta era requerida el", lang)} {fmt(due)}.
-            </div>
-          )}
-
-          {/* Viewed-by dropdown */}
-          {showViewedBy && (
-            <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid #BAE6FD", borderRadius: 8, background: "#F0F9FF" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#0369A1", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                <Eye style={{ width: 13, height: 13 }} />
-                {w("View History", "Historial de Visualización", lang)} ({viewEvents.length})
-              </div>
-              {viewEvents.length === 0 ? (
-                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("No view events yet.", "Sin eventos de visualización.", lang)}</div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {viewEvents.slice().reverse().map((evt) => (
-                    <div key={evt.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, padding: "3px 0", borderBottom: "1px solid #E0F2FE" }}>
-                      <span style={{ fontWeight: 600 }}>{evt.userFullName} <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>· {evt.userCompanyName}</span></span>
-                      <span style={{ color: "hsl(var(--muted-foreground))" }}>{new Date(evt.viewedAt).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.25)" }}>
-            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-              <Clock style={{ width: 13, height: 13 }} />
-              {w("Ball-in-Court History", "Historial de Responsable", lang)}
-            </div>
-            {ballHistory.length === 0 ? (
-              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                {rfi.sendStatus === "sent"
-                  ? w("No custody rows have been logged yet.", "Aun no hay filas de custodia registradas.", lang)
-                  : w("Not sent yet. The author holds the RFI until it is sent.", "Aun no enviado. El autor conserva el RFI hasta enviarlo.", lang)}
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {ballHistory.map(row => (
-                  <div key={row.id} style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 8, fontSize: 11, padding: "4px 0", borderBottom: "1px solid hsl(var(--border) / 0.5)" }}>
-                    <span style={{ fontWeight: 600 }}>{row.heldBy} <span style={{ fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>- {row.heldByCompany}</span></span>
-                    <span>{fmt(row.fromDate)} - {row.toDate ? fmt(row.toDate) : w("Current", "Actual", lang)}</span>
-                    <span style={{ color: "hsl(var(--muted-foreground))" }}>{row.toDate ? `${row.daysHeld ?? differenceInDays(new Date(row.toDate), new Date(row.fromDate))} ${w("days", "dias", lang)}` : w("Open", "Abierto", lang)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Generated Response Documents */}
-          {files && files.filter(f => f.source === "system-generated" && f.linkedRfiId === rfi.id).length > 0 && (
-            <div style={{ marginBottom: 14, padding: "10px 14px", border: "1px solid #BBF7D0", borderRadius: 8, background: "#F0FDF4" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#166534", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
-                {w("Auto-Generated Response Documents", "Documentos de Respuesta Generados", lang)}
-                <span style={{ fontSize: 9, fontWeight: 700, background: "#1E3A5F", color: "white", padding: "1px 6px", borderRadius: 10, marginLeft: 4 }}>BIMLog Auto</span>
-              </div>
-              {files.filter(f => f.source === "system-generated" && f.linkedRfiId === rfi.id).map(f => (
-                <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 4 }}>
-                  <FileText style={{ width: 12, height: 12, color: "#16A34A" }} />
-                  <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 11 }}>{f.fileName}</span>
-                  <button
-                    onClick={async () => {
-                      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-                      const resp = await fetch(`/api/v1/projects/${projectId}/files/${f.id}/download`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                      });
-                      if (resp.ok) {
-                        const blob = await resp.blob();
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a"); a.href = url; a.download = f.fileName; a.click();
-                        URL.revokeObjectURL(url);
-                      } else {
-                        toast({ title: w("Download failed", "Descarga fallida", lang), variant: "destructive" });
-                      }
-                    }}
-                    style={{ padding: "2px 8px", fontSize: 10, border: "1px solid #86EFAC", borderRadius: 4, background: "white", color: "#166534", cursor: "pointer" }}
-                  >
-                    {w("Download", "Descargar", lang)}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <SectionHeader title={w("1. Header / RFI Status", "1. Encabezado / Estado RFI", lang)} />
-          {/* Dates */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
-            {[
-              [w("Date Requested", "Fecha Solicitada", lang), fmt(rfi.dateRequested || rfi.createdAt)],
-              [w("Date Required", "Fecha Requerida", lang), infoEdit ? <input type="date" value={infoDateRequired} onChange={e => setInfoDateRequired(e.target.value)} style={{ ...infoInput, textAlign: "center", fontWeight: 700 }} /> : fmt(rfi.dateRequired || rfi.dueDate)],
-              [w("Days Outstanding", "Días en Espera", lang), `${days}d`],
-              [w("Date Answered", "Fecha Respondido", lang), fmt(rfi.dateAnswered || rfi.respondedAt)],
-            ].map(([label, value]) => (
-              <div key={String(label)} style={{ padding: "8px 12px", background: "hsl(var(--secondary) / 0.4)", borderRadius: 8, textAlign: "center" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 2 }}>{label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: label === w("Days Outstanding", "Días en Espera", lang) ? daysColor(days, isOverdue) : "hsl(var(--foreground))" }}>{value}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Activity timeline */}
-          {timeline.length > 0 && (
-            <div style={{ marginBottom: 16, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 8 }}>{w("Activity", "Actividad", lang)}</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {timeline.map((e, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#1D4ED8", flexShrink: 0 }} />
-                    <span style={{ fontWeight: 600 }}>{e.label}</span>
-                    {e.by && <span style={{ color: "hsl(var(--muted-foreground))" }}>· {e.by}</span>}
-                    <span style={{ marginLeft: "auto", color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{fmt(e.date)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <SectionHeader title={w("2. Submitted By", "2. Enviado Por", lang)} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, marginBottom: 16 }}>
-            <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted By", "Enviado Por", lang)}</div>
-                {canWrite && !infoEdit && (
-                  <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
-                )}
-              </div>
-              {infoEdit ? (
-                <>
-                  <input value={infoFromCompany} onChange={e => setInfoFromCompany(e.target.value)} placeholder={w("Company (you / asker)", "Empresa (usted / solicitante)", lang)} style={infoInput} />
-                  <input value={infoFromContact} onChange={e => setInfoFromContact(e.target.value)} placeholder={w("Contact name", "Nombre de contacto", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                  <input value={infoFromAddress} onChange={e => setInfoFromAddress(e.target.value)} placeholder={w("Address", "Direccion", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                  <input value={infoFromPhone} onChange={e => setInfoFromPhone(e.target.value)} placeholder={w("Phone", "Telefono", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                  <input value={infoFromEmail} onChange={e => setInfoFromEmail(e.target.value)} placeholder={w("Email", "Correo", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                </>
-              ) : (
-                <>
-                  {rfi.submittedByCompany && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><Building2 style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{rfi.submittedByCompany}</span></div>}
-                  {(rfi.submittedByContact || rfi.createdByName) && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><User style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedByContact || rfi.createdByName}</span></div>}
-                  {rfi.submittedByEmail && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><Mail style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedByEmail}</span></div>}
-                  {rfi.submittedByPhone && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Phone style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedByPhone}</span></div>}
-                  {rfi.submittedByAddress && <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}><MapPin style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedByAddress}</span></div>}
-                </>
-              )}
-            </div>
-            <SectionHeader title={w("3. Submitted To", "3. Enviado A", lang)} />
-            <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Submitted To", "Enviado A", lang)}</div>
-                {canWrite && !infoEdit && (
-                  <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
-                )}
-              </div>
-              {infoEdit ? (
-                <>
-                  <input list="rfi-dir-companies" value={infoToCompany} onChange={e => {
-                    const v = e.target.value; setInfoToCompany(v);
-                    const m = rfiDirectory.find(d => (d.companyName || "") === v);
-                    if (m && !infoToEmail) { if (m.fullName) setInfoToPerson(m.fullName); if (m.email) setInfoToEmail(m.email); }
-                  }} placeholder={w("Company — pick from directory or type new", "Empresa — elija del directorio o escriba nueva", lang)} style={infoInput} />
-                  <input list="rfi-dir-people" value={infoToPerson} onChange={e => {
-                    const v = e.target.value; setInfoToPerson(v);
-                    const m = rfiDirectory.find(d => d.fullName === v);
-                    if (m) { if (m.companyName) setInfoToCompany(m.companyName); if (m.email) setInfoToEmail(m.email); }
-                  }} placeholder={w("Person — pick or type new", "Persona — elija o escriba nueva", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                  <input value={infoToEmail} onChange={e => setInfoToEmail(e.target.value)} placeholder={w("Email", "Correo", lang)} style={{ ...infoInput, marginTop: 6 }} />
-                  <datalist id="rfi-dir-companies">{[...new Set(rfiDirectory.map(d => d.companyName).filter((c): c is string => !!c))].map((c, i) => <option key={i} value={c} />)}</datalist>
-                  <datalist id="rfi-dir-people">{rfiDirectory.map((d, i) => <option key={i} value={d.fullName}>{d.companyName ? `${d.fullName} — ${d.companyName}` : d.fullName}</option>)}</datalist>
-                </>
-              ) : (
-                <>
-                  {rfi.submittedToCompany && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><Building2 style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{rfi.submittedToCompany}</span></div>}
-                  {rfi.submittedToPerson && <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><User style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToPerson}</span></div>}
-                  {rfi.submittedToEmail && <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Mail style={{ width: 12, height: 12, color: "hsl(var(--muted-foreground))" }} /><span style={{ fontSize: 12 }}>{rfi.submittedToEmail}</span></div>}
-                  {!rfi.submittedToCompany && !rfi.submittedToPerson && <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>—</span>}
-                </>
-              )}
-            </div>
-          </div>
-
-          <SectionHeader title={w("4. Reference Information / Attachments", "4. Informacion de Referencia / Adjuntos", lang)} />
-
-          {/* Reference info */}
-          {(infoEdit || rfi.drawingNumber || rfi.drawingTitle || rfi.specSection || rfi.detailNumber || rfi.noteNumber || rfi.locationDescription || storedQuestionDocs.length > 0) && (
-            <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10 }}>{w("Reference Information", "Información de Referencia", lang)}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                <InfoRow label={w("Drawing #", "Plano #", lang)} value={rfi.drawingNumber} />
-                <InfoRow label={w("Drawing Title", "Título Plano", lang)} value={rfi.drawingTitle} />
-                <InfoRow label={w("Spec Section", "Sección Esp.", lang)} value={rfi.specSection} />
-                <InfoRow label={w("Detail #", "Detalle #", lang)} value={rfi.detailNumber} />
-                <InfoRow label={w("Note #", "Nota #", lang)} value={rfi.noteNumber} />
-                <InfoRow label={w("Location", "Ubicación", lang)} value={rfi.locationDescription} />
-              </div>
-              {infoEdit ? (
-                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    <input value={questionDocInput} onChange={e => setQuestionDocInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); e.preventDefault(); } }} placeholder={w("Paste a URL or file name, e.g. SK-105 Rev2.pdf", "Pegue URL o nombre de archivo, ej. SK-105 Rev2.pdf", lang)} style={{ ...infoInput, flex: "1 1 260px" }} />
-                    <Button type="button" size="sm" variant="outline" onClick={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }} style={{ fontSize: 11 }}>{w("Add Reference", "Agregar Referencia", lang)}</Button>
-                    <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
-                    <Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => qAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
-                      {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}
-                    </Button>
-                    {connectedFileSources.map(provider => (
-                      <Button key={provider.key} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "question", provider })} style={{ fontSize: 11, gap: 4 }}>
-                        <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
-                      </Button>
-                    ))}
-                  </div>
-                  {questionDocs.map((a, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12, color: "#1D4ED8" }}>
-                      <ExternalLink style={{ width: 12, height: 12 }} />
-                      {isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(a)}</a> : <span style={{ flex: 1 }}>{attachLabel(a)}</span>}
-                      <button type="button" onClick={() => setQuestionDocs(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 12, height: 12 }} /></button>
-                    </div>
-                  ))}
-                </div>
-              ) : storedQuestionDocs.length > 0 ? (
-                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.4)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Attachments / References", "Adjuntos / Referencias", lang)}</div>
-                  {storedQuestionDocs.map((a, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                      <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(a) ? <a href={a} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(a)}</a> : attachLabel(a)}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          )}
-
-          {/* Linked Items */}
-          <div style={{ marginBottom: 16, padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            {(rfi as { sourceViewpointId?: string | null }).sourceViewpointId && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid hsl(var(--border) / 0.4)", flexWrap: "wrap" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: "#F0FDFA", color: "#0F766E", border: "1px solid #5EEAD4" }}>
-                  <Navigation style={{ width: 12, height: 12 }} />{w("Viewpoint", "Punto de Vista", lang)} {(rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || (rfi as { sourceViewpointId?: string | null }).sourceViewpointId}
-                </span>
-                {infoEdit ? (
-                  <input
-                    value={infoVpLabel}
-                    onChange={(e) => setInfoVpLabel(e.target.value)}
-                    placeholder={(rfi as { sourceViewpointId?: string | null }).sourceViewpointId || w("custom label", "etiqueta personalizada", lang)}
-                    style={{ fontSize: 12, padding: "3px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", minWidth: 180 }}
-                  />
-                ) : (
-                  <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("linked automatically — this RFI came from this viewpoint", "vinculado automáticamente — este RFI proviene de este punto de vista", lang)}</span>
-                )}
-              </div>
-            )}
-            {vpImageUrl && (
-              <div style={{ marginBottom: 10 }}>
-                <img src={vpImageUrl} alt={w("Viewpoint screenshot", "Captura del punto de vista", lang)} style={{ maxWidth: "100%", borderRadius: 8, border: "1px solid hsl(var(--border))", display: "block" }} />
-              </div>
-            )}
-            {infoEdit && (
-              <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 8 }}>{w("Image Presentation", "Presentacion de Imagen", lang)}</div>
-                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, marginBottom: 8 }}>
-                  <input type="checkbox" checked={imagePresentation?.includeInCompletePdf !== false} onChange={e => {
-                    const include = e.target.checked;
-                    const sourceId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? viewpointFile?.id ?? null;
-                    setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: include }));
-                    if (sourceId) setPackageItems(prev => prev.map(item => item.fileId === sourceId ? { ...item, include } : item));
-                  }} />
-                  {w("Show image in Complete RFI PDF", "Mostrar imagen en PDF Completo RFI", lang)}
-                </label>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-                  <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "source"); e.target.value = ""; }} />
-                  <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "replacement"); e.target.value = ""; }} />
-                  <Button type="button" size="sm" variant="outline" onClick={() => imageEvidenceInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Upload Image", "Subir Imagen", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => imageReplacementInputRef.current?.click()} style={{ fontSize: 11, gap: 4 }}><RefreshCw style={{ width: 11, height: 11 }} />{w("Replace Image", "Reemplazar Imagen", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={pasteImageEvidence} style={{ fontSize: 11, gap: 4 }}><Clipboard style={{ width: 11, height: 11 }} />{w("Paste Image", "Pegar Imagen", lang)}</Button>
-                  <Button type="button" size="sm" variant="outline" onClick={captureScreenImage} style={{ fontSize: 11, gap: 4 }}><Camera style={{ width: 11, height: 11 }} />{w("Capture Screen", "Capturar Pantalla", lang)}</Button>
-                  {imagePresentation?.crop && (
-                    <Button type="button" size="sm" variant="outline" onClick={() => setImagePresentation(prev => ({ ...(prev || {}), sourceFileId: prev?.sourceFileId ?? viewpointFile?.id ?? null, includeInCompletePdf: prev?.includeInCompletePdf !== false, crop: null }))} style={{ fontSize: 11, gap: 4 }}><RotateCcw style={{ width: 11, height: 11 }} />{w("Clear Saved Crop", "Borrar Recorte Guardado", lang)}</Button>
-                  )}
-                </div>
-                {imagePresentation?.crop && (
-                  <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                    {w("This RFI has saved crop metadata. It will be preserved for exports until you clear it or the dedicated visual crop tool ships.", "Este RFI tiene datos de recorte guardados. Se conservaran para exportaciones hasta que los borre o se publique la herramienta visual dedicada.", lang)}
-                  </div>
-                )}
-                {pendingImage && (
-                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid hsl(var(--border) / 0.5)" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div>
-                    <img src={pendingImage.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} />
-                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div>
-                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      <Button type="button" size="sm" onClick={async () => { await uploadImageEvidence(pendingImage.file, pendingImage.mode); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} disabled={uploadingDoc} style={{ fontSize: 11, gap: 4 }}><Upload style={{ width: 11, height: 11 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} style={{ fontSize: 11 }}>{w("Cancel", "Cancelar", lang)}</Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {infoEdit && packageItems.length > 0 && (
-              <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 6 }}>{w("Complete RFI PDF Package Order", "Orden del Paquete PDF Completo RFI", lang)}</div>
-                {packageItems.map((item, i) => (
-                  <div key={item.key} style={{ display: "grid", gridTemplateColumns: "24px 1fr auto auto", gap: 6, alignItems: "center", fontSize: 11, padding: "4px 0", borderTop: i === 0 ? "none" : "1px solid hsl(var(--border) / 0.5)" }}>
-                    <input type="checkbox" checked={item.include} onChange={e => setPackageItems(prev => prev.map(p => p.key === item.key ? { ...p, include: e.target.checked } : p))} />
-                    <span><FileText style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />{item.label} <span style={{ color: "hsl(var(--muted-foreground))" }}>({attachmentExt(item.label)})</span></span>
-                    <Button type="button" size="sm" variant="outline" disabled={i === 0} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowUp style={{ width: 10, height: 10 }} /></Button>
-                    <Button type="button" size="sm" variant="outline" disabled={i === packageItems.length - 1} onClick={() => setPackageItems(prev => { const next = [...prev]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; return next.map((p, order) => ({ ...p, order })); })} style={{ fontSize: 10, padding: "2px 6px" }}><ArrowDown style={{ width: 10, height: 10 }} /></Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
-          </div>
-
-          <SectionHeader title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)} />
-
-          {/* Question */}
-          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase" }}>{w("Description of Question", "Descripción de la Pregunta", lang)}</div>
-              {canWrite && !infoEdit && (
-                <button onClick={startInfoEdit} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>{w("Edit", "Editar", lang)}</button>
-              )}
-              {infoEdit && (
-                <button onClick={() => handleQuestionAi()} disabled={qAiLoading} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#7C3AED", background: "transparent", border: "1px solid #C4B5FD", borderRadius: 6, padding: "3px 8px", cursor: "pointer" }}>
-                  {qAiLoading ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <Sparkles style={{ width: 11, height: 11 }} />}
-                  {w("AI Assist", "Asistencia IA", lang)}
-                </button>
-              )}
-            </div>
-            {infoEdit ? (
-              <textarea value={infoQuestion} onChange={e => setInfoQuestion(e.target.value)} rows={4} placeholder={w("Type the question or issue...", "Escriba la pregunta o el problema...", lang)} style={{ ...infoInput, lineHeight: 1.6, resize: "vertical" }} />
-            ) : (
-              <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.question || rfi.description || <span style={{ color: "hsl(var(--muted-foreground))" }}>—</span>}</p>
-            )}
-          </div>
-
-          <SectionHeader title={w("6. Impact Assessment", "6. Evaluacion de Impacto", lang)} />
-          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>{w("Flagged by asker and confirmed in response.", "Senalado por el solicitante y confirmado en la respuesta.", lang)}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: infoEdit ? 8 : 16 }}>
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Cost Impact", "Impacto en Costo", lang)}</div>
-              {infoEdit ? (
-                <>
-                  {["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].map(opt => (
-                    <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
-                      <input type="radio" name="info_cost" checked={infoCost === opt} onChange={() => setInfoCost(opt)} />
-                      {opt}
-                    </label>
-                  ))}
-                  {infoCostReasonRequired && (
-                    <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                      {infoCostAmountRequired && <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={infoInput} />}
-                      <textarea value={infoCostReason} onChange={e => setInfoCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ ...infoInput, minHeight: 64, resize: "vertical" }} />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.costImpact || "—"}</div>
-                  {rfi.costImpactAmount && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 2 }}>{rfi.costImpactAmount}</div>}
-                  {(rfi as Rfi & { costImpactReason?: string }).costImpactReason && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{(rfi as Rfi & { costImpactReason?: string }).costImpactReason}</div>}
-                  {confirmedCost?.costImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedCost.costImpact}{confirmedCost.costImpactAmount ? ` (${confirmedCost.costImpactAmount})` : ""}{confirmedCost.costImpactReason ? ` - ${confirmedCost.costImpactReason}` : ""}</div>}
-                </>
-              )}
-            </div>
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Schedule Impact", "Impacto en Programa", lang)}</div>
-              {infoEdit ? (
-                <>
-                  {["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"].map(opt => (
-                    <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
-                      <input type="radio" name="info_sched" checked={infoSched === opt} onChange={() => setInfoSched(opt)} />
-                      {opt}
-                    </label>
-                  ))}
-                  {infoScheduleDaysRequired && (
-                    <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                      <input value={infoSchedDays} onChange={e => setInfoSchedDays(e.target.value.replace(/[^0-9]/g, ""))} inputMode="numeric" placeholder={w("Calendar Days", "Dias Calendario", lang)} style={infoInput} />
-                      <textarea value={infoSchedReason} onChange={e => setInfoSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ ...infoInput, minHeight: 64, resize: "vertical" }} />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{rfi.scheduleImpact || "—"}</div>
-                  {rfi.scheduleImpactDays != null && <div style={{ fontSize: 12, color: "#D97706", marginTop: 2 }}>{rfi.scheduleImpactDays} {w("calendar days", "días calendario", lang)}</div>}
-                  {(rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{(rfi as Rfi & { scheduleImpactReason?: string }).scheduleImpactReason}</div>}
-                  {confirmedSched?.scheduleImpact && <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{w("Confirmed:", "Confirmado:", lang)} {confirmedSched.scheduleImpact}{confirmedSched.scheduleImpactDays != null ? ` (${confirmedSched.scheduleImpactDays}d)` : ""}{confirmedSched.scheduleImpactReason ? ` - ${confirmedSched.scheduleImpactReason}` : ""}</div>}
-                </>
-              )}
-            </div>
-          </div>
-          {infoEdit && (
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
-              <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: {
-                subject: infoSubject,
-                rfiType: infoType,
-                sourceViewpointLabel: infoVpLabel,
-                dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : undefined,
-                question: infoQuestion,
-                costImpact: infoCost,
-                costImpactAmount: infoCostAmountRequired ? infoCostAmt : null,
-                costImpactReason: infoCostReasonRequired ? infoCostReason : null,
-                scheduleImpact: infoSched,
-                scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null,
-                scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null,
-                distributionList: infoDist,
-                submittedByCompany: infoFromCompany,
-                submittedByContact: infoFromContact,
-                submittedByAddress: infoFromAddress,
-                submittedByPhone: infoFromPhone,
-                submittedByEmail: infoFromEmail,
-                submittedToCompany: infoToCompany,
-                submittedToPerson: infoToPerson,
-                submittedToEmail: infoToEmail,
-                attachmentsJson: questionDocs,
-                attachmentPackageJson: packageItems,
-                imagePresentationJson: imagePresentation,
-              } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save RFI", "Guardar RFI", lang)}</button>
-            </div>
-          )}
-
-          {/* Response section */}
-          <div style={{ marginBottom: 16, padding: "14px", border: `2px solid ${rfi.answer || rfi.response ? "#16A34A" : "hsl(var(--border))"}`, borderRadius: 8, background: rfi.answer || rfi.response ? "#F0FDF4" : "transparent" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-              {rfi.answer || rfi.response ? <CheckCircle2 style={{ width: 15, height: 15, color: "#16A34A" }} /> : <MessageSquare style={{ width: 15, height: 15 }} />}
-              {w("Response", "Respuesta", lang)}
-              {rfiResponses.length > 0 && <span style={{ marginLeft: "auto", fontSize: 11, background: "#DBEAFE", color: "#1D4ED8", padding: "1px 7px", borderRadius: 10, fontWeight: 600 }}>{rfiResponses.length} {w("response(s)", "respuesta(s)", lang)}</span>}
-            </div>
-
-            {/* Responses history list */}
-            {!responsesLoading && rfiResponses.length > 0 && (
-              <div style={{ marginBottom: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-                {rfiResponses.map((resp, i) => (
-                  <div key={resp.id} style={{ background: resp.isConflictOfInterest ? "#FEF3C7" : "#F8FAFC", border: `1px solid ${resp.isConflictOfInterest ? "#F59E0B" : "#E2E8F0"}`, borderRadius: 7, padding: "10px 12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: "#1E3A5F" }}>
-                        {w("Response", "Respuesta", lang)} {i + 1}
-                        {resp.answeredBy && ` — ${resp.answeredBy}`}
-                        {resp.answeredByCompany && ` (${resp.answeredByCompany})`}
-                      </span>
-                      <span style={{ fontSize: 10, color: "#64748B" }}>{fmt(resp.createdAt)}</span>
-                    </div>
-                    {resp.isConflictOfInterest && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 8px", background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 5, marginBottom: 6, fontSize: 11, color: "#92400E", fontWeight: 600 }}>
-                        <AlertTriangle size={12} style={{ flexShrink: 0 }} /> {w("Conflict of interest — logged in audit trail", "Conflicto de interés — registrado en auditoría", lang)}
-                      </div>
-                    )}
-                    <p style={{ fontSize: 12, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "#1E293B" }}>{resp.responseText}</p>
-                    {(resp.costImpact || resp.scheduleImpact) && (
-                      <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 11, color: "#64748B", flexWrap: "wrap" }}>
-                        {resp.costImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {resp.costImpact}{resp.costImpactAmount ? ` (${resp.costImpactAmount})` : ""}{resp.costImpactReason ? ` - ${resp.costImpactReason}` : ""}</span>}
-                        {resp.scheduleImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {resp.scheduleImpact}{resp.scheduleImpactDays != null ? ` (${resp.scheduleImpactDays}d)` : ""}{resp.scheduleImpactReason ? ` - ${resp.scheduleImpactReason}` : ""}</span>}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Legacy response (before new table) — only show if no new responses but old data exists */}
-            {rfiResponses.length === 0 && (rfi.answer || rfi.response) && (
-              <div style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{rfi.answer || rfi.response}</p>
-                {rfi.answeredBy && <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Answered by:", "Respondido por:", lang)} <strong>{rfi.answeredBy}</strong> {rfi.dateAnswered ? `· ${fmt(rfi.dateAnswered)}` : ""}</p>}
-                {(rfi.responseAttachmentsJson as string[] | null)?.length ? (
-                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #BBF7D0" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", marginBottom: 4 }}>{w("Response Documents", "Documentos de Respuesta", lang)}</div>
-                    {(rfi.responseAttachmentsJson as string[]).map((doc, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#1D4ED8", marginBottom: 2 }}>
-                        <ExternalLink style={{ width: 12, height: 12 }} />{isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>{attachLabel(doc)}</a> : attachLabel(doc)}
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            )}
-
-            {/* Add Response button — visible when responses exist and form is hidden */}
-            {canWrite && rfi.status !== "closed" && (rfiResponses.length > 0 || rfi.answer || rfi.response) && !showAddResponse && (
-              <button
-                type="button"
-                onClick={() => setShowAddResponse(true)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "9px 0", marginTop: 4, fontSize: 13, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "1.5px dashed #93C5FD", borderRadius: 8, cursor: "pointer" }}
-              >
-                <Plus style={{ width: 14, height: 14 }} />{w("Add Response", "Agregar Respuesta", lang)}
-              </button>
-            )}
-
-            {responseFormOpen && (
-              <div style={{ borderTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? "1px solid #BBF7D0" : undefined, paddingTop: rfiResponses.length > 0 || rfi.answer || rfi.response ? 12 : 0 }}>
-                {isCoi && (
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FFFBEB", border: "1.5px solid #F59E0B", borderRadius: 7, marginBottom: 12 }}>
-                    <AlertTriangle size={16} style={{ color: "#92400E", flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E" }}>
-                        {w("Warning: You are responding to your own RFI.", "Advertencia: Está respondiendo a su propio RFI.", lang)}
-                      </div>
-                      <div style={{ fontSize: 11, color: "#92400E", marginTop: 2 }}>
-                        {w("This has been flagged in the audit trail as a potential conflict of interest.", "Esto se marcará en la auditoría como un posible conflicto de interés.", lang)}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <label style={{ fontSize: 12, fontWeight: 700 }}>
-                    {w("Official Response / Reason", "Respuesta Oficial / Razón", lang)}
-                    <span style={{ fontSize: 10, color: "#DC2626", marginLeft: 4 }}>*</span>
-                    <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400, marginLeft: 6 }}>{w("Required to set status to Responded", "Requerido para marcar como Respondido", lang)}</span>
-                  </label>
-                  <Button size="sm" variant="outline" onClick={handleAiAssist} disabled={aiAssistLoading}
-                    style={{ gap: 5, fontSize: 11, borderColor: "#7C3AED", color: "#7C3AED", flexShrink: 0 }}>
-                    {aiAssistLoading ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <Sparkles style={{ width: 11, height: 11 }} />}
-                    {w("AI Assist", "Asistencia IA", lang)}
-                  </Button>
-                </div>
-                <textarea
-                  value={answer}
-                  onChange={e => setAnswer(e.target.value)}
-                  placeholder={w("Type the official response here, or click AI Assist to draft one…", "Escriba la respuesta oficial aquí, o use Asistencia IA para redactar…", lang)}
-                  style={{ width: "100%", minHeight: 120, fontSize: 12, borderRadius: 6, border: `1px solid ${!answer.trim() && closingStatus === "responded" ? "#DC2626" : "hsl(var(--border))"}`, padding: "8px 10px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                />
-                {!answer.trim() && closingStatus === "responded" && (
-                  <p style={{ fontSize: 11, color: "#DC2626", marginTop: 3 }}>{w("Official response text is required before setting status to Responded.", "Se requiere texto de respuesta oficial antes de establecer el estado como Respondido.", lang)}</p>
-                )}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
-                  <div>
-                    <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 3 }}>{w("Answered by", "Respondido por", lang)}</label>
-                    <Input value={answeredBy} onChange={e => setAnsweredBy(e.target.value)} style={{ fontSize: 12 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 3 }}>{w("Update status", "Actualizar estado", lang)}</label>
-                    <select value={closingStatus} onChange={e => setClosingStatus(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", padding: "0 8px" }}>
-                      {statusOptions.map(o => <option key={o.value} value={o.value}>{lang === "es" ? o.labelEs : o.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Fix 5 — Response documents */}
-                <div style={{ marginTop: 10 }}>
-                  <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Attach Response Documents", "Adjuntar Documentos de Respuesta", lang)}</label>
-                  <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>
-                    {w("Paste a URL, file name from BIMLog, or search project files below.", "Pegue una URL, nombre de archivo de BIMLog o busque archivos del proyecto.", lang)}
-                  </p>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)}
-                      placeholder={w("e.g. SK-105 Rev2.pdf or https://docs.example.com/response", "ej. SK-105 Rev2.pdf o https://docs.example.com/respuesta", lang)}
-                      style={{ fontSize: 12, flex: 1 }}
-                      onKeyDown={e => { if (e.key === "Enter" && responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); e.preventDefault(); } }} />
-                    <button type="button" title={w("Search project files", "Buscar archivos del proyecto", lang)}
-                      onClick={() => setShowFileSearch(!showFileSearch)}
-                      style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: showFileSearch ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: showFileSearch ? "white" : "hsl(var(--muted-foreground))" }}>
-                      <Search style={{ width: 13, height: 13 }} />
-                    </button>
-                    <Button size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }} style={{ fontSize: 11 }}>
-                      {w("Add", "Agregar", lang)}
-                    </Button>
-                    <input ref={rAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setResponseDocs(prev => [...prev, url])); e.target.value = ""; }} />
-                    <Button size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()} style={{ fontSize: 11, gap: 4 }}>
-                      {uploadingDoc ? <Loader2 style={{ width: 11, height: 11 }} className="animate-spin" /> : <FileText style={{ width: 11, height: 11 }} />}{w("Upload", "Subir", lang)}
-                    </Button>
-                    {connectedFileSources.map(provider => (
-                      <Button key={provider.key} size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })} style={{ fontSize: 11, gap: 4 }}>
-                        <FolderOpen style={{ width: 11, height: 11 }} />{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}
-                      </Button>
-                    ))}
-                  </div>
-                  {showFileSearch && (
-                    <div style={{ position: "relative" }}>
-                      <FileSearchDropdown
-                        files={files || []}
-                        onSelect={(name) => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }}
-                        onClose={() => setShowFileSearch(false)}
-                      />
-                    </div>
-                  )}
-                  {responseDocs.map((doc, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, fontSize: 12 }}>
-                      <ExternalLink style={{ width: 12, height: 12, color: "#1D4ED8" }} />
-                      {isUrlAttach(doc) ? <a href={doc} target="_blank" rel="noreferrer" style={{ flex: 1, color: "#1D4ED8" }}>{attachLabel(doc)}</a> : <span style={{ flex: 1 }}>{attachLabel(doc)}</span>}
-                      <button onClick={() => setResponseDocs(prev => prev.filter((_, j) => j !== i))} style={{ padding: 2, border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))" }}><X style={{ width: 11, height: 11 }} /></button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Impact update */}
-                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 12, marginBottom: 2 }}>{w("This response confirms the Impact shown above.", "Esta respuesta confirma el Impacto mostrado arriba.", lang)}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 6 }}>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Cost Impact", "Impacto Costo", lang)}</label>
-                    {["No Cost Impact", "Cost Increase TBD", "Cost Increase Known", "Cost Decrease"].map(opt => (
-                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
-                        <input type="radio" name="resp_cost" checked={costImpact === opt} onChange={() => setCostImpact(opt)} />
-                        {opt}
-                      </label>
-                    ))}
-                    {responseCostReasonRequired && (
-                      <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                        {responseCostAmountRequired && <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 11 }} />}
-                        <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 60, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Schedule Impact", "Impacto Programa", lang)}</label>
-                    {["No Schedule Impact", "Increase in Calendar Days", "Decrease in Calendar Days"].map(opt => (
-                      <label key={opt} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, cursor: "pointer", fontSize: 11 }}>
-                        <input type="radio" name="resp_sched" checked={schedImpact === opt} onChange={() => setSchedImpact(opt)} />
-                        {opt}
-                      </label>
-                    ))}
-                    {responseScheduleDaysRequired && (
-                      <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                        <Input type="number" value={schedDays} onChange={e => setSchedDays(e.target.value)} placeholder={w("Calendar Days", "Dias Calendario", lang)} style={{ fontSize: 11 }} />
-                        <textarea value={schedReason} onChange={e => setSchedReason(e.target.value)} placeholder={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} style={{ width: "100%", minHeight: 60, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Revision history */}
-          {rfi.parentRfiId && (
-            <div style={{ marginBottom: 16, padding: "10px 14px", background: "#EDE9FE", borderRadius: 8, border: "1px solid #C4B5FD" }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#7C3AED" }}>
-                {w("This is a revision.", "Esta es una revisión.", lang)} {w("Parent RFI ID:", "ID del RFI original:", lang)} #{rfi.parentRfiId} · {w("Revision #", "Revisión #", lang)}{rfi.revisionNumber}
-              </div>
-            </div>
-          )}
-
-          <SectionHeader title={w("7. Distribution and Email", "7. Distribución y Email", lang)} />
-
-          {/* Distribution list (CC) */}
-          {(infoEdit || (rfi.distributionList as string[] | null)?.length) ? (
-            <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, marginBottom: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 6 }}>{w("Distribution List (CC)", "Lista de Distribución (CC)", lang)}</div>
-              {infoEdit ? (
-                <>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <input value={distInput} onChange={e => setDistInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && distInput.trim()) { setInfoDist(prev => [...prev, distInput.trim()]); setDistInput(""); e.preventDefault(); } }} placeholder={w("Email or name to copy…", "Correo o nombre a copiar…", lang)} style={{ ...infoInput, flex: 1 }} />
-                    <button type="button" onClick={() => { if (distInput.trim()) { setInfoDist(prev => [...prev, distInput.trim()]); setDistInput(""); } }} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Add", "Agregar", lang)}</button>
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-                    {infoDist.map((e, i) => (
-                      <span key={i} style={{ fontSize: 11, padding: "3px 8px", background: "hsl(var(--secondary))", borderRadius: 12, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                        <Mail style={{ width: 10, height: 10 }} />{parseDistEntry(e).display}
-                        <button type="button" onClick={() => setInfoDist(prev => prev.filter((_, j) => j !== i))} style={{ border: "none", background: "transparent", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 0, marginLeft: 2 }}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {(rfi.distributionList as string[]).map(e => {
-                    const parsed = parseDistEntry(e);
-                    return (
-                      <span key={e} style={{ fontSize: 11, padding: "3px 8px", background: parsed.isExternal ? "#E0F2FE" : "hsl(var(--secondary))", borderRadius: 12, display: "flex", alignItems: "center", gap: 4, border: parsed.isExternal ? "1px solid #BAE6FD" : "none" }}>
-                        {parsed.isExternal ? <UserPlus style={{ width: 10, height: 10, color: "#0369A1" }} /> : <Mail style={{ width: 10, height: 10 }} />}
-                        {parsed.display}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : null}
-          {/* Email sending and accountability */}
-          <div style={{ marginBottom: 16, padding: "14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-              <Send style={{ width: 12, height: 12 }} />{w("Email / Sending", "Email / Envío", lang)}
-            </div>
-
-            {rfi.sendStatus === "sent" ? (
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "8px 12px", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8 }}>
-                <PenLine style={{ width: 14, height: 14, color: "#B45309", flexShrink: 0, marginTop: 1 }} />
-                <div style={{ fontSize: 12, color: "#92400E" }}>
-                  <span style={{ fontWeight: 700 }}>{w("Manually marked as sent", "Marcado manualmente como enviado", lang)}</span>
-                  {rfi.sentAt && <span> · {fmt(rfi.sentAt)}</span>}
-                  <div style={{ fontSize: 11, color: "#B45309", marginTop: 2 }}>{w("Self-reported by the author. BIMLog did not send this email.", "Auto-reportado por el autor. BIMLog no envió este correo.", lang)}</div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>
-                  {w("Not sent yet. Compose the email here, then send through your connected SendGrid account or copy it into your email client and mark it as sent to start the response clock.", "Aún no enviado. Redacte el correo aqui, luego envielo con su cuenta SendGrid conectada o copielo a su cliente de correo y marquelo como enviado para iniciar el reloj de respuesta.", lang)}
-                  <div style={{ marginTop: 4, fontSize: 11, color: "#B45309" }}>
-                    {w("AI text assist uses AI credits and does not read attached files unless you explicitly use file AI.", "La asistencia IA de texto usa creditos IA y no lee adjuntos salvo que use explicitamente IA de archivos.", lang)}
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: showSendPreview ? 10 : 0 }}>
-                  <Button size="sm" onClick={() => { const next = !showSendPreview; setShowSendPreview(next); if (next) setShowContextInput(true); }} style={{ gap: 5, fontSize: 11 }}>
-                    <Mail style={{ width: 12, height: 12 }} />{showSendPreview ? w("Hide email", "Ocultar correo", lang) : w("Compose email", "Redactar correo", lang)}
-                  </Button>
-                  {canWrite && rfi.status !== "closed" && sgConnected === true && (
-                    <Button size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail}
-                      title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}
-                      style={{ gap: 5, fontSize: 11 }}>
-                      {sending ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
-                      {w("Send via SendGrid", "Enviar por SendGrid", lang)}
-                    </Button>
-                  )}
-                  {canWrite && rfi.status !== "closed" && (
-                    <Button size="sm" variant={sgConnected === true ? "outline" : "default"} onClick={handleMarkSent} disabled={marking} style={{ gap: 5, fontSize: 11 }}>
-                      {marking ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Send style={{ width: 12, height: 12 }} />}
-                      {w("Mark as Sent", "Marcar como Enviado", lang)}
-                    </Button>
-                  )}
-                  {sgConnected === false && (
-                    <button type="button" onClick={() => setPage("/profile")} style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "transparent", border: "none", cursor: "pointer", textDecoration: "underline", padding: 0 }}>
-                      {w("Set up email sending", "Configurar envío de correo", lang)}
-                    </button>
-                  )}
-                </div>
-                {sgConnected === false && !hideSgNudge && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, padding: "8px 12px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8 }}>
-                    <Mail style={{ width: 14, height: 14, color: "#1D4ED8", flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "#1E3A5F", flex: 1 }}>
-                      {w("Connect your own SendGrid account to send RFIs directly from BIMLog — no copy-paste.", "Conecte su cuenta de SendGrid para enviar RFIs directamente desde BIMLog — sin copiar y pegar.", lang)}
-                    </span>
-                    <Button size="sm" onClick={() => setPage("/profile")} style={{ fontSize: 11, gap: 4, flexShrink: 0 }}>{w("Connect", "Conectar", lang)}</Button>
-                    <button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }}
-                      style={{ background: "transparent", border: "none", cursor: "pointer", color: "#64748B", flexShrink: 0, padding: 2 }}>
-                      <X style={{ width: 14, height: 14 }} />
-                    </button>
-                  </div>
-                )}
-                {showSendPreview && (
-                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, overflow: "hidden" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 10px", background: "hsl(var(--muted) / 0.4)", borderBottom: "1px solid hsl(var(--border))" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", gap: 5 }}>
-                        {aiPreview
-                          ? <><Sparkles style={{ width: 12, height: 12, color: "#7C3AED" }} />{w("AI-drafted email — copy-paste into your client", "Correo redactado por IA — copie en su cliente", lang)}</>
-                          : <><Mail style={{ width: 12, height: 12 }} />{w("Draft email — type your description, then Generate Email with AI", "Borrador de correo — escriba su descripcion, luego Generar Email con IA", lang)}</>}
-                      </span>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <Button variant="outline" size="sm" onClick={() => setShowContextInput(v => !v)} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          <Plus style={{ width: 12, height: 12 }} />{showContextInput ? w("Hide Email Description", "Ocultar Descripción", lang) : w("Description of Email", "Descripción de Email", lang)}
-                        </Button>
-                        <Button size="sm" onClick={() => void generatePreview()} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          {previewLoading ? <Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> : <Sparkles style={{ width: 12, height: 12 }} />}
-                          {aiPreview ? w("Regenerate Email with AI", "Regenerar Email con IA", lang) : w("Generate Email with AI", "Generar Email con IA", lang)}
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleCopyPreview} disabled={previewLoading} style={{ gap: 5, fontSize: 11, height: 26 }}>
-                          {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-                          {copied ? w("Copied", "Copiado", lang) : w("Copy", "Copiar", lang)}
-                        </Button>
-                      </div>
-                    </div>
-                    {showContextInput && (
-                      <div style={{ padding: "8px 10px", borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.2)" }}>
-                        <label style={{ fontSize: 11, fontWeight: 600, display: "block", marginBottom: 4 }}>{w("Description of Email", "Descripción de Email", lang)}</label>
-                        <textarea
-                          value={userContext}
-                          onChange={e => setUserContext(e.target.value)}
-                          placeholder={w("Type your message or context here, then click Generate Email with AI...", "Escriba su mensaje o contexto aqui, luego pulse Generar Email con IA...", lang)}
-                          style={{ width: "100%", minHeight: 72, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                        />
-                      </div>
-                    )}
-                    {previewFailed && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 11, color: "#B45309", background: "#FFFBEB", borderBottom: "1px solid #FDE68A" }}>
-                        <AlertTriangle style={{ width: 12, height: 12, flexShrink: 0 }} />{w("AI draft unavailable — using basic template.", "Borrador de IA no disponible — usando plantilla básica.", lang)}
-                      </div>
-                    )}
-                    {previewLoading ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 12px", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                        <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" />{w("Drafting email…", "Redactando correo…", lang)}
-                      </div>
-                    ) : (
-                      <>
-                        {!aiPreview && (
-                          <div style={{ padding: "6px 12px", fontSize: 11, color: "hsl(var(--muted-foreground))", background: "hsl(var(--muted) / 0.2)", borderBottom: "1px solid hsl(var(--border))" }}>
-                            {w("Basic template shown below. Type your email description above and click Generate Email with AI to improve it.", "Plantilla basica abajo. Escriba la descripcion del email arriba y pulse Generar Email con IA para mejorarla.", lang)}
-                          </div>
-                        )}
-                        <pre style={{ margin: 0, padding: "12px", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap", fontFamily: "inherit", color: "hsl(var(--foreground))" }}>{previewText}</pre>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Save Response — the final action for the whole page, below the email */}
-          {responseFormOpen && (
-            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 8, paddingTop: 14, borderTop: "1px solid hsl(var(--border))" }}>
-              {(rfiResponses.length > 0 || rfi.answer || rfi.response) && (
-                <Button variant="outline" size="sm" onClick={() => setShowAddResponse(false)} style={{ fontSize: 12 }}>
-                  {w("Cancel", "Cancelar", lang)}
-                </Button>
-              )}
-              <Button onClick={handleSaveResponse} disabled={isUpdating} style={{ fontSize: 13, gap: 6, padding: "8px 22px" }}>
-                {isUpdating ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : <CheckCircle2 style={{ width: 15, height: 15 }} />}
-                {w("Save Response", "Guardar Respuesta", lang)}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
+      <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
+      <input ref={rAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setResponseDocs(prev => [...prev, url])); e.target.value = ""; }} />
+      <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "source"); e.target.value = ""; }} />
+      <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "replacement"); e.target.value = ""; }} />
       {cloudPickerTarget && (
         <CloudPicker
           provider={cloudPickerTarget.provider}
@@ -3895,8 +2573,9 @@ ${hasResp ? `
           onClose={() => setCloudPickerTarget(null)}
         />
       )}
-    </div>
+    </>
   );
+
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -3926,7 +2605,7 @@ export function RfiActionBar({ actions, handlers, loading }: { actions: RfiActio
   );
 }
 
-function CanonicalField({ label, value, editable, onChange, full, multiline, type = "text" }: {
+function CanonicalField({ label, value, editable, onChange, full, multiline, type = "text", options }: {
   label: string;
   value: string;
   editable: boolean;
@@ -3934,18 +2613,23 @@ function CanonicalField({ label, value, editable, onChange, full, multiline, typ
   full?: boolean;
   multiline?: boolean;
   type?: string;
+  options?: RfiCanonicalOption[];
 }) {
   return (
     <div className={full ? "rfi-field full" : "rfi-field"} style={{ gridColumn: full ? "1 / -1" : undefined }}>
       <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{label}</label>
       {editable ? (
-        multiline ? (
+        options ? (
+          <select value={value} onChange={e => onChange?.(e.target.value)} style={{ width: "100%", height: 36, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", padding: "0 8px" }}>
+            {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        ) : multiline ? (
           <textarea value={value} onChange={e => onChange?.(e.target.value)} style={{ width: "100%", minHeight: 76, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
         ) : (
           <Input type={type} value={value} onChange={e => onChange?.(e.target.value)} style={{ fontSize: 12 }} />
         )
       ) : (
-        <div style={{ minHeight: 28, display: "flex", alignItems: "center", fontSize: 13, color: value ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>{value || "—"}</div>
+        <div style={{ minHeight: 28, display: "flex", alignItems: "center", fontSize: 13, color: value ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>{value || "-"}</div>
       )}
     </div>
   );
@@ -3962,11 +2646,32 @@ function CanonicalSection({ title, children }: { title: string; children: React.
 
 export function RfiCanonicalForm({
   lang, mode, recordState, values, permissions, references, attachments, imagePresentation, packageItems, responses,
-  loading, actions, onChange, onAddReference, onRemoveReference, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
+  loading, options, cloudAttachmentActions = [], imageAttachmentActions = [], pendingImagePreview, onAttachPendingImage, onCancelPendingImage,
+  actions, onChange, onAddReference, onRemoveReference, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
   onCopyEmail, actionMatrix,
 }: RfiCanonicalFormProps) {
   const editable = mode === "create" || mode === "edit";
   const matrix = actionMatrix ?? getRfiCanonicalActionMatrix({ mode, recordState, permissions, lang });
+  const headerActions = matrix.filter(action => action.key !== "save-response");
+  const responseActions = matrix.filter(action => action.key === "save-response");
+  const priorityOptions = options?.priorities?.length ? options.priorities : [
+    { value: "low", label: w("Low", "Baja", lang) },
+    { value: "medium", label: w("Medium", "Media", lang) },
+    { value: "high", label: w("High", "Alta", lang) },
+    { value: "critical", label: w("Critical", "Critica", lang) },
+  ];
+  const typeOptions = options?.rfiTypes?.length ? options.rfiTypes : DEFAULT_RFI_TYPES.map(type => ({ value: type, label: type }));
+  const costOptions = options?.costImpact?.length ? options.costImpact : [
+    { value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) },
+    { value: "Cost Increase TBD", label: w("Cost Increase TBD", "Aumento de Costo por Definir", lang) },
+    { value: "Cost Increase Known", label: w("Cost Increase Known", "Aumento de Costo Conocido", lang) },
+    { value: "Cost Decrease", label: w("Cost Decrease", "Disminucion de Costo", lang) },
+  ];
+  const scheduleOptions = options?.scheduleImpact?.length ? options.scheduleImpact : [
+    { value: "No Schedule Impact", label: w("No Schedule Impact", "Sin Impacto en Programa", lang) },
+    { value: "Increase in Calendar Days", label: w("Increase in Calendar Days", "Aumento en Dias Calendario", lang) },
+    { value: "Decrease in Calendar Days", label: w("Decrease in Calendar Days", "Disminucion en Dias Calendario", lang) },
+  ];
   const costNeedsReason = values.costImpact === "Cost Increase TBD" || values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const costNeedsAmount = values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const scheduleNeedsFields = values.scheduleImpact === "Increase in Calendar Days" || values.scheduleImpact === "Decrease in Calendar Days";
@@ -3985,18 +2690,18 @@ export function RfiCanonicalForm({
             </div>
             <div style={{ fontSize: 18, fontWeight: 800, marginTop: 6 }}>{values.subject || w("Untitled RFI", "RFI sin titulo", lang)}</div>
           </div>
-          <RfiActionBar actions={matrix} handlers={actions} loading={!!loading?.saving} />
+          <RfiActionBar actions={headerActions} handlers={actions} loading={!!loading?.saving} />
         </div>
         <div style={{ padding: "0 24px 24px" }}>
           <CanonicalSection title={w("1. Header / RFI Status", "1. Encabezado / Estado RFI", lang)}>
             <FormGrid>
               <CanonicalField label={w("RFI number", "Numero RFI", lang)} value={values.number || w("Assigned after save", "Asignado al guardar", lang)} editable={false} />
-              <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName || ""} editable={false} />
+              {values.projectName && <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName} editable={false} />}
               <CanonicalField label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
               <CanonicalField label={w("Status", "Estado", lang)} value={values.status} editable={false} />
-              <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} />
-              <CanonicalField label={w("Type", "Tipo", lang)} value={values.rfiType} editable={editable} onChange={v => onChange("rfiType", v)} />
-              <CanonicalField label={w("Date Requested", "Fecha Solicitada", lang)} value={values.dateRequested || ""} editable={editable} onChange={v => onChange("dateRequested", v)} type="date" />
+              <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} options={priorityOptions} />
+              <CanonicalField label={w("Type", "Tipo", lang)} value={values.rfiType} editable={editable} onChange={v => onChange("rfiType", v)} options={typeOptions} />
+              <CanonicalField label={w("Date Requested", "Fecha Solicitada", lang)} value={values.dateRequested || ""} editable={mode === "create"} onChange={v => onChange("dateRequested", v)} type="date" />
               <CanonicalField label={w("Date Required", "Fecha Requerida", lang)} value={values.dateRequired || ""} editable={editable} onChange={v => onChange("dateRequired", v)} type="date" />
               <CanonicalField label={w("Days Outstanding", "Dias Pendientes", lang)} value={values.daysOutstanding || ""} editable={false} />
               <CanonicalField label={w("Date Answered", "Fecha Respondido", lang)} value={values.dateAnswered || ""} editable={false} />
@@ -4015,8 +2720,8 @@ export function RfiCanonicalForm({
             <FormGrid>
               <CanonicalField label={w("Company", "Empresa", lang)} value={values.submittedToCompany} editable={editable} onChange={v => onChange("submittedToCompany", v)} />
               <CanonicalField label={w("Contact/person", "Contacto/persona", lang)} value={values.submittedToPerson} editable={editable} onChange={v => onChange("submittedToPerson", v)} />
-              <CanonicalField label={w("Address", "Direccion", lang)} value={values.submittedToAddress || ""} editable={editable} onChange={v => onChange("submittedToAddress", v)} full />
-              <CanonicalField label={w("Phone", "Telefono", lang)} value={values.submittedToPhone || ""} editable={editable} onChange={v => onChange("submittedToPhone", v)} />
+              {values.submittedToAddress && <CanonicalField label={w("Address", "Direccion", lang)} value={values.submittedToAddress} editable={false} full />}
+              {values.submittedToPhone && <CanonicalField label={w("Phone", "Telefono", lang)} value={values.submittedToPhone} editable={false} />}
               <CanonicalField label={w("Email", "Correo", lang)} value={values.submittedToEmail} editable={editable} onChange={v => onChange("submittedToEmail", v)} />
             </FormGrid>
           </CanonicalSection>
@@ -4029,24 +2734,26 @@ export function RfiCanonicalForm({
               <CanonicalField label={w("Note number", "Numero de Nota", lang)} value={values.noteNumber} editable={editable} onChange={v => onChange("noteNumber", v)} />
               <CanonicalField label={w("Location", "Ubicacion", lang)} value={values.locationDescription} editable={editable} onChange={v => onChange("locationDescription", v)} full />
             </FormGrid>
-            {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button></div>}
+            {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button>{imageAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}>{action.icon === "capture" ? <Camera style={{ width: 12, height: 12 }} /> : action.icon === "paste" ? <Clipboard style={{ width: 12, height: 12 }} /> : action.icon === "replace" ? <RefreshCw style={{ width: 12, height: 12 }} /> : <Upload style={{ width: 12, height: 12 }} />}{action.label}</Button>)}{cloudAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}><FolderOpen style={{ width: 12, height: 12 }} />{action.label}</Button>)}</div>}
             <div style={{ marginTop: 8, display: "grid", gap: 4 }}>{allReferences.length === 0 ? <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No references or attachments.", "Sin referencias o adjuntos.", lang)}</span> : allReferences.map((item, index) => <div key={`${item}-${index}`} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} /><span style={{ flex: 1 }}>{attachLabel(item)}</span>{editable && <Button type="button" size="sm" variant="outline" onClick={() => onRemoveReference(index)} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button>}</div>)}</div>
+            {pendingImagePreview && <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)", fontSize: 12 }}><div style={{ fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div><img src={pendingImagePreview.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} /><div style={{ color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={onAttachPendingImage} disabled={loading?.uploading} style={{ gap: 4 }}><Upload style={{ width: 12, height: 12 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onCancelPendingImage}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
             {(imagePresentation || packageItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>{imagePresentation && <div>{w("Viewpoint image is included in the RFI package.", "Imagen de punto de vista incluida en el paquete RFI.", lang)}</div>}{packageItems.length > 0 && <div>{w("Package order:", "Orden del paquete:", lang)} {packageItems.map(item => item.label).join(", ")}</div>}</div>}
           </CanonicalSection>
           <CanonicalSection title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)}>
             <CanonicalField label={w("Question", "Pregunta", lang)} value={values.question} editable={editable} onChange={v => onChange("question", v)} full multiline />
-            {editable && <Button type="button" size="sm" variant="outline" onClick={onGenerateQuestionAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{w("Generate Question with AI", "Generar Pregunta con IA", lang)}</Button>}
+            {editable && <CanonicalField label={w("Description for AI question assist", "Descripcion para asistencia IA de pregunta", lang)} value={values.questionAssistDescription || ""} editable={editable} onChange={v => onChange("questionAssistDescription", v)} full multiline />}
+            {editable && <Button type="button" size="sm" variant="outline" onClick={onGenerateQuestionAi} disabled={loading?.questionAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{loading?.questionAi ? w("Generating...", "Generando...", lang) : w("Generate Question with AI", "Generar Pregunta con IA", lang)}</Button>}
             <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Text assist uses AI credits and does not read attached files unless file-reading AI is explicitly used.", "La asistencia de texto usa creditos IA y no lee adjuntos salvo que se use IA de lectura de archivos explicitamente.", lang)}</p>
           </CanonicalSection>
           <CanonicalSection title={w("6. Impact Assessment", "6. Evaluacion de Impacto", lang)}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}>
               <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-                <CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={values.costImpact} editable={editable} onChange={v => onChange("costImpact", v)} />
+                <CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={values.costImpact} editable={editable} onChange={v => onChange("costImpact", v)} options={costOptions} />
                 {costNeedsAmount && <CanonicalField label={w("Cost Amount", "Monto de Costo", lang)} value={values.costImpactAmount} editable={editable} onChange={v => onChange("costImpactAmount", v)} />}
                 {costNeedsReason && <CanonicalField label={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} value={values.costImpactReason} editable={editable} onChange={v => onChange("costImpactReason", v)} multiline />}
               </div>
               <div style={{ padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-                <CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={values.scheduleImpact} editable={editable} onChange={v => onChange("scheduleImpact", v)} />
+                <CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={values.scheduleImpact} editable={editable} onChange={v => onChange("scheduleImpact", v)} options={scheduleOptions} />
                 {scheduleNeedsFields && <CanonicalField label={w("Calendar Days", "Dias Calendario", lang)} value={values.scheduleImpactDays} editable={editable} onChange={v => onChange("scheduleImpactDays", v)} />}
                 {scheduleNeedsFields && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={values.scheduleImpactReason} editable={editable} onChange={v => onChange("scheduleImpactReason", v)} multiline />}
               </div>
@@ -4055,10 +2762,10 @@ export function RfiCanonicalForm({
           <CanonicalSection title={w("7. Distribution / Email / Responses", "7. Distribucion / Email / Respuestas", lang)}>
             <CanonicalField label={w("Distribution", "Distribucion", lang)} value={values.distributionList.join(", ")} editable={editable} onChange={v => onChange("distributionList", v)} full />
             <CanonicalField label={w("Description of Email", "Descripcion de Email", lang)} value={values.emailDescription || ""} editable={editable} onChange={v => onChange("emailDescription", v)} full multiline />
-            {editable && <Button type="button" size="sm" variant="outline" onClick={onGenerateEmailAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{w("Generate Email with AI", "Generar Email con IA", lang)}</Button>}
+            {editable && <><Button type="button" size="sm" variant="outline" onClick={onGenerateEmailAi} disabled={loading?.emailAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{loading?.emailAi ? w("Generating...", "Generando...", lang) : w("Generate Email with AI", "Generar Email con IA", lang)}</Button><p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Email text assist uses AI credits and does not read attachments.", "La asistencia de email usa creditos IA y no lee adjuntos.", lang)}</p></>}
             {values.emailDraft && <div style={{ marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={onCopyEmail} style={{ marginBottom: 6, gap: 5 }}><Copy style={{ width: 12, height: 12 }} />{w("Copy Email", "Copiar Email", lang)}</Button><pre style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 12 }}>{values.emailDraft}</pre></div>}
             {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p></div>)}</div>}
-            {permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{matrix.some(action => action.key === "save-response") && <RfiActionBar actions={matrix.filter(action => action.key === "save-response")} handlers={actions} loading={!!loading?.response} />}</div>}
+            {permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{responseActions.length > 0 && <RfiActionBar actions={responseActions} handlers={actions} loading={!!loading?.response} />}</div>}
           </CanonicalSection>
         </div>
       </div>

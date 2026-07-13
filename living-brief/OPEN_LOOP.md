@@ -118,6 +118,13 @@ Verification required before customer retest:
 - Deferred: browser screenshot crop tools, complete issued-RFI PDF package/native PDF page-copy,
   Word/DOCX/Excel/image conversion verification, River Avenue page-box comparison, and authenticated
   repeated-viewpoint HTTP proof still require the larger RFI package implementation/test harness.
+
+2026-07-13 RFI Build 1A Correction 3:
+- Completed: removed the unreachable always-true create/detail shortcuts and deleted the obsolete duplicate New RFI and Existing RFI field markup after moving support controls into the reachable canonical path.
+- Completed: kept Add Reference, clean attachment labels, local file upload, image upload/paste/capture review, cloud attachments, package inclusion, question AI, email AI, Copy Email, exports, response save, viewed-by, ball-in-court, jump-viewpoint, and change-order actions reachable from the canonical RFI structure.
+- Completed: detail edit now persists priority, drawing number/title, spec section, detail number, note number, and location through the canonical adapter instead of discarding edits. Submitted To address/phone are read-only unless real values exist because the current API save path does not support editing them.
+- Verification: `git diff --check` passed with only a pre-existing line-ending warning on the mockup generated file, `pnpm run check:mojibake` passed, `pnpm run typecheck` passed, and `$env:PORT='3000'; pnpm run build` passed after filesystem approval for Vite temp/cache writes.
+- Still open for independent Build 1B review: no browser visual acceptance was claimed; dedicated visual crop tooling and the larger complete issued-RFI PDF package work remain deferred above.
 - PDF fixture note: local `pdfinfo`, `pypdf`, and resolvable `pdfjs-dist` were unavailable in this
   environment during this pass, so River Avenue page boxes were not programmatically recorded here.
 - Publish status: not published.
