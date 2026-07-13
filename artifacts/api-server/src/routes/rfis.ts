@@ -946,7 +946,9 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
           vpQuestion = vp.note || null;
           vpLocation = vp.floor || null;
         }
-      } catch { /* prefill is best-effort — never block RFI creation */ }
+      } catch (prefillError) {
+        console.error("[rfis/from-viewpoint] Viewpoint prefill failed; continuing with blank prefill:", prefillError instanceof Error ? prefillError.message : prefillError);
+      }
 
       const result = await db.transaction(async (tx) => {
         // The creator is the ASKER, not the responder: stamp Submitted By with the creator's
@@ -2407,6 +2409,13 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       const [{ maxNum }] = await tx.select({ maxNum: max(rfiResponsesTable.responseNumber) })
       .from(rfiResponsesTable).where(eq(rfiResponsesTable.rfiId, rfiId));
       const responseNumber = (maxNum ?? 0) + 1;
+      const responseCostNeedsAmount = body.costImpact === "Cost Increase Known" || body.costImpact === "Cost Decrease";
+      const responseCostNeedsReason = body.costImpact === "Cost Increase TBD" || responseCostNeedsAmount;
+      const responseScheduleNeedsDays = body.scheduleImpact === "Increase in Calendar Days" || body.scheduleImpact === "Decrease in Calendar Days";
+      const normalizedCostAmount = responseCostNeedsAmount ? body.costImpactAmount || null : null;
+      const normalizedCostReason = responseCostNeedsReason ? body.costImpactReason || null : null;
+      const normalizedScheduleDays = responseScheduleNeedsDays ? body.scheduleImpactDays ?? null : null;
+      const normalizedScheduleReason = responseScheduleNeedsDays ? body.scheduleImpactReason || null : null;
 
       const [inserted] = await tx.insert(rfiResponsesTable).values({
       rfiId,
@@ -2417,11 +2426,11 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       answeredByEmail: body.answeredByEmail || responderEmail || undefined,
       answeredByCompany: body.answeredByCompany || responderCompany || undefined,
       costImpact: body.costImpact || undefined,
-      costImpactAmount: body.costImpactAmount || undefined,
-      costImpactReason: body.costImpactReason || undefined,
+      costImpactAmount: normalizedCostAmount,
+      costImpactReason: normalizedCostReason,
       scheduleImpact: body.scheduleImpact || undefined,
-      scheduleImpactDays: body.scheduleImpactDays || undefined,
-      scheduleImpactReason: body.scheduleImpactReason || undefined,
+      scheduleImpactDays: normalizedScheduleDays,
+      scheduleImpactReason: normalizedScheduleReason,
       isConflictOfInterest: isCoi,
     }).returning();
 
@@ -2434,11 +2443,11 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       answeredBy: body.answeredBy || undefined,
       dateAnswered: answeredAt,
       costImpact: body.costImpact || undefined,
-      costImpactAmount: body.costImpactAmount || undefined,
-      costImpactReason: body.costImpactReason || undefined,
+      costImpactAmount: normalizedCostAmount,
+      costImpactReason: normalizedCostReason,
       scheduleImpact: body.scheduleImpact || undefined,
-      scheduleImpactDays: body.scheduleImpactDays || undefined,
-      scheduleImpactReason: body.scheduleImpactReason || undefined,
+      scheduleImpactDays: normalizedScheduleDays,
+      scheduleImpactReason: normalizedScheduleReason,
       responseAttachmentsJson: body.responseAttachmentsJson || [],
       ballInCourt: closesRfi ? null : submitterCompany,
       ...(body.closingStatus ? { status: body.closingStatus } : { status: "responded" }),

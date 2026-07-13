@@ -97,6 +97,31 @@ Verification required before customer retest:
 - Run behavior checks, `pnpm run check:mojibake`, `pnpm run typecheck`, and the production build.
 - Update this register with commit, push, publish, package, and Roberto/customer verification status.
 
+2026-07-13 focused RFI pass:
+- Completed: preserved `rfis.cost_impact_reason`, `rfis.schedule_impact_reason`,
+  `rfi_responses.cost_impact_reason`, and `rfi_responses.schedule_impact_reason` in the Drizzle
+  schemas and confirmed startup migrations remain additive `ADD COLUMN IF NOT EXISTS`; verified
+  feedback_items indexes still match the idempotent migration.
+- Completed: fixed Section 6 Cost Increase TBD handling so the Cost Reason / Explanation field is
+  visible and saved without requiring a cost amount on new RFI, duplicate-number retry payload,
+  existing RFI edit, and official response save.
+- Completed: normalized official response impact writes so no-impact/TBD paths do not preserve
+  stale cost amount, schedule days, or reason values.
+- Completed: confirmed `source_viewpoint_id` remains non-unique lineage only and the
+  `from-viewpoint` route has no duplicate-prevention check; storage uses unique physical filenames
+  for repeated screenshot uploads.
+- Completed: removed the silent viewpoint-prefill catch by logging a traceable server message while
+  still allowing RFI creation to continue.
+- Verification: `pnpm run check:mojibake` passed, `pnpm run typecheck` passed, and
+  `$env:PORT='3000'; pnpm run build` passed after rerun with filesystem approval for Vite cache
+  writes under the real repo.
+- Deferred: browser screenshot crop tools, complete issued-RFI PDF package/native PDF page-copy,
+  Word/DOCX/Excel/image conversion verification, River Avenue page-box comparison, and authenticated
+  repeated-viewpoint HTTP proof still require the larger RFI package implementation/test harness.
+- PDF fixture note: local `pdfinfo`, `pypdf`, and resolvable `pdfjs-dist` were unavailable in this
+  environment during this pass, so River Avenue page boxes were not programmatically recorded here.
+- Publish status: not published.
+
 ### Platform-Wide Report Design System
 
 Shipped first implementation scope on 2026-07-10:

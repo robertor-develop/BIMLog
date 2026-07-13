@@ -750,6 +750,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   const [emailDraftLoading, setEmailDraftLoading] = useState(false);
   const [emailDraftError, setEmailDraftError] = useState("");
   const [emailCopied, setEmailCopied] = useState(false);
+  const costReasonRequired = costImpact === "Cost Increase TBD" || costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const costAmountRequired = costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const scheduleDaysRequired = schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days";
   const addReference = () => {
@@ -968,7 +969,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       question: question || undefined,
       costImpact: costImpact || undefined,
       costImpactAmount: costAmountRequired ? costAmount : undefined,
-      costImpactReason: costAmountRequired ? costReason : undefined,
+      costImpactReason: costReasonRequired ? costReason : undefined,
       scheduleImpact: schedImpact || undefined,
       scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
       scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
@@ -1000,7 +1001,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         question: question || undefined,
         costImpact: costImpact || undefined,
         costImpactAmount: costAmountRequired ? costAmount : undefined,
-        costImpactReason: costAmountRequired ? costReason : undefined,
+        costImpactReason: costReasonRequired ? costReason : undefined,
         scheduleImpact: schedImpact || undefined,
         scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
         scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
@@ -1330,9 +1331,9 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
                   {opt}
                 </label>
               ))}
-              {costAmountRequired && (
+              {costReasonRequired && (
                 <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                  <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 12 }} />
+                  {costAmountRequired && <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 12 }} />}
                   <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 64, fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "7px 9px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
                 </div>
               )}
@@ -2129,8 +2130,10 @@ ${hasResp ? `
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
   const storedQuestionDocs = (rfi.attachmentsJson as string[] | null) || [];
+  const responseCostReasonRequired = costImpact === "Cost Increase TBD" || costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const responseCostAmountRequired = costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const responseScheduleDaysRequired = schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days";
+  const infoCostReasonRequired = infoCost === "Cost Increase TBD" || infoCost === "Cost Increase Known" || infoCost === "Cost Decrease";
   const infoCostAmountRequired = infoCost === "Cost Increase Known" || infoCost === "Cost Decrease";
   const infoScheduleDaysRequired = infoSched === "Increase in Calendar Days" || infoSched === "Decrease in Calendar Days";
   const timeline = [
@@ -2155,7 +2158,7 @@ ${hasResp ? `
           answeredBy: answeredBy || undefined,
           costImpact: costImpact || undefined,
           costImpactAmount: responseCostAmountRequired ? costAmount : undefined,
-          costImpactReason: responseCostAmountRequired ? costReason : undefined,
+          costImpactReason: responseCostReasonRequired ? costReason : undefined,
           scheduleImpact: schedImpact || undefined,
           scheduleImpactDays: responseScheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
           scheduleImpactReason: responseScheduleDaysRequired ? schedReason : undefined,
@@ -2583,9 +2586,9 @@ ${hasResp ? `
                       {opt}
                     </label>
                   ))}
-                  {infoCostAmountRequired && (
+                  {infoCostReasonRequired && (
                     <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                      <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={infoInput} />
+                      {infoCostAmountRequired && <input value={infoCostAmt} onChange={e => setInfoCostAmt(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={infoInput} />}
                       <textarea value={infoCostReason} onChange={e => setInfoCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ ...infoInput, minHeight: 64, resize: "vertical" }} />
                     </div>
                   )}
@@ -2629,7 +2632,7 @@ ${hasResp ? `
           {infoEdit && (
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginBottom: 16 }}>
               <button onClick={() => setInfoEdit(false)} style={{ fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" }}>{w("Cancel", "Cancelar", lang)}</button>
-              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmountRequired ? infoCostAmt : null, costImpactReason: infoCostAmountRequired ? infoCostReason : null, scheduleImpact: infoSched, scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
+              <button disabled={isUpdating} onClick={() => { updateRfi({ projectId, rfiId: rfi.id, data: { subject: infoSubject, rfiType: infoType, sourceViewpointLabel: infoVpLabel, question: infoQuestion, costImpact: infoCost, costImpactAmount: infoCostAmountRequired ? infoCostAmt : null, costImpactReason: infoCostReasonRequired ? infoCostReason : null, scheduleImpact: infoSched, scheduleImpactReason: infoScheduleDaysRequired ? infoSchedReason : null, distributionList: infoDist, submittedByCompany: infoFromCompany, submittedByContact: infoFromContact, submittedByEmail: infoFromEmail, submittedToCompany: infoToCompany, submittedToPerson: infoToPerson, submittedToEmail: infoToEmail, attachmentsJson: questionDocs, scheduleImpactDays: infoScheduleDaysRequired && infoSchedDays.trim() && !Number.isNaN(Number(infoSchedDays)) ? Number(infoSchedDays) : null } }); setInfoEdit(false); }} style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, border: "none", background: "#1E3A5F", color: "white", cursor: "pointer", opacity: isUpdating ? 0.6 : 1 }}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save", "Guardar", lang)}</button>
             </div>
           )}
 
@@ -2807,9 +2810,9 @@ ${hasResp ? `
                         {opt}
                       </label>
                     ))}
-                    {responseCostAmountRequired && (
+                    {responseCostReasonRequired && (
                       <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-                        <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 11 }} />
+                        {responseCostAmountRequired && <Input value={costAmount} onChange={e => setCostAmount(e.target.value)} placeholder={w("Cost Amount", "Monto de Costo", lang)} style={{ fontSize: 11 }} />}
                         <textarea value={costReason} onChange={e => setCostReason(e.target.value)} placeholder={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} style={{ width: "100%", minHeight: 60, fontSize: 11, borderRadius: 6, border: "1px solid hsl(var(--border))", padding: "6px 8px", background: "hsl(var(--background))", color: "hsl(var(--foreground))", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }} />
                       </div>
                     )}
