@@ -117,8 +117,6 @@ app.get("/api/v1/env-check", (_req: Request, res: Response) => {
 
 app.use("/api/v1", router);
 
-startOverdueNotifier();
-
 (async () => {
   try {
     await pool.query(`ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`);
@@ -150,7 +148,7 @@ startOverdueNotifier();
   }
 })();
 
-(async () => {
+const rfiMigrationReady = (async () => {
   try {
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_status text DEFAULT 'draft'`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_at timestamp`);
@@ -163,8 +161,13 @@ startOverdueNotifier();
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS attachment_package_json json DEFAULT '[]'::json`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS image_presentation_json json DEFAULT NULL`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_at timestamp`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_by_id integer`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_at timestamp`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_by_id integer`);
     await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
     await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
+    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS response_attachments_json json NOT NULL DEFAULT '[]'::json`);
     await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);
     await pool.query(`CREATE TABLE IF NOT EXISTS user_connections (
       id serial PRIMARY KEY,
@@ -197,13 +200,30 @@ startOverdueNotifier();
         ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);
       END IF;
     END $$;`);
+    await pool.query(`DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_closed_by_id_users_id_fk') THEN
+        ALTER TABLE rfis ADD CONSTRAINT rfis_closed_by_id_users_id_fk FOREIGN KEY (closed_by_id) REFERENCES users(id);
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_reopened_by_id_users_id_fk') THEN
+        ALTER TABLE rfis ADD CONSTRAINT rfis_reopened_by_id_users_id_fk FOREIGN KEY (reopened_by_id) REFERENCES users(id);
+      END IF;
+    END $$;`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfis_project_revision_family_number_uidx ON rfis (project_id, parent_rfi_id, revision_number) WHERE parent_rfi_id IS NOT NULL`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfi_responses_rfi_number_uidx ON rfi_responses (rfi_id, response_number)`);
     // Invariant: at most one OPEN custody row (to_date IS NULL) per RFI.
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL`);
     console.log("[migration] rfis send-accountability columns ensured");
+    return true;
   } catch (e) {
     console.error("[migration] rfis send-accountability migration failed:", e);
+    return false;
   }
 })();
+
+void rfiMigrationReady.then((ready) => {
+  if (ready) startOverdueNotifier();
+  else console.error("[overdue-notifier] Not started because the RFI schema migration failed.");
+});
 
 (async () => {
   try {

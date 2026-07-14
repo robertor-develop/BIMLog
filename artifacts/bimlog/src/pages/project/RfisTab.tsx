@@ -1407,72 +1407,42 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
     if (!subject.trim()) {
       toast({ title: w("Subject is required", "El asunto es requerido", lang), variant: "destructive" }); return;
     }
-    lastRfiData.current = {
+    const data = {
       subject, priority,
-      rfiType: rfiType || undefined,
-      dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
-      dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
-      projectAddress: projectAddress || undefined,
-      submittedByCompany: sByCompany || undefined,
-      submittedByContact: sByContact || undefined,
-      submittedByAddress: sByAddress || undefined,
-      submittedByPhone: sByPhone || undefined,
-      submittedByEmail: sByEmail || undefined,
-      submittedToCompany: sToCompany || undefined,
-      submittedToPerson: sToPerson || undefined,
-      submittedToEmail: sToEmail || undefined,
-      drawingNumber: drawingNum || undefined,
-      drawingTitle: drawingTitle || undefined,
-      specSection: specSection || undefined,
-      detailNumber: detailNum || undefined,
-      noteNumber: noteNum || undefined,
-      locationDescription: location || undefined,
-      question: question || undefined,
-      costImpact: costImpact || undefined,
-      costImpactAmount: costAmountRequired ? costAmount : undefined,
-      costImpactReason: costReasonRequired ? costReason : undefined,
-      scheduleImpact: schedImpact || undefined,
-      scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
-      scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
-      distributionList: distList.length > 0 ? distList : undefined,
-      attachmentsJson: allEvidence.length > 0 ? allEvidence : undefined,
-      attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
+      rfiType,
+      dateRequested: dateRequested ? new Date(dateRequested).toISOString() : "",
+      dateRequired: dateRequired ? new Date(dateRequired).toISOString() : "",
+      projectAddress,
+      submittedByCompany: sByCompany,
+      submittedByContact: sByContact,
+      submittedByAddress: sByAddress,
+      submittedByPhone: sByPhone,
+      submittedByEmail: sByEmail,
+      submittedToCompany: sToCompany,
+      submittedToPerson: sToPerson,
+      submittedToEmail: sToEmail,
+      drawingNumber: drawingNum,
+      drawingTitle,
+      specSection,
+      detailNumber: detailNum,
+      noteNumber: noteNum,
+      locationDescription: location,
+      question,
+      costImpact,
+      costImpactAmount: costAmountRequired ? costAmount : null,
+      costImpactReason: costReasonRequired ? costReason : null,
+      scheduleImpact: schedImpact,
+      scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : null,
+      scheduleImpactReason: scheduleDaysRequired ? schedReason : null,
+      distributionList: distList,
+      attachmentsJson: allEvidence,
+      attachmentPackageJson: packageItems,
       imagePresentationJson: imagePresentation,
     };
+    lastRfiData.current = data;
     createRfi({
       projectId,
-      data: {
-        subject, priority,
-        rfiType: rfiType || undefined,
-        dateRequested: dateRequested ? new Date(dateRequested).toISOString() : undefined,
-        dateRequired: dateRequired ? new Date(dateRequired).toISOString() : undefined,
-        projectAddress: projectAddress || undefined,
-        submittedByCompany: sByCompany || undefined,
-        submittedByContact: sByContact || undefined,
-        submittedByAddress: sByAddress || undefined,
-        submittedByPhone: sByPhone || undefined,
-        submittedByEmail: sByEmail || undefined,
-        submittedToCompany: sToCompany || undefined,
-        submittedToPerson: sToPerson || undefined,
-        submittedToEmail: sToEmail || undefined,
-        drawingNumber: drawingNum || undefined,
-        drawingTitle: drawingTitle || undefined,
-        specSection: specSection || undefined,
-        detailNumber: detailNum || undefined,
-        noteNumber: noteNum || undefined,
-        locationDescription: location || undefined,
-        question: question || undefined,
-        costImpact: costImpact || undefined,
-        costImpactAmount: costAmountRequired ? costAmount : undefined,
-        costImpactReason: costReasonRequired ? costReason : undefined,
-        scheduleImpact: schedImpact || undefined,
-        scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
-        scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
-        distributionList: distList.length > 0 ? distList : undefined,
-        attachmentsJson: allEvidence.length > 0 ? allEvidence : undefined,
-        attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
-        imagePresentationJson: imagePresentation,
-      },
+      data,
     });
   };
 
@@ -1500,10 +1470,17 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       case "locationDescription": setLocation(value); break;
       case "referenceInput": setAttachInput(value); break;
       case "question": setQuestion(value); break;
-      case "costImpact": setCostImpact(value); break;
+      case "costImpact":
+        setCostImpact(value);
+        if (value !== "Cost Increase Known" && value !== "Cost Decrease") setCostAmount("");
+        if (value !== "Cost Increase TBD" && value !== "Cost Increase Known" && value !== "Cost Decrease") setCostReason("");
+        break;
       case "costImpactAmount": setCostAmount(value); break;
       case "costImpactReason": setCostReason(value); break;
-      case "scheduleImpact": setSchedImpact(value); break;
+      case "scheduleImpact":
+        setSchedImpact(value);
+        if (value !== "Increase in Calendar Days" && value !== "Decrease in Calendar Days") { setSchedDays(""); setSchedReason(""); }
+        break;
       case "scheduleImpactDays": setSchedDays(value); break;
       case "scheduleImpactReason": setSchedReason(value); break;
       case "distributionList": setDistList(value.split(",").map(v => v.trim()).filter(Boolean)); break;
@@ -1634,10 +1611,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const rfiTypeOptions = configuredRfiTypes.length
     ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
     : DEFAULT_RFI_TYPES.map(t => ({ value: t, label: t }));
+  const configuredRespondedStatus = getOptions("rfi_status").find(option => option.value.toLowerCase() === "responded")?.value || rfi.status;
 
   const [answer, setAnswer] = useState(rfi.answer || rfi.response || "");
   const [answeredBy, setAnsweredBy] = useState(rfi.answeredBy || user?.fullName || "");
-  const [closingStatus, setClosingStatus] = useState(rfi.status);
+  const [closingStatus, setClosingStatus] = useState(configuredRespondedStatus);
   const [costImpact, setCostImpact] = useState(rfi.costImpact || "No Cost Impact");
   const [costAmount, setCostAmount] = useState(rfi.costImpactAmount || "");
   const [costReason, setCostReason] = useState((rfi as Rfi & { costImpactReason?: string }).costImpactReason || "");
@@ -2137,10 +2115,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const handleCloseRfi = async () => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}`, {
-        method: "PATCH",
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/close`, {
+        method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: "closed" }),
       });
       if (!r.ok) { const d = await r.json() as { error?: string }; throw new Error(d.error || "Failed"); }
       const updated = await r.json() as typeof rfi;
@@ -2244,10 +2221,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const handleReopenRfi = async () => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     try {
-      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}`, {
-        method: "PATCH",
+      const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/reopen`, {
+        method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: "open" }),
       });
       if (!r.ok) { const d = await r.json().catch(() => ({})) as { error?: string }; throw new Error(d.error || "Failed"); }
       const updated = await r.json() as typeof rfi;
@@ -2305,11 +2281,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const infoCostReasonRequired = infoCost === "Cost Increase TBD" || infoCost === "Cost Increase Known" || infoCost === "Cost Decrease";
   const infoCostAmountRequired = infoCost === "Cost Increase Known" || infoCost === "Cost Decrease";
   const infoScheduleDaysRequired = infoSched === "Increase in Calendar Days" || infoSched === "Decrease in Calendar Days";
+  const lifecycleRfi = rfi as Rfi & { closedAt?: string | null; reopenedAt?: string | null };
   const timeline = [
     { label: w("Created", "Creado", lang), date: rfi.createdAt as string | Date | null, by: rfi.createdByName || undefined },
     ...(rfi.sentAt ? [{ label: w("Sent to reviewer", "Enviado al revisor", lang), date: rfi.sentAt as string | Date | null, by: undefined as string | undefined }] : []),
     ...rfiResponses.map(r => ({ label: w("Response", "Respuesta", lang), date: r.createdAt as string | Date | null, by: r.answeredBy || undefined })),
     ...(rfi.dateAnswered ? [{ label: w("Answered", "Respondido", lang), date: rfi.dateAnswered as string | Date | null, by: undefined as string | undefined }] : []),
+    ...(lifecycleRfi.closedAt ? [{ label: w("Closed", "Cerrado", lang), date: lifecycleRfi.closedAt as string | Date | null, by: undefined as string | undefined }] : []),
+    ...(lifecycleRfi.reopenedAt ? [{ label: w("Reopened", "Reabierto", lang), date: lifecycleRfi.reopenedAt as string | Date | null, by: undefined as string | undefined }] : []),
   ].filter(e => !!e.date).sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
 
   const handleSaveResponse = async () => {
@@ -2336,7 +2315,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         }),
       });
       if (!r.ok) { const d = await r.json() as { error?: string }; throw new Error(d.error || "Failed"); }
-      const newResp = await r.json() as typeof rfiResponses[0];
+      const newResp = await r.json() as typeof rfiResponses[0] & { rfi?: Rfi };
       setRfiResponses(prev => [...prev, newResp]);
       setShowAddResponse(false);
       if (newResp.isConflictOfInterest) {
@@ -2345,7 +2324,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         toast({ title: w("Response saved.", "Respuesta guardada.", lang) });
       }
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
-      onUpdate({ ...rfi, answer, answeredBy, status: closingStatus });
+      if (newResp.rfi) onUpdate(newResp.rfi);
     } catch (err) {
       toast({ title: err instanceof Error ? err.message : w("Save failed", "Error al guardar", lang), variant: "destructive" });
     }
@@ -2360,12 +2339,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     lang,
   });
 
+  const wasPersistentlyReopened = !!lifecycleRfi.reopenedAt
+    && (!lifecycleRfi.closedAt || new Date(lifecycleRfi.reopenedAt).getTime() > new Date(lifecycleRfi.closedAt).getTime());
   const recordState: RfiRecordState = rfi.status === "closed"
     ? "closed"
+    : wasPersistentlyReopened
+      ? "reopened"
     : rfi.revisionNumber && rfi.revisionNumber > 0
       ? "revised"
-      : rfi.status === "open" && (rfi.sendStatus === "sent" || rfi.sentAt) && !rfi.dateAnswered && !rfi.answer && !rfi.response
-        ? "reopened"
       : rfi.sendStatus === "sent" || rfi.sentAt
         ? "sent"
         : "draft";
@@ -2386,14 +2367,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         subject: infoSubject,
         priority: infoPriority,
         rfiType: infoType,
-        drawingNumber: infoDrawingNumber || undefined,
-        drawingTitle: infoDrawingTitle || undefined,
-        specSection: infoSpecSection || undefined,
-        detailNumber: infoDetailNumber || undefined,
-        noteNumber: infoNoteNumber || undefined,
-        locationDescription: infoLocationDescription || undefined,
+        drawingNumber: infoDrawingNumber,
+        drawingTitle: infoDrawingTitle,
+        specSection: infoSpecSection,
+        detailNumber: infoDetailNumber,
+        noteNumber: infoNoteNumber,
+        locationDescription: infoLocationDescription,
         sourceViewpointLabel: infoVpLabel,
-        dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : undefined,
+        dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : "",
         projectAddress: infoProjectAddress,
         question: infoQuestion,
         costImpact: infoCost,
@@ -2442,10 +2423,17 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       case "referenceInput": setQuestionDocInput(value); break;
       case "question": setInfoQuestion(value); break;
       case "questionAssistDescription": setQuestionAiDescription(value); break;
-      case "costImpact": setInfoCost(value); break;
+      case "costImpact":
+        setInfoCost(value);
+        if (value !== "Cost Increase Known" && value !== "Cost Decrease") setInfoCostAmt("");
+        if (value !== "Cost Increase TBD" && value !== "Cost Increase Known" && value !== "Cost Decrease") setInfoCostReason("");
+        break;
       case "costImpactAmount": setInfoCostAmt(value); break;
       case "costImpactReason": setInfoCostReason(value); break;
-      case "scheduleImpact": setInfoSched(value); break;
+      case "scheduleImpact":
+        setInfoSched(value);
+        if (value !== "Increase in Calendar Days" && value !== "Decrease in Calendar Days") { setInfoSchedDays(""); setInfoSchedReason(""); }
+        break;
       case "scheduleImpactDays": setInfoSchedDays(value.replace(/[^0-9]/g, "")); break;
       case "scheduleImpactReason": setInfoSchedReason(value); break;
       case "distributionList": setInfoDist(value.split(",").map(v => v.trim()).filter(Boolean)); break;
@@ -2496,7 +2484,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const openNewResponse = () => {
     setAnswer("");
     setAnsweredBy(user?.fullName || "");
-    setClosingStatus(rfi.status);
+    setClosingStatus(configuredRespondedStatus);
     setCostImpact("No Cost Impact");
     setCostAmount("");
     setCostReason("");
@@ -2520,7 +2508,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         <Button type="button" size="sm" variant="outline" onClick={handleAiAssist} disabled={aiAssistLoading} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{aiAssistLoading ? w("Generating...", "Generando...", lang) : w("AI Assist Response", "Asistencia IA de Respuesta", lang)}</Button>
         <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 5 }}>{w("Text assist uses AI credits. It does not read response attachments.", "La asistencia de texto usa creditos IA. No lee los adjuntos de respuesta.", lang)}</p>
         <FormGrid><CanonicalField label={w("Answered By", "Respondido Por", lang)} value={answeredBy} editable onChange={setAnsweredBy} /><CanonicalField label={w("Closing Status", "Estado al Guardar", lang)} value={closingStatus} editable onChange={setClosingStatus} options={statusOptions.map(option => ({ value: option.value, label: lang === "es" ? option.labelEs : option.label }))} /></FormGrid>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}><div><CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={costImpact} editable onChange={setCostImpact} options={[{ value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) }, { value: "Cost Increase TBD", label: w("Cost Increase TBD", "Aumento por Definir", lang) }, { value: "Cost Increase Known", label: w("Cost Increase Known", "Aumento Conocido", lang) }, { value: "Cost Decrease", label: w("Cost Decrease", "Disminucion", lang) }]} />{responseCostAmountRequired && <CanonicalField label={w("Cost Amount", "Monto de Costo", lang)} value={costAmount} editable onChange={setCostAmount} />}{responseCostReasonRequired && <CanonicalField label={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} value={costReason} editable onChange={setCostReason} multiline />}</div><div><CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={schedImpact} editable onChange={setSchedImpact} options={[{ value: "No Schedule Impact", label: w("No Schedule Impact", "Sin Impacto en Programa", lang) }, { value: "Increase in Calendar Days", label: w("Increase in Calendar Days", "Aumento en Dias Calendario", lang) }, { value: "Decrease in Calendar Days", label: w("Decrease in Calendar Days", "Disminucion en Dias Calendario", lang) }]} />{responseScheduleDaysRequired && <CanonicalField label={w("Calendar Days", "Dias Calendario", lang)} value={schedDays} editable onChange={value => setSchedDays(value.replace(/[^0-9]/g, ""))} />}{responseScheduleDaysRequired && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={schedReason} editable onChange={setSchedReason} multiline />}</div></div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}><div><CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={costImpact} editable onChange={value => { setCostImpact(value); if (value !== "Cost Increase Known" && value !== "Cost Decrease") setCostAmount(""); if (value !== "Cost Increase TBD" && value !== "Cost Increase Known" && value !== "Cost Decrease") setCostReason(""); }} options={[{ value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) }, { value: "Cost Increase TBD", label: w("Cost Increase TBD", "Aumento por Definir", lang) }, { value: "Cost Increase Known", label: w("Cost Increase Known", "Aumento Conocido", lang) }, { value: "Cost Decrease", label: w("Cost Decrease", "Disminucion", lang) }]} />{responseCostAmountRequired && <CanonicalField label={w("Cost Amount", "Monto de Costo", lang)} value={costAmount} editable onChange={setCostAmount} />}{responseCostReasonRequired && <CanonicalField label={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} value={costReason} editable onChange={setCostReason} multiline />}</div><div><CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={schedImpact} editable onChange={value => { setSchedImpact(value); if (value !== "Increase in Calendar Days" && value !== "Decrease in Calendar Days") { setSchedDays(""); setSchedReason(""); } }} options={[{ value: "No Schedule Impact", label: w("No Schedule Impact", "Sin Impacto en Programa", lang) }, { value: "Increase in Calendar Days", label: w("Increase in Calendar Days", "Aumento en Dias Calendario", lang) }, { value: "Decrease in Calendar Days", label: w("Decrease in Calendar Days", "Disminucion en Dias Calendario", lang) }]} />{responseScheduleDaysRequired && <CanonicalField label={w("Calendar Days", "Dias Calendario", lang)} value={schedDays} editable onChange={value => setSchedDays(value.replace(/[^0-9]/g, ""))} />}{responseScheduleDaysRequired && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={schedReason} editable onChange={setSchedReason} multiline />}</div></div>
         <div style={{ marginTop: 10 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Response Attachments", "Adjuntos de Respuesta", lang)}</label><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 240px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()}>{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload Response File", "Subir Archivo de Respuesta", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowFileSearch(!showFileSearch)}>{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{connectedFileSources.map(provider => <Button key={`response-${provider.key}`} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })}>{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}</Button>)}</div>{showFileSearch && <div style={{ position: "relative" }}><FileSearchDropdown files={files || []} onSelect={name => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }} onClose={() => setShowFileSearch(false)} /></div>}{responseDocs.map((doc, index) => <div key={`${doc}-${index}`} style={{ display: "flex", gap: 7, alignItems: "center", marginTop: 5, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} />{isOpenableAttachment(doc) ? <button type="button" onClick={() => { void openRfiAttachment(doc).catch(error => toast({ title: error instanceof Error ? error.message : w("Attachment could not be opened", "No se pudo abrir el adjunto", lang), variant: "destructive" })); }} style={{ flex: 1, padding: 0, border: 0, background: "transparent", color: "#1D4ED8", textAlign: "left", cursor: "pointer", fontSize: 12 }}>{attachLabel(doc)}</button> : <span style={{ flex: 1 }}>{attachLabel(doc)}</span>}<Button type="button" size="sm" variant="outline" onClick={() => setResponseDocs(prev => prev.filter((_, itemIndex) => itemIndex !== index))} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button></div>)}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 7, marginTop: 12, paddingTop: 12, borderTop: "1px solid hsl(var(--border))" }}>{(rfiResponses.length > 0 || rfi.answer || rfi.response) && <Button type="button" size="sm" variant="outline" onClick={() => setShowAddResponse(false)}>{w("Cancel Response", "Cancelar Respuesta", lang)}</Button>}<Button type="button" size="sm" onClick={handleSaveResponse} disabled={isUpdating}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save Response", "Guardar Respuesta", lang)}</Button></div>
       </div>}

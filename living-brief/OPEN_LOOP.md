@@ -430,6 +430,29 @@ Final micro-correction:
 - Final verification: `git diff --check`, `pnpm run check:mojibake`, `pnpm run check:living-brief`, `pnpm run typecheck`, and `$env:PORT='3000'; pnpm run build` passed. The approved helper restarted the rebuilt API as PID `22348`; its loopback listener, health 200 response, bundle timestamp, length, and SHA-256 were reverified before a successful post-restart browser read of RFI `40`.
 - Acceptance status: evidence submitted for independent master review. Build 1B is not self-accepted. Nothing was published.
 
+### RFI Build 2 Persistence And Lifecycle Integrity
+
+- Starting commit: `082d0519954d3b943931fd43e68ebc9e44aa9e28`.
+- Canonical create, duplicate-number retry, existing edit, sent edit, closed edit, reopened edit, reload, and intentional clearing now use the same complete persistence contract. Clearing an impact selection also clears stale amount, day, and reason values.
+- Normal and viewpoint-created RFIs resolve a safe configured creation status: explicit safe default first, then semantic `draft`, then semantic `open`; responded/closed defaults and missing safe configuration fail explicitly.
+- Close and reopen are explicit transactional operations with persisted actor/timestamp evidence, custody-row termination/restoration, unsent author-held behavior, and lifecycle activity records. Sent drafts advance to the configured semantic `open` status instead of an unconfigured hard-coded value.
+- Revision numbers are allocated across the entire family under a transaction advisory lock. Revisions preserve the complete question-side record and viewpoint lineage, do not copy responses, and write source/revision lineage activity.
+- Each response owns `response_attachments_json`; response numbering is row-locked and protected by a unique index. Closing through a response is Project Admin-only, invalid statuses return 422, and closed RFIs reject responses until explicit reopen.
+- Material edits now write safe before/after activity details. The RFI Audit PDF includes lifecycle, response, and revision activity from the activity log.
+- Additive isolated-database operations only: four nullable RFI lifecycle columns, two actor foreign keys, one non-null response attachment JSON column with `[]` default, and two unique indexes. No drop, rename, rebuild, production, Replit, or Neon operation was performed.
+- Real API/database acceptance gates A-O passed against `127.0.0.1:3101` and `127.0.0.1:55432/bimlog_rfi_test`. Evidence: `C:\Dev\bimlog-tools\evidence\rfi-build-2\20260714-091443`.
+- Build 2 is submitted for independent review and is not self-accepted. Nothing was published. Build 3 was not started.
+
+Discovered and corrected:
+- Package selections reload in their explicit saved order; the acceptance fixture was corrected to assert normalized package order.
+- Windows PowerShell requires `-PassThru` to retain HTTP status while downloading the Audit PDF with `-OutFile`; this affected only the external evidence runner.
+- The prior mark-sent path could persist `in_review` without that value being configured. It now uses the configured semantic `open` value for draft/open records.
+- The overdue RFI notifier previously started before the additive RFI migration completed on a fresh schema. It now starts only after that migration succeeds and reports an explicit startup error otherwise.
+
+Deferred:
+- Independent acceptance and any production/Replit migration or publish remain outside this build.
+- Image crop/export redesign, plugin work, and Build 3 remain out of scope.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings

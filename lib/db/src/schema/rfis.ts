@@ -1,4 +1,5 @@
-import { pgTable, serial, text, timestamp, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, json, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -94,6 +95,15 @@ export const rfisTable = pgTable("rfis", {
   // the source viewpoint's code so the detail panel can deep-link back to it.
   sourceViewpointId: text("source_viewpoint_id"),
   sourceViewpointLabel: text("source_viewpoint_label"),
-});
+
+  closedAt: timestamp("closed_at"),
+  closedById: integer("closed_by_id").references(() => usersTable.id),
+  reopenedAt: timestamp("reopened_at"),
+  reopenedById: integer("reopened_by_id").references(() => usersTable.id),
+}, (t) => ({
+  revisionFamilyNumberUnique: uniqueIndex("rfis_project_revision_family_number_uidx")
+    .on(t.projectId, t.parentRfiId, t.revisionNumber)
+    .where(sql`parent_rfi_id IS NOT NULL`),
+}));
 
 export type Rfi = typeof rfisTable.$inferSelect;

@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
 import { rfisTable } from "./rfis";
 import { projectsTable } from "./projects";
 
@@ -17,8 +17,11 @@ export const rfiResponsesTable = pgTable("rfi_responses", {
   scheduleImpact: text("schedule_impact"),
   scheduleImpactDays: integer("schedule_impact_days"),
   scheduleImpactReason: text("schedule_impact_reason"),
+  responseAttachmentsJson: json("response_attachments_json").$type<string[]>().notNull().default([]),
   isConflictOfInterest: boolean("is_conflict_of_interest").default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  responseNumberUnique: uniqueIndex("rfi_responses_rfi_number_uidx").on(t.rfiId, t.responseNumber),
+}));
 
 export type RfiResponse = typeof rfiResponsesTable.$inferSelect;

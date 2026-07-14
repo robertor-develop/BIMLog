@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
-import { eq, and, count, max, isNull, or, ne } from "drizzle-orm";
+import { eq, and, count, max, isNull, or, ne, asc, desc, sql } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
@@ -117,6 +117,104 @@ function normalizeImagePresentation(value: unknown): RfiImagePresentation {
   };
 }
 
+type ConfiguredRfiStatus = { value: string; meta: Record<string, string> | null };
+
+async function configuredRfiStatuses(): Promise<ConfiguredRfiStatus[]> {
+  return db.select({ value: configOptionsTable.value, meta: configOptionsTable.meta })
+    .from(configOptionsTable)
+    .where(eq(configOptionsTable.category, "rfi_status"))
+    .orderBy(asc(configOptionsTable.sortOrder), asc(configOptionsTable.id));
+}
+
+function metaFlag(meta: Record<string, string> | null, ...keys: string[]): boolean {
+  return keys.some(key => String(meta?.[key] || "").toLowerCase() === "true");
+}
+
+function semanticStatus(rows: ConfiguredRfiStatus[], semantic: string): ConfiguredRfiStatus | undefined {
+  const normalized = semantic.toLowerCase();
+  return rows.find(row => row.value.trim().toLowerCase() === normalized)
+    || rows.find(row => [row.meta?.semantic, row.meta?.lifecycle, row.meta?.state].some(value => String(value || "").toLowerCase() === normalized));
+}
+
+async function resolveCreationRfiStatus(): Promise<string> {
+  const rows = await configuredRfiStatuses();
+  const explicit = rows.find(row => metaFlag(row.meta, "isDefault", "default", "is_default"));
+  if (explicit) {
+    const value = explicit.value.trim().toLowerCase();
+    if (value === "responded" || value === "closed" || metaFlag(explicit.meta, "setsRespondedAt", "closesRfi")) {
+      throw new Error(`Configured default RFI status '${explicit.value}' is not safe for new RFIs.`);
+    }
+    return explicit.value;
+  }
+  const draft = semanticStatus(rows, "draft");
+  if (draft) return draft.value;
+  const open = semanticStatus(rows, "open");
+  if (open) return open.value;
+  throw new Error("No safe new-RFI status is configured. Configure a default draft/open status or add a draft/open RFI status.");
+}
+
+async function resolveLifecycleStatus(kind: "closed" | "open" | "responded"): Promise<string> {
+  const rows = await configuredRfiStatuses();
+  const match = semanticStatus(rows, kind)
+    || rows.find(row => kind === "closed" ? metaFlag(row.meta, "closesRfi") : false);
+  if (!match) throw new Error(`No configured RFI status represents '${kind}'.`);
+  return match.value;
+}
+
+async function isProjectAdmin(projectId: number, userId: number, isSuperAdmin?: boolean): Promise<boolean> {
+  if (isSuperAdmin) return true;
+  const [member] = await db.select({ role: projectMembersTable.role }).from(projectMembersTable)
+    .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
+    .limit(1);
+  return member?.role === "project_admin";
+}
+
+function nullableText(value: unknown): string | null {
+  if (value == null) return null;
+  const text = String(value).trim();
+  return text || null;
+}
+
+function custodyDays(fromDate: Date, toDate: Date): number {
+  return Math.max(0, Math.floor((toDate.getTime() - fromDate.getTime()) / 86_400_000));
+}
+
+// Canonical persistence matrix: these fields must share create/retry/edit/reload
+// clearing semantics and produce a before/after audit entry when changed.
+const CANONICAL_RFI_PERSISTENCE_MATRIX: Record<string, string> = {
+  subject: "Subject", priority: "Priority", rfiType: "RFI Type", dateRequired: "Date Required",
+  projectAddress: "Project Address", submittedByCompany: "Submitted By Company", submittedByContact: "Submitted By Contact",
+  submittedByAddress: "Submitted By Address", submittedByPhone: "Submitted By Phone", submittedByEmail: "Submitted By Email",
+  submittedToCompany: "Submitted To Company", submittedToPerson: "Submitted To Person", submittedToEmail: "Submitted To Email",
+  drawingNumber: "Drawing Number", drawingTitle: "Drawing Title", specSection: "Specification Section", detailNumber: "Detail Number",
+  noteNumber: "Note Number", locationDescription: "Location", question: "Question", costImpact: "Cost Impact",
+  costImpactAmount: "Cost Amount", costImpactReason: "Cost Reason", scheduleImpact: "Schedule Impact",
+  scheduleImpactDays: "Schedule Days", scheduleImpactReason: "Schedule Reason", distributionList: "Distribution",
+  attachmentsJson: "References / Attachments", attachmentPackageJson: "Complete PDF Package", imagePresentationJson: "Image Presentation",
+  status: "Status",
+};
+
+function auditValue(field: string, value: unknown): unknown {
+  if (value instanceof Date) return value.toISOString();
+  if (field === "attachmentsJson" && Array.isArray(value)) return value.map(item => attachmentLabel(String(item)));
+  if (field === "distributionList" && Array.isArray(value)) return value.map(item => String(item).startsWith("EXT:") ? "External distribution recipient" : String(item));
+  if (field === "attachmentPackageJson" && Array.isArray(value)) return value.map((item: any) => ({ label: item?.label, include: item?.include !== false, order: item?.order }));
+  if (field === "imagePresentationJson" && value && typeof value === "object") {
+    const image = value as RfiImagePresentation;
+    return image ? { sourceFileId: image.sourceFileId, replacementFileId: image.replacementFileId, includeInCompletePdf: image.includeInCompletePdf !== false, crop: image.crop || null } : null;
+  }
+  return value ?? null;
+}
+
+function buildRfiChangeAudit(before: typeof rfisTable.$inferSelect, updates: Record<string, unknown>) {
+  return Object.keys(CANONICAL_RFI_PERSISTENCE_MATRIX).flatMap(field => {
+    if (!(field in updates)) return [];
+    const previous = auditValue(field, (before as any)[field]);
+    const next = auditValue(field, updates[field]);
+    return JSON.stringify(previous) === JSON.stringify(next) ? [] : [{ field: CANONICAL_RFI_PERSISTENCE_MATRIX[field], before: previous, after: next }];
+  });
+}
+
 // PDF checkbox characters: unchecked (\u2610), checked (\u2611)
 // PDFKit built-in fonts lack these glyphs; boxes are drawn manually below.
 const UNCHECKED_BOX = "\u2610";
@@ -132,6 +230,8 @@ function rfiToJson(r: typeof rfisTable.$inferSelect, extras: Record<string, unkn
     dateRequired: r.dateRequired?.toISOString(),
     dateAnswered: r.dateAnswered?.toISOString(),
     sentAt: r.sentAt?.toISOString(),
+    closedAt: r.closedAt?.toISOString(),
+    reopenedAt: r.reopenedAt?.toISOString(),
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
@@ -212,47 +312,47 @@ async function createRfiForProject(
   }
   const number = isDuplicate ? suggestedNumber : proposedNumber;
 
-  const defaultRfiStatus = await getDefaultValue("rfi_status");
+  const defaultRfiStatus = await resolveCreationRfiStatus();
   const [rfi] = await dbx.insert(rfisTable).values({
     projectId,
     number,
     subject: input.subject,
-    rfiType: input.rfiType || null,
-    description: input.description || null,
+    rfiType: nullableText(input.rfiType),
+    description: nullableText(input.description),
     status: defaultRfiStatus,
     priority: input.priority,
-    assignedToId: input.assignedToId || null,
+    assignedToId: input.assignedToId ?? null,
     createdById: user.userId,
     dueDate: input.dueDate ? new Date(input.dueDate) : null,
     dateRequested: input.dateRequested ? new Date(input.dateRequested) : new Date(),
     dateRequired: input.dateRequired ? new Date(input.dateRequired) : null,
-    submittedByCompany: input.submittedByCompany || null,
-    submittedByContact: input.submittedByContact || null,
-    submittedByAddress: input.submittedByAddress || null,
-    submittedByPhone: input.submittedByPhone || null,
-    submittedByEmail: input.submittedByEmail || null,
-    submittedToCompany: input.submittedToCompany || null,
-    submittedToPerson: input.submittedToPerson || null,
-    submittedToEmail: input.submittedToEmail || null,
-    drawingNumber: input.drawingNumber || null,
-    drawingTitle: input.drawingTitle || null,
-    specSection: input.specSection || null,
-    detailNumber: input.detailNumber || null,
-    noteNumber: input.noteNumber || null,
-    locationDescription: input.locationDescription || null,
-    question: input.question || null,
-    costImpact: input.costImpact || null,
-    costImpactAmount: input.costImpactAmount || null,
-    costImpactReason: input.costImpactReason || null,
-    scheduleImpact: input.scheduleImpact || null,
-    scheduleImpactDays: input.scheduleImpactDays || null,
-    scheduleImpactReason: input.scheduleImpactReason || null,
-    distributionList: input.distributionList || [],
-    attachmentsJson: input.attachmentsJson || [],
+    submittedByCompany: nullableText(input.submittedByCompany),
+    submittedByContact: nullableText(input.submittedByContact),
+    submittedByAddress: nullableText(input.submittedByAddress),
+    submittedByPhone: nullableText(input.submittedByPhone),
+    submittedByEmail: nullableText(input.submittedByEmail),
+    submittedToCompany: nullableText(input.submittedToCompany),
+    submittedToPerson: nullableText(input.submittedToPerson),
+    submittedToEmail: nullableText(input.submittedToEmail),
+    drawingNumber: nullableText(input.drawingNumber),
+    drawingTitle: nullableText(input.drawingTitle),
+    specSection: nullableText(input.specSection),
+    detailNumber: nullableText(input.detailNumber),
+    noteNumber: nullableText(input.noteNumber),
+    locationDescription: nullableText(input.locationDescription),
+    question: nullableText(input.question),
+    costImpact: nullableText(input.costImpact),
+    costImpactAmount: nullableText(input.costImpactAmount),
+    costImpactReason: nullableText(input.costImpactReason),
+    scheduleImpact: nullableText(input.scheduleImpact),
+    scheduleImpactDays: input.scheduleImpactDays ?? null,
+    scheduleImpactReason: nullableText(input.scheduleImpactReason),
+    distributionList: input.distributionList ?? [],
+    attachmentsJson: input.attachmentsJson ?? [],
     attachmentPackageJson: normalizePackageConfig(input.attachmentPackageJson),
     imagePresentationJson: normalizeImagePresentation(input.imagePresentationJson),
-    projectAddress: input.projectAddress || null,
-    sourceViewpointId: input.sourceViewpointId || null,
+    projectAddress: nullableText(input.projectAddress),
+    sourceViewpointId: nullableText(input.sourceViewpointId),
     revisionNumber: 0,
   }).returning();
 
@@ -1112,18 +1212,14 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       return;
     }
 
-    if (body.status && !(await validateConfigValue("rfi_status", body.status))) {
-      res.status(422).json({ error: `Invalid status value: ${body.status}` });
-      return;
-    }
-
-    // Only a Project Admin can close an RFI
-    if (body.status === "closed") {
-      const [member] = await db.select().from(projectMembersTable)
-        .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId)))
-        .limit(1);
-      if (!member || member.role !== "project_admin") {
-        res.status(403).json({ error: "Only a Project Admin can close an RFI" });
+    if (body.status) {
+      if (!(await validateConfigValue("rfi_status", body.status))) {
+        res.status(422).json({ error: `Invalid status value: ${body.status}` });
+        return;
+      }
+      const [closedStatus, openStatus] = await Promise.all([resolveLifecycleStatus("closed"), resolveLifecycleStatus("open")]);
+      if (body.status === closedStatus || (existing[0].status === closedStatus && body.status === openStatus)) {
+        res.status(422).json({ error: "Use the explicit close or reopen RFI operation for lifecycle transitions." });
         return;
       }
     }
@@ -1133,10 +1229,19 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     }
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (body.subject) updates.subject = body.subject;
-    if (body.rfiType !== undefined) updates.rfiType = body.rfiType;
-    if (body.sourceViewpointLabel !== undefined) updates.sourceViewpointLabel = body.sourceViewpointLabel;
-    if (body.description !== undefined) updates.description = body.description;
+    if (body.subject !== undefined) {
+      if (!body.subject.trim()) { res.status(422).json({ error: "Subject cannot be empty." }); return; }
+      updates.subject = body.subject.trim();
+    }
+    const optionalTextFields = [
+      "rfiType", "sourceViewpointLabel", "description", "response", "submittedByCompany", "submittedByContact",
+      "submittedByAddress", "submittedByPhone", "submittedByEmail", "submittedToCompany", "submittedToPerson",
+      "submittedToEmail", "drawingNumber", "drawingTitle", "specSection", "detailNumber", "noteNumber",
+      "locationDescription", "question", "answeredBy", "projectAddress",
+    ] as const;
+    for (const field of optionalTextFields) {
+      if (body[field] !== undefined) updates[field] = nullableText(body[field]);
+    }
     if (body.status) {
       updates.status = body.status;
       const statusMeta = await getConfigOptionMeta("rfi_status", body.status);
@@ -1146,31 +1251,20 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     }
     if (body.priority) updates.priority = body.priority;
     if (body.assignedToId !== undefined) updates.assignedToId = body.assignedToId;
-    if (body.response !== undefined) updates.response = body.response;
     if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
     if (body.dateRequested !== undefined) updates.dateRequested = body.dateRequested ? new Date(body.dateRequested) : null;
     if (body.dateRequired !== undefined) updates.dateRequired = body.dateRequired ? new Date(body.dateRequired) : null;
-    if (body.submittedByCompany !== undefined) updates.submittedByCompany = body.submittedByCompany;
-    if (body.submittedByContact !== undefined) updates.submittedByContact = body.submittedByContact;
-    if (body.submittedByAddress !== undefined) updates.submittedByAddress = body.submittedByAddress;
-    if (body.submittedByPhone !== undefined) updates.submittedByPhone = body.submittedByPhone;
-    if (body.submittedByEmail !== undefined) updates.submittedByEmail = body.submittedByEmail;
-    if (body.submittedToCompany !== undefined) updates.submittedToCompany = body.submittedToCompany;
-    if (body.submittedToPerson !== undefined) updates.submittedToPerson = body.submittedToPerson;
-    if (body.submittedToEmail !== undefined) updates.submittedToEmail = body.submittedToEmail;
-    if (body.drawingNumber !== undefined) updates.drawingNumber = body.drawingNumber;
-    if (body.drawingTitle !== undefined) updates.drawingTitle = body.drawingTitle;
-    if (body.specSection !== undefined) updates.specSection = body.specSection;
-    if (body.detailNumber !== undefined) updates.detailNumber = body.detailNumber;
-    if (body.noteNumber !== undefined) updates.noteNumber = body.noteNumber;
-    if (body.locationDescription !== undefined) updates.locationDescription = body.locationDescription;
-    if (body.question !== undefined) updates.question = body.question;
-    if (body.costImpact !== undefined) updates.costImpact = body.costImpact;
-    if (body.costImpactAmount !== undefined) updates.costImpactAmount = body.costImpactAmount;
-    if (body.costImpactReason !== undefined) updates.costImpactReason = body.costImpactReason;
-    if (body.scheduleImpact !== undefined) updates.scheduleImpact = body.scheduleImpact;
-    if (body.scheduleImpactDays !== undefined) updates.scheduleImpactDays = body.scheduleImpactDays;
-    if (body.scheduleImpactReason !== undefined) updates.scheduleImpactReason = body.scheduleImpactReason;
+    const nextCostImpact = body.costImpact !== undefined ? nullableText(body.costImpact) : existing[0].costImpact;
+    const costNeedsAmount = nextCostImpact === "Cost Increase Known" || nextCostImpact === "Cost Decrease";
+    const costNeedsReason = nextCostImpact === "Cost Increase TBD" || costNeedsAmount;
+    if (body.costImpact !== undefined) updates.costImpact = nextCostImpact;
+    if (body.costImpactAmount !== undefined || body.costImpact !== undefined) updates.costImpactAmount = costNeedsAmount ? nullableText(body.costImpactAmount ?? existing[0].costImpactAmount) : null;
+    if (body.costImpactReason !== undefined || body.costImpact !== undefined) updates.costImpactReason = costNeedsReason ? nullableText(body.costImpactReason ?? existing[0].costImpactReason) : null;
+    const nextScheduleImpact = body.scheduleImpact !== undefined ? nullableText(body.scheduleImpact) : existing[0].scheduleImpact;
+    const scheduleNeedsFields = nextScheduleImpact === "Increase in Calendar Days" || nextScheduleImpact === "Decrease in Calendar Days";
+    if (body.scheduleImpact !== undefined) updates.scheduleImpact = nextScheduleImpact;
+    if (body.scheduleImpactDays !== undefined || body.scheduleImpact !== undefined) updates.scheduleImpactDays = scheduleNeedsFields ? body.scheduleImpactDays ?? existing[0].scheduleImpactDays : null;
+    if (body.scheduleImpactReason !== undefined || body.scheduleImpact !== undefined) updates.scheduleImpactReason = scheduleNeedsFields ? nullableText(body.scheduleImpactReason ?? existing[0].scheduleImpactReason) : null;
     if (body.answer !== undefined) {
       updates.answer = body.answer;
       if (body.answer && !existing[0].dateAnswered) {
@@ -1178,14 +1272,13 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
         updates.respondedAt = new Date();
       }
     }
-    if (body.answeredBy !== undefined) updates.answeredBy = body.answeredBy;
     if (body.dateAnswered !== undefined) updates.dateAnswered = body.dateAnswered ? new Date(body.dateAnswered) : null;
     if (body.distributionList !== undefined) updates.distributionList = body.distributionList;
     if (body.attachmentsJson !== undefined) updates.attachmentsJson = body.attachmentsJson;
     if ((body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) updates.attachmentPackageJson = normalizePackageConfig((body as { attachmentPackageJson?: unknown }).attachmentPackageJson);
     if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) updates.imagePresentationJson = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
     if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
-    if (body.projectAddress !== undefined) updates.projectAddress = body.projectAddress;
+    const changes = buildRfiChangeAudit(existing[0], updates);
 
     const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
 
@@ -1197,7 +1290,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       actionType: "update",
       entityType: "rfi",
       entityId: rfiId,
-      details: `Updated RFI ${updated.number}${body.status ? ` → status: ${body.status}` : ""}${body.answer ? " (answered)" : ""}${body.costImpact !== undefined ? ` | Cost: ${body.costImpact || "cleared"}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact !== undefined ? ` | Schedule: ${body.scheduleImpact || "cleared"}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}${(body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined ? " | Complete PDF package configuration changed" : ""}${(body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined ? " | RFI image presentation changed" : ""}`,
+      details: JSON.stringify({ event: "rfi.updated", number: updated.number, changedAt: updates.updatedAt, changes }),
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));
@@ -1278,77 +1371,131 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
 });
 
 // ─── POST /projects/:projectId/rfis/:rfiId/revise ───────────────────────────
+router.post("/projects/:projectId/rfis/:rfiId/close", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    if (!(await isProjectAdmin(projectId, req.user!.userId, req.user!.isSuperAdmin))) {
+      res.status(403).json({ error: "Only a Project Admin can close an RFI." });
+      return;
+    }
+    const closedStatus = await resolveLifecycleStatus("closed");
+    const outcome = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT id FROM rfis WHERE id = ${rfiId} AND project_id = ${projectId} FOR UPDATE`);
+      const [existing] = await tx.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!existing) return { status: 404 as const, error: "RFI not found" };
+      if (existing.status === closedStatus) return { status: 409 as const, error: "This RFI is already closed." };
+      const closedAt = new Date();
+      const [openCustody] = await tx.select().from(rfiBallInCourtHistoryTable)
+        .where(and(eq(rfiBallInCourtHistoryTable.rfiId, rfiId), isNull(rfiBallInCourtHistoryTable.toDate))).limit(1);
+      if (openCustody) {
+        await tx.update(rfiBallInCourtHistoryTable).set({ toDate: closedAt, daysHeld: custodyDays(openCustody.fromDate, closedAt) })
+          .where(eq(rfiBallInCourtHistoryTable.id, openCustody.id));
+      }
+      const [updated] = await tx.update(rfisTable).set({
+        status: closedStatus, ballInCourt: null, closedAt, closedById: req.user!.userId, updatedAt: closedAt,
+      }).where(eq(rfisTable.id, rfiId)).returning();
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "close", entityType: "rfi", entityId: rfiId,
+        details: JSON.stringify({ event: "rfi.closed", number: existing.number, closedAt: closedAt.toISOString(), closedBy: req.user!.fullName, priorStatus: existing.status, priorCustody: openCustody ? { heldBy: openCustody.heldBy, heldByCompany: openCustody.heldByCompany } : null }),
+      });
+      return { status: 200 as const, rfi: updated };
+    });
+    if (outcome.status !== 200) { res.status(outcome.status).json({ error: outcome.error }); return; }
+    res.json(rfiToJson(outcome.rfi, { createdByName: req.user!.fullName }));
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "Could not close RFI" });
+  }
+});
+
+router.post("/projects/:projectId/rfis/:rfiId/reopen", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const [closedStatus, openStatus] = await Promise.all([resolveLifecycleStatus("closed"), resolveLifecycleStatus("open")]);
+    const outcome = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT id FROM rfis WHERE id = ${rfiId} AND project_id = ${projectId} FOR UPDATE`);
+      const [existing] = await tx.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!existing) return { status: 404 as const, error: "RFI not found" };
+      if (existing.status !== closedStatus) return { status: 409 as const, error: "Only a closed RFI can be reopened." };
+      const reopenedAt = new Date();
+      const [priorCustody] = await tx.select().from(rfiBallInCourtHistoryTable)
+        .where(eq(rfiBallInCourtHistoryTable.rfiId, rfiId)).orderBy(desc(rfiBallInCourtHistoryTable.fromDate)).limit(1);
+      const wasSent = existing.sendStatus === "sent" || !!existing.sentAt;
+      const canRestoreCustody = wasSent && !!priorCustody;
+      if (canRestoreCustody) {
+        await tx.insert(rfiBallInCourtHistoryTable).values({
+          rfiId, heldBy: priorCustody.heldBy, heldByCompany: priorCustody.heldByCompany,
+          fromDate: reopenedAt, toDate: null, daysHeld: null,
+        });
+      }
+      const [updated] = await tx.update(rfisTable).set({
+        status: openStatus,
+        ballInCourt: canRestoreCustody ? priorCustody.heldByCompany : null,
+        reopenedAt, reopenedById: req.user!.userId, updatedAt: reopenedAt,
+      }).where(eq(rfisTable.id, rfiId)).returning();
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "reopen", entityType: "rfi", entityId: rfiId,
+        details: JSON.stringify({ event: "rfi.reopened", number: existing.number, reopenedAt: reopenedAt.toISOString(), reopenedBy: req.user!.fullName, priorStatus: existing.status, restoredCustody: canRestoreCustody ? { heldBy: priorCustody.heldBy, heldByCompany: priorCustody.heldByCompany } : null, unsentAuthorHeld: !wasSent }),
+      });
+      return { status: 200 as const, rfi: updated };
+    });
+    if (outcome.status !== 200) { res.status(outcome.status).json({ error: outcome.error }); return; }
+    res.json(rfiToJson(outcome.rfi, { createdByName: req.user!.fullName }));
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "Could not reopen RFI" });
+  }
+});
+
 router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
 
-    const existing = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
-    if (existing.length === 0) {
-      res.status(404).json({ error: "RFI not found" });
+    const defaultStatus = await resolveCreationRfiStatus();
+    const outcome = await db.transaction(async tx => {
+      const [source] = await tx.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!source) return { status: 404 as const, error: "RFI not found" };
+      const parentId = source.parentRfiId ?? source.id;
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${projectId}, ${parentId})`);
+      const family = await tx.select().from(rfisTable).where(and(
+        eq(rfisTable.projectId, projectId),
+        or(eq(rfisTable.id, parentId), eq(rfisTable.parentRfiId, parentId)),
+      ));
+      const revNum = Math.max(0, ...family.map(item => item.revisionNumber ?? 0)) + 1;
+      const root = family.find(item => item.id === parentId) || source;
+      const newNumber = `${root.number.replace(/-R\d+$/, "")}-R${revNum}`;
+      const [newRfi] = await tx.insert(rfisTable).values({
+        projectId, number: newNumber, subject: source.subject, rfiType: source.rfiType, description: source.description,
+        status: defaultStatus, priority: source.priority, assignedToId: source.assignedToId, createdById: req.user!.userId,
+        dueDate: source.dueDate, dateRequested: new Date(), dateRequired: source.dateRequired,
+        submittedByCompany: source.submittedByCompany, submittedByContact: source.submittedByContact,
+        submittedByAddress: source.submittedByAddress, submittedByPhone: source.submittedByPhone, submittedByEmail: source.submittedByEmail,
+        submittedToCompany: source.submittedToCompany, submittedToPerson: source.submittedToPerson, submittedToEmail: source.submittedToEmail,
+        drawingNumber: source.drawingNumber, drawingTitle: source.drawingTitle, specSection: source.specSection,
+        detailNumber: source.detailNumber, noteNumber: source.noteNumber, locationDescription: source.locationDescription,
+        question: source.question, costImpact: source.costImpact, costImpactAmount: source.costImpactAmount,
+        costImpactReason: source.costImpactReason, scheduleImpact: source.scheduleImpact,
+        scheduleImpactDays: source.scheduleImpactDays, scheduleImpactReason: source.scheduleImpactReason,
+        distributionList: (source.distributionList as string[] | null) ?? [], attachmentsJson: (source.attachmentsJson as string[] | null) ?? [],
+        attachmentPackageJson: normalizePackageConfig(source.attachmentPackageJson),
+        imagePresentationJson: normalizeImagePresentation(source.imagePresentationJson), projectAddress: source.projectAddress,
+        sourceViewpointId: source.sourceViewpointId, sourceViewpointLabel: source.sourceViewpointLabel,
+        parentRfiId: parentId, revisionNumber: revNum, revisionOf: source.id, sendStatus: "draft",
+      }).returning();
+      const lineage = { event: "rfi.revised", sourceId: source.id, sourceNumber: source.number, revisionId: newRfi.id, revisionNumber: revNum, revisionRfiNumber: newNumber, familyRootId: parentId, createdAt: new Date().toISOString(), createdBy: req.user!.fullName };
+      await tx.insert(activityLogTable).values([
+        { projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "revise", entityType: "rfi", entityId: source.id, details: JSON.stringify({ ...lineage, perspective: "source" }) },
+        { projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "create", entityType: "rfi", entityId: newRfi.id, details: JSON.stringify({ ...lineage, perspective: "revision" }) },
+      ]);
+      return { status: 201 as const, rfi: newRfi };
+    });
+    if (outcome.status !== 201) { res.status(outcome.status).json({ error: outcome.error }); return; }
+    res.status(201).json(rfiToJson(outcome.rfi, { createdByName: req.user!.fullName }));
+  } catch (error) {
+    if ((error as { code?: string })?.code === "23505") {
+      res.status(409).json({ error: "A concurrent request already created this RFI revision. Reload and try again." });
       return;
     }
-
-    const orig = existing[0];
-    const parentId = orig.parentRfiId ?? orig.id;
-    const revNum = (orig.revisionNumber ?? 0) + 1;
-    const newNumber = `${orig.number.replace(/-R\d+$/, "")}-R${revNum}`;
-    const defaultStatus = await getDefaultValue("rfi_status");
-    const revisionSubject = `Revision of ${orig.number}: ${orig.subject}`;
-
-    const [newRfi] = await db.insert(rfisTable).values({
-      projectId,
-      number: newNumber,
-      subject: revisionSubject,
-      description: orig.description,
-      status: defaultStatus,
-      priority: orig.priority,
-      createdById: req.user!.userId,
-      dateRequested: new Date(),
-      dateRequired: orig.dateRequired,
-      submittedByCompany: orig.submittedByCompany,
-      submittedByContact: orig.submittedByContact,
-      submittedByAddress: orig.submittedByAddress,
-      submittedByPhone: orig.submittedByPhone,
-      submittedByEmail: orig.submittedByEmail,
-      submittedToCompany: orig.submittedToCompany,
-      submittedToPerson: orig.submittedToPerson,
-      submittedToEmail: orig.submittedToEmail,
-      drawingNumber: orig.drawingNumber,
-      drawingTitle: orig.drawingTitle,
-      specSection: orig.specSection,
-      detailNumber: orig.detailNumber,
-      noteNumber: orig.noteNumber,
-      locationDescription: orig.locationDescription,
-      question: orig.question,
-      costImpact: orig.costImpact,
-      costImpactAmount: orig.costImpactAmount,
-      costImpactReason: orig.costImpactReason,
-      scheduleImpact: orig.scheduleImpact,
-      scheduleImpactDays: orig.scheduleImpactDays,
-      scheduleImpactReason: orig.scheduleImpactReason,
-      distributionList: orig.distributionList as string[],
-      attachmentsJson: orig.attachmentsJson as string[],
-      attachmentPackageJson: normalizePackageConfig(orig.attachmentPackageJson),
-      imagePresentationJson: normalizeImagePresentation(orig.imagePresentationJson),
-      projectAddress: orig.projectAddress,
-      parentRfiId: parentId,
-      revisionNumber: revNum,
-      revisionOf: orig.id,
-    }).returning();
-
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "create",
-      entityType: "rfi",
-      entityId: newRfi.id,
-      details: `Created revision ${newNumber} from ${orig.number}`,
-    });
-
-    res.status(201).json(rfiToJson(newRfi, { createdByName: req.user!.fullName }));
-  } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
   }
@@ -1456,7 +1603,7 @@ function buildRfiDocxDocument(
               const respDate = fmtD(resp.createdAt);
               const respAuthor = resp.answeredBy || "—";
               const respText = stripMarkdown(resp.responseText || "—");
-              const respAtts: string[] = Array.isArray((resp as any).attachments) ? (resp as any).attachments : [];
+              const respAtts: string[] = Array.isArray(resp.responseAttachmentsJson) ? resp.responseAttachmentsJson : [];
               return new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 borders: {
@@ -1980,6 +2127,7 @@ Write only the full email body text, starting from the greeting and ending with 
 router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const openStatus = await resolveLifecycleStatus("open");
 
     // The transition (flip send status + flip ball-in-court + write the first
     // custody row) must be all-or-nothing, and exactly one caller may win the
@@ -2001,7 +2149,7 @@ router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requir
       const sentAt = new Date();
       // Auto-advance the workflow: a just-sent RFI moves to "in review" (the reviewer now
       // holds the ball). Don't downgrade one that's already responded/approved/closed.
-      const advanceStatus = (existing.status === "open" || existing.status === "draft") ? "in_review" : existing.status;
+      const advanceStatus = (existing.status === openStatus || existing.status === "draft") ? openStatus : existing.status;
       const updatedRows = await tx.update(rfisTable).set({
         sendStatus: "sent",
         sentAt,
@@ -2234,6 +2382,9 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     const viewEvents = await db.select().from(rfiViewEventsTable)
       .where(eq(rfiViewEventsTable.rfiId, rfiId))
       .orderBy(rfiViewEventsTable.viewedAt);
+    const activityEvents = await db.select().from(activityLogTable)
+      .where(and(eq(activityLogTable.projectId, projectId), eq(activityLogTable.entityType, "rfi"), eq(activityLogTable.entityId, rfiId)))
+      .orderBy(asc(activityLogTable.createdAt));
     const creator = await db.select().from(usersTable).where(eq(usersTable.id, rfi.createdById)).limit(1);
 
     const fmtD = (d: Date | string | null | undefined) =>
@@ -2298,7 +2449,35 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
 
     // ── Immutable Activity Log ────────────────────────────────────────────────
     doc.rect(MARGIN, y, contentW, 16).fill("#0F4C75");
-    doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("IMMUTABLE ACTIVITY LOG — VIEW & ACCESS EVENTS", MARGIN + 6, y + 4.5);
+    doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("RFI LIFECYCLE, RESPONSE & REVISION ACTIVITY", MARGIN + 6, y + 4.5);
+    doc.fillColor("black");
+    y += 16;
+
+    if (activityEvents.length === 0) {
+      doc.rect(MARGIN, y, contentW, 24).stroke("#E2E8F0");
+      doc.fillColor("#94A3B8").fontSize(9).font("Helvetica").text("No RFI activity events recorded.", MARGIN + 6, y + 7.5);
+      y += 28;
+    } else {
+      for (const event of activityEvents) {
+        const rowText = `${fmtTs(event.createdAt)} | ${event.userFullName} | ${event.actionType.toUpperCase()} | ${event.details || "No details"}`;
+        const rowHeight = Math.max(22, doc.heightOfString(rowText, { width: contentW - 12 }) + 10);
+        if (y + rowHeight > CONTENT_BOTTOM) {
+          drawFooter(doc, `BIMLog by IgniteSmart  |  RFI Audit Report: ${rfi.number}  |  Activity continued`);
+          doc.addPage(); doc.page.margins.bottom = 0; y = MARGIN;
+        }
+        doc.rect(MARGIN, y, contentW, rowHeight).stroke("#E2E8F0");
+        doc.fillColor("#1E293B").fontSize(7.5).font("Helvetica").text(rowText, MARGIN + 6, y + 5, { width: contentW - 12 });
+        y += rowHeight;
+      }
+      y += 6;
+    }
+
+    if (y + 40 > CONTENT_BOTTOM) {
+      drawFooter(doc, `BIMLog by IgniteSmart  |  RFI Audit Report: ${rfi.number}  |  Access events continued`);
+      doc.addPage(); doc.page.margins.bottom = 0; y = MARGIN;
+    }
+    doc.rect(MARGIN, y, contentW, 16).fill("#0F4C75");
+    doc.fillColor("white").fontSize(8).font("Helvetica-Bold").text("VIEW & ACCESS EVENTS", MARGIN + 6, y + 4.5);
     doc.fillColor("black");
     y += 16;
 
@@ -2737,6 +2916,18 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       return;
     }
 
+    if (body.closingStatus && !(await validateConfigValue("rfi_status", body.closingStatus))) {
+      res.status(422).json({ error: `Invalid closing status value: ${body.closingStatus}` });
+      return;
+    }
+    const [closedStatus, respondedStatus] = await Promise.all([resolveLifecycleStatus("closed"), resolveLifecycleStatus("responded")]);
+    const targetStatus = body.closingStatus || respondedStatus;
+    const closesRfi = targetStatus === closedStatus;
+    if (closesRfi && !(await isProjectAdmin(projectId, userId, req.user!.isSuperAdmin))) {
+      res.status(403).json({ error: "Only a Project Admin can close an RFI through a response." });
+      return;
+    }
+
     const [rfi] = await db.select().from(rfisTable)
       .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
@@ -2753,7 +2944,12 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     );
 
     // Compute next response_number for this RFI
-    const newResponse = await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM rfis WHERE id = ${rfiId} AND project_id = ${projectId} FOR UPDATE`);
+      const [lockedRfi] = await tx.select().from(rfisTable)
+        .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      if (!lockedRfi) return { status: 404 as const, error: "RFI not found" };
+      if (lockedRfi.status === closedStatus) return { status: 409 as const, error: "Reopen this RFI before adding another response." };
       const [{ maxNum }] = await tx.select({ maxNum: max(rfiResponsesTable.responseNumber) })
       .from(rfiResponsesTable).where(eq(rfiResponsesTable.rfiId, rfiId));
       const responseNumber = (maxNum ?? 0) + 1;
@@ -2764,6 +2960,9 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       const normalizedCostReason = responseCostNeedsReason ? body.costImpactReason || null : null;
       const normalizedScheduleDays = responseScheduleNeedsDays ? body.scheduleImpactDays ?? null : null;
       const normalizedScheduleReason = responseScheduleNeedsDays ? body.scheduleImpactReason || null : null;
+      const responseAttachments = Array.isArray(body.responseAttachmentsJson)
+        ? body.responseAttachmentsJson.filter(value => typeof value === "string" && value.trim()).map(value => value.trim())
+        : [];
 
       const [inserted] = await tx.insert(rfiResponsesTable).values({
       rfiId,
@@ -2779,14 +2978,14 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       scheduleImpact: body.scheduleImpact || undefined,
       scheduleImpactDays: normalizedScheduleDays,
       scheduleImpactReason: normalizedScheduleReason,
+      responseAttachmentsJson: responseAttachments,
       isConflictOfInterest: isCoi,
     }).returning();
 
       const answeredAt = new Date();
-      const closesRfi = body.closingStatus === "closed";
-      const submitterCompany = rfi.submittedByCompany || rfi.submittedByContact || "Submitter";
-      const submitterPerson = rfi.submittedByContact || rfi.submittedByEmail || submitterCompany;
-      await tx.update(rfisTable).set({
+      const submitterCompany = nullableText(lockedRfi.submittedByCompany) || nullableText(lockedRfi.submittedByContact) || nullableText(lockedRfi.submittedByEmail);
+      const submitterPerson = nullableText(lockedRfi.submittedByContact) || nullableText(lockedRfi.submittedByEmail) || submitterCompany;
+      const [updatedRfi] = await tx.update(rfisTable).set({
       answer: body.responseText.trim(),
       answeredBy: body.answeredBy || undefined,
       dateAnswered: answeredAt,
@@ -2796,11 +2995,13 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       scheduleImpact: body.scheduleImpact || undefined,
       scheduleImpactDays: normalizedScheduleDays,
       scheduleImpactReason: normalizedScheduleReason,
-      responseAttachmentsJson: body.responseAttachmentsJson || [],
+      responseAttachmentsJson: responseAttachments,
       ballInCourt: closesRfi ? null : submitterCompany,
-      ...(body.closingStatus ? { status: body.closingStatus } : { status: "responded" }),
+      status: targetStatus,
+      respondedAt: answeredAt,
+      ...(closesRfi ? { closedAt: answeredAt, closedById: userId } : {}),
       updatedAt: answeredAt,
-    }).where(eq(rfisTable.id, rfiId));
+    }).where(eq(rfisTable.id, rfiId)).returning();
 
       const [openCustody] = await tx.select().from(rfiBallInCourtHistoryTable)
         .where(and(eq(rfiBallInCourtHistoryTable.rfiId, rfiId), isNull(rfiBallInCourtHistoryTable.toDate)))
@@ -2808,10 +3009,10 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       if (openCustody) {
         await tx.update(rfiBallInCourtHistoryTable).set({
           toDate: answeredAt,
-          daysHeld: Math.max(0, daysSince(openCustody.fromDate)),
+          daysHeld: custodyDays(openCustody.fromDate, answeredAt),
         }).where(eq(rfiBallInCourtHistoryTable.id, openCustody.id));
       }
-      if (!closesRfi) {
+      if (!closesRfi && submitterCompany && submitterPerson) {
         await tx.insert(rfiBallInCourtHistoryTable).values({
           rfiId,
           heldBy: submitterPerson,
@@ -2833,7 +3034,7 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
         entityType: "rfi",
         entityId: rfiId,
         fileNameAfter: rfi.number,
-        details: `CONFLICT OF INTEREST: ${body.answeredBy || responderEmail || "Unknown"} responded to their own RFI (${rfi.number}) — ${rfi.subject}`,
+        details: JSON.stringify({ event: "rfi.response_conflict_of_interest", number: lockedRfi.number, responseNumber, responder: body.answeredBy || responderEmail || "Unknown" }),
       });
     }
 
@@ -2843,18 +3044,30 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       userId,
       userFullName: req.user!.fullName,
       userCompanyName: req.user!.companyName,
-      actionType: "update",
+      actionType: closesRfi ? "close" : "respond",
       entityType: "rfi",
       entityId: rfiId,
       fileNameAfter: rfi.number,
-      details: `RFI ${rfi.number} received official response from ${body.answeredBy || responderEmail || "Unknown"}${body.costImpact ? ` | Cost: ${body.costImpact}${body.costImpactAmount ? ` (${body.costImpactAmount})` : ""}${body.costImpactReason ? ` - ${body.costImpactReason}` : ""}` : ""}${body.scheduleImpact ? ` | Schedule: ${body.scheduleImpact}${body.scheduleImpactDays != null ? ` (${body.scheduleImpactDays} days)` : ""}${body.scheduleImpactReason ? ` - ${body.scheduleImpactReason}` : ""}` : ""}`,
+      details: JSON.stringify({
+        event: closesRfi ? "rfi.responded_and_closed" : "rfi.responded", number: lockedRfi.number, responseNumber,
+        respondedAt: answeredAt.toISOString(), responder: body.answeredBy || responderEmail || "Unknown",
+        status: { before: lockedRfi.status, after: targetStatus },
+        custody: { before: openCustody ? { heldBy: openCustody.heldBy, heldByCompany: openCustody.heldByCompany } : null, after: closesRfi || !submitterCompany ? null : { heldBy: submitterPerson, heldByCompany: submitterCompany } },
+        impact: { cost: body.costImpact || null, costAmount: normalizedCostAmount, costReason: normalizedCostReason, schedule: body.scheduleImpact || null, scheduleDays: normalizedScheduleDays, scheduleReason: normalizedScheduleReason },
+        attachments: responseAttachments.map(attachmentLabel),
+      }),
       });
 
-      return inserted;
+      return { status: 201 as const, response: inserted, rfi: updatedRfi };
     });
 
-    res.json({ ...newResponse, createdAt: newResponse.createdAt.toISOString(), isConflictOfInterest: isCoi });
+    if (result.status !== 201) { res.status(result.status).json({ error: result.error }); return; }
+    res.status(201).json({ ...result.response, createdAt: result.response.createdAt.toISOString(), isConflictOfInterest: isCoi, rfi: rfiToJson(result.rfi) });
   } catch (error) {
+    if ((error as { code?: string })?.code === "23505") {
+      res.status(409).json({ error: "A concurrent response was saved first. Reload and submit again." });
+      return;
+    }
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
