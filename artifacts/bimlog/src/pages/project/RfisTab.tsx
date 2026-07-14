@@ -19,7 +19,7 @@ import {
   RefreshCw, Phone, Loader2,
   Search, Calendar, Trash2,
   Send, Copy, FolderOpen,
-  Upload, Camera, Clipboard,
+  Upload, Camera, Clipboard, UserPlus, Mail, ExternalLink,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { logClientError } from "@/lib/client-log";
@@ -64,6 +64,44 @@ const attachLabel = (v: string) => {
   }
   return v;
 };
+
+const isOpenableAttachment = (value: string) => /^https?:\/\//i.test(value) || value.startsWith("/api/");
+
+async function openRfiAttachment(value: string) {
+  if (/^https?:\/\//i.test(value)) {
+    window.open(value, "_blank", "noopener,noreferrer");
+    return;
+  }
+  if (!value.startsWith("/api/")) return;
+  const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+  const response = await fetch(value, { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+  if (!response.ok) throw new Error("Attachment could not be opened");
+  const blobUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = attachLabel(value);
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000);
+}
+
+type ParsedDistributionEntry = { name: string; email: string; phone: string; isExternal: boolean; display: string };
+
+function encodeExternalDistributionEntry(name: string, email: string, phone: string) {
+  return `EXT:${encodeURIComponent(name.trim())}:${encodeURIComponent(email.trim())}:${encodeURIComponent(phone.trim())}`;
+}
+
+function parseDistributionEntry(entry: string): ParsedDistributionEntry {
+  if (!entry.startsWith("EXT:")) return { name: "", email: entry, phone: "", isExternal: false, display: entry };
+  const [rawName = "", rawEmail = "", rawPhone = ""] = entry.slice(4).split(":");
+  const decode = (value: string) => { try { return decodeURIComponent(value); } catch { return value; } };
+  const name = decode(rawName);
+  const email = decode(rawEmail);
+  const phone = decode(rawPhone);
+  return { name, email, phone, isExternal: true, display: `${name} <${email}>${phone ? ` - ${phone}` : ""} (external)` };
+}
+
+type RfiDirectoryContact = { fullName: string; email: string; companyName?: string | null };
+type RfiAttachmentSource = "reference" | "attachment";
 
 type RfiPackageItem = {
   key: string;
@@ -200,7 +238,8 @@ type RfiCanonicalFormProps = {
   actions: RfiCanonicalActions;
   onChange: (field: keyof RfiCanonicalValues, value: string) => void;
   onAddReference: () => void;
-  onRemoveReference: (index: number) => void;
+  onRemoveReference: (source: RfiAttachmentSource, index: number) => void;
+  onOpenReference?: (value: string) => void;
   onUploadFile: () => void;
   onGenerateQuestionAi: () => void;
   onGenerateEmailAi: () => void;
@@ -209,6 +248,7 @@ type RfiCanonicalFormProps = {
   statusContent?: React.ReactNode;
   submittedByDirectoryContent?: React.ReactNode;
   submittedToDirectoryContent?: React.ReactNode;
+  distributionContent?: React.ReactNode;
   referenceContent?: React.ReactNode;
   impactContent?: React.ReactNode;
   responseContent?: React.ReactNode;
@@ -912,6 +952,95 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 }
 
 // ─── RFI Create Panel ─────────────────────────────────────────────────────────
+function SubmittedToParticipantEditor({ projectId, contacts, selectedCompany, onSelect, onAddDistribution, onDirectoryAdded, lang }: {
+  projectId: number;
+  contacts: RfiDirectoryContact[];
+  selectedCompany: string;
+  onSelect: (company: string, person: string, email: string) => void;
+  onAddDistribution: (entry: string) => void;
+  onDirectoryAdded: (contact: RfiDirectoryContact) => void;
+  lang: string;
+}) {
+  const { toast } = useToast();
+  const [showExternalPerson, setShowExternalPerson] = useState(false);
+  const [showCompany, setShowCompany] = useState(false);
+  const [savingCompany, setSavingCompany] = useState(false);
+  const [externalName, setExternalName] = useState("");
+  const [externalEmail, setExternalEmail] = useState("");
+  const [externalPhone, setExternalPhone] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [companyContact, setCompanyContact] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const companies = [...new Set(contacts.map(contact => contact.companyName).filter((value): value is string => !!value))].sort();
+  const companyContacts = selectedCompany ? contacts.filter(contact => contact.companyName === selectedCompany) : contacts;
+
+  const addExternalPerson = () => {
+    if (!externalName.trim() || !externalEmail.trim()) return;
+    const entry = encodeExternalDistributionEntry(externalName, externalEmail, externalPhone);
+    onSelect(selectedCompany, externalName.trim(), externalEmail.trim());
+    onAddDistribution(entry);
+    setExternalName(""); setExternalEmail(""); setExternalPhone(""); setShowExternalPerson(false);
+  };
+
+  const addCompany = async () => {
+    if (!companyName.trim() || !companyContact.trim() || !companyEmail.trim()) {
+      toast({ title: w("Company, contact, and email are required.", "Empresa, contacto y correo son obligatorios.", lang), variant: "destructive" });
+      return;
+    }
+    setSavingCompany(true);
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      const response = await fetch(`/api/v1/projects/${projectId}/directory`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: companyContact.trim(), email: companyEmail.trim(), company_name: companyName.trim(), role: "External Company",
+          notes: [companyPhone.trim() && `Phone: ${companyPhone.trim()}`, companyAddress.trim() && `Address: ${companyAddress.trim()}`].filter(Boolean).join(" | ") || undefined,
+        }),
+      });
+      const data = await response.json().catch(() => ({})) as RfiDirectoryContact;
+      if (!response.ok) throw new Error(response.status === 403 ? w("You do not have permission to add project directory companies.", "No tiene permiso para agregar empresas al directorio del proyecto.", lang) : w("Company could not be added.", "No se pudo agregar la empresa.", lang));
+      const contact = { fullName: data.fullName || companyContact.trim(), email: data.email || companyEmail.trim(), companyName: data.companyName || companyName.trim() };
+      onDirectoryAdded(contact);
+      onSelect(contact.companyName || "", contact.fullName, contact.email);
+      onAddDistribution(contact.email);
+      setCompanyName(""); setCompanyContact(""); setCompanyEmail(""); setCompanyPhone(""); setCompanyAddress(""); setShowCompany(false);
+      toast({ title: w("Company added to the project directory.", "Empresa agregada al directorio del proyecto.", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Company could not be added.", "No se pudo agregar la empresa.", lang), variant: "destructive" });
+    } finally {
+      setSavingCompany(false);
+    }
+  };
+
+  return <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <label style={{ fontSize: 11, fontWeight: 700 }}>{w("Project company", "Empresa del proyecto", lang)}<select value={selectedCompany} onChange={event => onSelect(event.target.value, "", "")} style={{ width: "100%", height: 36, marginTop: 4, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select company...", "Seleccionar empresa...", lang)}</option>{companies.map(company => <option key={company} value={company}>{company}</option>)}</select></label>
+      <label style={{ fontSize: 11, fontWeight: 700 }}>{w("Project contact", "Contacto del proyecto", lang)}<select value="" onChange={event => { const contact = contacts.find(item => item.email === event.target.value); if (contact) onSelect(contact.companyName || "", contact.fullName, contact.email); }} style={{ width: "100%", height: 36, marginTop: 4, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select contact...", "Seleccionar contacto...", lang)}</option>{companyContacts.map(contact => <option key={contact.email} value={contact.email}>{contact.fullName} - {contact.email}</option>)}</select></label>
+    </div>
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Button type="button" size="sm" variant="outline" onClick={() => setShowExternalPerson(value => !value)}><UserPlus style={{ width: 12, height: 12, marginRight: 4 }} />{w("Add person not in list", "Agregar persona fuera de lista", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowCompany(value => !value)}><Plus style={{ width: 12, height: 12, marginRight: 4 }} />{w("Add company not in list", "Agregar empresa fuera de lista", lang)}</Button></div>
+    {showExternalPerson && <div style={{ padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><strong style={{ fontSize: 11 }}>{w("External person (RFI only, not a project member)", "Persona externa (solo RFI, no es miembro del proyecto)", lang)}</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}><Input value={externalName} onChange={event => setExternalName(event.target.value)} placeholder={w("Name *", "Nombre *", lang)} /><Input value={externalEmail} onChange={event => setExternalEmail(event.target.value)} placeholder={w("Email *", "Correo *", lang)} /><Input value={externalPhone} onChange={event => setExternalPhone(event.target.value)} placeholder={w("Phone", "Telefono", lang)} /></div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={addExternalPerson} disabled={!externalName.trim() || !externalEmail.trim()}>{w("Add and Select", "Agregar y Seleccionar", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowExternalPerson(false)}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
+    {showCompany && <div style={{ padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><strong style={{ fontSize: 11 }}>{w("Add company to the project directory", "Agregar empresa al directorio del proyecto", lang)}</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}><Input value={companyName} onChange={event => setCompanyName(event.target.value)} placeholder={w("Company *", "Empresa *", lang)} /><Input value={companyContact} onChange={event => setCompanyContact(event.target.value)} placeholder={w("Contact person *", "Persona de contacto *", lang)} /><Input value={companyEmail} onChange={event => setCompanyEmail(event.target.value)} placeholder={w("Email *", "Correo *", lang)} /><Input value={companyPhone} onChange={event => setCompanyPhone(event.target.value)} placeholder={w("Phone", "Telefono", lang)} /><Input value={companyAddress} onChange={event => setCompanyAddress(event.target.value)} placeholder={w("Address", "Direccion", lang)} style={{ gridColumn: "1 / -1" }} /></div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={() => void addCompany()} disabled={savingCompany}>{savingCompany ? w("Adding...", "Agregando...", lang) : w("Add Company", "Agregar Empresa", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowCompany(false)}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
+  </div>;
+}
+
+function RfiDistributionEditor({ entries, contacts, editable, onChange, lang }: { entries: string[]; contacts: RfiDirectoryContact[]; editable: boolean; onChange: (entries: string[]) => void; lang: string }) {
+  const [showExternal, setShowExternal] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const uniqueContacts = [...new Map(contacts.filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()];
+  const add = (entry: string) => onChange(entries.includes(entry) ? entries : [...entries, entry]);
+  const remove = (index: number) => onChange(entries.filter((_, itemIndex) => itemIndex !== index));
+  return <div style={{ display: "grid", gap: 8 }}>
+    {editable && uniqueContacts.length > 0 && <div><div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>{w("Project contacts", "Contactos del proyecto", lang)}</div>{uniqueContacts.map(contact => <label key={contact.email} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, marginTop: 4 }}><input type="checkbox" checked={entries.includes(contact.email)} onChange={event => event.target.checked ? add(contact.email) : onChange(entries.filter(entry => entry !== contact.email))} /><span>{contact.fullName}{contact.companyName ? ` - ${contact.companyName}` : ""}</span><span style={{ color: "hsl(var(--muted-foreground))" }}>{contact.email}</span></label>)}</div>}
+    <div><div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>{w("Current distribution", "Distribucion actual", lang)}</div>{entries.length === 0 ? <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No distribution recipients selected.", "No hay destinatarios seleccionados.", lang)}</span> : entries.map((entry, index) => { const parsed = parseDistributionEntry(entry); const contact = !parsed.isExternal ? uniqueContacts.find(item => item.email.toLowerCase() === parsed.email.toLowerCase()) : undefined; const display = contact ? `${contact.fullName}${contact.companyName ? ` - ${contact.companyName}` : ""} <${contact.email}>` : parsed.display; return <div key={`${entry}-${index}`} style={{ display: "flex", alignItems: "center", gap: 7, padding: "5px 0", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined, fontSize: 12 }}>{parsed.isExternal ? <UserPlus style={{ width: 12, height: 12 }} /> : <Mail style={{ width: 12, height: 12 }} />}<span style={{ flex: 1 }}>{display}</span>{editable && <Button type="button" size="sm" variant="outline" onClick={() => remove(index)}>{w("Remove", "Quitar", lang)}</Button>}</div>; })}</div>
+    {editable && <><Button type="button" size="sm" variant="outline" onClick={() => setShowExternal(value => !value)} style={{ justifySelf: "start" }}><UserPlus style={{ width: 12, height: 12, marginRight: 4 }} />{w("Add external contact", "Agregar contacto externo", lang)}</Button>{showExternal && <div style={{ padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><strong style={{ fontSize: 11 }}>{w("External contact (RFI notifications only, not a project member)", "Contacto externo (solo notificaciones RFI, no es miembro del proyecto)", lang)}</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}><Input value={name} onChange={event => setName(event.target.value)} placeholder={w("Name *", "Nombre *", lang)} /><Input value={email} onChange={event => setEmail(event.target.value)} placeholder={w("Email *", "Correo *", lang)} /><Input value={phone} onChange={event => setPhone(event.target.value)} placeholder={w("Phone (optional)", "Telefono (opcional)", lang)} /></div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" disabled={!name.trim() || !email.trim()} onClick={() => { add(encodeExternalDistributionEntry(name, email, phone)); setName(""); setEmail(""); setPhone(""); setShowExternal(false); }}>{w("Add to Distribution", "Agregar a Distribucion", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowExternal(false)}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}</>}
+  </div>;
+}
+
 function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang, onClose }: {
   projectId: number;
   prefill?: { subject?: string; question?: string; location?: string };
@@ -930,6 +1059,19 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
     ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
     : DEFAULT_RFI_TYPES.map(t => ({ value: t, label: t }));
   const { data: files } = useListFiles(projectId);
+  const [rfiDirectory, setRfiDirectory] = useState<RfiDirectoryContact[]>([]);
+  const memberContacts = useMemo<RfiDirectoryContact[]>(() => members.map(member => ({ fullName: member.userFullName, email: member.userEmail, companyName: member.userCompanyName || null })), [members]);
+  const availableContacts = useMemo(() => [...new Map([...memberContacts, ...rfiDirectory].filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()], [memberContacts, rfiDirectory]);
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(async response => {
+        const data = await response.json().catch(() => []);
+        if (!response.ok) throw new Error(w("Project directory could not be loaded.", "No se pudo cargar el directorio del proyecto.", lang));
+        setRfiDirectory(Array.isArray(data) ? data : []);
+      })
+      .catch(error => toast({ title: error instanceof Error ? error.message : w("Project directory could not be loaded.", "No se pudo cargar el directorio del proyecto.", lang), variant: "destructive" }));
+  }, [projectId, lang, toast]);
 
   // Fix 1 — auto-populate project address from last RFI that has one
   const lastAddress = useMemo(() => {
@@ -967,7 +1109,9 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const [fileSearch, setFileSearch] = useState<string | null>(null);
 
   const [question, setQuestion] = useState(prefill?.question || "");
+  const [references, setReferences] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<string[]>([]);
+  const allEvidence = useMemo(() => [...references, ...attachments], [references, attachments]);
   const [packageItems, setPackageItems] = useState<RfiPackageItem[]>([]);
   const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(null);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
@@ -996,21 +1140,21 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const addReference = () => {
     const value = attachInput.trim();
     if (!value) return;
-    setAttachments(prev => prev.includes(value) ? prev : [...prev, value]);
+    setReferences(prev => prev.includes(value) ? prev : [...prev, value]);
     setPackageItems(prev => prev.some(item => item.attachment === value) ? prev : [...prev, ...packageItemsFromAttachments([value], files || []).map(item => ({ ...item, order: prev.length }))]);
     setAttachInput("");
   };
   useEffect(() => {
     setPackageItems(prev => {
       const next = [...prev];
-      for (const item of packageItemsFromAttachments(attachments, files || [])) {
+      for (const item of packageItemsFromAttachments(allEvidence, files || [])) {
         if (!next.some(existing => existing.attachment === item.attachment || (existing.fileId && existing.fileId === item.fileId))) {
           next.push({ ...item, order: next.length });
         }
       }
-      return next.filter(item => !item.attachment || attachments.includes(item.attachment)).map((item, order) => ({ ...item, order }));
+      return next.filter(item => !item.attachment || allEvidence.includes(item.attachment)).map((item, order) => ({ ...item, order }));
     });
-  }, [attachments, files]);
+  }, [allEvidence, files]);
 
   // AI document import: read an existing PDF/Word/Excel and prefill this form.
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -1263,7 +1407,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
       scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
       distributionList: distList.length > 0 ? distList : undefined,
-      attachmentsJson: attachments.length > 0 ? attachments : undefined,
+      attachmentsJson: allEvidence.length > 0 ? allEvidence : undefined,
       attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
       imagePresentationJson: imagePresentation,
     };
@@ -1297,7 +1441,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : undefined,
         scheduleImpactReason: scheduleDaysRequired ? schedReason : undefined,
         distributionList: distList.length > 0 ? distList : undefined,
-        attachmentsJson: attachments.length > 0 ? attachments : undefined,
+        attachmentsJson: allEvidence.length > 0 ? allEvidence : undefined,
         attachmentPackageJson: packageItems.length > 0 ? packageItems : undefined,
         imagePresentationJson: imagePresentation,
       },
@@ -1383,7 +1527,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
           questionAssistDescription: aiDesc,
         }}
         permissions={{ canEdit: true, canRespond: false, canClose: false, canReopen: false, canExport: false, canRaiseChangeOrder: false, canJumpViewpoint: false }}
-        references={[]}
+        references={references}
         attachments={attachments}
         imagePresentation={imagePresentation}
         packageItems={packageItems}
@@ -1402,7 +1546,8 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         actions={{ submit: handleSubmit, cancel: onClose }}
         onChange={handleCanonicalCreateChange}
         onAddReference={addReference}
-        onRemoveReference={index => setAttachments(prev => prev.filter((_, i) => i !== index))}
+        onRemoveReference={(source, index) => source === "reference" ? setReferences(prev => prev.filter((_, i) => i !== index)) : setAttachments(prev => prev.filter((_, i) => i !== index))}
+        onOpenReference={value => { void openRfiAttachment(value).catch(error => toast({ title: error instanceof Error ? error.message : w("Attachment could not be opened", "No se pudo abrir el adjunto", lang), variant: "destructive" })); }}
         onUploadFile={() => attachFileRef.current?.click()}
         onGenerateQuestionAi={() => {
           const description = aiDesc.trim() || question.trim() || subject.trim();
@@ -1412,9 +1557,10 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         onGenerateEmailAi={generateCreateEmailDraft}
         onCopyEmail={copyCreateEmailDraft}
         emailCopied={emailCopied}
-        submittedByDirectoryContent={members.length > 0 ? <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const member = members.find(item => item.userEmail === e.target.value); if (member) { setsByContact(member.userFullName); setsByCompany(member.userCompanyName || ""); setsByEmail(member.userEmail); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{members.map(member => <option key={`from-${member.userEmail}`} value={member.userEmail}>{member.userFullName}{member.userCompanyName ? ` - ${member.userCompanyName}` : ""}</option>)}</select></div> : null}
-        submittedToDirectoryContent={members.length > 0 ? <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const member = members.find(item => item.userEmail === e.target.value); if (member) { setsToPerson(member.userFullName); setsToCompany(member.userCompanyName || ""); setsToEmail(member.userEmail); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{members.map(member => <option key={`to-${member.userEmail}`} value={member.userEmail}>{member.userFullName}{member.userCompanyName ? ` - ${member.userCompanyName}` : ""}</option>)}</select></div> : null}
-        referenceContent={<div style={{ position: "relative", marginTop: 8, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><Button type="button" size="sm" variant="outline" onClick={() => setFileSearch(fileSearch === "reference" ? null : "reference")}><Search style={{ width: 12, height: 12, marginRight: 4 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={importing} onClick={() => { if (window.confirm(w("AI file reading uses higher-cost AI credits and will read the selected document. Continue?", "La lectura de archivos con IA usa creditos IA de mayor costo y leera el documento seleccionado. Continuar?", lang))) importInputRef.current?.click(); }}>{importing ? w("Reading File with AI...", "Leyendo Archivo con IA...", lang) : w("Read File with AI", "Leer Archivo con IA", lang)}</Button>{importedFrom && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Prefilled from", "Completado desde", lang)}: {importedFrom}</span>}{fileSearch === "reference" && <FileSearchDropdown files={files || []} onSelect={name => { setAttachments(prev => [...prev, name]); setFileSearch(null); }} onClose={() => setFileSearch(null)} />}</div>}
+        submittedByDirectoryContent={availableContacts.length > 0 ? <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const contact = availableContacts.find(item => item.email === e.target.value); if (contact) { setsByContact(contact.fullName); setsByCompany(contact.companyName || ""); setsByEmail(contact.email); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{availableContacts.map(contact => <option key={`from-${contact.email}`} value={contact.email}>{contact.fullName}{contact.companyName ? ` - ${contact.companyName}` : ""}</option>)}</select></div> : null}
+        submittedToDirectoryContent={<SubmittedToParticipantEditor projectId={projectId} contacts={availableContacts} selectedCompany={sToCompany} onSelect={(company, person, email) => { setsToCompany(company); setsToPerson(person); setsToEmail(email); }} onAddDistribution={entry => setDistList(prev => prev.includes(entry) ? prev : [...prev, entry])} onDirectoryAdded={contact => setRfiDirectory(prev => prev.some(item => item.email.toLowerCase() === contact.email.toLowerCase()) ? prev : [...prev, contact])} lang={lang} />}
+        distributionContent={<RfiDistributionEditor entries={distList} contacts={availableContacts} editable onChange={setDistList} lang={lang} />}
+        referenceContent={<div style={{ position: "relative", marginTop: 8, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><Button type="button" size="sm" variant="outline" onClick={() => setFileSearch(fileSearch === "reference" ? null : "reference")}><Search style={{ width: 12, height: 12, marginRight: 4 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={importing} onClick={() => { if (window.confirm(w("AI file reading uses higher-cost AI credits and will read the selected document. Continue?", "La lectura de archivos con IA usa creditos IA de mayor costo y leera el documento seleccionado. Continuar?", lang))) importInputRef.current?.click(); }}>{importing ? w("Reading File with AI...", "Leyendo Archivo con IA...", lang) : w("Read File with AI", "Leer Archivo con IA", lang)}</Button>{importedFrom && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Prefilled from", "Completado desde", lang)}: {importedFrom}</span>}{fileSearch === "reference" && <FileSearchDropdown files={files || []} onSelect={name => { setReferences(prev => prev.includes(name) ? prev : [...prev, name]); setFileSearch(null); }} onClose={() => setFileSearch(null)} />}</div>}
         responseContent={emailDraftError ? <p style={{ marginTop: 8, fontSize: 11, color: "#DC2626" }}>{emailDraftError}</p> : null}
         onTogglePackageItem={(key, include) => setPackageItems(prev => prev.map(item => item.key === key ? { ...item, include } : item))}
         onMovePackageItem={(key, direction) => setPackageItems(prev => { const ordered = [...prev].sort((a, b) => a.order - b.order); const index = ordered.findIndex(item => item.key === key); const target = index + direction; if (index < 0 || target < 0 || target >= ordered.length) return prev; [ordered[index], ordered[target]] = [ordered[target], ordered[index]]; return ordered.map((item, order) => ({ ...item, order })); })}
@@ -1493,7 +1639,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoFromPhone, setInfoFromPhone] = useState("");
   const [infoFromEmail, setInfoFromEmail] = useState("");
   const [infoDateRequired, setInfoDateRequired] = useState("");
+  const [infoProjectAddress, setInfoProjectAddress] = useState(rfi.projectAddress || "");
+  const [questionReferences, setQuestionReferences] = useState<string[]>([]);
   const [questionDocs, setQuestionDocs] = useState<string[]>((rfi.attachmentsJson as string[] | null) || []);
+  const questionEvidence = useMemo(() => [...questionReferences, ...questionDocs], [questionReferences, questionDocs]);
   const [packageItems, setPackageItems] = useState<RfiPackageItem[]>(() => normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], []));
   const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(() => ((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null));
   const [questionDocInput, setQuestionDocInput] = useState("");
@@ -1510,6 +1659,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoDist, setInfoDist] = useState<string[]>((rfi.distributionList as string[] | null) || []);
   const startInfoEdit = () => {
     setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
+    setQuestionReferences([]);
     setPackageItems(normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], files || []));
     setImagePresentation((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null);
     setQuestionDocInput("");
@@ -1524,6 +1674,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoLocationDescription(rfi.locationDescription || "");
     setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
     setInfoDateRequired(rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
+    setInfoProjectAddress(rfi.projectAddress || "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setInfoQuestion(rfi.question || rfi.description || "");
     setQuestionAiDescription("");
@@ -1546,14 +1697,18 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   // Project Directory for the recipient picker: pick an existing company/person (auto-fills
   // their email) or just type a new one.
-  const [rfiDirectory, setRfiDirectory] = useState<{ fullName: string; email: string; companyName: string | null }[]>([]);
+  const [rfiDirectory, setRfiDirectory] = useState<RfiDirectoryContact[]>([]);
+  const detailContacts = useMemo(() => [...new Map([...members.map(member => ({ fullName: member.userFullName, email: member.userEmail, companyName: member.userCompanyName || null })), ...rfiDirectory].filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()], [members, rfiDirectory]);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : [])
-      .then((d) => { if (Array.isArray(d)) setRfiDirectory(d); })
-      .catch((error) => logClientError("RFI directory load", error));
-  }, [projectId]);
+      .then(async response => {
+        const data = await response.json().catch(() => []);
+        if (!response.ok) throw new Error(w("Project directory could not be loaded.", "No se pudo cargar el directorio del proyecto.", lang));
+        if (Array.isArray(data)) setRfiDirectory(data);
+      })
+      .catch(error => toast({ title: error instanceof Error ? error.message : w("Project directory could not be loaded.", "No se pudo cargar el directorio del proyecto.", lang), variant: "destructive" }));
+  }, [projectId, lang, toast]);
 
   const viewpointFile = useMemo(() => (files || []).find(f => f.source === "lens-viewpoint" && f.linkedRfiId === rfi.id), [files, rfi.id]);
 
@@ -1573,9 +1728,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   useEffect(() => {
     setPackageItems(prev => {
-      const base = normalizePackageItems(prev.length ? prev : (rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, questionDocs, files || []);
+      const base = normalizePackageItems(prev.length ? prev : (rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, questionEvidence, files || []);
       const next = [...base];
-      for (const docItem of packageItemsFromAttachments(questionDocs, files || [])) {
+      for (const docItem of packageItemsFromAttachments(questionEvidence, files || [])) {
         if (!next.some(item => item.attachment === docItem.attachment || (item.fileId && item.fileId === docItem.fileId))) {
           next.push({ ...docItem, order: next.length });
         }
@@ -1585,12 +1740,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           next.push({ key: `file:${file.id}`, label: file.fileName, fileId: file.id, attachment: `/api/v1/projects/${projectId}/files/${file.id}/download?name=${encodeURIComponent(file.fileName)}`, source: file.source || null, include: true, order: next.length });
         }
       }
-      return next.filter(item => !item.attachment || questionDocs.includes(item.attachment) || item.fileId).map((item, order) => ({ ...item, order }));
+      return next.filter(item => !item.attachment || questionEvidence.includes(item.attachment) || item.fileId).map((item, order) => ({ ...item, order }));
     });
     if (viewpointFile && !imagePresentation?.sourceFileId) {
       setImagePresentation({ sourceFileId: viewpointFile.id, includeInCompletePdf: true, crop: null });
     }
-  }, [files, questionDocs, rfi.id, projectId, viewpointFile, imagePresentation?.sourceFileId]);
+  }, [files, questionEvidence, rfi.id, projectId, viewpointFile, imagePresentation?.sourceFileId]);
   const [aiAssistLoading, setAiAssistLoading] = useState(false);
   const [rfiResponses, setRfiResponses] = useState<Array<{
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
@@ -1829,7 +1984,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const vpCode = (rfi as { sourceViewpointId?: string | null }).sourceViewpointId || undefined;
-      const atts = questionDocs.length ? questionDocs : ((rfi.attachmentsJson as string[] | null) || undefined);
+      const atts = questionEvidence.length ? questionEvidence : ((rfi.attachmentsJson as string[] | null) || undefined);
       const resp = await fetch(`/api/v1/rfis/generate-question`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -2211,6 +2366,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         locationDescription: infoLocationDescription || undefined,
         sourceViewpointLabel: infoVpLabel,
         dateRequired: infoDateRequired ? new Date(infoDateRequired).toISOString() : undefined,
+        projectAddress: infoProjectAddress,
         question: infoQuestion,
         costImpact: infoCost,
         costImpactAmount: infoCostAmountRequired ? infoCostAmt : null,
@@ -2227,7 +2383,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         submittedToCompany: infoToCompany,
         submittedToPerson: infoToPerson,
         submittedToEmail: infoToEmail,
-        attachmentsJson: questionDocs,
+        attachmentsJson: [...questionReferences, ...questionDocs],
         attachmentPackageJson: packageItems,
         imagePresentationJson: imagePresentation,
       },
@@ -2240,6 +2396,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       case "priority": setInfoPriority(value); break;
       case "rfiType": setInfoType(value); break;
       case "dateRequired": setInfoDateRequired(value); break;
+      case "projectAddress": setInfoProjectAddress(value); break;
       case "submittedByCompany": setInfoFromCompany(value); break;
       case "submittedByContact": setInfoFromContact(value); break;
       case "submittedByAddress": setInfoFromAddress(value); break;
@@ -2294,14 +2451,14 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     </div>
   );
 
-  const directoryPicker = (target: "from" | "to") => infoEdit && rfiDirectory.length > 0 ? (
-    <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const contact = rfiDirectory.find(item => item.email === e.target.value); if (!contact) return; if (target === "from") { setInfoFromContact(contact.fullName); setInfoFromCompany(contact.companyName || ""); setInfoFromEmail(contact.email); } else { setInfoToPerson(contact.fullName); setInfoToCompany(contact.companyName || ""); setInfoToEmail(contact.email); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{rfiDirectory.map(contact => <option key={`${target}-${contact.email}`} value={contact.email}>{contact.fullName}{contact.companyName ? ` - ${contact.companyName}` : ""}</option>)}</select></div>
+  const directoryPicker = (target: "from" | "to") => infoEdit && detailContacts.length > 0 ? (
+    <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const contact = detailContacts.find(item => item.email === e.target.value); if (!contact) return; if (target === "from") { setInfoFromContact(contact.fullName); setInfoFromCompany(contact.companyName || ""); setInfoFromEmail(contact.email); } else { setInfoToPerson(contact.fullName); setInfoToCompany(contact.companyName || ""); setInfoToEmail(contact.email); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{detailContacts.map(contact => <option key={`${target}-${contact.email}`} value={contact.email}>{contact.fullName}{contact.companyName ? ` - ${contact.companyName}` : ""}</option>)}</select></div>
   ) : null;
 
   const referenceContent = (
     <>
       {vpImageUrl && <div style={{ marginTop: 10 }}><div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 5 }}>{w("Source viewpoint image", "Imagen del punto de vista de origen", lang)}</div><img src={vpImageUrl} alt={w("RFI source viewpoint", "Punto de vista de origen del RFI", lang)} style={{ display: "block", maxWidth: "100%", maxHeight: 320, border: "1px solid hsl(var(--border))", borderRadius: 6 }} /></div>}
-      {infoEdit && <div style={{ position: "relative", marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={() => setShowQuestionFileSearch(!showQuestionFileSearch)} style={{ gap: 5 }}><Search style={{ width: 12, height: 12 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{showQuestionFileSearch && <FileSearchDropdown files={files || []} onSelect={name => { setQuestionDocs(prev => [...prev, name]); setShowQuestionFileSearch(false); }} onClose={() => setShowQuestionFileSearch(false)} />}</div>}
+      {infoEdit && <div style={{ position: "relative", marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={() => setShowQuestionFileSearch(!showQuestionFileSearch)} style={{ gap: 5 }}><Search style={{ width: 12, height: 12 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{showQuestionFileSearch && <FileSearchDropdown files={files || []} onSelect={name => { setQuestionReferences(prev => prev.includes(name) ? prev : [...prev, name]); setShowQuestionFileSearch(false); }} onClose={() => setShowQuestionFileSearch(false)} />}</div>}
       <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
     </>
   );
@@ -2336,7 +2493,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 5 }}>{w("Text assist uses AI credits. It does not read response attachments.", "La asistencia de texto usa creditos IA. No lee los adjuntos de respuesta.", lang)}</p>
         <FormGrid><CanonicalField label={w("Answered By", "Respondido Por", lang)} value={answeredBy} editable onChange={setAnsweredBy} /><CanonicalField label={w("Closing Status", "Estado al Guardar", lang)} value={closingStatus} editable onChange={setClosingStatus} options={statusOptions.map(option => ({ value: option.value, label: lang === "es" ? option.labelEs : option.label }))} /></FormGrid>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}><div><CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={costImpact} editable onChange={setCostImpact} options={[{ value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) }, { value: "Cost Increase TBD", label: w("Cost Increase TBD", "Aumento por Definir", lang) }, { value: "Cost Increase Known", label: w("Cost Increase Known", "Aumento Conocido", lang) }, { value: "Cost Decrease", label: w("Cost Decrease", "Disminucion", lang) }]} />{responseCostAmountRequired && <CanonicalField label={w("Cost Amount", "Monto de Costo", lang)} value={costAmount} editable onChange={setCostAmount} />}{responseCostReasonRequired && <CanonicalField label={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} value={costReason} editable onChange={setCostReason} multiline />}</div><div><CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={schedImpact} editable onChange={setSchedImpact} options={[{ value: "No Schedule Impact", label: w("No Schedule Impact", "Sin Impacto en Programa", lang) }, { value: "Increase in Calendar Days", label: w("Increase in Calendar Days", "Aumento en Dias Calendario", lang) }, { value: "Decrease in Calendar Days", label: w("Decrease in Calendar Days", "Disminucion en Dias Calendario", lang) }]} />{responseScheduleDaysRequired && <CanonicalField label={w("Calendar Days", "Dias Calendario", lang)} value={schedDays} editable onChange={value => setSchedDays(value.replace(/[^0-9]/g, ""))} />}{responseScheduleDaysRequired && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={schedReason} editable onChange={setSchedReason} multiline />}</div></div>
-        <div style={{ marginTop: 10 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Response Attachments", "Adjuntos de Respuesta", lang)}</label><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 240px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()}>{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload Response File", "Subir Archivo de Respuesta", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowFileSearch(!showFileSearch)}>{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{connectedFileSources.map(provider => <Button key={`response-${provider.key}`} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })}>{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}</Button>)}</div>{showFileSearch && <div style={{ position: "relative" }}><FileSearchDropdown files={files || []} onSelect={name => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }} onClose={() => setShowFileSearch(false)} /></div>}{responseDocs.map((doc, index) => <div key={`${doc}-${index}`} style={{ display: "flex", gap: 7, alignItems: "center", marginTop: 5, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} /><span style={{ flex: 1 }}>{attachLabel(doc)}</span><Button type="button" size="sm" variant="outline" onClick={() => setResponseDocs(prev => prev.filter((_, itemIndex) => itemIndex !== index))} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button></div>)}</div>
+        <div style={{ marginTop: 10 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Response Attachments", "Adjuntos de Respuesta", lang)}</label><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 240px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()}>{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload Response File", "Subir Archivo de Respuesta", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowFileSearch(!showFileSearch)}>{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{connectedFileSources.map(provider => <Button key={`response-${provider.key}`} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })}>{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}</Button>)}</div>{showFileSearch && <div style={{ position: "relative" }}><FileSearchDropdown files={files || []} onSelect={name => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }} onClose={() => setShowFileSearch(false)} /></div>}{responseDocs.map((doc, index) => <div key={`${doc}-${index}`} style={{ display: "flex", gap: 7, alignItems: "center", marginTop: 5, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} />{isOpenableAttachment(doc) ? <button type="button" onClick={() => { void openRfiAttachment(doc).catch(error => toast({ title: error instanceof Error ? error.message : w("Attachment could not be opened", "No se pudo abrir el adjunto", lang), variant: "destructive" })); }} style={{ flex: 1, padding: 0, border: 0, background: "transparent", color: "#1D4ED8", textAlign: "left", cursor: "pointer", fontSize: 12 }}>{attachLabel(doc)}</button> : <span style={{ flex: 1 }}>{attachLabel(doc)}</span>}<Button type="button" size="sm" variant="outline" onClick={() => setResponseDocs(prev => prev.filter((_, itemIndex) => itemIndex !== index))} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button></div>)}</div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 7, marginTop: 12, paddingTop: 12, borderTop: "1px solid hsl(var(--border))" }}>{(rfiResponses.length > 0 || rfi.answer || rfi.response) && <Button type="button" size="sm" variant="outline" onClick={() => setShowAddResponse(false)}>{w("Cancel Response", "Cancelar Respuesta", lang)}</Button>}<Button type="button" size="sm" onClick={handleSaveResponse} disabled={isUpdating}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save Response", "Guardar Respuesta", lang)}</Button></div>
       </div>}
     </div>
@@ -2356,7 +2513,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           rfiType: infoEdit ? infoType : (rfi.rfiType || ""),
           dateRequested: rfi.dateRequested ? format(parseISO(String(rfi.dateRequested)), "yyyy-MM-dd") : (rfi.createdAt ? format(parseISO(String(rfi.createdAt)), "yyyy-MM-dd") : ""),
           dateRequired: infoEdit ? infoDateRequired : (rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : (rfi.dueDate ? format(parseISO(String(rfi.dueDate)), "yyyy-MM-dd") : "")),
-          projectAddress: rfi.projectAddress || "",
+          projectAddress: infoEdit ? infoProjectAddress : (rfi.projectAddress || ""),
           daysOutstanding: `${days}d`,
           dateAnswered: fmt(rfi.dateAnswered || rfi.respondedAt),
           submittedByCompany: infoEdit ? infoFromCompany : (rfi.submittedByCompany || ""),
@@ -2388,8 +2545,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           responseText: answer,
         }}
         permissions={detailPermissions}
-        references={questionDocs}
-        attachments={[]}
+        references={questionReferences}
+        attachments={questionDocs}
         imagePresentation={imagePresentation}
         packageItems={packageItems}
         responses={rfiResponses.map(resp => ({ id: resp.id, text: resp.responseText, by: resp.answeredBy || undefined, date: resp.createdAt, attachments: resp.responseAttachmentsJson || undefined }))}
@@ -2423,8 +2580,9 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           "save-response": handleSaveResponse,
         }}
         onChange={handleCanonicalDetailChange}
-        onAddReference={() => { if (questionDocInput.trim()) { setQuestionDocs(prev => [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }}
-        onRemoveReference={index => setQuestionDocs(prev => prev.filter((_, i) => i !== index))}
+        onAddReference={() => { if (questionDocInput.trim()) { setQuestionReferences(prev => prev.includes(questionDocInput.trim()) ? prev : [...prev, questionDocInput.trim()]); setQuestionDocInput(""); } }}
+        onRemoveReference={(source, index) => source === "reference" ? setQuestionReferences(prev => prev.filter((_, i) => i !== index)) : setQuestionDocs(prev => prev.filter((_, i) => i !== index))}
+        onOpenReference={value => { void openRfiAttachment(value).catch(error => toast({ title: error instanceof Error ? error.message : w("Attachment could not be opened", "No se pudo abrir el adjunto", lang), variant: "destructive" })); }}
         onUploadFile={() => qAttachFileRef.current?.click()}
         onGenerateQuestionAi={() => handleQuestionAi(questionAiDescription)}
         onGenerateEmailAi={() => void generatePreview()}
@@ -2432,7 +2590,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         emailCopied={copied}
         statusContent={statusContent}
         submittedByDirectoryContent={directoryPicker("from")}
-        submittedToDirectoryContent={directoryPicker("to")}
+        submittedToDirectoryContent={infoEdit ? <SubmittedToParticipantEditor projectId={projectId} contacts={detailContacts} selectedCompany={infoToCompany} onSelect={(company, person, email) => { setInfoToCompany(company); setInfoToPerson(person); setInfoToEmail(email); }} onAddDistribution={entry => setInfoDist(prev => prev.includes(entry) ? prev : [...prev, entry])} onDirectoryAdded={contact => setRfiDirectory(prev => prev.some(item => item.email.toLowerCase() === contact.email.toLowerCase()) ? prev : [...prev, contact])} lang={lang} /> : null}
+        distributionContent={<RfiDistributionEditor entries={infoEdit ? infoDist : ((rfi.distributionList as string[] | null) || [])} contacts={detailContacts} editable={infoEdit} onChange={setInfoDist} lang={lang} />}
         referenceContent={referenceContent}
         impactContent={impactContent}
         responseContent={responseContent}
@@ -2531,8 +2690,8 @@ function CanonicalSection({ title, children }: { title: string; children: React.
 export function RfiCanonicalForm({
   lang, mode, recordState, values, permissions, references, attachments, imagePresentation, packageItems, responses,
   loading, options, cloudAttachmentActions = [], imageAttachmentActions = [], pendingImagePreview, onAttachPendingImage, onCancelPendingImage,
-  actions, onChange, onAddReference, onRemoveReference, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
-  onCopyEmail, emailCopied, statusContent, submittedByDirectoryContent, submittedToDirectoryContent, referenceContent, impactContent, responseContent,
+  actions, onChange, onAddReference, onRemoveReference, onOpenReference = () => undefined, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
+  onCopyEmail, emailCopied, statusContent, submittedByDirectoryContent, submittedToDirectoryContent, distributionContent, referenceContent, impactContent, responseContent,
   onTogglePackageItem, onMovePackageItem, onToggleViewpointImage, onClearImageCrop, actionMatrix,
 }: RfiCanonicalFormProps) {
   const editable = mode === "create" || mode === "edit";
@@ -2560,7 +2719,6 @@ export function RfiCanonicalForm({
   const costNeedsReason = values.costImpact === "Cost Increase TBD" || values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const costNeedsAmount = values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const scheduleNeedsFields = values.scheduleImpact === "Increase in Calendar Days" || values.scheduleImpact === "Decrease in Calendar Days";
-  const allReferences = [...references, ...attachments];
   return (
     <div className="rfi-canonical-form" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -2582,7 +2740,7 @@ export function RfiCanonicalForm({
             <FormGrid>
               <CanonicalField label={w("RFI number", "Numero RFI", lang)} value={values.number || w("Assigned after save", "Asignado al guardar", lang)} editable={false} />
               {values.projectName && <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName} editable={false} />}
-              {(mode === "create" || values.projectAddress) && <CanonicalField label={w("Project Address", "Direccion del Proyecto", lang)} value={values.projectAddress || ""} editable={mode === "create"} onChange={v => onChange("projectAddress", v)} full />}
+              {(editable || values.projectAddress) && <CanonicalField label={w("Project Address", "Direccion del Proyecto", lang)} value={values.projectAddress || ""} editable={editable} onChange={v => onChange("projectAddress", v)} full />}
               <CanonicalField label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
               <CanonicalField label={w("Status", "Estado", lang)} value={values.status} editable={false} />
               <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} options={priorityOptions} />
@@ -2624,7 +2782,7 @@ export function RfiCanonicalForm({
               <CanonicalField label={w("Location", "Ubicacion", lang)} value={values.locationDescription} editable={editable} onChange={v => onChange("locationDescription", v)} full />
             </FormGrid>
             {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button>{imageAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}>{action.icon === "capture" ? <Camera style={{ width: 12, height: 12 }} /> : action.icon === "paste" ? <Clipboard style={{ width: 12, height: 12 }} /> : action.icon === "replace" ? <RefreshCw style={{ width: 12, height: 12 }} /> : <Upload style={{ width: 12, height: 12 }} />}{action.label}</Button>)}{cloudAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}><FolderOpen style={{ width: 12, height: 12 }} />{action.label}</Button>)}</div>}
-            <div style={{ marginTop: 8, display: "grid", gap: 4 }}>{allReferences.length === 0 ? <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No references or attachments.", "Sin referencias o adjuntos.", lang)}</span> : allReferences.map((item, index) => <div key={`${item}-${index}`} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} /><span style={{ flex: 1 }}>{attachLabel(item)}</span>{editable && <Button type="button" size="sm" variant="outline" onClick={() => onRemoveReference(index)} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button>}</div>)}</div>
+            <div style={{ marginTop: 8, display: "grid", gap: 4 }}>{references.length + attachments.length === 0 ? <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No references or attachments.", "Sin referencias o adjuntos.", lang)}</span> : ([...references.map((value, index) => ({ value, index, source: "reference" as const })), ...attachments.map((value, index) => ({ value, index, source: "attachment" as const }))]).map(item => <div key={`${item.source}-${item.value}-${item.index}`} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} />{isOpenableAttachment(item.value) ? <button type="button" onClick={() => onOpenReference(item.value)} style={{ flex: 1, padding: 0, border: 0, background: "transparent", color: "#1D4ED8", textAlign: "left", cursor: "pointer", fontSize: 12 }}><ExternalLink style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />{attachLabel(item.value)}</button> : <span style={{ flex: 1 }}>{attachLabel(item.value)}</span>}{editable && <Button type="button" size="sm" variant="outline" onClick={() => onRemoveReference(item.source, item.index)} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button>}</div>)}</div>
             {pendingImagePreview && <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)", fontSize: 12 }}><div style={{ fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div><img src={pendingImagePreview.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} /><div style={{ color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={onAttachPendingImage} disabled={loading?.uploading} style={{ gap: 4 }}><Upload style={{ width: 12, height: 12 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onCancelPendingImage}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
             {(imagePresentation || packageItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Complete RFI PDF package", "Paquete PDF Completo RFI", lang)}</div>
@@ -2655,11 +2813,11 @@ export function RfiCanonicalForm({
             {impactContent}
           </CanonicalSection>
           <CanonicalSection title={w("7. Distribution / Email / Responses", "7. Distribucion / Email / Respuestas", lang)}>
-            <CanonicalField label={w("Distribution", "Distribucion", lang)} value={values.distributionList.join(", ")} editable={editable} onChange={v => onChange("distributionList", v)} full />
+            {distributionContent ?? <RfiDistributionEditor entries={values.distributionList} contacts={[]} editable={editable} onChange={entries => onChange("distributionList", entries.join(","))} lang={lang} />}
             <CanonicalField label={w("Description of Email", "Descripcion de Email", lang)} value={values.emailDescription || ""} editable={editable} onChange={v => onChange("emailDescription", v)} full multiline />
             {editable && <><Button type="button" size="sm" variant="outline" onClick={onGenerateEmailAi} disabled={loading?.emailAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{loading?.emailAi ? w("Generating...", "Generando...", lang) : w("Generate Email with AI", "Generar Email con IA", lang)}</Button><p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Email text assist uses AI credits and does not read attachments.", "La asistencia de email usa creditos IA y no lee adjuntos.", lang)}</p></>}
             {values.emailDraft && <div style={{ marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={onCopyEmail} style={{ marginBottom: 6, gap: 5 }}><Copy style={{ width: 12, height: 12 }} />{emailCopied ? w("Email Copied", "Email Copiado", lang) : w("Copy Email", "Copiar Email", lang)}</Button><pre style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 12 }}>{values.emailDraft}</pre></div>}
-            {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p>{response.attachments?.map((attachment, attachmentIndex) => <div key={`${attachment}-${attachmentIndex}`} style={{ display: "flex", gap: 5, alignItems: "center", color: "#1D4ED8", marginTop: 3 }}><FileText style={{ width: 11, height: 11 }} />{attachLabel(attachment)}</div>)}</div>)}</div>}
+            {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p>{response.attachments?.map((attachment, attachmentIndex) => <div key={`${attachment}-${attachmentIndex}`} style={{ display: "flex", gap: 5, alignItems: "center", color: "#1D4ED8", marginTop: 3 }}><FileText style={{ width: 11, height: 11 }} />{isOpenableAttachment(attachment) ? <button type="button" onClick={() => onOpenReference(attachment)} style={{ padding: 0, border: 0, background: "transparent", color: "#1D4ED8", cursor: "pointer", fontSize: 12 }}>{attachLabel(attachment)}</button> : attachLabel(attachment)}</div>)}</div>)}</div>}
             {responseContent ?? (permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{responseActions.length > 0 && <RfiActionBar actions={responseActions} handlers={actions} loading={!!loading?.response} />}</div>)}
           </CanonicalSection>
         </div>

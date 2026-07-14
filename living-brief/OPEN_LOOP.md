@@ -397,6 +397,22 @@ Correction 2:
 - Screenshot capture was retried with the requested existing Chrome executable path (`C:\Program Files\Google\Chrome\Application\chrome.exe`). Chrome launched through Playwright, but localhost Vite startup could not be kept running in this sandbox: direct background process launch hit Windows PATH/environment issues, PowerShell job launch required escalation for Vite temp files, then Vite required `PORT`, and the final `Start-Process -UseNewEnvironment` path caused Node CSPRNG initialization failure. No browser or system package was installed.
 - Do not mark Build 1 accepted until the ten requested screenshots are captured from `artifacts/bimlog/rfi-canonical-harness.html` or the live app with Vite bound to `127.0.0.1`.
 
+### RFI Build 1A Correction 5
+Starting commit: `9a167fc8598dd93ab4a406c03fa5349e229b4b83`.
+
+Source correction completed:
+- The single `RfiCanonicalForm` remains the owner of the seven-section create/detail/edit structure.
+- Section 3 restores project-directory company/contact selection, RFI-only external people, and real project-directory company creation without fabricated fallback data.
+- Section 7 restores explicit project-contact selection, clean external-recipient display, external-contact creation, and recipient removal without exposing internal `EXT:` storage values.
+- Section 4 keeps manual references and uploaded attachments as distinct UI collections, opens authenticated `/api/` attachments through an authorized fetch, opens HTTP(S) references, keeps plain names as text, and removes from the correct source collection.
+- Existing RFI edit now persists Project Address through the existing update API and activity record path.
+
+Acceptance state:
+- Correction 5 source is ready for independent review.
+- Build 1A remains pending independent acceptance.
+- Build 1B has not started.
+- Do not publish from this source-review step.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings
