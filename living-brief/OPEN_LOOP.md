@@ -418,6 +418,18 @@ Final micro-correction:
 - CC addresses are deduplicated case-insensitively and malformed or empty distribution entries are excluded.
 - Build 1A remains pending independent acceptance. Build 1B has not started. Nothing was published.
 
+### RFI Build 1B Browser Acceptance Evidence
+
+- Starting commit: `8b9f9e4ba562f4e74ad61a160204d6738afe0c66`.
+- Environment: real BIMLog browser route at `http://127.0.0.1:3100/projects/1/rfis`, current API bundle on `127.0.0.1:3101`, isolated PostgreSQL database `bimlog_rfi_test` on `127.0.0.1:55432`, and existing Chrome `150.0.7871.114`. No harness, static mockup, production service, or production data was used.
+- Browser-found corrections: saved-RFI edit mode now exposes one primary `Save RFI` and one neutral `Cancel` action; detail headers now identify `Draft RFI`, `Sent RFI`, `Closed RFI`, `Reopened RFI`, and `Revised RFI` instead of the ambiguous `Existing RFI` label.
+- Persisted acceptance records: canonical matrix IDs `39` (draft/edit/upload), `40` (sent/response/email/export), `41` (closed), `42` (reopened), `44` (revision), `45` (viewpoint-created), `46` (browser-created conditional impacts/reference), UI lifecycle IDs `51` and `52`, and participant/directory RFI ID `53`.
+- Passed browser matrix: shared 1-7 structure; create and existing edit persistence; immediate manual reference display; cost amount/reason and schedule days/reason conditionals; real attachment upload with clean name; reference-removal isolation; decoded external distribution display; project-directory company/contact creation and selection; encoded external recipient persistence; click-driven Copy Email; zero automatic AI requests; response visibility; ball-in-court history; UI-driven mark-sent, close, reopen, and revise transitions; viewpoint control; linked-item controls; authenticated attachment download; HTTP reference opening; and PDF, Complete PDF, DOCX, and Audit PDF downloads.
+- Required screenshots: `C:\Dev\bimlog-tools\evidence\rfi-build-1b\20260714-073359\01-new-rfi-initial.png` through `12-section7-distribution-email-responses.png`. Supporting proofs are `acceptance-results.json`, `state-label-proof.json`, `behavior-proof.json`, `participant-directory-proof.json`, `export-download-proof.json`, and `runtime-proof.json` in the same folder.
+- Isolated configuration observation: the local seed contains all four RFI status values but does not declare a default; new API records therefore carried the local configured status `responded` while the independent send lifecycle remained `draft`. This was not hidden or treated as production behavior, and no test-helper or API change was made in this browser-only pass.
+- Final verification: `git diff --check`, `pnpm run check:mojibake`, `pnpm run check:living-brief`, `pnpm run typecheck`, and `$env:PORT='3000'; pnpm run build` passed. The approved helper restarted the rebuilt API as PID `22348`; its loopback listener, health 200 response, bundle timestamp, length, and SHA-256 were reverified before a successful post-restart browser read of RFI `40`.
+- Acceptance status: evidence submitted for independent master review. Build 1B is not self-accepted. Nothing was published.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings

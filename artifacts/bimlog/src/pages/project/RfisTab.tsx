@@ -338,6 +338,12 @@ function getSavedRfiActionMatrix(params: {
   lang: string;
 }): RfiActionDefinition[] {
   const { rfi, canWrite, isProjectAdmin, hasViewpoint, isEditing, lang } = params;
+  if (canWrite && isEditing) {
+    return [
+      { key: "save-rfi", label: w("Save RFI", "Guardar RFI", lang), variant: "primary" },
+      { key: "cancel", label: w("Cancel", "Cancelar", lang), variant: "secondary" },
+    ];
+  }
   const actions: RfiActionDefinition[] = [
     { key: "back", label: w("Back to RFI Log", "Volver al Registro RFI", lang), variant: "secondary" },
     { key: "export-pdf", label: w("RFI PDF", "RFI PDF", lang), variant: "secondary" },
@@ -2358,6 +2364,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     ? "closed"
     : rfi.revisionNumber && rfi.revisionNumber > 0
       ? "revised"
+      : rfi.status === "open" && (rfi.sendStatus === "sent" || rfi.sentAt) && !rfi.dateAnswered && !rfi.answer && !rfi.response
+        ? "reopened"
       : rfi.sendStatus === "sent" || rfi.sentAt
         ? "sent"
         : "draft";
@@ -2716,6 +2724,14 @@ export function RfiCanonicalForm({
 }: RfiCanonicalFormProps) {
   const editable = mode === "create" || mode === "edit";
   const matrix = actionMatrix ?? getRfiCanonicalActionMatrix({ mode, recordState, permissions, lang });
+  const recordStateLabel: Record<RfiRecordState, string> = {
+    new: w("New RFI", "Nuevo RFI", lang),
+    draft: w("Draft RFI", "RFI Borrador", lang),
+    sent: w("Sent RFI", "RFI Enviado", lang),
+    closed: w("Closed RFI", "RFI Cerrado", lang),
+    reopened: w("Reopened RFI", "RFI Reabierto", lang),
+    revised: w("Revised RFI", "RFI Revisado", lang),
+  };
   const headerActions = matrix.filter(action => action.key !== "save-response");
   const responseActions = matrix.filter(action => action.key === "save-response");
   const priorityOptions = options?.priorities?.length ? options.priorities : [
@@ -2744,7 +2760,7 @@ export function RfiCanonicalForm({
       <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em" }}>{recordState === "new" ? w("New RFI", "Nuevo RFI", lang) : w("Existing RFI", "RFI Existente", lang)}</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em" }}>{recordStateLabel[recordState]}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
               {values.number && <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700 }}>{values.number}</span>}
               <span className={`badge ${STATUS_BADGE[values.status] ?? "badge-gray"}`}>{values.status || w("Draft", "Borrador", lang)}</span>
