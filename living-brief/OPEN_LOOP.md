@@ -32,6 +32,20 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Telegram Product Implementation 1
+
+- Starting commit: `18256153fe9c82ac149bfca53d9909a0c63d99c8`. Rejected local commit `2e10a1c` is being corrected locally and must not be pushed.
+- Corrected source scope: channel-linking only. No RFI/Submittal notification delivery, assistant, AI, file-reading, delivery workflow, live webhook registration, production secret change, publish, or notifier completion was performed.
+- Added additive schema/startup migrations for `notification_channels`, `channel_linking_tokens`, `notification_preferences`, `consent_records`, and `telegram_inbound_updates`; linking tokens now store accepted consent version and purpose `channel_linking`.
+- Browser Profile now requires explicit unchecked consent before creating a Telegram link. The request must include `consentAccepted: true`, the exact current consent version, and purpose `channel_linking`.
+- Telegram preferences start disabled with empty topics. The bot says the BIMLog channel is connected, not that active RFI/Submittal notifications are enabled.
+- Webhook behavior now stores a durable inbound receipt first, returns 200 after receipt, treats duplicate adapter/update IDs as safe, and processes from the recoverable inbound-update table outside the acknowledgement path. Startup recovery processes durable `received` rows.
+- Identity conflict handling rejects active Telegram identity reassignment to a different BIMLog user instead of silently revoking another user's link. Browser and Telegram disconnect now use one canonical transactional revocation path.
+- Profile and deterministic bot responses have reviewed English/Spanish text with UTF-8 accents. Source scans reject `espanol`, `ingles`, `estan`, `task_notifications`, default enabled RFI/Submittal Telegram topics, duplicate disconnect implementations, webhook payload logging, TODO/mock behavior, and destructive migrations.
+- Local source gates passed after correction: `git diff --check`, `pnpm run check:mojibake`, `pnpm run check:living-brief`, `pnpm run typecheck`, `$env:PORT='3000'; pnpm run build`, and `pnpm --filter @workspace/api-server exec tsx scripts/telegram-product-proof.ts`.
+- Behavior evidence passed against a fresh disposable PostgreSQL 18 database on `127.0.0.1:55433`; the temporary server was stopped after the run. The final runner exited 0 and recorded all consent, token, duplicate-update, adapter/secret rejection, private-chat, concurrent-consumption, identity-conflict, disconnect, restart-recovery, UTF-8, status-privacy, and disabled-topic gates at `C:\Dev\bimlog-tools\evidence\telegram-product-implementation-1\20260714-141736\behavior-results.json`.
+- Review status: corrected implementation and local evidence are complete; awaiting independent review. Not self-accepted, not pushed, and not published.
+
 ### Canonical RFI Workflow and Complete Issued RFI Package
 
 Purpose: eliminate the divergent New RFI, viewpoint-created RFI, existing RFI, sent RFI,

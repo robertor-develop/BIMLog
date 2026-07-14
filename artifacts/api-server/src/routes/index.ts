@@ -33,6 +33,7 @@ import autodeskRouter from "./autodesk";
 import livingBriefRouter from "./living_brief";
 import connectionsRouter from "./connections";
 import feedbackRouter from "./feedback";
+import telegramProductRouter from "./telegram-product";
 
 const router: IRouter = Router();
 
@@ -70,6 +71,7 @@ router.use(autodeskRouter);
 router.use(livingBriefRouter);
 router.use(connectionsRouter);
 router.use(feedbackRouter);
+router.use(telegramProductRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId

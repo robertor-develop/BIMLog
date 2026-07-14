@@ -37,3 +37,4 @@ export * from "./platform-settings";
 export * from "./user-connections";
 export * from "./ai-usage-events";
 export * from "./feedback-items";
+export * from "./telegram-product";

@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   User, Building2, Lock, Bell, Zap, Key, ChevronLeft,
   Check, Copy, RefreshCw, Pen, Upload, Trash2, AlertTriangle,
-  FolderOpen, Clock, Activity, ExternalLink, Camera, Mail
+  FolderOpen, Clock, Activity, ExternalLink, Camera, Mail, MessageCircle
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
@@ -89,6 +90,18 @@ interface ActivityEntry {
   createdAt: string;
 }
 
+interface TelegramStatus {
+  configured: boolean;
+  connected: boolean;
+  status: "unavailable" | "not_connected" | "pending" | "connected" | "expired" | "blocked" | "revoked";
+  language: "en" | "es";
+  consentVersion: string;
+  consentPurpose: "channel_linking";
+  consentAccepted: boolean;
+  accountLabel: string | null;
+  linkedAt: string | null;
+}
+
 const DEFAULT_PREFS = {
   emailRfiAssigned: true,
   emailSubmittalAssigned: true,
@@ -148,7 +161,7 @@ function ScoreBar({ label, rate, detail }: { label: string; rate: number | null;
 export function Profile() {
   const { token, user: storeUser, setAuth } = useAuthStore();
   const { toast } = useToast();
-  const { t } = useI18n();
+  const { t, tt } = useI18n();
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [perfScore, setPerfScore] = useState<PerformanceScore | null>(null);
@@ -178,6 +191,13 @@ export function Profile() {
   const [sgFromInput, setSgFromInput] = useState("");
   const [savingSg, setSavingSg] = useState(false);
   const [removingSg, setRemovingSg] = useState(false);
+  const [telegramStatus, setTelegramStatus] = useState<TelegramStatus | null>(null);
+  const [loadingTelegram, setLoadingTelegram] = useState(true);
+  const [creatingTelegramLink, setCreatingTelegramLink] = useState(false);
+  const [telegramLink, setTelegramLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const [telegramConsentAccepted, setTelegramConsentAccepted] = useState(false);
+  const [savingTelegramLanguage, setSavingTelegramLanguage] = useState(false);
+  const [disconnectingTelegram, setDisconnectingTelegram] = useState(false);
 
   const [signatureMode, setSignatureMode] = useState<"canvas" | "upload">("canvas");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -329,6 +349,7 @@ export function Profile() {
     loadMyProjects();
     loadRecentActivity();
     loadConnections();
+    loadTelegramStatus();
     // Handle the OAuth return from a provider connect.
     const params = new URLSearchParams(window.location.search);
     if (params.get("connected")) {
@@ -489,6 +510,85 @@ export function Profile() {
       setConnections(Array.isArray(data) ? data : []);
     } catch (error) {
       logClientError("profile connections load", error);
+    }
+  }
+
+  async function loadTelegramStatus() {
+    setLoadingTelegram(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/telegram/status`, { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load Telegram status");
+      setTelegramStatus(data);
+      setTelegramConsentAccepted(false);
+    } catch (error) {
+      logClientError("profile telegram status load", error);
+    } finally {
+      setLoadingTelegram(false);
+    }
+  }
+
+  async function createTelegramLink() {
+    setCreatingTelegramLink(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/telegram/link`, {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          consentAccepted: telegramConsentAccepted,
+          consentVersion: telegramStatus?.consentVersion,
+          purpose: "channel_linking",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || tt("Could not create Telegram link", "No se pudo crear la conexión de Telegram"));
+      setTelegramLink({ url: data.url, expiresAt: data.expiresAt });
+      window.open(data.url, "_blank", "noopener,noreferrer");
+      toast({ title: tt("Telegram link created", "Conexión de Telegram creada") });
+      await loadTelegramStatus();
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : tt("Could not create Telegram link", "No se pudo crear la conexión de Telegram"), variant: "destructive" });
+    } finally {
+      setCreatingTelegramLink(false);
+    }
+  }
+
+  async function saveTelegramLanguage(language: "en" | "es") {
+    setSavingTelegramLanguage(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/telegram/language`, {
+        method: "PATCH",
+        headers: authHeaders,
+        body: JSON.stringify({ language }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || tt("Could not update language", "No se pudo actualizar el idioma"));
+      setTelegramStatus(data);
+      toast({ title: tt("Telegram language updated", "Idioma de Telegram actualizado") });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : tt("Could not update Telegram language", "No se pudo actualizar el idioma de Telegram"), variant: "destructive" });
+    } finally {
+      setSavingTelegramLanguage(false);
+    }
+  }
+
+  async function disconnectTelegram() {
+    setDisconnectingTelegram(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/telegram`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || tt("Could not disconnect Telegram", "No se pudo desconectar Telegram"));
+      setTelegramStatus(data);
+      setTelegramLink(null);
+      setTelegramConsentAccepted(false);
+      toast({ title: tt("Telegram disconnected", "Telegram desconectado") });
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : tt("Could not disconnect Telegram", "No se pudo desconectar Telegram"), variant: "destructive" });
+    } finally {
+      setDisconnectingTelegram(false);
     }
   }
 
@@ -1309,6 +1409,108 @@ export function Profile() {
                   platform.openai.com/api-keys
                 </a>
               </p>
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard title={tt("Telegram Channel", "Canal de Telegram")} icon={MessageCircle}>
+          {loadingTelegram ? (
+            <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>{tt("Loading Telegram status...", "Cargando estado de Telegram...")}</div>
+          ) : telegramStatus?.configured === false ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Badge variant="outline" style={{ width: "fit-content", color: "#B45309", borderColor: "#FDE68A", background: "#FEF3C7" }}>
+                {tt("Unavailable", "No disponible")}
+              </Badge>
+              <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", margin: 0 }}>
+                {tt("Telegram channel linking is not configured for this BIMLog environment.", "La conexión del canal de Telegram no está configurada para este entorno de BIMLog.")}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <Badge style={{
+                  background: telegramStatus?.connected ? "#DCFCE7" : "#F3F4F6",
+                  color: telegramStatus?.connected ? "#16A34A" : "#374151",
+                  border: `1px solid ${telegramStatus?.connected ? "#BBF7D0" : "#D1D5DB"}`,
+                  padding: "4px 10px",
+                  fontWeight: 600,
+                }}>
+                  {telegramStatus?.connected ? <Check style={{ width: 12, height: 12, marginRight: 4 }} /> : null}
+                  {(() => {
+                    const labels: Record<TelegramStatus["status"], string> = {
+                      unavailable: tt("Unavailable", "No disponible"),
+                      not_connected: tt("Not connected", "Sin conexión"),
+                      pending: tt("Pending", "Pendiente"),
+                      connected: tt("Connected", "Conectado"),
+                      expired: tt("Expired", "Expirado"),
+                      blocked: tt("Blocked", "Bloqueado"),
+                      revoked: tt("Revoked", "Revocado"),
+                    };
+                    return labels[telegramStatus?.status || "not_connected"];
+                  })()}
+                </Badge>
+                {telegramStatus?.accountLabel && (
+                  <span style={{ fontSize: 13, color: "hsl(var(--muted-foreground))" }}>{telegramStatus.accountLabel}</span>
+                )}
+              </div>
+
+              <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                {tt("Consent version", "Versión de consentimiento")} {telegramStatus?.consentVersion || tt("unconfigured", "sin configuración")} · {tt("Purpose", "Propósito")}: {telegramStatus?.consentPurpose || "channel_linking"}
+                {telegramStatus?.connected && telegramStatus.linkedAt ? ` · ${tt("Connected", "Conectado")} ${new Date(telegramStatus.linkedAt).toLocaleDateString()}` : ""}
+              </div>
+
+              {telegramStatus?.connected ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <Label style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tt("Language", "Idioma")}</Label>
+                    <Button size="sm" variant={telegramStatus.language === "en" ? "default" : "outline"} disabled={savingTelegramLanguage} onClick={() => saveTelegramLanguage("en")}>{tt("English", "inglés")}</Button>
+                    <Button size="sm" variant={telegramStatus.language === "es" ? "default" : "outline"} disabled={savingTelegramLanguage} onClick={() => saveTelegramLanguage("es")}>Español</Button>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={disconnectTelegram} disabled={disconnectingTelegram} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6 }}>
+                    <Trash2 style={{ width: 12, height: 12 }} />
+                    {disconnectingTelegram ? tt("Disconnecting...", "Desconectando...") : tt("Disconnect", "Desconectar")}
+                  </Button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", margin: 0 }}>
+                    {tt(
+                      "Create a private Telegram channel link, open the bot chat, send /start, then choose your language in Telegram. This build only links the channel; RFI and Submittal notification delivery is not enabled.",
+                      "Crea una conexión privada del canal de Telegram, abre el chat del bot, envía /start y luego elige tu idioma en Telegram. Esta versión solo conecta el canal; la entrega de notificaciones de RFI y Submittals no está habilitada."
+                    )}
+                  </p>
+                  <label style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+                    <Checkbox
+                      checked={telegramConsentAccepted}
+                      onCheckedChange={(checked) => setTelegramConsentAccepted(checked === true)}
+                      style={{ marginTop: 2 }}
+                    />
+                    <span style={{ fontSize: 12, color: "hsl(var(--foreground))" }}>
+                      {tt(
+                        `I agree to connect my private Telegram account to BIMLog, store encrypted and hashed Telegram identifiers for channel linking, receive deterministic Telegram communication when later enabled, and revoke the connection at any time. Consent version ${telegramStatus?.consentVersion || "unconfigured"}.`,
+                        `Acepto conectar mi cuenta privada de Telegram a BIMLog, guardar identificadores de Telegram cifrados y con hash para la conexión del canal, recibir comunicación determinística de Telegram cuando se habilite más adelante y revocar la conexión en cualquier momento. Versión de consentimiento ${telegramStatus?.consentVersion || "sin configuración"}.`
+                      )}
+                    </span>
+                  </label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    <Button size="sm" onClick={createTelegramLink} disabled={creatingTelegramLink || !telegramConsentAccepted} style={{ gap: 6 }}>
+                      <MessageCircle style={{ width: 12, height: 12 }} />
+                      {creatingTelegramLink ? tt("Creating...", "Creando...") : tt("Connect Telegram", "Conectar Telegram")}
+                    </Button>
+                    {telegramLink && (
+                      <Button size="sm" variant="outline" onClick={() => window.open(telegramLink.url, "_blank", "noopener,noreferrer")} style={{ gap: 6 }}>
+                        <ExternalLink style={{ width: 12, height: 12 }} />
+                        {tt("Open link", "Abrir conexión")}
+                      </Button>
+                    )}
+                  </div>
+                  {telegramLink && (
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                      {tt("Link expires at", "La conexión expira a las")} {new Date(telegramLink.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </SectionCard>

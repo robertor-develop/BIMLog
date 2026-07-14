@@ -3,6 +3,7 @@ import cors from "cors";
 import session from "express-session";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
+import { startTelegramProductWorker } from "./lib/telegram-product";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -53,6 +54,7 @@ const jsonTypeMatcher = (req: Request): boolean => {
 // bytes with a string-aware repair.
 const RAW_BODY_BYPASS_RE = /\/clash-reports\/(plugin-sync|lens-sync)$/;
 const RAW_BODY_BYPASS_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
+const TELEGRAM_WEBHOOK_RE = /^\/api\/v1\/webhooks\/telegram\//;
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method !== "POST" || !RAW_BODY_BYPASS_RE.test(req.path)) return next();
   const chunks: Buffer[] = [];
@@ -81,6 +83,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.on("error", () => finish(() => next()));
 });
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!TELEGRAM_WEBHOOK_RE.test(req.path)) return next();
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (!ct.includes("application/json")) {
+    res.status(415).json({ error: "Content-Type must be application/json" });
+    return;
+  }
+  next();
+});
+app.use("/api/v1/webhooks/telegram", express.json({ limit: "64kb", type: "application/json", verify: captureRawBody }));
 app.use(express.json({ limit: "500mb", type: jsonTypeMatcher, verify: captureRawBody }));
 app.use(express.urlencoded({ extended: true, limit: "500mb", verify: captureRawBody }));
 
@@ -233,6 +245,93 @@ void rfiMigrationReady.then((ready) => {
     console.log("[migration] submittals tracker columns ensured");
   } catch (e) {
     console.error("[migration] submittals tracker columns migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS notification_channels (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      adapter_id text NOT NULL,
+      provider text NOT NULL DEFAULT 'telegram',
+      status text NOT NULL DEFAULT 'connected',
+      telegram_user_hash text NOT NULL,
+      telegram_chat_hash text NOT NULL,
+      encrypted_telegram_user_id text NOT NULL,
+      encrypted_telegram_chat_id text NOT NULL,
+      account_label text,
+      metadata jsonb,
+      linked_at timestamptz NOT NULL DEFAULT now(),
+      revoked_at timestamptz,
+      updated_at timestamptz NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_user_uidx ON notification_channels (adapter_id, user_id) WHERE status = 'connected'`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_telegram_user_uidx ON notification_channels (adapter_id, telegram_user_hash) WHERE status = 'connected'`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS channel_linking_tokens (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      adapter_id text NOT NULL,
+      token_hmac text NOT NULL,
+      status text NOT NULL DEFAULT 'pending',
+      consent_version text NOT NULL DEFAULT '',
+      consent_purpose text NOT NULL DEFAULT 'channel_linking',
+      expires_at timestamptz NOT NULL,
+      consumed_at timestamptz,
+      revoked_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_version text NOT NULL DEFAULT ''`);
+    await pool.query(`ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_purpose text NOT NULL DEFAULT 'channel_linking'`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS channel_linking_tokens_hmac_uidx ON channel_linking_tokens (adapter_id, token_hmac)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS channel_linking_tokens_user_created_idx ON channel_linking_tokens (user_id, created_at)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS notification_preferences (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      adapter_id text NOT NULL,
+      channel text NOT NULL DEFAULT 'telegram',
+      enabled text NOT NULL DEFAULT 'false',
+      language text NOT NULL DEFAULT 'en',
+      topics jsonb NOT NULL DEFAULT '{}'::jsonb,
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT notification_preferences_language_chk CHECK (language IN ('en', 'es')),
+      CONSTRAINT notification_preferences_enabled_chk CHECK (enabled IN ('true', 'false'))
+    )`);
+    await pool.query(`ALTER TABLE notification_preferences ALTER COLUMN enabled SET DEFAULT 'false'`);
+    await pool.query(`ALTER TABLE notification_preferences ALTER COLUMN topics SET DEFAULT '{}'::jsonb`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_preferences_user_adapter_uidx ON notification_preferences (user_id, adapter_id, channel)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS consent_records (
+      id serial PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      adapter_id text NOT NULL,
+      channel text NOT NULL DEFAULT 'telegram',
+      consent_version text NOT NULL,
+      status text NOT NULL,
+      purpose text NOT NULL DEFAULT 'channel_linking',
+      source text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT consent_records_status_chk CHECK (status IN ('granted', 'revoked'))
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS consent_records_user_created_idx ON consent_records (user_id, created_at)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS telegram_inbound_updates (
+      id serial PRIMARY KEY,
+      adapter_id text NOT NULL,
+      update_id text NOT NULL,
+      status text NOT NULL DEFAULT 'received',
+      telegram_user_hash text,
+      telegram_chat_hash text,
+      command text,
+      encrypted_evidence text NOT NULL,
+      error_code text,
+      received_at timestamptz NOT NULL DEFAULT now(),
+      processed_at timestamptz
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS telegram_inbound_updates_adapter_update_uidx ON telegram_inbound_updates (adapter_id, update_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS telegram_inbound_updates_received_idx ON telegram_inbound_updates (received_at)`);
+    console.log("[migration] telegram product notification tables ensured");
+    startTelegramProductWorker();
+  } catch (e) {
+    console.error("[migration] telegram product notification migration failed:", e);
   }
 })();
 
