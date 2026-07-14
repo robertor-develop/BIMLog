@@ -107,6 +107,19 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (a collision-skip returns id:null).
 
 ## Open items / known limitations
+- v1.60.9 identity contract: platform row ID is stored locally as `serverId` and is the
+  lifecycle-revision identity; Navisworks GUID identifies the current physical saved viewpoint;
+  `supersedesId` is lineage; `issueGroupId` is grouping; display IDs/names are labels only.
+- Web-created Edit/Reassign successors are materialized during Pull/Reconcile by copying the
+  predecessor with `CreateUniqueCopy`, stamping the successor `serverId`, and preserving camera,
+  hidden state, sectioning, redlines, markup, and saved-viewpoint state. Repeated runs match the
+  stamped `serverId` and do not create another successor.
+- Jump requests now carry serverId, projectId, Navisworks GUID when available, and the display
+  label as fallback. The local server resolves serverId first, then exact GUID, and uses a label
+  only when exactly one candidate matches; ambiguous label-only jumps are blocked explicitly.
+- v1.60.9 builds passed for Navisworks 2025 and 2021 as AnyCPU/.NET Framework 4.8. The 2025
+  package is `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.9.zip`. Field verification by
+  Ruben in Navisworks 2025 remains required before closing the reported workflow.
 - `SUPERSEDED->successor` tree marker is best-effort (read-only after round-trip). Platform =
   source of truth.
 - Read-only plugin users still get a silent 401/403 sync failure with no clear UI signal — not
