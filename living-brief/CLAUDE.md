@@ -233,6 +233,13 @@ inline badge. If one side's design changes, the other side must be reviewed too.
   repair it immediately at the source and rerun `pnpm run check:mojibake`.
 - Do not publish if `pnpm run check:mojibake` fails.
 
+## Living Brief integrity release gate
+
+- Run `pnpm run check:living-brief` after Living Brief governance changes and before every
+  production build. The root build runs it automatically after the mojibake check.
+- Do not publish while the integrity check fails; fix the reported document, link, authority, or
+  standards-source error first.
+
 ## Architecture rules
 - Monorepo: pnpm workspaces. See PLATFORM.md for the full map.
 - Backend API is Express; every route is mounted under the global prefix `/api/v1`.

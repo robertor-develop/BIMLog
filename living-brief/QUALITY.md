@@ -223,6 +223,8 @@ Before calling a feature done, verify:
 - It links to related modules.
 - It has clean UTF-8 text.
 - It passes `pnpm run check:mojibake`.
+- It passes `pnpm run check:living-brief` when Living Brief governance is in scope; the root
+  production build enforces both checks before typecheck and package builds.
 - It does not create duplicate, contradictory counters.
 - It does not create dirty historical report data.
 
