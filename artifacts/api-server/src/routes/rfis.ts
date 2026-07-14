@@ -3125,25 +3125,28 @@ router.delete("/projects/:projectId/rfis/attachments/staged/:fileId",
     try {
       const projectId = parsePositiveId(req.params.projectId, "project ID");
       const fileId = parsePositiveId(req.params.fileId, "file ID");
-      const [file] = await db.select().from(filesTable).where(and(
-        eq(filesTable.id, fileId),
-        eq(filesTable.projectId, projectId),
-        eq(filesTable.uploadedById, req.user!.userId),
-        eq(filesTable.source, "rfi-attachment"),
-        isNull(filesTable.linkedRfiId),
-      )).limit(1);
-      if (!file) {
-        res.status(404).json({ error: "This staged upload is unavailable or is already attached to an RFI." });
-        return;
-      }
-      if (file.storagePath) await storage.delete(file.storagePath);
-      await db.delete(filesTable).where(and(
-        eq(filesTable.id, file.id),
-        eq(filesTable.projectId, projectId),
-        eq(filesTable.uploadedById, req.user!.userId),
-        eq(filesTable.source, "rfi-attachment"),
-        isNull(filesTable.linkedRfiId),
-      ));
+      await db.transaction(async tx => {
+        await tx.execute(sql`SELECT id FROM files WHERE id = ${fileId} AND project_id = ${projectId} FOR UPDATE`);
+        const [file] = await tx.select().from(filesTable).where(and(
+          eq(filesTable.id, fileId),
+          eq(filesTable.projectId, projectId),
+        )).limit(1);
+        if (!file || file.uploadedById !== req.user!.userId || file.source !== "rfi-attachment") {
+          throw new RfiAttachmentError("This staged upload is unavailable.", 404);
+        }
+        if (file.linkedRfiId != null) {
+          throw new RfiAttachmentError("This upload was attached to an RFI before cleanup completed.", 409);
+        }
+        if (file.storagePath) await storage.delete(file.storagePath);
+        const [deleted] = await tx.delete(filesTable).where(and(
+          eq(filesTable.id, file.id),
+          eq(filesTable.projectId, projectId),
+          eq(filesTable.uploadedById, req.user!.userId),
+          eq(filesTable.source, "rfi-attachment"),
+          isNull(filesTable.linkedRfiId),
+        )).returning({ id: filesTable.id });
+        if (!deleted) throw new RfiAttachmentError("This upload changed before cleanup completed.", 409);
+      });
       res.json({ success: true, fileId });
     } catch (error) {
       if (error instanceof RfiAttachmentError) { res.status(error.status).json({ error: error.message }); return; }

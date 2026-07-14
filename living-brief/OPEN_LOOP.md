@@ -465,6 +465,14 @@ Deferred:
 - Acceptance found that Multer's multipart header decoding could misread a valid UTF-8 filename such as `café` as Latin-1. RFI upload normalization now repairs a reversible UTF-8-as-Latin-1 decode while preserving already-valid names; authenticated upload/download and staged cleanup evidence covers the corrected accented filename.
 - Build 3 is submitted for independent review and is not self-accepted. Nothing was published and Build 4 was not started.
 
+Final integrity correction:
+- Starting commit: `e9fb794103f649ea62f8b4a4a251c3e6821421bf`.
+- Every `files.ts` response containing a complete file row now passes through one public serializer. Project-file list/upload/update, CVR proceed/approve/reject, and nested CVR report issue rows omit storage paths, source locations, and internal file metadata.
+- Staged cleanup now locks the candidate row transactionally, revalidates project/uploader/source/unlinked eligibility under that lock, deletes storage while binding is excluded, and conditionally deletes the row. A completed bind returns an explicit cleanup conflict instead of allowing storage deletion.
+- Real isolated acceptance evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-3\20260714-113827`. Recursive JSON inspection found no `storagePath` or internal storage/provider fields across all audited file responses, including one real nested CVR issue row.
+- In the real bind/delete race, cleanup won with HTTP 200, binding failed with HTTP 404, the row and object were absent, and the RFI did not persist the locator. A normal bind regression then returned HTTP 200, cleanup returned HTTP 409, the linked row/object remained, and authenticated upload/download SHA-256 values matched.
+- Build 3 remains submitted for independent review and is not self-accepted. Nothing was published and Build 4 was not started.
+
 Deferred:
 - Complete PDF/export layout redesign and image crop tooling remain later-build work; Build 3 preserves original evidence files without claiming conversion support.
 - Plugin work, production/Replit/Neon operations, migration/publish work, and Build 4 remain out of scope.

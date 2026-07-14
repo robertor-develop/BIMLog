@@ -24,6 +24,18 @@ const router: IRouter = Router();
 
 const uploadMiddleware = multer({ storage: multer.memoryStorage() });
 
+type FileRow = typeof filesTable.$inferSelect;
+
+function serializePublicFile<T extends FileRow, E extends Record<string, unknown> = Record<string, never>>(file: T, extra?: E) {
+  const {
+    storagePath: _storagePath,
+    sourceLocation: _sourceLocation,
+    fileMetadata: _fileMetadata,
+    ...publicFile
+  } = file;
+  return { ...publicFile, ...(extra || {}) };
+}
+
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
 
 // ── File type tier classification ────────────────────────────────────────────
@@ -446,15 +458,13 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
           const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, users[0].companyId)).limit(1);
           uploadedByCompany = companies[0]?.name || "";
         }
-        const { storagePath: _storagePath, ...safeFile } = f;
-        return {
-          ...safeFile,
+        return serializePublicFile(f, {
           uploadedByName,
           uploadedByCompany,
           createdAt: f.createdAt.toISOString(),
           updatedAt: f.updatedAt.toISOString(),
           documentRelationshipDeclaredAt: f.documentRelationshipDeclaredAt?.toISOString() ?? null,
-        };
+        });
       })
     );
 
@@ -1022,14 +1032,13 @@ router.post(
           : `Uploaded file: ${fileName} [${documentRelationship}]`,
       });
 
-      res.status(201).json({
-        ...file,
+      res.status(201).json(serializePublicFile(file, {
         uploadedByName: req.user!.fullName,
         uploadedByCompany: req.user!.companyName,
         createdAt: file.createdAt.toISOString(),
         updatedAt: file.updatedAt.toISOString(),
         documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
-      });
+      }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bad request";
       res.status(400).json({ error: message });
@@ -1094,14 +1103,13 @@ router.patch("/projects/:projectId/files/:fileId", authMiddleware, requirePermis
       await runBimFallbackCvr(fileId, body.fileName, projectId);
     }
 
-    res.json({
-      ...updated,
+    res.json(serializePublicFile(updated, {
       uploadedByName: req.user!.fullName,
       uploadedByCompany: req.user!.companyName,
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
       documentRelationshipDeclaredAt: updated.documentRelationshipDeclaredAt?.toISOString() ?? null,
-    });
+    }));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
@@ -1173,7 +1181,7 @@ router.post("/projects/:projectId/files/:fileId/cvr-proceed", authMiddleware, re
       details: `User proceeded despite ${file.contentVerificationResult} warning. Reason: ${reason?.trim() || "(none provided)"}`,
     });
 
-    res.json(updated);
+    res.json(serializePublicFile(updated));
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
@@ -1217,7 +1225,7 @@ router.post("/projects/:projectId/files/:fileId/cvr-approve", authMiddleware, re
       details: `Admin approved file "${file.fileName}". Reason: ${reason?.trim() || "Approved"}. Approved by ${req.user!.fullName} at ${now.toISOString()}.`,
     });
 
-    res.json(updated);
+    res.json(serializePublicFile(updated));
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
@@ -1262,7 +1270,7 @@ router.post("/projects/:projectId/files/:fileId/cvr-reject", authMiddleware, req
       details: `Admin rejected file "${file.fileName}". Reason: ${reason.trim()}. Rejected by ${req.user!.fullName} at ${now.toISOString()}.`,
     });
 
-    res.json(updated);
+    res.json(serializePublicFile(updated));
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
@@ -1309,7 +1317,7 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
     const issuesWithUploader = await Promise.all(
       issues.map(async (f) => {
         const users = await db.select().from(usersTable).where(eq(usersTable.id, f.uploadedById)).limit(1);
-        return { ...f, uploadedByName: users[0]?.fullName || null };
+        return serializePublicFile(f, { uploadedByName: users[0]?.fullName || null });
       })
     );
 
