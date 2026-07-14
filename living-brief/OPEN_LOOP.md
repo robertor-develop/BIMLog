@@ -413,6 +413,11 @@ Acceptance state:
 - Build 1B has not started.
 - Do not publish from this source-review step.
 
+Final micro-correction:
+- SendGrid CC construction now parses stored distribution entries before validating email addresses, so plain project contacts, legacy external contacts, and URI-encoded external contacts are delivered.
+- CC addresses are deduplicated case-insensitively and malformed or empty distribution entries are excluded.
+- Build 1A remains pending independent acceptance. Build 1B has not started. Nothing was published.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings

@@ -100,6 +100,28 @@ function parseDistributionEntry(entry: string): ParsedDistributionEntry {
   return { name, email, phone, isExternal: true, display: `${name} <${email}>${phone ? ` - ${phone}` : ""} (external)` };
 }
 
+export function getRfiDistributionCcEmails(entries: string[]): string[] {
+  const seen = new Set<string>();
+  return entries.flatMap(entry => {
+    const email = parseDistributionEntry(entry).email.trim();
+    if (!/^[^\s<>@]+@[^\s<>@]+$/.test(email)) return [];
+    const key = email.toLowerCase();
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [email];
+  });
+}
+
+export function getRfiDistributionCcProof() {
+  return {
+    plainEmail: getRfiDistributionCcEmails(["project@company.com"]),
+    legacyExternal: getRfiDistributionCcEmails(["EXT:Legacy Contact:legacy@company.com:555-0100"]),
+    encodedExternal: getRfiDistributionCcEmails([encodeExternalDistributionEntry("Encoded Contact", "name@company.com", "555-0200")]),
+    duplicateCaseInsensitive: getRfiDistributionCcEmails(["duplicate@company.com", "DUPLICATE@COMPANY.COM"]),
+    malformed: getRfiDistributionCcEmails(["", "not-an-email", "EXT:Broken:%E0%A4%A:"]),
+  };
+}
+
 type RfiDirectoryContact = { fullName: string; email: string; companyName?: string | null };
 type RfiAttachmentSource = "reference" | "attachment";
 
@@ -1912,9 +1934,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const to = rfi.submittedToEmail || "";
-      const cc = ((rfi.distributionList as string[] | null) || [])
-        .map(e => (e.match(/[^\s<>]+@[^\s<>]+/) || [])[0])
-        .filter((e): e is string => !!e);
+      const cc = getRfiDistributionCcEmails((rfi.distributionList as string[] | null) || []);
       const subject = `${rfi.number} — ${rfi.subject}`;
       // Strip any leading To:/Subject: header lines so the body is clean.
       const body = previewText.replace(/^(To:.*\n|Subject:.*\n|\s*\n)+/i, "").trim();
