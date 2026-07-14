@@ -19,7 +19,7 @@ import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken, providerFromParam } from "../lib/oauth";
 import { downloadCloud } from "../lib/cloud-files";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import { Document, Paragraph, TextRun, SymbolRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
+import { Document, Paragraph, TextRun, SymbolRun, ImageRun, Table, TableRow, TableCell, Packer, WidthType, BorderStyle, HeadingLevel, AlignmentType, ShadingType } from "docx";
 import { PDFDocument as PdfLibDocument } from "pdf-lib";
 const router: IRouter = Router();
 
@@ -205,6 +205,7 @@ async function storeRfiAttachment(params: {
   fileName: string;
   buffer: Buffer;
   origin: "local-upload" | "google_drive" | "dropbox" | "bim360" | "procore";
+  imageOrigin?: Exclude<RfiImageKind, "viewpoint"> | null;
 }) {
   const fileName = cleanAttachmentFileName(params.fileName);
   if (params.buffer.length === 0) throw new RfiAttachmentError("Zero-byte files cannot be attached.", 400);
@@ -220,7 +221,7 @@ async function storeRfiAttachment(params: {
       status: defaultFileStatus,
       uploadedById: params.userId,
       source: "rfi-attachment",
-      fileMetadata: { rfiAttachmentOrigin: params.origin },
+      fileMetadata: { rfiAttachmentOrigin: params.origin, ...(params.imageOrigin ? { rfiImageOrigin: params.imageOrigin } : {}) },
       storagePath,
       linkedRfiId: params.rfiId,
     }).returning();
@@ -355,12 +356,77 @@ function normalizeImagePresentation(value: unknown): RfiImagePresentation {
   };
 }
 
-async function validateImagePresentationFiles(projectId: number, presentation: RfiImagePresentation) {
-  if (!presentation) return;
+type StoredRfiImage = {
+  file: typeof filesTable.$inferSelect;
+  buffer: Buffer;
+  type: "png" | "jpg";
+  width: number;
+  height: number;
+};
+
+async function decodeStoredRfiImage(file: typeof filesTable.$inferSelect): Promise<StoredRfiImage> {
+  if (!file.storagePath || file.fileSize <= 0) throw new RfiAttachmentError(`RFI image ${file.id} has no stored image bytes.`, 422);
+  const buffer = await storage.download(file.storagePath);
+  if (buffer.length === 0) throw new RfiAttachmentError(`RFI image ${file.id} is empty.`, 422);
+  const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const type = buffer.subarray(0, 8).equals(pngSignature)
+    ? "png"
+    : buffer[0] === 0xff && buffer[1] === 0xd8 ? "jpg" : null;
+  if (!type) throw new RfiAttachmentError(`File ${file.id} is not a supported PNG or JPEG image.`, 422);
+  try {
+    const probe = await PdfLibDocument.create();
+    const image = type === "png" ? await probe.embedPng(buffer) : await probe.embedJpg(buffer);
+    if (!Number.isFinite(image.width) || !Number.isFinite(image.height) || image.width <= 0 || image.height <= 0) throw new Error("invalid dimensions");
+    return { file, buffer, type, width: image.width, height: image.height };
+  } catch {
+    throw new RfiAttachmentError(`File ${file.id} contains corrupt or undecodable image bytes.`, 422);
+  }
+}
+
+function storedRfiImageKind(file: typeof filesTable.$inferSelect): RfiImageKind | null {
+  if (file.source === "lens-viewpoint") return "viewpoint";
+  if (file.source !== "rfi-attachment") return null;
+  const origin = (file.fileMetadata as Record<string, unknown> | null)?.rfiImageOrigin;
+  return origin === "upload" || origin === "paste" || origin === "screen-snip" ? origin : "upload";
+}
+
+async function validateImagePresentationFiles(
+  projectId: number,
+  presentation: RfiImagePresentation,
+  dbx: Pick<typeof db, "select"> = db,
+  persistedPresentation: RfiImagePresentation = null,
+): Promise<Map<number, StoredRfiImage>> {
+  const decoded = new Map<number, StoredRfiImage>();
+  if (!presentation) return decoded;
   const ids = [...new Set([presentation.sourceFileId, presentation.replacementFileId].filter((id): id is number => typeof id === "number"))];
-  if (!ids.length) return;
-  const rows = await db.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, ids)));
+  if (!ids.length) return decoded;
+  const rows = await dbx.select().from(filesTable).where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, ids)));
   if (rows.length !== ids.length) throw new RfiAttachmentError("An RFI image file is missing or belongs to another project.", 409);
+  for (const file of rows) {
+    const expectedKind = file.id === presentation.replacementFileId ? presentation.replacementKind : presentation.sourceKind;
+    if (!expectedKind) throw new RfiAttachmentError(`Image provenance is required for file ${file.id}.`, 422);
+    const knownKind = storedRfiImageKind(file);
+    const persistedKind = file.id === persistedPresentation?.replacementFileId ? persistedPresentation.replacementKind : file.id === persistedPresentation?.sourceFileId ? persistedPresentation.sourceKind : null;
+    const isGrandfatheredUnchangedKind = knownKind === "upload" && !(file.fileMetadata as Record<string, unknown> | null)?.rfiImageOrigin && persistedKind === expectedKind;
+    if (!knownKind || (knownKind !== expectedKind && !isGrandfatheredUnchangedKind)) {
+      throw new RfiAttachmentError(`Image provenance for file ${file.id} is ${knownKind || "unsupported"}, not ${expectedKind}.`, 422);
+    }
+    decoded.set(file.id, await decodeStoredRfiImage(file));
+  }
+  return decoded;
+}
+
+type ActiveRfiExportImage = StoredRfiImage & { crop: NonNullable<RfiImagePresentation>["crop"] };
+
+async function loadActiveRfiExportImage(rfi: typeof rfisTable.$inferSelect): Promise<ActiveRfiExportImage | null> {
+  const presentation = normalizeImagePresentation(rfi.imagePresentationJson);
+  if (!presentation || presentation.showInRfi === false) return null;
+  const activeId = presentation.replacementFileId ?? presentation.sourceFileId;
+  if (!activeId) return null;
+  const decoded = await validateImagePresentationFiles(rfi.projectId, presentation, db, presentation);
+  const image = decoded.get(activeId);
+  if (!image) throw new RfiAttachmentError("The active RFI image is unavailable.", 409);
+  return { ...image, crop: presentation.crop ?? null };
 }
 
 type ConfiguredRfiStatus = { value: string; meta: Record<string, string> | null };
@@ -654,6 +720,7 @@ function makeRfiPdf(
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: { name: string } | undefined,
   attachmentLabels: Map<string, string> = new Map(),
+  activeImage: ActiveRfiExportImage | null = null,
 ): void {
   const fmtD = (d: Date | string | null | undefined) =>
     d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
@@ -741,6 +808,27 @@ function makeRfiPdf(
   y += qH + 8;
 
   // ── Section 4: Responses ────────────────────────────────────────────────────
+  if (activeImage) {
+    const crop = activeImage.crop || { x: 0, y: 0, width: 1, height: 1 };
+    const ratio = (activeImage.width * crop.width) / (activeImage.height * crop.height);
+    let imageWidth = contentW;
+    let imageHeight = imageWidth / ratio;
+    if (imageHeight > 260) { imageHeight = 260; imageWidth = imageHeight * ratio; }
+    checkPage(imageHeight + 28);
+    doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
+    doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
+      .text("RFI IMAGE", MARGIN + 8, y + 5, { lineBreak: false });
+    y += 20;
+    const imageX = MARGIN + (contentW - imageWidth) / 2;
+    doc.save().rect(imageX, y, imageWidth, imageHeight).clip();
+    const drawWidth = imageWidth / crop.width;
+    const drawHeight = imageHeight / crop.height;
+    doc.image(activeImage.buffer, imageX - crop.x * drawWidth, y - crop.y * drawHeight, { width: drawWidth, height: drawHeight });
+    doc.restore();
+    doc.rect(imageX, y, imageWidth, imageHeight).stroke("#CBD5E1");
+    y += imageHeight + 8;
+  }
+
   if (responses.length > 0) {
     for (const resp of responses) {
       const respNum    = resp.responseNumber ?? 1;
@@ -1555,39 +1643,44 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     }
     if (body.dateAnswered !== undefined) updates.dateAnswered = body.dateAnswered ? new Date(body.dateAnswered) : null;
     if (body.distributionList !== undefined) updates.distributionList = body.distributionList;
-    if (body.attachmentsJson !== undefined || (body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) {
-      const normalized = await normalizeRfiAttachments({
-        projectId,
-        values: body.attachmentsJson ?? existing[0].attachmentsJson,
-        packageValue: (body as { attachmentPackageJson?: unknown }).attachmentPackageJson ?? existing[0].attachmentPackageJson,
-        userId: req.user!.userId,
-        rfiId,
-        tx: db,
-      });
-      updates.attachmentsJson = normalized.values;
-      updates.attachmentPackageJson = normalized.packageItems;
-      await bindStagedRfiFiles(db, normalized.fileRows, rfiId, req.user!.userId);
-    }
-    if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) {
-      const presentation = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
-      await validateImagePresentationFiles(projectId, presentation);
-      updates.imagePresentationJson = presentation;
-    }
     if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
-    const changes = buildRfiChangeAudit(existing[0], updates);
-    const imageEvents = "imagePresentationJson" in updates ? imagePresentationAuditEvents(existing[0].imagePresentationJson, updates.imagePresentationJson) : [];
-
-    const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
-
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "update",
-      entityType: "rfi",
-      entityId: rfiId,
-      details: JSON.stringify({ event: "rfi.updated", number: updated.number, changedAt: updates.updatedAt, changes, imageEvents }),
+    const { updated } = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT id FROM rfis WHERE id = ${rfiId} AND project_id = ${projectId} FOR UPDATE`);
+      let stagedFiles = new Map<number, typeof filesTable.$inferSelect>();
+      if (body.attachmentsJson !== undefined || (body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) {
+        const normalized = await normalizeRfiAttachments({
+          projectId,
+          values: body.attachmentsJson ?? existing[0].attachmentsJson,
+          packageValue: (body as { attachmentPackageJson?: unknown }).attachmentPackageJson ?? existing[0].attachmentPackageJson,
+          userId: req.user!.userId,
+          rfiId,
+          tx,
+        });
+        updates.attachmentsJson = normalized.values;
+        updates.attachmentPackageJson = normalized.packageItems;
+        stagedFiles = normalized.fileRows;
+      }
+      if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) {
+        const presentation = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
+        await validateImagePresentationFiles(projectId, presentation, tx, normalizeImagePresentation(existing[0].imagePresentationJson));
+        updates.imagePresentationJson = presentation;
+      }
+      const changes = buildRfiChangeAudit(existing[0], updates);
+      const imageEvents = "imagePresentationJson" in updates ? imagePresentationAuditEvents(existing[0].imagePresentationJson, updates.imagePresentationJson) : [];
+      const [updatedRfi] = await tx.update(rfisTable).set(updates).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).returning();
+      if (!updatedRfi) throw new RfiAttachmentError("RFI changed before it could be saved.", 409);
+      await bindStagedRfiFiles(tx, stagedFiles, rfiId, req.user!.userId);
+      await tx.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "update",
+        entityType: "rfi",
+        entityId: rfiId,
+        details: JSON.stringify({ event: "rfi.updated", number: updatedRfi.number, changedAt: updates.updatedAt, changes, imageEvents }),
+      });
+      return { updated: updatedRfi };
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));
@@ -1819,6 +1912,7 @@ function buildRfiDocxDocument(
   rfi: typeof rfisTable.$inferSelect,
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   attachmentLabels: Map<string, string> = new Map(),
+  activeImage: ActiveRfiExportImage | null = null,
 ): Document {
   const fmtD = (d: Date | string | null | undefined) => {
     if (!d) return "—";
@@ -1879,6 +1973,26 @@ function buildRfiDocxDocument(
   const actualAttachments = ((rfi.attachmentsJson as unknown as string[] | null) || []).map(value => attachmentLabels.get(value) || attachmentLabel(value));
   const attachOpts = actualAttachments.length > 0 ? actualAttachments : ["None"];
   const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
+  const imageParagraphs: Paragraph[] = [];
+  if (activeImage) {
+    const crop = activeImage.crop || { x: 0, y: 0, width: 1, height: 1 };
+    const ratio = (activeImage.width * crop.width) / (activeImage.height * crop.height);
+    let width = 500;
+    let height = width / ratio;
+    if (height > 300) { height = 300; width = height * ratio; }
+    const imageOptions = activeImage.crop
+      ? {
+          type: "svg" as const,
+          data: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${crop.x * activeImage.width} ${crop.y * activeImage.height} ${crop.width * activeImage.width} ${crop.height * activeImage.height}"><image href="data:image/${activeImage.type === "jpg" ? "jpeg" : "png"};base64,${activeImage.buffer.toString("base64")}" width="${activeImage.width}" height="${activeImage.height}"/></svg>`),
+          fallback: { type: activeImage.type, data: activeImage.buffer },
+          transformation: { width, height },
+        }
+      : { type: activeImage.type, data: activeImage.buffer, transformation: { width, height } };
+    imageParagraphs.push(
+      sectionHeader("RFI IMAGE"),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new ImageRun(imageOptions)] }),
+    );
+  }
 
   return new Document({
     sections: [{
@@ -1910,6 +2024,7 @@ function buildRfiDocxDocument(
           spacing: { after: 200 },
           children: [new TextRun({ text: stripMarkdown(rfi.question || rfi.description || "—"), size: 20 })],
         }),
+        ...imageParagraphs,
         sectionHeader("RFI RESPONSES"),
         ...(responses.length > 0
           ? responses.map((resp, i) => {
@@ -2030,7 +2145,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       res.send(pdfBuffer);
     });
 
-    makeRfiPdf(doc, rfi, responses, project, attachmentLabels);
+    makeRfiPdf(doc, rfi, responses, project, attachmentLabels, await loadActiveRfiExportImage(rfi));
     doc.end();
 
     db.insert(activityLogTable).values({
@@ -2056,18 +2171,20 @@ async function renderRfiPdfBuffer(
   rfi: typeof rfisTable.$inferSelect,
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: { name: string } | undefined,
+  includePresentationImage = true,
 ): Promise<Buffer> {
   const attachmentLabels = await loadAttachmentLabels(rfi.projectId, [
     rfi.attachmentsJson as string[] | null,
     ...responses.map(response => response.responseAttachmentsJson as string[] | null),
   ]);
+  const activeImage = includePresentationImage ? await loadActiveRfiExportImage(rfi) : null;
   return new Promise((resolve, reject) => {
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
-    makeRfiPdf(doc, rfi, responses, project, attachmentLabels);
+    makeRfiPdf(doc, rfi, responses, project, attachmentLabels, activeImage);
     doc.end();
   });
 }
@@ -2252,7 +2369,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
       included.push(`${label} (${copied.length} page${copied.length === 1 ? "" : "s"})`);
     };
 
-    await appendPdf(await renderRfiPdfBuffer(rfi, responses, project), "BIMLog RFI record");
+    await appendPdf(await renderRfiPdfBuffer(rfi, responses, project, false), "BIMLog RFI record");
 
     const failures: string[] = [];
     for (const item of selectedItems) {
@@ -3142,16 +3259,15 @@ router.post("/projects/:projectId/rfis/import-prefill",
 // Uploads a file from the user's computer, stores it via the storage adapter as
 // a downloadable file record, and returns a download URL to add to an RFI's
 // attachments. rfiId is optional (the create form has no RFI yet).
-router.post("/projects/:projectId/rfis/attachments/upload",
-  authMiddleware,
-  requirePermission("admin", "write"),
-  acceptRfiAttachmentUpload,
-  async (req, res) => {
+function storeUploadedRfiAttachment(imageOrigin: Exclude<RfiImageKind, "viewpoint"> | null) {
+  return async (req: any, res: any) => {
     try {
       const projectId = parsePositiveId(req.params.projectId, "project ID");
       if (!req.file) { res.status(400).json({ error: "Select a file to upload." }); return; }
       if (req.file.size === 0 || req.file.buffer.length === 0) { res.status(400).json({ error: "Zero-byte files cannot be attached." }); return; }
       const rfiId = await validateRfiAttachmentTarget(projectId, req.body?.rfiId);
+      const isImageUpload = req.file.mimetype === "image/png" || req.file.mimetype === "image/jpeg";
+      if (imageOrigin && !isImageUpload) throw new RfiAttachmentError("This image channel accepts PNG or JPEG files only.", 422);
       res.json(await storeRfiAttachment({
         projectId,
         rfiId,
@@ -3159,14 +3275,19 @@ router.post("/projects/:projectId/rfis/attachments/upload",
         fileName: req.file.originalname,
         buffer: req.file.buffer,
         origin: "local-upload",
+        imageOrigin: isImageUpload ? imageOrigin || "upload" : null,
       }));
     } catch (error) {
       if (error instanceof RfiAttachmentError) { res.status(error.status).json({ error: error.message }); return; }
       console.error("[rfis/attachments/upload] Upload failed", error);
       res.status(500).json({ error: "The file could not be stored. Try again." });
     }
-  }
-);
+  };
+}
+
+router.post("/projects/:projectId/rfis/attachments/upload", authMiddleware, requirePermission("admin", "write"), acceptRfiAttachmentUpload, storeUploadedRfiAttachment(null));
+router.post("/projects/:projectId/rfis/attachments/paste-image", authMiddleware, requirePermission("admin", "write"), acceptRfiAttachmentUpload, storeUploadedRfiAttachment("paste"));
+router.post("/projects/:projectId/rfis/attachments/screen-snip", authMiddleware, requirePermission("admin", "write"), acceptRfiAttachmentUpload, storeUploadedRfiAttachment("screen-snip"));
 
 router.delete("/projects/:projectId/rfis/attachments/staged/:fileId",
   authMiddleware,
@@ -3430,7 +3551,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       rfi.attachmentsJson as string[] | null,
       ...responses.map(response => response.responseAttachmentsJson as string[] | null),
     ]);
-    const doc = buildRfiDocxDocument(rfi, responses, attachmentLabels);
+    const doc = buildRfiDocxDocument(rfi, responses, attachmentLabels, await loadActiveRfiExportImage(rfi));
     const buffer = await Packer.toBuffer(doc);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.docx"`);

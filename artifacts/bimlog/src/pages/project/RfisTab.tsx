@@ -204,10 +204,12 @@ type PendingImage = {
   kind: "upload" | "paste" | "screen-snip";
 };
 
+type PendingImageInput = Omit<PendingImage, "url">;
+
 type CapturedFrame = { url: string; fileName: string };
 
 async function validateImageForReview(file: File): Promise<void> {
-  if (!file.type.startsWith("image/") || file.size <= 0) throw new Error("unsupported_or_empty_image");
+  if (!file.type.startsWith("image/") || file.size <= 0 || !["image/png", "image/jpeg"].includes(file.type)) throw new Error("unsupported_or_empty_image");
   try {
     const bitmap = await createImageBitmap(file);
     if (!bitmap.width || !bitmap.height) throw new Error("empty_image_frame");
@@ -215,6 +217,10 @@ async function validateImageForReview(file: File): Promise<void> {
   } catch {
     throw new Error("image_decode_failed");
   }
+}
+
+function revokeObjectUrlAfterRender(url: string): void {
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 async function acquireCapturedFrame(fileName: string): Promise<CapturedFrame> {
@@ -1257,6 +1263,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const [packageItems, setPackageItems] = useState<RfiPackageItem[]>([]);
   const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(null);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
+  const [pendingImageQueue, setPendingImageQueue] = useState<PendingImageInput[]>([]);
   const [capturedFrame, setCapturedFrame] = useState<CapturedFrame | null>(null);
   const [savedImagePreviewUrl, setSavedImagePreviewUrl] = useState<string | null>(null);
   const [editingSavedImage, setEditingSavedImage] = useState(false);
@@ -1360,7 +1367,8 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const fd = new FormData();
       fd.append("file", file);
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
+      const imagePath = imageKind === "paste" ? "paste-image" : imageKind === "screen-snip" ? "screen-snip" : "upload";
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/${file.type.startsWith("image/") ? imagePath : "upload"}`, {
         method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
       });
       const result = await resp.json().catch(() => ({})) as { downloadUrl?: string; fileId?: number; fileName?: string; error?: string };
@@ -1416,11 +1424,16 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       const code = error instanceof Error ? error.message : "image_decode_failed";
       toast({ title: code === "unsupported_or_empty_image" ? w("Select a supported, non-empty image.", "Seleccione una imagen compatible y no vacia.", lang) : w("The image could not be decoded.", "No se pudo decodificar la imagen.", lang), variant: "destructive" }); return;
     }
-    setPendingImage(prev => {
-      if (prev?.url) URL.revokeObjectURL(prev.url);
-      return { file, url: URL.createObjectURL(file), mode: "source", kind };
-    });
+    setUploadResults(prev => [...prev.filter(item => item.name !== file.name), { name: file.name, state: "uploading", message: w("Awaiting crop review", "Esperando revision de recorte", lang) }]);
+    setPendingImageQueue(prev => [...prev, { file, mode: "source", kind }]);
   };
+
+  useEffect(() => {
+    if (pendingImage || pendingImageQueue.length === 0) return;
+    const [next, ...rest] = pendingImageQueue;
+    setPendingImageQueue(rest);
+    setPendingImage({ ...next, url: URL.createObjectURL(next.file) });
+  }, [pendingImage, pendingImageQueue]);
 
   const pasteCreateImage = async () => {
     if (!navigator.clipboard?.read) {
@@ -1724,11 +1737,11 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         onMovePackageItem={(key, direction) => setPackageItems(prev => { const ordered = [...prev].sort((a, b) => a.order - b.order); const index = ordered.findIndex(item => item.key === key); const target = index + direction; if (index < 0 || target < 0 || target >= ordered.length) return prev; [ordered[index], ordered[target]] = [ordered[target], ordered[index]]; return ordered.map((item, order) => ({ ...item, order })); })}
         onToggleViewpointImage={include => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf: include } : prev)}
       />
-      <input ref={attachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) { const images=selected.filter(file=>file.type.startsWith("image/")); const documents=selected.filter(file=>!file.type.startsWith("image/")); if(documents.length)void Promise.all(documents.map(file=>uploadAttachment(file))); if(images[0])void beginPendingImage(images[0],"upload"); if(images.length>1)toast({title:w("Review image files one at a time.","Revise los archivos de imagen uno por uno.",lang)}); } e.target.value = ""; }} />
+      <input ref={attachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) { const images=selected.filter(file=>file.type.startsWith("image/")); const documents=selected.filter(file=>!file.type.startsWith("image/")); documents.forEach(file=>{void uploadAttachment(file);}); images.forEach(file=>{void beginPendingImage(file,"upload");}); } e.target.value = ""; }} />
       <input ref={importInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) void handleImportPrefill(f); e.target.value = ""; }} />
       <input ref={imageFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) void beginPendingImage(f, "upload"); e.target.value = ""; }} />
-      {capturedFrame && <RfiSnippingWorkspace src={capturedFrame.url} fileName={capturedFrame.fileName} lang={lang} onComplete={file => { URL.revokeObjectURL(capturedFrame.url); setCapturedFrame(null); void beginPendingImage(file, "screen-snip"); }} onRetake={() => { URL.revokeObjectURL(capturedFrame.url); setCapturedFrame(null); void captureCreateImage(); }} onCancel={() => { URL.revokeObjectURL(capturedFrame.url); setCapturedFrame(null); }} />}
-      {pendingImage && <RfiImageCropEditor src={pendingImage.url} fileName={pendingImage.file.name} initialCrop={null} lang={lang} onApply={crop => { const current=pendingImage; setPendingImage(null); void uploadAttachment(current.file,crop,current.kind).finally(()=>URL.revokeObjectURL(current.url)); }} onCancel={() => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }} onRetake={pendingImage.kind === "screen-snip" ? () => { URL.revokeObjectURL(pendingImage.url); setPendingImage(null); void captureCreateImage(); } : undefined} />}
+      {capturedFrame && <RfiSnippingWorkspace src={capturedFrame.url} fileName={capturedFrame.fileName} lang={lang} onComplete={file => { setCapturedFrame(null); revokeObjectUrlAfterRender(capturedFrame.url); void beginPendingImage(file, "screen-snip"); }} onRetake={() => { setCapturedFrame(null); revokeObjectUrlAfterRender(capturedFrame.url); void captureCreateImage(); }} onCancel={() => { setCapturedFrame(null); revokeObjectUrlAfterRender(capturedFrame.url); }} />}
+      {pendingImage && <RfiImageCropEditor src={pendingImage.url} fileName={pendingImage.file.name} initialCrop={null} lang={lang} onApply={crop => { const current=pendingImage; setPendingImage(null); void uploadAttachment(current.file,crop,current.kind).finally(()=>URL.revokeObjectURL(current.url)); }} onCancel={() => { setUploadResults(prev=>prev.map(item=>item.name===pendingImage.file.name?{name:item.name,state:"error",message:w("Canceled - not uploaded","Cancelado - no subido",lang)}:item)); setPendingImage(null); revokeObjectUrlAfterRender(pendingImage.url); }} onRetake={pendingImage.kind === "screen-snip" ? () => { setPendingImage(null); revokeObjectUrlAfterRender(pendingImage.url); void captureCreateImage(); } : undefined} />}
       {editingSavedImage && savedImagePreviewUrl && <RfiImageCropEditor src={savedImagePreviewUrl} fileName={w("Saved RFI image","Imagen RFI guardada",lang)} initialCrop={imagePresentation?.crop || null} lang={lang} onApply={crop => { setImagePresentation(prev => prev ? { ...prev, crop } : prev); setEditingSavedImage(false); }} onCancel={() => setEditingSavedImage(false)} />}
       {cloudPickerCreate && (
         <CloudPicker
@@ -2097,33 +2110,34 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // Upload attachments from the user's computer (question + response docs).
   const qAttachFileRef = useRef<HTMLInputElement>(null);
   const rAttachFileRef = useRef<HTMLInputElement>(null);
+  const editStagedFileIds = useRef(new Set<number>());
   const responseStagedFileIds = useRef(new Set<number>());
   const imageEvidenceInputRef = useRef<HTMLInputElement>(null);
   const imageReplacementInputRef = useRef<HTMLInputElement>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [detailUploadResults, setDetailUploadResults] = useState<Array<{ name: string; state: "uploading" | "success" | "error"; message?: string }>>([]);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
+  const [pendingImageQueue, setPendingImageQueue] = useState<PendingImageInput[]>([]);
   const [capturedFrame, setCapturedFrame] = useState<CapturedFrame | null>(null);
   const [editingPersistedImage, setEditingPersistedImage] = useState(false);
   useEffect(() => () => {
     if (capturedFrame) URL.revokeObjectURL(capturedFrame.url);
     if (pendingImage) URL.revokeObjectURL(pendingImage.url);
   }, [capturedFrame, pendingImage]);
-  const uploadDoc = async (file: File, onUploaded: (uploaded: { downloadUrl: string; fileId: number; fileName: string }) => void, stageOnly = false) => {
+  const uploadDoc = async (file: File, onUploaded: (uploaded: { downloadUrl: string; fileId: number; fileName: string }) => void, stagingTarget: "edit" | "response" = "edit") => {
     setUploadingDoc(true);
     setDetailUploadResults(prev => [...prev.filter(item => item.name !== file.name), { name: file.name, state: "uploading" }]);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const fd = new FormData();
       fd.append("file", file);
-      if (!stageOnly) fd.append("rfiId", String(rfi.id));
       const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
         method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
       });
       const data = await resp.json().catch(() => ({})) as { downloadUrl?: string; fileId?: number; fileName?: string; error?: string };
       if (!resp.ok || !data.downloadUrl || !data.fileId || !data.fileName) throw new Error(data.error || "Upload failed");
       const uploaded = data as { downloadUrl: string; fileId: number; fileName: string };
-      if (stageOnly) responseStagedFileIds.current.add(uploaded.fileId);
+      (stagingTarget === "edit" ? editStagedFileIds : responseStagedFileIds).current.add(uploaded.fileId);
       onUploaded(uploaded);
       setDetailUploadResults(prev => prev.map(item => item.name === file.name ? { name: data.fileName || file.name, state: "success", message: w("Attached", "Adjuntado", lang) } : item));
       toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
@@ -2297,16 +2311,18 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   const uploadImageEvidence = async (file: File, mode: "source" | "replacement", crop: NormalizedCrop | null, kind: PendingImage["kind"]) => {
     setUploadingDoc(true);
+    setDetailUploadResults(prev => [...prev.filter(item => item.name !== file.name), { name: file.name, state: "uploading", message: w("Uploading confirmed image", "Subiendo imagen confirmada", lang) }]);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("rfiId", String(rfi.id));
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/upload`, {
+      const imagePath = kind === "paste" ? "paste-image" : kind === "screen-snip" ? "screen-snip" : "upload";
+      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/${imagePath}`, {
         method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd,
       });
       if (!resp.ok) throw new Error("Upload failed");
       const data = await resp.json() as { fileId: number; fileName: string; downloadUrl: string };
+      editStagedFileIds.current.add(data.fileId);
       setQuestionDocs(prev => prev.includes(data.downloadUrl) ? prev : [...prev, data.downloadUrl]);
       setPackageItems(prev => {
         const sourceId = imagePresentation?.sourceFileId ?? viewpointFile?.id ?? null;
@@ -2324,9 +2340,11 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         includeInCompletePdf: prev?.includeInCompletePdf !== false,
         crop,
       }));
+      setDetailUploadResults(prev => prev.map(item => item.name === file.name ? { name: data.fileName, state: "success", message: w("Attached", "Adjuntado", lang) } : item));
       toast({ title: mode === "replacement" ? w("Replacement image attached. Original evidence preserved.", "Imagen de reemplazo adjuntada. Evidencia original preservada.", lang) : w("Image attached.", "Imagen adjuntada.", lang) });
     } catch (error) {
       const message = error instanceof TypeError ? w("Network error while uploading the image.", "Error de red al subir la imagen.", lang) : error instanceof Error ? error.message : w("Image upload failed", "Error al subir imagen", lang);
+      setDetailUploadResults(prev => prev.map(item => item.name === file.name ? { name: file.name, state: "error", message } : item));
       toast({ title: message, variant: "destructive" });
     } finally {
       setUploadingDoc(false);
@@ -2335,11 +2353,16 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   const beginPendingImage = async (file: File, mode: "source" | "replacement", kind: PendingImage["kind"]) => {
     try { await validateImageForReview(file); } catch (error) { toast({ title: error instanceof Error && error.message === "unsupported_or_empty_image" ? w("Select a supported, non-empty image.", "Seleccione una imagen compatible y no vacia.", lang) : w("The image could not be decoded.", "No se pudo decodificar la imagen.", lang), variant: "destructive" }); return; }
-    setPendingImage(prev => {
-      if (prev?.url) URL.revokeObjectURL(prev.url);
-      return { file, url: URL.createObjectURL(file), mode, kind };
-    });
+    setDetailUploadResults(prev => [...prev.filter(item => item.name !== file.name), { name: file.name, state: "uploading", message: w("Awaiting crop review", "Esperando revision de recorte", lang) }]);
+    setPendingImageQueue(prev => [...prev, { file, mode, kind }]);
   };
+
+  useEffect(() => {
+    if (pendingImage || pendingImageQueue.length === 0) return;
+    const [next, ...rest] = pendingImageQueue;
+    setPendingImageQueue(rest);
+    setPendingImage({ ...next, url: URL.createObjectURL(next.file) });
+  }, [pendingImage, pendingImageQueue]);
 
   const pasteImageEvidence = async () => {
     if (!navigator.clipboard?.read) {
@@ -2400,6 +2423,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const { mutate: updateRfi, isPending: isUpdating } = useUpdateRfi({
     mutation: {
       onSuccess: (updated) => {
+        editStagedFileIds.current.clear();
+        setInfoEdit(false);
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
         toast({ title: w("RFI updated", "RFI actualizado", lang) });
         onUpdate(updated);
@@ -2516,6 +2541,32 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     canRaiseChangeOrder: canWrite,
     canJumpViewpoint: !!(rfi as { sourceViewpointId?: string | null }).sourceViewpointId,
   };
+  const removeEditStagedFile = async (fileId: number): Promise<boolean> => {
+    if (!editStagedFileIds.current.has(fileId)) return true;
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    const response = await fetch(`/api/v1/projects/${projectId}/rfis/attachments/staged/${fileId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      toast({ title: data.error || w("Staged upload could not be removed.", "No se pudo quitar el archivo temporal.", lang), variant: "destructive" });
+      return false;
+    }
+    editStagedFileIds.current.delete(fileId);
+    return true;
+  };
+  const cancelInfoEdit = async () => {
+    const results = await Promise.all([...editStagedFileIds.current].map(removeEditStagedFile));
+    if (results.some(result => !result)) {
+      toast({ title: w("Cancel is incomplete. The RFI remains in edit mode until staged files are removed.", "La cancelacion esta incompleta. El RFI permanece en edicion hasta quitar los archivos temporales.", lang), variant: "destructive" });
+      return;
+    }
+    setPendingImageQueue([]);
+    if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+    setPendingImage(null);
+    if (capturedFrame) URL.revokeObjectURL(capturedFrame.url);
+    setCapturedFrame(null);
+    startInfoEdit();
+    setInfoEdit(false);
+  };
   const saveCanonicalRfi = () => {
     updateRfi({
       projectId,
@@ -2554,7 +2605,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         imagePresentationJson: imagePresentation,
       },
     });
-    setInfoEdit(false);
   };
   const handleCanonicalDetailChange = (field: keyof RfiCanonicalValues, value: string) => {
     switch (field) {
@@ -2761,12 +2811,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           "raise-change-order": () => { if (!raisingCo) void handleRaiseChangeOrder(); },
           "jump-viewpoint": () => { void fetch(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "")}`, { mode: "no-cors" }); },
           "save-rfi": saveCanonicalRfi,
-          cancel: () => { setImagePresentation((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || (viewpointFile ? { sourceFileId: viewpointFile.id, sourceKind: "viewpoint", showInRfi: true, includeInCompletePdf: true, crop: null } : null)); setPackageItems(normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], files || [])); setInfoEdit(false); },
+          cancel: () => { void cancelInfoEdit(); },
           "save-response": handleSaveResponse,
         }}
         onChange={handleCanonicalDetailChange}
         onAddReference={() => { const normalized = normalizeManualReference(questionDocInput); if (!normalized.value) { toast({ title: normalized.error || w("Invalid reference", "Referencia no valida", lang), variant: "destructive" }); return; } setQuestionReferences(prev => prev.includes(normalized.value!) ? prev : [...prev, normalized.value!]); setQuestionDocInput(""); }}
-        onRemoveReference={(source, index) => source === "reference" ? setQuestionReferences(prev => prev.filter((_, i) => i !== index)) : setQuestionDocs(prev => prev.filter((_, i) => i !== index))}
+        onRemoveReference={(source, index) => { if (source === "reference") { setQuestionReferences(prev => prev.filter((_, i) => i !== index)); return; } const value=questionDocs[index];const fileId=fileIdFromAttachment(value);if(fileId&&editStagedFileIds.current.has(fileId)){void removeEditStagedFile(fileId).then(removed=>{if(removed)setQuestionDocs(prev=>prev.filter((_,i)=>i!==index));});}else setQuestionDocs(prev=>prev.filter((_,i)=>i!==index)); }}
         onOpenReference={value => { void openRfiAttachment(value).catch(error => toast({ title: error instanceof Error ? error.message : w("Attachment could not be opened", "No se pudo abrir el adjunto", lang), variant: "destructive" })); }}
         onUploadFile={() => qAttachFileRef.current?.click()}
         onGenerateQuestionAi={() => handleQuestionAi(questionAiDescription)}
@@ -2786,20 +2836,19 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         onClearImageCrop={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)}
         actionMatrix={savedRfiActions.map(action => action.key === "raise-change-order" && raisingCo ? { ...action, label: w("Creating Change Order...", "Creando Orden de Cambio...", lang) } : action.key === "revise" && isRevising ? { ...action, label: w("Creating Revision...", "Creando Revision...", lang) } : action)}
       />
-      <input ref={qAttachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) { const images=selected.filter(file=>file.type.startsWith("image/")); const documents=selected.filter(file=>!file.type.startsWith("image/")); if(documents.length)void Promise.all(documents.map(file=>uploadDoc(file,uploaded=>{setQuestionDocs(prev=>prev.includes(uploaded.downloadUrl)?prev:[...prev,uploaded.downloadUrl]);setPackageItems(prev=>prev.some(item=>item.fileId===uploaded.fileId)?prev:[...prev,{key:`file:${uploaded.fileId}`,label:uploaded.fileName,fileId:uploaded.fileId,attachment:uploaded.downloadUrl,source:"rfi-attachment",include:true,order:prev.length}]);}))); if(images[0])void beginPendingImage(images[0],"replacement","upload"); if(images.length>1)toast({title:w("Review image files one at a time.","Revise los archivos de imagen uno por uno.",lang)}); } e.target.value = ""; }} />
-      <input ref={rAttachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) void Promise.all(selected.map(file => uploadDoc(file, uploaded => setResponseDocs(prev => prev.includes(uploaded.downloadUrl) ? prev : [...prev, uploaded.downloadUrl]), true))); e.target.value = ""; }} />
+      <input ref={qAttachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) { const images=selected.filter(file=>file.type.startsWith("image/")); const documents=selected.filter(file=>!file.type.startsWith("image/")); documents.forEach(file=>{void uploadDoc(file,uploaded=>{setQuestionDocs(prev=>prev.includes(uploaded.downloadUrl)?prev:[...prev,uploaded.downloadUrl]);setPackageItems(prev=>prev.some(item=>item.fileId===uploaded.fileId)?prev:[...prev,{key:`file:${uploaded.fileId}`,label:uploaded.fileName,fileId:uploaded.fileId,attachment:uploaded.downloadUrl,source:"rfi-attachment",include:true,order:prev.length}]);});}); images.forEach(file=>{void beginPendingImage(file,"replacement","upload");}); } e.target.value = ""; }} />
+      <input ref={rAttachFileRef} type="file" multiple style={{ display: "none" }} onChange={e => { const selected = [...(e.target.files || [])]; if (selected.length) selected.forEach(file => { void uploadDoc(file, uploaded => setResponseDocs(prev => prev.includes(uploaded.downloadUrl) ? prev : [...prev, uploaded.downloadUrl]), "response"); }); e.target.value = ""; }} />
       <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) void beginPendingImage(f, "source", "upload"); e.target.value = ""; }} />
       <input ref={imageReplacementInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) void beginPendingImage(f, "replacement", "upload"); e.target.value = ""; }} />
-      {capturedFrame && <RfiSnippingWorkspace src={capturedFrame.url} fileName={capturedFrame.fileName} lang={lang} onComplete={file=>{URL.revokeObjectURL(capturedFrame.url);setCapturedFrame(null);void beginPendingImage(file,"replacement","screen-snip");}} onRetake={()=>{URL.revokeObjectURL(capturedFrame.url);setCapturedFrame(null);void captureScreenImage();}} onCancel={()=>{URL.revokeObjectURL(capturedFrame.url);setCapturedFrame(null);}}/>}
-      {pendingImage&&<RfiImageCropEditor src={pendingImage.url} fileName={pendingImage.file.name} initialCrop={null} lang={lang} onApply={crop=>{const current=pendingImage;setPendingImage(null);void uploadImageEvidence(current.file,current.mode,crop,current.kind).finally(()=>URL.revokeObjectURL(current.url));}} onCancel={()=>{URL.revokeObjectURL(pendingImage.url);setPendingImage(null);}} onReplace={()=>imageReplacementInputRef.current?.click()} onRetake={pendingImage.kind==="screen-snip"?()=>{URL.revokeObjectURL(pendingImage.url);setPendingImage(null);void captureScreenImage();}:undefined}/>}
+      {capturedFrame && <RfiSnippingWorkspace src={capturedFrame.url} fileName={capturedFrame.fileName} lang={lang} onComplete={file=>{setCapturedFrame(null);revokeObjectUrlAfterRender(capturedFrame.url);void beginPendingImage(file,"replacement","screen-snip");}} onRetake={()=>{setCapturedFrame(null);revokeObjectUrlAfterRender(capturedFrame.url);void captureScreenImage();}} onCancel={()=>{setCapturedFrame(null);revokeObjectUrlAfterRender(capturedFrame.url);}}/>}
+      {pendingImage&&<RfiImageCropEditor src={pendingImage.url} fileName={pendingImage.file.name} initialCrop={null} lang={lang} onApply={crop=>{const current=pendingImage;setPendingImage(null);void uploadImageEvidence(current.file,current.mode,crop,current.kind).finally(()=>URL.revokeObjectURL(current.url));}} onCancel={()=>{setDetailUploadResults(prev=>prev.map(item=>item.name===pendingImage.file.name?{name:item.name,state:"error",message:w("Canceled - not uploaded","Cancelado - no subido",lang)}:item));setPendingImage(null);revokeObjectUrlAfterRender(pendingImage.url);}} onRetake={pendingImage.kind==="screen-snip"?()=>{setPendingImage(null);revokeObjectUrlAfterRender(pendingImage.url);void captureScreenImage();}:undefined}/>}
       {editingPersistedImage&&activeImageUrl&&<RfiImageCropEditor src={activeImageUrl} fileName={w("Persisted RFI image","Imagen RFI persistida",lang)} initialCrop={imagePresentation?.crop||null} lang={lang} onApply={crop=>{setImagePresentation(prev=>prev?{...prev,crop}:prev);setEditingPersistedImage(false);}} onCancel={()=>setEditingPersistedImage(false)} onReplace={()=>imageReplacementInputRef.current?.click()}/>}
       {cloudPickerTarget && (
         <CloudPicker
           provider={cloudPickerTarget.provider}
           projectId={projectId}
-          rfiId={cloudPickerTarget.target === "question" ? rfi.id : undefined}
           lang={lang}
-          onAttached={file => { if (cloudPickerTarget.target === "question") { setQuestionDocs(prev => prev.includes(file.downloadUrl) ? prev : [...prev, file.downloadUrl]); setPackageItems(prev => prev.some(item => item.fileId === file.fileId) ? prev : [...prev, { key: `file:${file.fileId}`, label: file.fileName, fileId: file.fileId, attachment: file.downloadUrl, source: `cloud:${cloudPickerTarget.provider.key}`, include: true, order: prev.length }]); } else { responseStagedFileIds.current.add(file.fileId); setResponseDocs(prev => prev.includes(file.downloadUrl) ? prev : [...prev, file.downloadUrl]); } }}
+          onAttached={file => { if (cloudPickerTarget.target === "question") { editStagedFileIds.current.add(file.fileId); setQuestionDocs(prev => prev.includes(file.downloadUrl) ? prev : [...prev, file.downloadUrl]); setPackageItems(prev => prev.some(item => item.fileId === file.fileId) ? prev : [...prev, { key: `file:${file.fileId}`, label: file.fileName, fileId: file.fileId, attachment: file.downloadUrl, source: `cloud:${cloudPickerTarget.provider.key}`, include: true, order: prev.length }]); } else { responseStagedFileIds.current.add(file.fileId); setResponseDocs(prev => prev.includes(file.downloadUrl) ? prev : [...prev, file.downloadUrl]); } }}
           onClose={() => setCloudPickerTarget(null)}
         />
       )}
