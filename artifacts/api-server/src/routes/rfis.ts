@@ -33,9 +33,13 @@ type RfiPackageItem = {
   order: number;
 };
 
+type RfiImageKind = "viewpoint" | "upload" | "paste" | "screen-snip";
 type RfiImagePresentation = {
   sourceFileId?: number | null;
   replacementFileId?: number | null;
+  sourceKind?: RfiImageKind | null;
+  replacementKind?: Exclude<RfiImageKind, "viewpoint"> | null;
+  showInRfi?: boolean;
   includeInCompletePdf?: boolean;
   crop?: { x: number; y: number; width: number; height: number } | null;
 } | null;
@@ -315,23 +319,48 @@ function normalizePackageConfig(value: unknown): RfiPackageItem[] {
 function normalizeImagePresentation(value: unknown): RfiImagePresentation {
   if (value == null || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
-  const sourceFileId = typeof raw.sourceFileId === "number" && Number.isFinite(raw.sourceFileId) ? raw.sourceFileId : null;
-  const replacementFileId = typeof raw.replacementFileId === "number" && Number.isFinite(raw.replacementFileId) ? raw.replacementFileId : null;
+  const normalizeFileId = (field: "sourceFileId" | "replacementFileId") => {
+    const candidate = raw[field];
+    if (candidate == null) return null;
+    if (typeof candidate !== "number" || !Number.isSafeInteger(candidate) || candidate <= 0) throw new RfiAttachmentError(`${field} must be a positive BIMLog file ID or null.`, 422);
+    return candidate;
+  };
+  const sourceFileId = normalizeFileId("sourceFileId");
+  const replacementFileId = normalizeFileId("replacementFileId");
+  const sourceKinds = new Set<RfiImageKind>(["viewpoint", "upload", "paste", "screen-snip"]);
+  const replacementKinds = new Set<Exclude<RfiImageKind, "viewpoint">>(["upload", "paste", "screen-snip"]);
+  if (raw.sourceKind != null && (typeof raw.sourceKind !== "string" || !sourceKinds.has(raw.sourceKind as RfiImageKind))) throw new RfiAttachmentError("Invalid RFI image source kind.", 422);
+  if (raw.replacementKind != null && (typeof raw.replacementKind !== "string" || !replacementKinds.has(raw.replacementKind as Exclude<RfiImageKind, "viewpoint">))) throw new RfiAttachmentError("Invalid RFI replacement image kind.", 422);
+  if (raw.showInRfi != null && typeof raw.showInRfi !== "boolean") throw new RfiAttachmentError("showInRfi must be a boolean.", 422);
+  if (raw.includeInCompletePdf != null && typeof raw.includeInCompletePdf !== "boolean") throw new RfiAttachmentError("includeInCompletePdf must be a boolean.", 422);
   let crop: { x: number; y: number; width: number; height: number } | null = null;
-  if (raw.crop && typeof raw.crop === "object") {
+  if (raw.crop != null) {
+    if (typeof raw.crop !== "object" || Array.isArray(raw.crop)) throw new RfiAttachmentError("Image crop must be normalized bounds or null.", 422);
     const c = raw.crop as Record<string, unknown>;
     const x = Number(c.x), y = Number(c.y), width = Number(c.width), height = Number(c.height);
     if (![x, y, width, height].every(Number.isFinite) || x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 1 || y + height > 1) {
-      throw new Error("Image crop bounds must be normalized values within 0..1.");
+      throw new RfiAttachmentError("Image crop bounds must be finite normalized values within 0..1 and have positive area.", 422);
     }
-    crop = { x, y, width, height };
+    const clamp = (number: number) => Math.min(1, Math.max(0, Number(number.toFixed(8))));
+    crop = { x: clamp(x), y: clamp(y), width: clamp(width), height: clamp(height) };
   }
   return {
     sourceFileId,
     replacementFileId,
+    sourceKind: raw.sourceKind as RfiImageKind | null | undefined,
+    replacementKind: raw.replacementKind as Exclude<RfiImageKind, "viewpoint"> | null | undefined,
+    showInRfi: raw.showInRfi !== false,
     includeInCompletePdf: raw.includeInCompletePdf !== false,
     crop,
   };
+}
+
+async function validateImagePresentationFiles(projectId: number, presentation: RfiImagePresentation) {
+  if (!presentation) return;
+  const ids = [...new Set([presentation.sourceFileId, presentation.replacementFileId].filter((id): id is number => typeof id === "number"))];
+  if (!ids.length) return;
+  const rows = await db.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, ids)));
+  if (rows.length !== ids.length) throw new RfiAttachmentError("An RFI image file is missing or belongs to another project.", 409);
 }
 
 type ConfiguredRfiStatus = { value: string; meta: Record<string, string> | null };
@@ -418,7 +447,7 @@ function auditValue(field: string, value: unknown): unknown {
   if (field === "attachmentPackageJson" && Array.isArray(value)) return value.map((item: any) => ({ label: item?.label, include: item?.include !== false, order: item?.order }));
   if (field === "imagePresentationJson" && value && typeof value === "object") {
     const image = value as RfiImagePresentation;
-    return image ? { sourceFileId: image.sourceFileId, replacementFileId: image.replacementFileId, includeInCompletePdf: image.includeInCompletePdf !== false, crop: image.crop || null } : null;
+    return image ? { sourceFileId: image.sourceFileId, replacementFileId: image.replacementFileId, sourceKind: image.sourceKind, replacementKind: image.replacementKind, showInRfi: image.showInRfi !== false, includeInCompletePdf: image.includeInCompletePdf !== false, crop: image.crop || null } : null;
   }
   return value ?? null;
 }
@@ -430,6 +459,20 @@ function buildRfiChangeAudit(before: typeof rfisTable.$inferSelect, updates: Rec
     const next = auditValue(field, updates[field]);
     return JSON.stringify(previous) === JSON.stringify(next) ? [] : [{ field: CANONICAL_RFI_PERSISTENCE_MATRIX[field], before: previous, after: next }];
   });
+}
+
+function imagePresentationAuditEvents(beforeValue: unknown, afterValue: unknown): string[] {
+  const before = normalizeImagePresentation(beforeValue);
+  const after = normalizeImagePresentation(afterValue);
+  const events: string[] = [];
+  const beforeActive = before?.replacementFileId ?? before?.sourceFileId ?? null;
+  const afterActive = after?.replacementFileId ?? after?.sourceFileId ?? null;
+  if (!beforeActive && afterActive) events.push(after?.replacementKind === "screen-snip" || after?.sourceKind === "screen-snip" ? "screen_snip_added" : "image_added");
+  if (before?.replacementFileId !== after?.replacementFileId) events.push(after?.replacementFileId ? "replacement_selected" : "original_restored");
+  if (JSON.stringify(before?.crop ?? null) !== JSON.stringify(after?.crop ?? null)) events.push(after?.crop ? "crop_applied" : "crop_cleared");
+  if ((before?.showInRfi !== false) !== (after?.showInRfi !== false)) events.push(after?.showInRfi === false ? "rfi_image_hidden" : "rfi_image_shown");
+  if ((before?.includeInCompletePdf !== false) !== (after?.includeInCompletePdf !== false)) events.push("complete_pdf_inclusion_changed");
+  return events;
 }
 
 // PDF checkbox characters: unchecked (\u2610), checked (\u2611)
@@ -530,6 +573,8 @@ async function createRfiForProject(
   const number = isDuplicate ? suggestedNumber : proposedNumber;
 
   const defaultRfiStatus = await resolveCreationRfiStatus();
+  const imagePresentation = normalizeImagePresentation(input.imagePresentationJson);
+  await validateImagePresentationFiles(projectId, imagePresentation);
   const [rfi] = await dbx.insert(rfisTable).values({
     projectId,
     number,
@@ -567,7 +612,7 @@ async function createRfiForProject(
     distributionList: input.distributionList ?? [],
     attachmentsJson: input.attachmentsJson ?? [],
     attachmentPackageJson: normalizePackageConfig(input.attachmentPackageJson),
-    imagePresentationJson: normalizeImagePresentation(input.imagePresentationJson),
+    imagePresentationJson: imagePresentation,
     projectAddress: nullableText(input.projectAddress),
     sourceViewpointId: nullableText(input.sourceViewpointId),
     revisionNumber: 0,
@@ -581,7 +626,7 @@ async function createRfiForProject(
     actionType: "create",
     entityType: "rfi",
     entityId: rfi.id,
-    details: `Created RFI ${number}: ${input.subject}${input.costImpact ? ` | Cost: ${input.costImpact}${input.costImpactAmount ? ` (${input.costImpactAmount})` : ""}${input.costImpactReason ? ` - ${input.costImpactReason}` : ""}` : ""}${input.scheduleImpact ? ` | Schedule: ${input.scheduleImpact}${input.scheduleImpactDays != null ? ` (${input.scheduleImpactDays} days)` : ""}${input.scheduleImpactReason ? ` - ${input.scheduleImpactReason}` : ""}` : ""}`,
+    details: `Created RFI ${number}: ${input.subject}${input.costImpact ? ` | Cost: ${input.costImpact}${input.costImpactAmount ? ` (${input.costImpactAmount})` : ""}${input.costImpactReason ? ` - ${input.costImpactReason}` : ""}` : ""}${input.scheduleImpact ? ` | Schedule: ${input.scheduleImpact}${input.scheduleImpactDays != null ? ` (${input.scheduleImpactDays} days)` : ""}${input.scheduleImpactReason ? ` - ${input.scheduleImpactReason}` : ""}` : ""}${imagePresentation ? ` | Image event: ${imagePresentation.sourceKind === "screen-snip" ? "screen_snip_added" : "image_added"}` : ""}`,
   });
 
   return { ok: true, rfi };
@@ -1523,9 +1568,14 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       updates.attachmentPackageJson = normalized.packageItems;
       await bindStagedRfiFiles(db, normalized.fileRows, rfiId, req.user!.userId);
     }
-    if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) updates.imagePresentationJson = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
+    if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) {
+      const presentation = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
+      await validateImagePresentationFiles(projectId, presentation);
+      updates.imagePresentationJson = presentation;
+    }
     if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
     const changes = buildRfiChangeAudit(existing[0], updates);
+    const imageEvents = "imagePresentationJson" in updates ? imagePresentationAuditEvents(existing[0].imagePresentationJson, updates.imagePresentationJson) : [];
 
     const [updated] = await db.update(rfisTable).set(updates).where(eq(rfisTable.id, rfiId)).returning();
 
@@ -1537,7 +1587,7 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       actionType: "update",
       entityType: "rfi",
       entityId: rfiId,
-      details: JSON.stringify({ event: "rfi.updated", number: updated.number, changedAt: updates.updatedAt, changes }),
+      details: JSON.stringify({ event: "rfi.updated", number: updated.number, changedAt: updates.updatedAt, changes, imageEvents }),
     });
 
     res.json(rfiToJson(updated, { createdByName: req.user!.fullName }));

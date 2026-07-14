@@ -491,6 +491,20 @@ Deferred:
 - Complete PDF/export layout redesign and image crop tooling remain later-build work; Build 3 preserves original evidence files without claiming conversion support.
 - Plugin work, production/Replit/Neon operations, migration/publish work, and Build 4 remain out of scope.
 
+### RFI Build 4 Snipping And Non-Destructive Crop Tools
+
+- Required ancestor: `71b1d2ab18e986fe604b2afcc931860118f46be9`. Concurrent Telegram and Navisworks commits were preserved while this RFI-only build proceeded.
+- The canonical New RFI and Existing RFI Section 4 flows now share reusable BIMLog Snipping, Crop, and image-presentation controls. Upload, clipboard paste, real screen capture, existing source images, and replacements all require visual review before upload.
+- Screen capture uses the browser Screen Capture API with a privacy-preserving browser-tab preference, freezes one frame, stops all media tracks, supports draw/move/eight-handle resize, rasterizes only the selected rectangle, clears temporary canvas memory, revokes object URLs, and opens the selected PNG in the Crop Tool. Cancel and retake do not upload.
+- Crop state is normalized non-destructive metadata. The API rejects malformed, non-finite, zero-area, out-of-bounds, missing-file, and cross-project payloads; intentional `crop: null`, replacement clearing, visibility, Complete PDF inclusion, reload, and revision copying are preserved.
+- `imagePresentationJson` now records source/replacement kind, `showInRfi`, `includeInCompletePdf`, and crop metadata without adding a database column. Existing records default to visible. Original source and replacement bytes remain unchanged.
+- Existing image activity records distinguish image/snip creation, replacement selection, original restore, crop apply/clear, show/hide, and Complete PDF inclusion changes through the existing RFI activity mechanism.
+- Real isolated API/database and Chrome acceptance evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-4\20260714-135910`. The selected-only screen snip is exactly `749 x 480` pixels, matching the displayed selection; the full captured frame was never uploaded or persisted; the two staged browser files were removed through the authenticated cleanup route with HTTP 200.
+- Browser acceptance verified landscape crop, click-driven paste, real Screen Capture source selection, cancel, retake, move, edge/corner resize, selected-only PNG generation, optional Crop Tool refinement, upload-after-confirmation, staged cleanup, and shared existing-RFI controls with zero console errors. Runtime evidence also verifies replacement/restore, show/hide, revision persistence, original SHA-256 preservation, API failures, audit events, and current Complete PDF crop/include behavior.
+- The current Complete RFI PDF consumed saved crop metadata, produced distinct successful outputs for active replacement, excluded image, and restored original, and did not stretch the tested portrait/landscape fixtures. Build 4 did not redesign any export.
+- Build 5 remains responsible for the broader RFI PDF, Complete PDF, DOCX, Audit PDF, native merge/conversion, drawing-page-dimension, and report visual-design overhaul.
+- Build 4 is submitted for independent acceptance and is not self-accepted. Nothing was published.
+
 ## Deferred
 
 ### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Watching

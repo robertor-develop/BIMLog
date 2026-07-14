@@ -68,6 +68,9 @@ export const rfisTable = pgTable("rfis", {
   imagePresentationJson: json("image_presentation_json").$type<{
     sourceFileId?: number | null;
     replacementFileId?: number | null;
+    sourceKind?: "viewpoint" | "upload" | "paste" | "screen-snip" | null;
+    replacementKind?: "upload" | "paste" | "screen-snip" | null;
+    showInRfi?: boolean;
     includeInCompletePdf?: boolean;
     crop?: { x: number; y: number; width: number; height: number } | null;
   } | null>().default(null),
