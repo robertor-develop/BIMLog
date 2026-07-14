@@ -26,7 +26,7 @@ behavior.
 - Semantic versioning v1.6.x. Package with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
-  README revision + write a per-revision update .txt covering the delta. Current: v1.6.3.
+  README revision + write a per-revision update .txt covering the delta. Current physical package: v1.60.10.
   Shared logic in `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` must be reviewed in both physical
   copies for every shared change; preserve intentional version-specific differences.
 
@@ -107,6 +107,21 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (a collision-skip returns id:null).
 
 ## Open items / known limitations
+- v1.60.10 corrects the v1.60.9 successor-name regression. Successors now receive their clean
+  BIMLog name while detached, before `AddCopy`; the inserted object is resolved by exact GUID,
+  stamped with complete successor/project metadata, and verified by name/metadata/folder readback.
+- Persisted saved-viewpoint renames use `Document.SavedViewpoints.EditDisplayName`. A failed
+  materialization removes only its captured incomplete GUID and remains retryable.
+- Strict v1.60.9 remnants matching `^BIMLog successor ([1-9][0-9]*) ([0-9a-fA-F]{32})$`
+  are repaired only inside BIMLog-managed roots. Duplicate remnants are removed by exact GUID
+  only after one canonical candidate verifies; an orphan is preserved, reported, and blocks the
+  destructive folder rebuild.
+- Both 2025 and 2021 v1.60.10 builds passed as AnyCPU/.NET Framework 4.8. The 2025 package is
+  `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.10.zip`, SHA-256
+  `72A9C743D55BB0DFBE275C164E6C93E0248BDEBBC590DDCB0647DF56F8C550EE`. Evidence is at
+  `C:\Dev\bimlog-tools\evidence\navisworks-successor-name-fix\20260714-141458`.
+- Ruben must still install v1.60.10 and verify the affected model inside Navisworks Manage 2025;
+  source/build/package verification is not field verification.
 - v1.60.9 identity contract: platform row ID is stored locally as `serverId` and is the
   lifecycle-revision identity; Navisworks GUID identifies the current physical saved viewpoint;
   `supersedesId` is lineage; `issueGroupId` is grouping; display IDs/names are labels only.

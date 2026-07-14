@@ -493,17 +493,24 @@ Deferred:
 
 ## Deferred
 
-### Navisworks Superseded Viewpoint Reconciliation v1.60.9 - Watching
+### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Watching
 
-- Shipped source/package on 2026-07-14: platform Jump sends immutable row identity; both physical
+- v1.60.9 field regression: web-created successors could remain visible with internal
+  `BIMLog successor <rowId> <token>` names when post-insertion direct name mutation failed.
+- v1.60.10 source/package produced on 2026-07-14: clean names are assigned before insertion,
+  persisted mutation uses the supported API, readback is mandatory, exact-GUID compensation
+  removes incomplete copies, and strict existing remnants are repaired without label deletion.
+- Platform Jump continues to send immutable row identity; both physical
   plugin sources reconcile by `serverId`, GUID, and lineage rather than display label.
 - Web-created Edit/Reassign successors are copied deterministically from their physical predecessor
   and stamped with the new platform row ID. Duplicate display labels remain separate and ambiguous
   label-only jumps are blocked.
-- Local gates passed: platform mojibake, Living Brief integrity, typecheck, production build; 2025
-  and 2021 plugin Debug builds passed as AnyCPU/net48; v1.60.9 package inventory/hash verified.
-- Evidence: `C:\Dev\bimlog-tools\evidence\navisworks-supersede-sync\20260714-identity-fix`.
-- Open field gate: Ruben must install the v1.60.9 package and verify the affected web reassignment,
+- Local gates passed: deterministic successor-name fixtures; 2025 and 2021 plugin Debug builds
+  as AnyCPU/net48; v1.60.10 assembly/package inventory and matching DLL hash.
+- Package: `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.10.zip`, SHA-256
+  `72A9C743D55BB0DFBE275C164E6C93E0248BDEBBC590DDCB0647DF56F8C550EE`.
+- Evidence: `C:\Dev\bimlog-tools\evidence\navisworks-successor-name-fix\20260714-141458`.
+- Open field gate: Ruben must install the v1.60.10 package and verify the affected web reassignment,
   superseded predecessor, active successor, duplicate-label HV-010, Pull/Reconcile, and Jump flows
   inside Navisworks Manage 2025. Do not call field verification complete before that confirmation.
 
