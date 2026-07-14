@@ -453,6 +453,22 @@ Deferred:
 - Independent acceptance and any production/Replit migration or publish remain outside this build.
 - Image crop/export redesign, plugin work, and Build 3 remain out of scope.
 
+### RFI Build 3 Reference And Attachment Integrity
+
+- Starting commit: `cfcb9645ee97c28dd896569c1c1c7d1724aed99d`.
+- `files` remains the stored-file and storage-identity authority; `attachmentsJson` owns RFI manual-reference and file membership; `attachmentPackageJson` owns only Complete PDF inclusion/order; and each `rfi_responses.response_attachments_json` owns that response's evidence independently.
+- One canonical internal-file locator parser and attachment normalizer now validate same-project file identity, reject malformed/cross-project locators and unsafe schemes, preserve clean display names, deduplicate stable file/reference keys, and remove package ghosts.
+- New-RFI uploads remain staged until create succeeds. Creation validates and binds eligible staged files transactionally, duplicate-number retry binds them once, and verified user removal/cancel deletes only the current uploader's unlinked RFI-staging row and storage object.
+- Local upload, existing project-file selection, authenticated download, response attachments, revisions, and Complete PDF membership now use stable file IDs rather than filename identity. Selected existing files retain their original ownership; viewpoint evidence remains separate.
+- Real authenticated API/database and browser acceptance evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-3\20260714-104133`. It includes byte-for-byte SHA-256 upload/download proof, staged cleanup, database identity, package reload, independent response ownership, security/error statuses, runtime identity, and real-browser screenshots from the production RFI route.
+- The isolated environment has no connected cloud provider. No provider URL, token, credential, or fabricated cloud success was persisted; the unavailable state is recorded in the acceptance evidence.
+- Acceptance found that Multer's multipart header decoding could misread a valid UTF-8 filename such as `café` as Latin-1. RFI upload normalization now repairs a reversible UTF-8-as-Latin-1 decode while preserving already-valid names; authenticated upload/download and staged cleanup evidence covers the corrected accented filename.
+- Build 3 is submitted for independent review and is not self-accepted. Nothing was published and Build 4 was not started.
+
+Deferred:
+- Complete PDF/export layout redesign and image crop tooling remain later-build work; Build 3 preserves original evidence files without claiming conversion support.
+- Plugin work, production/Replit/Neon operations, migration/publish work, and Build 4 remain out of scope.
+
 ## Deferred
 
 ### Telegram / WhatsApp Briefings

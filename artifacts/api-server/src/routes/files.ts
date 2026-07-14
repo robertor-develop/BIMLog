@@ -446,8 +446,9 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
           const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, users[0].companyId)).limit(1);
           uploadedByCompany = companies[0]?.name || "";
         }
+        const { storagePath: _storagePath, ...safeFile } = f;
         return {
-          ...f,
+          ...safeFile,
           uploadedByName,
           uploadedByCompany,
           createdAt: f.createdAt.toISOString(),
@@ -469,6 +470,24 @@ function getBaseName(fileName: string): string {
   return (fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName).toLowerCase();
 }
 
+function safeDownloadDisposition(fileName: string, disposition: "inline" | "attachment" = "attachment"): string {
+  const clean = fileName.replace(/[\u0000-\u001f\u007f"\\]/g, "").trim() || "download";
+  const ascii = clean.replace(/[^\x20-\x7e]/g, "_");
+  return `${disposition}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(clean)}`;
+}
+
+function storedFileContentType(fileType: string, fileName: string): string {
+  const ext = (fileName.split(".").pop() || fileType || "").toLowerCase();
+  const types: Record<string, string> = {
+    pdf: "application/pdf", doc: "application/msword", docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    csv: "text/csv", txt: "text/plain", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
+    tif: "image/tiff", tiff: "image/tiff", bmp: "image/bmp", gif: "image/gif", webp: "image/webp",
+    msg: "application/vnd.ms-outlook",
+  };
+  return types[ext] || (fileType.includes("/") ? fileType : "application/octet-stream");
+}
+
 // ─── GET /projects/:projectId/files/:fileId/download ─────────────────────────
 router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
@@ -488,12 +507,8 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
     if (file.storagePath) {
       try {
         const buffer = await storage.download(file.storagePath);
-        const ct = file.fileType === "png" ? "image/png"
-          : file.fileType === "jpg" || file.fileType === "jpeg" ? "image/jpeg"
-          : file.fileType === "pdf" ? "application/pdf"
-          : "application/octet-stream";
-        res.setHeader("Content-Type", ct);
-        res.setHeader("Content-Disposition", `inline; filename="${file.fileName}"`);
+        res.setHeader("Content-Type", storedFileContentType(file.fileType, file.fileName));
+        res.setHeader("Content-Disposition", safeDownloadDisposition(file.fileName, "inline"));
         res.send(buffer);
       } catch {
         res.status(404).json({ error: "Stored file not found" });
@@ -530,7 +545,7 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
     doc.on("end", () => {
       const pdfBuffer = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"`);
+      res.setHeader("Content-Disposition", safeDownloadDisposition(file.fileName));
       res.setHeader("Content-Length", pdfBuffer.length);
       res.send(pdfBuffer);
     });

@@ -31,8 +31,8 @@ export class LocalDiskStorageAdapter implements StorageAdapter {
   async delete(storagePath: string): Promise<void> {
     try {
       fs.unlinkSync(storagePath);
-    } catch {
-      void 0;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   }
 }

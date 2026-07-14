@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { rfisTable, usersTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
-import { eq, and, count, max, isNull, or, ne, asc, desc, sql } from "drizzle-orm";
+import { eq, and, count, max, isNull, or, ne, asc, desc, sql, inArray } from "drizzle-orm";
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
@@ -40,6 +40,216 @@ type RfiImagePresentation = {
   crop?: { x: number; y: number; width: number; height: number } | null;
 } | null;
 
+const RFI_ATTACHMENT_LIMIT_BYTES = 50 * 1024 * 1024;
+const INTERNAL_FILE_LOCATOR = /^\/api\/v1\/projects\/(\d+)\/files\/(\d+)\/download(?:\?name=[^#&]*)?$/;
+const UNSAFE_REFERENCE_SCHEME = /^(?:javascript|data|file|vbscript|blob):/i;
+const URI_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+
+class RfiAttachmentError extends Error {
+  constructor(message: string, readonly status = 422) {
+    super(message);
+  }
+}
+
+function cleanAttachmentFileName(value: string): string {
+  const multipartDecoded = Buffer.from(value || "attachment", "latin1").toString("utf8");
+  const normalizedValue = multipartDecoded.includes("\uFFFD")
+    ? value
+    : Buffer.from(multipartDecoded, "utf8").toString("latin1") === value
+      ? multipartDecoded
+      : value;
+  const withoutPath = path.posix.basename(path.win32.basename(normalizedValue || "attachment"));
+  const cleaned = withoutPath.replace(/[\u0000-\u001f\u007f]/g, "").trim();
+  return cleaned || "attachment";
+}
+
+function canonicalFileLocator(projectId: number, fileId: number): string {
+  return `/api/v1/projects/${projectId}/files/${fileId}/download`;
+}
+
+function parseInternalFileLocator(value: string): { projectId: number; fileId: number } | null {
+  const match = value.match(INTERNAL_FILE_LOCATOR);
+  if (!match) return null;
+  const projectId = Number(match[1]);
+  const fileId = Number(match[2]);
+  return Number.isSafeInteger(projectId) && projectId > 0 && Number.isSafeInteger(fileId) && fileId > 0
+    ? { projectId, fileId }
+    : null;
+}
+
+function normalizeReferenceValue(value: unknown): string {
+  if (typeof value !== "string" || !value.trim()) throw new RfiAttachmentError("References and attachments cannot be blank.");
+  const trimmed = value.trim();
+  if (UNSAFE_REFERENCE_SCHEME.test(trimmed)) throw new RfiAttachmentError("That reference URL scheme is not allowed.");
+  if (trimmed.startsWith("/api/")) {
+    const parsed = parseInternalFileLocator(trimmed);
+    if (!parsed) throw new RfiAttachmentError("Malformed BIMLog file locator.");
+    return canonicalFileLocator(parsed.projectId, parsed.fileId);
+  }
+  if (URI_SCHEME.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
+    throw new RfiAttachmentError("Only HTTP or HTTPS external references are allowed.");
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed);
+      if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("scheme");
+      return url.toString();
+    } catch {
+      throw new RfiAttachmentError("Enter a valid HTTP or HTTPS reference URL.");
+    }
+  }
+  return trimmed;
+}
+
+function referencePackageKey(value: string): string {
+  return `ref:${crypto.createHash("sha256").update(value).digest("hex").slice(0, 20)}`;
+}
+
+async function normalizeRfiAttachments(params: {
+  projectId: number;
+  values: unknown;
+  packageValue?: unknown;
+  userId: number;
+  rfiId?: number | null;
+  tx: any;
+}) {
+  const { projectId, userId, rfiId, tx } = params;
+  if (!Number.isSafeInteger(projectId) || projectId <= 0) throw new RfiAttachmentError("Invalid project ID.", 400);
+  const rawValues = params.values == null ? [] : params.values;
+  if (!Array.isArray(rawValues)) throw new RfiAttachmentError("References and attachments must be an array.");
+
+  const values: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of rawValues) {
+    const normalized = normalizeReferenceValue(raw);
+    const key = normalized.toLowerCase();
+    if (!seen.has(key)) { seen.add(key); values.push(normalized); }
+  }
+
+  const fileRows = new Map<number, typeof filesTable.$inferSelect>();
+  for (const value of values) {
+    const locator = parseInternalFileLocator(value);
+    if (!locator) continue;
+    if (locator.projectId !== projectId) throw new RfiAttachmentError("A BIMLog file locator belongs to a different project.", 409);
+    await tx.execute(sql`SELECT id FROM files WHERE id = ${locator.fileId} AND project_id = ${projectId} FOR UPDATE`);
+    const [file] = await tx.select().from(filesTable)
+      .where(and(eq(filesTable.id, locator.fileId), eq(filesTable.projectId, projectId))).limit(1);
+    if (!file) throw new RfiAttachmentError("A referenced BIMLog file does not exist in this project.", 404);
+    if (file.source === "rfi-attachment" && file.linkedRfiId == null && file.uploadedById !== userId) {
+      throw new RfiAttachmentError("A staged RFI upload can only be attached by its uploader.", 403);
+    }
+    fileRows.set(file.id, file);
+  }
+
+  const requested = normalizePackageConfig(params.packageValue);
+  const requestedByKey = new Map(requested.map(item => [item.key, item]));
+  const requestedByAttachment = new Map<string, RfiPackageItem>();
+  for (const item of requested) {
+    if (!item.attachment) continue;
+    try { requestedByAttachment.set(normalizeReferenceValue(item.attachment), item); } catch { /* stale package ghosts are discarded below */ }
+  }
+  const packageItems = values.map((value, index) => {
+    const locator = parseInternalFileLocator(value);
+    const file = locator ? fileRows.get(locator.fileId) : undefined;
+    const key = file ? `file:${file.id}` : referencePackageKey(value);
+    const prior = requestedByKey.get(key) || requestedByAttachment.get(value) || (file ? requested.find(item => item.fileId === file.id) : undefined);
+    return {
+      key,
+      label: file?.fileName || attachmentLabel(value),
+      fileId: file?.id ?? null,
+      attachment: value,
+      source: file && typeof (file.fileMetadata as Record<string, unknown> | null)?.rfiAttachmentOrigin === "string" && (file.fileMetadata as Record<string, unknown>).rfiAttachmentOrigin !== "local-upload"
+        ? `cloud:${String((file.fileMetadata as Record<string, unknown>).rfiAttachmentOrigin)}`
+        : file?.source || (value.startsWith("http") ? "external-reference" : "manual-reference"),
+      include: prior?.include !== false,
+      order: prior?.order ?? index,
+    };
+  }).sort((a, b) => a.order - b.order).map((item, order) => ({ ...item, order }));
+
+  return { values, fileRows, packageItems };
+}
+
+async function bindStagedRfiFiles(tx: any, files: Map<number, typeof filesTable.$inferSelect>, rfiId: number, userId: number) {
+  for (const file of files.values()) {
+    if (file.source !== "rfi-attachment" || file.linkedRfiId != null) continue;
+    const [updated] = await tx.update(filesTable).set({ linkedRfiId: rfiId, updatedAt: new Date() })
+      .where(and(eq(filesTable.id, file.id), eq(filesTable.uploadedById, userId), eq(filesTable.source, "rfi-attachment"), isNull(filesTable.linkedRfiId)))
+      .returning({ id: filesTable.id });
+    if (!updated) throw new RfiAttachmentError("A staged RFI upload changed before it could be attached.", 409);
+  }
+}
+
+function parsePositiveId(value: unknown, label: string): number {
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) throw new RfiAttachmentError(`Invalid ${label}.`, 400);
+  return parsed;
+}
+
+async function validateRfiAttachmentTarget(projectId: number, value: unknown): Promise<number | null> {
+  if (value == null || String(value).trim() === "") return null;
+  const rfiId = parsePositiveId(value, "RFI ID");
+  const [rfi] = await db.select({ id: rfisTable.id }).from(rfisTable)
+    .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).limit(1);
+  if (!rfi) throw new RfiAttachmentError("The target RFI does not exist in this project.", 404);
+  return rfiId;
+}
+
+async function storeRfiAttachment(params: {
+  projectId: number;
+  rfiId: number | null;
+  userId: number;
+  fileName: string;
+  buffer: Buffer;
+  origin: "local-upload" | "google_drive" | "dropbox" | "bim360" | "procore";
+}) {
+  const fileName = cleanAttachmentFileName(params.fileName);
+  if (params.buffer.length === 0) throw new RfiAttachmentError("Zero-byte files cannot be attached.", 400);
+  const ext = (fileName.split(".").pop() || "bin").toLowerCase();
+  const storagePath = await storage.upload(params.buffer, params.projectId, `rfi-attach-${Date.now()}-${fileName}`);
+  try {
+    const defaultFileStatus = await getDefaultValue("file_status");
+    const [row] = await db.insert(filesTable).values({
+      projectId: params.projectId,
+      fileName,
+      fileSize: params.buffer.length,
+      fileType: ext,
+      status: defaultFileStatus,
+      uploadedById: params.userId,
+      source: "rfi-attachment",
+      fileMetadata: { rfiAttachmentOrigin: params.origin },
+      storagePath,
+      linkedRfiId: params.rfiId,
+    }).returning();
+    return {
+      fileId: row.id,
+      fileName,
+      fileSize: row.fileSize,
+      fileType: row.fileType,
+      source: row.source,
+      linkedRfiId: row.linkedRfiId,
+      downloadUrl: canonicalFileLocator(params.projectId, row.id),
+    };
+  } catch (error) {
+    await storage.delete(storagePath).catch(storageError => console.error("[rfis/attachments] Failed to compensate storage write", storageError));
+    throw error;
+  }
+}
+
+const rfiAttachmentUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: RFI_ATTACHMENT_LIMIT_BYTES } });
+function acceptRfiAttachmentUpload(req: any, res: any, next: any) {
+  rfiAttachmentUpload.single("file")(req, res, (error: unknown) => {
+    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+      res.status(413).json({ error: `File exceeds the ${RFI_ATTACHMENT_LIMIT_BYTES / 1024 / 1024} MB upload limit.` });
+      return;
+    }
+    if (error) {
+      res.status(400).json({ error: "The attachment upload could not be processed." });
+      return;
+    }
+    next();
+  });
+}
+
 function daysSince(d: Date | string): number {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000);
 }
@@ -58,10 +268,8 @@ function stripMarkdown(text: string): string {
 }
 
 function attachmentLabel(value: string): string {
-  const nameMatch = value.match(/[?&]name=([^&]+)/);
-  if (nameMatch) {
-    try { return decodeURIComponent(nameMatch[1]); } catch { return nameMatch[1]; }
-  }
+  const locator = parseInternalFileLocator(value);
+  if (locator) return `BIMLog file #${locator.fileId}`;
   try {
     if (/^https?:\/\//i.test(value) || value.startsWith("/api/")) {
       const url = new URL(value, "https://bimlog.local");
@@ -72,6 +280,15 @@ function attachmentLabel(value: string): string {
     return value;
   }
   return value;
+}
+
+async function loadAttachmentLabels(projectId: number, collections: Array<string[] | null | undefined>) {
+  const values = collections.flatMap(collection => collection || []);
+  const ids = [...new Set(values.map(value => parseInternalFileLocator(value)?.fileId).filter((id): id is number => !!id))];
+  const rows = ids.length ? await db.select({ id: filesTable.id, fileName: filesTable.fileName }).from(filesTable)
+    .where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, ids))) : [];
+  const names = new Map(rows.map(row => [row.id, row.fileName]));
+  return new Map(values.map(value => [value, names.get(parseInternalFileLocator(value)?.fileId || -1) || attachmentLabel(value)]));
 }
 
 function normalizePackageConfig(value: unknown): RfiPackageItem[] {
@@ -391,6 +608,7 @@ function makeRfiPdf(
   rfi: typeof rfisTable.$inferSelect,
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: { name: string } | undefined,
+  attachmentLabels: Map<string, string> = new Map(),
 ): void {
   const fmtD = (d: Date | string | null | undefined) =>
     d ? new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—";
@@ -532,7 +750,7 @@ function makeRfiPdf(
 
   // ── Section 7: Attachments / references (actual list from the RFI) ──────────
   const attList = (rfi.attachmentsJson as unknown as string[] | null) || [];
-  const attLines = attList.length > 0 ? attList.map(attachmentLabel) : ["None"];
+  const attLines = attList.length > 0 ? attList.map(value => attachmentLabels.get(value) || attachmentLabel(value)) : ["None"];
   checkPage(20 + attLines.length * 14);
   doc.rect(MARGIN, y, contentW, 16).fill("#F1F5F9");
   doc.fillColor("#64748B").fontSize(7.5).font("Helvetica-Bold")
@@ -1017,11 +1235,25 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
     const body = CreateRfiBody.parse(req.body);
 
-    const result = await createRfiForProject(projectId, {
-      ...body,
-      number: req.body.number as string | undefined,
-      forceNumber: req.body.forceNumber as boolean | undefined,
-    }, req.user!);
+    const result = await db.transaction(async tx => {
+      const normalized = await normalizeRfiAttachments({
+        projectId,
+        values: body.attachmentsJson,
+        packageValue: (body as { attachmentPackageJson?: unknown }).attachmentPackageJson,
+        userId: req.user!.userId,
+        tx,
+      });
+      const created = await createRfiForProject(projectId, {
+        ...body,
+        attachmentsJson: normalized.values,
+        attachmentPackageJson: normalized.packageItems,
+        number: req.body.number as string | undefined,
+        forceNumber: req.body.forceNumber as boolean | undefined,
+      }, req.user!, tx);
+      if (!created.ok) return created;
+      await bindStagedRfiFiles(tx, normalized.fileRows, created.rfi.id, req.user!.userId);
+      return created;
+    });
 
     if (!result.ok) {
       res.status(result.status).json(result.payload);
@@ -1033,6 +1265,10 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
     // their own email client) and then recorded via POST .../mark-sent. Creating an
     // RFI never moves the ball-in-court — that flip happens only at mark-sent time.
   } catch (error) {
+    if (error instanceof RfiAttachmentError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
   }
@@ -1274,8 +1510,19 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
     }
     if (body.dateAnswered !== undefined) updates.dateAnswered = body.dateAnswered ? new Date(body.dateAnswered) : null;
     if (body.distributionList !== undefined) updates.distributionList = body.distributionList;
-    if (body.attachmentsJson !== undefined) updates.attachmentsJson = body.attachmentsJson;
-    if ((body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) updates.attachmentPackageJson = normalizePackageConfig((body as { attachmentPackageJson?: unknown }).attachmentPackageJson);
+    if (body.attachmentsJson !== undefined || (body as { attachmentPackageJson?: unknown }).attachmentPackageJson !== undefined) {
+      const normalized = await normalizeRfiAttachments({
+        projectId,
+        values: body.attachmentsJson ?? existing[0].attachmentsJson,
+        packageValue: (body as { attachmentPackageJson?: unknown }).attachmentPackageJson ?? existing[0].attachmentPackageJson,
+        userId: req.user!.userId,
+        rfiId,
+        tx: db,
+      });
+      updates.attachmentsJson = normalized.values;
+      updates.attachmentPackageJson = normalized.packageItems;
+      await bindStagedRfiFiles(db, normalized.fileRows, rfiId, req.user!.userId);
+    }
     if ((body as { imagePresentationJson?: unknown }).imagePresentationJson !== undefined) updates.imagePresentationJson = normalizeImagePresentation((body as { imagePresentationJson?: unknown }).imagePresentationJson);
     if (body.responseAttachmentsJson !== undefined) updates.responseAttachmentsJson = body.responseAttachmentsJson;
     const changes = buildRfiChangeAudit(existing[0], updates);
@@ -1365,6 +1612,10 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
       });
     }
   } catch (error) {
+    if (error instanceof RfiAttachmentError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
     const message = error instanceof Error ? error.message : "Bad request";
     res.status(400).json({ error: message });
   }
@@ -1464,6 +1715,14 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
       const revNum = Math.max(0, ...family.map(item => item.revisionNumber ?? 0)) + 1;
       const root = family.find(item => item.id === parentId) || source;
       const newNumber = `${root.number.replace(/-R\d+$/, "")}-R${revNum}`;
+      const normalizedAttachments = await normalizeRfiAttachments({
+        projectId,
+        values: source.attachmentsJson,
+        packageValue: source.attachmentPackageJson,
+        userId: req.user!.userId,
+        rfiId: source.id,
+        tx,
+      });
       const [newRfi] = await tx.insert(rfisTable).values({
         projectId, number: newNumber, subject: source.subject, rfiType: source.rfiType, description: source.description,
         status: defaultStatus, priority: source.priority, assignedToId: source.assignedToId, createdById: req.user!.userId,
@@ -1476,8 +1735,8 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
         question: source.question, costImpact: source.costImpact, costImpactAmount: source.costImpactAmount,
         costImpactReason: source.costImpactReason, scheduleImpact: source.scheduleImpact,
         scheduleImpactDays: source.scheduleImpactDays, scheduleImpactReason: source.scheduleImpactReason,
-        distributionList: (source.distributionList as string[] | null) ?? [], attachmentsJson: (source.attachmentsJson as string[] | null) ?? [],
-        attachmentPackageJson: normalizePackageConfig(source.attachmentPackageJson),
+        distributionList: (source.distributionList as string[] | null) ?? [], attachmentsJson: normalizedAttachments.values,
+        attachmentPackageJson: normalizedAttachments.packageItems,
         imagePresentationJson: normalizeImagePresentation(source.imagePresentationJson), projectAddress: source.projectAddress,
         sourceViewpointId: source.sourceViewpointId, sourceViewpointLabel: source.sourceViewpointLabel,
         parentRfiId: parentId, revisionNumber: revNum, revisionOf: source.id, sendStatus: "draft",
@@ -1492,6 +1751,10 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
     if (outcome.status !== 201) { res.status(outcome.status).json({ error: outcome.error }); return; }
     res.status(201).json(rfiToJson(outcome.rfi, { createdByName: req.user!.fullName }));
   } catch (error) {
+    if (error instanceof RfiAttachmentError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
     if ((error as { code?: string })?.code === "23505") {
       res.status(409).json({ error: "A concurrent request already created this RFI revision. Reload and try again." });
       return;
@@ -1505,6 +1768,7 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
 function buildRfiDocxDocument(
   rfi: typeof rfisTable.$inferSelect,
   responses: (typeof rfiResponsesTable.$inferSelect)[],
+  attachmentLabels: Map<string, string> = new Map(),
 ): Document {
   const fmtD = (d: Date | string | null | undefined) => {
     if (!d) return "—";
@@ -1562,7 +1826,7 @@ function buildRfiDocxDocument(
     return checkRow(label, isChecked);
   });
 
-  const actualAttachments = ((rfi.attachmentsJson as unknown as string[] | null) || []).map(attachmentLabel);
+  const actualAttachments = ((rfi.attachmentsJson as unknown as string[] | null) || []).map(value => attachmentLabels.get(value) || attachmentLabel(value));
   const attachOpts = actualAttachments.length > 0 ? actualAttachments : ["None"];
   const attachCheckboxes = attachOpts.map(opt => checkRow(opt, false));
 
@@ -1647,7 +1911,7 @@ function buildRfiDocxDocument(
                         ] : []),
                         ...(respAtts.length > 0 ? [
                           new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: "Attachments", bold: true, size: 16, color: "64748B" })] }),
-                          ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `- ${attachmentLabel(a)}`, size: 18 })] })),
+                          ...respAtts.map((a: string) => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `- ${attachmentLabels.get(a) || attachmentLabel(a)}`, size: 18 })] })),
                         ] : []),
                         ...(resp.isConflictOfInterest ? [
                           new Paragraph({ spacing: { before: 60, after: 60 }, children: [new TextRun({ text: "CONFLICT OF INTEREST — Logged in audit trail", bold: true, size: 18, color: "92400E" })] }),
@@ -1701,6 +1965,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
+    const attachmentLabels = await loadAttachmentLabels(projectId, [
+      rfi.attachmentsJson as string[] | null,
+      ...responses.map(response => response.responseAttachmentsJson as string[] | null),
+    ]);
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -1712,7 +1980,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       res.send(pdfBuffer);
     });
 
-    makeRfiPdf(doc, rfi, responses, project);
+    makeRfiPdf(doc, rfi, responses, project, attachmentLabels);
     doc.end();
 
     db.insert(activityLogTable).values({
@@ -1739,22 +2007,23 @@ async function renderRfiPdfBuffer(
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: { name: string } | undefined,
 ): Promise<Buffer> {
+  const attachmentLabels = await loadAttachmentLabels(rfi.projectId, [
+    rfi.attachmentsJson as string[] | null,
+    ...responses.map(response => response.responseAttachmentsJson as string[] | null),
+  ]);
   return new Promise((resolve, reject) => {
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
-    makeRfiPdf(doc, rfi, responses, project);
+    makeRfiPdf(doc, rfi, responses, project, attachmentLabels);
     doc.end();
   });
 }
 
 function attachmentFileId(value: string): number | null {
-  const match = value.match(/\/files\/(\d+)\/download\b/i);
-  if (!match) return null;
-  const id = Number(match[1]);
-  return Number.isFinite(id) ? id : null;
+  return parseInternalFileLocator(value)?.fileId ?? null;
 }
 
 function fileExtension(fileName: string): string {
@@ -1898,14 +2167,14 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
 
     if (packageItems.length > 0) {
       for (const item of packageItems.filter(item => item.include).sort((a, b) => a.order - b.order)) {
-        const file = item.fileId ? filesById.get(item.fileId) : item.attachment ? allFiles.find(candidate => candidate.fileName === item.attachment) : null;
+        const file = item.fileId ? filesById.get(item.fileId) : null;
         if (imagePresentation?.includeInCompletePdf === false && file && (file.id === imagePresentation.sourceFileId || file.id === imagePresentation.replacementFileId || file.source === "lens-viewpoint")) continue;
         addFileItem(item.label, file, true);
       }
     } else {
       for (const attachment of ((rfi.attachmentsJson as unknown as string[] | null) || [])) {
         const id = attachmentFileId(attachment);
-        const file = id ? filesById.get(id) : allFiles.find(candidate => candidate.fileName === attachment);
+        const file = id ? filesById.get(id) : undefined;
         if (file) {
           if (!seen.has(file.id)) {
             selectedItems.push({ label: file.fileName, file });
@@ -1915,12 +2184,12 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
           referencesOnly.push(attachmentLabel(attachment));
         }
       }
-      for (const file of allFiles.filter(candidate => candidate.linkedRfiId === rfiId && candidate.source !== "system-generated")) {
-        if (imagePresentation?.includeInCompletePdf === false && (file.id === imagePresentation.sourceFileId || file.source === "lens-viewpoint")) continue;
-        if (!seen.has(file.id)) {
-          selectedItems.push({ label: file.fileName, file });
-          seen.add(file.id);
-        }
+    }
+    if (imagePresentation?.includeInCompletePdf !== false) {
+      const imageId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId;
+      const imageFile = imageId ? filesById.get(imageId) : undefined;
+      if (imageFile && !selectedItems.some(item => item.file?.id === imageFile.id)) {
+        selectedItems.push({ label: imageFile.fileName, file: imageFile });
       }
     }
 
@@ -2709,10 +2978,11 @@ Write only the email body. Do not include "To:" or "Subject:" header lines.`;
 router.post("/projects/:projectId/rfis/attachments/from-google-drive",
   authMiddleware, requirePermission("admin", "write"),
   async (req, res) => {
-    const projectId = Number(req.params.projectId);
     const { fileId, fileName, mimeType, rfiId } = req.body as { fileId?: string; fileName?: string; mimeType?: string; rfiId?: number };
     if (!fileId || !fileName) { res.status(400).json({ error: "fileId and fileName are required" }); return; }
     try {
+      const projectId = parsePositiveId(req.params.projectId, "project ID");
+      const targetRfiId = await validateRfiAttachmentTarget(projectId, rfiId);
       const token = await getValidAccessToken(req.user!.userId, "google_drive");
       const isGoogleDoc = (mimeType || "").startsWith("application/vnd.google-apps");
       // Google-native docs must be exported; regular files stream with alt=media.
@@ -2722,17 +2992,10 @@ router.post("/projects/:projectId/rfis/attachments/from-google-drive",
       const dl = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!dl.ok) { res.status(502).json({ error: `Google Drive download failed (${dl.status})` }); return; }
       const buffer = Buffer.from(await dl.arrayBuffer());
-      const finalName = isGoogleDoc && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
-      const ext = (finalName.split(".").pop() || "").toLowerCase();
-      const storagePath = await storage.upload(buffer, projectId, `rfi-attach-${Date.now()}-${finalName}`);
-      const defaultFileStatus = await getDefaultValue("file_status");
-      const [row] = await db.insert(filesTable).values({
-        projectId, fileName: finalName, fileSize: buffer.length, fileType: ext || "bin",
-        status: defaultFileStatus, uploadedById: req.user!.userId, source: "rfi-attachment",
-        storagePath, linkedRfiId: rfiId ? Number(rfiId) : null,
-      }).returning();
-      res.json({ fileId: row.id, fileName: finalName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(finalName)}` });
+      const importedName = isGoogleDoc && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
+      res.json(await storeRfiAttachment({ projectId, rfiId: targetRfiId, userId: req.user!.userId, fileName: importedName, buffer, origin: "google_drive" }));
     } catch (err) {
+      if (err instanceof RfiAttachmentError) { res.status(err.status).json({ error: err.message }); return; }
       const msg = err instanceof Error ? err.message : "Import failed";
       res.status(msg === "not_connected" ? 428 : 500).json({ error: msg === "not_connected" ? "Connect Google Drive first." : msg });
     }
@@ -2742,7 +3005,6 @@ router.post("/projects/:projectId/rfis/attachments/from-google-drive",
 router.post("/projects/:projectId/rfis/attachments/from-cloud",
   authMiddleware, requirePermission("admin", "write"),
   async (req, res) => {
-    const projectId = Number(req.params.projectId);
     const { provider, ref, fileName, mimeType, rfiId } = req.body as {
       provider?: string; ref?: string; fileName?: string; mimeType?: string; rfiId?: number;
     };
@@ -2752,28 +3014,13 @@ router.post("/projects/:projectId/rfis/attachments/from-cloud",
       return;
     }
     try {
+      const projectId = parsePositiveId(req.params.projectId, "project ID");
+      const targetRfiId = await validateRfiAttachmentTarget(projectId, rfiId);
       const { buffer, exportedPdf } = await downloadCloud(req.user!.userId, key, ref, mimeType);
-      const finalName = exportedPdf && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
-      const ext = (finalName.split(".").pop() || "").toLowerCase();
-      const storagePath = await storage.upload(buffer, projectId, `rfi-attach-${Date.now()}-${finalName}`);
-      const defaultFileStatus = await getDefaultValue("file_status");
-      const [row] = await db.insert(filesTable).values({
-        projectId,
-        fileName: finalName,
-        fileSize: buffer.length,
-        fileType: ext || "bin",
-        status: defaultFileStatus,
-        uploadedById: req.user!.userId,
-        source: "rfi-attachment",
-        storagePath,
-        linkedRfiId: rfiId ? Number(rfiId) : null,
-      }).returning();
-      res.json({
-        fileId: row.id,
-        fileName: finalName,
-        downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(finalName)}`,
-      });
+      const importedName = exportedPdf && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
+      res.json(await storeRfiAttachment({ projectId, rfiId: targetRfiId, userId: req.user!.userId, fileName: importedName, buffer, origin: key }));
     } catch (err) {
+      if (err instanceof RfiAttachmentError) { res.status(err.status).json({ error: err.message }); return; }
       const msg = err instanceof Error ? err.message : "Import failed";
       res.status(msg === "not_connected" ? 428 : 500).json({
         error: msg === "not_connected" ? "Connect this file source before importing." : "Could not import that file.",
@@ -2848,30 +3095,60 @@ router.post("/projects/:projectId/rfis/import-prefill",
 router.post("/projects/:projectId/rfis/attachments/upload",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  acceptRfiAttachmentUpload,
   async (req, res) => {
-    const projectId = Number(req.params.projectId);
     try {
-      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const rfiId = req.body?.rfiId ? Number(req.body.rfiId) : null;
-      const fileName = req.file.originalname || "attachment";
-      const ext = (fileName.split(".").pop() || "").toLowerCase();
-      const storagePath = await storage.upload(req.file.buffer, projectId, `rfi-attach-${Date.now()}-${fileName}`);
-      const defaultFileStatus = await getDefaultValue("file_status");
-      const [row] = await db.insert(filesTable).values({
+      const projectId = parsePositiveId(req.params.projectId, "project ID");
+      if (!req.file) { res.status(400).json({ error: "Select a file to upload." }); return; }
+      if (req.file.size === 0 || req.file.buffer.length === 0) { res.status(400).json({ error: "Zero-byte files cannot be attached." }); return; }
+      const rfiId = await validateRfiAttachmentTarget(projectId, req.body?.rfiId);
+      res.json(await storeRfiAttachment({
         projectId,
-        fileName,
-        fileSize: req.file.size,
-        fileType: ext || "bin",
-        status: defaultFileStatus,
-        uploadedById: req.user!.userId,
-        source: "rfi-attachment",
-        storagePath,
-        linkedRfiId: rfiId,
-      }).returning();
-      res.json({ fileId: row.id, fileName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(fileName)}` });
+        rfiId,
+        userId: req.user!.userId,
+        fileName: req.file.originalname,
+        buffer: req.file.buffer,
+        origin: "local-upload",
+      }));
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Upload failed" });
+      if (error instanceof RfiAttachmentError) { res.status(error.status).json({ error: error.message }); return; }
+      console.error("[rfis/attachments/upload] Upload failed", error);
+      res.status(500).json({ error: "The file could not be stored. Try again." });
+    }
+  }
+);
+
+router.delete("/projects/:projectId/rfis/attachments/staged/:fileId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    try {
+      const projectId = parsePositiveId(req.params.projectId, "project ID");
+      const fileId = parsePositiveId(req.params.fileId, "file ID");
+      const [file] = await db.select().from(filesTable).where(and(
+        eq(filesTable.id, fileId),
+        eq(filesTable.projectId, projectId),
+        eq(filesTable.uploadedById, req.user!.userId),
+        eq(filesTable.source, "rfi-attachment"),
+        isNull(filesTable.linkedRfiId),
+      )).limit(1);
+      if (!file) {
+        res.status(404).json({ error: "This staged upload is unavailable or is already attached to an RFI." });
+        return;
+      }
+      if (file.storagePath) await storage.delete(file.storagePath);
+      await db.delete(filesTable).where(and(
+        eq(filesTable.id, file.id),
+        eq(filesTable.projectId, projectId),
+        eq(filesTable.uploadedById, req.user!.userId),
+        eq(filesTable.source, "rfi-attachment"),
+        isNull(filesTable.linkedRfiId),
+      ));
+      res.json({ success: true, fileId });
+    } catch (error) {
+      if (error instanceof RfiAttachmentError) { res.status(error.status).json({ error: error.message }); return; }
+      console.error("[rfis/attachments/staged] Cleanup failed", error);
+      res.status(500).json({ error: "The staged upload could not be removed." });
     }
   }
 );
@@ -2960,9 +3237,15 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
       const normalizedCostReason = responseCostNeedsReason ? body.costImpactReason || null : null;
       const normalizedScheduleDays = responseScheduleNeedsDays ? body.scheduleImpactDays ?? null : null;
       const normalizedScheduleReason = responseScheduleNeedsDays ? body.scheduleImpactReason || null : null;
-      const responseAttachments = Array.isArray(body.responseAttachmentsJson)
-        ? body.responseAttachmentsJson.filter(value => typeof value === "string" && value.trim()).map(value => value.trim())
-        : [];
+      const normalizedResponseAttachments = await normalizeRfiAttachments({
+        projectId,
+        values: body.responseAttachmentsJson,
+        userId,
+        rfiId,
+        tx,
+      });
+      const responseAttachments = normalizedResponseAttachments.values;
+      await bindStagedRfiFiles(tx, normalizedResponseAttachments.fileRows, rfiId, userId);
 
       const [inserted] = await tx.insert(rfiResponsesTable).values({
       rfiId,
@@ -3064,6 +3347,10 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     if (result.status !== 201) { res.status(result.status).json({ error: result.error }); return; }
     res.status(201).json({ ...result.response, createdAt: result.response.createdAt.toISOString(), isConflictOfInterest: isCoi, rfi: rfiToJson(result.rfi) });
   } catch (error) {
+    if (error instanceof RfiAttachmentError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
     if ((error as { code?: string })?.code === "23505") {
       res.status(409).json({ error: "A concurrent response was saved first. Reload and submit again." });
       return;
@@ -3086,7 +3373,11 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
-    const doc = buildRfiDocxDocument(rfi, responses);
+    const attachmentLabels = await loadAttachmentLabels(projectId, [
+      rfi.attachmentsJson as string[] | null,
+      ...responses.map(response => response.responseAttachmentsJson as string[] | null),
+    ]);
+    const doc = buildRfiDocxDocument(rfi, responses, attachmentLabels);
     const buffer = await Packer.toBuffer(doc);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}.docx"`);
