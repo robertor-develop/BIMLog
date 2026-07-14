@@ -129,6 +129,17 @@ Verification required before customer retest:
   environment during this pass, so River Avenue page boxes were not programmatically recorded here.
 - Publish status: not published.
 
+2026-07-13 RFI Build 1A Correction 4:
+- Corrective status: implementation and local Source Gate evidence only. Build 1A remains unaccepted pending independent review; Build 1B was not started and the application was not published.
+- Completed: the single production `RfiCanonicalForm` now owns placement for saved-RFI actions and specialized Section 1, 4, 6, and 7 behavior. No fallback or duplicate 1-7 field form was restored.
+- Completed: Section 1 visibly restores current ball in court, custody history, activity timeline, and the Viewed By results panel. Section 4 restores linked items, project-file selection, source-viewpoint evidence, interactive package include/order controls, image include/exclude, and saved-crop preservation/reset. Section 6 shows latest confirmed response impacts.
+- Completed: Section 7 restores manual Mark as Sent, connected SendGrid delivery and setup guidance, existing responses and clean attachment names, explicit Add Response, local/cloud/project-file response attachments, response AI text assist, Answered By, response cost/schedule accountability fields, closing status, and one Save Response action at the bottom of the response form.
+- Completed: the visible Create Revision action now uses the real linked-revision API mutation and audit path. The obsolete preload/create pseudo-revision path and disconnected legacy `.doc` generator were removed.
+- Completed: saved RFI actions are passed through `savedRfiActions`; `RfiActionBar` omits any action without a real handler. New viewpoint-prefilled RFIs cannot render Jump to Viewpoint without a handler, while saved RFIs retain the existing local jump handler.
+- Completed: New RFI restores project-directory pickers, project-file references, and explicit higher-cost AI file reading with a confirmation warning. Text-only question/email/response AI remains click-driven and states that attachments are not read.
+- Source cleanup: the focused definition-only scan found no local constant, state setter, handler, ref, or helper function occurring only at its declaration after correction.
+- Local verification: `git diff --check`, `pnpm run check:mojibake`, `pnpm run typecheck`, and `$env:PORT='3000'; pnpm run build` passed. The first sandboxed build attempt was blocked by Vite temp-file permissions; the approved rerun passed. Independent browser behavior and visual acceptance remain required before Build 1A can be accepted.
+
 2026-07-13 Build 1 - Canonical RFI UI:
 - Scope: browser UI only for the canonical RFI 1-7 structure. No export routes, PDF/DOCX/Audit
   PDF/Complete PDF generation, Office conversion, plugin code, production data, environment,

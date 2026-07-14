@@ -15,11 +15,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare, Plus, X, FileText, Download,
-  LayoutList, Table2, Sparkles, Clock, AlertTriangle, CheckCircle2,
-  RefreshCw, ExternalLink, User, Building2, Mail, Phone, MapPin, Loader2,
-  Search, UserPlus, Shield, Eye, DollarSign, Calendar, Trash2,
-  Send, Copy, Check, PenLine, Navigation, ChevronLeft, FolderOpen,
-  Upload, Camera, Clipboard, RotateCcw, ArrowUp, ArrowDown,
+  LayoutList, Table2, Sparkles, AlertTriangle,
+  RefreshCw, Phone, Loader2,
+  Search, Calendar, Trash2,
+  Send, Copy, FolderOpen,
+  Upload, Camera, Clipboard,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { logClientError } from "@/lib/client-log";
@@ -51,7 +51,6 @@ type FileSourceProvider = typeof FILE_SOURCE_PROVIDERS[number];
 
 // Attachments are plain strings (a URL, a file name, or an uploaded-file
 // download URL carrying ?name=). These render them nicely + clickably.
-const isUrlAttach = (v: string) => /^https?:\/\//.test(v) || v.startsWith("/api/");
 const attachLabel = (v: string) => {
   const m = v.match(/[?&]name=([^&]+)/);
   if (m) { try { return decodeURIComponent(m[1]); } catch { return m[1]; } }
@@ -93,6 +92,7 @@ type RfiUiMode = "create" | "view" | "edit";
 type RfiRecordState = "new" | "draft" | "sent" | "closed" | "reopened" | "revised";
 
 type RfiActionKey =
+  | "back"
   | "submit"
   | "cancel"
   | "save-rfi"
@@ -106,6 +106,7 @@ type RfiActionKey =
   | "reopen"
   | "raise-change-order"
   | "jump-viewpoint"
+  | "revise"
   | "save-response";
 
 type RfiActionDefinition = {
@@ -117,6 +118,7 @@ type RfiActionDefinition = {
 type RfiCanonicalValues = {
   number?: string;
   projectName?: string;
+  projectAddress?: string;
   subject: string;
   status: string;
   priority: string;
@@ -182,7 +184,7 @@ type RfiCanonicalFormProps = {
   attachments: string[];
   imagePresentation: RfiImagePresentation;
   packageItems: RfiPackageItem[];
-  responses: Array<{ id?: number; text: string; by?: string; date?: string }>;
+  responses: Array<{ id?: number; text: string; by?: string; date?: string; attachments?: string[] }>;
   loading?: Partial<Record<"saving" | "uploading" | "questionAi" | "emailAi" | "response", boolean>>;
   options?: {
     priorities?: RfiCanonicalOption[];
@@ -203,6 +205,17 @@ type RfiCanonicalFormProps = {
   onGenerateQuestionAi: () => void;
   onGenerateEmailAi: () => void;
   onCopyEmail: () => void;
+  emailCopied?: boolean;
+  statusContent?: React.ReactNode;
+  submittedByDirectoryContent?: React.ReactNode;
+  submittedToDirectoryContent?: React.ReactNode;
+  referenceContent?: React.ReactNode;
+  impactContent?: React.ReactNode;
+  responseContent?: React.ReactNode;
+  onTogglePackageItem?: (key: string, include: boolean) => void;
+  onMovePackageItem?: (key: string, direction: -1 | 1) => void;
+  onToggleViewpointImage?: (include: boolean) => void;
+  onClearImageCrop?: () => void;
   actionMatrix?: RfiActionDefinition[];
 };
 
@@ -264,6 +277,7 @@ function getSavedRfiActionMatrix(params: {
 }): RfiActionDefinition[] {
   const { rfi, canWrite, isProjectAdmin, hasViewpoint, isEditing, lang } = params;
   const actions: RfiActionDefinition[] = [
+    { key: "back", label: w("Back to RFI Log", "Volver al Registro RFI", lang), variant: "secondary" },
     { key: "export-pdf", label: w("RFI PDF", "RFI PDF", lang), variant: "secondary" },
     { key: "export-complete-pdf", label: w("Complete RFI PDF", "PDF Completo RFI", lang), variant: "secondary" },
     { key: "export-docx", label: w("RFI DOCX", "RFI DOCX", lang), variant: "secondary" },
@@ -271,6 +285,7 @@ function getSavedRfiActionMatrix(params: {
     { key: "viewed-by", label: w("Viewed By", "Visto Por", lang), variant: "secondary" },
   ];
   if (canWrite && !isEditing) actions.push({ key: "edit", label: w("Edit RFI", "Editar RFI", lang), variant: "secondary" });
+  if (canWrite && !isEditing) actions.push({ key: "revise", label: w("Create Revision", "Crear Revision", lang), variant: "secondary" });
   if (rfi.status === "closed") {
     if (canWrite) actions.push({ key: "reopen", label: w("Reopen RFI", "Reabrir RFI", lang), variant: "secondary" });
   } else if (isProjectAdmin) {
@@ -286,11 +301,6 @@ function fileIdFromAttachment(value: string): number | null {
   if (!match) return null;
   const id = Number(match[1]);
   return Number.isFinite(id) ? id : null;
-}
-
-function attachmentExt(label: string) {
-  const ext = label.split(".").pop();
-  return ext && ext !== label ? ext.toUpperCase() : "REF";
 }
 
 function packageItemsFromAttachments(attachments: string[], files: ProjectFile[] = []): RfiPackageItem[] {
@@ -348,17 +358,6 @@ function daysColor(days: number, isOverdue: boolean) {
   return "#16A34A";
 }
 
-// Parse distribution entry - "EXT:name:email:phone" or plain email
-function parseDistEntry(entry: string): { display: string; isExternal: boolean; email: string } {
-  if (entry.startsWith("EXT:")) {
-    const parts = entry.slice(4).split(":");
-    const name = parts[0] || "";
-    const email = parts[1] || "";
-    return { display: `${name} <${email}> (ext.)`, isExternal: true, email };
-  }
-  return { display: entry, isExternal: false, email: entry };
-}
-
 // ─── FileSearchDropdown ───────────────────────────────────────────────────────
 function FileSearchDropdown({ files, onSelect, onClose }: {
   files: ProjectFile[];
@@ -390,33 +389,6 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
 }
 
 // ─── main export ─────────────────────────────────────────────────────────────
-const RefFieldWithSearch = ({ label, value, onChange, placeholder, fieldKey, fileSearch, setFileSearch, files, lang }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder: string; fieldKey: string;
-  fileSearch: string | null; setFileSearch: (v: string | null) => void; files: any[]; lang: string;
-}) => (
-  <FormField label={label}>
-    <div style={{ position: "relative" }}>
-      <div style={{ display: "flex", gap: 4 }}>
-        <Input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{ fontSize: 12, flex: 1 }} />
-        <button
-          type="button"
-          title={w("Search project files", "Buscar archivos del proyecto", lang)}
-          onClick={() => setFileSearch(fileSearch === fieldKey ? null : fieldKey)}
-          style={{ padding: "0 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: fileSearch === fieldKey ? "hsl(var(--primary))" : "transparent", cursor: "pointer", color: fileSearch === fieldKey ? "white" : "hsl(var(--muted-foreground))" }}
-        >
-          <Search style={{ width: 12, height: 12 }} />
-        </button>
-      </div>
-      {fileSearch === fieldKey && (
-        <FileSearchDropdown
-          files={files || []}
-          onSelect={(name) => { onChange(name); setFileSearch(null); }}
-          onClose={() => setFileSearch(null)}
-        />
-      )}
-    </div>
-  </FormField>
-);
 
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
@@ -431,7 +403,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
-  const [revising, setRevising] = useState<Rfi | null>(null);
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
@@ -647,7 +618,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         members={members || []}
         user={user}
         onClose={() => setSelectedRfi(null)}
-        onRevise={(rfi) => { setSelectedRfi(null); setRevising(rfi); }}
+        onRevise={setSelectedRfi}
         onExportPdf={handleExportPdf}
         onExportCompletePdf={handleExportCompletePdf}
         onUpdate={(updated) => setSelectedRfi(updated)}
@@ -656,17 +627,16 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   }
 
   // Create / edit RFI as a full page too (not a modal).
-  if (showCreate || revising) {
+  if (showCreate) {
     return (
       <RfiCreatePanel
         projectId={projectId}
-        preload={revising ?? undefined}
         prefill={createPreload}
         existingRfis={rfis || []}
         members={members || []}
         user={user}
         lang={lang}
-        onClose={() => { setShowCreate(false); setRevising(null); setCreatePreload(undefined); }}
+        onClose={() => { setShowCreate(false); setCreatePreload(undefined); }}
       />
     );
   }
@@ -942,9 +912,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 }
 
 // ─── RFI Create Panel ─────────────────────────────────────────────────────────
-function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, user, lang, onClose }: {
+function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang, onClose }: {
   projectId: number;
-  preload?: Rfi;
   prefill?: { subject?: string; question?: string; location?: string };
   existingRfis: Rfi[];
   members: { userFullName: string; userCompanyName?: string; userEmail: string }[];
@@ -962,75 +931,58 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     : DEFAULT_RFI_TYPES.map(t => ({ value: t, label: t }));
   const { data: files } = useListFiles(projectId);
 
-  const isRevision = !!preload;
-
   // Fix 1 — auto-populate project address from last RFI that has one
   const lastAddress = useMemo(() => {
-    if (preload?.projectAddress) return preload.projectAddress;
     const withAddr = [...existingRfis].reverse().find(r => r.projectAddress);
     return withAddr?.projectAddress || "";
-  }, [existingRfis, preload]);
+  }, [existingRfis]);
 
-  const [subject, setSubject] = useState(preload?.subject || prefill?.subject || "");
-  const [rfiType, setRfiType] = useState(preload?.rfiType || rfiTypeOptions[0]?.value || "");
-  const [priority, setPriority] = useState(preload?.priority || priorityOptions[0]?.value || "medium");
+  const [subject, setSubject] = useState(prefill?.subject || "");
+  const [rfiType, setRfiType] = useState(rfiTypeOptions[0]?.value || "");
+  const [priority, setPriority] = useState(priorityOptions[0]?.value || "medium");
   const [dateRequested, setDateRequested] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [dateRequired, setDateRequired] = useState(preload?.dateRequired ? format(parseISO(preload.dateRequired), "yyyy-MM-dd") : "");
+  const [dateRequired, setDateRequired] = useState("");
   const [projectAddress, setProjectAddress] = useState(lastAddress);
 
-  const [sByCompany, setsByCompany] = useState(preload?.submittedByCompany || user?.companyName || "");
-  const [sByContact, setsByContact] = useState(preload?.submittedByContact || user?.fullName || "");
-  const [sByAddress, setsByAddress] = useState(preload?.submittedByAddress || "");
-  const [sByPhone, setsByPhone] = useState(preload?.submittedByPhone || "");
-  const [sByEmail, setsByEmail] = useState(preload?.submittedByEmail || user?.email || "");
+  const [sByCompany, setsByCompany] = useState(user?.companyName || "");
+  const [sByContact, setsByContact] = useState(user?.fullName || "");
+  const [sByAddress, setsByAddress] = useState("");
+  const [sByPhone, setsByPhone] = useState("");
+  const [sByEmail, setsByEmail] = useState(user?.email || "");
 
-  const [sToCompany, setsToCompany] = useState(preload?.submittedToCompany || "");
-  const [sToPerson, setsToPerson] = useState(preload?.submittedToPerson || "");
-  const [sToEmail, setsToEmail] = useState(preload?.submittedToEmail || "");
+  const [sToCompany, setsToCompany] = useState("");
+  const [sToPerson, setsToPerson] = useState("");
+  const [sToEmail, setsToEmail] = useState("");
 
   // Fix 2 — add external person to submitted to
-  const [showAddExtPerson, setShowAddExtPerson] = useState(false);
-  const [showAddCompany, setShowAddCompany] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanyEmail, setNewCompanyEmail] = useState("");
-  const [newCompanyPhone, setNewCompanyPhone] = useState("");
-  const [newCompanyAddress, setNewCompanyAddress] = useState("");
-  const [newContactPerson, setNewContactPerson] = useState("");
-  const [extPersonName, setExtPersonName] = useState("");
-  const [extPersonEmail, setExtPersonEmail] = useState("");
-  const [extPersonPhone, setExtPersonPhone] = useState("");
 
-  const [drawingNum, setDrawingNum] = useState(preload?.drawingNumber || "");
-  const [drawingTitle, setDrawingTitle] = useState(preload?.drawingTitle || "");
-  const [specSection, setSpecSection] = useState(preload?.specSection || "");
-  const [detailNum, setDetailNum] = useState(preload?.detailNumber || "");
-  const [noteNum, setNoteNum] = useState(preload?.noteNumber || "");
-  const [location, setLocation] = useState(preload?.locationDescription || prefill?.location || "");
+  const [drawingNum, setDrawingNum] = useState("");
+  const [drawingTitle, setDrawingTitle] = useState("");
+  const [specSection, setSpecSection] = useState("");
+  const [detailNum, setDetailNum] = useState("");
+  const [noteNum, setNoteNum] = useState("");
+  const [location, setLocation] = useState(prefill?.location || "");
 
   // Fix 3 — file search state per reference field
   const [fileSearch, setFileSearch] = useState<string | null>(null);
 
-  const [question, setQuestion] = useState(preload?.question || prefill?.question || "");
-  const [attachments, setAttachments] = useState<string[]>(preload?.attachmentsJson || []);
-  const [packageItems, setPackageItems] = useState<RfiPackageItem[]>(() => normalizePackageItems((preload as Rfi & { attachmentPackageJson?: unknown })?.attachmentPackageJson, preload?.attachmentsJson || [], []));
-  const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(() => (preload as Rfi & { imagePresentationJson?: RfiImagePresentation })?.imagePresentationJson || null);
+  const [question, setQuestion] = useState(prefill?.question || "");
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [packageItems, setPackageItems] = useState<RfiPackageItem[]>([]);
+  const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(null);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [attachInput, setAttachInput] = useState("");
 
-  const [costImpact, setCostImpact] = useState(preload?.costImpact || "No Cost Impact");
-  const [costAmount, setCostAmount] = useState(preload?.costImpactAmount || "");
-  const [costReason, setCostReason] = useState((preload as Rfi & { costImpactReason?: string })?.costImpactReason || "");
-  const [schedImpact, setSchedImpact] = useState(preload?.scheduleImpact || "No Schedule Impact");
-  const [schedDays, setSchedDays] = useState(preload?.scheduleImpactDays != null ? String(preload.scheduleImpactDays) : "");
-  const [schedReason, setSchedReason] = useState((preload as Rfi & { scheduleImpactReason?: string })?.scheduleImpactReason || "");
+  const [costImpact, setCostImpact] = useState("No Cost Impact");
+  const [costAmount, setCostAmount] = useState("");
+  const [costReason, setCostReason] = useState("");
+  const [schedImpact, setSchedImpact] = useState("No Schedule Impact");
+  const [schedDays, setSchedDays] = useState("");
+  const [schedReason, setSchedReason] = useState("");
 
-  const [distList, setDistList] = useState<string[]>(preload?.distributionList || []);
+  const [distList, setDistList] = useState<string[]>([]);
 
   // Fix 4 — external contact form state
-  const [showAddExtContact, setShowAddExtContact] = useState(false);
-  const [extContactName, setExtContactName] = useState("");
-  const [extContactEmail, setExtContactEmail] = useState("");
-  const [extContactPhone, setExtContactPhone] = useState("");
 
   const [aiDesc, setAiDesc] = useState("");
   const [emailDescription, setEmailDescription] = useState("");
@@ -1194,8 +1146,6 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       .catch((error) => logClientError("RFI create file source connection load", error));
   }, []);
 
-  const uniqueCompanies = [...new Set(members.map(m => m.userCompanyName).filter(Boolean) as string[])];
-  const companyPeople = (company: string) => members.filter(m => m.userCompanyName === company);
 
   const lastRfiData = useRef<any>(null);
 
@@ -1203,7 +1153,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
-        toast({ title: w(isRevision ? "RFI revision created" : "RFI created", isRevision ? "Revisión de RFI creada" : "RFI creado", lang) });
+        toast({ title: w("RFI created", "RFI creado", lang) });
         onClose();
       },
       onError: (error: any) => {
@@ -1278,25 +1228,8 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
   };
 
   // Fix 2 — save external person
-  const handleAddExtPerson = () => {
-    if (!extPersonName.trim() || !extPersonEmail.trim()) return;
-    setsToPerson(extPersonName.trim());
-    setsToEmail(extPersonEmail.trim());
-    // Also add to distribution list
-    const entry = `EXT:${extPersonName.trim()}:${extPersonEmail.trim()}:${extPersonPhone.trim()}`;
-    setDistList(prev => prev.includes(entry) ? prev : [...prev, entry]);
-    setShowAddExtPerson(false);
-    setExtPersonName(""); setExtPersonEmail(""); setExtPersonPhone("");
-  };
 
   // Fix 4 — save external contact
-  const handleAddExtContact = () => {
-    if (!extContactName.trim() || !extContactEmail.trim()) return;
-    const entry = `EXT:${extContactName.trim()}:${extContactEmail.trim()}:${extContactPhone.trim()}`;
-    setDistList(prev => prev.includes(entry) ? prev : [...prev, entry]);
-    setShowAddExtContact(false);
-    setExtContactName(""); setExtContactEmail(""); setExtContactPhone("");
-  };
 
   const handleSubmit = () => {
     if (!subject.trim()) {
@@ -1378,6 +1311,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
       case "rfiType": setRfiType(value); break;
       case "dateRequested": setDateRequested(value); break;
       case "dateRequired": setDateRequired(value); break;
+      case "projectAddress": setProjectAddress(value); break;
       case "submittedByCompany": setsByCompany(value); break;
       case "submittedByContact": setsByContact(value); break;
       case "submittedByAddress": setsByAddress(value); break;
@@ -1420,6 +1354,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           rfiType,
           dateRequested,
           dateRequired,
+          projectAddress,
           submittedByCompany: sByCompany,
           submittedByContact: sByContact,
           submittedByAddress: sByAddress,
@@ -1447,7 +1382,7 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
           emailDraft,
           questionAssistDescription: aiDesc,
         }}
-        permissions={{ canEdit: true, canRespond: false, canClose: false, canReopen: false, canExport: false, canRaiseChangeOrder: false, canJumpViewpoint: !!(preload as { sourceViewpointId?: string | null } | undefined)?.sourceViewpointId }}
+        permissions={{ canEdit: true, canRespond: false, canClose: false, canReopen: false, canExport: false, canRaiseChangeOrder: false, canJumpViewpoint: false }}
         references={[]}
         attachments={attachments}
         imagePresentation={imagePresentation}
@@ -1476,8 +1411,17 @@ function RfiCreatePanel({ projectId, preload, prefill, existingRfis, members, us
         }}
         onGenerateEmailAi={generateCreateEmailDraft}
         onCopyEmail={copyCreateEmailDraft}
+        emailCopied={emailCopied}
+        submittedByDirectoryContent={members.length > 0 ? <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const member = members.find(item => item.userEmail === e.target.value); if (member) { setsByContact(member.userFullName); setsByCompany(member.userCompanyName || ""); setsByEmail(member.userEmail); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{members.map(member => <option key={`from-${member.userEmail}`} value={member.userEmail}>{member.userFullName}{member.userCompanyName ? ` - ${member.userCompanyName}` : ""}</option>)}</select></div> : null}
+        submittedToDirectoryContent={members.length > 0 ? <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const member = members.find(item => item.userEmail === e.target.value); if (member) { setsToPerson(member.userFullName); setsToCompany(member.userCompanyName || ""); setsToEmail(member.userEmail); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{members.map(member => <option key={`to-${member.userEmail}`} value={member.userEmail}>{member.userFullName}{member.userCompanyName ? ` - ${member.userCompanyName}` : ""}</option>)}</select></div> : null}
+        referenceContent={<div style={{ position: "relative", marginTop: 8, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><Button type="button" size="sm" variant="outline" onClick={() => setFileSearch(fileSearch === "reference" ? null : "reference")}><Search style={{ width: 12, height: 12, marginRight: 4 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={importing} onClick={() => { if (window.confirm(w("AI file reading uses higher-cost AI credits and will read the selected document. Continue?", "La lectura de archivos con IA usa creditos IA de mayor costo y leera el documento seleccionado. Continuar?", lang))) importInputRef.current?.click(); }}>{importing ? w("Reading File with AI...", "Leyendo Archivo con IA...", lang) : w("Read File with AI", "Leer Archivo con IA", lang)}</Button>{importedFrom && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Prefilled from", "Completado desde", lang)}: {importedFrom}</span>}{fileSearch === "reference" && <FileSearchDropdown files={files || []} onSelect={name => { setAttachments(prev => [...prev, name]); setFileSearch(null); }} onClose={() => setFileSearch(null)} />}</div>}
+        responseContent={emailDraftError ? <p style={{ marginTop: 8, fontSize: 11, color: "#DC2626" }}>{emailDraftError}</p> : null}
+        onTogglePackageItem={(key, include) => setPackageItems(prev => prev.map(item => item.key === key ? { ...item, include } : item))}
+        onMovePackageItem={(key, direction) => setPackageItems(prev => { const ordered = [...prev].sort((a, b) => a.order - b.order); const index = ordered.findIndex(item => item.key === key); const target = index + direction; if (index < 0 || target < 0 || target >= ordered.length) return prev; [ordered[index], ordered[target]] = [ordered[target], ordered[index]]; return ordered.map((item, order) => ({ ...item, order })); })}
+        onToggleViewpointImage={include => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf: include } : prev)}
       />
       <input ref={attachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadAttachment(f); e.target.value = ""; }} />
+      <input ref={importInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) void handleImportPrefill(f); e.target.value = ""; }} />
       <input ref={imageFileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f); e.target.value = ""; }} />
       {cloudPickerCreate && (
         <CloudPicker
@@ -1564,7 +1508,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [infoLocationDescription, setInfoLocationDescription] = useState(rfi.locationDescription || "");
   const [infoVpLabel, setInfoVpLabel] = useState("");
   const [infoDist, setInfoDist] = useState<string[]>((rfi.distributionList as string[] | null) || []);
-  const [distInput, setDistInput] = useState("");
   const startInfoEdit = () => {
     setQuestionDocs((rfi.attachmentsJson as string[] | null) || []);
     setPackageItems(normalizePackageItems((rfi as Rfi & { attachmentPackageJson?: unknown }).attachmentPackageJson, (rfi.attachmentsJson as string[] | null) || [], files || []));
@@ -1582,7 +1525,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
     setInfoDateRequired(rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
-    setDistInput("");
     setInfoQuestion(rfi.question || rfi.description || "");
     setQuestionAiDescription("");
     setInfoCost(rfi.costImpact || "No Cost Impact");
@@ -1601,8 +1543,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoFromEmail(rfi.submittedByEmail || "");
     setInfoEdit(true);
   };
-
-  const infoInput = { width: "100%", fontSize: 13, padding: "6px 8px", border: "1px solid hsl(var(--border))", borderRadius: 6, fontFamily: "inherit", background: "transparent", color: "inherit" } as const;
 
   // Project Directory for the recipient picker: pick an existing company/person (auto-fills
   // their email) or just type a new one.
@@ -1656,7 +1596,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     id: number; responseText: string; answeredBy: string | null; answeredByEmail: string | null;
     answeredByCompany: string | null; costImpact: string | null; costImpactAmount: string | null; costImpactReason: string | null;
     scheduleImpact: string | null; scheduleImpactDays: number | null; scheduleImpactReason: string | null;
-    isConflictOfInterest: boolean | null; createdAt: string;
+    isConflictOfInterest: boolean | null; createdAt: string; responseAttachmentsJson?: string[] | null;
   }>>([]);
   const [responsesLoading, setResponsesLoading] = useState(false);
 
@@ -1705,7 +1645,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.ok ? r.json() : [])
-      .then((data) => { if (Array.isArray(data)) setRfiResponses(data); })
+      .then((data) => { if (Array.isArray(data)) { setRfiResponses(data); const latest = data[data.length - 1] as { responseAttachmentsJson?: string[] | null } | undefined; if (latest?.responseAttachmentsJson?.length) setResponseDocs(latest.responseAttachmentsJson); } })
       .catch((error) => logClientError("RFI responses load", error))
       .finally(() => setResponsesLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1715,17 +1655,16 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [responseDocInput, setResponseDocInput] = useState("");
   const [responseDocs, setResponseDocs] = useState<string[]>(rfi.responseAttachmentsJson || []);
   const [showFileSearch, setShowFileSearch] = useState(false);
+  const [showQuestionFileSearch, setShowQuestionFileSearch] = useState(false);
   const [showAddResponse, setShowAddResponse] = useState(false);
 
   // ── RFI sending (manual, self-reported — no platform delivery) ───────────
   const [marking, setMarking] = useState(false);
-  const [showSendPreview, setShowSendPreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const [aiPreview, setAiPreview] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [userContext, setUserContext] = useState("");
-  const [showContextInput, setShowContextInput] = useState(false);
 
   const sendPreviewText = [
     `To: ${rfi.submittedToEmail || rfi.submittedToPerson || rfi.submittedToCompany || ""}`,
@@ -1996,134 +1935,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     }
   };
 
-  const _handleExportWordLegacy = () => {
-    const fmtW = (d: string | Date | null | undefined) => {
-      if (!d) return "—";
-      const dt = typeof d === "string" ? new Date(d) : d;
-      return dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    };
-    const hasResp = !!(rfi.answer || rfi.response);
-    const respText = rfi.answer || rfi.response || "";
-
-    const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1E293B;margin:36pt;}
-h1{color:#1E3A5F;font-size:16pt;border-bottom:2pt solid #2563EB;padding-bottom:4pt;}
-h2{color:#1E3A5F;font-size:10pt;margin:14pt 0 4pt;}
-table{width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:10pt;}
-td{padding:4pt 6pt;vertical-align:top;}
-.lbl{background:#F1F5F9;font-weight:bold;width:25%;}
-.resp-hdr{background:#0F4C75;color:white;font-weight:bold;padding:4pt 6pt;font-size:9pt;text-transform:uppercase;}
-.resp-box{border:1pt solid #CBD5E1;padding:8pt;min-height:60pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;}
-.blank-box{border:1pt solid #CBD5E1;min-height:60pt;}
-.sig-row td{border-top:1pt solid #CBD5E1;padding-top:4pt;font-size:9pt;color:#64748B;}
-</style></head><body>
-<h1>REQUEST FOR INFORMATION — ${rfi.number}</h1>
-<table>
-  <tr><td class="lbl">Project</td><td colspan="3">${rfi.subject}</td></tr>
-  <tr><td class="lbl">Subject</td><td colspan="3">${rfi.subject}</td></tr>
-  <tr><td class="lbl">Status</td><td>${(rfi.status || "").replace("_", " ")}</td><td class="lbl">Priority</td><td>${rfi.priority || "—"}</td></tr>
-  <tr><td class="lbl">Date Requested</td><td>${fmtW(rfi.dateRequested || rfi.createdAt)}</td><td class="lbl">Date Required</td><td>${fmtW(rfi.dateRequired || rfi.dueDate)}</td></tr>
-  <tr><td class="lbl">Submitted By</td><td>${rfi.submittedByCompany || "—"} / ${rfi.submittedByContact || rfi.createdByName || "—"}</td><td class="lbl">Submitted To</td><td>${rfi.submittedToCompany || "—"} / ${rfi.submittedToPerson || "—"}</td></tr>
-  <tr><td class="lbl">Drawing #</td><td>${rfi.drawingNumber || "—"}</td><td class="lbl">Spec Section</td><td>${rfi.specSection || "—"}</td></tr>
-  <tr><td class="lbl">Cost Impact</td><td>${rfi.costImpact || "—"}${rfi.costImpactAmount ? ` — ${rfi.costImpactAmount}` : ""}</td><td class="lbl">Schedule Impact</td><td>${rfi.scheduleImpact || "—"}${rfi.scheduleImpactDays != null ? ` (${rfi.scheduleImpactDays} days)` : ""}</td></tr>
-</table>
-<h2>Description of Question</h2>
-<div style="border:1pt solid #CBD5E1;padding:8pt;font-size:10pt;line-height:1.5;white-space:pre-wrap;">${rfi.question || rfi.description || "—"}</div>
-<br/>
-<table><tr><td class="resp-hdr" colspan="4">OFFICIAL RESPONSE</td></tr></table>
-${hasResp ? `
-<div class="resp-box">${respText}</div>
-<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
-  <tr>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:30%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ANSWERED BY (Name &amp; Company)</div>
-      <div style="font-size:10pt;">${rfi.answeredBy || "—"}</div>
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:20%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">DATE OF RESPONSE</div>
-      <div style="font-size:10pt;">${fmtW(rfi.dateAnswered || rfi.respondedAt)}</div>
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
-      <div style="font-size:9pt;">
-        ${'No Cost Impact,Cost Increase TBD,Cost Increase Known,Cost Decrease'.split(',').map(opt => 
-          `${rfi.costImpact === opt ? '&#9745;' : '&#9633;'} ${opt}${opt === 'Cost Increase Known' && rfi.costImpactAmount ? `: ${rfi.costImpactAmount}` : ''}`
-        ).join('<br/>')}
-      </div>
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
-      <div style="font-size:9pt;">
-        ${'No Schedule Impact,Increase in Calendar Days,Decrease in Calendar Days'.split(',').map(opt => 
-          `${rfi.scheduleImpact === opt ? '&#9745;' : '&#9633;'} ${opt}${opt !== 'No Schedule Impact' && rfi.scheduleImpactDays != null ? `: ${rfi.scheduleImpactDays}d` : ''}`
-        ).join('<br/>')}
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ATTACHMENTS</div>
-      <div style="font-size:9pt;">
-        &#9633; See marked up drawings<br/>&#9633; See attached specifications<br/>&#9633; See attached schedules<br/>&#9633; None
-      </div>
-    </td>
-    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SIGNATURE</div>
-      <div style="margin-bottom:6pt;"><span style="font-size:8pt;color:#64748B;">Name:</span> ${rfi.answeredBy || "—"}</div>
-      <div style="border-bottom:1pt solid #CBD5E1;min-height:24pt;margin-top:4pt;"></div>
-    </td>
-  </tr>
-</table>
-` : `
-<div class="blank-box" style="min-height:288pt;"></div>
-<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;">
-  <tr>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:30%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">ANSWERED BY (Name &amp; Company)</div>
-      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:20%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:12pt;">DATE OF RESPONSE</div>
-      <div style="border-bottom:1pt solid #CBD5E1;min-height:18pt;"></div>
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">COST IMPACT</div>
-      &#9633; No Cost Impact<br/>&#9633; Cost Increase TBD<br/>&#9633; Cost Increase Known: $__________<br/>&#9633; Cost Decrease
-    </td>
-    <td style="border:1pt solid #CBD5E1;padding:4pt 6pt;width:25%;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SCHEDULE IMPACT</div>
-      &#9633; No Schedule Impact<br/>&#9633; Increase in Calendar Days: _______<br/>&#9633; Decrease in Calendar Days: _______
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">ATTACHMENTS</div>
-      &#9633; See marked up drawings &nbsp; &#9633; See attached specifications &nbsp; &#9633; See attached schedules &nbsp; &#9633; None
-    </td>
-    <td colspan="2" style="border:1pt solid #CBD5E1;padding:4pt 6pt;vertical-align:top;">
-      <div style="font-size:8pt;font-weight:bold;color:#64748B;margin-bottom:4pt;">SIGNATURE</div>
-      <div style='display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:4pt;font-size:8pt;'>
-        <div>Name: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
-        <div>Title: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
-      </div>
-      <div style='display:grid;grid-template-columns:1fr 1fr;gap:8pt;font-size:8pt;'>
-        <div>Company: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
-        <div>Date: <div style="border-bottom:1pt solid #CBD5E1;min-height:16pt;"></div></div>
-      </div>
-    </td>
-  </tr>
-</table>
-`}
-<p style="font-size:8pt;color:#94A3B8;margin-top:24pt;">Generated by BIMLog by IgniteSmart | ${rfi.number} | ${new Date().toLocaleDateString()}</p>
-</body></html>`;
-
-    const blob = new Blob([html], { type: "application/msword" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.doc`; a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: w("Word document exported", "Documento Word exportado", lang) });
-  };
 
   const handleDownloadAuditCert = async () => {
     try {
@@ -2286,13 +2097,14 @@ ${hasResp ? `
     },
   });
 
-  const { mutate: reviseRfi } = useReviseRfi({
+  const { mutate: reviseRfi, isPending: isRevising } = useReviseRfi({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (revised) => {
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
-        toast({ title: w("Revision created", "Revisión creada", lang) });
-        onClose();
+        toast({ title: w("Revision created", "Revision creada", lang) });
+        onRevise(revised);
       },
+      onError: () => toast({ title: w("Revision failed", "Error al crear revision", lang), variant: "destructive" }),
     },
   });
 
@@ -2306,7 +2118,6 @@ ${hasResp ? `
   // The single impact block shows what the asker flagged plus what the latest response confirmed.
   const confirmedCost = [...rfiResponses].reverse().find(r => r.costImpact);
   const confirmedSched = [...rfiResponses].reverse().find(r => r.scheduleImpact);
-  const storedQuestionDocs = (rfi.attachmentsJson as string[] | null) || [];
   const responseCostReasonRequired = costImpact === "Cost Increase TBD" || costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const responseCostAmountRequired = costImpact === "Cost Increase Known" || costImpact === "Cost Decrease";
   const responseScheduleDaysRequired = schedImpact === "Increase in Calendar Days" || schedImpact === "Decrease in Calendar Days";
@@ -2358,15 +2169,6 @@ ${hasResp ? `
       toast({ title: err instanceof Error ? err.message : w("Save failed", "Error al guardar", lang), variant: "destructive" });
     }
   };
-
-  const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => (
-    value ? (
-      <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8, paddingBottom: 6, borderBottom: "1px solid hsl(var(--border) / 0.4)", marginBottom: 4 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.05em", paddingTop: 2 }}>{label}</span>
-        <span style={{ fontSize: 13 }}>{value}</span>
-      </div>
-    ) : null
-  );
 
   const savedRfiActions = getSavedRfiActionMatrix({
     rfi,
@@ -2468,6 +2270,78 @@ ${hasResp ? `
     }
   };
 
+  const movePackageItem = (key: string, direction: -1 | 1) => {
+    setPackageItems(prev => {
+      const ordered = [...prev].sort((a, b) => a.order - b.order);
+      const index = ordered.findIndex(item => item.key === key);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= ordered.length) return prev;
+      [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+      return ordered.map((item, order) => ({ ...item, order }));
+    });
+  };
+
+  const statusContent = (
+    <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+      <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+        <strong>{w("Current ball in court", "Responsable actual", lang)}:</strong>{" "}
+        <span style={{ color: bic?.color }}>{bic?.label || w("Closed - no active custody", "Cerrado - sin custodia activa", lang)}</span>
+        {isOverdue && <span style={{ marginLeft: 8, color: "#DC2626", fontWeight: 700 }}>{w("Overdue", "Vencido", lang)}</span>}
+      </div>
+      {showViewedBy && <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Viewed By", "Visto Por", lang)}</strong><div style={{ marginTop: 6 }}>{viewEvents.length ? viewEvents.map(v => `${v.userFullName || v.userCompanyName} (${fmt(v.viewedAt)})`).join(", ") : w("No view events recorded.", "No hay vistas registradas.", lang)}</div></div>}
+      <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 7 }}>{w("Ball-in-Court History", "Historial de Responsable", lang)}</div>{ballHistory.length ? ballHistory.map(row => <div key={row.id} style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr auto", gap: 8, fontSize: 11, padding: "4px 0", borderTop: "1px solid hsl(var(--border) / 0.5)" }}><span><strong>{row.heldBy}</strong>{row.heldByCompany ? ` - ${row.heldByCompany}` : ""}</span><span>{fmt(row.fromDate)} - {row.toDate ? fmt(row.toDate) : w("Current", "Actual", lang)}</span><span>{row.toDate ? `${row.daysHeld ?? differenceInDays(new Date(row.toDate), new Date(row.fromDate))} ${w("days", "dias", lang)}` : w("Open", "Abierto", lang)}</span></div>) : <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{rfi.sendStatus === "sent" ? w("No custody rows have been logged yet.", "Aun no hay filas de custodia registradas.", lang) : w("Not sent yet. The author holds the RFI until it is sent.", "Aun no enviado. El autor conserva el RFI hasta enviarlo.", lang)}</div>}</div>
+      {timeline.length > 0 && <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: 7 }}>{w("Activity", "Actividad", lang)}</div>{timeline.map((event, index) => <div key={`${event.label}-${index}`} style={{ display: "flex", gap: 8, fontSize: 12, padding: "3px 0" }}><strong>{event.label}</strong>{event.by && <span>{event.by}</span>}<span style={{ marginLeft: "auto", color: "hsl(var(--muted-foreground))" }}>{fmt(event.date)}</span></div>)}</div>}
+    </div>
+  );
+
+  const directoryPicker = (target: "from" | "to") => infoEdit && rfiDirectory.length > 0 ? (
+    <div style={{ marginTop: 8 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Choose from project directory", "Elegir del directorio del proyecto", lang)}</label><select value="" onChange={e => { const contact = rfiDirectory.find(item => item.email === e.target.value); if (!contact) return; if (target === "from") { setInfoFromContact(contact.fullName); setInfoFromCompany(contact.companyName || ""); setInfoFromEmail(contact.email); } else { setInfoToPerson(contact.fullName); setInfoToCompany(contact.companyName || ""); setInfoToEmail(contact.email); } }} style={{ width: "100%", height: 36, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select a contact...", "Seleccione un contacto...", lang)}</option>{rfiDirectory.map(contact => <option key={`${target}-${contact.email}`} value={contact.email}>{contact.fullName}{contact.companyName ? ` - ${contact.companyName}` : ""}</option>)}</select></div>
+  ) : null;
+
+  const referenceContent = (
+    <>
+      {vpImageUrl && <div style={{ marginTop: 10 }}><div style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 5 }}>{w("Source viewpoint image", "Imagen del punto de vista de origen", lang)}</div><img src={vpImageUrl} alt={w("RFI source viewpoint", "Punto de vista de origen del RFI", lang)} style={{ display: "block", maxWidth: "100%", maxHeight: 320, border: "1px solid hsl(var(--border))", borderRadius: 6 }} /></div>}
+      {infoEdit && <div style={{ position: "relative", marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={() => setShowQuestionFileSearch(!showQuestionFileSearch)} style={{ gap: 5 }}><Search style={{ width: 12, height: 12 }} />{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{showQuestionFileSearch && <FileSearchDropdown files={files || []} onSelect={name => { setQuestionDocs(prev => [...prev, name]); setShowQuestionFileSearch(false); }} onClose={() => setShowQuestionFileSearch(false)} />}</div>}
+      <LinkedItemsPanel projectId={projectId} entityType="rfi" entityId={rfi.id} canWrite={canWrite} />
+    </>
+  );
+
+  const impactContent = (confirmedCost?.costImpact || confirmedSched?.scheduleImpact) ? <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 12, color: "#166534" }}>{confirmedCost?.costImpact && <div><strong>{w("Latest confirmed cost impact", "Ultimo impacto de costo confirmado", lang)}:</strong> {confirmedCost.costImpact}{confirmedCost.costImpactAmount ? ` (${confirmedCost.costImpactAmount})` : ""}{confirmedCost.costImpactReason ? ` - ${confirmedCost.costImpactReason}` : ""}</div>}{confirmedSched?.scheduleImpact && <div><strong>{w("Latest confirmed schedule impact", "Ultimo impacto de programa confirmado", lang)}:</strong> {confirmedSched.scheduleImpact}{confirmedSched.scheduleImpactDays != null ? ` (${confirmedSched.scheduleImpactDays}d)` : ""}{confirmedSched.scheduleImpactReason ? ` - ${confirmedSched.scheduleImpactReason}` : ""}</div>}</div> : null;
+
+  const openNewResponse = () => {
+    setAnswer("");
+    setAnsweredBy(user?.fullName || "");
+    setClosingStatus(rfi.status);
+    setCostImpact("No Cost Impact");
+    setCostAmount("");
+    setCostReason("");
+    setSchedImpact("No Schedule Impact");
+    setSchedDays("");
+    setSchedReason("");
+    setResponseDocInput("");
+    setResponseDocs([]);
+    setShowAddResponse(true);
+  };
+
+  const responseContent = (
+    <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
+      <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><strong style={{ fontSize: 12 }}>{w("Issue and email actions", "Acciones de envio y email", lang)}</strong>{canWrite && rfi.status !== "closed" && sgConnected === true && <Button type="button" size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail} title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}>{sending ? w("Sending...", "Enviando...", lang) : w("Send via SendGrid", "Enviar por SendGrid", lang)}</Button>}{canWrite && rfi.status !== "closed" && rfi.sendStatus !== "sent" && <Button type="button" size="sm" variant="outline" onClick={handleMarkSent} disabled={marking}>{marking ? w("Saving...", "Guardando...", lang) : w("Mark as Sent", "Marcar como Enviado", lang)}</Button>}{sgConnected === false && <Button type="button" size="sm" variant="outline" onClick={() => setPage("/profile")}>{w("Set Up Email Sending", "Configurar Envio de Email", lang)}</Button>}</div>{sgConnected === false && !hideSgNudge && <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, padding: "8px 10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11 }}><span style={{ flex: 1 }}>{w("Connect your own SendGrid account to send RFIs directly. Mark as Sent remains available for delivery outside BIMLog.", "Conecte su propia cuenta SendGrid para enviar RFIs directamente. Marcar como Enviado sigue disponible para envios fuera de BIMLog.", lang)}</span><button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }} style={{ border: "none", background: "transparent", cursor: "pointer" }}><X style={{ width: 14, height: 14 }} /></button></div>}{previewFailed && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 6 }}>{w("AI email draft was unavailable. The standard editable draft remains available.", "El borrador IA no estuvo disponible. El borrador estandar editable sigue disponible.", lang)}</p>}</div>
+      {responsesLoading && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Loading responses...", "Cargando respuestas...", lang)}</div>}
+      {!responsesLoading && rfiResponses.length === 0 && (rfi.answer || rfi.response) && <div style={{ padding: "10px 12px", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 12 }}><strong>{w("Existing official response", "Respuesta oficial existente", lang)}</strong><p style={{ whiteSpace: "pre-wrap", marginTop: 5 }}>{rfi.answer || rfi.response}</p>{rfi.answeredBy && <div>{w("Answered By", "Respondido Por", lang)}: {rfi.answeredBy}</div>}</div>}
+      {canWrite && rfi.status !== "closed" && !responseFormOpen && <Button type="button" variant="outline" onClick={openNewResponse} style={{ justifySelf: "start", gap: 5 }}><Plus style={{ width: 13, height: 13 }} />{w("Add Response", "Agregar Respuesta", lang)}</Button>}
+      {responseFormOpen && <div style={{ padding: "12px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+        {isCoi && <div style={{ marginBottom: 8, padding: "8px 10px", border: "1px solid #FCA5A5", borderRadius: 6, color: "#991B1B", fontSize: 11 }}>{w("Conflict-of-interest warning: you are responding from the submitting person or company. This will be recorded in the audit trail.", "Advertencia de conflicto de interes: responde desde la persona o empresa remitente. Se registrara en la auditoria.", lang)}</div>}
+        <CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={answer} editable onChange={setAnswer} full multiline />
+        <Button type="button" size="sm" variant="outline" onClick={handleAiAssist} disabled={aiAssistLoading} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{aiAssistLoading ? w("Generating...", "Generando...", lang) : w("AI Assist Response", "Asistencia IA de Respuesta", lang)}</Button>
+        <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 5 }}>{w("Text assist uses AI credits. It does not read response attachments.", "La asistencia de texto usa creditos IA. No lee los adjuntos de respuesta.", lang)}</p>
+        <FormGrid><CanonicalField label={w("Answered By", "Respondido Por", lang)} value={answeredBy} editable onChange={setAnsweredBy} /><CanonicalField label={w("Closing Status", "Estado al Guardar", lang)} value={closingStatus} editable onChange={setClosingStatus} options={statusOptions.map(option => ({ value: option.value, label: lang === "es" ? option.labelEs : option.label }))} /></FormGrid>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}><div><CanonicalField label={w("Cost Impact", "Impacto en Costo", lang)} value={costImpact} editable onChange={setCostImpact} options={[{ value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) }, { value: "Cost Increase TBD", label: w("Cost Increase TBD", "Aumento por Definir", lang) }, { value: "Cost Increase Known", label: w("Cost Increase Known", "Aumento Conocido", lang) }, { value: "Cost Decrease", label: w("Cost Decrease", "Disminucion", lang) }]} />{responseCostAmountRequired && <CanonicalField label={w("Cost Amount", "Monto de Costo", lang)} value={costAmount} editable onChange={setCostAmount} />}{responseCostReasonRequired && <CanonicalField label={w("Cost Reason / Explanation", "Razon / Explicacion de Costo", lang)} value={costReason} editable onChange={setCostReason} multiline />}</div><div><CanonicalField label={w("Schedule Impact", "Impacto en Programa", lang)} value={schedImpact} editable onChange={setSchedImpact} options={[{ value: "No Schedule Impact", label: w("No Schedule Impact", "Sin Impacto en Programa", lang) }, { value: "Increase in Calendar Days", label: w("Increase in Calendar Days", "Aumento en Dias Calendario", lang) }, { value: "Decrease in Calendar Days", label: w("Decrease in Calendar Days", "Disminucion en Dias Calendario", lang) }]} />{responseScheduleDaysRequired && <CanonicalField label={w("Calendar Days", "Dias Calendario", lang)} value={schedDays} editable onChange={value => setSchedDays(value.replace(/[^0-9]/g, ""))} />}{responseScheduleDaysRequired && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={schedReason} editable onChange={setSchedReason} multiline />}</div></div>
+        <div style={{ marginTop: 10 }}><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{w("Response Attachments", "Adjuntos de Respuesta", lang)}</label><div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Input value={responseDocInput} onChange={e => setResponseDocInput(e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 240px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={() => { if (responseDocInput.trim()) { setResponseDocs(prev => [...prev, responseDocInput.trim()]); setResponseDocInput(""); } }}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" disabled={uploadingDoc} onClick={() => rAttachFileRef.current?.click()}>{uploadingDoc ? w("Uploading...", "Subiendo...", lang) : w("Upload Response File", "Subir Archivo de Respuesta", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowFileSearch(!showFileSearch)}>{w("Select Project File", "Seleccionar Archivo del Proyecto", lang)}</Button>{connectedFileSources.map(provider => <Button key={`response-${provider.key}`} type="button" size="sm" variant="outline" onClick={() => setCloudPickerTarget({ target: "response", provider })}>{w(`From ${provider.label}`, `Desde ${provider.label}`, lang)}</Button>)}</div>{showFileSearch && <div style={{ position: "relative" }}><FileSearchDropdown files={files || []} onSelect={name => { setResponseDocs(prev => [...prev, name]); setShowFileSearch(false); }} onClose={() => setShowFileSearch(false)} /></div>}{responseDocs.map((doc, index) => <div key={`${doc}-${index}`} style={{ display: "flex", gap: 7, alignItems: "center", marginTop: 5, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} /><span style={{ flex: 1 }}>{attachLabel(doc)}</span><Button type="button" size="sm" variant="outline" onClick={() => setResponseDocs(prev => prev.filter((_, itemIndex) => itemIndex !== index))} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button></div>)}</div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 7, marginTop: 12, paddingTop: 12, borderTop: "1px solid hsl(var(--border))" }}>{(rfiResponses.length > 0 || rfi.answer || rfi.response) && <Button type="button" size="sm" variant="outline" onClick={() => setShowAddResponse(false)}>{w("Cancel Response", "Cancelar Respuesta", lang)}</Button>}<Button type="button" size="sm" onClick={handleSaveResponse} disabled={isUpdating}>{isUpdating ? w("Saving...", "Guardando...", lang) : w("Save Response", "Guardar Respuesta", lang)}</Button></div>
+      </div>}
+    </div>
+  );
+
   return (
     <>
       <RfiCanonicalForm
@@ -2482,6 +2356,7 @@ ${hasResp ? `
           rfiType: infoEdit ? infoType : (rfi.rfiType || ""),
           dateRequested: rfi.dateRequested ? format(parseISO(String(rfi.dateRequested)), "yyyy-MM-dd") : (rfi.createdAt ? format(parseISO(String(rfi.createdAt)), "yyyy-MM-dd") : ""),
           dateRequired: infoEdit ? infoDateRequired : (rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : (rfi.dueDate ? format(parseISO(String(rfi.dueDate)), "yyyy-MM-dd") : "")),
+          projectAddress: rfi.projectAddress || "",
           daysOutstanding: `${days}d`,
           dateAnswered: fmt(rfi.dateAnswered || rfi.respondedAt),
           submittedByCompany: infoEdit ? infoFromCompany : (rfi.submittedByCompany || ""),
@@ -2517,7 +2392,7 @@ ${hasResp ? `
         attachments={[]}
         imagePresentation={imagePresentation}
         packageItems={packageItems}
-        responses={rfiResponses.map(resp => ({ id: resp.id, text: resp.responseText, by: resp.answeredBy || undefined, date: resp.createdAt }))}
+        responses={rfiResponses.map(resp => ({ id: resp.id, text: resp.responseText, by: resp.answeredBy || undefined, date: resp.createdAt, attachments: resp.responseAttachmentsJson || undefined }))}
         loading={{ saving: isUpdating, uploading: uploadingDoc, questionAi: qAiLoading, emailAi: previewLoading, response: isUpdating }}
         options={{ priorities: priorityOptions, rfiTypes: rfiTypeOptions }}
         cloudAttachmentActions={infoEdit ? connectedFileSources.map(provider => ({ key: provider.key, label: w(`From ${provider.label}`, `Desde ${provider.label}`, lang), icon: "cloud" as const, onClick: () => setCloudPickerTarget({ target: "question", provider }) })) : []}
@@ -2531,15 +2406,17 @@ ${hasResp ? `
         onAttachPendingImage={async () => { if (!pendingImage) return; await uploadImageEvidence(pendingImage.file, pendingImage.mode); URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
         onCancelPendingImage={() => { if (pendingImage) URL.revokeObjectURL(pendingImage.url); setPendingImage(null); }}
         actions={{
+          back: onClose,
           "export-pdf": () => onExportPdf(rfi),
           "export-complete-pdf": () => onExportCompletePdf(rfi),
           "export-docx": handleExportWord,
           "export-audit-pdf": handleDownloadAuditCert,
           "viewed-by": () => setShowViewedBy(!showViewedBy),
           edit: startInfoEdit,
+          revise: () => { if (!isRevising) reviseRfi({ projectId, rfiId: rfi.id, data: {} }); },
           close: handleCloseRfi,
           reopen: handleReopenRfi,
-          "raise-change-order": handleRaiseChangeOrder,
+          "raise-change-order": () => { if (!raisingCo) void handleRaiseChangeOrder(); },
           "jump-viewpoint": () => { void fetch(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "")}`, { mode: "no-cors" }); },
           "save-rfi": saveCanonicalRfi,
           cancel: () => setInfoEdit(false),
@@ -2552,13 +2429,19 @@ ${hasResp ? `
         onGenerateQuestionAi={() => handleQuestionAi(questionAiDescription)}
         onGenerateEmailAi={() => void generatePreview()}
         onCopyEmail={handleCopyPreview}
+        emailCopied={copied}
+        statusContent={statusContent}
+        submittedByDirectoryContent={directoryPicker("from")}
+        submittedToDirectoryContent={directoryPicker("to")}
+        referenceContent={referenceContent}
+        impactContent={impactContent}
+        responseContent={responseContent}
+        onTogglePackageItem={(key, include) => setPackageItems(prev => prev.map(item => item.key === key ? { ...item, include } : item))}
+        onMovePackageItem={movePackageItem}
+        onToggleViewpointImage={include => { const fileId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? viewpointFile?.id; setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf: include } : prev); if (fileId) setPackageItems(prev => prev.map(item => item.fileId === fileId ? { ...item, include } : item)); }}
+        onClearImageCrop={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)}
+        actionMatrix={savedRfiActions.map(action => action.key === "raise-change-order" && raisingCo ? { ...action, label: w("Creating Change Order...", "Creando Orden de Cambio...", lang) } : action.key === "revise" && isRevising ? { ...action, label: w("Creating Revision...", "Creando Revision...", lang) } : action)}
       />
-      {showViewedBy && viewEvents.length > 0 && (
-        <div style={{ maxWidth: 1180, margin: "10px auto", padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
-          <strong>{w("Viewed By", "Visto Por", lang)}</strong>
-          <div style={{ marginTop: 6 }}>{viewEvents.map(v => `${v.userFullName || v.userCompanyName} (${fmt(v.viewedAt)})`).join(", ")}</div>
-        </div>
-      )}
       <input ref={qAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setQuestionDocs(prev => [...prev, url])); e.target.value = ""; }} />
       <input ref={rAttachFileRef} type="file" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadDoc(f, url => setResponseDocs(prev => [...prev, url])); e.target.value = ""; }} />
       <input ref={imageEvidenceInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) beginPendingImage(f, "source"); e.target.value = ""; }} />
@@ -2582,6 +2465,7 @@ ${hasResp ? `
 export function RfiActionBar({ actions, handlers, loading }: { actions: RfiActionDefinition[]; handlers: RfiCanonicalActions; loading?: boolean }) {
   const seen = new Set<RfiActionKey>();
   const uniqueActions = actions.filter(action => {
+    if (!handlers[action.key]) return false;
     if (seen.has(action.key)) return false;
     seen.add(action.key);
     return true;
@@ -2648,7 +2532,8 @@ export function RfiCanonicalForm({
   lang, mode, recordState, values, permissions, references, attachments, imagePresentation, packageItems, responses,
   loading, options, cloudAttachmentActions = [], imageAttachmentActions = [], pendingImagePreview, onAttachPendingImage, onCancelPendingImage,
   actions, onChange, onAddReference, onRemoveReference, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
-  onCopyEmail, actionMatrix,
+  onCopyEmail, emailCopied, statusContent, submittedByDirectoryContent, submittedToDirectoryContent, referenceContent, impactContent, responseContent,
+  onTogglePackageItem, onMovePackageItem, onToggleViewpointImage, onClearImageCrop, actionMatrix,
 }: RfiCanonicalFormProps) {
   const editable = mode === "create" || mode === "edit";
   const matrix = actionMatrix ?? getRfiCanonicalActionMatrix({ mode, recordState, permissions, lang });
@@ -2697,6 +2582,7 @@ export function RfiCanonicalForm({
             <FormGrid>
               <CanonicalField label={w("RFI number", "Numero RFI", lang)} value={values.number || w("Assigned after save", "Asignado al guardar", lang)} editable={false} />
               {values.projectName && <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName} editable={false} />}
+              {(mode === "create" || values.projectAddress) && <CanonicalField label={w("Project Address", "Direccion del Proyecto", lang)} value={values.projectAddress || ""} editable={mode === "create"} onChange={v => onChange("projectAddress", v)} full />}
               <CanonicalField label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
               <CanonicalField label={w("Status", "Estado", lang)} value={values.status} editable={false} />
               <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} options={priorityOptions} />
@@ -2706,6 +2592,7 @@ export function RfiCanonicalForm({
               <CanonicalField label={w("Days Outstanding", "Dias Pendientes", lang)} value={values.daysOutstanding || ""} editable={false} />
               <CanonicalField label={w("Date Answered", "Fecha Respondido", lang)} value={values.dateAnswered || ""} editable={false} />
             </FormGrid>
+            {statusContent}
           </CanonicalSection>
           <CanonicalSection title={w("2. Submitted By", "2. Enviado Por", lang)}>
             <FormGrid>
@@ -2715,6 +2602,7 @@ export function RfiCanonicalForm({
               <CanonicalField label={w("Phone", "Telefono", lang)} value={values.submittedByPhone} editable={editable} onChange={v => onChange("submittedByPhone", v)} />
               <CanonicalField label={w("Email", "Correo", lang)} value={values.submittedByEmail} editable={editable} onChange={v => onChange("submittedByEmail", v)} />
             </FormGrid>
+            {submittedByDirectoryContent}
           </CanonicalSection>
           <CanonicalSection title={w("3. Submitted To", "3. Enviado A", lang)}>
             <FormGrid>
@@ -2724,6 +2612,7 @@ export function RfiCanonicalForm({
               {values.submittedToPhone && <CanonicalField label={w("Phone", "Telefono", lang)} value={values.submittedToPhone} editable={false} />}
               <CanonicalField label={w("Email", "Correo", lang)} value={values.submittedToEmail} editable={editable} onChange={v => onChange("submittedToEmail", v)} />
             </FormGrid>
+            {submittedToDirectoryContent}
           </CanonicalSection>
           <CanonicalSection title={w("4. Reference Information / Attachments", "4. Informacion de Referencia / Adjuntos", lang)}>
             <FormGrid>
@@ -2737,7 +2626,12 @@ export function RfiCanonicalForm({
             {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button>{imageAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}>{action.icon === "capture" ? <Camera style={{ width: 12, height: 12 }} /> : action.icon === "paste" ? <Clipboard style={{ width: 12, height: 12 }} /> : action.icon === "replace" ? <RefreshCw style={{ width: 12, height: 12 }} /> : <Upload style={{ width: 12, height: 12 }} />}{action.label}</Button>)}{cloudAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}><FolderOpen style={{ width: 12, height: 12 }} />{action.label}</Button>)}</div>}
             <div style={{ marginTop: 8, display: "grid", gap: 4 }}>{allReferences.length === 0 ? <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("No references or attachments.", "Sin referencias o adjuntos.", lang)}</span> : allReferences.map((item, index) => <div key={`${item}-${index}`} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}><FileText style={{ width: 12, height: 12 }} /><span style={{ flex: 1 }}>{attachLabel(item)}</span>{editable && <Button type="button" size="sm" variant="outline" onClick={() => onRemoveReference(index)} style={{ color: "#DC2626", borderColor: "#FCA5A5" }}>{w("Remove", "Quitar", lang)}</Button>}</div>)}</div>
             {pendingImagePreview && <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.2)", fontSize: 12 }}><div style={{ fontWeight: 700, marginBottom: 6 }}>{w("Review image before attaching", "Revise la imagen antes de adjuntar", lang)}</div><img src={pendingImagePreview.url} alt={w("Pending RFI image", "Imagen RFI pendiente", lang)} style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 6, border: "1px solid hsl(var(--border))", display: "block", marginBottom: 8 }} /><div style={{ color: "hsl(var(--muted-foreground))" }}>{w("Visual crop tooling is not enabled in this build. Existing saved crop metadata is preserved until the dedicated crop tool ships.", "La herramienta visual de recorte no esta habilitada en esta version. Los datos de recorte guardados se conservan hasta la herramienta dedicada.", lang)}</div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={onAttachPendingImage} disabled={loading?.uploading} style={{ gap: 4 }}><Upload style={{ width: 12, height: 12 }} />{w("Attach Image", "Adjuntar Imagen", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onCancelPendingImage}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
-            {(imagePresentation || packageItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>{imagePresentation && <div>{w("Viewpoint image is included in the RFI package.", "Imagen de punto de vista incluida en el paquete RFI.", lang)}</div>}{packageItems.length > 0 && <div>{w("Package order:", "Orden del paquete:", lang)} {packageItems.map(item => item.label).join(", ")}</div>}</div>}
+            {(imagePresentation || packageItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Complete RFI PDF package", "Paquete PDF Completo RFI", lang)}</div>
+              {imagePresentation && <><label style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}><input type="checkbox" checked={imagePresentation.includeInCompletePdf !== false} disabled={!editable || !onToggleViewpointImage} onChange={e => onToggleViewpointImage?.(e.target.checked)} />{w("Include viewpoint image", "Incluir imagen del punto de vista", lang)}</label>{imagePresentation.crop && <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, color: "hsl(var(--muted-foreground))" }}><span>{w("Saved crop metadata will be preserved in exports.", "Los datos de recorte guardados se conservaran en exportaciones.", lang)}</span>{editable && onClearImageCrop && <Button type="button" size="sm" variant="outline" onClick={onClearImageCrop}>{w("Clear Saved Crop", "Borrar Recorte Guardado", lang)}</Button>}</div>}</>}
+              {packageItems.map((item, index) => <div key={item.key} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 8, padding: "5px 0", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined }}><input type="checkbox" checked={item.include} disabled={!editable || !onTogglePackageItem} onChange={e => onTogglePackageItem?.(item.key, e.target.checked)} /><span>{item.label}</span>{editable && onMovePackageItem && <span style={{ display: "flex", gap: 4 }}><Button type="button" size="sm" variant="outline" disabled={index === 0} onClick={() => onMovePackageItem(item.key, -1)} title={w("Move up", "Mover arriba", lang)}>↑</Button><Button type="button" size="sm" variant="outline" disabled={index === packageItems.length - 1} onClick={() => onMovePackageItem(item.key, 1)} title={w("Move down", "Mover abajo", lang)}>↓</Button></span>}</div>)}
+            </div>}
+            {referenceContent}
           </CanonicalSection>
           <CanonicalSection title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)}>
             <CanonicalField label={w("Question", "Pregunta", lang)} value={values.question} editable={editable} onChange={v => onChange("question", v)} full multiline />
@@ -2758,14 +2652,15 @@ export function RfiCanonicalForm({
                 {scheduleNeedsFields && <CanonicalField label={w("Schedule Reason / Explanation", "Razon / Explicacion de Programa", lang)} value={values.scheduleImpactReason} editable={editable} onChange={v => onChange("scheduleImpactReason", v)} multiline />}
               </div>
             </div>
+            {impactContent}
           </CanonicalSection>
           <CanonicalSection title={w("7. Distribution / Email / Responses", "7. Distribucion / Email / Respuestas", lang)}>
             <CanonicalField label={w("Distribution", "Distribucion", lang)} value={values.distributionList.join(", ")} editable={editable} onChange={v => onChange("distributionList", v)} full />
             <CanonicalField label={w("Description of Email", "Descripcion de Email", lang)} value={values.emailDescription || ""} editable={editable} onChange={v => onChange("emailDescription", v)} full multiline />
             {editable && <><Button type="button" size="sm" variant="outline" onClick={onGenerateEmailAi} disabled={loading?.emailAi} style={{ marginTop: 8, gap: 5 }}><Sparkles style={{ width: 12, height: 12 }} />{loading?.emailAi ? w("Generating...", "Generando...", lang) : w("Generate Email with AI", "Generar Email con IA", lang)}</Button><p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{w("Email text assist uses AI credits and does not read attachments.", "La asistencia de email usa creditos IA y no lee adjuntos.", lang)}</p></>}
-            {values.emailDraft && <div style={{ marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={onCopyEmail} style={{ marginBottom: 6, gap: 5 }}><Copy style={{ width: 12, height: 12 }} />{w("Copy Email", "Copiar Email", lang)}</Button><pre style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 12 }}>{values.emailDraft}</pre></div>}
-            {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p></div>)}</div>}
-            {permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{responseActions.length > 0 && <RfiActionBar actions={responseActions} handlers={actions} loading={!!loading?.response} />}</div>}
+            {values.emailDraft && <div style={{ marginTop: 8 }}><Button type="button" size="sm" variant="outline" onClick={onCopyEmail} style={{ marginBottom: 6, gap: 5 }}><Copy style={{ width: 12, height: 12 }} />{emailCopied ? w("Email Copied", "Email Copiado", lang) : w("Copy Email", "Copiar Email", lang)}</Button><pre style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 12 }}>{values.emailDraft}</pre></div>}
+            {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p>{response.attachments?.map((attachment, attachmentIndex) => <div key={`${attachment}-${attachmentIndex}`} style={{ display: "flex", gap: 5, alignItems: "center", color: "#1D4ED8", marginTop: 3 }}><FileText style={{ width: 11, height: 11 }} />{attachLabel(attachment)}</div>)}</div>)}</div>}
+            {responseContent ?? (permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{responseActions.length > 0 && <RfiActionBar actions={responseActions} handlers={actions} loading={!!loading?.response} />}</div>)}
           </CanonicalSection>
         </div>
       </div>
@@ -2784,15 +2679,6 @@ function SectionHeader({ title }: { title: string }) {
 function FormGrid({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px", marginTop: 10 }}>
-      {children}
-    </div>
-  );
-}
-
-function FormField({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
-  return (
-    <div style={{ gridColumn: full ? "span 2" : undefined, display: "flex", flexDirection: "column", gap: 3 }}>
-      <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))" }}>{label}</label>
       {children}
     </div>
   );
