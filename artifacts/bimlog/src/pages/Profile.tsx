@@ -103,6 +103,39 @@ interface TelegramStatus {
   linkedAt: string | null;
 }
 
+interface TelegramConversationSummary {
+  id: string;
+  mode: "help" | "assistant" | "support";
+  status: string;
+  language: "en" | "es";
+  ai_funding_source: string | null;
+  latest_message: string | null;
+  message_count: number;
+  case_number: string | null;
+  support_subject: string | null;
+  support_status: string | null;
+  ai_status: string | null;
+  currency: string | null;
+  estimated_max_micros: string | null;
+  actual_micros: string | null;
+  last_activity_at: string;
+}
+
+interface TelegramSupportCaseSummary {
+  id: string;
+  case_number: string;
+  subject: string;
+  severity: string;
+  status: string;
+  created_at: string;
+}
+
+interface TelegramConversationPanel {
+  conversations: TelegramConversationSummary[];
+  supportCases: TelegramSupportCaseSummary[];
+  aiUsage: unknown[];
+}
+
 const DEFAULT_PREFS = {
   emailRfiAssigned: true,
   emailSubmittalAssigned: true,
@@ -195,6 +228,8 @@ export function Profile() {
   const [telegramConsentAccepted, setTelegramConsentAccepted] = useState(false);
   const [savingTelegramLanguage, setSavingTelegramLanguage] = useState(false);
   const [disconnectingTelegram, setDisconnectingTelegram] = useState(false);
+  const [telegramPanel, setTelegramPanel] = useState<TelegramConversationPanel | null>(null);
+  const [loadingTelegramPanel, setLoadingTelegramPanel] = useState(false);
 
   const [signatureMode, setSignatureMode] = useState<"canvas" | "upload">("canvas");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -347,6 +382,7 @@ export function Profile() {
     loadRecentActivity();
     loadConnections();
     loadTelegramStatus();
+    loadTelegramPanel();
     // Handle the OAuth return from a provider connect.
     const params = new URLSearchParams(window.location.search);
     if (params.get("connected")) {
@@ -488,6 +524,24 @@ export function Profile() {
     }
   }
 
+  async function loadTelegramPanel() {
+    setLoadingTelegramPanel(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/telegram/conversations`, { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load Telegram conversations");
+      setTelegramPanel({
+        conversations: Array.isArray(data.conversations) ? data.conversations : [],
+        supportCases: Array.isArray(data.supportCases) ? data.supportCases : [],
+        aiUsage: Array.isArray(data.aiUsage) ? data.aiUsage : [],
+      });
+    } catch (error) {
+      logClientError("profile telegram conversation panel load", error);
+    } finally {
+      setLoadingTelegramPanel(false);
+    }
+  }
+
   async function createTelegramLink() {
     setCreatingTelegramLink(true);
     try {
@@ -544,6 +598,7 @@ export function Profile() {
       setTelegramStatus(data);
       setTelegramLink(null);
       setTelegramConsentAccepted(false);
+      await loadTelegramPanel();
       toast({ title: tt("Telegram disconnected", "Telegram desconectado") });
     } catch (e) {
       toast({ title: e instanceof Error ? e.message : tt("Could not disconnect Telegram", "No se pudo desconectar Telegram"), variant: "destructive" });
@@ -1425,6 +1480,53 @@ export function Profile() {
                   )}
                 </div>
               )}
+              <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{tt("Conversation and support summary", "Resumen de conversaciones y soporte")}</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                      {tt("Telegram assistant use requires explicit confirmation and follows your AI credit controls.", "El asistente de Telegram requiere confirmacion explicita y respeta tus controles de creditos de IA.")}
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={loadTelegramPanel} disabled={loadingTelegramPanel} style={{ gap: 6 }}>
+                    <RefreshCw style={{ width: 12, height: 12 }} />
+                    {tt("Refresh", "Actualizar")}
+                  </Button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("Recent conversations", "Conversaciones recientes")}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800 }}>{telegramPanel?.conversations?.length ?? 0}</div>
+                  </div>
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("Support cases", "Casos de soporte")}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800 }}>{telegramPanel?.supportCases?.length ?? 0}</div>
+                  </div>
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("Assistant runs", "Ejecuciones de asistente")}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800 }}>{telegramPanel?.aiUsage?.length ?? 0}</div>
+                  </div>
+                </div>
+                {(telegramPanel?.conversations || []).slice(0, 3).map((item) => (
+                  <div key={item.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 4 }}>
+                      <Badge variant="outline">{item.mode}</Badge>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{item.status}</span>
+                      {item.ai_funding_source && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("Funding", "Fondos")}: {item.ai_funding_source}</span>}
+                      {item.case_number && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{item.case_number}</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{item.latest_message || tt("No message summary yet.", "Sin resumen de mensaje.")}</div>
+                    {item.estimated_max_micros && (
+                      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 4 }}>
+                        {tt("AI status", "Estado IA")}: {item.ai_status || "n/a"} · {item.currency || "USD"} {item.actual_micros || item.estimated_max_micros} micros
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", margin: 0 }}>
+                  {tt("Privacy: BIMLog stores encrypted Telegram identifiers, hashed matching identifiers, durable receipts, conversation summaries, support cases, and AI cost receipts. Use /disconnect or the button above to revoke channel linking.", "Privacidad: BIMLog guarda identificadores de Telegram cifrados, hashes de coincidencia, recibos durables, resumenes de conversaciones, casos de soporte y recibos de costo de IA. Usa /disconnect o el boton de arriba para revocar la conexion.")}
+                </p>
+              </div>
             </div>
           )}
         </SectionCard>

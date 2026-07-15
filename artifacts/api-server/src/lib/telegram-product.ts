@@ -1,5 +1,14 @@
 import crypto from "crypto";
 import { pool } from "@workspace/db";
+import {
+  AiControlError,
+  cancelRun,
+  confirmEstimate,
+  createEstimate,
+  reserveRun,
+  type Actor,
+} from "./ai-control-plane";
+import { TelegramProviderBrokerError, executeTelegramAssistantBroker } from "./telegram-product-provider-broker";
 
 const TOKEN_BYTES = 32;
 const TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -52,6 +61,8 @@ export interface TelegramWebhookUpdate {
 interface TelegramReply {
   chatId: string;
   text: string;
+  conversationId?: string | null;
+  outboundMessageId?: string | null;
 }
 
 interface QueryClient {
@@ -68,6 +79,9 @@ interface EncryptedWebhookEvidence {
   telegramChatId: string | null;
   memberStatus: string | null;
 }
+
+type ConversationMode = "help" | "assistant" | "support";
+type FundingSource = "personal" | "company" | "system";
 
 export class TelegramProductError extends Error {
   status: number;
@@ -168,7 +182,7 @@ function commandParts(text: string): { command: string; argument: string } {
 function localized(language: TelegramLanguage, key: string): string {
   const messages: Record<TelegramLanguage, Record<string, string>> = {
     en: {
-      help: "Your BIMLog Telegram channel is connected. Commands: /settings, /language en, /language es, /privacy, /disconnect.",
+      help: "Your BIMLog Telegram channel is connected. Commands: /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
       settings: "BIMLog Telegram channel connected. Language: English. Use /language es for Spanish or /disconnect to revoke the connection.",
       privacy: "BIMLog stores encrypted Telegram identifiers, hashed identifiers for matching, consent records, and durable update receipts for channel linking. Use /disconnect to revoke.",
       disconnected: "The BIMLog Telegram channel was disconnected and the channel-linking consent was revoked.",
@@ -180,7 +194,7 @@ function localized(language: TelegramLanguage, key: string): string {
       invalid: "This link is invalid or expired. Open your BIMLog Profile to create a new link.",
     },
     es: {
-      help: "Tu canal de Telegram de BIMLog está conectado. Comandos: /settings, /language en, /language es, /privacy, /disconnect.",
+      help: "Tu canal de Telegram de BIMLog está conectado. Comandos: /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
       settings: "Canal de Telegram de BIMLog conectado. Idioma: Español. Usa /language en para inglés o /disconnect para revocar la conexión.",
       privacy: "Privacidad: BIMLog guarda identificadores de Telegram cifrados, identificadores hash para coincidencia, registros de consentimiento y recibos durables para la conexión del canal. Usa /disconnect para revocar.",
       disconnected: "El canal de Telegram de BIMLog fue desconectado y el consentimiento de conexión del canal fue revocado.",
@@ -203,6 +217,109 @@ function bilingualStart(): string {
     "Conexión del canal de BIMLog.",
     "Elige idioma: /language en o /language es.",
   ].join("\n");
+}
+
+export async function ensureTelegramProductConversationSchema(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS telegram_conversations (
+      id text PRIMARY KEY,
+      user_id integer NOT NULL REFERENCES users(id),
+      company_id integer NOT NULL REFERENCES companies(id),
+      notification_channel_id integer REFERENCES notification_channels(id),
+      adapter_id text NOT NULL,
+      language text NOT NULL DEFAULT 'en',
+      mode text NOT NULL,
+      project_id integer REFERENCES projects(id),
+      status text NOT NULL DEFAULT 'new',
+      ai_funding_source text,
+      ai_run_id text REFERENCES ai_runs(id),
+      support_case_id text,
+      privacy_notice_version text NOT NULL DEFAULT '',
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      closed_at timestamptz,
+      last_activity_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT telegram_conversations_language_chk CHECK(language IN ('en','es')),
+      CONSTRAINT telegram_conversations_mode_chk CHECK(mode IN ('help','assistant','support')),
+      CONSTRAINT telegram_conversations_status_chk CHECK(status IN ('open','pending_confirmation','closed','failed')),
+      CONSTRAINT telegram_conversations_funding_chk CHECK(ai_funding_source IS NULL OR ai_funding_source IN ('personal','company','system'))
+    );
+    CREATE INDEX IF NOT EXISTS telegram_conversations_user_activity_idx ON telegram_conversations(user_id,last_activity_at DESC);
+    CREATE INDEX IF NOT EXISTS telegram_conversations_company_activity_idx ON telegram_conversations(company_id,last_activity_at DESC);
+
+    CREATE TABLE IF NOT EXISTS telegram_conversation_messages (
+      id text PRIMARY KEY,
+      conversation_id text NOT NULL REFERENCES telegram_conversations(id),
+      direction text NOT NULL,
+      sender_role text NOT NULL,
+      telegram_update_id text,
+      telegram_message_id text,
+      idempotency_key text NOT NULL,
+      language text NOT NULL DEFAULT 'en',
+      sanitized_text text NOT NULL,
+      message_type text NOT NULL DEFAULT 'text',
+      processing_state text NOT NULL DEFAULT 'processed',
+      delivery_state text NOT NULL DEFAULT 'not_applicable',
+      requested_action text,
+      delivered_summary text,
+      ai_run_id text REFERENCES ai_runs(id),
+      error_category text,
+      telegram_delivery_message_id text,
+      delivered_at timestamptz,
+      delivery_attempts integer NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT telegram_conversation_messages_direction_chk CHECK(direction IN ('inbound','outbound','system')),
+      CONSTRAINT telegram_conversation_messages_sender_chk CHECK(sender_role IN ('user','assistant','system','support')),
+      CONSTRAINT telegram_conversation_messages_language_chk CHECK(language IN ('en','es')),
+      CONSTRAINT telegram_conversation_messages_state_chk CHECK(processing_state IN ('processed','pending_confirmation','cancelled','failed'))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS telegram_conversation_messages_idempotency_uidx ON telegram_conversation_messages(conversation_id,idempotency_key);
+    CREATE INDEX IF NOT EXISTS telegram_conversation_messages_created_idx ON telegram_conversation_messages(conversation_id,created_at);
+    ALTER TABLE telegram_conversation_messages ADD COLUMN IF NOT EXISTS telegram_delivery_message_id text;
+    ALTER TABLE telegram_conversation_messages ADD COLUMN IF NOT EXISTS delivered_at timestamptz;
+    ALTER TABLE telegram_conversation_messages ADD COLUMN IF NOT EXISTS delivery_attempts integer NOT NULL DEFAULT 0;
+
+    CREATE TABLE IF NOT EXISTS telegram_support_cases (
+      id text PRIMARY KEY,
+      case_number text NOT NULL UNIQUE,
+      user_id integer NOT NULL REFERENCES users(id),
+      company_id integer NOT NULL REFERENCES companies(id),
+      conversation_id text REFERENCES telegram_conversations(id),
+      project_id integer REFERENCES projects(id),
+      category text NOT NULL,
+      subject text NOT NULL,
+      description text NOT NULL,
+      severity text NOT NULL DEFAULT 'normal',
+      status text NOT NULL DEFAULT 'open',
+      language text NOT NULL DEFAULT 'en',
+      assigned_to_id integer REFERENCES users(id),
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      closed_at timestamptz,
+      CONSTRAINT telegram_support_cases_status_chk CHECK(status IN ('new','acknowledged','in_progress','waiting_for_user','resolved','closed')),
+      CONSTRAINT telegram_support_cases_severity_chk CHECK(severity IN ('low','normal','high','urgent')),
+      CONSTRAINT telegram_support_cases_language_chk CHECK(language IN ('en','es'))
+    );
+    CREATE INDEX IF NOT EXISTS telegram_support_cases_user_idx ON telegram_support_cases(user_id,created_at DESC);
+    CREATE INDEX IF NOT EXISTS telegram_support_cases_company_idx ON telegram_support_cases(company_id,status,created_at DESC);
+    ALTER TABLE telegram_support_cases DROP CONSTRAINT IF EXISTS telegram_support_cases_status_chk;
+    UPDATE telegram_support_cases SET status = CASE status WHEN 'open' THEN 'new' WHEN 'triaged' THEN 'acknowledged' WHEN 'waiting_on_customer' THEN 'waiting_for_user' ELSE status END
+    WHERE status IN ('open','triaged','waiting_on_customer');
+    ALTER TABLE telegram_support_cases ADD CONSTRAINT telegram_support_cases_status_chk CHECK(status IN ('new','acknowledged','in_progress','waiting_for_user','resolved','closed'));
+
+    CREATE TABLE IF NOT EXISTS telegram_support_case_events (
+      id text PRIMARY KEY,
+      case_id text NOT NULL REFERENCES telegram_support_cases(id),
+      actor_user_id integer REFERENCES users(id),
+      action text NOT NULL,
+      from_status text,
+      to_status text,
+      reason text NOT NULL,
+      details jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS telegram_support_case_events_case_idx ON telegram_support_case_events(case_id,created_at);
+  `);
 }
 
 function linkSuccess(): string {
@@ -461,6 +578,409 @@ async function languageForTelegramUser(client: QueryClient, config: TelegramProd
   return { language: row?.language === "es" ? "es" : "en", userId: row?.user_id ?? null, email: row?.email ?? null, status: row?.status ?? null };
 }
 
+async function connectedTelegramAccount(client: QueryClient, config: TelegramProductConfig, telegramUserHash: string): Promise<{ language: TelegramLanguage; userId: number | null; companyId: number | null; email: string | null; status: string | null; channelId: number | null; isSuperAdmin: boolean; isCompanyAdmin: boolean }> {
+  const result = await client.query<{
+    user_id: number;
+    company_id: number;
+    email: string;
+    language: TelegramLanguage | null;
+    status: string;
+    channel_id: number;
+    is_super_admin: boolean | null;
+    is_company_admin: boolean | null;
+  }>(
+    `SELECT nc.id AS channel_id, nc.user_id, u.company_id, u.email, u.is_super_admin, np.language, nc.status,
+       EXISTS(SELECT 1 FROM company_ai_administrators ca WHERE ca.user_id=u.id AND ca.company_id=u.company_id AND ca.status='active') AS is_company_admin
+     FROM notification_channels nc
+     INNER JOIN users u ON u.id = nc.user_id
+     LEFT JOIN notification_preferences np ON np.user_id = nc.user_id AND np.adapter_id = nc.adapter_id AND np.channel = 'telegram'
+     WHERE nc.adapter_id = $1 AND nc.telegram_user_hash = $2 AND nc.status = 'connected'
+     LIMIT 1`,
+    [config.adapterId, telegramUserHash],
+  );
+  const row = result.rows[0];
+  return {
+    language: row?.language === "es" ? "es" : "en",
+    userId: row?.user_id ?? null,
+    companyId: row?.company_id ?? null,
+    email: row?.email ?? null,
+    status: row?.status ?? null,
+    channelId: row?.channel_id ?? null,
+    isSuperAdmin: row?.is_super_admin === true,
+    isCompanyAdmin: row?.is_company_admin === true,
+  };
+}
+
+function sanitizeTelegramText(value: string | null | undefined): string {
+  return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 1800);
+}
+
+function assistantIntro(language: TelegramLanguage): string {
+  return language === "es"
+    ? "Modo asistente de BIMLog. No leo archivos ni cambio proyectos desde Telegram. Para usar IA escribe: /assistant personal tu pregunta, /assistant company tu pregunta, o /assistant system tu pregunta. Te mostraré costo y pediré confirmación antes de reservar créditos."
+    : "BIMLog assistant mode. I do not read files or change projects from Telegram. To use AI, send: /assistant personal your question, /assistant company your question, or /assistant system your question. I will show cost and ask for confirmation before reserving credits.";
+}
+
+function supportIntro(language: TelegramLanguage): string {
+  return language === "es"
+    ? "Soporte de BIMLog. Para abrir un caso escribe: /support categoría | asunto | descripción | prioridad. Ejemplo: /support Cuenta | No puedo entrar | Mi enlace no funciona | high"
+    : "BIMLog support. To open a case, send: /support category | subject | description | severity. Example: /support Account | Cannot sign in | My link does not work | high";
+}
+
+const SUPPORT_CATEGORIES = new Set(["account_access", "platform_behavior", "telegram_assistant", "billing_ai_usage", "navisworks_plugin", "report_export", "other"]);
+const SUPPORT_SEVERITIES = new Set(["low", "normal", "high", "urgent"]);
+
+function supportCategoryLabels(language: TelegramLanguage): string {
+  return language === "es"
+    ? "Categorías: account_access (Cuenta), platform_behavior (Plataforma), telegram_assistant (Asistente Telegram), billing_ai_usage (Facturación IA), navisworks_plugin (Navisworks), report_export (Reportes), other (Otro)."
+    : "Categories: account_access, platform_behavior, telegram_assistant, billing_ai_usage, navisworks_plugin, report_export, other.";
+}
+
+function parseSupportDraft(argument: string): { category: string; subject: string; description: string; severity: string } | null {
+  const parts = String(argument || "").split("|").map((p) => sanitizeTelegramText(p));
+  if (parts.length < 4) return null;
+  const category = parts[0].toLowerCase();
+  const severity = parts[3].toLowerCase();
+  if (!SUPPORT_CATEGORIES.has(category) || !parts[1] || parts[1].length < 4 || !parts[2] || parts[2].length < 8 || !SUPPORT_SEVERITIES.has(severity)) return null;
+  return { category, subject: parts[1], description: parts[2], severity };
+}
+
+function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string {
+  const ordinary = language === "es"
+    ? [
+        "Menu de BIMLog:",
+        "/help - Ayuda de BIMLog",
+        "/assistant - Asistente BIMLog",
+        "/support - Soporte",
+        "/conversations - Mis Conversaciones",
+        "/support_cases - Mis Casos de Soporte",
+        "/ai_usage - Uso de IA",
+        "/language en|es - Idioma",
+        "/settings - Vinculación de Cuenta",
+        "/privacy - Privacidad",
+      ]
+    : [
+        "BIMLog menu:",
+        "/help - BIMLog Help",
+        "/assistant - BIMLog Assistant",
+        "/support - Support",
+        "/conversations - My Conversations",
+        "/support_cases - My Support Cases",
+        "/ai_usage - AI Usage",
+        "/language en|es - Language",
+        "/settings - Account Link",
+        "/privacy - Privacy",
+      ];
+  const admin = language === "es"
+    ? ["/admin_support_queue - Cola de Soporte", "/admin_conversation_audit - Auditoría de Conversaciones", "/admin_ai_usage - Supervisión de Uso de IA", "/admin_failed_deliveries - Entregas Fallidas"]
+    : ["/admin_support_queue - Support Queue", "/admin_conversation_audit - Conversation Audit", "/admin_ai_usage - AI Usage Oversight", "/admin_failed_deliveries - Failed Deliveries"];
+  return [...ordinary, ...(isSuperAdmin ? ["", ...(language === "es" ? ["Opciones de superadministrador:"] : ["Super-admin options:"]), ...admin] : [])].join("\n");
+}
+
+async function handleHelpCommand(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const conversationId = await openConversation(client, { userId: account.userId, companyId: account.companyId, channelId: account.channelId, adapterId: config.adapterId, language, mode: "help", status: "closed", privacyNoticeVersion: config.consentVersion });
+  await recordConversationMessage(client, { conversationId, direction: "inbound", role: "user", updateId: evidence.updateId, key: `help-in:${evidence.updateId}`, language, text: evidence.command || "/help", requestedAction: "help_menu" });
+  const text = productMenu(language, account.isSuperAdmin);
+  const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", key: `help-out:${evidence.updateId}`, language, text, deliveryState: "pending", requestedAction: "help_menu", summary: "BIMLog product menu" });
+  return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+}
+
+function parseFunding(argument: string): { source: FundingSource; prompt: string } | null {
+  const trimmed = sanitizeTelegramText(argument);
+  const match = /^(personal|company|system)\s+(.+)/i.exec(trimmed);
+  if (!match) return null;
+  return { source: match[1].toLowerCase() as FundingSource, prompt: match[2].trim() };
+}
+
+async function openConversation(client: QueryClient, input: { userId: number; companyId: number; channelId: number | null; adapterId: string; language: TelegramLanguage; mode: ConversationMode; status?: string; funding?: FundingSource | null; aiRunId?: string | null; privacyNoticeVersion?: string }): Promise<string> {
+  const id = crypto.randomUUID();
+  await client.query(
+    `INSERT INTO telegram_conversations(id,user_id,company_id,notification_channel_id,adapter_id,language,mode,status,ai_funding_source,ai_run_id,privacy_notice_version)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+    [id, input.userId, input.companyId, input.channelId, input.adapterId, input.language, input.mode, input.status || "open", input.funding || null, input.aiRunId || null, input.privacyNoticeVersion || ""],
+  );
+  return id;
+}
+
+async function recordConversationMessage(client: QueryClient, input: { conversationId: string; direction: "inbound" | "outbound" | "system"; role: "user" | "assistant" | "system" | "support"; updateId?: string | null; key: string; language: TelegramLanguage; text: string; state?: string; deliveryState?: "pending" | "delivered" | "failed" | "not_applicable"; requestedAction?: string | null; summary?: string | null; aiRunId?: string | null; error?: string | null }): Promise<string | null> {
+  const id = crypto.randomUUID();
+  const result = await client.query<{ id: string }>(
+    `INSERT INTO telegram_conversation_messages(id,conversation_id,direction,sender_role,telegram_update_id,idempotency_key,language,sanitized_text,processing_state,delivery_state,requested_action,delivered_summary,ai_run_id,error_category)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+     ON CONFLICT (conversation_id,idempotency_key) DO NOTHING
+     RETURNING id`,
+    [id, input.conversationId, input.direction, input.role, input.updateId || null, input.key, input.language, sanitizeTelegramText(input.text), input.state || "processed", input.deliveryState || (input.direction === "outbound" ? "pending" : "not_applicable"), input.requestedAction || null, input.summary || null, input.aiRunId || null, input.error || null],
+  );
+  await client.query(`UPDATE telegram_conversations SET updated_at=now(), last_activity_at=now() WHERE id=$1`, [input.conversationId]);
+  return result.rows[0]?.id || null;
+}
+
+async function latestPendingAssistantConversation(client: QueryClient, userId: number, conversationId: string) {
+  const { rows } = await client.query<any>(
+    `SELECT c.*, r.estimate_fingerprint, r.context_manifest_hash
+     FROM telegram_conversations c
+     LEFT JOIN ai_runs r ON r.id=c.ai_run_id
+     WHERE c.id=$1 AND c.user_id=$2 AND c.mode='assistant' AND c.status='pending_confirmation'
+     LIMIT 1`,
+    [conversationId, userId],
+  );
+  return rows[0] || null;
+}
+
+async function latestOpenAssistantConversation(client: QueryClient, account: Awaited<ReturnType<typeof connectedTelegramAccount>>) {
+  const { rows } = await client.query<any>(
+    `SELECT c.*, r.provider, r.model, r.credit_owner_type, r.connection_id
+     FROM telegram_conversations c
+     JOIN ai_runs r ON r.id=c.ai_run_id
+     WHERE c.user_id=$1 AND c.company_id=$2 AND c.notification_channel_id=$3 AND c.mode='assistant' AND c.status='open'
+     ORDER BY c.last_activity_at DESC, c.created_at DESC
+     LIMIT 1`,
+    [account.userId, account.companyId, account.channelId],
+  );
+  return rows[0] || null;
+}
+
+async function assistantBrokerContext(client: QueryClient, conversationId: string, language: TelegramLanguage): Promise<Array<{ role: "system" | "user" | "assistant"; content: string }>> {
+  const rows = await client.query<{ sender_role: string; sanitized_text: string }>(
+    `SELECT sender_role,sanitized_text
+     FROM telegram_conversation_messages
+     WHERE conversation_id=$1 AND sender_role IN ('user','assistant')
+     ORDER BY created_at DESC
+     LIMIT 8`,
+    [conversationId],
+  );
+  const ordered = rows.rows.reverse().map((row) => ({
+    role: row.sender_role === "assistant" ? "assistant" as const : "user" as const,
+    content: sanitizeTelegramText(row.sanitized_text).slice(0, 1800),
+  })).filter((row) => row.content);
+  return [
+    {
+      role: "system",
+      content: language === "es"
+        ? "Eres el asistente de BIMLog en Telegram. Responde de forma concisa. No leas archivos, no envies emails, no generes reportes y no modifiques proyectos."
+        : "You are the BIMLog Telegram assistant. Answer concisely. Do not read files, send emails, generate reports, or modify projects.",
+    },
+    ...ordered,
+  ];
+}
+
+async function selectedConnectionForFunding(client: QueryClient, actor: Actor, funding: FundingSource): Promise<{ id: string; provider: string; model: string; label: string; owner_type: string } | null> {
+  const { rows } = await client.query<any>(
+    `SELECT id, provider, label, owner_type, allowed_models
+     FROM provider_connections
+     WHERE status='active'
+       AND (
+         ($1='personal' AND owner_type='personal' AND user_id=$2)
+         OR ($1='company' AND owner_type='company' AND company_id=$3)
+         OR ($1='system' AND owner_type='system' AND $4::boolean)
+       )
+     ORDER BY updated_at DESC, created_at DESC
+     LIMIT 1`,
+    [funding, actor.userId, actor.companyId, actor.isSuperAdmin],
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const models = Array.isArray(row.allowed_models) ? row.allowed_models : [];
+  return { id: row.id, provider: row.provider, model: String(models[0] || "test-model"), label: row.label, owner_type: row.owner_type };
+}
+
+async function handleAssistantCommand(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const parsed = parseFunding(evidence.argument || "");
+  if (!parsed) return { chatId: evidence.telegramChatId!, text: assistantIntro(language) };
+  const actor: Actor = { userId: account.userId, companyId: account.companyId, isSuperAdmin: account.isSuperAdmin, isCompanyAdmin: account.isCompanyAdmin };
+  const connection = await selectedConnectionForFunding(client, actor, parsed.source);
+  if (!connection) {
+    const text = language === "es"
+      ? `No hay una conexión de IA activa para ${parsed.source}. Configura proveedor, precios, derechos y presupuesto en el panel de IA antes de usar Telegram.`
+      : `No active AI connection is available for ${parsed.source}. Configure provider, pricing, entitlement, and budget in the AI panel before using Telegram.`;
+    const conversationId = await openConversation(client, { userId: account.userId, companyId: account.companyId, channelId: account.channelId, adapterId: config.adapterId, language, mode: "assistant", status: "failed", funding: parsed.source, privacyNoticeVersion: config.consentVersion });
+    await recordConversationMessage(client, { conversationId, direction: "inbound", role: "user", updateId: evidence.updateId, key: `update:${evidence.updateId}`, language, text: parsed.prompt, state: "failed", requestedAction: "assistant_estimate", error: "CONNECTION_UNAVAILABLE" });
+    return { chatId: evidence.telegramChatId!, text };
+  }
+  try {
+    const estimate = await createEstimate(actor, {
+      capability: "assistant",
+      purpose: "Telegram bilingual assistant",
+      provider: connection.provider,
+      model: connection.model,
+      connectionId: connection.id,
+      creditOwnerType: parsed.source,
+      sessionId: `telegram:${config.adapterId}:${account.userId}`,
+      contextManifestHash: hmacValue(config, `telegram-assistant:${account.userId}:${sanitizeTelegramText(parsed.prompt)}`),
+      contextCategories: ["telegram_conversation", "user_prompt"],
+      inputTokenMin: 1,
+      inputTokenMax: 800,
+      outputTokenMax: 400,
+      filesWillBeTransmitted: false,
+      idempotencyKey: `telegram-assistant-estimate:${evidence.updateId}`,
+    });
+    const conversationId = await openConversation(client, { userId: account.userId, companyId: account.companyId, channelId: account.channelId, adapterId: config.adapterId, language, mode: "assistant", status: "pending_confirmation", funding: parsed.source, aiRunId: estimate.id, privacyNoticeVersion: config.consentVersion });
+    await recordConversationMessage(client, { conversationId, direction: "inbound", role: "user", updateId: evidence.updateId, key: `update:${evidence.updateId}`, language, text: parsed.prompt, state: "pending_confirmation", requestedAction: "assistant_estimate", aiRunId: estimate.id });
+    const warning = parsed.source === "personal"
+      ? (language === "es" ? "Se usarán tus créditos personales/BYO." : "This will use your personal/BYO AI credits.")
+      : parsed.source === "company"
+        ? (language === "es" ? "Se usarán créditos de IA de la compañía si tienes asignación." : "This will use company AI credits if you have allocation.")
+        : (language === "es" ? "Se usarán créditos de plataforma/sistema; solo superadministradores pueden confirmar." : "This will use platform/system AI credits; only super admins can confirm.");
+    const text = language === "es"
+      ? `${warning}\nEstimado: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nPara confirmar: /confirm_ai ${conversationId}\nPara cancelar: /cancel_ai ${conversationId}`
+      : `${warning}\nEstimate: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nTo confirm: /confirm_ai ${conversationId}\nTo cancel: /cancel_ai ${conversationId}`;
+    const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", key: `estimate-reply:${estimate.id}`, language, text, state: "pending_confirmation", deliveryState: "pending", requestedAction: "assistant_confirmation", aiRunId: estimate.id });
+    return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+  } catch (error) {
+    const code = error instanceof AiControlError ? error.code : "AI_ESTIMATE_FAILED";
+    const text = language === "es" ? `No se pudo preparar la estimación de IA: ${code}.` : `Could not prepare the AI estimate: ${code}.`;
+    return { chatId: evidence.telegramChatId!, text };
+  }
+}
+
+async function handleContinueAi(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const prompt = sanitizeTelegramText(evidence.argument || "");
+  if (!prompt) return { chatId: evidence.telegramChatId!, text: language === "es" ? "Escribe /continue_ai seguido de tu nueva pregunta." : "Send /continue_ai followed by your new question." };
+  const open = await latestOpenAssistantConversation(client, account);
+  if (!open?.ai_run_id) return { chatId: evidence.telegramChatId!, text: language === "es" ? "No hay una conversación de asistente abierta." : "There is no open assistant conversation." };
+  if (open.language !== language) return { chatId: evidence.telegramChatId!, text: language === "es" ? "El idioma cambió. Inicia una nueva conversación para cambiar idioma." : "Language changed. Start a new conversation to change language." };
+  const actor: Actor = { userId: account.userId, companyId: account.companyId, isSuperAdmin: account.isSuperAdmin, isCompanyAdmin: account.isCompanyAdmin };
+  try {
+    const estimate = await createEstimate(actor, {
+      capability: "assistant",
+      purpose: "Telegram bilingual assistant continuation",
+      provider: open.provider,
+      model: open.model,
+      connectionId: open.connection_id,
+      creditOwnerType: open.credit_owner_type,
+      sessionId: `telegram:${config.adapterId}:${account.userId}:${open.id}`,
+      contextManifestHash: hmacValue(config, `telegram-assistant-continue:${open.id}:${prompt}`),
+      contextCategories: ["telegram_conversation", "user_prompt", "prior_messages"],
+      inputTokenMin: 1,
+      inputTokenMax: 800,
+      outputTokenMax: 400,
+      filesWillBeTransmitted: false,
+      idempotencyKey: `telegram-assistant-continue:${evidence.updateId}`,
+    });
+    await client.query(`UPDATE telegram_conversations SET status='pending_confirmation', ai_run_id=$2, ai_funding_source=$3, updated_at=now(), last_activity_at=now() WHERE id=$1`, [open.id, estimate.id, open.credit_owner_type]);
+    await recordConversationMessage(client, { conversationId: open.id, direction: "inbound", role: "user", updateId: evidence.updateId, key: `continue:${evidence.updateId}`, language, text: prompt, state: "pending_confirmation", requestedAction: "assistant_continue_estimate", aiRunId: estimate.id });
+    const warning = open.credit_owner_type === "personal"
+      ? (language === "es" ? "Se usarán tus créditos personales/BYO." : "This will use your personal/BYO AI credits.")
+      : open.credit_owner_type === "company"
+        ? (language === "es" ? "Se usarán créditos de IA de la compañía si tienes asignación." : "This will use company AI credits if you have allocation.")
+        : (language === "es" ? "Se usarán créditos de plataforma/sistema; solo superadministradores pueden confirmar." : "This will use platform/system AI credits; only super admins can confirm.");
+    const text = language === "es"
+      ? `${warning}\nEstimado: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nPara confirmar: /confirm_ai ${open.id}\nPara cancelar: /cancel_ai ${open.id}`
+      : `${warning}\nEstimate: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nTo confirm: /confirm_ai ${open.id}\nTo cancel: /cancel_ai ${open.id}`;
+    const outboundMessageId = await recordConversationMessage(client, { conversationId: open.id, direction: "outbound", role: "assistant", key: `continue-estimate:${estimate.id}`, language, text, state: "pending_confirmation", deliveryState: "pending", requestedAction: "assistant_continue_confirmation", aiRunId: estimate.id });
+    return { chatId: evidence.telegramChatId!, text, conversationId: open.id, outboundMessageId };
+  } catch (error) {
+    const code = error instanceof AiControlError ? error.code : "AI_ESTIMATE_FAILED";
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? `No se pudo continuar la IA: ${code}.` : `Could not continue AI: ${code}.` };
+  }
+}
+
+async function handleCloseConversation(client: QueryClient, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const open = await latestOpenAssistantConversation(client, account);
+  if (!open?.id) return { chatId: evidence.telegramChatId!, text: language === "es" ? "No hay una conversación abierta." : "There is no open conversation." };
+  await client.query(`UPDATE telegram_conversations SET status='closed', closed_at=now(), updated_at=now() WHERE id=$1 AND user_id=$2`, [open.id, account.userId]);
+  await recordConversationMessage(client, { conversationId: open.id, direction: "system", role: "system", updateId: evidence.updateId, key: `close:${evidence.updateId}`, language, text: "closed", requestedAction: "assistant_conversation_closed" });
+  return { chatId: evidence.telegramChatId!, text: language === "es" ? "Conversación cerrada." : "Conversation closed." };
+}
+
+async function handleConfirmAi(client: QueryClient, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence, cancelOnly = false): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const conversationId = sanitizeTelegramText(evidence.argument || "");
+  const pending = await latestPendingAssistantConversation(client, account.userId, conversationId);
+  if (!pending?.ai_run_id) {
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? "No encontré una conversación de IA pendiente para confirmar o cancelar." : "I could not find a pending AI conversation to confirm or cancel." };
+  }
+  const actor: Actor = { userId: account.userId, companyId: account.companyId, isSuperAdmin: account.isSuperAdmin, isCompanyAdmin: account.isCompanyAdmin };
+  if (cancelOnly) {
+    try {
+      await cancelRun(actor, pending.ai_run_id);
+    } catch (error) {
+      if (!(error instanceof AiControlError) || error.code !== "RUN_NOT_RESERVED") throw error;
+      await pool.query(
+        `UPDATE ai_runs SET status='cancelled', updated_at=now()
+         WHERE id=$1 AND user_id=$2 AND status IN ('estimated','confirmed','file_confirmed')`,
+        [pending.ai_run_id, actor.userId],
+      );
+    }
+    await client.query(`UPDATE telegram_conversations SET status='closed', closed_at=now(), updated_at=now() WHERE id=$1`, [conversationId]);
+    await recordConversationMessage(client, { conversationId, direction: "system", role: "system", updateId: evidence.updateId, key: `cancel:${evidence.updateId}`, language, text: "cancelled", state: "cancelled", aiRunId: pending.ai_run_id });
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? "Solicitud de IA cancelada. No se llamó al proveedor y no se cobraron créditos." : "AI request cancelled. No provider was called and no credits were charged." };
+  }
+  try {
+    const confirmationId = `telegram-confirm:${evidence.updateId}`;
+    const confirmed = await confirmEstimate(actor, pending.ai_run_id, { confirmationId, estimateFingerprint: pending.estimate_fingerprint, contextManifestHash: pending.context_manifest_hash, fileManifestHash: null });
+    const reserved = await reserveRun(actor, pending.ai_run_id, { confirmationId, estimateFingerprint: confirmed.estimate_fingerprint, contextManifestHash: confirmed.context_manifest_hash, fileManifestHash: null });
+    const context = await assistantBrokerContext(client, conversationId, language);
+    const result = await executeTelegramAssistantBroker(actor, pending.ai_run_id, context);
+    await client.query(`UPDATE telegram_conversations SET status='open', updated_at=now() WHERE id=$1`, [conversationId]);
+    const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", updateId: evidence.updateId, key: `answer:${reserved.id}`, language, text: result.text, deliveryState: "pending", aiRunId: pending.ai_run_id, summary: "provider assistant response" });
+    return { chatId: evidence.telegramChatId!, text: result.text, conversationId, outboundMessageId };
+  } catch (error) {
+    const code = error instanceof TelegramProviderBrokerError ? error.code : error instanceof AiControlError ? error.code : "AI_CONFIRM_FAILED";
+    await recordConversationMessage(client, { conversationId, direction: "system", role: "system", updateId: evidence.updateId, key: `confirm-error:${evidence.updateId}`, language, text: code, state: "failed", aiRunId: pending.ai_run_id, error: code });
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? `No se pudo confirmar la IA: ${code}.` : `Could not confirm AI: ${code}.` };
+  }
+}
+
+async function handleSupportCommand(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const draft = parseSupportDraft(evidence.argument || "");
+  if (!draft) return { chatId: evidence.telegramChatId!, text: `${supportIntro(language)}\n${supportCategoryLabels(language)}` };
+  const conversationId = await openConversation(client, { userId: account.userId, companyId: account.companyId, channelId: account.channelId, adapterId: config.adapterId, language, mode: "support", status: "pending_confirmation", privacyNoticeVersion: config.consentVersion });
+  const draftText = `${draft.category} | ${draft.subject} | ${draft.description} | ${draft.severity}`;
+  await recordConversationMessage(client, { conversationId, direction: "inbound", role: "user", updateId: evidence.updateId, key: `support-draft:${evidence.updateId}`, language, text: draftText, state: "pending_confirmation", requestedAction: "support_intake_draft" });
+  const text = language === "es"
+    ? `Resumen de soporte:\nCategoria: ${draft.category}\nAsunto: ${draft.subject}\nDescripcion: ${draft.description}\nPrioridad: ${draft.severity}\nConfirmar: /confirm_support ${conversationId}\nCancelar: /cancel_support ${conversationId}`
+    : `Support summary:\nCategory: ${draft.category}\nSubject: ${draft.subject}\nDescription: ${draft.description}\nSeverity: ${draft.severity}\nConfirm: /confirm_support ${conversationId}\nCancel: /cancel_support ${conversationId}`;
+  const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "support", key: `support-summary:${conversationId}`, language, text, deliveryState: "pending", requestedAction: "support_confirmation", summary: "support intake summary" });
+  return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+}
+
+async function handleConfirmSupport(client: QueryClient, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence, cancelOnly = false): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const conversationId = sanitizeTelegramText(evidence.argument || "");
+  const row = await client.query<{ sanitized_text: string }>(
+    `SELECT m.sanitized_text FROM telegram_conversations c JOIN telegram_conversation_messages m ON m.conversation_id=c.id
+     WHERE c.id=$1 AND c.user_id=$2 AND c.mode='support' AND c.status='pending_confirmation' AND m.requested_action='support_intake_draft'
+     ORDER BY m.created_at DESC LIMIT 1`,
+    [conversationId, account.userId],
+  );
+  const draft = parseSupportDraft(row.rows[0]?.sanitized_text || "");
+  if (!draft) return { chatId: evidence.telegramChatId!, text: language === "es" ? "No hay un caso de soporte pendiente." : "No pending support case was found." };
+  if (cancelOnly) {
+    await client.query(`UPDATE telegram_conversations SET status='closed', closed_at=now(), updated_at=now() WHERE id=$1`, [conversationId]);
+    await recordConversationMessage(client, { conversationId, direction: "system", role: "system", updateId: evidence.updateId, key: `support-cancel:${evidence.updateId}`, language, text: "cancelled", state: "cancelled", requestedAction: "support_cancelled" });
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? "Solicitud de soporte cancelada. No se creó ningún caso." : "Support request cancelled. No case was created." };
+  }
+  const caseNumber = `TG-${Date.now().toString(36).toUpperCase()}-${crypto.randomInt(1000, 9999)}`;
+  const caseId = crypto.randomUUID();
+  await client.query(
+    `INSERT INTO telegram_support_cases(id,case_number,user_id,company_id,conversation_id,category,subject,description,severity,status,language)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'new',$10)`,
+    [caseId, caseNumber, account.userId, account.companyId, conversationId, draft.category, draft.subject, draft.description, draft.severity, language],
+  );
+  await client.query(`UPDATE telegram_conversations SET support_case_id=$2, status='closed', closed_at=now(), updated_at=now() WHERE id=$1`, [conversationId, caseId]);
+  await client.query(
+    `INSERT INTO telegram_support_case_events(id,case_id,actor_user_id,action,from_status,to_status,reason,details)
+     VALUES($1,$2,$3,'created',NULL,'new',$4,$5::jsonb)`,
+    [crypto.randomUUID(), caseId, account.userId, "telegram_user_confirmed", JSON.stringify({ updateId: evidence.updateId, category: draft.category, severity: draft.severity })],
+  );
+  const text = language === "es" ? `Caso de soporte creado: ${caseNumber}. Estado: new.` : `Support case created: ${caseNumber}. Status: new.`;
+  const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "support", key: `support-created:${caseId}`, language, text, deliveryState: "pending", requestedAction: "support_case_created", summary: "support case created" });
+  return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+}
+
 async function processStartToken(client: QueryClient, config: TelegramProductConfig, token: string, telegramUserId: string, telegramChatId: string, accountLabel: string | null): Promise<TelegramReply> {
   const tokenHmac = hmacValue(config, token);
   const telegramUserHash = hmacValue(config, `telegram-user:${telegramUserId}`);
@@ -546,7 +1066,7 @@ async function processCommand(client: QueryClient, config: TelegramProductConfig
   }
   if (!evidence.telegramChatId || !evidence.telegramUserId || evidence.chatType !== "private") return null;
   const telegramUserHash = hmacValue(config, `telegram-user:${evidence.telegramUserId}`);
-  const connected = await languageForTelegramUser(client, config, telegramUserHash);
+  const connected = await connectedTelegramAccount(client, config, telegramUserHash);
   const language = connected.language;
   const accountLabel = null;
 
@@ -554,9 +1074,23 @@ async function processCommand(client: QueryClient, config: TelegramProductConfig
     if (evidence.argument) return processStartToken(client, config, evidence.argument, evidence.telegramUserId, evidence.telegramChatId, accountLabel);
     return { chatId: evidence.telegramChatId, text: bilingualStart() };
   }
-  if (evidence.command === "/help") return { chatId: evidence.telegramChatId, text: localized(language, "help") };
+  if (evidence.command === "/help" || evidence.command === "/menu") return handleHelpCommand(client, config, connected, evidence);
+  if (evidence.command === "/ayuda") return handleHelpCommand(client, config, { ...connected, language: "es" }, evidence);
+  if (["/admin_support_queue", "/admin_conversation_audit", "/admin_ai_usage", "/admin_failed_deliveries"].includes(evidence.command || "")) {
+    if (!connected.userId) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
+    if (!connected.isSuperAdmin) return { chatId: evidence.telegramChatId, text: language === "es" ? "Acceso denegado." : "Access denied." };
+    return { chatId: evidence.telegramChatId, text: productMenu(language, true) };
+  }
   if (evidence.command === "/settings") return { chatId: evidence.telegramChatId, text: connected.userId ? localized(language, "settings") : localized(language, "notConnected") };
   if (evidence.command === "/privacy") return { chatId: evidence.telegramChatId, text: localized(language, "privacy") };
+  if (evidence.command === "/assistant" || evidence.command === "/asistente") return handleAssistantCommand(client, config, connected, evidence);
+  if (evidence.command === "/continue_ai") return handleContinueAi(client, config, connected, evidence);
+  if (evidence.command === "/confirm_ai") return handleConfirmAi(client, connected, evidence, false);
+  if (evidence.command === "/cancel_ai") return handleConfirmAi(client, connected, evidence, true);
+  if (evidence.command === "/close_conversation") return handleCloseConversation(client, connected, evidence);
+  if (evidence.command === "/support" || evidence.command === "/soporte") return handleSupportCommand(client, config, connected, evidence);
+  if (evidence.command === "/confirm_support") return handleConfirmSupport(client, connected, evidence, false);
+  if (evidence.command === "/cancel_support") return handleConfirmSupport(client, connected, evidence, true);
   if (evidence.command === "/language") {
     const nextLanguage = parseLanguage(evidence.argument);
     if (!connected.userId || !connected.email) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
@@ -699,13 +1233,32 @@ export function startTelegramProductWorker(): void {
 export async function sendTelegramReply(reply: TelegramReply | null): Promise<void> {
   if (!reply) return;
   const config = requireTelegramProductConfig();
+  if (reply.outboundMessageId) {
+    const current = await pool.query<{ delivery_state: string }>(`SELECT delivery_state FROM telegram_conversation_messages WHERE id=$1`, [reply.outboundMessageId]);
+    if (current.rows[0]?.delivery_state === "delivered") return;
+    await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='pending', delivery_attempts=delivery_attempts+1 WHERE id=$1 AND delivery_state<>'delivered'`, [reply.outboundMessageId]);
+  }
   const response = await fetch(`${BOT_API_BASE}/bot${config.botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: reply.chatId, text: reply.text, disable_web_page_preview: true }),
   });
   if (!response.ok) {
+    if (reply.outboundMessageId) {
+      await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='failed', error_category=$2 WHERE id=$1`, [reply.outboundMessageId, `TELEGRAM_HTTP_${response.status}`]);
+    }
     throw new TelegramProductError(502, "TELEGRAM_SEND_FAILED", `Telegram sendMessage failed with status ${response.status}.`);
+  }
+  const body = await response.json().catch(() => null) as { ok?: boolean; result?: { message_id?: number | string } } | null;
+  const messageId = body?.ok === true && body.result?.message_id != null ? String(body.result.message_id) : "";
+  if (!messageId) {
+    if (reply.outboundMessageId) {
+      await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='failed', error_category='TELEGRAM_INVALID_RESPONSE' WHERE id=$1`, [reply.outboundMessageId]);
+    }
+    throw new TelegramProductError(502, "TELEGRAM_INVALID_RESPONSE", "Telegram sendMessage did not return a valid message id.");
+  }
+  if (reply.outboundMessageId) {
+    await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='delivered', telegram_delivery_message_id=$2, delivered_at=now(), error_category=NULL WHERE id=$1`, [reply.outboundMessageId, messageId]);
   }
 }
 
