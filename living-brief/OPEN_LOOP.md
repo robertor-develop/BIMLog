@@ -513,6 +513,21 @@ Deferred:
 - Correction evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-4-correction\20260714-172059`. It includes authenticated API/database/storage proofs, original-byte hashes, real-browser JSON/screenshots, standard and Complete PDF variants, DOCX package inspection, and LibreOffice-rendered visible/hidden DOCX artifacts.
 - Build 4 functional correction was independently accepted. Its focused evidence directory was sanitized, and the accepted correction was cleanly integrated from the exact `origin/master` baseline without unrelated Telegram or Navisworks commits. Nothing was published, and Build 5 has not started.
 
+### RFI Build 5 Professional Standard Exports
+
+- Starting commit: `6919765be8c7cd3f0042fa62b4283d4862210181`.
+- RFI PDF and RFI DOCX now consume one canonical saved-record export model in `artifacts/api-server/src/lib/rfi-standard-exports.ts`. The model covers the numbered 1-7 application structure, participants, references and clean attachment names, persisted image presentation, multiline question text, impact accountability, decoded distribution, persisted email wording, and ordered official responses with independent attachments and impacts.
+- The standard PDF is a searchable Letter construction record with repeated BIMLog identity, disciplined blue/neutral styling, safe pagination, Page X of Y, generation timestamp, content fingerprint, and draft watermark. Persisted original/replacement crop and show/hide state are honored.
+- The DOCX contains editable native Word content with Letter margins, styles, tables, header/footer, Page X of Y fields, embedded aspect-ratio-preserving images, and the same canonical field inventory as the PDF. All focused samples opened and rendered through LibreOffice without broken relationships.
+- The Audit PDF is now a factual evidence report with identity, lifecycle state, event-category coverage, chronological actor/timestamp/action history, safe before/after summaries, custody history, response evidence, and view/access history. Missing categories are explicit, and the report makes no unsupported certification claim.
+- Acceptance inspection found and corrected two final export defects: odd-length DOCX field groups exposed a padding label as `Not recorded`, and saved audit details exposed numeric BIMLog file locator IDs. Padding cells are now blank and audit file labels retain factual change context without internal IDs.
+- Isolated acceptance covered draft, sent, closed, reopened, revised, Cost Increase TBD, known cost, schedule increase/decrease, long text, several references, multiple attachments, decoded distribution, two responses, cropped original image, replacement image, and hidden image. Evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-5\20260714-223603`.
+- Build 5 is submitted as a local review commit for independent master review and is not self-accepted. Nothing was pushed or published.
+
+Deferred:
+- Complete RFI PDF attachment/package merging, native PDF pages, Office conversion, and mixed page sizes remain Build 6 scope. Build 6 was not started.
+- Production, Replit, Neon, plugin, Telegram, Lens, Schedule, Submittals, and global-layout work remain outside this build.
+
 ## Deferred
 
 ### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Watching

@@ -183,6 +183,8 @@ const rfiMigrationReady = (async () => {
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS attachment_package_json json DEFAULT '[]'::json`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS image_presentation_json json DEFAULT NULL`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_description text`);
+    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_draft text`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_at timestamp`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_by_id integer`);
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_at timestamp`);

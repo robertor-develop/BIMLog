@@ -55,6 +55,8 @@ export const rfisTable = pgTable("rfis", {
   dateAnswered: timestamp("date_answered"),
 
   distributionList: json("distribution_list").$type<string[]>().default([]),
+  emailDescription: text("email_description"),
+  emailDraft: text("email_draft"),
   attachmentsJson: json("attachments_json").$type<string[]>().default([]),
   attachmentPackageJson: json("attachment_package_json").$type<Array<{
     key: string;

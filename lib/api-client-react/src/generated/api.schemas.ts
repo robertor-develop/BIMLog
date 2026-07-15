@@ -184,6 +184,8 @@ export interface Rfi {
   answeredBy?: string;
   dateAnswered?: string;
   distributionList?: string[];
+  emailDescription?: string;
+  emailDraft?: string;
   attachmentsJson?: string[];
   attachmentPackageJson?: Record<string, unknown>[];
   imagePresentationJson?: Record<string, unknown> | null;
@@ -228,6 +230,8 @@ export interface CreateRfiRequest {
   scheduleImpactDays?: number | null;
   scheduleImpactReason?: string | null;
   distributionList?: string[];
+  emailDescription?: string;
+  emailDraft?: string;
   attachmentsJson?: string[];
   attachmentPackageJson?: Record<string, unknown>[];
   imagePresentationJson?: Record<string, unknown> | null;
@@ -272,6 +276,8 @@ export interface UpdateRfiRequest {
   answeredBy?: string;
   dateAnswered?: string;
   distributionList?: string[];
+  emailDescription?: string;
+  emailDraft?: string;
   attachmentsJson?: string[];
   attachmentPackageJson?: Record<string, unknown>[];
   imagePresentationJson?: Record<string, unknown> | null;

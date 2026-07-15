@@ -1601,6 +1601,8 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       scheduleImpactDays: scheduleDaysRequired && schedDays ? parseInt(schedDays) : null,
       scheduleImpactReason: scheduleDaysRequired ? schedReason : null,
       distributionList: distList,
+      emailDescription,
+      emailDraft,
       attachmentsJson: allEvidence,
       attachmentPackageJson: packageItems,
       imagePresentationJson: imagePresentation,
@@ -1771,6 +1773,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   onExportCompletePdf: (rfi: Rfi) => void;
   onUpdate: (rfi: Rfi) => void;
 }) {
+  const persistedEmail = rfi as Rfi & { emailDescription?: string | null; emailDraft?: string | null };
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getLabel, getOptions } = useConfig();
@@ -1869,6 +1872,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoFromAddress(rfi.submittedByAddress || "");
     setInfoFromPhone(rfi.submittedByPhone || "");
     setInfoFromEmail(rfi.submittedByEmail || "");
+    setUserContext(persistedEmail.emailDescription || "");
+    setAiPreview(persistedEmail.emailDraft || null);
     setInfoEdit(true);
   };
 
@@ -1987,10 +1992,10 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // ── RFI sending (manual, self-reported — no platform delivery) ───────────
   const [marking, setMarking] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [aiPreview, setAiPreview] = useState<string | null>(null);
+  const [aiPreview, setAiPreview] = useState<string | null>(persistedEmail.emailDraft || null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
-  const [userContext, setUserContext] = useState("");
+  const [userContext, setUserContext] = useState(persistedEmail.emailDescription || "");
 
   const sendPreviewText = [
     `To: ${rfi.submittedToEmail || rfi.submittedToPerson || rfi.submittedToCompany || ""}`,
@@ -2600,6 +2605,8 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         submittedToCompany: infoToCompany,
         submittedToPerson: infoToPerson,
         submittedToEmail: infoToEmail,
+        emailDescription: userContext,
+        emailDraft: previewText,
         attachmentsJson: [...questionReferences, ...questionDocs],
         attachmentPackageJson: packageItems,
         imagePresentationJson: imagePresentation,

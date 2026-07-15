@@ -51,6 +51,8 @@ export interface Rfi {
   answeredBy?: string;
   dateAnswered?: string;
   distributionList?: string[];
+  emailDescription?: string;
+  emailDraft?: string;
   attachmentsJson?: string[];
   attachmentPackageJson?: Record<string, unknown>[];
   imagePresentationJson?: Record<string, unknown> | null;
