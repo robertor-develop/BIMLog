@@ -522,10 +522,10 @@ Deferred:
 - The Audit PDF is now a factual evidence report with identity, lifecycle state, event-category coverage, chronological actor/timestamp/action history, safe before/after summaries, custody history, response evidence, and view/access history. Missing categories are explicit, and the report makes no unsupported certification claim.
 - Acceptance inspection found and corrected two final export defects: odd-length DOCX field groups exposed a padding label as `Not recorded`, and saved audit details exposed numeric BIMLog file locator IDs. Padding cells are now blank and audit file labels retain factual change context without internal IDs.
 - Isolated acceptance covered draft, sent, closed, reopened, revised, Cost Increase TBD, known cost, schedule increase/decrease, long text, several references, multiple attachments, decoded distribution, two responses, cropped original image, replacement image, and hidden image. Evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-5\20260714-223603`.
-- Build 5 is submitted as a local review commit for independent master review and is not self-accepted. Nothing was pushed or published.
+- Build 5 was independently accepted by the master coordinator and cleanly integrated. The standard RFI PDF, editable RFI DOCX, factual RFI Audit PDF, and shared canonical export model are accepted. Nothing was published.
 
 Deferred:
-- Complete RFI PDF attachment/package merging, native PDF pages, Office conversion, and mixed page sizes remain Build 6 scope. Build 6 was not started.
+- Complete RFI PDF attachment/package merging, native PDF pages, Office conversion, and mixed page sizes remain Build 6 scope. Build 6 has not started.
 - Production, Replit, Neon, plugin, Telegram, Lens, Schedule, Submittals, and global-layout work remain outside this build.
 
 ## Deferred
