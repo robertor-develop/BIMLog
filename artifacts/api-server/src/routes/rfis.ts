@@ -9,10 +9,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
 import multer from "multer";
 import crypto from "crypto";
-import fs from "fs";
-import os from "os";
 import path from "path";
-import { spawnSync } from "child_process";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
@@ -30,6 +27,11 @@ import {
   type CanonicalRfiExportModel,
   type RfiExportImage,
 } from "../lib/rfi-standard-exports";
+import {
+  buildCompleteRfiPackage,
+  CompletePackageError,
+  type CompletePackageInputItem,
+} from "../lib/rfi-complete-package";
 const router: IRouter = Router();
 
 type RfiPackageItem = {
@@ -155,11 +157,15 @@ async function normalizeRfiAttachments(params: {
   }
 
   const requested = normalizePackageConfig(params.packageValue);
-  const requestedByKey = new Map(requested.map(item => [item.key, item]));
+  const requestedByKey = new Map<string, RfiPackageItem>();
   const requestedByAttachment = new Map<string, RfiPackageItem>();
   for (const item of requested) {
+    if (!requestedByKey.has(item.key)) requestedByKey.set(item.key, item);
     if (!item.attachment) continue;
-    try { requestedByAttachment.set(normalizeReferenceValue(item.attachment), item); } catch { /* stale package ghosts are discarded below */ }
+    try {
+      const attachment = normalizeReferenceValue(item.attachment);
+      if (!requestedByAttachment.has(attachment)) requestedByAttachment.set(attachment, item);
+    } catch { /* stale package ghosts are discarded below */ }
   }
   const packageItems = values.map((value, index) => {
     const locator = parseInternalFileLocator(value);
@@ -1835,7 +1841,7 @@ async function renderRfiPdfBuffer(
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: typeof projectsTable.$inferSelect | undefined,
   includePresentationImage = true,
-): Promise<Buffer> {
+): Promise<{ buffer: Buffer; model: CanonicalRfiExportModel }> {
   const attachmentLabels = await loadAttachmentLabels(rfi.projectId, [
     rfi.attachmentsJson as string[] | null,
     ...responses.map(response => response.responseAttachmentsJson as string[] | null),
@@ -1843,7 +1849,7 @@ async function renderRfiPdfBuffer(
   const activeImage = includePresentationImage ? await loadActiveRfiExportImage(rfi) : null;
   const generatedAt = new Date();
   const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, generatedAt });
-  return new Promise((resolve, reject) => {
+  const buffer = await new Promise<Buffer>((resolve, reject) => {
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -1852,245 +1858,98 @@ async function renderRfiPdfBuffer(
     renderCanonicalRfiPdf(doc, exportData.model, exportData.image);
     doc.end();
   });
+  return { buffer, model: exportData.model };
 }
 
 function attachmentFileId(value: string): number | null {
   return parseInternalFileLocator(value)?.fileId ?? null;
 }
 
-function fileExtension(fileName: string): string {
-  return (fileName.split(".").pop() || "").toLowerCase();
-}
-
-function isImageAttachment(fileName: string, fileType: string | null | undefined): boolean {
-  const ext = fileExtension(fileName);
-  const type = (fileType || "").toLowerCase();
-  return ["png", "jpg", "jpeg"].includes(ext) || type === "image/png" || type === "image/jpeg" || type === "image/jpg";
-}
-
-async function renderImageAttachmentPdf(fileName: string, buffer: Buffer, crop?: { x: number; y: number; width: number; height: number } | null): Promise<Buffer> {
-  const pdf = await PdfLibDocument.create();
-  const ext = fileExtension(fileName);
-  const image = ext === "jpg" || ext === "jpeg" ? await pdf.embedJpg(buffer) : await pdf.embedPng(buffer);
-  const c = crop || { x: 0, y: 0, width: 1, height: 1 };
-  const pageWidth = 612;
-  const pageHeight = Math.max(72, pageWidth * ((image.height * c.height) / (image.width * c.width)));
-  const page = pdf.addPage([pageWidth, pageHeight]);
-  const drawWidth = pageWidth / c.width;
-  const drawHeight = drawWidth * (image.height / image.width);
-  const x = -c.x * drawWidth;
-  const bottomCrop = 1 - c.y - c.height;
-  const y = -bottomCrop * drawHeight;
-  page.drawImage(image, { x, y, width: drawWidth, height: drawHeight });
-  return Buffer.from(await pdf.save({ useObjectStreams: false }));
-}
-
-function libreOfficeExecutable(): string {
-  if (process.env.LIBREOFFICE_PATH) return process.env.LIBREOFFICE_PATH;
-  if (process.env.SOFFICE_PATH) return process.env.SOFFICE_PATH;
-  const windowsCandidates = [
-    "C:\\Program Files\\LibreOffice\\program\\soffice.com",
-    "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
-  ];
-  const found = windowsCandidates.find(candidate => fs.existsSync(candidate));
-  return found || "soffice";
-}
-
-function convertOfficeToPdf(fileName: string, buffer: Buffer): Buffer {
-  const ext = fileExtension(fileName);
-  if ((ext === "docx" || ext === "xlsx") && !buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]))) {
-    throw new Error(`${ext.toUpperCase()} file is corrupt or not a valid Office Open XML package`);
-  }
-  if (ext === "docx" && !buffer.includes(Buffer.from("word/"))) {
-    throw new Error("DOCX file is missing Word document parts");
-  }
-  if (ext === "xlsx" && !buffer.includes(Buffer.from("xl/workbook"))) {
-    throw new Error("XLSX file is missing workbook parts");
-  }
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-rfi-office-"));
-  try {
-    const inputPath = path.join(tempDir, `input.${ext}`);
-    fs.writeFileSync(inputPath, buffer);
-    const exe = libreOfficeExecutable();
-    const result = spawnSync(exe, [
-      "--headless",
-      "--nologo",
-      "--nofirststartwizard",
-      "--convert-to",
-      "pdf",
-      "--outdir",
-      tempDir,
-      inputPath,
-    ], { timeout: 60_000, encoding: "utf8", windowsHide: true });
-    if (result.error) throw result.error;
-    if (result.status !== 0) {
-      throw new Error((result.stderr || result.stdout || `LibreOffice exited with ${result.status}`).trim());
-    }
-    const outputPath = path.join(tempDir, "input.pdf");
-    if (!fs.existsSync(outputPath)) {
-      throw new Error("LibreOffice did not produce a PDF output file");
-    }
-    return fs.readFileSync(outputPath);
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
-}
-
-async function renderCompleteManifestPdf(args: {
-  rfiNumber: string;
-  projectName: string;
-  packageHash: string;
-  included: string[];
-  referencesOnly: string[];
-}): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = createPdfDocument({ margin: 50, size: "LETTER", autoFirstPage: true });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("error", reject);
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.fontSize(16).fillColor("#0F172A").font("Helvetica-Bold").text("Complete RFI PDF Manifest");
-    doc.moveDown(0.5);
-    doc.fontSize(10).fillColor("#334155").font("Helvetica")
-      .text(`RFI: ${args.rfiNumber}`)
-      .text(`Project: ${args.projectName}`)
-      .text(`Generated: ${new Date().toISOString()}`)
-      .text(`Report fingerprint: ${args.packageHash}`);
-    doc.moveDown();
-    doc.font("Helvetica-Bold").text("Included package pages");
-    doc.font("Helvetica");
-    args.included.forEach((item, i) => doc.text(`${i + 1}. ${item}`));
-    if (args.referencesOnly.length > 0) {
-      doc.moveDown();
-      doc.font("Helvetica-Bold").text("References listed on the RFI record");
-      doc.font("Helvetica");
-      args.referencesOnly.forEach((item, i) => doc.text(`${i + 1}. ${item}`));
-    }
-    doc.end();
-  });
-}
-
 router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, requireProjectMember(), async (req, res) => {
+  let rfiNumber = "RFI";
+  const abortController = new AbortController();
+  const cancelExport = () => abortController.abort();
+  req.once("aborted", cancelExport);
+  res.once("close", () => { if (!res.writableEnded) cancelExport(); });
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
     const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
+    rfiNumber = rfi.number;
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     const responses = await db.select().from(rfiResponsesTable)
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
-    const allFiles = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
-    const filesById = new Map(allFiles.map(file => [file.id, file]));
     const imagePresentation = normalizeImagePresentation(rfi.imagePresentationJson);
     const packageItems = normalizePackageConfig(rfi.attachmentPackageJson);
-    const selectedItems: Array<{ label: string; file: typeof allFiles[number] | null }> = [];
-    const referencesOnly: string[] = [];
-    const seen = new Set<number>();
+    const activeImageId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? null;
+    const fileIds = [...new Set([...packageItems.map(item => item.fileId).filter((id): id is number => typeof id === "number"), ...(activeImageId ? [activeImageId] : [])])];
+    const fileRows = fileIds.length ? await db.select().from(filesTable)
+      .where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, fileIds))) : [];
+    const filesById = new Map(fileRows.map(file => [file.id, file]));
+    const packageInputs: CompletePackageInputItem[] = [];
+    const seenFiles = new Set<number>();
+    const seenReferences = new Set<string>();
 
-    const addFileItem = (label: string, file: typeof allFiles[number] | undefined | null, include: boolean) => {
-      if (!include) return;
-      if (file) {
-        selectedItems.push({ label: label || file.fileName, file });
+    for (const item of packageItems.sort((left, right) => left.order - right.order)) {
+      if (item.fileId) {
+        const file = filesById.get(item.fileId);
+        if (!file && item.include) throw new CompletePackageError(`${item.label} is no longer available in this project.`, "missing_file", item.label);
+        if (!file) continue;
+        if (seenFiles.has(item.fileId)) continue;
+        seenFiles.add(item.fileId);
+        const isPresentationFile = item.fileId === imagePresentation?.sourceFileId || item.fileId === imagePresentation?.replacementFileId;
+        let buffer: Buffer | undefined;
+        if (file && item.include && !isPresentationFile) {
+          if (!file.storagePath) throw new CompletePackageError(`${file.fileName} has no stored file content.`, "missing_file", file.fileName);
+          try { buffer = await storage.download(file.storagePath); }
+          catch { throw new CompletePackageError(`${file.fileName} could not be read from BIMLog storage.`, "missing_file", file.fileName); }
+        }
+        packageInputs.push({ order: packageInputs.length, label: file?.fileName || item.label, fileName: file?.fileName || item.label, sourceType: file?.source || item.source || "BIMLog file", include: item.include && !isPresentationFile, buffer, role: "attachment", exclusionReason: isPresentationFile ? "Controlled independently by the persisted Complete PDF image setting." : undefined });
       } else {
-        referencesOnly.push(label);
-      }
-    };
-
-    if (packageItems.length > 0) {
-      for (const item of packageItems.filter(item => item.include).sort((a, b) => a.order - b.order)) {
-        const file = item.fileId ? filesById.get(item.fileId) : null;
-        if (imagePresentation?.includeInCompletePdf === false && file && (file.id === imagePresentation.sourceFileId || file.id === imagePresentation.replacementFileId || file.source === "lens-viewpoint")) continue;
-        addFileItem(item.label, file, true);
-      }
-    } else {
-      for (const attachment of ((rfi.attachmentsJson as unknown as string[] | null) || [])) {
-        const id = attachmentFileId(attachment);
-        const file = id ? filesById.get(id) : undefined;
-        if (file) {
-          if (!seen.has(file.id)) {
-            selectedItems.push({ label: file.fileName, file });
-            seen.add(file.id);
-          }
-        } else {
-          referencesOnly.push(attachmentLabel(attachment));
-        }
-      }
-    }
-    if (imagePresentation?.includeInCompletePdf !== false) {
-      const imageId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId;
-      const imageFile = imageId ? filesById.get(imageId) : undefined;
-      if (imageFile && !selectedItems.some(item => item.file?.id === imageFile.id)) {
-        selectedItems.push({ label: imageFile.fileName, file: imageFile });
+        const referenceKey = String(item.attachment || item.label).trim().toLowerCase();
+        if (!referenceKey || seenReferences.has(referenceKey)) continue;
+        seenReferences.add(referenceKey);
+        packageInputs.push({ order: packageInputs.length, label: item.label, sourceType: "Reference only (no binary pages)", include: false, exclusionReason: item.include ? "Listed as a reference; no binary file was supplied." : "Excluded in the saved package configuration." });
       }
     }
 
-    const finalPdf = await PdfLibDocument.create();
-    const included: string[] = [];
-    const appendPdf = async (buffer: Buffer, label: string) => {
-      const sourcePdf = await PdfLibDocument.load(buffer, { ignoreEncryption: true });
-      const copied = await finalPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
-      copied.forEach(page => finalPdf.addPage(page));
-      included.push(`${label} (${copied.length} page${copied.length === 1 ? "" : "s"})`);
-    };
-
-    await appendPdf(await renderRfiPdfBuffer(rfi, responses, project, false), "BIMLog RFI record");
-
-    const failures: string[] = [];
-    for (const item of selectedItems) {
-      const file = item.file;
-      if (!file) continue;
-      const ext = fileExtension(file.fileName);
-      if (!file.storagePath) {
-        failures.push(`${file.fileName}: no stored binary is available`);
-        continue;
-      }
-      try {
-        const buffer = await storage.download(file.storagePath);
-        if (ext === "pdf" || (file.fileType || "").toLowerCase() === "application/pdf") {
-          await appendPdf(buffer, file.fileName);
-        } else if (isImageAttachment(file.fileName, file.fileType)) {
-          const crop = imagePresentation && (file.id === imagePresentation.replacementFileId || file.id === imagePresentation.sourceFileId)
-            ? imagePresentation.crop
-            : null;
-          await appendPdf(await renderImageAttachmentPdf(file.fileName, buffer, crop), file.fileName);
-        } else if (["doc", "docx", "xls", "xlsx"].includes(ext)) {
-          await appendPdf(convertOfficeToPdf(file.fileName, buffer), file.fileName);
-        } else {
-          failures.push(`${file.fileName}: unsupported Complete RFI PDF attachment type`);
-        }
-      } catch (error) {
-        failures.push(`${file.fileName}: ${error instanceof Error ? error.message : "conversion failed"}`);
-      }
+    for (const reference of ((rfi.attachmentsJson as string[] | null) || []).filter(value => !attachmentFileId(value))) {
+      const key = reference.trim().toLowerCase();
+      if (!key || seenReferences.has(key)) continue;
+      seenReferences.add(key);
+      packageInputs.push({ order: packageInputs.length, label: attachmentLabel(reference), sourceType: "Reference only (no binary pages)", include: false, exclusionReason: "Listed on the RFI record; no binary file was supplied." });
     }
 
-    if (failures.length > 0) {
-      res.status(422).json({
-        error: "Complete RFI PDF could not be generated because one or more attachments could not be included.",
-        details: failures,
-      });
-      return;
+    if (activeImageId) {
+      const imageFile = filesById.get(activeImageId);
+      if (!imageFile && imagePresentation?.includeInCompletePdf !== false) throw new CompletePackageError("The selected RFI presentation image is no longer available.", "missing_file", "RFI presentation image");
+      let buffer: Buffer | undefined;
+      if (imageFile && imagePresentation?.includeInCompletePdf !== false) {
+        if (!imageFile.storagePath) throw new CompletePackageError(`${imageFile.fileName} has no stored image content.`, "missing_file", imageFile.fileName);
+        try { buffer = await storage.download(imageFile.storagePath); }
+        catch { throw new CompletePackageError(`${imageFile.fileName} could not be read from BIMLog storage.`, "missing_file", imageFile.fileName); }
+      }
+      packageInputs.push({ order: packageInputs.length, label: imageFile?.fileName || "RFI presentation image", fileName: imageFile?.fileName || "RFI-presentation-image.png", sourceType: imagePresentation?.replacementFileId ? "RFI replacement presentation image" : "RFI source presentation image", include: imagePresentation?.includeInCompletePdf !== false, buffer, role: "presentation-image", crop: imagePresentation?.crop || null, exclusionReason: imagePresentation?.includeInCompletePdf === false ? "Excluded by the persisted Complete PDF image setting." : undefined });
     }
 
-    const packageHash = crypto
-      .createHash("sha256")
-      .update(JSON.stringify({ rfiId, included, referencesOnly, generatedAt: new Date().toISOString() }))
-      .digest("hex");
-    await appendPdf(await renderCompleteManifestPdf({
+    const canonical = await renderRfiPdfBuffer(rfi, responses, project, false);
+    const result = await buildCompleteRfiPackage({
       rfiNumber: rfi.number,
       projectName: project?.name || `Project ${projectId}`,
-      packageHash,
-      included,
-      referencesOnly,
-    }), "Attachment manifest and report fingerprint");
+      canonicalRfiPdf: canonical.buffer,
+      logicalState: {
+        canonicalModel: canonical.model,
+        attachmentPackage: packageItems.map(item => ({ key: item.key, label: item.label, include: item.include, order: item.order, source: item.source })),
+        imagePresentation,
+      },
+      items: packageInputs,
+      signal: abortController.signal,
+    });
 
-    const pdfBuffer = Buffer.from(await finalPdf.save({ useObjectStreams: false }));
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - Complete RFI Package`)}"`);
-    res.setHeader("Content-Length", pdfBuffer.length);
-    res.send(pdfBuffer);
-
-    db.insert(activityLogTable).values({
+    const includedItemCount = packageInputs.filter(item => item.include).length;
+    await db.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
       userFullName: req.user!.fullName || "User",
@@ -2098,13 +1957,32 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
       actionType: "export",
       entityType: "rfi",
       entityId: rfiId,
-      details: `Complete RFI PDF exported: ${rfi.number} | ${included.join("; ")}`,
-    }).catch((activityError) => {
-      console.error("[rfis] Failed to log Complete RFI PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
+      details: JSON.stringify({ event: "rfi.complete_pdf_exported", number: rfi.number, includedItemCount, logicalPackageFingerprint: result.logicalFingerprint, success: true }),
     });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - Complete RFI Package`)}"`);
+    res.setHeader("Content-Length", result.buffer.length);
+    res.setHeader("X-BIMLog-Package-Fingerprint", result.logicalFingerprint);
+    res.send(result.buffer);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
+    const projectId = Number(req.params.projectId);
+    const rfiId = Number(req.params.rfiId);
+    const failure = error instanceof CompletePackageError ? error : null;
+    if (Number.isSafeInteger(projectId) && Number.isSafeInteger(rfiId) && req.user) {
+      await db.insert(activityLogTable).values({
+        projectId, userId: req.user.userId, userFullName: req.user.fullName || "User", userCompanyName: req.user.companyName || "",
+        actionType: "export_failed", entityType: "rfi", entityId: rfiId,
+        details: JSON.stringify({ event: "rfi.complete_pdf_failed", number: rfiNumber, success: false, failureCategory: failure?.category || "package_validation", fileName: failure?.fileName || null }),
+      }).catch(activityError => console.error("[rfis] Failed to log Complete RFI PDF failure:", activityError instanceof Error ? activityError.message : activityError));
+    }
+    if (failure?.category === "cancelled" || res.destroyed) return;
+    if (failure) {
+      res.status(failure.status).json({ error: "Complete RFI PDF could not be generated.", details: [failure.message], category: failure.category });
+      return;
+    }
+    console.error("[rfis] Complete RFI PDF generation failed:", error instanceof Error ? error.message : error);
+    res.status(500).json({ error: "Complete RFI PDF could not be generated." });
   }
 });
 

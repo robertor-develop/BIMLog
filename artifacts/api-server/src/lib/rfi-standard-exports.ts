@@ -719,6 +719,8 @@ function parseAuditDetails(event: RfiAuditEventSource): { summary: string; chang
       "rfi.closed": "RFI closed.", "rfi.reopened": "RFI reopened.", "rfi.revised": "RFI revision created.",
       "rfi.responded": "Official response recorded.", "rfi.responded_and_closed": "Official response recorded and RFI closed.",
       "rfi.marked_sent": "RFI marked as sent.",
+      "rfi.complete_pdf_exported": "Complete RFI PDF package exported.",
+      "rfi.complete_pdf_failed": "Complete RFI PDF package generation failed.",
     };
     const imageEvents = Array.isArray(parsed.imageEvents) ? parsed.imageEvents.map(value => humanize(value)).join(", ") : "";
     const summary = knownSummary[eventName] || (imageEvents ? `Image presentation updated: ${imageEvents}.` : `${humanize(event.actionType)} recorded.`);

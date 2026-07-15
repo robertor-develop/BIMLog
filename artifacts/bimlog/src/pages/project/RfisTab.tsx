@@ -491,12 +491,25 @@ function fileIdFromAttachment(value: string): number | null {
   return parseInternalFileLocator(value)?.fileId ?? null;
 }
 
+function completePackageMethodLabel(fileName: string, lang: string): string {
+  const ext = (fileName.split(".").pop() || "").toLowerCase();
+  if (ext === "pdf") return w("Native PDF pages", "Paginas PDF nativas", lang);
+  if (["doc", "docx", "xls", "xlsx", "csv", "txt"].includes(ext)) return w("Requires configured document converter; readiness checked at export", "Requiere convertidor de documentos configurado; disponibilidad verificada al exportar", lang);
+  if (["png", "jpg", "jpeg", "tif", "tiff", "bmp", "gif", "webp"].includes(ext)) return w("Validated image page", "Pagina de imagen validada", lang);
+  if (ext === "msg") return w("Not supported - export will explain the required action", "No compatible - la exportacion explicara la accion requerida", lang);
+  return w("Format checked during export", "Formato verificado durante la exportacion", lang);
+}
+
 function packageItemsFromAttachments(attachments: string[], files: ProjectFile[] = []): RfiPackageItem[] {
-  return attachments.map((attachment, order) => {
+  const seen = new Set<string>();
+  return attachments.flatMap((attachment, order) => {
     const fileId = fileIdFromAttachment(attachment);
+    const identity = fileId ? `file:${fileId}` : `ref:${attachment.trim().toLowerCase()}`;
+    if (seen.has(identity)) return [];
+    seen.add(identity);
     const file = fileId ? files.find(f => f.id === fileId) : undefined;
     const label = file?.fileName || attachLabel(attachment);
-    return {
+    return [{
       key: fileId ? `file:${fileId}` : `ref:${encodeURIComponent(attachment)}`,
       label,
       fileId: file?.id ?? fileId,
@@ -504,13 +517,13 @@ function packageItemsFromAttachments(attachments: string[], files: ProjectFile[]
       source: file?.source || null,
       include: true,
       order,
-    };
-  });
+    }];
+  }).map((item, order) => ({ ...item, order }));
 }
 
 function normalizePackageItems(value: unknown, attachments: string[], files: ProjectFile[] = []): RfiPackageItem[] {
   if (!Array.isArray(value) || value.length === 0) return packageItemsFromAttachments(attachments, files);
-  return value.map((raw, order) => {
+  const normalized = value.map((raw, order) => {
     const item = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
     const fileId = typeof item.fileId === "number" ? item.fileId : null;
     const attachment = typeof item.attachment === "string" ? item.attachment : null;
@@ -525,7 +538,15 @@ function normalizePackageItems(value: unknown, attachments: string[], files: Pro
       include: item.include !== false,
       order: typeof item.order === "number" ? item.order : order,
     };
-  }).sort((a, b) => a.order - b.order).map((item, order) => ({ ...item, order }));
+  }).filter(item => (!item.attachment || attachments.includes(item.attachment)) && (!files.length || !item.fileId || files.some(file => file.id === item.fileId)))
+    .sort((a, b) => a.order - b.order);
+  const seen = new Set<string>();
+  return normalized.filter(item => {
+    const identity = item.fileId ? `file:${item.fileId}` : `ref:${String(item.attachment || item.label).trim().toLowerCase()}`;
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  }).map((item, order) => ({ ...item, order }));
 }
 
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
@@ -2660,10 +2681,15 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const movePackageItem = (key: string, direction: -1 | 1) => {
     setPackageItems(prev => {
       const ordered = [...prev].sort((a, b) => a.order - b.order);
-      const index = ordered.findIndex(item => item.key === key);
+      const presentationIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId]
+        .filter((id): id is number => typeof id === "number"));
+      const visible = ordered.filter(item => !item.fileId || !presentationIds.has(item.fileId));
+      const index = visible.findIndex(item => item.key === key);
       const target = index + direction;
-      if (index < 0 || target < 0 || target >= ordered.length) return prev;
-      [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+      if (index < 0 || target < 0 || target >= visible.length) return prev;
+      const left = ordered.findIndex(item => item.key === visible[index].key);
+      const right = ordered.findIndex(item => item.key === visible[target].key);
+      [ordered[left], ordered[right]] = [ordered[right], ordered[left]];
       return ordered.map((item, order) => ({ ...item, order }));
     });
   };
@@ -2803,7 +2829,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteImageEvidence },
           { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureScreenImage },
         ] : []}
-        imagePresentationContent={(imagePresentation || viewpointFile) ? <RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => { const fileId=imagePresentation?.replacementFileId??imagePresentation?.sourceFileId??viewpointFile?.id;setImagePresentation(prev=>prev?{...prev,includeInCompletePdf}:prev);if(fileId)setPackageItems(prev=>prev.map(item=>item.fileId===fileId?{...item,include:includeInCompletePdf}:item)); }} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} /> : null}
+        imagePresentationContent={(imagePresentation || viewpointFile) ? <RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} /> : null}
         actions={{
           back: onClose,
           "export-pdf": () => onExportPdf(rfi),
@@ -2839,7 +2865,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         responseContent={responseContent}
         onTogglePackageItem={(key, include) => setPackageItems(prev => prev.map(item => item.key === key ? { ...item, include } : item))}
         onMovePackageItem={movePackageItem}
-        onToggleViewpointImage={include => { const fileId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? viewpointFile?.id; setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf: include } : prev); if (fileId) setPackageItems(prev => prev.map(item => item.fileId === fileId ? { ...item, include } : item)); }}
+        onToggleViewpointImage={include => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf: include } : prev)}
         onClearImageCrop={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)}
         actionMatrix={savedRfiActions.map(action => action.key === "raise-change-order" && raisingCo ? { ...action, label: w("Creating Change Order...", "Creando Orden de Cambio...", lang) } : action.key === "revise" && isRevising ? { ...action, label: w("Creating Revision...", "Creando Revision...", lang) } : action)}
       />
@@ -2971,6 +2997,8 @@ export function RfiCanonicalForm({
   const costNeedsReason = values.costImpact === "Cost Increase TBD" || values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const costNeedsAmount = values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const scheduleNeedsFields = values.scheduleImpact === "Increase in Calendar Days" || values.scheduleImpact === "Decrease in Calendar Days";
+  const presentationFileIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId].filter((id): id is number => typeof id === "number"));
+  const packageDisplayItems = packageItems.filter(item => !item.fileId || !presentationFileIds.has(item.fileId));
   const fileForAttachment = (value: string) => {
     const fileId = fileIdFromAttachment(value);
     return fileId ? attachmentFiles.find(file => file.id === fileId) : undefined;
@@ -3054,9 +3082,9 @@ export function RfiCanonicalForm({
               {uploadResults.length > 0 && <div style={{ display: "grid", gap: 4, marginTop: 8 }}>{uploadResults.map((result, index) => <div key={`${result.name}-${index}`} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11, color: result.state === "error" ? "#B91C1C" : result.state === "success" ? "#166534" : "hsl(var(--muted-foreground))" }}>{result.state === "success" ? <CheckCircle2 style={{ width: 13, height: 13 }} /> : result.state === "error" ? <CircleAlert style={{ width: 13, height: 13 }} /> : <Loader2 className="animate-spin" style={{ width: 13, height: 13 }} />}<span>{result.name}{result.message ? ` - ${result.message}` : ""}</span></div>)}</div>}
             </div>
             {imagePresentationContent}
-            {(imagePresentation || packageItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+            {(imagePresentation || packageDisplayItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Complete RFI PDF package", "Paquete PDF Completo RFI", lang)}</div>
-              {packageItems.map((item, index) => <div key={item.key} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 8, padding: "5px 0", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined }}><input type="checkbox" checked={item.include} disabled={!editable || !onTogglePackageItem} onChange={e => onTogglePackageItem?.(item.key, e.target.checked)} /><span>{item.label}</span>{editable && onMovePackageItem && <span style={{ display: "flex", gap: 4 }}><Button type="button" size="icon" variant="outline" disabled={index === 0} onClick={() => onMovePackageItem(item.key, -1)} title={w("Move up", "Mover arriba", lang)}><ChevronUp style={{ width: 14, height: 14 }} /></Button><Button type="button" size="icon" variant="outline" disabled={index === packageItems.length - 1} onClick={() => onMovePackageItem(item.key, 1)} title={w("Move down", "Mover abajo", lang)}><ChevronDown style={{ width: 14, height: 14 }} /></Button></span>}</div>)}
+              {packageDisplayItems.map((item, index) => <div key={item.key} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 8, padding: "5px 0", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined }}><input type="checkbox" checked={item.include} disabled={!editable || !onTogglePackageItem} onChange={e => onTogglePackageItem?.(item.key, e.target.checked)} /><span><strong style={{ display: "block" }}>{item.label}</strong><span style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{completePackageMethodLabel(item.label, lang)}</span></span>{editable && onMovePackageItem && <span style={{ display: "flex", gap: 4 }}><Button type="button" size="icon" variant="outline" disabled={index === 0} onClick={() => onMovePackageItem(item.key, -1)} title={w("Move up", "Mover arriba", lang)}><ChevronUp style={{ width: 14, height: 14 }} /></Button><Button type="button" size="icon" variant="outline" disabled={index === packageDisplayItems.length - 1} onClick={() => onMovePackageItem(item.key, 1)} title={w("Move down", "Mover abajo", lang)}><ChevronDown style={{ width: 14, height: 14 }} /></Button></span>}</div>)}
             </div>}
             {referenceContent}
           </CanonicalSection>
