@@ -524,11 +524,56 @@ Deferred:
 - Isolated acceptance covered draft, sent, closed, reopened, revised, Cost Increase TBD, known cost, schedule increase/decrease, long text, several references, multiple attachments, decoded distribution, two responses, cropped original image, replacement image, and hidden image. Evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-5\20260714-223603`.
 - Build 5 was independently accepted by the master coordinator and cleanly integrated. The standard RFI PDF, editable RFI DOCX, factual RFI Audit PDF, and shared canonical export model are accepted. Nothing was published.
 
-Deferred:
-- Complete RFI PDF attachment/package merging, native PDF pages, Office conversion, and mixed page sizes remain Build 6 scope. Build 6 has not started.
+Deferred at Build 5 acceptance:
+- Complete RFI PDF attachment/package merging, native PDF pages, Office conversion, and mixed page sizes were assigned to Build 6 and are addressed in the Build 6 review record below.
 - Production, Replit, Neon, plugin, Telegram, Lens, Schedule, Submittals, and global-layout work remain outside this build.
 
+### RFI Build 6 Complete PDF Package And Native Fidelity
+
+- Starting baseline: `3fe1b2c5ada4cf6c657a44b90731a3ea6fbe08cd`.
+- The Complete RFI PDF now uses a dedicated atomic package pipeline. Build 5 canonical RFI pages remain first and unchanged; saved `attachmentPackageJson` controls binary attachment inclusion/order, while saved `imagePresentationJson` independently controls the original/replacement presentation image, crop, standard-RFI visibility, and Complete PDF inclusion.
+- Native PDF pages are copied without rasterization or page-size normalization. Structural comparison of the unchanged five-page River Avenue fixture against merged package pages 3-7 found exact MediaBox, CropBox, TrimBox, BleedBox, ArtBox, rotation, decoded content streams, resource inventories, embedded-image inventories, vector-operator counts, and extracted text. Existing source qpdf resource/AutoCAD character-map warnings remain distinguishable from merge defects.
+- DOC, DOCX, XLS, XLSX, CSV, and TXT use a bounded LibreOffice capability contract with an isolated locked-down profile and deterministic cleanup. PNG, JPEG, TIFF, BMP, GIF, and WEBP use validated image decoding, aspect-ratio preservation, reliable DPI when available, and a documented no-DPI policy without crop or stretch. Presentation crop applies only to the presentation image.
+- Generation preconverts and validates all selected sources before assembly, validates the final PDF, enforces byte/page/pixel limits, rejects malformed/cross-project/missing/corrupt/zero-byte sources cleanly, and records one sanitized success or failure activity per request. The searchable manifest records clean labels, source and converted hashes, source page inventories, page ranges, methods, warnings, and a stable logical fingerprint derived from canonical saved state and source bytes.
+- Real authenticated isolated-local API evidence proves package inclusion/order persistence, duplicate suppression, revision preservation, independent `showInRfi` and `includeInCompletePdf`, original/replacement selection, stable fingerprints, missing/corrupt source rejection, and success/failure activity integrity. Focused evidence is under `C:\Dev\bimlog-tools\evidence\rfi-build-6\20260715-130643`.
+- Build 6 is submitted as a local review commit only and is not self-accepted. Nothing was pushed or published, and Build 7 was not started.
+
+Deferred:
+- Outlook MSG conversion remains explicitly unsupported. An included MSG returns a clean 422 naming the file; there is no silent omission or partial package.
+- Native PDF annotations are imported as supported by pdf-lib. Cross-document destinations are not rewritten and this limitation is stated in the package manifest; no stronger preservation claim is made.
+- Independent acceptance and any production/Replit/Neon operation remain outside Build 6.
+
 ## Deferred
+
+### Telegram Product Build 3 - Bilingual Conversational Assistant And Support Core
+
+- Local review implementation is complete in the isolated `telegram-product-build3-clean` worktree from baseline `be3a76aa5ea8f2a7749f0f4c845a04d69d5934c9`.
+- Added canonical Telegram product conversation, message, support case, and support case event tables through additive startup migration and Drizzle schema exports.
+- Telegram inbound processing now supports bilingual help/privacy/language flows, deterministic assistant estimate/confirm/cancel/failure handling through the Build 2 AI control plane, and support case creation from private Telegram chat.
+- Browser Profile now exposes recent Telegram conversation summaries, AI funding/status/usage, support cases, and privacy/consent summary from authenticated product routes.
+- Super-admin Telegram review routes require a reason and write `admin_actions_log` entries; ordinary users cannot access global conversation/support review.
+- Real local evidence passed 30/30 checks against the isolated database `127.0.0.1:55432/bimlog_rfi_test` and real app routes/Telegram queue. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-3\20260715T140026\telegram-product-build3-evidence.json`.
+- No production, Replit, Neon, live webhook configuration, polling/controller startup, push, publish, or customer data access was performed.
+
+Initial submission limitations, superseded by the corrections below:
+- The initial local evidence used deterministic settlement/failure broker paths; the accepted correction replaces that limitation with real provider HTTP execution and provider-returned usage.
+- Build 4 remains not started.
+- Production Telegram webhook setup and deployment remain blocked until explicitly authorized.
+
+Correction after rejected local commit `e25bb8a7803eb93ab618a14e6f193757be9918b7`:
+- Removed fake Telegram Assistant execution, hardcoded assistant text, fixed token counts, fabricated provider IDs, and the production `TELEGRAM_PRODUCT_AI_TEST_MODE` branch.
+- Added a production provider broker that revalidates the reserved AI run, uses `withProviderSecret`, calls OpenAI/Anthropic HTTP APIs, returns only provider text, and settles only with provider-returned usage.
+- Delivery accountability now records outbound messages as pending, stores Telegram `message_id` only after successful Telegram response, records failed delivery categories, and skips resending already-delivered outbound records.
+- Support intake is staged and creates a case only after confirmation, using required statuses `new`, `acknowledged`, `in_progress`, `waiting_for_user`, `resolved`, `closed` with transition events.
+- Corrected evidence passed the exact 30-item matrix. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-3-correction\20260715T150459`; manifest SHA-256 `f7b30f30767c0f54e24fbada4aacddc1b973f83044ac749423ac172430d28a47`.
+
+Final focused correction and independent acceptance:
+- Accepted source commit: `6585682ca377a5a1f6937f8be23837eef9c80972`, cleanly integrated as `3566ab7b3b20f4529df62b231ca5fdfe005dd8ea` from accepted master baseline `3fe1b2c5ada4cf6c657a44b90731a3ea6fbe08cd` without importing its older ancestry.
+- Real provider HTTP execution now supports bounded English and Spanish multi-turn context, provider-returned usage settlement, response-body and response-header request identifiers, and rejection/release without settlement when the provider supplies no request identifier.
+- Target-specific super-admin content review requires an exact conversation ID and reason with audit evidence; bulk review remains metadata-only. Ordinary-user and company boundaries remain enforced.
+- Final isolated evidence passed 30/30 with real built-API stop/start persistence and delivery accountability. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-3-final\20260715T174744Z`; manifest SHA-256 `baecba1def3baf1d9f0c4d00fef8d5e1110ac65872deb35b7fe1223a747d8bd0`.
+- Clean-integration evidence again passed 30/30 against the isolated local database. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-3-integration\20260715T183706Z`; manifest SHA-256 `03438111df8c26c281d47dd45d315a3eadb327ea66cc998809ff55828872ceab`.
+- Telegram Product Build 3 was independently accepted for clean integration. Nothing was published, and Telegram Product Build 4 was not started.
 
 ### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Watching
 
