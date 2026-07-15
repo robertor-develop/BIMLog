@@ -32,6 +32,17 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Telegram Product Implementation 2 - AI Control Plane
+
+- Independent review found the candidate AI control plane acceptable only after adding explicit provider-failure accounting and retry conflict checks. Failed provider requests now record a single zero-cost failure receipt, release any reservation, mark the run `failed`, and reject retried failure/settlement callbacks that reuse the same run with different details.
+- Clean integration scope: secure provider connections, effective-dated price/entitlement policy, company budgets, user allocations, estimates, explicit confirmations, separate file-reading confirmation, reservations, cancellation, settlement, failure, append-only cost receipts, authenticated management routes, and the Profile/Project AI control panels.
+- The correction explicitly tightens provider-management authorization, blocks pending/rotated key activation without validation, scopes budget/allocation responses by role, applies corrections to budget and allocation ledgers, and supersedes versioned policies instead of silently choosing ambiguous active rows.
+- Integration evidence is stored under `C:\Dev\bimlog-tools\evidence\telegram-product-build-2-review`; the final reviewed run records behavior, authenticated HTTP, browser-role/source checks, Telegram Build 1 identity/link regression proof, validation commands, and sanitized hashes.
+- Build 2 was cleanly integrated from `origin/master` at `6919765be8c7cd3f0042fa62b4283d4862210181` without Navisworks/plugin, RFI, generated mockup, or generated PLATFORM.md changes. Nothing was published, and Product Build 3 was not started.
+- Legacy plaintext values in `users.openai_api_key` and AI rows in `user_connections.credentials` were preserved non-destructively. New plaintext writes are blocked; a separately reviewed migration/retirement plan is still required before those legacy columns or rows can be removed.
+- Existing AI generation call sites remain on the legacy usage path. A later build must integrate each call site with estimate, explicit confirmation, reservation, broker execution, provider-reported settlement, and receipt display. No conversation or file-reading execution was added here.
+- No real provider generation occurred. Production KEK provisioning, provider credentials, budget/pricing policy, production migration, live Telegram webhook configuration, customer messaging, file delivery, publish, and rollout remain explicitly out of scope.
+
 ### Telegram Product Implementation 1
 
 - Starting commit: `18256153fe9c82ac149bfca53d9909a0c63d99c8`. Rejected local commit `2e10a1c` is being corrected locally and must not be pushed.

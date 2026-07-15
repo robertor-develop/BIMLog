@@ -467,7 +467,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationInfo | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showApiDocs, setShowApiDocs] = useState(false);
-  const [showAnthropicConnect, setShowAnthropicConnect] = useState(false);
   const [connections, setConnections] = useState<ConnectedService[]>([]);
   const [aiUsage, setAiUsage] = useState<AiUsageSummary | null>(null);
 
@@ -529,16 +528,6 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         />
       )}
       {showApiDocs && <ApiDocsModal onClose={() => setShowApiDocs(false)} />}
-      {showAnthropicConnect && (
-        <AnthropicConnectModal
-          token={token}
-          onClose={() => setShowAnthropicConnect(false)}
-          onConnected={() => {
-            loadConnections().catch((error) => logClientError("integrations connections refresh", error));
-            loadAiUsage().catch((error) => logClientError("integrations AI usage refresh", error));
-          }}
-        />
-      )}
 
       {/* Header KPIs */}
       <div className="kpi-grid-4" style={{ marginBottom: 20 }}>
@@ -651,7 +640,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
 
                 {/* Action */}
                 <button
-                  onClick={() => integration.id === "claude" ? setShowAnthropicConnect(true) : setSelectedIntegration(integration)}
+                  onClick={() => integration.id === "claude" ? navigate("/profile") : setSelectedIntegration(integration)}
                   style={{
                     marginTop: 6, width: "100%", padding: "6px 0",
                     borderRadius: 6, fontSize: 11, fontWeight: 600,

@@ -38,3 +38,4 @@ export * from "./user-connections";
 export * from "./ai-usage-events";
 export * from "./feedback-items";
 export * from "./telegram-product";
+export * from "./ai-control-plane";

@@ -181,7 +181,11 @@ try {
 
   assert.equal(await postWebhook(baseUrl, { update_id: 203, message: { text: "/help", chat: { id: -100, type: "group" }, from: { id: 9001 } } }), 200);
   await queue();
-  const nonPrivate = await pool.query<{ status: string; error_code: string }>("SELECT status, error_code FROM telegram_inbound_updates WHERE adapter_id = $1 AND update_id = '203'", [config.adapterId]);
+  const nonPrivate = await waitFor(
+    () => pool.query<{ status: string; error_code: string }>("SELECT status, error_code FROM telegram_inbound_updates WHERE adapter_id = $1 AND update_id = '203'", [config.adapterId]),
+    (result) => result.rows[0]?.status === "rejected" && result.rows[0]?.error_code === "NON_PRIVATE_CHAT",
+    "Non-private chat update did not reach its durable rejected state.",
+  );
   assert.deepEqual(nonPrivate.rows[0], { status: "rejected", error_code: "NON_PRIVATE_CHAT" });
   results.nonPrivateChatRejected = true;
 

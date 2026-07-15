@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
+import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -181,10 +182,6 @@ export function Profile() {
 
   const [tokenCopied, setTokenCopied] = useState(false);
   const [generatingToken, setGeneratingToken] = useState(false);
-
-  const [openaiKeyInput, setOpenaiKeyInput] = useState("");
-  const [savingOpenaiKey, setSavingOpenaiKey] = useState(false);
-  const [removingOpenaiKey, setRemovingOpenaiKey] = useState(false);
 
   const [connections, setConnections] = useState<{ provider: string; status: string; accountLabel: string | null }[]>([]);
   const [sgKeyInput, setSgKeyInput] = useState("");
@@ -463,43 +460,6 @@ export function Profile() {
       toast({ title: e instanceof Error ? e.message : "Failed to generate token", variant: "destructive" });
     } finally {
       setGeneratingToken(false);
-    }
-  }
-
-  async function saveOpenaiKey() {
-    if (!openaiKeyInput.trim()) return;
-    setSavingOpenaiKey(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/openai-key`, {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({ key: openaiKeyInput.trim() }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error);
-      toast({ title: "OpenAI API key saved" });
-      setOpenaiKeyInput("");
-      await loadProfile();
-    } catch (e) {
-      toast({ title: e instanceof Error ? e.message : "Failed to save key", variant: "destructive" });
-    } finally {
-      setSavingOpenaiKey(false);
-    }
-  }
-
-  async function removeOpenaiKey() {
-    setRemovingOpenaiKey(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/openai-key`, {
-        method: "DELETE",
-        headers: authHeaders,
-      });
-      if (!res.ok) throw new Error((await res.json()).error);
-      toast({ title: "OpenAI API key removed" });
-      await loadProfile();
-    } catch (e) {
-      toast({ title: e instanceof Error ? e.message : "Failed to remove key", variant: "destructive" });
-    } finally {
-      setRemovingOpenaiKey(false);
     }
   }
 
@@ -1362,55 +1322,9 @@ export function Profile() {
           )}
         </SectionCard>
 
-        {/* 8. OpenAI API Key */}
-        <SectionCard title="OpenAI API Key" icon={Zap}>
-          <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
-            Required for audio transcription in Meeting Minutes. Your key is used only for your account — you pay OpenAI directly at $0.006/minute (~$0.36 per hour of audio).
-          </p>
-          {profile?.openai_api_key === "configured" ? (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                <Badge style={{ background: "#DCFCE7", color: "#16A34A", border: "1px solid #BBF7D0", padding: "4px 10px", fontWeight: 600 }}>
-                  <Check style={{ width: 12, height: 12, marginRight: 4 }} /> Configured
-                </Badge>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={removeOpenaiKey}
-                disabled={removingOpenaiKey}
-                style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6 }}
-              >
-                <Trash2 style={{ width: 12, height: 12 }} />
-                {removingOpenaiKey ? "Removing…" : "Remove Key"}
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
-                <Input
-                  type="password"
-                  value={openaiKeyInput}
-                  onChange={e => setOpenaiKeyInput(e.target.value)}
-                  placeholder="sk-..."
-                  style={{ flex: 1, fontFamily: "monospace", fontSize: 12 }}
-                />
-                <Button
-                  size="sm"
-                  onClick={saveOpenaiKey}
-                  disabled={savingOpenaiKey || !openaiKeyInput.trim()}
-                >
-                  {savingOpenaiKey ? "Saving…" : "Save Key"}
-                </Button>
-              </div>
-              <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>
-                Get your key at{" "}
-                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" style={{ color: "#2563EB" }}>
-                  platform.openai.com/api-keys
-                </a>
-              </p>
-            </div>
-          )}
+        {/* 8. Secure AI control plane */}
+        <SectionCard title="AI Credits & Cost Controls" icon={Zap}>
+          <AiControlPlanePanel token={token} />
         </SectionCard>
 
         <SectionCard title={tt("Telegram Channel", "Canal de Telegram")} icon={MessageCircle}>

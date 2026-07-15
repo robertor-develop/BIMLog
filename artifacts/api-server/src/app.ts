@@ -4,6 +4,7 @@ import session from "express-session";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { startTelegramProductWorker } from "./lib/telegram-product";
+import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -128,6 +129,15 @@ app.get("/api/v1/env-check", (_req: Request, res: Response) => {
 });
 
 app.use("/api/v1", router);
+
+(async () => {
+  try {
+    await ensureAiControlPlaneSchema();
+    console.log("[migration] AI control-plane tables ensured");
+  } catch (e) {
+    console.error("[migration] AI control-plane migration failed:", e);
+  }
+})();
 
 (async () => {
   try {

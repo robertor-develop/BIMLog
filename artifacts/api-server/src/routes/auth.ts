@@ -170,7 +170,7 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
 
 router.patch("/users/me", authMiddleware, async (req, res) => {
   try {
-    const { fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences, openai_api_key } = req.body;
+    const { fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences } = req.body;
     const userId = req.user!.userId;
 
     const updates: Partial<typeof usersTable.$inferInsert> = {};
@@ -180,7 +180,6 @@ router.patch("/users/me", authMiddleware, async (req, res) => {
     if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
     if (signatureUrl !== undefined) updates.signatureUrl = signatureUrl;
     if (notificationPreferences !== undefined) updates.notificationPreferences = notificationPreferences;
-    if (openai_api_key !== undefined) updates.openaiApiKey = openai_api_key === "" ? null : openai_api_key;
 
     await db.update(usersTable).set(updates).where(eq(usersTable.id, userId));
 
@@ -273,17 +272,7 @@ router.patch("/users/me/password", authMiddleware, async (req, res) => {
 });
 
 router.post("/auth/openai-key", authMiddleware, async (req, res) => {
-  try {
-    const { key } = req.body as { key?: string };
-    if (!key || typeof key !== "string" || !key.startsWith("sk-")) {
-      res.status(400).json({ error: "Invalid OpenAI API key. Must be a non-empty string starting with sk-." });
-      return;
-    }
-    await db.update(usersTable).set({ openaiApiKey: key }).where(eq(usersTable.id, req.user!.userId));
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to save OpenAI key" });
-  }
+  res.status(410).json({ error: "LEGACY_AI_KEY_RETIRED", message: "Use /api/v1/ai-control/provider-connections. Existing legacy values are preserved pending audited migration." });
 });
 
 router.delete("/auth/openai-key", authMiddleware, async (req, res) => {
