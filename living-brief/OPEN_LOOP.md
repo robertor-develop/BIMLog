@@ -500,7 +500,7 @@ Deferred:
 - Server image presentation validation now reads stored bytes, accepts only decodable PNG/JPEG data, rejects PDF and corrupt-image sources with explicit 422 responses, and verifies immutable server-known upload, paste, screen-snip, or viewpoint provenance.
 - `showInRfi` controls browser presentation, standard RFI PDF, and RFI DOCX. Crop metadata and replacement/original selection are honored without changing stored evidence bytes. `includeInCompletePdf` remains independent; the Complete RFI record page does not duplicate the standard image.
 - Correction evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-4-correction\20260714-172059`. It includes authenticated API/database/storage proofs, original-byte hashes, real-browser JSON/screenshots, standard and Complete PDF variants, DOCX package inspection, and LibreOffice-rendered visible/hidden DOCX artifacts.
-- Build 4 correction is submitted for independent review and is not accepted or self-accepted. Build 5 remains deferred. Nothing was published.
+- Build 4 functional correction was independently accepted. Its focused evidence directory was sanitized, and the accepted correction was cleanly integrated from the exact `origin/master` baseline without unrelated Telegram or Navisworks commits. Nothing was published, and Build 5 has not started.
 
 ## Deferred
 
