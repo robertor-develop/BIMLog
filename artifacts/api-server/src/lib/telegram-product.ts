@@ -8,13 +8,14 @@ import {
   reserveRun,
   type Actor,
 } from "./ai-control-plane";
-import { TelegramProviderBrokerError, executeTelegramAssistantBroker } from "./telegram-product-provider-broker";
+import { TelegramProviderBrokerError, executeTelegramAssistantBroker, executeTelegramDeliveryIntentBroker } from "./telegram-product-provider-broker";
+import { cancelDeliveryRequest, confirmDeliveryRequest, createDeliveryRequest, executeDeliveryRequest, listDeliveryRequests } from "./telegram-product-delivery";
 
 const TOKEN_BYTES = 32;
 const TOKEN_TTL_MS = 10 * 60 * 1000;
 const LINK_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const LINK_RATE_LIMIT_MAX = 5;
-const BOT_API_BASE = "https://api.telegram.org";
+const BOT_API_BASE = (process.env.TELEGRAM_PRODUCT_TELEGRAM_API_BASE_URL || "https://api.telegram.org").replace(/\/$/, "");
 const CONSENT_PURPOSE = "channel_linking";
 
 export type TelegramLanguage = "en" | "es";
@@ -182,7 +183,7 @@ function commandParts(text: string): { command: string; argument: string } {
 function localized(language: TelegramLanguage, key: string): string {
   const messages: Record<TelegramLanguage, Record<string, string>> = {
     en: {
-      help: "Your BIMLog Telegram channel is connected. Commands: /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
+      help: "Your BIMLog Telegram channel is connected. Commands: /deliver, /my_deliveries, /cancel_delivery, /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
       settings: "BIMLog Telegram channel connected. Language: English. Use /language es for Spanish or /disconnect to revoke the connection.",
       privacy: "BIMLog stores encrypted Telegram identifiers, hashed identifiers for matching, consent records, and durable update receipts for channel linking. Use /disconnect to revoke.",
       disconnected: "The BIMLog Telegram channel was disconnected and the channel-linking consent was revoked.",
@@ -194,7 +195,7 @@ function localized(language: TelegramLanguage, key: string): string {
       invalid: "This link is invalid or expired. Open your BIMLog Profile to create a new link.",
     },
     es: {
-      help: "Tu canal de Telegram de BIMLog está conectado. Comandos: /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
+      help: "Tu canal de Telegram de BIMLog está conectado. Comandos: /deliver, /mis_entregas, /cancel_delivery, /settings, /assistant, /support, /language en, /language es, /privacy, /disconnect.",
       settings: "Canal de Telegram de BIMLog conectado. Idioma: Español. Usa /language en para inglés o /disconnect para revocar la conexión.",
       privacy: "Privacidad: BIMLog guarda identificadores de Telegram cifrados, identificadores hash para coincidencia, registros de consentimiento y recibos durables para la conexión del canal. Usa /disconnect para revocar.",
       disconnected: "El canal de Telegram de BIMLog fue desconectado y el consentimiento de conexión del canal fue revocado.",
@@ -655,6 +656,8 @@ function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string 
         "/conversations - Mis Conversaciones",
         "/support_cases - Mis Casos de Soporte",
         "/ai_usage - Uso de IA",
+        "/deliver - Entregar archivo o exportación",
+        "/mis_entregas - Mis entregas",
         "/language en|es - Idioma",
         "/settings - Vinculación de Cuenta",
         "/privacy - Privacidad",
@@ -667,6 +670,8 @@ function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string 
         "/conversations - My Conversations",
         "/support_cases - My Support Cases",
         "/ai_usage - AI Usage",
+        "/deliver - Deliver a file or export",
+        "/my_deliveries - My deliveries",
         "/language en|es - Language",
         "/settings - Account Link",
         "/privacy - Privacy",
@@ -675,6 +680,72 @@ function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string 
     ? ["/admin_support_queue - Cola de Soporte", "/admin_conversation_audit - Auditoría de Conversaciones", "/admin_ai_usage - Supervisión de Uso de IA", "/admin_failed_deliveries - Entregas Fallidas"]
     : ["/admin_support_queue - Support Queue", "/admin_conversation_audit - Conversation Audit", "/admin_ai_usage - AI Usage Oversight", "/admin_failed_deliveries - Failed Deliveries"];
   return [...ordinary, ...(isSuperAdmin ? ["", ...(language === "es" ? ["Opciones de superadministrador:"] : ["Super-admin options:"]), ...admin] : [])].join("\n");
+}
+
+function deliveryGuide(language: TelegramLanguage): string {
+  const types = "project_file, rfi_pdf, rfi_complete_pdf, rfi_docx, rfi_audit_pdf";
+  return language === "es"
+    ? `Entrega guiada sin IA. Usa: /deliver proyecto | tipo | id | telegram|email | me|correos. Tipos: ${types}. BIMLog mostrará una vista previa antes de enviar.`
+    : `Guided zero-AI delivery. Use: /deliver project | type | id | telegram|email | me|emails. Types: ${types}. BIMLog shows a preview before sending.`;
+}
+
+function naturalLanguageDeliveryGuide(language: TelegramLanguage): string {
+  return language === "es"
+    ? "La interpretación de una solicitud de entrega en lenguaje natural usa IA y no se ejecuta automáticamente. Elige fondos y envía /assistant personal tu solicitud, /assistant company tu solicitud o /assistant system tu solicitud. BIMLog mostrará el costo estimado y exigirá /confirm_ai antes de llamar al proveedor. Usa /deliver para el flujo guiado sin IA."
+    : "Natural-language delivery interpretation uses AI and does not run automatically. Choose funding and send /assistant personal your request, /assistant company your request, or /assistant system your request. BIMLog will show the cost estimate and require /confirm_ai before calling the provider. Use /deliver for the zero-AI guided flow.";
+}
+
+function deliveryPreviewText(delivery: any, language: TelegramLanguage): string {
+  const recipients = delivery.recipients.join(", ");
+  const warning = delivery.externalRecipients.length
+    ? (language === "es" ? `\nADVERTENCIA: destinatarios externos: ${delivery.externalRecipients.join(", ")}. Confirma primero el artefacto, canal y destinatarios; después se exigirá una segunda confirmación externa.` : `\nWARNING: external recipients: ${delivery.externalRecipients.join(", ")}. First confirm the artifact, channel, and recipients; a separate external-recipient confirmation will then be required.`)
+    : "";
+  return language === "es"
+    ? `Vista previa ${delivery.id}\nArtefacto: ${delivery.artifactLabel}\nCanal: ${delivery.channel}\nDestinatarios: ${recipients}${warning}\nPrimera confirmación: /confirm_delivery ${delivery.id}\nCancelar: /cancel_delivery ${delivery.id}`
+    : `Preview ${delivery.id}\nArtifact: ${delivery.artifactLabel}\nChannel: ${delivery.channel}\nRecipients: ${recipients}${warning}\nFirst confirmation: /confirm_delivery ${delivery.id}\nCancel: /cancel_delivery ${delivery.id}`;
+}
+
+async function handleDeliveryCommand(account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const parts = String(evidence.argument || "").split("|").map((part) => sanitizeTelegramText(part));
+  if (parts.length < 5) return { chatId: evidence.telegramChatId!, text: deliveryGuide(language) };
+  try {
+    const delivery = await createDeliveryRequest({
+      userId: account.userId, projectId: parts[0], artifactType: parts[1], entityId: parts[2], channel: parts[3].toLowerCase(),
+      recipients: parts[4], language, confirmationKey: `telegram-delivery:${evidence.updateId}`,
+    }) as any;
+    return { chatId: evidence.telegramChatId!, text: deliveryPreviewText(delivery, language) };
+  } catch (error) {
+    const code = error instanceof TelegramProductError ? error.code : "DELIVERY_PREVIEW_FAILED";
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? `No se pudo preparar la entrega: ${code}.` : `Could not prepare delivery: ${code}.` };
+  }
+}
+
+async function handleDeliveryConfirmation(account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence, external: boolean): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const id = sanitizeTelegramText(evidence.argument || "");
+  try {
+    const confirmation = await confirmDeliveryRequest(account.userId, id, external) as any;
+    if (confirmation.externalConfirmationRequired) return { chatId: evidence.telegramChatId!, text: language === "es" ? `Confirma el envío externo con /confirm_external_delivery ${id}.` : `Confirm the external delivery with /confirm_external_delivery ${id}.` };
+    const result = confirmation.status === "confirmed" ? await executeDeliveryRequest(id) as any : confirmation;
+    const text = result.status === "delivered"
+      ? (language === "es" ? `Entrega confirmada por el proveedor. Referencia: ${result.providerReference}.` : `Delivery acknowledged by the provider. Reference: ${result.providerReference}.`)
+      : (language === "es" ? `Estado: ${result.status}. ${result.failureCategory || ""}` : `Status: ${result.status}. ${result.failureCategory || ""}`);
+    return { chatId: evidence.telegramChatId!, text };
+  } catch (error) {
+    const code = error instanceof TelegramProductError ? error.code : "DELIVERY_FAILED";
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? `Entrega no confirmada: ${code}.` : `Delivery not acknowledged: ${code}.` };
+  }
+}
+
+async function handleMyDeliveries(account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const rows = await listDeliveryRequests(account.userId) as any[];
+  if (!rows.length) return { chatId: evidence.telegramChatId!, text: language === "es" ? "No tienes entregas." : "You have no deliveries." };
+  return { chatId: evidence.telegramChatId!, text: rows.slice(0, 10).map((row) => `${row.id} | ${row.artifactLabel} | ${row.channel} | ${row.status}`).join("\n") };
 }
 
 async function handleHelpCommand(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
@@ -784,6 +855,54 @@ async function selectedConnectionForFunding(client: QueryClient, actor: Actor, f
   if (!row) return null;
   const models = Array.isArray(row.allowed_models) ? row.allowed_models : [];
   return { id: row.id, provider: row.provider, model: String(models[0] || "test-model"), label: row.label, owner_type: row.owner_type };
+}
+
+function looksLikeNaturalDeliveryRequest(text: string): boolean {
+  const clean = sanitizeTelegramText(text).toLowerCase();
+  return /\b(send|email|deliver|share|env[ií]a(?:me)?|manda(?:me)?|entrega)\b/.test(clean)
+    && /\b(rfi|pdf|docx|file|report|audit|telegram|email|archivo|informe|auditor[ií]a)\b/.test(clean);
+}
+
+async function handleNaturalDeliveryEstimate(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
+  const language = account.language;
+  if (!account.userId || !account.companyId) return { chatId: evidence.telegramChatId!, text: localized(language, "notConnected") };
+  const prompt = sanitizeTelegramText(`${evidence.command || ""} ${evidence.argument || ""}`);
+  const actor: Actor = { userId: account.userId, companyId: account.companyId, isSuperAdmin: account.isSuperAdmin, isCompanyAdmin: account.isCompanyAdmin };
+  const funding: FundingSource = "personal";
+  const connection = await selectedConnectionForFunding(client, actor, funding);
+  if (!connection) return { chatId: evidence.telegramChatId!, text: naturalLanguageDeliveryGuide(language) };
+  try {
+    const estimate = await createEstimate(actor, {
+      capability: "assistant", purpose: "Telegram natural-language delivery interpretation", provider: connection.provider, model: connection.model,
+      connectionId: connection.id, creditOwnerType: funding, sessionId: `telegram-delivery-intent:${config.adapterId}:${account.userId}`,
+      contextManifestHash: hmacValue(config, `telegram-delivery-intent:${account.userId}:${prompt}`),
+      contextCategories: ["telegram_delivery_request", "authorized_project_artifact_metadata"], inputTokenMin: 1, inputTokenMax: 1000,
+      outputTokenMax: 300, filesWillBeTransmitted: false, idempotencyKey: `telegram-delivery-intent-estimate:${evidence.updateId}`,
+    });
+    const conversationId = await openConversation(client, { userId: account.userId, companyId: account.companyId, channelId: account.channelId, adapterId: config.adapterId, language, mode: "assistant", status: "pending_confirmation", funding, aiRunId: estimate.id, privacyNoticeVersion: config.consentVersion });
+    await recordConversationMessage(client, { conversationId, direction: "inbound", role: "user", updateId: evidence.updateId, key: `delivery-intent:${evidence.updateId}`, language, text: prompt, state: "pending_confirmation", requestedAction: "delivery_intent_estimate", aiRunId: estimate.id });
+    const text = language === "es"
+      ? `Esta interpretación usará tus créditos personales/BYO. No se leerá ni enviará ningún archivo. Estimado: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nConfirmar IA: /confirm_ai ${conversationId}\nCancelar: /cancel_ai ${conversationId}\nFlujo sin IA: /deliver`
+      : `This interpretation will use your personal/BYO AI credits. No file will be read or sent. Estimate: ${estimate.currency} ${estimate.estimated_min_micros}-${estimate.estimated_max_micros} micros.\nConfirm AI: /confirm_ai ${conversationId}\nCancel: /cancel_ai ${conversationId}\nZero-AI flow: /deliver`;
+    const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", key: `delivery-intent-estimate:${estimate.id}`, language, text, state: "pending_confirmation", deliveryState: "pending", requestedAction: "delivery_intent_confirmation", aiRunId: estimate.id });
+    return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+  } catch (error) {
+    const code = error instanceof AiControlError ? error.code : "AI_ESTIMATE_FAILED";
+    return { chatId: evidence.telegramChatId!, text: language === "es" ? `No se pudo preparar la interpretación: ${code}. Usa /deliver.` : `Could not prepare interpretation: ${code}. Use /deliver.` };
+  }
+}
+
+async function deliveryIntentBrokerContext(client: QueryClient, conversationId: string, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, language: TelegramLanguage) {
+  const promptResult = await client.query<{ sanitized_text: string }>(`SELECT sanitized_text FROM telegram_conversation_messages WHERE conversation_id=$1 AND requested_action='delivery_intent_estimate' ORDER BY created_at DESC LIMIT 1`, [conversationId]);
+  const projects = await client.query(`SELECT p.id,p.name,p.code FROM projects p WHERE $2::boolean OR EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=$1 AND pm.status='active') ORDER BY p.id LIMIT 50`, [account.userId, account.isSuperAdmin]);
+  const projectIds = projects.rows.map((row: any) => Number(row.id));
+  const rfis = projectIds.length ? await client.query(`SELECT id,project_id,number FROM rfis WHERE project_id=ANY($1::int[]) ORDER BY id LIMIT 100`, [projectIds]) : { rows: [] };
+  const files = projectIds.length ? await client.query(`SELECT id,project_id,file_name FROM files WHERE project_id=ANY($1::int[]) AND status='active' ORDER BY id LIMIT 100`, [projectIds]) : { rows: [] };
+  const catalog = JSON.stringify({ projects: projects.rows, rfis: rfis.rows, files: files.rows });
+  return [
+    { role: "system" as const, content: `Interpret one BIMLog delivery request. Return JSON only. Either {"kind":"delivery","projectId":positive integer,"artifactType":"project_file|rfi_pdf|rfi_complete_pdf|rfi_docx|rfi_audit_pdf","entityId":positive integer,"channel":"telegram|email","recipients":"me" or ["email"]} or {"kind":"ambiguous","missing":["field"]}. Use only exact IDs from the authorized metadata. Never infer an absent project, artifact, channel, or recipient. "to me" with Telegram means recipients "me". Do not authorize or deliver anything. Language is ${language}. Authorized metadata: ${catalog}` },
+    { role: "user" as const, content: sanitizeTelegramText(promptResult.rows[0]?.sanitized_text || "") },
+  ];
 }
 
 async function handleAssistantCommand(client: QueryClient, config: TelegramProductConfig, account: Awaited<ReturnType<typeof connectedTelegramAccount>>, evidence: EncryptedWebhookEvidence): Promise<TelegramReply> {
@@ -899,6 +1018,8 @@ async function handleConfirmAi(client: QueryClient, account: Awaited<ReturnType<
   if (!pending?.ai_run_id) {
     return { chatId: evidence.telegramChatId!, text: language === "es" ? "No encontré una conversación de IA pendiente para confirmar o cancelar." : "I could not find a pending AI conversation to confirm or cancel." };
   }
+  const pendingAction = await client.query<{ requested_action: string }>(`SELECT requested_action FROM telegram_conversation_messages WHERE conversation_id=$1 AND direction='inbound' ORDER BY created_at DESC LIMIT 1`, [conversationId]);
+  const isDeliveryIntent = pendingAction.rows[0]?.requested_action === "delivery_intent_estimate";
   const actor: Actor = { userId: account.userId, companyId: account.companyId, isSuperAdmin: account.isSuperAdmin, isCompanyAdmin: account.isCompanyAdmin };
   if (cancelOnly) {
     try {
@@ -919,6 +1040,26 @@ async function handleConfirmAi(client: QueryClient, account: Awaited<ReturnType<
     const confirmationId = `telegram-confirm:${evidence.updateId}`;
     const confirmed = await confirmEstimate(actor, pending.ai_run_id, { confirmationId, estimateFingerprint: pending.estimate_fingerprint, contextManifestHash: pending.context_manifest_hash, fileManifestHash: null });
     const reserved = await reserveRun(actor, pending.ai_run_id, { confirmationId, estimateFingerprint: confirmed.estimate_fingerprint, contextManifestHash: confirmed.context_manifest_hash, fileManifestHash: null });
+    if (isDeliveryIntent) {
+      const context = await deliveryIntentBrokerContext(client, conversationId, account, language);
+      const interpreted = await executeTelegramDeliveryIntentBroker(actor, pending.ai_run_id, context);
+      if (interpreted.intent.kind === "ambiguous") {
+        await client.query(`UPDATE telegram_conversations SET status='closed',closed_at=now(),updated_at=now() WHERE id=$1`, [conversationId]);
+        const missing = interpreted.intent.missing.join(", ");
+        const text = language === "es" ? `Faltan datos para crear una vista previa: ${missing}. No se envió nada. Usa /deliver para continuar.` : `More information is required to create a preview: ${missing}. Nothing was sent. Use /deliver to continue.`;
+        const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", updateId: evidence.updateId, key: `delivery-intent-ambiguous:${reserved.id}`, language, text, deliveryState: "pending", requestedAction: "delivery_intent_ambiguous", aiRunId: pending.ai_run_id, summary: "ambiguous delivery intent; no preview" });
+        return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+      }
+      const delivery = await createDeliveryRequest({
+        userId: account.userId, projectId: interpreted.intent.projectId, artifactType: interpreted.intent.artifactType,
+        entityId: interpreted.intent.entityId, channel: interpreted.intent.channel, recipients: interpreted.intent.recipients,
+        language, confirmationKey: `telegram-ai-delivery:${pending.ai_run_id}`, conversationId,
+      });
+      await client.query(`UPDATE telegram_conversations SET status='closed',closed_at=now(),updated_at=now() WHERE id=$1`, [conversationId]);
+      const text = deliveryPreviewText(delivery, language);
+      const outboundMessageId = await recordConversationMessage(client, { conversationId, direction: "outbound", role: "assistant", updateId: evidence.updateId, key: `delivery-intent-preview:${reserved.id}`, language, text, deliveryState: "pending", requestedAction: "delivery_preview_created", aiRunId: pending.ai_run_id, summary: "AI-interpreted delivery preview; not sent" });
+      return { chatId: evidence.telegramChatId!, text, conversationId, outboundMessageId };
+    }
     const context = await assistantBrokerContext(client, conversationId, language);
     const result = await executeTelegramAssistantBroker(actor, pending.ai_run_id, context);
     await client.query(`UPDATE telegram_conversations SET status='open', updated_at=now() WHERE id=$1`, [conversationId]);
@@ -1083,6 +1224,15 @@ async function processCommand(client: QueryClient, config: TelegramProductConfig
   }
   if (evidence.command === "/settings") return { chatId: evidence.telegramChatId, text: connected.userId ? localized(language, "settings") : localized(language, "notConnected") };
   if (evidence.command === "/privacy") return { chatId: evidence.telegramChatId, text: localized(language, "privacy") };
+  if (evidence.command === "/deliver") return handleDeliveryCommand(connected, evidence);
+  if (evidence.command === "/my_deliveries" || evidence.command === "/mis_entregas") return handleMyDeliveries(connected, evidence);
+  if (evidence.command === "/confirm_delivery") return handleDeliveryConfirmation(connected, evidence, false);
+  if (evidence.command === "/confirm_external_delivery") return handleDeliveryConfirmation(connected, evidence, true);
+  if (evidence.command === "/cancel_delivery") {
+    if (!connected.userId) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
+    const delivery = await cancelDeliveryRequest(connected.userId, sanitizeTelegramText(evidence.argument || "")) as any;
+    return { chatId: evidence.telegramChatId, text: language === "es" ? `Entrega ${delivery.status}. No se envió nada.` : `Delivery ${delivery.status}. Nothing was sent.` };
+  }
   if (evidence.command === "/assistant" || evidence.command === "/asistente") return handleAssistantCommand(client, config, connected, evidence);
   if (evidence.command === "/continue_ai") return handleContinueAi(client, config, connected, evidence);
   if (evidence.command === "/confirm_ai") return handleConfirmAi(client, connected, evidence, false);
@@ -1108,6 +1258,11 @@ async function processCommand(client: QueryClient, config: TelegramProductConfig
   if (evidence.command === "/disconnect") {
     if (!connected.userId || !connected.email) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
     return revokeTelegramConnectionTx(client, config, connected.userId, connected.email, "telegram_command", language);
+  }
+  if (evidence.command && !evidence.command.startsWith("/")) {
+    const naturalText = `${evidence.command} ${evidence.argument || ""}`;
+    if (looksLikeNaturalDeliveryRequest(naturalText)) return handleNaturalDeliveryEstimate(client, config, connected, evidence);
+    return { chatId: evidence.telegramChatId, text: naturalLanguageDeliveryGuide(language) };
   }
   return { chatId: evidence.telegramChatId, text: localized(language, "unknown") };
 }

@@ -4,6 +4,7 @@ import session from "express-session";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { ensureTelegramProductConversationSchema, startTelegramProductWorker } from "./lib/telegram-product";
+import { ensureTelegramProductDeliverySchema, recoverAbandonedDeliveryAttempts } from "./lib/telegram-product-delivery";
 import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { pool } from "@workspace/db";
 
@@ -341,6 +342,9 @@ void rfiMigrationReady.then((ready) => {
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS telegram_inbound_updates_adapter_update_uidx ON telegram_inbound_updates (adapter_id, update_id)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS telegram_inbound_updates_received_idx ON telegram_inbound_updates (received_at)`);
     await ensureTelegramProductConversationSchema();
+    await ensureTelegramProductDeliverySchema();
+    const recoveredUnknownDeliveries = await recoverAbandonedDeliveryAttempts();
+    if (recoveredUnknownDeliveries) console.warn(`[telegram-product] recovered ${recoveredUnknownDeliveries} abandoned delivery attempt(s) as delivery_unknown`);
     console.log("[migration] telegram product notification tables ensured");
     startTelegramProductWorker();
   } catch (e) {

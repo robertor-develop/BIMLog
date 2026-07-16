@@ -134,6 +134,10 @@ interface TelegramConversationPanel {
   conversations: TelegramConversationSummary[];
   supportCases: TelegramSupportCaseSummary[];
   aiUsage: unknown[];
+  deliveries: Array<{
+    id: string; artifactLabel: string; channel: "telegram" | "email"; recipients: string[];
+    status: string; providerReference: string | null; failureCategory: string | null; createdAt: string;
+  }>;
 }
 
 const DEFAULT_PREFS = {
@@ -534,6 +538,7 @@ export function Profile() {
         conversations: Array.isArray(data.conversations) ? data.conversations : [],
         supportCases: Array.isArray(data.supportCases) ? data.supportCases : [],
         aiUsage: Array.isArray(data.aiUsage) ? data.aiUsage : [],
+        deliveries: Array.isArray(data.deliveries) ? data.deliveries : [],
       });
     } catch (error) {
       logClientError("profile telegram conversation panel load", error);
@@ -1506,6 +1511,10 @@ export function Profile() {
                     <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("Assistant runs", "Ejecuciones de asistente")}</div>
                     <div style={{ fontSize: 20, fontWeight: 800 }}>{telegramPanel?.aiUsage?.length ?? 0}</div>
                   </div>
+                  <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tt("My deliveries", "Mis entregas")}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800 }}>{telegramPanel?.deliveries?.length ?? 0}</div>
+                  </div>
                 </div>
                 {(telegramPanel?.conversations || []).slice(0, 3).map((item) => (
                   <div key={item.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
@@ -1521,6 +1530,21 @@ export function Profile() {
                         {tt("AI status", "Estado IA")}: {item.ai_status || "n/a"} · {item.currency || "USD"} {item.actual_micros || item.estimated_max_micros} micros
                       </div>
                     )}
+                  </div>
+                ))}
+                {(telegramPanel?.deliveries || []).slice(0, 5).map((delivery) => (
+                  <div key={delivery.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 4 }}>
+                      <Badge variant="outline">{delivery.channel}</Badge>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{delivery.status}</span>
+                      <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{new Date(delivery.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div style={{ fontSize: 12 }}>{delivery.artifactLabel}</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 3 }}>
+                      {tt("Recipients", "Destinatarios")}: {delivery.recipients.join(", ")}
+                      {delivery.providerReference ? ` · ${tt("Reference", "Referencia")}: ${delivery.providerReference}` : ""}
+                      {delivery.failureCategory ? ` · ${tt("Failure", "Falla")}: ${delivery.failureCategory}` : ""}
+                    </div>
                   </div>
                 ))}
                 <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", margin: 0 }}>

@@ -9,6 +9,9 @@ export class TelegramProviderBrokerError extends Error {
 
 type BrokerMessage = { role: "user" | "assistant" | "system"; content: string };
 type BrokerResult = { text: string; providerRequestId: string; inputTokens: number; outputTokens: number };
+export type TelegramDeliveryIntent =
+  | { kind: "delivery"; projectId: number; artifactType: string; entityId: number; channel: "telegram" | "email"; recipients: string | string[] }
+  | { kind: "ambiguous"; missing: string[] };
 
 const OPENAI_BASE_URL = "https://api.openai.com/v1";
 const ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
@@ -94,4 +97,36 @@ export async function executeTelegramAssistantBroker(actor: Actor, runId: string
     await failRunFromBroker({ source: "provider_broker", runId, providerRequestId: undefined, errorCode: code });
     throw error;
   }
+}
+
+function deliveryIntentFromText(text: string): TelegramDeliveryIntent {
+  const candidate = /```(?:json)?\s*([\s\S]*?)```/i.exec(text)?.[1] || text;
+  let value: any;
+  try { value = JSON.parse(candidate); }
+  catch { throw new TelegramProviderBrokerError("DELIVERY_INTENT_INVALID", "Provider did not return valid structured delivery intent.", 422); }
+  if (value?.kind === "ambiguous") {
+    const missing = Array.isArray(value.missing) ? value.missing.map(cleanText).filter(Boolean).slice(0, 8) : [];
+    return { kind: "ambiguous", missing: missing.length ? missing : ["delivery details"] };
+  }
+  const projectId = Number(value?.projectId);
+  const entityId = Number(value?.entityId);
+  const artifactType = cleanText(value?.artifactType);
+  const channel = cleanText(value?.channel).toLowerCase();
+  const recipients = Array.isArray(value?.recipients)
+    ? value.recipients.map(cleanText).filter(Boolean).slice(0, 25)
+    : cleanText(value?.recipients);
+  if (value?.kind !== "delivery" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(entityId) || entityId <= 0 || !artifactType || !["telegram", "email"].includes(channel) || (Array.isArray(recipients) ? !recipients.length : !recipients)) {
+    throw new TelegramProviderBrokerError("DELIVERY_INTENT_INVALID", "Provider delivery intent was incomplete or malformed.", 422);
+  }
+  return { kind: "delivery", projectId, entityId, artifactType, channel: channel as "telegram" | "email", recipients };
+}
+
+export async function executeTelegramDeliveryIntentBroker(
+  actor: Actor,
+  runId: string,
+  messages: BrokerMessage[],
+  transport: typeof fetch = fetch,
+): Promise<{ intent: TelegramDeliveryIntent; providerRequestId: string }> {
+  const result = await executeTelegramAssistantBroker(actor, runId, messages, transport);
+  return { intent: deliveryIntentFromText(result.text), providerRequestId: result.providerRequestId };
 }

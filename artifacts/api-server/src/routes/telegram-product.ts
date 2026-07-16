@@ -16,6 +16,14 @@ import {
   telegramProductHealth,
   timingSafeEqualText,
 } from "../lib/telegram-product";
+import {
+  cancelDeliveryRequest,
+  confirmDeliveryRequest,
+  createDeliveryRequest,
+  executeDeliveryRequest,
+  listDeliveryRequests,
+  readSecureDeliveryLink,
+} from "../lib/telegram-product-delivery";
 
 const router: Router = Router();
 
@@ -98,10 +106,99 @@ router.get("/integrations/telegram/conversations", authMiddleware, async (req, r
       [actor.userId],
     );
     const usage = await listUsage(actor);
-    res.json({ conversations: conversations.rows, supportCases: supportCases.rows, aiUsage: usage.filter((row: any) => row.capability === "assistant").slice(0, 25) });
+    res.json({ conversations: conversations.rows, supportCases: supportCases.rows, aiUsage: usage.filter((row: any) => row.capability === "assistant").slice(0, 25), deliveries: await listDeliveryRequests(actor.userId) });
   } catch (err) {
     sendTelegramError(res, err);
   }
+});
+
+router.get("/integrations/telegram/deliveries", authMiddleware, async (req, res) => {
+  try {
+    res.json({ deliveries: await listDeliveryRequests(req.user!.userId) });
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/deliveries/preview", authMiddleware, async (req, res) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    res.status(201).json(await createDeliveryRequest({
+      userId: req.user!.userId,
+      projectId: body.projectId,
+      artifactType: body.artifactType,
+      entityId: body.entityId,
+      channel: body.channel,
+      recipients: body.recipients,
+      language: body.language === "es" ? "es" : "en",
+      confirmationKey: typeof body.confirmationKey === "string" ? body.confirmationKey : `browser:${crypto.randomUUID()}`,
+    }));
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/deliveries/:id/confirm", authMiddleware, async (req, res) => {
+  try {
+    if ((req.body as { externalConfirmation?: unknown }).externalConfirmation === true) {
+      throw new TelegramProductError(409, "EXTERNAL_CONFIRMATION_BYPASS_REJECTED", "Use the separate external confirmation step after the first confirmation.");
+    }
+    const confirmed = await confirmDeliveryRequest(req.user!.userId, String(req.params.id), false);
+    if ((confirmed as { externalConfirmationRequired?: boolean }).externalConfirmationRequired) { res.status(409).json(confirmed); return; }
+    const status = (confirmed as { status: string }).status;
+    res.json(status === "confirmed" ? await executeDeliveryRequest(String(req.params.id)) : confirmed);
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/deliveries/:id/confirm-external", authMiddleware, async (req, res) => {
+  try {
+    const confirmed = await confirmDeliveryRequest(req.user!.userId, String(req.params.id), true);
+    res.json((confirmed as { status: string }).status === "confirmed" ? await executeDeliveryRequest(String(req.params.id)) : confirmed);
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/deliveries/:id/cancel", authMiddleware, async (req, res) => {
+  try { res.json(await cancelDeliveryRequest(req.user!.userId, String(req.params.id))); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/integrations/telegram/deliveries/links/:token", authMiddleware, async (req, res) => {
+  try {
+    const artifact = await readSecureDeliveryLink(String(req.params.token), req.user!.userId);
+    const clean = artifact.fileName.replace(/[\u0000-\u001f\u007f"\\]/g, "").trim() || "BIMLog-delivery";
+    res.setHeader("Content-Type", artifact.contentType);
+    res.setHeader("Content-Disposition", `attachment; filename="${clean.replace(/[^\x20-\x7e]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(clean)}`);
+    res.setHeader("Content-Length", artifact.size);
+    res.send(artifact.buffer);
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/integrations/telegram/admin/deliveries", authMiddleware, async (req, res) => {
+  try {
+    const actor = await actorFor(req.user!.userId);
+    if (!actor.isSuperAdmin) throw new TelegramProductError(403, "SUPER_ADMIN_REQUIRED", "Super admin access required.");
+    const reason = reasonText(req.query.reason);
+    if (!reason) throw new TelegramProductError(400, "REASON_REQUIRED", "A specific access reason is required.");
+    const rows = await pool.query(`SELECT d.id,d.user_id,d.company_id,d.project_id,d.artifact_type,d.artifact_entity_id,d.artifact_label,d.channel,d.status,
+      jsonb_array_length(d.recipient_identities) AS recipient_count,d.attempt_count,d.provider_acknowledgement_state,d.failure_category,d.artifact_sha256,d.artifact_size,d.created_at,d.updated_at,d.delivered_at
+      FROM telegram_delivery_requests d ORDER BY d.created_at DESC LIMIT 100`);
+    await auditAdminAccess(actor, "telegram_admin_deliveries_accessed", "telegram_delivery", "list", reason, { rowCount: rows.rowCount });
+    res.json({ deliveries: rows.rows });
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/integrations/telegram/admin/deliveries/:id", authMiddleware, async (req, res) => {
+  try {
+    const actor = await actorFor(req.user!.userId);
+    if (!actor.isSuperAdmin) throw new TelegramProductError(403, "SUPER_ADMIN_REQUIRED", "Super admin access required.");
+    const reason = reasonText(req.query.reason);
+    if (!reason) throw new TelegramProductError(400, "REASON_REQUIRED", "A specific access reason is required.");
+    const id = String(req.params.id);
+    const delivery = await pool.query(`SELECT id,user_id,company_id,project_id,artifact_type,artifact_entity_id,artifact_label,channel,recipient_identities,external_recipients,language,status,
+      confirmed_at,external_warning_acknowledged,external_warning_acknowledged_at,external_confirmed_at,provider_acknowledgement_state,provider_reference,attempt_count,delivered_at,failure_category,artifact_sha256,artifact_size,expires_at,created_at,updated_at
+      FROM telegram_delivery_requests WHERE id=$1`, [id]);
+    if (!delivery.rows[0]) throw new TelegramProductError(404, "DELIVERY_NOT_FOUND", "Delivery request not found.");
+    const events = await pool.query(`SELECT id,actor_user_id,from_status,to_status,event_type,reason,safe_details,created_at FROM telegram_delivery_events WHERE delivery_id=$1 ORDER BY created_at,id`, [id]);
+    const attempts = await pool.query(`SELECT id,attempt_number,channel,state,provider_reference,failure_category,started_at,completed_at FROM telegram_delivery_attempts WHERE delivery_id=$1 ORDER BY attempt_number`, [id]);
+    await auditAdminAccess(actor, "telegram_admin_delivery_details_accessed", "telegram_delivery", id, reason, { eventCount: events.rowCount, attemptCount: attempts.rowCount });
+    res.json({ delivery: delivery.rows[0], events: events.rows, attempts: attempts.rows });
+  } catch (err) { sendTelegramError(res, err); }
 });
 
 router.get("/integrations/telegram/admin/conversations", authMiddleware, async (req, res) => {

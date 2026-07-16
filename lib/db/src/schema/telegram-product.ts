@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, jsonb, boolean, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { usersTable } from "./users";
 import { companiesTable } from "./users";
@@ -176,6 +176,85 @@ export const telegramSupportCaseEventsTable = pgTable("telegram_support_case_eve
   caseIdx: index("telegram_support_case_events_case_idx").on(t.caseId, t.createdAt),
 }));
 
+export const telegramDeliveryRequestsTable = pgTable("telegram_delivery_requests", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  companyId: integer("company_id").references(() => companiesTable.id).notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  conversationId: text("conversation_id").references(() => telegramConversationsTable.id),
+  artifactType: text("artifact_type").notNull(),
+  artifactEntityId: text("artifact_entity_id").notNull(),
+  canonicalRoute: text("canonical_route"),
+  artifactLabel: text("artifact_label").notNull(),
+  channel: text("channel").notNull(),
+  recipientIdentities: jsonb("recipient_identities").$type<string[]>().notNull().default([]),
+  externalRecipients: jsonb("external_recipients").$type<string[]>().notNull().default([]),
+  language: text("language").notNull().default("en"),
+  status: text("status").notNull().default("draft"),
+  confirmationKey: text("confirmation_key").notNull(),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  externalWarningAcknowledged: boolean("external_warning_acknowledged").notNull().default(false),
+  externalWarningAcknowledgedAt: timestamp("external_warning_acknowledged_at", { withTimezone: true }),
+  externalConfirmedAt: timestamp("external_confirmed_at", { withTimezone: true }),
+  providerAcknowledgementState: text("provider_acknowledgement_state"),
+  providerReference: text("provider_reference"),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+  failureCategory: text("failure_category"),
+  artifactSha256: text("artifact_sha256"),
+  artifactSize: integer("artifact_size"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  userCreatedIdx: index("telegram_delivery_requests_user_created_idx").on(t.userId, t.createdAt),
+  projectCreatedIdx: index("telegram_delivery_requests_project_created_idx").on(t.projectId, t.createdAt),
+  confirmationUnique: uniqueIndex("telegram_delivery_requests_confirmation_uidx").on(t.confirmationKey),
+  userConfirmationUnique: uniqueIndex("telegram_delivery_requests_user_confirmation_uidx").on(t.userId, t.confirmationKey),
+}));
+
+export const telegramDeliveryEventsTable = pgTable("telegram_delivery_events", {
+  id: text("id").primaryKey(),
+  deliveryId: text("delivery_id").references(() => telegramDeliveryRequestsTable.id).notNull(),
+  actorUserId: integer("actor_user_id").references(() => usersTable.id),
+  fromStatus: text("from_status"),
+  toStatus: text("to_status").notNull(),
+  eventType: text("event_type").notNull(),
+  reason: text("reason").notNull(),
+  safeDetails: jsonb("safe_details").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  deliveryIdx: index("telegram_delivery_events_delivery_idx").on(t.deliveryId, t.createdAt),
+}));
+
+export const telegramDeliveryAttemptsTable = pgTable("telegram_delivery_attempts", {
+  id: text("id").primaryKey(),
+  deliveryId: text("delivery_id").references(() => telegramDeliveryRequestsTable.id).notNull(),
+  attemptNumber: integer("attempt_number").notNull(),
+  channel: text("channel").notNull(),
+  state: text("state").notNull().default("persisted"),
+  providerReference: text("provider_reference"),
+  failureCategory: text("failure_category"),
+  startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (t) => ({
+  deliveryAttemptUnique: uniqueIndex("telegram_delivery_attempts_number_uidx").on(t.deliveryId, t.attemptNumber),
+}));
+
+export const telegramDeliveryLinksTable = pgTable("telegram_delivery_links", {
+  id: text("id").primaryKey(),
+  deliveryId: text("delivery_id").references(() => telegramDeliveryRequestsTable.id).notNull(),
+  audienceUserId: integer("audience_user_id").references(() => usersTable.id).notNull(),
+  tokenHmac: text("token_hmac").notNull(),
+  status: text("status").notNull().default("active"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+}, (t) => ({
+  tokenUnique: uniqueIndex("telegram_delivery_links_token_uidx").on(t.tokenHmac),
+  deliveryIdx: index("telegram_delivery_links_delivery_idx").on(t.deliveryId),
+}));
+
 export type NotificationChannel = typeof notificationChannelsTable.$inferSelect;
 export type ChannelLinkingToken = typeof channelLinkingTokensTable.$inferSelect;
 export type NotificationPreference = typeof notificationPreferencesTable.$inferSelect;
@@ -185,3 +264,7 @@ export type TelegramConversation = typeof telegramConversationsTable.$inferSelec
 export type TelegramConversationMessage = typeof telegramConversationMessagesTable.$inferSelect;
 export type TelegramSupportCase = typeof telegramSupportCasesTable.$inferSelect;
 export type TelegramSupportCaseEvent = typeof telegramSupportCaseEventsTable.$inferSelect;
+export type TelegramDeliveryRequest = typeof telegramDeliveryRequestsTable.$inferSelect;
+export type TelegramDeliveryEvent = typeof telegramDeliveryEventsTable.$inferSelect;
+export type TelegramDeliveryAttempt = typeof telegramDeliveryAttemptsTable.$inferSelect;
+export type TelegramDeliveryLink = typeof telegramDeliveryLinksTable.$inferSelect;
