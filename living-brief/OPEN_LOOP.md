@@ -32,6 +32,16 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Plans, Entitlements & Feature Controls - Step 1 Accepted
+
+- Accepted source commit `35b01ae7ce80344fae13550b36ca8353ad643901` was cleanly applied to `origin/master` baseline `2d57aaff7c58e27cb0b1e8290375c5d7f4be2543` without importing its older branch ancestry. Integration commit: `0e73ba0aaa29c4d4f5de023aa25caeceb435f1da`.
+- Added the versioned canonical feature catalog, append-only activation/platform/audit journals, and an authenticated advisory entitlement resolver. Public decisions are read-only and cannot authorize execution; arbitrary query parameters cannot satisfy confirmation requirements.
+- Seat classes remain separate from scoped project roles. Current Project Admin, Convention Manager, Discipline Lead, Member, Sub-trade, and Read Only roles plus bounded legacy `admin`/`viewer` aliases map through canonical authorities. Permission metadata may restrict but never broaden authority; inactive, missing, and unknown roles deny safely.
+- Company-scoped evaluation rechecks the authenticated user's current database company association. Per-feature transaction locking serializes concurrent platform capability versions. Catalog corrections supersede with later immutable versions rather than altering history.
+- The truthful initial catalog contains 10 available, 7 coming-later, and 2 preview entries. Deterministic notifications and Concierge Assist remain coming later. File reading is a confirmation-gated control classification and does not grant universal execution.
+- Final isolated validation passed 41 pure resolver checks, 21 real PostgreSQL checks, 34 authenticated HTTP checks, and 4 concurrency checks, including 20 simultaneous writes producing unique ordered versions 1-20. Sanitized integration evidence remains external at `C:\Dev\bimlog-tools\evidence\plans-entitlements-step1-integration\20260716T193426Z`; manifest SHA-256 `e2ae5a315de45fdaaf4cc10343538e4ad88be7efde3662c19fec3fa08f04b025`. No evidence files are committed to the product repository.
+- Step 2 remains deferred and was not started. Subscription, seat assignment, add-on, trial, contract, allowance, downgrade, pricing, checkout, invoice, and payment-provider authorities require separate approval and implementation.
+
 ### Telegram Product Implementation 2 - AI Control Plane
 
 - Independent review found the candidate AI control plane acceptable only after adding explicit provider-failure accounting and retry conflict checks. Failed provider requests now record a single zero-cost failure receipt, release any reservation, mark the run `failed`, and reject retried failure/settlement callbacks that reuse the same run with different details.
