@@ -250,6 +250,10 @@ export function MasterSidebar() {
           </div>
 
           <div style={{ padding: "0 14px 4px" }}>
+            <button className="sidebar-nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }} onClick={() => setLocation("/settings/notifications")}>
+              <Bell style={{ width: 14, height: 14, flexShrink: 0 }} />
+              {t("Notifications", "Notificaciones")}
+            </button>
             <button className="sidebar-nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }} onClick={() => setLocation("/settings/company-profile")}>
               <Building2 style={{ width: 14, height: 14, flexShrink: 0 }} />
               {t("Company Profile", "Perfil de Empresa")}

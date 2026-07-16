@@ -19,6 +19,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
+import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -1485,6 +1486,7 @@ export function Profile() {
                   )}
                 </div>
               )}
+              {telegramStatus?.connected && <NotificationPreferenceCenter mode="compact" />}
               <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                   <div>

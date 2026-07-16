@@ -5,6 +5,7 @@ import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { ensureTelegramProductConversationSchema, startTelegramProductWorker } from "./lib/telegram-product";
 import { ensureTelegramProductDeliverySchema, recoverAbandonedDeliveryAttempts } from "./lib/telegram-product-delivery";
+import { ensureTelegramNotificationSchema, recoverNotificationOutbox, startNotificationOutboxWorker } from "./lib/telegram-product-notifications";
 import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { pool } from "@workspace/db";
@@ -353,10 +354,14 @@ void rfiMigrationReady.then((ready) => {
     await pool.query(`CREATE INDEX IF NOT EXISTS telegram_inbound_updates_received_idx ON telegram_inbound_updates (received_at)`);
     await ensureTelegramProductConversationSchema();
     await ensureTelegramProductDeliverySchema();
+    await ensureTelegramNotificationSchema();
     const recoveredUnknownDeliveries = await recoverAbandonedDeliveryAttempts();
+    const recoveredUnknownNotifications = await recoverNotificationOutbox();
     if (recoveredUnknownDeliveries) console.warn(`[telegram-product] recovered ${recoveredUnknownDeliveries} abandoned delivery attempt(s) as delivery_unknown`);
+    if (recoveredUnknownNotifications) console.warn(`[telegram-notifications] recovered ${recoveredUnknownNotifications} stale attempt(s) as unknown/manual review`);
     console.log("[migration] telegram product notification tables ensured");
     startTelegramProductWorker();
+    startNotificationOutboxWorker();
   } catch (e) {
     console.error("[migration] telegram product notification migration failed:", e);
   }

@@ -658,6 +658,15 @@ function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string 
         "/ai_usage - Uso de IA",
         "/deliver - Entregar archivo o exportación",
         "/mis_entregas - Mis entregas",
+        "/notification_settings - Configuración de Notificaciones",
+        "/pause_notifications - Pausar Notificaciones",
+        "/resume_notifications - Reanudar Notificaciones",
+        "/my_projects - Mis Proyectos",
+        "/modules - Módulos",
+        "/delivery_method - Método de Entrega",
+        "/frequency - Frecuencia",
+        "/quiet_hours - Horario Silencioso",
+        "/test_notifications - Probar Mis Notificaciones",
         "/language en|es - Idioma",
         "/settings - Vinculación de Cuenta",
         "/privacy - Privacidad",
@@ -672,6 +681,15 @@ function productMenu(language: TelegramLanguage, isSuperAdmin: boolean): string 
         "/ai_usage - AI Usage",
         "/deliver - Deliver a file or export",
         "/my_deliveries - My deliveries",
+        "/notification_settings - Notification Settings",
+        "/pause_notifications - Pause Notifications",
+        "/resume_notifications - Resume Notifications",
+        "/my_projects - My Projects",
+        "/modules - Modules",
+        "/delivery_method - Delivery Method",
+        "/frequency - Frequency",
+        "/quiet_hours - Quiet Hours",
+        "/test_notifications - Test My Notifications",
         "/language en|es - Language",
         "/settings - Account Link",
         "/privacy - Privacy",
@@ -1222,7 +1240,30 @@ async function processCommand(client: QueryClient, config: TelegramProductConfig
     if (!connected.isSuperAdmin) return { chatId: evidence.telegramChatId, text: language === "es" ? "Acceso denegado." : "Access denied." };
     return { chatId: evidence.telegramChatId, text: productMenu(language, true) };
   }
-  if (evidence.command === "/settings") return { chatId: evidence.telegramChatId, text: connected.userId ? localized(language, "settings") : localized(language, "notConnected") };
+  if (["/settings","/notification_settings","/configuracion_notificaciones","/my_projects","/mis_proyectos","/modules","/modulos","/delivery_method","/metodo_entrega","/frequency","/frecuencia","/quiet_hours","/horario_silencioso"].includes(evidence.command || "")) {
+    if (!connected.userId) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
+    const { getNotificationPreferenceCenter } = await import("./telegram-product-notifications");
+    const center = await getNotificationPreferenceCenter(connected.userId); const s: any = center.settings;
+    const projectNames = center.projects.filter((p: any) => p.enabled).map((p: any) => p.name).slice(0, 8).join(", ") || (language === "es" ? "ninguno" : "none");
+    const moduleNames = center.modules.filter((m: any) => m.enabled).map((m: any) => language === "es" ? m.es : m.en).join(", ") || (language === "es" ? "ninguno" : "none");
+    const text = language === "es"
+      ? `Configuración de Notificaciones\nEstado: ${s.enabled ? (s.paused ? "pausado" : "activo") : "desactivado"}\nIdioma: Español\nZona horaria: ${s.timezone}\nHorario silencioso: ${s.quiet_hours_start || "—"}–${s.quiet_hours_end || "—"}\nFrecuencia: ${s.delivery_frequency}\nTelegram: ${s.telegramEnabled ? "sí" : "no"}\nEmail: no disponible hasta migración cifrada\nProyectos: ${projectNames}\nMódulos conectados: ${moduleNames}\n\n/pause_notifications /resume_notifications /test_notifications /language en|es`
+      : `Notification Settings\nState: ${s.enabled ? (s.paused ? "paused" : "active") : "disabled"}\nLanguage: English\nTimezone: ${s.timezone}\nQuiet hours: ${s.quiet_hours_start || "—"}–${s.quiet_hours_end || "—"}\nFrequency: ${s.delivery_frequency}\nTelegram: ${s.telegramEnabled ? "yes" : "no"}\nEmail: unavailable until encrypted migration\nProjects: ${projectNames}\nConnected modules: ${moduleNames}\n\n/pause_notifications /resume_notifications /test_notifications /language en|es`;
+    return { chatId: evidence.telegramChatId, text };
+  }
+  if (["/pause_notifications","/pausar_notificaciones","/resume_notifications","/reanudar_notificaciones"].includes(evidence.command || "")) {
+    if (!connected.userId) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
+    const paused = evidence.command === "/pause_notifications" || evidence.command === "/pausar_notificaciones";
+    const { setNotificationsPaused } = await import("./telegram-product-notifications");
+    await setNotificationsPaused(connected.userId, paused, "telegram_command");
+    return { chatId: evidence.telegramChatId, text: language === "es" ? (paused ? "Notificaciones pausadas. Tu conexión de Telegram se conserva." : "Notificaciones reanudadas con tus opciones anteriores.") : (paused ? "Notifications paused. Your Telegram link is retained." : "Notifications resumed with your previous choices.") };
+  }
+  if (["/test_notifications","/probar_notificaciones"].includes(evidence.command || "")) {
+    if (!connected.userId) return { chatId: evidence.telegramChatId, text: localized(language, "notConnected") };
+    const { sendTestNotification } = await import("./telegram-product-notifications");
+    const result: any = await sendTestNotification(connected.userId);
+    return { chatId: evidence.telegramChatId, text: language === "es" ? `Prueba de notificación: ${result.state}.` : `Notification test: ${result.state}.` };
+  }
   if (evidence.command === "/privacy") return { chatId: evidence.telegramChatId, text: localized(language, "privacy") };
   if (evidence.command === "/deliver") return handleDeliveryCommand(connected, evidence);
   if (evidence.command === "/my_deliveries" || evidence.command === "/mis_entregas") return handleMyDeliveries(connected, evidence);
@@ -1385,18 +1426,19 @@ export function startTelegramProductWorker(): void {
   setInterval(run, 30_000).unref?.();
 }
 
-export async function sendTelegramReply(reply: TelegramReply | null): Promise<void> {
-  if (!reply) return;
+export async function sendTelegramReply(reply: TelegramReply | null): Promise<string | null> {
+  if (!reply) return null;
   const config = requireTelegramProductConfig();
   if (reply.outboundMessageId) {
     const current = await pool.query<{ delivery_state: string }>(`SELECT delivery_state FROM telegram_conversation_messages WHERE id=$1`, [reply.outboundMessageId]);
-    if (current.rows[0]?.delivery_state === "delivered") return;
+    if (current.rows[0]?.delivery_state === "delivered") return null;
     await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='pending', delivery_attempts=delivery_attempts+1 WHERE id=$1 AND delivery_state<>'delivered'`, [reply.outboundMessageId]);
   }
   const response = await fetch(`${BOT_API_BASE}/bot${config.botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: reply.chatId, text: reply.text, disable_web_page_preview: true }),
+    signal: AbortSignal.timeout(Math.max(250, Number(process.env.TELEGRAM_PRODUCT_NOTIFICATION_TIMEOUT_MS || 10000))),
   });
   if (!response.ok) {
     if (reply.outboundMessageId) {
@@ -1415,6 +1457,23 @@ export async function sendTelegramReply(reply: TelegramReply | null): Promise<vo
   if (reply.outboundMessageId) {
     await pool.query(`UPDATE telegram_conversation_messages SET delivery_state='delivered', telegram_delivery_message_id=$2, delivered_at=now(), error_category=NULL WHERE id=$1`, [reply.outboundMessageId, messageId]);
   }
+  return messageId;
+}
+
+export async function sendVerifiedTelegramNotification(userId: number, text: string): Promise<string> {
+  const config = requireTelegramProductConfig();
+  const result = await pool.query<{ encrypted_telegram_chat_id: string }>(
+    `SELECT encrypted_telegram_chat_id FROM notification_channels
+     WHERE user_id=$1 AND adapter_id=$2 AND provider='telegram' AND status='connected'
+     ORDER BY linked_at DESC LIMIT 1`,
+    [userId, config.adapterId],
+  );
+  const encrypted = result.rows[0]?.encrypted_telegram_chat_id;
+  if (!encrypted) throw new TelegramProductError(409, "TELEGRAM_CHANNEL_UNAVAILABLE", "A verified linked private Telegram chat is required.");
+  const chat = decryptEvidence<{ telegramChatId: string }>(config, encrypted);
+  const acknowledgement = await sendTelegramReply({ chatId: chat.telegramChatId, text: sanitizeTelegramText(text).slice(0, 3500) });
+  if (!acknowledgement) throw new TelegramProductError(502, "TELEGRAM_INVALID_RESPONSE", "Telegram acknowledgement is missing.");
+  return acknowledgement;
 }
 
 export function telegramProductHealth() {

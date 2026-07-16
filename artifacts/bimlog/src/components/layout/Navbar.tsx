@@ -41,15 +41,16 @@ export function Navbar() {
 
   return (
     <header className="topbar app-topbar">
+      <style>{`@media (max-width:520px){.app-topbar{padding-left:10px;padding-right:10px;gap:6px}.app-topbar-actions{margin-right:0!important;gap:2px}.app-topbar-byline,.app-topbar-profile-label{display:none}.app-topbar-actions button{padding-left:7px;padding-right:7px}}`}</style>
       <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
         <div className="flex items-baseline gap-1.5">
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>BIMLog</span>
-          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span>
+          <span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span>
         </div>
       </Link>
 
-      <div className="flex items-center gap-2 ml-auto" style={{ marginRight: 56 }}>
+      <div className="app-topbar-actions flex items-center gap-2 ml-auto" style={{ marginRight: 56 }}>
         {user ? (
           <>
             {!isDashboard && (
@@ -92,7 +93,7 @@ export function Navbar() {
               >
                 {!avatarUrl && (user.fullName?.charAt(0).toUpperCase() ?? "?")}
               </div>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>{tt("Profile", "Perfil")}</span>
+              <span className="app-topbar-profile-label" style={{ fontSize: 12, fontWeight: 500, color: "hsl(var(--foreground))" }}>{tt("Profile", "Perfil")}</span>
             </Link>
 
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>

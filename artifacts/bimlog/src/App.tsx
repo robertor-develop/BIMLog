@@ -17,6 +17,7 @@ import { ProjectDetail } from "@/pages/ProjectDetail";
 import { SetupGuide } from "@/pages/SetupGuide";
 import { Profile } from "@/pages/Profile";
 import { CompanyProfile } from "@/pages/CompanyProfile";
+import { NotificationSettings } from "@/pages/NotificationSettings";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
@@ -113,6 +114,9 @@ function Router() {
       </Route>
       <Route path="/settings/company-profile">
         {() => <ProtectedRoute component={CompanyProfile} />}
+      </Route>
+      <Route path="/settings/notifications">
+        {() => <ProtectedRoute component={NotificationSettings} />}
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}

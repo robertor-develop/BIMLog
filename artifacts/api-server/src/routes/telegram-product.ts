@@ -24,6 +24,13 @@ import {
   listDeliveryRequests,
   readSecureDeliveryLink,
 } from "../lib/telegram-product-delivery";
+import {
+  getNotificationPreferenceCenter,
+  processNotificationOutbox,
+  sendTestNotification,
+  setNotificationsPaused,
+  updateNotificationPreferenceCenter,
+} from "../lib/telegram-product-notifications";
 
 const router: Router = Router();
 
@@ -82,6 +89,70 @@ router.get("/integrations/telegram/status", authMiddleware, async (req, res) => 
   } catch (err) {
     sendTelegramError(res, err);
   }
+});
+
+router.get("/integrations/telegram/notification-settings", authMiddleware, async (req, res) => {
+  try { res.json(await getNotificationPreferenceCenter(req.user!.userId)); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.put("/integrations/telegram/notification-settings", authMiddleware, async (req, res) => {
+  try { res.json(await updateNotificationPreferenceCenter(req.user!.userId, req.body, "browser")); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/notification-settings/pause", authMiddleware, async (req, res) => {
+  try { res.json(await setNotificationsPaused(req.user!.userId, true, "browser")); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/notification-settings/resume", authMiddleware, async (req, res) => {
+  try { res.json(await setNotificationsPaused(req.user!.userId, false, "browser")); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/notification-settings/test", authMiddleware, async (req, res) => {
+  try { res.json(await sendTestNotification(req.user!.userId)); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.post("/integrations/telegram/notification-outbox/process", authMiddleware, async (req, res) => {
+  try {
+    const actor = await actorFor(req.user!.userId);
+    if (!actor.isSuperAdmin) throw new TelegramProductError(403, "SUPER_ADMIN_REQUIRED", "Super admin access required.");
+    res.json(await processNotificationOutbox(25));
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/integrations/telegram/admin/notifications", authMiddleware, async (req, res) => {
+  try {
+    const actor = await actorFor(req.user!.userId);
+    if (!actor.isSuperAdmin) throw new TelegramProductError(403, "SUPER_ADMIN_REQUIRED", "Super admin access required.");
+    const reason = reasonText(req.query.reason);
+    if (!reason) throw new TelegramProductError(400, "REASON_REQUIRED", "A specific access reason is required.");
+    const rows = await pool.query(`SELECT id,company_id,project_id,user_id,module_key,event_key,channel,delivery_frequency,state,attempt_count,
+      failure_category,created_at,updated_at,delivered_at FROM telegram_notification_outbox ORDER BY created_at DESC LIMIT 100`);
+    await auditAdminAccess(actor,"telegram_admin_notifications_accessed","telegram_notification","list",reason,{rowCount:rows.rowCount});
+    res.json({notifications:rows.rows});
+  } catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/integrations/telegram/admin/notifications/:id", authMiddleware, async (req, res) => {
+  try {
+    const actor = await actorFor(req.user!.userId);
+    if (!actor.isSuperAdmin) throw new TelegramProductError(403, "SUPER_ADMIN_REQUIRED", "Super admin access required.");
+    const reason = reasonText(req.query.reason);
+    if (!reason) throw new TelegramProductError(400, "REASON_REQUIRED", "A specific access reason is required.");
+    const id=String(req.params.id);
+    const notification=await pool.query(`SELECT id,canonical_event_id,company_id,project_id,user_id,module_key,event_key,source_record_type,source_record_id,
+      channel,delivery_frequency,digest_window_key,state,attempt_count,provider_acknowledgement_id,failure_category,security_critical,created_at,updated_at,delivered_at
+      FROM telegram_notification_outbox WHERE id=$1`,[id]);
+    if(!notification.rows[0])throw new TelegramProductError(404,"NOTIFICATION_NOT_FOUND","Notification not found.");
+    const events=await pool.query(`SELECT id,actor_user_id,from_state,to_state,event_type,reason,safe_details,created_at FROM telegram_notification_outbox_events WHERE notification_id=$1 ORDER BY created_at,id`,[id]);
+    const attempts=await pool.query(`SELECT id,attempt_number,channel,state,provider_acknowledgement_id,failure_category,started_at,completed_at FROM telegram_notification_attempts WHERE notification_id=$1 ORDER BY attempt_number`,[id]);
+    await auditAdminAccess(actor,"telegram_admin_notification_details_accessed","telegram_notification",id,reason,{eventCount:events.rowCount,attemptCount:attempts.rowCount});
+    res.json({notification:notification.rows[0],events:events.rows,attempts:attempts.rows});
+  } catch(err){sendTelegramError(res,err);}
 });
 
 router.get("/integrations/telegram/conversations", authMiddleware, async (req, res) => {

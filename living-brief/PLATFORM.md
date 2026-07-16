@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-16T19:33:46.570Z
+> Last generated: 2026-07-16T22:15:56.132Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -124,6 +124,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\lib\feature-catalog-service.ts
 - artifacts\api-server\src\lib\import-intelligence.ts
 - artifacts\api-server\src\lib\initial-feature-catalog.ts
+- artifacts\api-server\src\lib\lens-import-contract.ts
 - artifacts\api-server\src\lib\oauth.ts
 - artifacts\api-server\src\lib\overdue-notifier.ts
 - artifacts\api-server\src\lib\pdf-kit.ts
@@ -136,6 +137,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\lib\scoped-authority.ts
 - artifacts\api-server\src\lib\storage-adapter.ts
 - artifacts\api-server\src\lib\telegram-product-delivery.ts
+- artifacts\api-server\src\lib\telegram-product-notifications.ts
 - artifacts\api-server\src\lib\telegram-product-provider-broker.ts
 - artifacts\api-server\src\lib\telegram-product.ts
 
@@ -166,6 +168,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\files.ts
 - lib\db\src\schema\index.ts
 - lib\db\src\schema\invitations.ts
+- lib\db\src\schema\lens-imports.ts
 - lib\db\src\schema\lens-viewpoint-reports.ts
 - lib\db\src\schema\lens-viewpoint-sequence-counters.ts
 - lib\db\src\schema\lens-viewpoints.ts
@@ -202,6 +205,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\bimlog\src\pages\Landing.tsx
 - artifacts\bimlog\src\pages\LivingBrief.tsx
 - artifacts\bimlog\src\pages\Login.tsx
+- artifacts\bimlog\src\pages\NotificationSettings.tsx
 - artifacts\bimlog\src\pages\PendingItems.tsx
 - artifacts\bimlog\src\pages\Pricing.tsx
 - artifacts\bimlog\src\pages\Privacy.tsx
@@ -248,6 +252,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - /setup-guide
 - /profile
 - /settings/company-profile
+- /settings/notifications
 - /admin
 - /total-control
 - /living-brief
