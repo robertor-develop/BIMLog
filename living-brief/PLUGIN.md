@@ -26,7 +26,7 @@ behavior.
 - Semantic versioning v1.6.x. Package with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
-  README revision + write a per-revision update .txt covering the delta. Current physical package: v1.60.10.
+  README revision + write a per-revision update .txt covering the delta. Current review candidate: v1.60.13.
   Shared logic in `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` must be reviewed in both physical
   copies for every shared change; preserve intentional version-specific differences.
 
@@ -107,6 +107,28 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (a collision-skip returns id:null).
 
 ## Open items / known limitations
+- v1.60.13 is the project-28 preserve-first Reconcile candidate. In v1.60.12,
+  `CleanBIMLogViewsAgainstPlatform` deleted a physical local viewpoint when `MatchPlatformRow`
+  returned null and local metadata contained `serverId`. Reconcile could also rebuild only matched
+  rows into staging and remove the prior BIMLog folders, indirectly discarding unmatched viewpoints.
+- Normal Pull/Reconcile now preserves omitted, ambiguous, incomplete, wrong-project, `Guid.Empty`,
+  duplicate-label, historical, and strict-temporary records. Verified rows update/rename/move in
+  place; destructive folder rebuilding is disabled; unresolved remnants are isolated by row.
+- Reconcile records before/after distinct physical counts. Count may decrease only for an exact
+  duplicate after project, serverId, shared `bimlogPhysicalId`, independently unique non-empty GUID
+  targets, canonical metadata/folder, and canonical survivor readback all pass.
+- The platform Pull query already includes all lifecycle rows for the requested project. Its concrete
+  defect was omitting row `projectId` from the response. The route now returns it, and both plugins
+  require it to match the configured project before applying a row.
+- Deterministic source/state matrix: 26/26 passed; this is not live Navisworks evidence. Debug
+  AnyCPU/net48 builds passed with zero errors. DLL SHA-256: 2025
+  `A66618980D099D88FDF80BDAE235A50CA3EB89CAFA5BB9F1470C970C853F564D`; 2021
+  `3A39B02E6CCD3FE21AD3041AB9B083B4E50029DE1BDB539DC420C3F7F16E851A`.
+- Review-only ZIP: `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.13.zip`, SHA-256
+  `AB9CE37B33FB11CBF7935DF0FCA1E1A514346DC0399CB15C049756E9BB5CA2AC`.
+- Ruben's project-28 NWD has not been supplied. No project-28 live inventory, repeated Pull/Reconcile,
+  save/reopen, Jump, or field acceptance has occurred. Do not install/distribute or close the issue
+  until isolated-copy acceptance passes and Roberto authorizes Ruben's Navisworks 2025 test.
 - v1.60.10 corrects the v1.60.9 successor-name regression. Successors now receive their clean
   BIMLog name while detached, before `AddCopy`; the inserted object is resolved by exact GUID,
   stamped with complete successor/project metadata, and verified by name/metadata/folder readback.

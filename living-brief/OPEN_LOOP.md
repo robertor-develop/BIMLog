@@ -601,7 +601,31 @@ Final focused correction and independent acceptance:
 - Clean-integration evidence again passed 30/30 against the isolated local database. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-3-integration\20260715T183706Z`; manifest SHA-256 `03438111df8c26c281d47dd45d315a3eadb327ea66cc998809ff55828872ceab`.
 - Telegram Product Build 3 was independently accepted for clean integration. Nothing was published, and Telegram Product Build 4 was not started.
 
-### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Watching
+### Navisworks Project-28 Preserve-First Reconcile v1.60.13 - Review Candidate
+
+- Ruben reports a physical active viewpoint disappears after Pull from Platform followed by
+  Reconcile. Reported unresolved successor rows include 99-109, 181, and 316.
+- Proven v1.60.12 root cause: an unmatched local `serverId` was passed to
+  `doc.SavedViewpoints.Remove(loc.Vp)`. Reconcile could also remove prior BIMLog folders after copying
+  matched rows only. Both destructive normal-operation paths are disabled in v1.60.13.
+- Omitted, ambiguous, incomplete, wrong-project, `Guid.Empty`, duplicate-label, historical, and strict
+  temporary records are preserved. Strict remnants are isolated by row and cannot cancel unrelated
+  reconciliation. Verified rows are moved in place, preserving physical Navisworks state.
+- Normal Pull/Reconcile enforces a distinct-physical-count invariant. Exact duplicate removal requires
+  verified project/server/physical identity, independently unique non-empty GUID targets, canonical
+  metadata/folder, and survivor readback; ambiguity removes nothing.
+- Platform Pull returns every lifecycle row for the requested project and now includes each row's
+  `projectId`, allowing the plugin to reject missing/wrong-project rows before mutation.
+- Deterministic matrix: 26/26 passed. Debug AnyCPU/net48 builds passed with zero errors. DLL hashes:
+  2025 `A66618980D099D88FDF80BDAE235A50CA3EB89CAFA5BB9F1470C970C853F564D`; 2021
+  `3A39B02E6CCD3FE21AD3041AB9B083B4E50029DE1BDB539DC420C3F7F16E851A`.
+- Review ZIP: `H:\BIMLogPlugin2025\BIMLog-Lens-Navisworks2025-v1.60.13.zip`, SHA-256
+  `AB9CE37B33FB11CBF7935DF0FCA1E1A514346DC0399CB15C049756E9BB5CA2AC`.
+- Project-28 NWD acceptance is pending because the supplied NWD is not present. Do not install,
+  distribute, send Completed, or close the customer issue until isolated-copy Pull/Reconcile twice,
+  save/reopen, inventory/Jump/state checks, Roberto approval, and Ruben's 2025 confirmation pass.
+
+### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Superseded by v1.60.13 Candidate
 
 - v1.60.9 field regression: web-created successors could remain visible with internal
   `BIMLog successor <rowId> <token>` names when post-insertion direct name mutation failed.

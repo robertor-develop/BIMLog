@@ -831,6 +831,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const byId = new Map(rows.map(r => [r.id, r]));
       const viewpoints = rows.map(r => ({
         id: r.id,
+        projectId: r.projectId,
         viewpointId: r.viewpointId,
         displayId: r.displayId,
         navisworksGuid: r.navisworksGuid,
