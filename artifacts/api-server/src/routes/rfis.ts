@@ -11,7 +11,6 @@ import multer from "multer";
 import crypto from "crypto";
 import path from "path";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
-import * as XLSX from "xlsx";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken, providerFromParam } from "../lib/oauth";
 import { downloadCloud } from "../lib/cloud-files";
@@ -32,6 +31,7 @@ import {
   CompletePackageError,
   type CompletePackageInputItem,
 } from "../lib/rfi-complete-package";
+import { buildRfiRegisterWorkbook } from "../lib/rfi-register-export";
 const router: IRouter = Router();
 
 type RfiPackageItem = {
@@ -1144,95 +1144,90 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
 router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const view = String(req.query.view || "cards");
     const status = String(req.query.status || "all");
-    const search = String(req.query.search || "").trim().toLowerCase();
+    const search = String(req.query.search || "").trim();
+    if (status !== "all" && !(await validateConfigValue("rfi_status", status))) {
+      res.status(422).json({ error: "Invalid RFI status filter." });
+      return;
+    }
 
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     const rfis = await db.query.rfisTable.findMany({
       where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
       orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
     });
-
-    const filtered = rfis
-      .filter(rfi => status === "all" || rfi.status === status)
-      .filter(rfi => {
-        if (!search) return true;
-        return [
-          rfi.number,
-          rfi.subject,
-          rfi.submittedByCompany,
-          rfi.submittedToCompany,
-          rfi.submittedToPerson,
-          rfi.submittedToEmail,
-        ].some(value => String(value || "").toLowerCase().includes(search));
-      });
-
-    const rows = filtered.length > 0 ? filtered : rfis;
-    const fmt = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("en-US") : "";
-    const ballInCourt = (rfi: typeof rfisTable.$inferSelect) => {
-      if (rfi.status === "closed") return "Closed";
-      if (rfi.status === "responded") return rfi.submittedByCompany || "Submitter";
-      return rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer";
-    };
-    const projectLabel = project ? `${project.name}${project.code ? ` (${project.code})` : ""}` : `Project ${projectId}`;
-    const isLog = view === "log";
-    const headerRow = isLog
-      ? [
-          "RFI #", "Subject", "Status", "Priority", "Date Requested", "Date Required",
-          "Submitted By Company", "Submitted By Contact", "Submitted By Email",
-          "Submitted To Company", "Submitted To Contact", "Submitted To Email",
-          "Drawing #", "Drawing Title", "Spec Section", "Detail #", "Note #", "Location",
-          "Cost Impact", "Cost Amount", "Cost Reason", "Schedule Impact", "Schedule Days", "Schedule Reason",
-          "Ball in Court", "Days Outstanding", "Answer", "Answered By", "Date Answered",
-        ]
-      : ["RFI #", "Subject", "Status", "Priority", "Ball in Court", "Days Outstanding"];
-    const data = rows.map(rfi => {
-      const days = daysSince(rfi.createdAt);
-      if (!isLog) {
-        return [rfi.number, rfi.subject, rfi.status, rfi.priority, ballInCourt(rfi), days];
-      }
-      return [
-        rfi.number, rfi.subject, rfi.status, rfi.priority,
-        fmt(rfi.dateRequested || rfi.createdAt), fmt(rfi.dateRequired || rfi.dueDate),
-        rfi.submittedByCompany || "", rfi.submittedByContact || "", rfi.submittedByEmail || "",
-        rfi.submittedToCompany || "", rfi.submittedToPerson || "", rfi.submittedToEmail || "",
-        rfi.drawingNumber || "", rfi.drawingTitle || "", rfi.specSection || "",
-        rfi.detailNumber || "", rfi.noteNumber || "", rfi.locationDescription || "",
-        rfi.costImpact || "", rfi.costImpactAmount || "", rfi.costImpactReason || "",
-        rfi.scheduleImpact || "", rfi.scheduleImpactDays != null ? rfi.scheduleImpactDays : "", rfi.scheduleImpactReason || "",
-        ballInCourt(rfi), days, rfi.answer || rfi.response || "",
-        rfi.answeredBy || "", fmt(rfi.dateAnswered || rfi.respondedAt),
-      ];
-    });
-
-    const worksheet = XLSX.utils.aoa_to_sheet([
-      ["BIMLog by IgniteSmart", projectLabel],
-      [isLog ? "RFI Log" : "RFI Summary", `Generated ${new Date().toLocaleString("en-US")}`],
-      [],
-      headerRow,
-      ...data,
+    const rfiIds = rfis.map(rfi => rfi.id);
+    const [responses, custody, directoryRows] = await Promise.all([
+      rfiIds.length
+        ? db.select().from(rfiResponsesTable)
+          .where(and(eq(rfiResponsesTable.projectId, projectId), inArray(rfiResponsesTable.rfiId, rfiIds)))
+          .orderBy(asc(rfiResponsesTable.rfiId), asc(rfiResponsesTable.responseNumber))
+        : Promise.resolve([]),
+      rfiIds.length
+        ? db.select().from(rfiBallInCourtHistoryTable)
+          .where(inArray(rfiBallInCourtHistoryTable.rfiId, rfiIds))
+          .orderBy(asc(rfiBallInCourtHistoryTable.rfiId), asc(rfiBallInCourtHistoryTable.fromDate))
+        : Promise.resolve([]),
+      db.select({
+        id: usersTable.id,
+        name: usersTable.fullName,
+        email: usersTable.email,
+        phone: usersTable.phone,
+        company: companiesTable.name,
+        address: companiesTable.address,
+      }).from(projectMembersTable)
+        .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
+        .innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(eq(projectMembersTable.projectId, projectId)),
     ]);
-    worksheet["!cols"] = headerRow.map((header, columnIndex) => {
-      const maxValue = Math.max(header.length, ...data.map(row => String(row[columnIndex] || "").length));
-      return { wch: Math.min(Math.max(maxValue + 2, 12), 45) };
+    const attachmentLabels = await loadAttachmentLabels(projectId, [
+      ...rfis.map(rfi => rfi.attachmentsJson as string[] | null),
+      ...responses.map(response => response.responseAttachmentsJson as string[] | null),
+    ]);
+    const generatedAt = new Date();
+    const output = buildRfiRegisterWorkbook({
+      project: project || { id: projectId, name: `Project ${projectId}`, code: null, location: null },
+      rfis,
+      responses,
+      custody,
+      directory: directoryRows.map(row => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        company: row.company,
+        address: row.address,
+      })),
+      attachmentLabels,
+      filters: { status, search },
+      generatedAt,
+      generatedBy: req.user!.fullName || "BIMLog user",
     });
-    worksheet["!autofilter"] = {
-      ref: XLSX.utils.encode_range({
-        s: { r: 3, c: 0 },
-        e: { r: Math.max(data.length + 3, 3), c: headerRow.length - 1 },
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName || "User",
+      userCompanyName: req.user!.companyName || "",
+      actionType: "export",
+      entityType: "rfi",
+      entityId: projectId,
+      details: JSON.stringify({
+        event: "rfi.register_excel_exported",
+        success: true,
+        statusFilter: status,
+        searchApplied: Boolean(search),
+        matchingRfis: output.result.filteredCount,
+        totalRfis: output.result.totalCount,
+        generatedAt: generatedAt.toISOString(),
       }),
-    };
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, isLog ? "RFI Log" : "RFI Summary");
-    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
-    const projectCode = String(project?.code || project?.name || `Project${projectId}`).replace(/[^\w.-]+/g, "-");
+    });
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename="${projectCode}-${isLog ? "RFI-Log" : "RFI-Summary"}.xlsx"`);
-    res.send(buffer);
+    res.setHeader("Content-Disposition", `attachment; filename="${output.filename}"`);
+    res.setHeader("Content-Length", output.buffer.length);
+    res.send(output.buffer);
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+    console.error("[rfis] RFI Register Excel generation failed:", error instanceof Error ? error.message : error);
+    res.status(500).json({ error: "RFI Register Excel could not be generated." });
   }
 });
 

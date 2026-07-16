@@ -616,6 +616,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
   const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
+  const [exportingRegister, setExportingRegister] = useState(false);
   const rfisQueryClient = useQueryClient();
 
   // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
@@ -708,8 +709,9 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const handleExportAllExcel = async () => {
     if (!rfis) return;
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    setExportingRegister(true);
     try {
-      const params = new URLSearchParams({ view, status: statusFilter, search });
+      const params = new URLSearchParams({ status: statusFilter, search });
       const response = await fetch(`/api/v1/projects/${projectId}/rfis/export-excel?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -721,13 +723,20 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `RFI-${view === "log" ? "Log" : "Summary"}-${projectId}.xlsx`;
+      const disposition = response.headers.get("Content-Disposition") || "";
+      const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+      const basicName = disposition.match(/filename="([^"]+)"/i)?.[1];
+      let downloadName = basicName || `Project-${projectId}-RFI-Register.xlsx`;
+      if (encodedName) { try { downloadName = decodeURIComponent(encodedName); } catch { /* use fallback */ } }
+      a.download = downloadName;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: w("Excel exported", "Excel exportado", lang) });
+      toast({ title: w("RFI Register Excel exported", "Registro RFI Excel exportado", lang) });
     } catch (error) {
       logClientError("RFI Excel export", error);
-      toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
+      toast({ title: w("RFI Register Excel export failed", "Error al exportar Registro RFI Excel", lang), variant: "destructive" });
+    } finally {
+      setExportingRegister(false);
     }
   };
   const filtered = useMemo(() => {
@@ -870,8 +879,9 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             </button>
           </div>
           {rfis && rfis.length > 0 && (
-            <Button variant="outline" size="sm" onClick={handleExportAllExcel} style={{ gap: 5, fontSize: 11 }}>
-              <Download style={{ width: 12, height: 12 }} />{w("Export All", "Exportar Todo", lang)}
+            <Button variant="outline" size="sm" onClick={handleExportAllExcel} disabled={exportingRegister} style={{ gap: 5, fontSize: 11 }}>
+              {exportingRegister ? <Loader2 className="animate-spin" style={{ width: 12, height: 12 }} /> : <Download style={{ width: 12, height: 12 }} />}
+              {exportingRegister ? w("Exporting Register...", "Exportando Registro...", lang) : w("RFI Register Excel", "Registro RFI Excel", lang)}
             </Button>
           )}
           {canWrite && (

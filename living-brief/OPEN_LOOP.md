@@ -554,6 +554,17 @@ Deferred:
 - Native PDF annotations are imported as supported by pdf-lib. Cross-document destinations are not rewritten and this limitation is stated in the package manifest; no stronger preservation claim is made.
 - Independent acceptance and any production/Replit/Neon operation remain outside Build 6.
 
+### RFI Build 7 Canonical Register And Professional Excel Export
+
+- Starting baseline: `3af9cf0a82d33aac5e7954b9ea9b156bca9637a1`.
+- Local review implementation replaces the prior one-sheet RFI Excel export with one canonical server-side register workbook model. The workbook contains exactly four sheets in order: `RFI Register`, `Responses`, `Ball-in-Court History`, and `Export Information`.
+- The prior zero-result fallback was removed. Status and search filters now export the actual filtered result set, including an intentionally empty register when no RFI matches, instead of silently exporting all project RFIs.
+- The workbook uses clean attachment labels, decoded distribution recipients, project-scoped responses and custody history, real date and numeric cell values, frozen headers, auto-filters, widths, margins, and landscape fit-to-width print settings. Formula-control text is prefixed to prevent spreadsheet formula execution.
+- The browser control is now explicit: `RFI Register Excel` / `Registro RFI Excel`. It sends the active status and search filters, shows loading state, uses the server filename, and preserves current RFI page state.
+- Local artifact evidence is stored at `C:\Dev\bimlog-tools\evidence\rfi-build-7\20260715-220000`. The generated workbook SHA-256 is `43401a30c1314ebd465dc7b74a158f57802c38798b12b9a9df6a27bae5051fd3`. XLSX parser inspection and raw ZIP/XML inspection both confirmed the sheet order and workbook settings; the evidence privacy scan found no storage paths, filesystem paths, credentials, bearer strings, API keys, passwords, token query strings, or signed-provider query strings.
+- Correction after rejected local commit `bab618d5dc2b3a60ba18f1276f5e27997562263e`: Cost Amount and Calendar Days now export as numeric cells for numeric values in both Register and Responses sheets, invalid numeric text remains inert text instead of silently becoming zero, formula-control text is protected without converting negative numeric costs, register columns include send/source/count/current-custody/latest-response/created/updated fields, and Current Ball in Court is sourced only from the open `rfi_ball_in_court_history` row. Corrected evidence passed 91/91 named checks, including real LibreOffice headless open/save validation. Evidence: `C:\Dev\bimlog-tools\evidence\rfi-build-7\20260716-000000-correction`; manifest SHA-256 `9cdf54f723b3478095094fd577405be5b0b230ed874ef8c798dc0dfa59e0f208`.
+- Build 7 remains local-review only. Nothing was pushed, published, or connected to production/Replit/Neon, and Build 8 was not started.
+
 ## Deferred
 
 ### Telegram Product Build 4 - Secure Delivery Concierge Foundation
