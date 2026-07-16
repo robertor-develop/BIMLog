@@ -543,7 +543,11 @@ Deferred at Build 5 acceptance:
 - Final narrow correction starts each POSIX converter in a new owned process group and signals only that group on timeout, request cancellation, or output-limit failure. Windows retains argument-array `taskkill /PID <owned-pid> /T /F`; both paths await converter closure before workspace cleanup, with direct-child termination only as a fallback when the platform tree mechanism itself is unavailable.
 - OOXML preflight now bounds ZIP metadata before reading any relationship payload: 4,096 entries, 256 MiB declared uncompressed data, 1 MiB per relationship entry, 4 MiB total relationship data inspected, and a 1,000:1 compression-ratio ceiling for entries of at least 1 MiB. Excessive archives return `422 resource_limit` before LibreOffice starts.
 - Windows parent/child/grandchild termination is covered locally for timeout and cancellation. POSIX strategy selection and negative-process-group ownership are deterministic in local proof; actual Linux/Replit process-tree execution remains a deployment acceptance item because no existing POSIX runtime was available for this correction.
-- Build 6 correction is submitted as a replacement local review commit only and is not self-accepted. Nothing was pushed or published, and Build 7 was not started.
+- Independent review accepted source commit `89ec3818126cd47d8a2a19d58b1a4baef7e1d7e2`; clean integration commit `0d774412e352e668328939ef21bc84cf9a1afecc` preserves the accepted implementation on the current `origin/master` lineage.
+- Clean-integration evidence passed all 52 checks. Evidence: `C:\Dev\bimlog-tools\evidence\rfi-build-6-integration\20260715-202552`; manifest SHA-256 `12afcb8d9a85027d8207c44feb460a5f4c4980d8b4d6b51397344a7be4cd3d31`.
+- Build 6 source and focused artifacts are independently accepted for clean integration. Actual Linux/Replit POSIX process-tree execution remains required before publication; this acceptance does not waive that deployment gate.
+- The separate `OPEN_LOOP.md`-only commit containing this record is the final Build 6 acceptance commit.
+- Nothing was published, and Build 7 was not started.
 
 Deferred:
 - Outlook MSG conversion remains explicitly unsupported. An included MSG returns a clean 422 naming the file; there is no silent omission or partial package.
