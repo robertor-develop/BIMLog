@@ -647,6 +647,26 @@ Final focused correction and independent acceptance:
   distribute, send Completed, or close the customer issue until isolated-copy Pull/Reconcile twice,
   save/reopen, inventory/Jump/state checks, Roberto approval, and Ruben's 2025 confirmation pass.
 
+### Navisworks v1.60.13 Project Import/Rebind Platform Correction - Integrated
+
+- Clean integration base: `2d57aaff7c58e27cb0b1e8290375c5d7f4be2543`. The accepted local candidate
+  `bc64520de42e85ca2f99e0670be851573def0750` was applied as a diff only; its older branch ancestry was
+  not imported.
+- The platform import endpoint now persists a canonical immutable request hash, namespaces
+  idempotency by authenticated user and target project, returns controlled HTTP 409
+  `IMPORT_IDEMPOTENCY_CONFLICT` for same-key/different-content retries, validates bounded input before
+  transactions, sanitizes failures with correlation IDs, and persists queryable target
+  `bimlog_physical_id` values returned by Pull.
+- Integrated evidence passed 15/15 source contract checks and 68/68 real authenticated API/database
+  checks against `127.0.0.1:55432/bimlog_rfi_test`, proving idempotency, concurrency, rollback, restart
+  persistence, project boundaries, Pull contract, legacy NULL request hash controlled 409, zero test
+  identities remaining, privacy scan, and no destructive Lens import migration block. Evidence:
+  `C:\Dev\bimlog-tools\evidence\navisworks-project-import\lens-import-20260716200026-945467`;
+  manifest SHA-256 `3dfc8a5480fcabdf88130585cb8066f85067ab8ccafc19178727db2aef11cbff`.
+- No Replit publish, production/Neon access, projects 28/34/35 access, customer data access, Navisworks
+  relaunch, deployed Sync/Pull/Reconcile/Import, DLL/package install, distribution, or new plugin version
+  occurred.
+
 ### Navisworks Superseded Viewpoint Reconciliation v1.60.10 - Superseded by v1.60.13 Candidate
 
 - v1.60.9 field regression: web-created successors could remain visible with internal

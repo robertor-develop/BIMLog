@@ -129,6 +129,20 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Ruben's project-28 NWD has not been supplied. No project-28 live inventory, repeated Pull/Reconcile,
   save/reopen, Jump, or field acceptance has occurred. Do not install/distribute or close the issue
   until isolated-copy acceptance passes and Roberto authorizes Ruben's Navisworks 2025 test.
+- Project Import/Rebind platform correction is integrated for v1.60.13 review. Import idempotency is
+  scoped by authenticated user, target project, and import key; a canonical request hash covers user,
+  target, model, source projects, and normalized viewpoint identity/lineage payload. Exact retry returns
+  the same completed batch/mapping; changed content or model returns HTTP 409
+  `IMPORT_IDEMPOTENCY_CONFLICT` without returning prior mappings. New target physical identities persist
+  on both import items and queryable target viewpoint rows and are returned by Lens Pull. Real integrated
+  authenticated API/database evidence passed 68/68 against `127.0.0.1:55432/bimlog_rfi_test`, including
+  first import, retry, content/model conflicts, different-user namespace, authorization, concurrency,
+  rollback, restart retry, Pull contract, project/input boundaries, legacy NULL-hash handling, cleanup,
+  and privacy scan. Evidence:
+  `C:\Dev\bimlog-tools\evidence\navisworks-project-import\lens-import-20260716200026-945467`;
+  manifest SHA-256 `3dfc8a5480fcabdf88130585cb8066f85067ab8ccafc19178727db2aef11cbff`.
+  This was not a Replit publish, production/Neon run, project-28/34/35 run, customer-data access, or
+  live Navisworks field acceptance.
 - v1.60.10 corrects the v1.60.9 successor-name regression. Successors now receive their clean
   BIMLog name while detached, before `AddCopy`; the inserted object is resolved by exact GUID,
   stamped with complete successor/project metadata, and verified by name/metadata/folder readback.
