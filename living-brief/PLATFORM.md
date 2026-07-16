@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-13T23:21:34.156Z
+> Last generated: 2026-07-16T19:33:46.570Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -26,6 +26,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\activity.ts
 - artifacts\api-server\src\routes\admin.ts
 - artifacts\api-server\src\routes\agents.ts
+- artifacts\api-server\src\routes\ai-control-plane.ts
 - artifacts\api-server\src\routes\auth.ts
 - artifacts\api-server\src\routes\autodesk.ts
 - artifacts\api-server\src\routes\change_orders.ts
@@ -39,6 +40,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\dashboard_briefing.ts
 - artifacts\api-server\src\routes\documents.ts
 - artifacts\api-server\src\routes\downloads.ts
+- artifacts\api-server\src\routes\features.ts
 - artifacts\api-server\src\routes\feedback.ts
 - artifacts\api-server\src\routes\files.ts
 - artifacts\api-server\src\routes\health.ts
@@ -57,6 +59,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\search.ts
 - artifacts\api-server\src\routes\submittal_reports.ts
 - artifacts\api-server\src\routes\submittals.ts
+- artifacts\api-server\src\routes\telegram-product.ts
 - artifacts\api-server\src\routes\transmittals.ts
 
 ## Backend route mount order (routes/index.ts, under /api/v1)
@@ -94,23 +97,47 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - livingBriefRouter
 - connectionsRouter
 - feedbackRouter
+- telegramProductRouter
+- aiControlPlaneRouter
+- featuresRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts\api-server\src\middlewares\auth.ts
 - artifacts\api-server\src\middlewares\config-validator.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
+- artifacts\api-server\src\lib\ai-control-plane-migration.ts
+- artifacts\api-server\src\lib\ai-control-plane.behavior.ts
+- artifacts\api-server\src\lib\ai-control-plane.http-evidence.ts
+- artifacts\api-server\src\lib\ai-control-plane.ts
+- artifacts\api-server\src\lib\ai-control-plane.ui-fixture.ts
 - artifacts\api-server\src\lib\ai-usage.ts
 - artifacts\api-server\src\lib\cloud-files.ts
 - artifacts\api-server\src\lib\email.ts
+- artifacts\api-server\src\lib\entitlement-contract.ts
+- artifacts\api-server\src\lib\entitlement-resolver.behavior.ts
 - artifacts\api-server\src\lib\extract-file-text.ts
+- artifacts\api-server\src\lib\feature-catalog-concurrency.behavior.ts
+- artifacts\api-server\src\lib\feature-catalog-db.behavior.ts
+- artifacts\api-server\src\lib\feature-catalog-http.behavior.ts
+- artifacts\api-server\src\lib\feature-catalog-migration.ts
+- artifacts\api-server\src\lib\feature-catalog-service.ts
 - artifacts\api-server\src\lib\import-intelligence.ts
+- artifacts\api-server\src\lib\initial-feature-catalog.ts
 - artifacts\api-server\src\lib\oauth.ts
 - artifacts\api-server\src\lib\overdue-notifier.ts
 - artifacts\api-server\src\lib\pdf-kit.ts
 - artifacts\api-server\src\lib\pdf-logo.ts
 - artifacts\api-server\src\lib\project-intelligence.ts
+- artifacts\api-server\src\lib\rfi-complete-package.behavior.ts
+- artifacts\api-server\src\lib\rfi-complete-package.ts
+- artifacts\api-server\src\lib\rfi-register-export.ts
+- artifacts\api-server\src\lib\rfi-standard-exports.ts
+- artifacts\api-server\src\lib\scoped-authority.ts
 - artifacts\api-server\src\lib\storage-adapter.ts
+- artifacts\api-server\src\lib\telegram-product-delivery.ts
+- artifacts\api-server\src\lib\telegram-product-provider-broker.ts
+- artifacts\api-server\src\lib\telegram-product.ts
 
 ## Agents (artifacts/api-server/src/agents)
 - artifacts\api-server\src\agents\base-agent.ts
@@ -123,6 +150,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\activity.ts
 - lib\db\src\schema\admin-actions-log.ts
 - lib\db\src\schema\agent-insights.ts
+- lib\db\src\schema\ai-control-plane.ts
 - lib\db\src\schema\ai-usage-events.ts
 - lib\db\src\schema\change-orders.ts
 - lib\db\src\schema\clash_reports.ts
@@ -132,6 +160,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\conventions.ts
 - lib\db\src\schema\coordination_intake_events.ts
 - lib\db\src\schema\email-log.ts
+- lib\db\src\schema\feature-catalog.ts
 - lib\db\src\schema\feature-flags.ts
 - lib\db\src\schema\feedback-items.ts
 - lib\db\src\schema\files.ts
@@ -156,6 +185,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\submittal-view-events.ts
 - lib\db\src\schema\submittal_reports.ts
 - lib\db\src\schema\submittals.ts
+- lib\db\src\schema\telegram-product.ts
 - lib\db\src\schema\transmittals.ts
 - lib\db\src\schema\user-connections.ts
 - lib\db\src\schema\users.ts

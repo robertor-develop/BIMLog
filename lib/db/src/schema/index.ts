@@ -39,3 +39,4 @@ export * from "./ai-usage-events";
 export * from "./feedback-items";
 export * from "./telegram-product";
 export * from "./ai-control-plane";
+export * from "./feature-catalog";

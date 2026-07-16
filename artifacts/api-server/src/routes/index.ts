@@ -35,6 +35,7 @@ import connectionsRouter from "./connections";
 import feedbackRouter from "./feedback";
 import telegramProductRouter from "./telegram-product";
 import aiControlPlaneRouter from "./ai-control-plane";
+import featuresRouter from "./features";
 
 const router: IRouter = Router();
 
@@ -74,6 +75,7 @@ router.use(connectionsRouter);
 router.use(feedbackRouter);
 router.use(telegramProductRouter);
 router.use(aiControlPlaneRouter);
+router.use(featuresRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId

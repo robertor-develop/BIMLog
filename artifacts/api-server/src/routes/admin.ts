@@ -37,14 +37,14 @@ router.use("/admin", authMiddleware, async (req, res, next) => {
   return next();
 });
 
-const DEFAULT_FLAGS = [
-  { flagName: "ai_presubmission_check", enabled: true },
-  { flagName: "ai_name_suggestion", enabled: true },
-  { flagName: "audit_certificate", enabled: true },
-  { flagName: "email_notifications", enabled: true },
-  { flagName: "rapid_approval_detection", enabled: true },
-  { flagName: "procurement_before_approval_warning", enabled: true },
-];
+const LEGACY_FLAG_CATALOG_KEYS: Record<string, string | null> = {
+  ai_presubmission_check: null,
+  ai_name_suggestion: null,
+  audit_certificate: "rfi.export.pdf",
+  email_notifications: "notifications.deterministic",
+  rapid_approval_detection: null,
+  procurement_before_approval_warning: null,
+};
 
 async function logAdminAction(params: {
   adminUserId: number;
@@ -732,27 +732,29 @@ router.get("/admin/email-log", async (req, res) => {
 router.get("/admin/feature-flags", async (req, res) => {
   try {
     const existing = await db.select().from(featureFlagsTable);
-    if (existing.length === 0) {
-      for (const flag of DEFAULT_FLAGS) {
-        await db.insert(featureFlagsTable).values({ ...flag, appliesTo: "global" }).onConflictDoNothing();
-      }
-      const seeded = await db.select().from(featureFlagsTable);
-      return res.json(seeded.map(f => ({ ...f, updatedAt: f.updatedAt.toISOString() })));
-    }
-    return res.json(existing.map(f => ({ ...f, updatedAt: f.updatedAt.toISOString() })));
-  } catch (err) { return res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
+    return res.json(existing.map(f => ({
+      ...f,
+      updatedAt: f.updatedAt.toISOString(),
+      legacyOnly: true,
+      operationalCapabilityProven: false,
+      catalogFeatureKey: LEGACY_FLAG_CATALOG_KEYS[f.flagName] ?? null,
+    })));
+  } catch { return res.status(500).json({ error: "Legacy feature flags are temporarily unavailable." }); }
 });
 
-router.patch("/admin/feature-flags/:id", async (req, res) => {
+router.patch("/admin/feature-flags/:id", isSuperAdminMiddleware, async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     const { enabled } = req.body as { enabled: boolean };
+    if (!Number.isSafeInteger(id) || typeof enabled !== "boolean") { res.status(400).json({ error: "A valid flag id and enabled value are required." }); return; }
+    const [authority] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+    if (!authority?.isSuperAdmin) { res.status(403).json({ error: "Verified super-admin authority is required." }); return; }
     const [flag] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.id, id)).limit(1);
     if (!flag) { res.status(404).json({ error: "Flag not found" }); return; }
     const [updated] = await db.update(featureFlagsTable).set({ enabled, updatedAt: new Date(), updatedBy: req.user!.userId }).where(eq(featureFlagsTable.id, id)).returning();
-    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "toggle_feature_flag", targetType: "feature_flag", targetId: String(id), details: { flagName: flag.flagName, enabled } });
-    res.json({ ...updated, updatedAt: updated.updatedAt.toISOString() });
-  } catch (err) { res.status(400).json({ error: err instanceof Error ? err.message : "Failed to update flag" }); }
+    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: authority.email, action: "toggle_legacy_feature_flag", targetType: "legacy_feature_flag", targetId: String(id), details: { flagName: flag.flagName, enabled, operationalCapabilityProven: false } });
+    res.json({ ...updated, updatedAt: updated.updatedAt.toISOString(), legacyOnly: true, operationalCapabilityProven: false });
+  } catch { res.status(400).json({ error: "Legacy feature flag change failed." }); }
 });
 
 // ── Tab 8: Admin Actions Log ──────────────────────────────────────────────────
