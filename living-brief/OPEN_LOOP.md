@@ -556,6 +556,21 @@ Deferred:
 
 ## Deferred
 
+### Telegram Product Build 4 - Secure Delivery Concierge Foundation
+
+- Starting baseline: `43497bb8e2db1b8b567ddf6bc060b0afbcadd646`.
+- Added one durable delivery-request, immutable transition-event, provider-attempt, and short-lived audience-link model for authorized existing BIMLog artifacts.
+- Guided English and Spanish Telegram delivery supports project files plus the existing canonical RFI PDF, Complete RFI PDF, RFI DOCX, and RFI Audit PDF routes. Unsupported artifact types fail explicitly; no alternate report generator was added.
+- Telegram delivery is limited to the linked user's verified private chat. Email recipients are explicit, normalized, deduplicated, previewed, and require a second confirmation when outside the user's verified company/project participants.
+- Authorization is rechecked at preview, immediately before canonical generation/storage read, and immediately before provider contact. Delivery attempts are persisted before contact; only a real acknowledgement ID can produce `delivered`.
+- Direct attachment limits are configurable. Oversized delivery uses a random, short-lived, audience-bound, exact-artifact BIMLog link when safe; otherwise it fails explicitly without truncation or silent compression.
+- Existing limitation: the legacy SendGrid connection stores its API key server-side in `user_connections.credentials`. Build 4 does not duplicate or expose that key, but a focused provider-credential migration is required to establish encrypted-at-rest storage and rotation for legacy email connections.
+- Independent-review correction now requires user-scoped atomic idempotency, an explicit persisted external-warning acknowledgement before the separate external confirmation, transactional state/event/attempt changes, stale-state restart recovery without resend, narrow rejection of every oversized email, broader timeout-to-unknown classification, requester-only Telegram large-file links, audited link access, and bounded preparation. Corrected rebuilt-API evidence passed 79/79 against `127.0.0.1:55432/bimlog_rfi_test` with loopback-only AI, Telegram, and email provider fixtures. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-4-idempotency-correction\20260716T021040Z`; manifest SHA-256 `2a53dd8ad4a1dfed4d5968357c72431eb2fb25aba09978504bf3f85d3adc25ac`.
+- Idempotency index migration is additive: new requests store a user-namespaced HMAC confirmation key and use `telegram_delivery_requests_user_confirmation_uidx` on `(user_id, confirmation_key)`. The earlier global index is intentionally retained to avoid a destructive automatic `DROP INDEX`; a separately reviewed future migration may remove that redundant legacy index after deployment compatibility is established.
+- Independent master review accepted source commit `8f769a45796bfeac3d7bfa9990a0022214ecbe45`. Clean integration commit `be0a55e4d02c1139244d324fc6d9e27e873f7e1e` applies only the accepted Build 4 implementation to master baseline `3af9cf0a82d33aac5e7954b9ea9b156bca9637a1`, preserving the accepted RFI Build 5/6 schema and startup behavior.
+- Clean-integration evidence reran all 79 checks with zero failures against `127.0.0.1:55432/bimlog_rfi_test` using loopback-only provider fixtures. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-4-integration\20260716T115522Z`; manifest SHA-256 `64769e119f8434f28779cd98bca3cfb4e4c9e9c4e297ba462c60609c9f29b404`. Privacy/secret scanning passed and the harness left zero test seed records.
+- Telegram Product Build 4 is independently accepted and cleanly integrated. Nothing was published, no live webhook was configured, no customer file/email was sent, and Telegram Product Build 5 was not started.
+
 ### Telegram Product Build 3 - Bilingual Conversational Assistant And Support Core
 
 - Local review implementation is complete in the isolated `telegram-product-build3-clean` worktree from baseline `be3a76aa5ea8f2a7749f0f4c845a04d69d5934c9`.
