@@ -481,6 +481,13 @@ void rfiMigrationReady.then((ready) => {
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'`);
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS supersedes_id INTEGER`);
     await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS revision_number INTEGER NOT NULL DEFAULT 1`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS import_batch_id INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_project_id INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_server_id INTEGER`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_physical_id TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_display_label TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS imported_lineage_status TEXT`);
+    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS bimlog_physical_id TEXT`);
     // Backfill: every pre-existing row is revision 1 (the ADD COLUMN default already
     // applies, but make it explicit and null-safe in case the column predates this).
     await pool.query(`UPDATE lens_viewpoints SET revision_number = 1 WHERE revision_number IS NULL`);
@@ -510,6 +517,43 @@ void rfiMigrationReady.then((ready) => {
     // One active row per display_id within a project — DB backstop for the lens-sync
     // display_id collision guard. Excludes NULL display_ids so they stay distinct.
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_display_active_unique ON lens_viewpoints (project_id, display_id) WHERE lifecycle_status = 'active' AND display_id IS NOT NULL`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_import_batches (
+      id SERIAL PRIMARY KEY,
+      target_project_id INTEGER NOT NULL,
+      import_key TEXT NOT NULL,
+      model_key TEXT NOT NULL,
+      request_hash TEXT NOT NULL,
+      source_project_ids TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      requested_by_id INTEGER NOT NULL,
+      created_count INTEGER NOT NULL DEFAULT 0,
+      reused_count INTEGER NOT NULL DEFAULT 0,
+      unresolved_count INTEGER NOT NULL DEFAULT 0,
+      failed_count INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      completed_at TIMESTAMPTZ
+    )`);
+    await pool.query(`ALTER TABLE lens_import_batches ADD COLUMN IF NOT EXISTS request_hash TEXT`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_import_batches_user_target_key_unique ON lens_import_batches (requested_by_id, target_project_id, import_key)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS lens_import_batches_target_created_idx ON lens_import_batches (target_project_id, created_at DESC)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_import_items (
+      id SERIAL PRIMARY KEY,
+      batch_id INTEGER NOT NULL,
+      target_project_id INTEGER NOT NULL,
+      source_identity_key TEXT NOT NULL,
+      source_project_id INTEGER NOT NULL,
+      source_server_id INTEGER,
+      source_physical_id TEXT,
+      source_navisworks_guid TEXT,
+      source_display_label TEXT,
+      target_server_id INTEGER NOT NULL,
+      target_physical_id TEXT NOT NULL,
+      target_viewpoint_id TEXT NOT NULL,
+      lineage_status TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_import_items_batch_source_unique ON lens_import_items (batch_id, source_identity_key)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS lens_import_items_target_server_idx ON lens_import_items (target_project_id, target_server_id)`);
     console.log("[migration] lens_viewpoints lifecycle + sequence-counter migration ensured");
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);

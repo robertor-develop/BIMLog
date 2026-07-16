@@ -1,5 +1,5 @@
 ﻿import { Router } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
@@ -12,6 +12,15 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
+import { createHash, randomUUID } from "crypto";
+import { LensImportValidationError, validateAndHashLensImportRequest } from "../lib/lens-import-contract";
+
+function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
+  const safe = err as { name?: string; code?: string };
+  console.error(`[${scope}]`, { correlationId, errorName: safe?.name ?? "Error", databaseCode: safe?.code ?? null });
+}
+
+type LensImportDbClient = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }>; release: () => void };
 
 // String-aware repair for the Navisworks plugin's malformed JSON. The plugin
 // runs under a non-invariant locale (e.g. es-*) so .NET formats decimal numbers
@@ -810,6 +819,167 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
   }
 );
 
+// Read-only authorization/context check for a copied-model import. The source
+// project is never queried here: access is answered from the current user's
+// membership/super-admin record only, so an inaccessible source project leaks no
+// customer data beyond the numeric ID already embedded in the local NWD.
+router.get("/projects/:projectId/clash-reports/lens-import-context",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const targetProjectId = Number(req.params.projectId);
+    const sourceProjectId = Number(req.query.sourceProjectId);
+    if (!Number.isInteger(sourceProjectId) || sourceProjectId <= 0) {
+      res.status(400).json({ error: "invalid_source_project", message: "sourceProjectId must be a positive integer" });
+      return;
+    }
+    try {
+      const target = await pool.query<{ id: number; code: string; name: string }>(
+        `SELECT id, code, name FROM projects WHERE id = $1 LIMIT 1`, [targetProjectId]);
+      if (target.rows.length !== 1 || target.rows[0].id !== targetProjectId) {
+        res.status(404).json({ error: "target_project_not_found", message: "The configured destination project does not exist" });
+        return;
+      }
+      const access = await pool.query<{ allowed: boolean }>(`
+        SELECT (
+          EXISTS (SELECT 1 FROM users WHERE id = $1 AND is_super_admin = true)
+          OR EXISTS (SELECT 1 FROM project_members WHERE user_id = $1 AND project_id = $2)
+        ) AS allowed`, [req.user!.userId, sourceProjectId]);
+      res.json({
+        success: true,
+        target: { ...target.rows[0], writable: true },
+        sourceProjectId,
+        sourceAccess: access.rows[0]?.allowed === true,
+        sourceAccessChecked: true,
+        sourceProjectContacted: false,
+      });
+    } catch (err) {
+      const correlationId = randomUUID();
+      logLensImportInternal("lens-import-context", correlationId, err);
+      res.status(500).json({ error: "LENS_IMPORT_CONTEXT_FAILED", message: "The project import context could not be verified. Try again or contact support with the correlation ID.", correlationId });
+    }
+  });
+
+// Atomic and idempotent copied-model import. The request contains only metadata
+// embedded in the local NWD; this handler never reads or mutates the source
+// project. A target-project/import-key lock makes retries, lost responses and
+// concurrent confirmations return one stable mapping.
+router.post("/projects/:projectId/clash-reports/lens-import",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const targetProjectId = Number(req.params.projectId);
+    const authenticatedUserId = req.user!.userId;
+    const correlationId = randomUUID();
+    let plan;
+    try {
+      plan = validateAndHashLensImportRequest(req.body, authenticatedUserId, targetProjectId);
+    } catch (err) {
+      if (err instanceof LensImportValidationError) {
+        res.status(err.status).json({ error: err.code, message: err.message, correlationId });
+        return;
+      }
+      logLensImportInternal("lens-import-validation", correlationId, err);
+      res.status(400).json({ error: "INVALID_IMPORT_REQUEST", message: "The import request is invalid.", correlationId });
+      return;
+    }
+    const { importKey, modelKey, requestHash, sourceProjectIds, records: normalized } = plan;
+    let client: LensImportDbClient | null = null;
+    try {
+      client = await pool.connect() as unknown as LensImportDbClient;
+      if (!client) throw new Error("Database client unavailable");
+      await client.query("BEGIN");
+      const target = await client.query(`SELECT id, code, name FROM projects WHERE id = $1 LIMIT 1`, [targetProjectId]) as { rows: Array<{ id: number; code: string; name: string }> };
+      if (target.rows.length !== 1 || target.rows[0].id !== targetProjectId) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "TARGET_PROJECT_NOT_FOUND", message: "The configured destination project was not found.", correlationId });
+        return;
+      }
+      await client.query(`INSERT INTO lens_import_batches
+        (target_project_id, import_key, model_key, request_hash, source_project_ids, status, requested_by_id)
+        VALUES ($1,$2,$3,$4,$5,'pending',$6)
+        ON CONFLICT (requested_by_id, target_project_id, import_key) DO NOTHING`,
+        [targetProjectId, importKey, modelKey, requestHash, sourceProjectIds.join(","), authenticatedUserId]);
+      const batchResult = await client.query(
+        `SELECT id, status, model_key, request_hash, requested_by_id, target_project_id FROM lens_import_batches
+         WHERE requested_by_id = $1 AND target_project_id = $2 AND import_key = $3 FOR UPDATE`,
+        [authenticatedUserId, targetProjectId, importKey]) as { rows: Array<{ id: number; status: string; model_key: string; request_hash: string; requested_by_id: number; target_project_id: number }> };
+      const batch = batchResult.rows[0];
+      if (!batch) throw new Error("Import batch could not be acquired");
+      if (batch.requested_by_id !== authenticatedUserId || batch.target_project_id !== targetProjectId || batch.model_key !== modelKey || batch.request_hash !== requestHash) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "IMPORT_IDEMPOTENCY_CONFLICT", message: "This import key was already used with different import content. Create a new import plan instead of reusing the key.", correlationId });
+        return;
+      }
+      if (batch.status === "complete") {
+        const existing = await client.query(`SELECT source_identity_key AS "sourceIdentityKey", source_project_id AS "sourceProjectId",
+          source_server_id AS "sourceServerId", source_physical_id AS "sourcePhysicalId", target_server_id AS "targetServerId",
+          target_physical_id AS "targetPhysicalId", target_viewpoint_id AS "targetViewpointId", lineage_status AS "lineageStatus"
+          FROM lens_import_items WHERE batch_id = $1 ORDER BY id`, [batch.id]);
+        await client.query("COMMIT");
+        res.json({ success: true, reusedBatch: true, importBatchId: batch.id, target: target.rows[0], sourceProjectContacted: false,
+          created: 0, reused: existing.rows.length, unresolved: existing.rows.filter((x: any) => x.lineageStatus === "unresolved").length, failed: 0, mappings: existing.rows });
+        return;
+      }
+      const mapping = new Map<string, { targetServerId: number; targetPhysicalId: string; targetViewpointId: string }>();
+      const mappingRows: any[] = [];
+      for (const row of normalized) {
+        const suffix = createHash("sha256").update(requestHash + "|" + row.sourceIdentityKey).digest("hex").slice(0, 24);
+        const targetViewpointId = `import-${targetProjectId}-${suffix}`;
+        const targetPhysicalId = randomUUID();
+        const inserted = await client.query(`INSERT INTO lens_viewpoints
+          (project_id, viewpoint_id, note, trade, responsible_company, report_type, priority, floor, open_items,
+           status, issue_group_id, lifecycle_status, revision_number, synced_at, import_batch_id, source_project_id,
+           source_server_id, source_physical_id, source_display_label, imported_lineage_status, bimlog_physical_id)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),$14,$15,$16,$17,$18,'pending',$19) RETURNING id`,
+          [targetProjectId, targetViewpointId, row.note, row.trade, row.responsibleCompany, row.reportType, row.priority,
+           row.floor, row.openItems, row.status, row.issueGroupId, row.lifecycle, row.revisionNumber, batch.id,
+           row.sourceProjectId, row.sourceServerId, row.sourcePhysicalId, row.sourceDisplayLabel, targetPhysicalId]) as { rows: Array<{ id: number }> };
+        const targetServerId = inserted.rows[0].id;
+        mapping.set(row.sourceIdentityKey, { targetServerId, targetPhysicalId, targetViewpointId });
+        mappingRows.push({ row, targetServerId, targetPhysicalId, targetViewpointId });
+      }
+      let unresolved = 0;
+      for (const item of mappingRows) {
+        let lineageStatus = "not_applicable";
+        if (item.row.sourceSupersedesIdentityKey) {
+          const predecessor = mapping.get(item.row.sourceSupersedesIdentityKey);
+          if (predecessor) {
+            await client.query(`UPDATE lens_viewpoints SET supersedes_id = $1, imported_lineage_status = 'remapped' WHERE id = $2`, [predecessor.targetServerId, item.targetServerId]);
+            lineageStatus = "remapped";
+          } else {
+            await client.query(`UPDATE lens_viewpoints SET imported_lineage_status = 'unresolved' WHERE id = $1`, [item.targetServerId]);
+            lineageStatus = "unresolved";
+            unresolved++;
+          }
+        } else {
+          await client.query(`UPDATE lens_viewpoints SET imported_lineage_status = 'not_applicable' WHERE id = $1`, [item.targetServerId]);
+        }
+        await client.query(`INSERT INTO lens_import_items
+          (batch_id, target_project_id, source_identity_key, source_project_id, source_server_id, source_physical_id,
+           source_navisworks_guid, source_display_label, target_server_id, target_physical_id, target_viewpoint_id, lineage_status)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+          [batch.id, targetProjectId, item.row.sourceIdentityKey, item.row.sourceProjectId, item.row.sourceServerId,
+           item.row.sourcePhysicalId, item.row.sourceNavisworksGuid, item.row.sourceDisplayLabel, item.targetServerId,
+           item.targetPhysicalId, item.targetViewpointId, lineageStatus]);
+        item.lineageStatus = lineageStatus;
+      }
+      await client.query(`UPDATE lens_import_batches SET status='complete', created_count=$1, unresolved_count=$2, completed_at=NOW() WHERE id=$3`, [mappingRows.length, unresolved, batch.id]);
+      await client.query("COMMIT");
+      res.json({ success: true, reusedBatch: false, importBatchId: batch.id, target: target.rows[0], sourceProjectContacted: false,
+        created: mappingRows.length, reused: 0, unresolved, failed: 0,
+        mappings: mappingRows.map(x => ({ sourceIdentityKey: x.row.sourceIdentityKey, sourceProjectId: x.row.sourceProjectId,
+          sourceServerId: x.row.sourceServerId, sourcePhysicalId: x.row.sourcePhysicalId, targetServerId: x.targetServerId,
+          targetPhysicalId: x.targetPhysicalId, targetViewpointId: x.targetViewpointId, lineageStatus: x.lineageStatus })) });
+    } catch (err) {
+      if (client) { try { await client.query("ROLLBACK"); } catch { /* preserve the original internal failure */ } }
+      logLensImportInternal("lens-import", correlationId, err);
+      res.status(500).json({ error: "LENS_IMPORT_FAILED", message: "The import could not be completed. No local metadata should be changed. Retry with the correlation ID if support is needed.", correlationId });
+    } finally {
+      if (client) client.release();
+    }
+  });
+
 // BIMLog Lens viewpoint pull - all viewpoints for a project, newest capture first.
 router.get("/projects/:projectId/clash-reports/lens-pull",
   authMiddleware,
@@ -852,6 +1022,12 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         supersedesId: r.supersedesId,
         supersedesCode: r.supersedesId != null && byId.has(r.supersedesId) ? codeOf(byId.get(r.supersedesId)!) : null,
         revisionNumber: r.revisionNumber,
+        bimlogPhysicalId: r.bimlogPhysicalId,
+        importBatchId: r.importBatchId,
+        sourceProjectId: r.sourceProjectId,
+        sourceServerId: r.sourceServerId,
+        sourcePhysicalId: r.sourcePhysicalId,
+        importedLineageStatus: r.importedLineageStatus,
       }));
       res.json({ success: true, viewpoints });
     } catch (err) {
