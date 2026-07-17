@@ -36,6 +36,7 @@ import feedbackRouter from "./feedback";
 import telegramProductRouter from "./telegram-product";
 import aiControlPlaneRouter from "./ai-control-plane";
 import featuresRouter from "./features";
+import featurePoliciesRouter from "./feature-policies";
 
 const router: IRouter = Router();
 
@@ -75,6 +76,7 @@ router.use(connectionsRouter);
 router.use(feedbackRouter);
 router.use(telegramProductRouter);
 router.use(aiControlPlaneRouter);
+router.use(featurePoliciesRouter);
 router.use(featuresRouter);
 
 // Soft-delete routes are appended inside their existing route files:

@@ -24,7 +24,8 @@ function mapFeature(row: Record<string, unknown>): CatalogFeature {
     productFamily: String(row.product_family), module: String(row.module), capabilityStatus: String(row.capability_status) as CatalogFeature["capabilityStatus"],
     tierAvailability: array(row.tier_availability), bundleDependencies: array(row.bundle_dependencies), eligibleSeatClasses: array(row.eligible_seat_classes),
     requiredScopedAuthorities: array(row.required_scoped_authorities), supportsCompanyPolicy: row.supports_company_policy === true,
-    supportsProjectPolicy: row.supports_project_policy === true, aiClassification: String(row.ai_classification) as CatalogFeature["aiClassification"],
+    supportsProjectPolicy: row.supports_project_policy === true, supportsUserPreference: row.supports_user_preference === true,
+    policyConfigurationKeys: array(row.policy_configuration_keys), aiClassification: String(row.ai_classification) as CatalogFeature["aiClassification"],
     supportedCreditPayers: array(row.supported_credit_payers), meteringPolicyKey: row.metering_policy_key == null ? null : String(row.metering_policy_key),
     confirmationRequirements: array(row.confirmation_requirements), fileReading: row.file_reading === true, externalDelivery: row.external_delivery === true,
     auditRequirements: array(row.audit_requirements), authorizedDataScope: array(row.authorized_data_scope),
@@ -115,23 +116,26 @@ export async function resolveEffectiveEntitlement(input: { featureKey: string; u
   }
   if (feature.commercialAuthority !== "none") context.commercial = { configured: false };
   if (input.projectId !== undefined) {
-    const membership = await pool.query(`SELECT pm.role,pm.status,co.meta FROM project_members pm
+    const membership = await pool.query(`SELECT pm.role,pm.status,co.meta,owner.company_id AS owner_company_id FROM projects p
+      JOIN users owner ON owner.id=p.created_by_id LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=$2
       LEFT JOIN config_options co ON co.category='member_role' AND co.value=pm.role
-      WHERE pm.project_id=$1 AND pm.user_id=$2 ORDER BY co.id NULLS LAST LIMIT 1`, [input.projectId, input.userId]);
+      WHERE p.id=$1 ORDER BY co.id NULLS LAST LIMIT 1`, [input.projectId, input.userId]);
     const row = membership.rows[0];
     const meta = row?.meta && typeof row.meta === "object" ? row.meta as Record<string, unknown> : null;
     const legacyPermission = row?.role === "admin" ? "admin" : row?.role === "viewer" ? "read" : null;
-    context.project = { requested: true, membership: !row ? "missing" : row.status === "active" ? "active" : "inactive", role: row?.role, permissionCategory: typeof meta?.permission === "string" ? meta.permission : legacyPermission };
+    const sameCompany = Number(row?.owner_company_id) === currentCompanyId;
+    context.project = { requested: true, membership: !row || !sameCompany || !row.role ? "missing" : row.status === "active" ? "active" : "inactive", role: sameCompany ? row?.role : undefined, permissionCategory: sameCompany && typeof meta?.permission === "string" ? meta.permission : sameCompany ? legacyPermission : null };
   }
-  if (feature.preferenceKey) {
-    const preference = await pool.query(`SELECT notification_preferences FROM users WHERE id=$1`, [input.userId]);
-    const values = preference.rows[0]?.notification_preferences;
-    if (values && typeof values === "object" && feature.preferenceKey in values) {
-      context.userPreference = { enabled: values[feature.preferenceKey] !== false, version: 1 };
-    }
-  }
+  const { policyContext } = await import("./feature-policy-service");
+  const policy = await policyContext({ feature, userId: input.userId, companyId: currentCompanyId,
+    projectId: context.project?.membership === "active" ? input.projectId : undefined, at: now });
+  context.companyPolicy = policy.companyPolicy;
+  context.projectPolicy = policy.projectPolicy;
+  context.userPreference = policy.userPreference;
   context.aiControl = await aiControlContext(feature, currentCompanyId);
-  return resolveEntitlement(feature, context);
+  const decision = resolveEntitlement(feature, context);
+  decision.policy = { inheritancePath: policy.inheritancePath, configuration: policy.configuration };
+  return decision;
 }
 
 export async function createPlatformCapabilityVersion(input: { featureKey: string; status: CapabilityStatus; reasonCode: string; explanation: BilingualText; actorUserId: number }): Promise<Record<string, unknown>> {

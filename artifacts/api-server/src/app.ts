@@ -8,6 +8,7 @@ import { ensureTelegramProductDeliverySchema, recoverAbandonedDeliveryAttempts }
 import { ensureTelegramNotificationSchema, recoverNotificationOutbox, startNotificationOutboxWorker } from "./lib/telegram-product-notifications";
 import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
+import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -139,6 +140,15 @@ app.use("/api/v1", router);
     console.log("[migration] AI control-plane tables ensured");
   } catch (e) {
     console.error("[migration] AI control-plane migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
+    await startFeaturePolicyMigration();
+    console.log("[migration] feature policy control tables ensured");
+  } catch {
+    console.error("[migration] feature policy control migration failed");
   }
 })();
 

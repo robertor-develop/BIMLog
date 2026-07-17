@@ -1,11 +1,13 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectsTable, projectMembersTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { projectsTable, projectMembersTable, projectCompanyBindingVersionsTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { eq, ne, count, inArray, and, sql, ilike } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getRolesByPermission, getDefaultValue } from "../middlewares/config-validator";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
+import { waitForFeaturePolicyMigration } from "../lib/feature-policy-migration";
 
 const router: IRouter = Router();
 
@@ -101,6 +103,7 @@ router.get("/projects/list-for-plugin", authMiddleware, async (req, res) => {
 
 router.post("/projects", authMiddleware, async (req, res) => {
   try {
+    await waitForFeaturePolicyMigration();
     const body = CreateProjectBody.parse(req.body);
     const userId = req.user!.userId;
 
@@ -114,26 +117,26 @@ router.post("/projects", authMiddleware, async (req, res) => {
     }
 
     const defaultStatus = await getDefaultValue("project_status");
-    const [project] = await db
-      .insert(projectsTable)
-      .values({
-        name: body.name,
-        description: body.description || null,
-        code: body.code,
-        status: defaultStatus,
-        createdById: userId,
-      })
-      .returning();
-
     const adminRoles = await getRolesByPermission("admin");
     if (adminRoles.length === 0) {
       res.status(500).json({ error: "No admin role configured. Seed the config_options table with member_role entries." });
       return;
     }
-    await db.insert(projectMembersTable).values({
-      projectId: project.id,
-      userId,
-      role: adminRoles[0],
+    const project = await db.transaction(async (tx) => {
+      const [freshActor] = await tx.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+      if (!freshActor) throw new Error("Current database company could not be verified.");
+      const [created] = await tx.insert(projectsTable).values({
+          name: body.name, description: body.description || null, code: body.code, status: defaultStatus, createdById: userId,
+        }).returning();
+      await tx.insert(projectMembersTable).values({ projectId: created.id, userId, role: adminRoles[0] });
+      await tx.insert(projectCompanyBindingVersionsTable).values({
+        id: crypto.randomUUID(), projectId: created.id, companyId: freshActor.companyId, version: 1, boundById: userId,
+        reasonCode: "AUTHENTICATED_PROJECT_CREATION",
+        explanationEn: "Company binding established from the creator's freshly verified company during project creation.",
+        explanationEs: "Vinculación de empresa establecida desde la empresa del creador verificada nuevamente durante la creación del proyecto.",
+        auditEvidence: { source: "authenticated_project_creation" },
+      });
+      return created;
     });
 
     res.status(201).json({

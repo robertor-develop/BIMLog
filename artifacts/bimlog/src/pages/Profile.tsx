@@ -20,6 +20,7 @@ import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
+import { FeaturePolicySettingsPanel } from "@/components/settings/FeaturePolicySettingsPanel";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -823,6 +824,8 @@ export function Profile() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        <FeaturePolicySettingsPanel />
 
         {/* 2. Personal Info */}
         <SectionCard title="Personal Information" icon={User}>

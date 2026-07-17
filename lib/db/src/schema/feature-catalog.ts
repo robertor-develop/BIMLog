@@ -21,6 +21,8 @@ export const featureCatalogVersionsTable = pgTable("feature_catalog_versions", {
   requiredScopedAuthorities: jsonb("required_scoped_authorities").$type<string[]>().notNull().default([]),
   supportsCompanyPolicy: boolean("supports_company_policy").notNull().default(false),
   supportsProjectPolicy: boolean("supports_project_policy").notNull().default(false),
+  supportsUserPreference: boolean("supports_user_preference").notNull().default(false),
+  policyConfigurationKeys: jsonb("policy_configuration_keys").$type<string[]>().notNull().default([]),
   aiClassification: text("ai_classification").notNull(),
   supportedCreditPayers: jsonb("supported_credit_payers").$type<string[]>().notNull().default([]),
   meteringPolicyKey: text("metering_policy_key"),

@@ -22,6 +22,7 @@ export interface EntitlementDecision {
   confirmations?: string[];
   evaluatedAt: string;
   evaluation: { mode: "advisory_read_only"; authorizesExecution: false };
+  policy?: { inheritancePath: string[]; configuration: Record<string, unknown> };
 }
 
 export interface CatalogFeature {
@@ -39,6 +40,8 @@ export interface CatalogFeature {
   requiredScopedAuthorities: string[];
   supportsCompanyPolicy: boolean;
   supportsProjectPolicy: boolean;
+  supportsUserPreference: boolean;
+  policyConfigurationKeys: string[];
   aiClassification: AiClassification;
   supportedCreditPayers: string[];
   meteringPolicyKey: string | null;
@@ -71,10 +74,10 @@ export interface ResolverContext {
     trialActive?: boolean;
     contractDecision?: "grant" | "restrict";
   };
-  companyPolicy?: { enabled: boolean; version: number };
-  projectPolicy?: { enabled: boolean; version: number };
+  companyPolicy?: { decision: "enabled" | "disabled" | "inherit"; version: number; configuration?: Record<string, unknown> };
+  projectPolicy?: { decision: "enabled" | "disabled" | "inherit"; version: number; configuration?: Record<string, unknown> };
   seat?: { configured: boolean; eligible: boolean; className?: string };
-  userPreference?: { enabled: boolean; version: number };
+  userPreference?: { decision?: "enabled" | "disabled" | "inherit"; enabled?: boolean; version: number };
   allowance?: { allowed: boolean; unit: string; remaining: string; requested: string; version: number };
   aiControl?: { allowed: boolean; code?: EntitlementCode; state?: string; version: number; allowance?: { unit: string; remaining: string; requested: string } };
   trustedConfirmations?: string[];
@@ -98,7 +101,7 @@ export function validateCatalogFeature(feature: CatalogFeature): boolean {
     && !Number.isNaN(Date.parse(feature.effectiveFrom)) && (feature.effectiveTo === null || !Number.isNaN(Date.parse(feature.effectiveTo)))
     && [feature.tierAvailability, feature.bundleDependencies, feature.eligibleSeatClasses, feature.requiredScopedAuthorities,
       feature.supportedCreditPayers, feature.confirmationRequirements, feature.auditRequirements, feature.authorizedDataScope,
-      feature.capabilityDependencies].every((values) => boundedArray(values));
+      feature.capabilityDependencies, feature.policyConfigurationKeys].every((values) => boundedArray(values));
 }
 
 export const ENTITLEMENT_EXPLANATIONS: Record<EntitlementCode, BilingualText> = {
@@ -161,13 +164,15 @@ export function resolveEntitlement(feature: CatalogFeature, context: ResolverCon
     if (commercialCode !== "ENT_TRIAL_ACTIVE") commercialCode = "ENT_INCLUDED";
   }
 
-  if (feature.supportsCompanyPolicy && context.companyPolicy) {
-    sources.push(source("company_policy", "policy:company", context.companyPolicy.version));
-    if (!context.companyPolicy.enabled) return finish("deny", "company_policy_disabled", "ENT_COMPANY_DISABLED");
+  if (feature.supportsCompanyPolicy) {
+    const policy = context.companyPolicy;
+    sources.push(source("company_policy", `policy:company:${policy?.decision ?? "missing_inherit"}`, policy?.version ?? 0));
+    if (policy?.decision === "disabled") return finish("deny", "company_policy_disabled", "ENT_COMPANY_DISABLED");
   }
-  if (feature.supportsProjectPolicy && context.projectPolicy) {
-    sources.push(source("project_policy", "policy:project", context.projectPolicy.version));
-    if (!context.projectPolicy.enabled) return finish("deny", "project_policy_disabled", "ENT_PROJECT_DISABLED");
+  if (feature.supportsProjectPolicy) {
+    const policy = context.projectPolicy;
+    sources.push(source("project_policy", `policy:project:${policy?.decision ?? "missing_inherit"}`, policy?.version ?? 0));
+    if (policy?.decision === "disabled") return finish("deny", "project_policy_disabled", "ENT_PROJECT_DISABLED");
   }
   if (context.seat?.configured) {
     sources.push(source("seat_eligibility", "seat:current", 1));
@@ -181,9 +186,11 @@ export function resolveEntitlement(feature: CatalogFeature, context: ResolverCon
       return finish("deny", "scoped_role_restricted", "ENT_ROLE_RESTRICTED");
     }
   }
-  if (feature.preferenceKey && context.userPreference) {
-    sources.push(source("user_preference", `preference:${feature.preferenceKey}`, context.userPreference.version));
-    if (!context.userPreference.enabled) return finish("deny", "user_opted_out", "ENT_USER_DISABLED");
+  if (feature.supportsUserPreference && feature.preferenceKey) {
+    const preference = context.userPreference;
+    const preferenceDecision = preference?.decision ?? (preference?.enabled === false ? "disabled" : preference?.enabled === true ? "enabled" : "inherit");
+    sources.push(source("user_preference", `preference:${feature.preferenceKey}:${preference ? preferenceDecision : "missing_inherit"}`, preference?.version ?? 0));
+    if (preferenceDecision === "disabled") return finish("deny", "user_opted_out", "ENT_USER_DISABLED");
   }
   if (context.aiControl) {
     sources.push(source("ai_control_plane", "ai-control:effective", context.aiControl.version));

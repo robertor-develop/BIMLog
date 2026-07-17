@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-16T22:15:56.132Z
+> Last generated: 2026-07-17T02:47:00.827Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -40,6 +40,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\dashboard_briefing.ts
 - artifacts\api-server\src\routes\documents.ts
 - artifacts\api-server\src\routes\downloads.ts
+- artifacts\api-server\src\routes\feature-policies.ts
 - artifacts\api-server\src\routes\features.ts
 - artifacts\api-server\src\routes\feedback.ts
 - artifacts\api-server\src\routes\files.ts
@@ -99,6 +100,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - feedbackRouter
 - telegramProductRouter
 - aiControlPlaneRouter
+- featurePoliciesRouter
 - featuresRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
@@ -122,6 +124,11 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\lib\feature-catalog-http.behavior.ts
 - artifacts\api-server\src\lib\feature-catalog-migration.ts
 - artifacts\api-server\src\lib\feature-catalog-service.ts
+- artifacts\api-server\src\lib\feature-policy-browser.behavior.ts
+- artifacts\api-server\src\lib\feature-policy-migration.ts
+- artifacts\api-server\src\lib\feature-policy-service.ts
+- artifacts\api-server\src\lib\feature-policy-support-matrix.ts
+- artifacts\api-server\src\lib\feature-policy.behavior.ts
 - artifacts\api-server\src\lib\import-intelligence.ts
 - artifacts\api-server\src\lib\initial-feature-catalog.ts
 - artifacts\api-server\src\lib\lens-import-contract.ts
@@ -164,6 +171,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\email-log.ts
 - lib\db\src\schema\feature-catalog.ts
 - lib\db\src\schema\feature-flags.ts
+- lib\db\src\schema\feature-policies.ts
 - lib\db\src\schema\feedback-items.ts
 - lib\db\src\schema\files.ts
 - lib\db\src\schema\index.ts

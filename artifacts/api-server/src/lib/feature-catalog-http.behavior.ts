@@ -15,7 +15,7 @@ if (!["127.0.0.1", "localhost", "::1"].includes(identity.hostname) || identity.p
 await pool.query(`
   CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL);
   CREATE TABLE users(id serial PRIMARY KEY,email text NOT NULL UNIQUE,password_hash text NOT NULL,full_name text NOT NULL,company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false,notification_preferences jsonb);
-  CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL);
+  CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL,created_by_id integer NOT NULL REFERENCES users(id));
   CREATE TABLE project_members(id serial PRIMARY KEY,project_id integer NOT NULL REFERENCES projects(id),user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text);
   CREATE TABLE config_options(id serial PRIMARY KEY,category text NOT NULL,value text NOT NULL,label text NOT NULL,label_es text NOT NULL,sort_order integer NOT NULL DEFAULT 0,meta json);
   CREATE TABLE admin_actions_log(id serial PRIMARY KEY,admin_user_id integer NOT NULL,admin_email text NOT NULL,action text NOT NULL,target_type text,target_id text,details jsonb,created_at timestamp NOT NULL DEFAULT now());
@@ -35,7 +35,7 @@ const userRows = await pool.query(`INSERT INTO users(email,password_hash,full_na
   ('current-super@example.test','x','Current Super',$1,true,'{}') RETURNING id,email`,[companyId]);
 const ids = new Map(userRows.rows.map((row)=>[String(row.email),Number(row.id)]));
 const roleEmail: Record<typeof roles[number],string> = {project_admin:"project-admin@example.test",convention_manager:"convention@example.test",discipline_lead:"discipline@example.test",member:"member@example.test",sub_trade:"subtrade@example.test",read_only:"readonly@example.test"};
-const project = await pool.query(`INSERT INTO projects(name) VALUES('HTTP Project') RETURNING id`); const projectId=Number(project.rows[0].id);
+const project = await pool.query(`INSERT INTO projects(name,created_by_id) VALUES('HTTP Project',$1) RETURNING id`,[ids.get("project-admin@example.test")]); const projectId=Number(project.rows[0].id);
 for(const role of roles) await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,$3,'active')`,[projectId,ids.get(roleEmail[role]),role]);
 await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'member','inactive'),($1,$3,'future_unknown','active')`,[projectId,ids.get("inactive@example.test"),ids.get("unknown@example.test")]);
 await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active'),($1,$3,'viewer','active')`,[projectId,ids.get("legacy-admin@example.test"),ids.get("legacy-viewer@example.test")]);

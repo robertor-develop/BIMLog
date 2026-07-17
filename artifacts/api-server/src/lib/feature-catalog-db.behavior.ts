@@ -13,7 +13,7 @@ if (!["127.0.0.1", "localhost", "::1"].includes(identity.hostname) || identity.p
 await setup.query(`
   CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL);
   CREATE TABLE users(id serial PRIMARY KEY,email text NOT NULL,company_id integer REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false,notification_preferences jsonb);
-  CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL);
+  CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL,created_by_id integer NOT NULL REFERENCES users(id));
   CREATE TABLE project_members(id serial PRIMARY KEY,project_id integer NOT NULL REFERENCES projects(id),user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text);
   CREATE TABLE config_options(id serial PRIMARY KEY,category text NOT NULL,value text NOT NULL,label text NOT NULL,label_es text NOT NULL,sort_order integer NOT NULL DEFAULT 0,meta json);
   CREATE TABLE admin_actions_log(id serial PRIMARY KEY,admin_user_id integer NOT NULL,admin_email text NOT NULL,action text NOT NULL,target_type text,target_id text,details jsonb,created_at timestamp NOT NULL DEFAULT now());
@@ -26,7 +26,7 @@ const otherCompanyId = otherCompany.rows[0].id as number;
 const users = await setup.query(`INSERT INTO users(email,company_id,is_super_admin,notification_preferences) VALUES
   ('super@example.test',$1,true,'{}'),('member@example.test',$1,false,'{}'),('inactive@example.test',$1,false,'{}'),('project-admin@example.test',$1,false,'{}'),('missing@example.test',$1,false,'{}') RETURNING id,email`, [companyId]);
 const byEmail = new Map(users.rows.map((row) => [row.email as string, row.id as number]));
-const project = await setup.query(`INSERT INTO projects(name) VALUES('Step 1 Evidence Project') RETURNING id`);
+const project = await setup.query(`INSERT INTO projects(name,created_by_id) VALUES('Step 1 Evidence Project',$1) RETURNING id`,[byEmail.get("project-admin@example.test")]);
 const projectId = project.rows[0].id as number;
 await setup.query(`INSERT INTO config_options(category,value,label,label_es,meta) VALUES
   ('member_role','project_admin','Project Admin','Administrador','{"permission":"admin"}'),
@@ -54,16 +54,16 @@ const afterRead = await setup.query(`SELECT (SELECT count(*) FROM feature_catalo
 assert.deepEqual(afterRead.rows[0],beforeRead.rows[0]); checks.readsMutatedDatabase=false;
 
 let immutable = false;
-try { await setup.query(`UPDATE feature_catalog_versions SET name_en='changed' WHERE id='rfi.core:1'`); } catch { immutable=true; }
+try { await setup.query(`UPDATE feature_catalog_versions SET name_en='changed' WHERE id='rfi.core:2'`); } catch { immutable=true; }
 assert.equal(immutable,true); checks.activatedVersionImmutable=true;
 for (const [name,sql] of [
-  ["activatedVersionDelete",`DELETE FROM feature_catalog_versions WHERE id='rfi.core:1'`],
-  ["activationUpdate",`UPDATE feature_catalog_activations SET evidence='{}' WHERE id='activation:rfi.core:1'`],
-  ["activationDelete",`DELETE FROM feature_catalog_activations WHERE id='activation:rfi.core:1'`],
+  ["activatedVersionDelete",`DELETE FROM feature_catalog_versions WHERE id='rfi.core:2'`],
+  ["activationUpdate",`UPDATE feature_catalog_activations SET evidence='{}' WHERE id='activation:rfi.core:2'`],
+  ["activationDelete",`DELETE FROM feature_catalog_activations WHERE id='activation:rfi.core:2'`],
 ] as const) { let rejected=false;try{await setup.query(sql);}catch{rejected=true;}assert.equal(rejected,true);checks[name]=true; }
-await setup.query(`INSERT INTO feature_catalog_versions SELECT 'rfi.core:2',feature_key,2,name_en,name_es,description_en,description_es,product_family,module,capability_status,tier_availability,bundle_dependencies,eligible_seat_classes,required_scoped_authorities,supports_company_policy,supports_project_policy,ai_classification,supported_credit_payers,metering_policy_key,confirmation_requirements,file_reading,external_delivery,audit_requirements,authorized_data_scope,preview_upgrade_explanation_en,preview_upgrade_explanation_es,now(),effective_to,deprecated_at,replacement_feature_key,deprecation_explanation_en,deprecation_explanation_es,contract_override_mode,capability_dependencies,commercial_authority,preference_key,$1,now() FROM feature_catalog_versions WHERE id='rfi.core:1'`, [byEmail.get("super@example.test")]);
-await setup.query(`INSERT INTO feature_catalog_activations(id,catalog_version_id,activated_by_id,evidence) VALUES('activation:rfi.core:2','rfi.core:2',$1,'{"source":"local_db_evidence"}')`, [byEmail.get("super@example.test")]);
-assert.equal((await getEffectiveFeature("rfi.core"))?.version,2); checks.supersedingVersion=2;
+await setup.query(`INSERT INTO feature_catalog_versions SELECT 'rfi.core:3',feature_key,3,name_en,name_es,description_en,description_es,product_family,module,capability_status,tier_availability,bundle_dependencies,eligible_seat_classes,required_scoped_authorities,supports_company_policy,supports_project_policy,supports_user_preference,policy_configuration_keys,ai_classification,supported_credit_payers,metering_policy_key,confirmation_requirements,file_reading,external_delivery,audit_requirements,authorized_data_scope,preview_upgrade_explanation_en,preview_upgrade_explanation_es,now(),effective_to,deprecated_at,replacement_feature_key,deprecation_explanation_en,deprecation_explanation_es,contract_override_mode,capability_dependencies,commercial_authority,preference_key,$1,now() FROM feature_catalog_versions WHERE id='rfi.core:2'`, [byEmail.get("super@example.test")]);
+await setup.query(`INSERT INTO feature_catalog_activations(id,catalog_version_id,activated_by_id,evidence) VALUES('activation:rfi.core:3','rfi.core:3',$1,'{"source":"local_db_evidence"}')`, [byEmail.get("super@example.test")]);
+assert.equal((await getEffectiveFeature("rfi.core"))?.version,3); checks.supersedingVersion=3;
 
 let projectAdminRejected=false;
 try { await createPlatformCapabilityVersion({featureKey:"rfi.core",status:"suspended",reasonCode:"LOCAL_TEST",explanation:{en:"Local evidence.",es:"Evidencia local."},actorUserId:byEmail.get("project-admin@example.test")!}); } catch { projectAdminRejected=true; }
