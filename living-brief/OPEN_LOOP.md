@@ -32,6 +32,18 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Meeting Minutes M2 Existing Project Submittal Links Accepted
+
+- Accepted candidate `9f05f20e7577a9010469ff0eee237707e59690f2` was independently reviewed and applied as content only to clean `origin/master` baseline `801244388d9d7c9ef9cbcd25a20fc21d697fdd53`, without importing candidate ancestry. Clean integration commit: `f4bcc37f39fa638e55db0ad5c318afcc5dea0516`.
+- Meeting Minutes now selects one or more existing same-project Submittal Log records by stable record ID. The bilingual selector searches number, title, and description; filters floor/area, discipline/trade, status, and responsible person/company; identifies already-linked rows; and excludes attachments, storage paths, raw URLs, private file metadata, unrelated participant details, and audit payloads.
+- Additive `meeting_submittal_links` stores canonical `submittal_id` plus immutable meeting-time snapshots for number, title, description, floor, discipline, discipline bucket, status, responsible party, and deadline. The unique `(meeting_id, submittal_id)` index is the concurrency boundary. Later canonical edits never silently refresh meeting rows; Open Original Submittal resolves the current accessible canonical record.
+- Discipline mapping is explicit: Plumbing, HVAC/Mechanical, Fire Protection/Fire Suppression/Sprinkler, and Electrical populate only their corresponding status column; a real non-empty unmapped trade uses Other; missing trade with a generic Submittal type populates no discipline status column. No unrelated status is fabricated.
+- Authenticated project membership is required for reads. Mutations additionally require configured admin/write permission and revalidate the meeting, non-deleted Submittal, and exact same-project ownership. Cross-project, deleted, inaccessible, and unauthorized identities fail safely. Unlinking removes only the association; Meeting Minutes contains no Submittal creation or canonical mutation path.
+- Existing manual `DELIVERABLES` notes remain unchanged and render separately as legacy rows. Meeting PDF exports render immutable link snapshots, while the original-record deep link opens current canonical data. Draft values do not refresh automatically or invisibly.
+- Independent M2 API/database proof passed 26/26, including combined filters, multi-select, duplicate/concurrent convergence, authorization, snapshot preservation, parsed-PDF export truth, unlink integrity, legacy preservation, privacy, reload, and zero new Submittals. M1 regression proof passed 17/17. Fresh English desktop and Spanish 390px browser evidence passed with no exceptions or horizontal overflow.
+- Required validation passed: `git diff --check`, mojibake scan, Living Brief integrity, typecheck, and `$env:PORT='3000'; pnpm run build`. Sanitized evidence: `C:\Dev\bimlog-tools\evidence\meeting-minutes-m2\20260720-180745`; manifest SHA-256 `8d587a73ee5d619b05b48de93e0e088033df970c31301201eb86d3b0994a04a5`. Evidence privacy scanning found zero matches and isolated cleanup left zero test identities.
+- Nothing was published. M3 and M4 were not started.
+
 ### Meeting Minutes M1 Existing Project RFI Links Accepted
 
 - Accepted candidate `447ea95e8f389ea1600cc2c834ab273354cf4f8d` was independently reviewed and applied as content only to clean `origin/master` baseline `d4862ad6b1d13ac49972561cc8c99916f7dc15e9`, without importing its older ancestry. Clean integration commit: `b1913aa5ed70e46f900f0dd4facc16030be78bf8`.
