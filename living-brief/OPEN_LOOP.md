@@ -32,6 +32,18 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Cost & Financial Control Build 1 Accepted
+
+- Accepted candidate `67b248fc5f158a5a84d2369ef574883f5d0e334d` was independently reviewed and applied as content only to clean `origin/master` baseline `12f5ab3947b0ebd38eed059ad59a72196674f314`, without importing its older ancestry. Clean integration commit: `893bb0b99e1305fc6d722032094b4e08fd75cc3a`.
+- Build 1 establishes only the financial authority and currency-control foundation. Financial Viewer, Cost Preparer, Cost Reviewer, Cost Approver, Financial Administrator, and Auditor are explicit, independent, effective-dated authorities. Existing application roles and Super Administrator status provide no silent financial visibility or approval authority; bootstrap and emergency suspension remain explicit, reason-required, and audited.
+- Money uses canonical decimal strings with six-place `BigInt` comparison and `numeric(30,6)` persistence. ISO currencies are validated, mixed-currency comparison and conversion are denied, and approval policies match exact company/project scope, category, currency, effective dates, and amount limits. Maker/checker separation, revoked/expired grants, missing limits, related-request review signals, and company/project suspension all fail closed.
+- Additive tables `financial_context_versions`, `financial_authority_grants`, `financial_authority_revocations`, `financial_approval_policy_versions`, `financial_suspension_events`, and `financial_authority_journal` retain immutable history. Database triggers reject ordinary update and delete on every table. Concurrent context and policy writes serialize to distinct versions; stale in-place rewrites are rejected.
+- The canonical entitlement resolver remains a separate required advisory gate and cannot authorize financial execution. The bilingual Settings → Financial Controls interface exposes only the current user's redacted effective state unless an explicit Financial Administrator or Auditor grant permits more. No budget, contract, commitment, Cost Event, forecast, payment application, ERP synchronization, financial AI, accounting posting, or money movement was added.
+- Independent Finance evidence passed 40/40 focused checks, 9/9 disposable PostgreSQL checks, 17/17 authenticated HTTP/concurrency/atomicity checks, and 6/6 English desktop/Spanish 390px browser checks. Review corrected only a missing effective timestamp in the browser evidence fixture; production behavior was unchanged.
+- Focused regressions passed Plans/Entitlements 60/60, Meeting Minutes M1 17/17, Meeting Minutes M2 26/26, Telegram product foundation proof, and Notification Center 4/4. Required `git diff --check`, mojibake, Living Brief, final typecheck, production build, exact-decimal, additive-migration, privacy, boundary, and preservation checks passed.
+- Sanitized external evidence: `C:\Dev\bimlog-tools\evidence\cost-financial-control-build-1-integration\20260720T223125Z`; manifest SHA-256 `9fcc9db9dc589b5a67a79db4c299754f197dd0df5da3ad63cddb4cc011c1c71e`. Candidate evidence hashes were verified; its redacted disposable connection line was not propagated into integration evidence.
+- Nothing was published or deployed. Finance Build 2 was not started, and the active Navisworks work was not modified.
+
 ### Meeting Minutes M2 Existing Project Submittal Links Accepted
 
 - Accepted candidate `9f05f20e7577a9010469ff0eee237707e59690f2` was independently reviewed and applied as content only to clean `origin/master` baseline `801244388d9d7c9ef9cbcd25a20fc21d697fdd53`, without importing candidate ancestry. Clean integration commit: `f4bcc37f39fa638e55db0ad5c318afcc5dea0516`.
