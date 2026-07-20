@@ -32,6 +32,17 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Meeting Minutes M1 Existing Project RFI Links Accepted
+
+- Accepted candidate `447ea95e8f389ea1600cc2c834ab273354cf4f8d` was independently reviewed and applied as content only to clean `origin/master` baseline `d4862ad6b1d13ac49972561cc8c99916f7dc15e9`, without importing its older ancestry. Clean integration commit: `b1913aa5ed70e46f900f0dd4facc16030be78bf8`.
+- Meeting Minutes now selects one or more existing same-project RFIs by stable record ID. The selector searches number, title, description, and question; displays number, title/description, status, and responsible/ball-in-court; identifies already-linked rows; and exposes no attachment, storage, raw URL, or private audit payloads.
+- `meeting_rfi_links` is additive and preserves immutable meeting-time number, title, description, status, and responsible snapshots beside canonical `rfi_id`. The unique `(meeting_id, rfi_id)` index is the concurrency boundary. Later RFI edits do not silently rewrite saved meeting history; Open Original RFI resolves the current canonical record.
+- Authenticated project membership is required for reads. Write routes also require configured admin/write permission. Meeting existence, non-deleted RFI existence, and exact same-project identity are revalidated server-side; inaccessible and cross-project identities fail without enumeration. Removing a link deletes only the association and never updates or deletes the RFI.
+- Existing pipe-delimited manual RFI rows remain untouched in `meeting_minutes.notes` and are rendered as legacy text. There is no destructive migration, silent conversion, RFI creation path, or original-RFI mutation in Meeting Minutes.
+- Independent review corrected cross-search multi-select caching and removed fallback database credentials from the focused proof. Final focused API/database proof passed 17/17, including number/description search, multi-select, duplicates, concurrent requests, authorization, cross-project rejection, unlink integrity, legacy preservation, Open Original, and reload persistence. Real English desktop and Spanish 390px browser evidence passed with no selector overflow or browser exceptions.
+- Required validation passed: `git diff --check`, mojibake scan, Living Brief integrity, typecheck, and `$env:PORT='3000'; pnpm run build`. External sanitized evidence: `C:\Dev\bimlog-tools\evidence\meeting-minutes-m1\20260720-154857`; manifest SHA-256 `48a07d3aeb1b5f06e5bcd7421bcb2ad8bc7ada11308ce53a1c20b3b70305c105`.
+- Nothing was published. Meetings M2, M3, and M4 were not started.
+
 ### Shop Drawing Control Filter Hotfix Accepted
 
 - Accepted candidate `8c2e5709cf18f977d653bece5d6625d416ef46eb` was independently reviewed and applied as content only to clean `origin/master` baseline `c13d9044513169ff61816f8e598197c25334981e`, without importing its older ancestry. Clean integration commit: `02e3f773e2ed796dde3567a0170f3f399f863c69`.
