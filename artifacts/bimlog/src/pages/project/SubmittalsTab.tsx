@@ -230,6 +230,7 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 type TrackerExportFilters = { floor?: string; trade?: string; type?: string; date?: string; status?: string };
+type FilterOption = { label: string; value: string };
 
 async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel", filters: TrackerExportFilters = {}) {
   const endpoint = format === "pdf"
@@ -273,6 +274,77 @@ function AiBadge({ result }: { result: "pass" | "possible_issue" | "fail" }) {
   );
 }
 
+function filterKey(value: string | null | undefined): string {
+  return String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function cleanLabel(value: string | null | undefined): string {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+function titleLabel(value: string | null | undefined): string {
+  const clean = cleanLabel(value);
+  if (!clean) return "";
+  return clean
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, char => char.toUpperCase())
+    .replace(/\bHvac\b/g, "HVAC")
+    .replace(/\bRfi\b/g, "RFI");
+}
+
+function tradeLabel(value: string | null | undefined): string {
+  const key = filterKey(value);
+  if (!key) return "";
+  if (["hvac", "mechanical", "mech", "mep mechanical", "air conditioning"].includes(key)) return "HVAC";
+  if (["plumbing", "plumb", "plbg"].includes(key)) return "Plumbing";
+  if (["electrical", "electric", "elec"].includes(key)) return "Electrical";
+  if (["fire protection", "fire", "fire sprinkler", "fp"].includes(key)) return "Fire Protection";
+  if (["architectural", "architecture", "arch"].includes(key)) return "Architectural";
+  return titleLabel(value);
+}
+
+function drawingTypeLabel(value: string | null | undefined): string {
+  const key = filterKey(value);
+  if (!key) return "";
+  if (key.includes("sleeve") && (key.includes("vertical") || /\bv\b/.test(key))) return "Sleeve V";
+  if (key.includes("sleeve") && (key.includes("horizontal") || /\bh\b/.test(key))) return "Sleeve H";
+  if (key.includes("shop") && key.includes("drawing")) return "Shop Drawing";
+  if (key === "shop" || key === "shop drawing" || key === "shop drawings") return "Shop Drawing";
+  if (key === "shop_drawing") return "Shop Drawing";
+  if (key.includes("sleeve")) return "Sleeve";
+  const known = CATEGORY_OPTIONS.find(option => filterKey(option.value) === key || filterKey(option.label) === key || filterKey(option.labelEs) === key);
+  return known?.label || titleLabel(value);
+}
+
+function filterOption(label: string): FilterOption | null {
+  const clean = cleanLabel(label);
+  const value = filterKey(clean);
+  return clean && value ? { label: clean, value } : null;
+}
+
+function mergeOptions(labels: string[]): FilterOption[] {
+  const seen = new Set<string>();
+  const out: FilterOption[] = [];
+  for (const label of labels) {
+    const option = filterOption(label);
+    if (!option || seen.has(option.value)) continue;
+    seen.add(option.value);
+    out.push(option);
+  }
+  return out;
+}
+
+function sortOptions(options: FilterOption[]): FilterOption[] {
+  return [...options].sort((a, b) => a.label.localeCompare(b.label));
+}
+
 // ─── Submittal Tracking List ──────────────────────────────────────────────────
 function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: {
   projectId: number; submittals: Submittal[]; lang: string; onGoSubmittals: () => void;
@@ -299,33 +371,30 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
     return () => { cancelled = true; };
   }, [projectId]);
 
-  const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Other"];
+  const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Architectural", "Other"];
   function tradeOf(s: Submittal): string {
-    if (s.trade) return s.trade;
+    if (s.trade) return tradeLabel(s.trade);
     const t = (s.submittalCategory ?? s.submittalType ?? "").toLowerCase();
     if (t.includes("plumb")) return "Plumbing";
     if (t.includes("hvac") || t.includes("mechanical")) return "HVAC";
     if (t.includes("fire")) return "Fire Protection";
     if (t.includes("electr")) return "Electrical";
+    if (t.includes("arch")) return "Architectural";
     return "Other";
   }
   function floorOf(s: Submittal): string {
-    return s.floor || s.drawingNumber || w("Unassigned", "Sin asignar", lang);
+    return cleanLabel(s.floor) || w("Unassigned", "Sin asignar", lang);
   }
 
   function typeOf(s: Submittal): string {
-    const raw = `${s.submittalType ?? ""} ${s.submittalCategory ?? ""}`.toLowerCase();
-    if (raw.includes("sleeve") && (raw.includes("vert") || raw.includes("vertical") || raw.includes(" v"))) return "Sleeve V";
-    if (raw.includes("sleeve") && (raw.includes("horiz") || raw.includes("horizontal") || raw.includes(" h"))) return "Sleeve H";
-    if (raw.includes("shop")) return "Shop";
-    if (raw.includes("sleeve")) return "Sleeve";
-    return w("Other", "Otro", lang);
+    return drawingTypeLabel(s.submittalCategory || s.submittalType) || w("Other", "Otro", lang);
   }
 
   function trackerTypeMatches(filter: string, actual: string): boolean {
     if (!filter) return true;
-    if (filter === "Sleeve") return actual === "Sleeve" || actual === "Sleeve V" || actual === "Sleeve H";
-    return actual === filter;
+    const actualKey = filterKey(actual);
+    if (filter === "sleeve") return actualKey === "sleeve" || actualKey === "sleeve v" || actualKey === "sleeve h";
+    return actualKey === filter;
   }
 
   function trackerDateRaw(s: Submittal): string {
@@ -346,35 +415,23 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   const [filterStatus, setFilterStatus] = useState("");
 
   const filterOptions = useMemo(() => {
-    const uniq = (rows: string[]) => Array.from(new Set(rows.filter(Boolean))).sort((a, b) => a.localeCompare(b));
-    const uniqPreserve = (rows: string[]) => {
-      const seen = new Set<string>();
-      const out: string[] = [];
-      for (const row of rows) {
-        const value = (row || "").trim();
-        const key = value.toLowerCase();
-        if (!value || seen.has(key)) continue;
-        seen.add(key);
-        out.push(value);
-      }
-      return out;
-    };
-    const standardTypes = ["Shop", "Sleeve V", "Sleeve H", "Sleeve", "Other"];
+    const realTypes = sortOptions(mergeOptions(submittals.map(typeOf))).map(option => option.label);
+    const hasSleeveRows = realTypes.some(label => ["sleeve", "sleeve v", "sleeve h"].includes(filterKey(label)));
     return {
-      floors: uniqPreserve([...buildingLevels, ...uniq(submittals.map(floorOf))]),
-      trades: uniqPreserve([...TRADE_ORDER, ...uniq(submittals.map(tradeOf))]),
-      types: uniqPreserve([...standardTypes, ...uniq(submittals.map(typeOf))]),
-      dates: uniq(submittals.map(trackerDateRaw)),
-      statuses: uniq(submittals.map(s => s.status || w("Unknown", "Desconocido", lang))),
+      floors: sortOptions(mergeOptions([...buildingLevels, ...submittals.map(floorOf)])),
+      trades: sortOptions(mergeOptions(submittals.map(tradeOf))),
+      types: mergeOptions([...(hasSleeveRows ? ["Sleeve"] : []), ...realTypes]),
+      dates: Array.from(new Set(submittals.map(trackerDateRaw).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+      statuses: sortOptions(mergeOptions(submittals.map(s => s.status || w("Unknown", "Desconocido", lang)))),
     };
   }, [submittals, buildingLevels, lang]);
 
   const visibleSubmittals = useMemo(() => submittals.filter(s => {
-    if (filterFloor && floorOf(s) !== filterFloor) return false;
-    if (filterTrade && tradeOf(s) !== filterTrade) return false;
+    if (filterFloor && filterKey(floorOf(s)) !== filterFloor) return false;
+    if (filterTrade && filterKey(tradeOf(s)) !== filterTrade) return false;
     if (!trackerTypeMatches(filterType, typeOf(s))) return false;
     if (filterDate && trackerDateRaw(s) !== filterDate) return false;
-    if (filterStatus && (s.status || w("Unknown", "Desconocido", lang)) !== filterStatus) return false;
+    if (filterStatus && filterKey(s.status || w("Unknown", "Desconocido", lang)) !== filterStatus) return false;
     return true;
   }), [submittals, filterFloor, filterTrade, filterType, filterDate, filterStatus, lang]);
 
@@ -494,21 +551,21 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           {w("Building Level", "Nivel", lang)}
           <select className="input" value={filterFloor} onChange={e => setFilterFloor(e.target.value)}>
             <option value="">{w("All Building Levels", "Todos los Niveles", lang)}</option>
-            {filterOptions.floors.map(v => <option key={v} value={v}>{v}</option>)}
+            {filterOptions.floors.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
           {w("Trade", "Disciplina", lang)}
           <select className="input" value={filterTrade} onChange={e => setFilterTrade(e.target.value)}>
             <option value="">{w("All Trades", "Todas las Disciplinas", lang)}</option>
-            {filterOptions.trades.map(v => <option key={v} value={v}>{v}</option>)}
+            {filterOptions.trades.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
           {w("Drawing Type", "Tipo de Plano", lang)}
           <select className="input" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="">{w("All Drawing Types", "Todos los Tipos de Plano", lang)}</option>
-            {filterOptions.types.map(v => <option key={v} value={v}>{v}</option>)}
+            {filterOptions.types.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
@@ -522,7 +579,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           {w("Review Status", "Estado de Revision", lang)}
           <select className="input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
             <option value="">{w("All Review Statuses", "Todos los Estados de Revision", lang)}</option>
-            {filterOptions.statuses.map(v => <option key={v} value={v}>{v}</option>)}
+            {filterOptions.statuses.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
         <Button
@@ -549,6 +606,11 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         ))}
       </div>
 
+      {visibleSubmittals.length === 0 ? (
+        <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: "28px 20px", textAlign: "center", color: "#64748B", fontSize: 13 }}>
+          {w("No submittals match the selected Shop Drawing Control filters.", "Ningun entregable coincide con los filtros seleccionados de control de shop drawings.", lang)}
+        </div>
+      ) : (
       <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -605,6 +667,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

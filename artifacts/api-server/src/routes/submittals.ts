@@ -53,18 +53,67 @@ function fmtTs(d: Date | string) {
   });
 }
 
+function filterKey(value: string | null | undefined): string {
+  return String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function cleanLabel(value: string | null | undefined): string {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+function titleLabel(value: string | null | undefined): string {
+  const clean = cleanLabel(value);
+  if (!clean) return "";
+  return clean
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, char => char.toUpperCase())
+    .replace(/\bHvac\b/g, "HVAC")
+    .replace(/\bRfi\b/g, "RFI");
+}
+
+function trackerTradeLabel(value: string | null | undefined): string {
+  const key = filterKey(value);
+  if (!key) return "";
+  if (["hvac", "mechanical", "mech", "mep mechanical", "air conditioning"].includes(key)) return "HVAC";
+  if (["plumbing", "plumb", "plbg"].includes(key)) return "Plumbing";
+  if (["electrical", "electric", "elec"].includes(key)) return "Electrical";
+  if (["fire protection", "fire", "fire sprinkler", "fp"].includes(key)) return "Fire Protection";
+  if (["architectural", "architecture", "arch"].includes(key)) return "Architectural";
+  return titleLabel(value);
+}
+
+function trackerDrawingTypeLabel(value: string | null | undefined): string {
+  const key = filterKey(value);
+  if (!key) return "";
+  if (key.includes("sleeve") && (key.includes("vertical") || /\bv\b/.test(key))) return "Sleeve V";
+  if (key.includes("sleeve") && (key.includes("horizontal") || /\bh\b/.test(key))) return "Sleeve H";
+  if (key.includes("shop") && key.includes("drawing")) return "Shop Drawing";
+  if (key === "shop" || key === "shop drawing" || key === "shop drawings") return "Shop Drawing";
+  if (key === "shop_drawing") return "Shop Drawing";
+  if (key.includes("sleeve")) return "Sleeve";
+  return titleLabel(value);
+}
+
 function trackerTrade(s: typeof submittalsTable.$inferSelect): string {
-  if (s.trade) return s.trade;
+  if (s.trade) return trackerTradeLabel(s.trade);
   const raw = `${s.submittalCategory ?? ""} ${s.submittalType ?? ""}`.toLowerCase();
   if (raw.includes("plumb")) return "Plumbing";
   if (raw.includes("hvac") || raw.includes("mechanical")) return "HVAC";
   if (raw.includes("fire")) return "Fire Protection";
   if (raw.includes("electr")) return "Electrical";
+  if (raw.includes("arch")) return "Architectural";
   return "Other";
 }
 
 function trackerFloor(s: typeof submittalsTable.$inferSelect): string {
-  return s.floor || s.drawingNumber || "Unassigned";
+  return cleanLabel(s.floor) || "Unassigned";
 }
 
 function trackerDecision(s: typeof submittalsTable.$inferSelect): string {
@@ -74,18 +123,15 @@ function trackerDecision(s: typeof submittalsTable.$inferSelect): string {
 }
 
 function trackerType(s: typeof submittalsTable.$inferSelect): string {
-  const raw = `${s.submittalType ?? ""} ${s.submittalCategory ?? ""}`.toLowerCase();
-  if (raw.includes("sleeve") && (raw.includes("vert") || raw.includes("vertical") || raw.includes(" v"))) return "Sleeve V";
-  if (raw.includes("sleeve") && (raw.includes("horiz") || raw.includes("horizontal") || raw.includes(" h"))) return "Sleeve H";
-  if (raw.includes("shop")) return "Shop";
-  if (raw.includes("sleeve")) return "Sleeve";
-  return "Other";
+  return trackerDrawingTypeLabel(s.submittalCategory || s.submittalType) || "Other";
 }
 
 function trackerTypeMatches(filter: string, actual: string): boolean {
-  if (!filter) return true;
-  if (filter === "Sleeve") return actual === "Sleeve" || actual === "Sleeve V" || actual === "Sleeve H";
-  return actual === filter;
+  const filterValue = filterKey(filter);
+  if (!filterValue) return true;
+  const actualKey = filterKey(actual);
+  if (filterValue === "sleeve") return actualKey === "sleeve" || actualKey === "sleeve v" || actualKey === "sleeve h";
+  return actualKey === filterValue;
 }
 
 function trackerDateValue(s: typeof submittalsTable.$inferSelect): string {
@@ -103,17 +149,17 @@ function trackerDateLabel(s: typeof submittalsTable.$inferSelect): string {
 }
 
 function filterTrackerSubmittals(req: Request, subs: Array<typeof submittalsTable.$inferSelect>) {
-  const floor = String(req.query.floor || "").trim();
-  const trade = String(req.query.trade || "").trim();
+  const floor = filterKey(String(req.query.floor || ""));
+  const trade = filterKey(String(req.query.trade || ""));
   const type = String(req.query.type || "").trim();
   const date = String(req.query.date || "").trim();
-  const status = String(req.query.status || "").trim();
+  const status = filterKey(String(req.query.status || ""));
   return subs.filter((submittal) => {
-    if (floor && trackerFloor(submittal) !== floor) return false;
-    if (trade && trackerTrade(submittal) !== trade) return false;
+    if (floor && filterKey(trackerFloor(submittal)) !== floor) return false;
+    if (trade && filterKey(trackerTrade(submittal)) !== trade) return false;
     if (!trackerTypeMatches(type, trackerType(submittal))) return false;
     if (date && trackerDateValue(submittal) !== date) return false;
-    if (status && (submittal.status || "Unknown") !== status) return false;
+    if (status && filterKey(submittal.status || "Unknown") !== status) return false;
     return true;
   });
 }
