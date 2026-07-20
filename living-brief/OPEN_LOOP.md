@@ -32,6 +32,14 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Shop Drawing Control Filter Hotfix Accepted
+
+- Accepted candidate `8c2e5709cf18f977d653bece5d6625d416ef46eb` was independently reviewed and applied as content only to clean `origin/master` baseline `c13d9044513169ff61816f8e598197c25334981e`, without importing its older ancestry. Clean integration commit: `02e3f773e2ed796dde3567a0170f3f399f863c69`.
+- Shop Drawing Control Building Level, Trade, and Drawing Type filters now normalize case, whitespace, punctuation, underscores, and approved aliases for comparison only. Clean human-readable labels are preserved, persisted customer data is not rewritten, and Building Level uses configured project levels plus actual submittal rows.
+- UI visible rows and PDF/Excel tracker exports use the same filter semantics. The focused fixture proves All restores every record, combined filters return only matching rows, zero-result filters remain empty, Sleeve includes Sleeve/Sleeve V/Sleeve H, and HVAC, Plumbing, Electrical, Fire Protection, Architectural, Shop Drawing, Sleeve V, Sleeve H, and Product Data variants filter correctly.
+- Repository evidence JSON from the candidate was excluded. Final sanitized evidence was regenerated outside the repository at `C:\Dev\bimlog-tools\evidence\shop-drawing-filter-hotfix\2026-07-20T19-11-22-382Z`; manifest SHA-256 `c5db85acda7e67fbc8631bc9f42b388007e9fb00a2956ba8696787b285f2640e`.
+- Focused validation passed: filter proof, `git diff --check`, mojibake scan, Living Brief integrity, typecheck, and production build. Nothing was published.
+
 ### Plans, Entitlements & Feature Controls - Step 1 Accepted
 
 - Accepted source commit `35b01ae7ce80344fae13550b36ca8353ad643901` was cleanly applied to `origin/master` baseline `2d57aaff7c58e27cb0b1e8290375c5d7f4be2543` without importing its older branch ancestry. Integration commit: `0e73ba0aaa29c4d4f5de023aa25caeceb435f1da`.
