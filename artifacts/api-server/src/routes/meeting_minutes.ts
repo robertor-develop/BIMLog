@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import {
   meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
   activityLogTable, usersTable, rfisTable, meetingRfiLinksTable,
+  submittalsTable, meetingSubmittalLinksTable,
   linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
 import { eq, and, desc, ne, isNull, or, ilike, inArray, asc } from "drizzle-orm";
@@ -28,6 +29,71 @@ const parseLegacyRfiRows = (notes: string | null) => {
   });
 };
 
+const parseLegacyDeliverableRows = (notes: string | null) => {
+  if (!notes) return [];
+  const block = notes.match(/(?:^|\n\n)DELIVERABLES:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  if (!block) return [];
+  return block.split("\n").filter(Boolean).map((line) => ({ raw: line }));
+};
+
+type DisciplineBucket = "plumbing" | "hvac" | "fireProtection" | "electrical" | "other" | null;
+
+function cleanLabel(value: string | null | undefined) {
+  return value?.trim().replace(/[_-]+/g, " ").replace(/\s+/g, " ") || null;
+}
+
+function titleLabel(value: string | null | undefined) {
+  const cleaned = cleanLabel(value);
+  return cleaned ? cleaned.replace(/\b\w/g, character => character.toUpperCase()) : null;
+}
+
+function submittalDiscipline(submittal: typeof submittalsTable.$inferSelect) {
+  if (cleanLabel(submittal.trade)) return titleLabel(submittal.trade);
+  const fallback = `${submittal.submittalCategory || ""} ${submittal.submittalType || ""}`.toLowerCase();
+  if (fallback.includes("plumb")) return "Plumbing";
+  if (fallback.includes("hvac") || fallback.includes("mechanical")) return "HVAC";
+  if (fallback.includes("fire protection") || fallback.includes("fire suppression") || fallback.includes("sprinkler")) return "Fire Protection";
+  if (fallback.includes("electr")) return "Electrical";
+  return null;
+}
+
+function submittalDisciplineBucket(discipline: string | null): DisciplineBucket {
+  const key = discipline?.toLowerCase() || "";
+  if (!key) return null;
+  if (key.includes("plumb")) return "plumbing";
+  if (key.includes("hvac") || key.includes("mechanical")) return "hvac";
+  if (key.includes("fire protection") || key.includes("fire suppression") || key.includes("sprinkler")) return "fireProtection";
+  if (key.includes("electr")) return "electrical";
+  return "other";
+}
+
+function submittalResponsible(submittal: typeof submittalsTable.$inferSelect, assignedToName?: string | null) {
+  return cleanLabel(submittal.ballInCourt || assignedToName || submittal.responsibleCompany || submittal.submittedToPerson || submittal.submittedToCompany);
+}
+
+const serializeMeetingSubmittalLink = (link: typeof meetingSubmittalLinksTable.$inferSelect) => ({
+  id: link.id,
+  submittalId: link.submittalId,
+  number: link.numberSnapshot,
+  title: link.titleSnapshot,
+  description: link.descriptionSnapshot,
+  floor: link.floorSnapshot,
+  discipline: link.disciplineSnapshot,
+  disciplineBucket: link.disciplineBucketSnapshot as DisciplineBucket,
+  status: link.statusSnapshot,
+  responsible: link.responsibleSnapshot,
+  deadline: link.deadlineSnapshot,
+  linkedAt: link.createdAt,
+  valuesMode: "snapshot" as const,
+});
+
+async function getMeetingSubmittalLinks(meetingId: number) {
+  const links = await db.select().from(meetingSubmittalLinksTable)
+    .where(eq(meetingSubmittalLinksTable.meetingId, meetingId))
+    .orderBy(asc(meetingSubmittalLinksTable.id));
+  return links.map(serializeMeetingSubmittalLink);
+}
+
 const serializeMeetingRfiLink = (link: typeof meetingRfiLinksTable.$inferSelect) => ({
   id: link.id,
   rfiId: link.rfiId,
@@ -49,6 +115,43 @@ async function getMeetingRfiLinks(meetingId: number) {
 
 class MeetingRfiLinkError extends Error {
   constructor(public status: number, public code: string) { super(code); }
+}
+
+class MeetingSubmittalLinkError extends Error {
+  constructor(public status: number, public code: string) { super(code); }
+}
+
+async function insertMeetingSubmittalLinks(executor: any, projectId: number, meetingId: number, rawSubmittalIds: number[], userId: number) {
+  const submittalIds = [...new Set(rawSubmittalIds.filter(Number.isInteger))];
+  if (!submittalIds.length) return { requested: 0, added: 0 };
+
+  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+  if (!meeting) throw new MeetingSubmittalLinkError(404, "meeting_not_found");
+
+  const rows = await executor.select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
+    .from(submittalsTable).leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
+    .where(and(inArray(submittalsTable.id, submittalIds), eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)));
+  if (rows.length !== submittalIds.length) throw new MeetingSubmittalLinkError(404, "submittal_not_accessible");
+
+  const inserted = await executor.insert(meetingSubmittalLinksTable).values(rows.map(({ submittal, assignedToName }: any) => {
+    const discipline = submittalDiscipline(submittal);
+    return {
+      projectId, meetingId, submittalId: submittal.id,
+      numberSnapshot: submittal.number,
+      titleSnapshot: submittal.title,
+      descriptionSnapshot: submittal.description || null,
+      floorSnapshot: cleanLabel(submittal.floor),
+      disciplineSnapshot: discipline,
+      disciplineBucketSnapshot: submittalDisciplineBucket(discipline),
+      statusSnapshot: submittal.status,
+      responsibleSnapshot: submittalResponsible(submittal, assignedToName),
+      deadlineSnapshot: submittal.dateRequired || submittal.dueDate || null,
+      createdById: userId,
+    };
+  })).onConflictDoNothing({ target: [meetingSubmittalLinksTable.meetingId, meetingSubmittalLinksTable.submittalId] })
+    .returning({ id: meetingSubmittalLinksTable.id });
+  return { requested: submittalIds.length, added: inserted.length };
 }
 
 async function insertMeetingRfiLinks(executor: any, projectId: number, meetingId: number, rawRfiIds: number[], userId: number) {
@@ -96,7 +199,8 @@ router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember
       const attendees = await db.select({ id: meetingAttendeesTable.id }).from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, m.id));
       const actionItems = await db.select({ id: actionItemsTable.id, status: actionItemsTable.status }).from(actionItemsTable).where(eq(actionItemsTable.meetingId, m.id));
       const linkedRfis = await getMeetingRfiLinks(m.id);
-      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, legacyRfis: parseLegacyRfiRows(m.notes) };
+      const linkedSubmittals = await getMeetingSubmittalLinks(m.id);
+      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes) };
     }));
     res.json(result);
   } catch (err) {
@@ -111,11 +215,15 @@ router.post("/projects/:projectId/meetings", authMiddleware, requirePermission("
     title: string; meeting_date: string; location?: string; notes?: string;
     attendees?: { user_id?: number; external_email?: string; full_name: string; company?: string; role?: string }[];
     rfi_ids?: number[];
+    submittal_ids?: number[];
   };
   if (!body.title || !body.meeting_date) { res.status(400).json({ error: "title and meeting_date required" }); return; }
   try {
     if (body.rfi_ids !== undefined && (!Array.isArray(body.rfi_ids) || body.rfi_ids.some(id => !Number.isInteger(id)))) {
       res.status(400).json({ error: "valid_rfi_ids_required" }); return;
+    }
+    if (body.submittal_ids !== undefined && (!Array.isArray(body.submittal_ids) || body.submittal_ids.some(id => !Number.isInteger(id)))) {
+      res.status(400).json({ error: "valid_submittal_ids_required" }); return;
     }
     const meeting = await db.transaction(async (tx) => {
       const [created] = await tx.insert(meetingMinutesTable).values({
@@ -133,6 +241,7 @@ router.post("/projects/:projectId/meetings", authMiddleware, requirePermission("
         })));
       }
       await insertMeetingRfiLinks(tx, projectId, created.id, body.rfi_ids ?? [], req.user!.userId);
+      await insertMeetingSubmittalLinks(tx, projectId, created.id, body.submittal_ids ?? [], req.user!.userId);
       await tx.insert(activityLogTable).values({
         projectId, userId: req.user!.userId,
         userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
@@ -223,6 +332,96 @@ router.delete("/projects/:projectId/meetings/:meetingId/rfis/:rfiId", authMiddle
   }
 });
 
+// Minimal project-scoped selector payload: attachments, storage locators,
+// contact details, audit data, and all other private fields are excluded.
+router.get("/projects/:projectId/meetings/submittal-candidates", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const q = String(req.query.q ?? "").trim().toLowerCase();
+  const floor = String(req.query.floor ?? "").trim().toLowerCase();
+  const disciplineFilter = String(req.query.discipline ?? "").trim().toLowerCase();
+  const status = String(req.query.status ?? "").trim().toLowerCase();
+  const responsibleFilter = String(req.query.responsible ?? "").trim().toLowerCase();
+  const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+  try {
+    let alreadyLinked = new Set<number>();
+    if (meetingId !== null) {
+      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+      alreadyLinked = new Set((await db.select({ submittalId: meetingSubmittalLinksTable.submittalId }).from(meetingSubmittalLinksTable)
+        .where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meetingId)))).map(row => row.submittalId));
+    }
+    const rows = await db.select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
+      .from(submittalsTable).leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
+      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
+      .orderBy(asc(submittalsTable.number));
+    const candidates = rows.map(({ submittal, assignedToName }) => {
+      const discipline = submittalDiscipline(submittal);
+      const responsible = submittalResponsible(submittal, assignedToName);
+      return {
+        id: submittal.id,
+        number: submittal.number,
+        title: submittal.title,
+        description: submittal.description || null,
+        floor: cleanLabel(submittal.floor),
+        discipline,
+        disciplineBucket: submittalDisciplineBucket(discipline),
+        status: submittal.status,
+        responsible,
+        deadline: submittal.dateRequired || submittal.dueDate || null,
+        alreadyAdded: alreadyLinked.has(submittal.id),
+      };
+    }).filter(candidate => {
+      const text = `${candidate.number} ${candidate.title} ${candidate.description || ""}`.toLowerCase();
+      if (q && !text.includes(q)) return false;
+      if (floor && (candidate.floor || "").toLowerCase() !== floor) return false;
+      if (disciplineFilter && (candidate.discipline || "").toLowerCase() !== disciplineFilter) return false;
+      if (status && candidate.status.toLowerCase() !== status) return false;
+      if (responsibleFilter && !(candidate.responsible || "").toLowerCase().includes(responsibleFilter)) return false;
+      return true;
+    }).slice(0, 200);
+    res.json(candidates);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+router.post("/projects/:projectId/meetings/:meetingId/submittals", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  const submittalIds = req.body?.submittal_ids;
+  if (!Array.isArray(submittalIds) || submittalIds.length === 0 || submittalIds.some((id: unknown) => !Number.isInteger(id))) {
+    res.status(400).json({ error: "valid_submittal_ids_required" }); return;
+  }
+  try {
+    const result = await db.transaction(tx => insertMeetingSubmittalLinks(tx, projectId, meetingId, submittalIds, req.user!.userId));
+    res.status(result.added ? 201 : 200).json({ ...result, links: await getMeetingSubmittalLinks(meetingId) });
+  } catch (err) {
+    if (err instanceof MeetingSubmittalLinkError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+router.delete("/projects/:projectId/meetings/:meetingId/submittals/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  const submittalId = Number(req.params.submittalId);
+  try {
+    const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+    const removed = await db.delete(meetingSubmittalLinksTable).where(and(
+      eq(meetingSubmittalLinksTable.projectId, projectId),
+      eq(meetingSubmittalLinksTable.meetingId, meetingId),
+      eq(meetingSubmittalLinksTable.submittalId, submittalId),
+    )).returning({ id: meetingSubmittalLinksTable.id });
+    if (!removed.length) { res.status(404).json({ error: "meeting_submittal_link_not_found" }); return; }
+    res.json({ removed: true, submittalId });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
 // ── GET /projects/:projectId/meetings/:meetingId ──────────────────────────────
 router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
@@ -233,7 +432,7 @@ router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requirePr
     if (!meeting) { res.status(404).json({ error: "Not found" }); return; }
     const attendees = await db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
     const actionItems = await db.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId));
-    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes) });
+    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes) });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }

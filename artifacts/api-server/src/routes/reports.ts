@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import {
   projectsTable, rfisTable, submittalsTable, filesTable,
   activityLogTable, transmittalsTable, changeOrdersTable,
-  meetingMinutesTable, actionItemsTable, projectMembersTable, usersTable,
+  meetingMinutesTable, meetingSubmittalLinksTable, actionItemsTable, projectMembersTable, usersTable,
   namingConventionsTable, namingFieldsTable, namingConventionVersionsTable,
 } from "@workspace/db/schema";
 import { eq, and, inArray, desc, ne } from "drizzle-orm";
@@ -322,6 +322,23 @@ router.get("/projects/:projectId/reports/meeting-minutes/pdf", async (req, res) 
       doc.fontSize(10).font("Helvetica-Bold").fillColor("#111").text(`${new Date(m.meetingDate).toLocaleDateString()} — ${m.title}`);
       if (m.location) doc.fontSize(8).font("Helvetica").fillColor("#666").text(`Location: ${m.location}`);
       if (m.notes) doc.fontSize(8).font("Helvetica").fillColor("#374151").text(m.notes, { indent: 10 });
+      const linkedSubmittals = await db.select().from(meetingSubmittalLinksTable)
+        .where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, m.id)))
+        .orderBy(meetingSubmittalLinksTable.id);
+      if (linkedSubmittals.length) {
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("#111").text("Linked Submittals (meeting-time values)", { indent: 10 });
+        linkedSubmittals.forEach(link => {
+          const details = [
+            link.floorSnapshot,
+            link.disciplineSnapshot,
+            link.statusSnapshot.replace(/[_-]+/g, " "),
+            link.responsibleSnapshot,
+            link.deadlineSnapshot ? `Due ${new Date(link.deadlineSnapshot).toLocaleDateString()}` : null,
+          ].filter(Boolean).join(" · ");
+          doc.fontSize(8).font("Helvetica").fillColor("#374151")
+            .text(`${link.numberSnapshot} — ${link.titleSnapshot}${link.descriptionSnapshot && link.descriptionSnapshot !== link.titleSnapshot ? `: ${link.descriptionSnapshot}` : ""}${details ? ` (${details})` : ""}`, { indent: 16 });
+        });
+      }
       if (m.aiSummary) doc.fontSize(8).font("Helvetica-Oblique").fillColor("#2563EB").text(`AI Summary: ${m.aiSummary}`, { indent: 10 });
       doc.moveDown(0.5);
     }

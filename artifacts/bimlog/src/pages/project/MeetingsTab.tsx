@@ -19,6 +19,7 @@ interface Meeting {
   notes?: string; aiSummary?: string; attendeeCount: number;
   openActionItems: number; actionItemCount: number; createdAt: string;
   linkedRfis?: LinkedRfi[]; legacyRfis?: RFIRow[];
+  linkedSubmittals?: LinkedSubmittal[]; legacyDeliverables?: LegacyDeliverableRow[];
 }
 
 interface Attendee {
@@ -40,6 +41,21 @@ interface RfiCandidate {
   status: string; responsible?: string | null; alreadyAdded: boolean;
 }
 
+type DisciplineBucket = "plumbing" | "hvac" | "fireProtection" | "electrical" | "other" | null;
+
+interface LinkedSubmittal {
+  id?: number; submittalId: number; number: string; title: string;
+  description?: string | null; floor?: string | null; discipline?: string | null;
+  disciplineBucket: DisciplineBucket; status: string; responsible?: string | null;
+  deadline?: string | null;
+}
+
+interface SubmittalCandidate extends Omit<LinkedSubmittal, "submittalId"> {
+  id: number; alreadyAdded: boolean;
+}
+
+interface LegacyDeliverableRow { raw: string; }
+
 interface DeliverableRow {
   floor: string; description: string; plumbing: string; hvac: string;
   fireProt: string; electrical: string; other: string; coordinator: string; deadline: string;
@@ -55,7 +71,6 @@ interface ActionItem {
   dueDate?: string; status: string; isOverdue?: boolean;
 }
 
-const STATUS_OPTIONS = ["PENDING", "COMPLETE", "N/A", ""];
 const CELL_STYLE = {
   border: "1px solid #E5E7EB", padding: "6px 8px",
   fontSize: 12, verticalAlign: "middle" as const
@@ -65,16 +80,7 @@ const TH_STYLE = {
   fontWeight: 700, fontSize: 11, textTransform: "uppercase" as const
 };
 
-function StatusCell({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const color = value === "COMPLETE" ? "#DCFCE7" : value === "PENDING" ? "#FEF3C7" : value === "N/A" ? "#F3F4F6" : "white";
-  const textColor = value === "COMPLETE" ? "#16A34A" : value === "PENDING" ? "#D97706" : "#6B7280";
-  return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      style={{ background: color, color: textColor, border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, fontWeight: 600, padding: "2px 4px", width: "100%" }}>
-      {STATUS_OPTIONS.map(o => <option key={o} value={o}>{o || "—"}</option>)}
-    </select>
-  );
-}
+const humanLabel = (value?: string | null) => value ? value.replace(/[_-]+/g, " ").replace(/\b\w/g, character => character.toUpperCase()) : "—";
 
 export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
@@ -169,6 +175,19 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   const [selectorLoading, setSelectorLoading] = useState(false);
   const [selectorError, setSelectorError] = useState("");
   const [selectorSaving, setSelectorSaving] = useState(false);
+  const [selectedSubmittals, setSelectedSubmittals] = useState<LinkedSubmittal[]>([]);
+  const [submittalSelectorMeetingId, setSubmittalSelectorMeetingId] = useState<number | null | undefined>(undefined);
+  const [submittalQuery, setSubmittalQuery] = useState("");
+  const [submittalFloor, setSubmittalFloor] = useState("");
+  const [submittalDiscipline, setSubmittalDiscipline] = useState("");
+  const [submittalStatus, setSubmittalStatus] = useState("");
+  const [submittalResponsible, setSubmittalResponsible] = useState("");
+  const [submittalCandidates, setSubmittalCandidates] = useState<SubmittalCandidate[]>([]);
+  const [submittalCandidateCache, setSubmittalCandidateCache] = useState<Map<number, SubmittalCandidate>>(new Map());
+  const [submittalSelectedIds, setSubmittalSelectedIds] = useState<Set<number>>(new Set());
+  const [submittalLoading, setSubmittalLoading] = useState(false);
+  const [submittalError, setSubmittalError] = useState("");
+  const [submittalSaving, setSubmittalSaving] = useState(false);
   const [deliverables, setDeliverables] = useState<DeliverableRow[]>([
     { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
     { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
@@ -291,7 +310,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     setTitle(""); setMeetingDate(""); setMeetingTime("10:00"); setLocation("");
     setAgendaItems(["", "", "", ""]);
     setAttendees([{ trade: "", company: "", fullName: "", role: "", email: "", phone: "" }]);
-    setRfis([]); setSelectedRfis([]);
+    setRfis([]); setSelectedRfis([]); setSelectedSubmittals([]);
     setDeliverables([
       { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
       { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
@@ -415,6 +434,119 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     </div>
   ) : null;
 
+  const loadSubmittalCandidates = async () => {
+    if (submittalSelectorMeetingId === undefined) return;
+    setSubmittalLoading(true); setSubmittalError("");
+    try {
+      const params = new URLSearchParams();
+      if (submittalQuery.trim()) params.set("q", submittalQuery.trim());
+      if (submittalFloor.trim()) params.set("floor", submittalFloor.trim());
+      if (submittalDiscipline.trim()) params.set("discipline", submittalDiscipline.trim());
+      if (submittalStatus.trim()) params.set("status", submittalStatus.trim());
+      if (submittalResponsible.trim()) params.set("responsible", submittalResponsible.trim());
+      if (submittalSelectorMeetingId !== null) params.set("meeting_id", String(submittalSelectorMeetingId));
+      const response = await fetch(`${API}/projects/${projectId}/meetings/submittal-candidates?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error(t("Could not load project Submittals.", "No se pudieron cargar los Submittals del proyecto."));
+      const rows = await response.json() as SubmittalCandidate[];
+      const locallySelected = new Set(selectedSubmittals.map(row => row.submittalId));
+      const normalized = rows.map(row => ({ ...row, alreadyAdded: row.alreadyAdded || (submittalSelectorMeetingId === null && locallySelected.has(row.id)) }));
+      setSubmittalCandidates(normalized);
+      setSubmittalCandidateCache(previous => {
+        const next = new Map(previous);
+        normalized.forEach(row => next.set(row.id, row));
+        return next;
+      });
+    } catch (err) {
+      setSubmittalError(err instanceof Error ? err.message : t("Could not load project Submittals.", "No se pudieron cargar los Submittals del proyecto."));
+    } finally { setSubmittalLoading(false); }
+  };
+
+  useEffect(() => {
+    if (submittalSelectorMeetingId === undefined) return;
+    const timer = window.setTimeout(() => { void loadSubmittalCandidates(); }, 200);
+    return () => window.clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submittalSelectorMeetingId, submittalQuery, submittalFloor, submittalDiscipline, submittalStatus, submittalResponsible, projectId]);
+
+  const openSubmittalSelector = (meetingId: number | null) => {
+    setSubmittalQuery(""); setSubmittalFloor(""); setSubmittalDiscipline(""); setSubmittalStatus(""); setSubmittalResponsible("");
+    setSubmittalSelectedIds(new Set()); setSubmittalCandidates([]); setSubmittalCandidateCache(new Map()); setSubmittalError("");
+    setSubmittalSelectorMeetingId(meetingId);
+  };
+
+  const closeSubmittalSelector = () => { if (!submittalSaving) setSubmittalSelectorMeetingId(undefined); };
+
+  const addSelectedSubmittals = async () => {
+    const ids = [...submittalSelectedIds];
+    if (!ids.length) return;
+    setSubmittalSaving(true); setSubmittalError("");
+    try {
+      if (submittalSelectorMeetingId === null) {
+        setSelectedSubmittals(previous => {
+          const existing = new Set(previous.map(row => row.submittalId));
+          return [...previous, ...ids.filter(id => !existing.has(id)).map(id => {
+            const row = submittalCandidateCache.get(id)!;
+            return { submittalId: row.id, number: row.number, title: row.title, description: row.description, floor: row.floor, discipline: row.discipline, disciplineBucket: row.disciplineBucket, status: row.status, responsible: row.responsible, deadline: row.deadline };
+          })];
+        });
+      } else if (submittalSelectorMeetingId !== undefined) {
+        const response = await fetch(`${API}/projects/${projectId}/meetings/${submittalSelectorMeetingId}/submittals`, {
+          method: "POST", headers, body: JSON.stringify({ submittal_ids: ids }),
+        });
+        if (!response.ok) {
+          throw new Error(t("Could not add the selected Submittals.", "No se pudieron añadir los Submittals seleccionados."));
+        }
+        await loadMeetings();
+      }
+      setSubmittalSelectorMeetingId(undefined);
+    } catch (err) {
+      setSubmittalError(err instanceof Error ? err.message : t("Could not add the selected Submittals.", "No se pudieron añadir los Submittals seleccionados."));
+    } finally { setSubmittalSaving(false); }
+  };
+
+  const removeMeetingSubmittal = async (meetingId: number, submittalId: number) => {
+    const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}/submittals/${submittalId}`, { method: "DELETE", headers });
+    if (!response.ok) { setError(t("Could not remove the meeting link.", "No se pudo quitar el enlace del acta.")); return; }
+    await loadMeetings();
+  };
+
+  const openOriginalSubmittal = (submittalId: number) => window.location.assign(`/projects/${projectId}/submittals?submittal=${submittalId}`);
+
+  const SubmittalSelectorModal = () => submittalSelectorMeetingId !== undefined ? (
+    <div role="dialog" aria-modal="true" aria-label={t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}
+      style={{ position: "fixed", inset: 0, zIndex: 1100, background: "rgba(15,23,42,0.58)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
+      <div style={{ background: "white", borderRadius: 12, width: "min(880px, calc(100vw - 24px))", maxHeight: "calc(100vh - 24px)", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,.25)", overflow: "hidden" }}>
+        <div style={{ padding: "16px 16px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800 }}>{t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}</div><div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{t("Select one or more existing Submittals from this project.", "Seleccione uno o más Submittals existentes de este proyecto.")}</div></div>
+          <button aria-label={t("Close", "Cerrar")} onClick={closeSubmittalSelector} style={{ border: 0, background: "transparent", cursor: "pointer", padding: 6 }}><X size={18} /></button>
+        </div>
+        <div style={{ padding: "0 16px 12px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8 }}>
+          <div style={{ position: "relative", gridColumn: "1 / -1" }}><Search size={15} style={{ position: "absolute", left: 12, top: 11, color: "#6B7280" }} /><input autoFocus className="input" value={submittalQuery} onChange={event => setSubmittalQuery(event.target.value)} placeholder={t("Search number, title, or description", "Buscar número, título o descripción")} style={{ width: "100%", paddingLeft: 34, margin: 0 }} /></div>
+          <input className="input" value={submittalFloor} onChange={event => setSubmittalFloor(event.target.value)} placeholder={t("Floor / area", "Piso / área")} style={{ margin: 0, minWidth: 0 }} />
+          <input className="input" value={submittalDiscipline} onChange={event => setSubmittalDiscipline(event.target.value)} placeholder={t("Discipline / trade", "Disciplina / oficio")} style={{ margin: 0, minWidth: 0 }} />
+          <input className="input" value={submittalStatus} onChange={event => setSubmittalStatus(event.target.value)} placeholder={t("Status", "Estado")} style={{ margin: 0, minWidth: 0 }} />
+          <input className="input" value={submittalResponsible} onChange={event => setSubmittalResponsible(event.target.value)} placeholder={t("Responsible person / company", "Persona / empresa responsable")} style={{ margin: 0, minWidth: 0 }} />
+        </div>
+        <div style={{ overflowY: "auto", padding: "0 16px", minHeight: 160 }}>
+          {submittalLoading && <div style={{ padding: 32, textAlign: "center", color: "#6B7280" }}>{t("Loading Submittals…", "Cargando Submittals…")}</div>}
+          {!submittalLoading && submittalError && <div style={{ padding: 24, textAlign: "center", color: "#B91C1C" }}><div>{submittalError}</div><button className="btn btn-sm btn-outline" onClick={() => void loadSubmittalCandidates()} style={{ marginTop: 10 }}><RefreshCw size={12} style={{ marginRight: 5 }} />{t("Retry", "Reintentar")}</button></div>}
+          {!submittalLoading && !submittalError && submittalCandidates.length === 0 && <div style={{ padding: 32, textAlign: "center", color: "#6B7280" }}>{submittalQuery || submittalFloor || submittalDiscipline || submittalStatus || submittalResponsible ? t("No Submittals match these filters.", "Ningún Submittal coincide con estos filtros.") : t("No Submittals exist in this project.", "No existen Submittals en este proyecto.")}</div>}
+          {!submittalLoading && !submittalError && submittalCandidates.map(submittal => {
+            const checked = submittalSelectedIds.has(submittal.id);
+            return <label key={submittal.id} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "12px 4px", borderBottom: "1px solid #E5E7EB", cursor: submittal.alreadyAdded ? "default" : "pointer", opacity: submittal.alreadyAdded ? .65 : 1 }}>
+              <input type="checkbox" checked={checked || submittal.alreadyAdded} disabled={submittal.alreadyAdded} onChange={() => setSubmittalSelectedIds(previous => { const next = new Set(previous); checked ? next.delete(submittal.id) : next.add(submittal.id); return next; })} style={{ marginTop: 3 }} />
+              <div style={{ minWidth: 0, flex: 1 }}><div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center" }}><strong style={{ fontSize: 13 }}>{submittal.number}</strong><span style={{ fontSize: 13 }}>{submittal.title}</span>{submittal.alreadyAdded && <span style={{ fontSize: 10, color: "#166534", background: "#DCFCE7", padding: "2px 6px", borderRadius: 10 }}>{t("Already added", "Ya añadido")}</span>}</div>
+                {submittal.description && submittal.description !== submittal.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 3, overflowWrap: "anywhere" }}>{submittal.description}</div>}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, fontSize: 11, color: "#6B7280", marginTop: 5 }}><span>{t("Floor / area", "Piso / área")}: {submittal.floor || "—"}</span><span>{t("Discipline", "Disciplina")}: {submittal.discipline || "—"}</span><span>{t("Status", "Estado")}: {humanLabel(submittal.status)}</span><span>{t("Responsible", "Responsable")}: {submittal.responsible || "—"}</span><span>{t("Deadline", "Fecha límite")}: {submittal.deadline ? new Date(submittal.deadline).toLocaleDateString() : "—"}</span></div>
+              </div>
+            </label>;
+          })}
+        </div>
+        <div style={{ padding: 16, display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8, borderTop: "1px solid #E5E7EB" }}><button className="btn btn-outline" onClick={closeSubmittalSelector}>{t("Cancel", "Cancelar")}</button><button className="btn btn-primary" onClick={() => void addSelectedSubmittals()} disabled={!submittalSelectedIds.size || submittalSaving}>{submittalSaving ? t("Adding…", "Añadiendo…") : t(`Add Selected (${submittalSelectedIds.size})`, `Añadir seleccionados (${submittalSelectedIds.size})`)}</button></div>
+      </div>
+    </div>
+  ) : null;
+
   const buildNotes = () => {
     const parts: string[] = [];
     const agenda = agendaItems.filter(Boolean);
@@ -446,6 +578,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           role: a.role, external_email: a.email || undefined,
         })),
         rfi_ids: selectedRfis.map(rfi => rfi.rfiId),
+        submittal_ids: selectedSubmittals.map(submittal => submittal.submittalId),
       };
       const r = await fetch(`${API}/projects/${projectId}/meetings`, {
         method: "POST", headers, body: JSON.stringify(body),
@@ -569,6 +702,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
                     {canWrite && <button className="btn btn-sm btn-outline" onClick={() => openRfiSelector(m.id)}><Plus size={12} style={{ marginRight: 4 }} />{t("Add Existing RFI", "Añadir RFI existente")}</button>}
+                    {canWrite && <button className="btn btn-sm btn-outline" onClick={() => openSubmittalSelector(m.id)}><Plus size={12} style={{ marginRight: 4 }} />{t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}</button>}
                     {canWrite && (
                       <button
                         title={t("Delete meeting", "Eliminar reunión")}
@@ -580,7 +714,9 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                     )}
                   </div>
                   {!!m.linkedRfis?.length && <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>{m.linkedRfis.map(rfi => <div key={rfi.rfiId} style={{ border: "1px solid #DBEAFE", background: "#F8FAFC", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}><div style={{ flex: "1 1 220px", minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{rfi.rfiNumber} · {rfi.title}</div>{rfi.description && rfi.description !== rfi.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2 }}>{rfi.description}</div>}<div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>{t("Status", "Estado")}: {rfi.status} · {t("Responsible", "Responsable")}: {rfi.responsible || "—"}</div></div><button className="btn btn-sm btn-outline" onClick={() => openOriginalRfi(rfi.rfiId)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Original RFI", "Abrir RFI original")}</button>{canWrite && <button className="btn btn-sm btn-outline" onClick={() => void removeMeetingRfi(m.id, rfi.rfiId)}>{t("Remove link", "Quitar enlace")}</button>}</div>)}</div>}
+                  {!!m.linkedSubmittals?.length && <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>{m.linkedSubmittals.map(submittal => <div key={submittal.submittalId} style={{ border: "1px solid #C7D2FE", background: "#F8FAFC", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}><div style={{ flex: "1 1 240px", minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{submittal.number} · {submittal.title}</div>{submittal.description && submittal.description !== submittal.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2 }}>{submittal.description}</div>}<div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>{[submittal.floor, submittal.discipline, humanLabel(submittal.status), submittal.responsible, submittal.deadline ? new Date(submittal.deadline).toLocaleDateString() : null].filter(Boolean).join(" · ")}</div></div><button className="btn btn-sm btn-outline" onClick={() => openOriginalSubmittal(submittal.submittalId)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Original Submittal", "Abrir Submittal original")}</button>{canWrite && <button className="btn btn-sm btn-outline" onClick={() => void removeMeetingSubmittal(m.id, submittal.submittalId)}>{t("Remove link", "Quitar enlace")}</button>}</div>)}</div>}
                   {!!m.legacyRfis?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual RFI notes", "Notas RFI manuales anteriores")}</div>{m.legacyRfis.map((row, index) => <div key={`${row.rfiNumber}-${index}`} style={{ fontSize: 12 }}>{[row.rfiNumber, row.description, row.status, row.responsible].filter(Boolean).join(" · ")}</div>)}</div>}
+                  {!!m.legacyDeliverables?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Deliverable notes", "Notas manuales anteriores de Entregables")}</div>{m.legacyDeliverables.map((row, index) => <div key={`${row.raw}-${index}`} style={{ fontSize: 12, overflowWrap: "anywhere" }}>{row.raw}</div>)}</div>}
                 </div>
               ))}
             </div>
@@ -643,6 +779,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
             </div>
       )}
       <RfiSelectorModal />
+      <SubmittalSelectorModal />
     </div>
   );
 
@@ -937,10 +1074,10 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <SectionHeader label={t("Deliverables", "Entregables")} sectionKey="deliverables" />
+        <SectionHeader label={t("Submittals / Deliverables", "Submittals / Entregables")} sectionKey="deliverables" />
         {expandedSections.deliverables && (
           <div style={{ background: "white", border: "1px solid #E5E7EB", borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div style={{ overflowX: "auto" }}><table style={{ width: "100%", minWidth: 940, borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {[t("Floor/Area","Piso/Área"), t("Description","Descripción"), "PLUMBING", "HVAC", "FIRE PROT.", "ELECTRICAL", "OTHER", "COORDINATOR", t("Deadline","Fecha Límite"), ""].map(h => (
@@ -949,35 +1086,20 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                 </tr>
               </thead>
               <tbody>
-                {deliverables.map((d, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                    <td style={CELL_STYLE}>
-                      <input value={d.floor} onChange={e => { const arr = [...deliverables]; arr[i].floor = e.target.value; setDeliverables(arr); }}
-                        style={{ border: "none", outline: "none", width: "100%", fontSize: 12, fontWeight: 600, background: "transparent" }} />
-                    </td>
-                    <td style={CELL_STYLE}>
-                      <input value={d.description} onChange={e => { const arr = [...deliverables]; arr[i].description = e.target.value; setDeliverables(arr); }}
-                        style={{ border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" }} />
-                    </td>
-                    {(["plumbing","hvac","fireProt","electrical","other","coordinator"] as (keyof DeliverableRow)[]).map(field => (
-                      <td key={field} style={{ ...CELL_STYLE, width: 90 }}>
-                        <StatusCell value={d[field]} onChange={v => { const arr = [...deliverables]; (arr[i] as any)[field] = v; setDeliverables(arr); }} />
-                      </td>
-                    ))}
-                    <td style={{ ...CELL_STYLE, width: 100 }}>
-                      <input type="date" value={d.deadline} onChange={e => { const arr = [...deliverables]; arr[i].deadline = e.target.value; setDeliverables(arr); }}
-                        style={{ border: "none", outline: "none", width: "100%", fontSize: 11, background: "transparent" }} />
-                    </td>
-                    <td style={CELL_STYLE}>
-                      <button onClick={() => setDeliverables(deliverables.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}><Trash2 size={12} /></button>
-                    </td>
-                  </tr>
-                ))}
+                {selectedSubmittals.map(submittal => <tr key={submittal.submittalId} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                  <td style={CELL_STYLE}>{submittal.floor || "—"}</td>
+                  <td style={CELL_STYLE}><div style={{ fontWeight: 700 }}>{submittal.number} · {submittal.title}</div>{submittal.description && submittal.description !== submittal.title && <div style={{ color: "#6B7280", marginTop: 2 }}>{submittal.description}</div>}<div style={{ color: "#6B7280", marginTop: 2, fontSize: 10 }}>{submittal.discipline || t("No discipline assigned", "Sin disciplina asignada")}</div></td>
+                  {(["plumbing", "hvac", "fireProtection", "electrical", "other"] as const).map(bucket => <td key={bucket} style={{ ...CELL_STYLE, width: 90, fontWeight: submittal.disciplineBucket === bucket ? 700 : 400 }}>{submittal.disciplineBucket === bucket ? humanLabel(submittal.status) : "—"}</td>)}
+                  <td style={{ ...CELL_STYLE, width: 110 }}>{submittal.responsible || "—"}</td>
+                  <td style={{ ...CELL_STYLE, width: 100 }}>{submittal.deadline ? new Date(submittal.deadline).toLocaleDateString() : "—"}</td>
+                  <td style={CELL_STYLE}><div style={{ display: "flex", gap: 4 }}><button aria-label={t("Open Original Submittal", "Abrir Submittal original")} title={t("Open Original Submittal", "Abrir Submittal original")} onClick={() => openOriginalSubmittal(submittal.submittalId)} style={{ background: "none", border: "none", cursor: "pointer", color: "#2563EB" }}><ExternalLink size={12} /></button><button aria-label={t("Remove Submittal", "Quitar Submittal")} onClick={() => setSelectedSubmittals(previous => previous.filter(row => row.submittalId !== submittal.submittalId))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}><Trash2 size={12} /></button></div></td>
+                </tr>)}
               </tbody>
-            </table>
+            </table></div>
+            {!!deliverables.some(row => row.description || row.plumbing || row.hvac || row.fireProt || row.electrical || row.other) && <div style={{ margin: 10, padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Deliverable rows (preserved)", "Filas manuales anteriores de Entregables (conservadas)")}</div>{deliverables.filter(row => row.description || row.plumbing || row.hvac || row.fireProt || row.electrical || row.other).map((row, index) => <div key={index} style={{ fontSize: 12 }}>{[row.floor, row.description, row.plumbing && `PL:${row.plumbing}`, row.hvac && `HVAC:${row.hvac}`, row.fireProt && `FP:${row.fireProt}`, row.electrical && `ELE:${row.electrical}`, row.other && `OTHER:${row.other}`, row.deadline].filter(Boolean).join(" · ")}</div>)}</div>}
             <div style={{ padding: 10 }}>
-              <button className="btn btn-sm btn-outline" onClick={() => setDeliverables([...deliverables, { floor: "", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" }])}>
-                <Plus size={12} style={{ marginRight: 4 }} />{t("Add Row", "Agregar Fila")}
+              <button className="btn btn-sm btn-outline" onClick={() => openSubmittalSelector(null)}>
+                <Plus size={12} style={{ marginRight: 4 }} />{t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}
               </button>
             </div>
           </div>
@@ -1078,6 +1200,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         </div>
       )}
       <RfiSelectorModal />
+      <SubmittalSelectorModal />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { pgTable, serial, text, timestamp, integer, uniqueIndex } from "drizzle-
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 import { rfisTable } from "./rfis";
+import { submittalsTable } from "./submittals";
 
 export const meetingMinutesTable = pgTable("meeting_minutes", {
   id: serial("id").primaryKey(),
@@ -46,6 +47,29 @@ export const meetingRfiLinksTable = pgTable("meeting_rfi_links", {
   meetingRfiUnique: uniqueIndex("meeting_rfi_links_meeting_rfi_uidx").on(t.meetingId, t.rfiId),
 }));
 
+// Canonical Submittal identity plus immutable meeting-time display snapshots.
+// Later Submittal edits cannot silently rewrite saved or exported minutes.
+export const meetingSubmittalLinksTable = pgTable("meeting_submittal_links", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+  submittalId: integer("submittal_id").references(() => submittalsTable.id).notNull(),
+  numberSnapshot: text("number_snapshot").notNull(),
+  titleSnapshot: text("title_snapshot").notNull(),
+  descriptionSnapshot: text("description_snapshot"),
+  floorSnapshot: text("floor_snapshot"),
+  disciplineSnapshot: text("discipline_snapshot"),
+  disciplineBucketSnapshot: text("discipline_bucket_snapshot"),
+  statusSnapshot: text("status_snapshot").notNull(),
+  responsibleSnapshot: text("responsible_snapshot"),
+  deadlineSnapshot: timestamp("deadline_snapshot"),
+  createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  meetingSubmittalUnique: uniqueIndex("meeting_submittal_links_meeting_submittal_uidx").on(t.meetingId, t.submittalId),
+}));
+
 export type MeetingMinutes = typeof meetingMinutesTable.$inferSelect;
 export type MeetingAttendee = typeof meetingAttendeesTable.$inferSelect;
 export type MeetingRfiLink = typeof meetingRfiLinksTable.$inferSelect;
+export type MeetingSubmittalLink = typeof meetingSubmittalLinksTable.$inferSelect;

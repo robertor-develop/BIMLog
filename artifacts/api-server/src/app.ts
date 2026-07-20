@@ -307,6 +307,33 @@ void rfiMigrationReady.then((ready) => {
 
 (async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_submittal_links (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      submittal_id integer NOT NULL REFERENCES submittals(id),
+      number_snapshot text NOT NULL,
+      title_snapshot text NOT NULL,
+      description_snapshot text,
+      floor_snapshot text,
+      discipline_snapshot text,
+      discipline_bucket_snapshot text,
+      status_snapshot text NOT NULL,
+      responsible_snapshot text,
+      deadline_snapshot timestamp,
+      created_by_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_submittal_links_meeting_submittal_uidx ON meeting_submittal_links (meeting_id, submittal_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_submittal_links_project_meeting_idx ON meeting_submittal_links (project_id, meeting_id)`);
+    console.log("[migration] meeting Submittal links ensured");
+  } catch (e) {
+    console.error("[migration] meeting Submittal link migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS notification_channels (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),

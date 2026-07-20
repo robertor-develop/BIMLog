@@ -718,6 +718,20 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
     data: Submittal[]; isLoading: boolean;
   };
 
+  useEffect(() => {
+    if (!submittals.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedId = Number(params.get("submittal"));
+    if (!Number.isInteger(requestedId) || requestedId <= 0) return;
+    const requested = submittals.find(submittal => submittal.id === requestedId);
+    if (!requested) return;
+    setView("submittals");
+    setSelectedSubmittal(requested);
+    params.delete("submittal");
+    const query = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+  }, [submittals]);
+
   const pendingCount = submittals.filter(s => !["approved", "approved_as_noted", "rejected"].includes(s.status)).length;
   const approvedCount = submittals.filter(s => s.status === "approved" || s.status === "approved_as_noted").length;
   const actionNeeded = submittals.filter(s => {
