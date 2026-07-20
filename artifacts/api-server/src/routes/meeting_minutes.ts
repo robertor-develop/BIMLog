@@ -2,10 +2,10 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import {
   meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
-  activityLogTable, usersTable,
+  activityLogTable, usersTable, rfisTable, meetingRfiLinksTable,
   linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, ne, isNull, or } from "drizzle-orm";
+import { eq, and, desc, ne, isNull, or, ilike, inArray, asc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
@@ -18,6 +18,73 @@ const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process")
 const router: Router = Router();
 const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
+const parseLegacyRfiRows = (notes: string | null) => {
+  if (!notes) return [];
+  const block = notes.match(/(?:^|\n\n)RFIS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  if (!block) return [];
+  return block.split("\n").filter(Boolean).map((line) => {
+    const [rfiNumber = "", description = "", status = "", responsible = ""] = line.split("|").map((value) => value.trim());
+    return { rfiNumber, description, status, responsible };
+  });
+};
+
+const serializeMeetingRfiLink = (link: typeof meetingRfiLinksTable.$inferSelect) => ({
+  id: link.id,
+  rfiId: link.rfiId,
+  rfiNumber: link.rfiNumberSnapshot,
+  title: link.titleSnapshot,
+  description: link.descriptionSnapshot,
+  status: link.statusSnapshot,
+  responsible: link.responsibleSnapshot,
+  linkedAt: link.createdAt,
+  valuesMode: "snapshot" as const,
+});
+
+async function getMeetingRfiLinks(meetingId: number) {
+  const links = await db.select().from(meetingRfiLinksTable)
+    .where(eq(meetingRfiLinksTable.meetingId, meetingId))
+    .orderBy(asc(meetingRfiLinksTable.id));
+  return links.map(serializeMeetingRfiLink);
+}
+
+class MeetingRfiLinkError extends Error {
+  constructor(public status: number, public code: string) { super(code); }
+}
+
+async function insertMeetingRfiLinks(executor: any, projectId: number, meetingId: number, rawRfiIds: number[], userId: number) {
+  const rfiIds = [...new Set(rawRfiIds.filter(Number.isInteger))];
+  if (!rfiIds.length) return { requested: 0, added: 0 };
+
+  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+  if (!meeting) throw new MeetingRfiLinkError(404, "meeting_not_found");
+
+  const rows = await executor.select({
+    id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject,
+    description: rfisTable.description, question: rfisTable.question, status: rfisTable.status,
+    ballInCourt: rfisTable.ballInCourt, submittedToPerson: rfisTable.submittedToPerson,
+    submittedToCompany: rfisTable.submittedToCompany, assignedToName: usersTable.fullName,
+  }).from(rfisTable).leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
+    .where(and(inArray(rfisTable.id, rfiIds), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)));
+
+  if (rows.length !== rfiIds.length) {
+    // Deliberately do not reveal whether an inaccessible identity exists in a
+    // different project or was deleted.
+    throw new MeetingRfiLinkError(404, "rfi_not_accessible");
+  }
+
+  const inserted = await executor.insert(meetingRfiLinksTable).values(rows.map((r: any) => ({
+    projectId, meetingId, rfiId: r.id,
+    rfiNumberSnapshot: r.number,
+    titleSnapshot: r.subject || r.description || r.question || r.number,
+    descriptionSnapshot: r.description || r.question || null,
+    statusSnapshot: r.status,
+    responsibleSnapshot: r.ballInCourt || r.assignedToName || r.submittedToPerson || r.submittedToCompany || null,
+    createdById: userId,
+  }))).onConflictDoNothing({ target: [meetingRfiLinksTable.meetingId, meetingRfiLinksTable.rfiId] }).returning({ id: meetingRfiLinksTable.id });
+  return { requested: rfiIds.length, added: inserted.length };
+}
+
 // ── GET /projects/:projectId/meetings ─────────────────────────────────────────
 router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
@@ -28,7 +95,8 @@ router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember
     const result = await Promise.all(meetings.map(async m => {
       const attendees = await db.select({ id: meetingAttendeesTable.id }).from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, m.id));
       const actionItems = await db.select({ id: actionItemsTable.id, status: actionItemsTable.status }).from(actionItemsTable).where(eq(actionItemsTable.meetingId, m.id));
-      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length };
+      const linkedRfis = await getMeetingRfiLinks(m.id);
+      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, legacyRfis: parseLegacyRfiRows(m.notes) };
     }));
     res.json(result);
   } catch (err) {
@@ -42,34 +110,114 @@ router.post("/projects/:projectId/meetings", authMiddleware, requirePermission("
   const body = req.body as {
     title: string; meeting_date: string; location?: string; notes?: string;
     attendees?: { user_id?: number; external_email?: string; full_name: string; company?: string; role?: string }[];
+    rfi_ids?: number[];
   };
   if (!body.title || !body.meeting_date) { res.status(400).json({ error: "title and meeting_date required" }); return; }
   try {
-    const [meeting] = await db.insert(meetingMinutesTable).values({
-      projectId, title: body.title,
-      meetingDate: new Date(body.meeting_date),
-      location: body.location ?? null, notes: body.notes ?? null,
-      createdById: req.user!.userId,
-    }).returning();
+    if (body.rfi_ids !== undefined && (!Array.isArray(body.rfi_ids) || body.rfi_ids.some(id => !Number.isInteger(id)))) {
+      res.status(400).json({ error: "valid_rfi_ids_required" }); return;
+    }
+    const meeting = await db.transaction(async (tx) => {
+      const [created] = await tx.insert(meetingMinutesTable).values({
+        projectId, title: body.title,
+        meetingDate: new Date(body.meeting_date),
+        location: body.location ?? null, notes: body.notes ?? null,
+        createdById: req.user!.userId,
+      }).returning();
 
-    if (body.attendees?.length) {
-      await db.insert(meetingAttendeesTable).values(
-        body.attendees.map(a => ({
-          meetingId: meeting.id, userId: a.user_id ?? null,
+      if (body.attendees?.length) {
+        await tx.insert(meetingAttendeesTable).values(body.attendees.map(a => ({
+          meetingId: created.id, userId: a.user_id ?? null,
           externalEmail: a.external_email ?? null, fullName: a.full_name,
           company: a.company ?? null, role: a.role ?? null,
-        }))
-      );
-    }
-
-    await db.insert(activityLogTable).values({
-      projectId, userId: req.user!.userId,
-      userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-      actionType: "create", entityType: "meeting", entityId: meeting.id,
-      fileNameBefore: null, fileNameAfter: null,
-      details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
+        })));
+      }
+      await insertMeetingRfiLinks(tx, projectId, created.id, body.rfi_ids ?? [], req.user!.userId);
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "create", entityType: "meeting", entityId: created.id,
+        fileNameBefore: null, fileNameAfter: null,
+        details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
+      });
+      return created;
     });
     res.status(201).json(meeting);
+  } catch (err) {
+    if (err instanceof MeetingRfiLinkError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// Selector payload is intentionally minimal: no attachments, URLs, storage
+// locators, or private audit data are exposed.
+router.get("/projects/:projectId/meetings/rfi-candidates", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const q = String(req.query.q ?? "").trim();
+  const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+  try {
+    let alreadyLinked = new Set<number>();
+    if (meetingId !== null) {
+      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+      alreadyLinked = new Set((await db.select({ rfiId: meetingRfiLinksTable.rfiId }).from(meetingRfiLinksTable)
+        .where(and(eq(meetingRfiLinksTable.projectId, projectId), eq(meetingRfiLinksTable.meetingId, meetingId)))).map(row => row.rfiId));
+    }
+    const base = and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt));
+    const where = q ? and(base, or(
+      ilike(rfisTable.number, `%${q}%`), ilike(rfisTable.subject, `%${q}%`),
+      ilike(rfisTable.description, `%${q}%`), ilike(rfisTable.question, `%${q}%`),
+    )) : base;
+    const candidates = await db.select({
+      id: rfisTable.id, number: rfisTable.number, title: rfisTable.subject,
+      description: rfisTable.description, question: rfisTable.question, status: rfisTable.status,
+      ballInCourt: rfisTable.ballInCourt, submittedToPerson: rfisTable.submittedToPerson,
+      submittedToCompany: rfisTable.submittedToCompany, assignedToName: usersTable.fullName,
+    }).from(rfisTable).leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
+      .where(where).orderBy(asc(rfisTable.number)).limit(100);
+    res.json(candidates.map(rfi => ({
+      id: rfi.id, number: rfi.number,
+      title: rfi.title || rfi.description || rfi.question || rfi.number,
+      description: rfi.description || rfi.question || null,
+      status: rfi.status,
+      responsible: rfi.ballInCourt || rfi.assignedToName || rfi.submittedToPerson || rfi.submittedToCompany || null,
+      alreadyAdded: alreadyLinked.has(rfi.id),
+    })));
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+router.post("/projects/:projectId/meetings/:meetingId/rfis", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  const rfiIds = req.body?.rfi_ids;
+  if (!Array.isArray(rfiIds) || rfiIds.length === 0 || rfiIds.some((id: unknown) => !Number.isInteger(id))) {
+    res.status(400).json({ error: "valid_rfi_ids_required" }); return;
+  }
+  try {
+    const result = await db.transaction(tx => insertMeetingRfiLinks(tx, projectId, meetingId, rfiIds, req.user!.userId));
+    res.status(result.added ? 201 : 200).json({ ...result, links: await getMeetingRfiLinks(meetingId) });
+  } catch (err) {
+    if (err instanceof MeetingRfiLinkError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+router.delete("/projects/:projectId/meetings/:meetingId/rfis/:rfiId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  const rfiId = Number(req.params.rfiId);
+  try {
+    const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+    const removed = await db.delete(meetingRfiLinksTable).where(and(
+      eq(meetingRfiLinksTable.projectId, projectId), eq(meetingRfiLinksTable.meetingId, meetingId), eq(meetingRfiLinksTable.rfiId, rfiId),
+    )).returning({ id: meetingRfiLinksTable.id });
+    if (!removed.length) { res.status(404).json({ error: "meeting_rfi_link_not_found" }); return; }
+    res.json({ removed: true, rfiId });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
@@ -85,7 +233,7 @@ router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requirePr
     if (!meeting) { res.status(404).json({ error: "Not found" }); return; }
     const attendees = await db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
     const actionItems = await db.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId));
-    res.json({ ...meeting, attendees, actionItems });
+    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes) });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }

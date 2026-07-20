@@ -1,6 +1,7 @@
-import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, uniqueIndex } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
+import { rfisTable } from "./rfis";
 
 export const meetingMinutesTable = pgTable("meeting_minutes", {
   id: serial("id").primaryKey(),
@@ -27,5 +28,24 @@ export const meetingAttendeesTable = pgTable("meeting_attendees", {
   role: text("role"),
 });
 
+// Canonical RFI identity plus immutable meeting-time display snapshots. Later
+// RFI edits therefore cannot rewrite saved or exported meeting history.
+export const meetingRfiLinksTable = pgTable("meeting_rfi_links", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+  rfiId: integer("rfi_id").references(() => rfisTable.id).notNull(),
+  rfiNumberSnapshot: text("rfi_number_snapshot").notNull(),
+  titleSnapshot: text("title_snapshot").notNull(),
+  descriptionSnapshot: text("description_snapshot"),
+  statusSnapshot: text("status_snapshot").notNull(),
+  responsibleSnapshot: text("responsible_snapshot"),
+  createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  meetingRfiUnique: uniqueIndex("meeting_rfi_links_meeting_rfi_uidx").on(t.meetingId, t.rfiId),
+}));
+
 export type MeetingMinutes = typeof meetingMinutesTable.$inferSelect;
 export type MeetingAttendee = typeof meetingAttendeesTable.$inferSelect;
+export type MeetingRfiLink = typeof meetingRfiLinksTable.$inferSelect;

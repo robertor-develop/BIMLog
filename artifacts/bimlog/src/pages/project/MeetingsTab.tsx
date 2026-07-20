@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { useListMembers } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Trash2, Search, ExternalLink, RefreshCw, X } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { isDebug } from "@/lib/debug";
 import {
@@ -18,6 +18,7 @@ interface Meeting {
   id: number; title: string; meetingDate: string; location?: string;
   notes?: string; aiSummary?: string; attendeeCount: number;
   openActionItems: number; actionItemCount: number; createdAt: string;
+  linkedRfis?: LinkedRfi[]; legacyRfis?: RFIRow[];
 }
 
 interface Attendee {
@@ -27,6 +28,16 @@ interface Attendee {
 
 interface RFIRow {
   rfiNumber: string; description: string; status: string; responsible: string;
+}
+
+interface LinkedRfi {
+  id?: number; rfiId: number; rfiNumber: string; title: string;
+  description?: string | null; status: string; responsible?: string | null;
+}
+
+interface RfiCandidate {
+  id: number; number: string; title: string; description?: string | null;
+  status: string; responsible?: string | null; alreadyAdded: boolean;
 }
 
 interface DeliverableRow {
@@ -146,9 +157,18 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   const [attendees, setAttendees] = useState<Attendee[]>([
     { trade: "", company: "", fullName: "", role: "", email: "", phone: "" }
   ]);
-  const [rfis, setRfis] = useState<RFIRow[]>([
-    { rfiNumber: "", description: "", status: "PENDING", responsible: "" }
-  ]);
+  // Manual rows remain only for imported legacy text; canonical selections
+  // persist through meeting_rfi_links.
+  const [rfis, setRfis] = useState<RFIRow[]>([]);
+  const [selectedRfis, setSelectedRfis] = useState<LinkedRfi[]>([]);
+  const [selectorMeetingId, setSelectorMeetingId] = useState<number | null | undefined>(undefined);
+  const [selectorQuery, setSelectorQuery] = useState("");
+  const [selectorCandidates, setSelectorCandidates] = useState<RfiCandidate[]>([]);
+  const [selectorCandidateCache, setSelectorCandidateCache] = useState<Map<number, RfiCandidate>>(new Map());
+  const [selectorSelectedIds, setSelectorSelectedIds] = useState<Set<number>>(new Set());
+  const [selectorLoading, setSelectorLoading] = useState(false);
+  const [selectorError, setSelectorError] = useState("");
+  const [selectorSaving, setSelectorSaving] = useState(false);
   const [deliverables, setDeliverables] = useState<DeliverableRow[]>([
     { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
     { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
@@ -271,7 +291,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     setTitle(""); setMeetingDate(""); setMeetingTime("10:00"); setLocation("");
     setAgendaItems(["", "", "", ""]);
     setAttendees([{ trade: "", company: "", fullName: "", role: "", email: "", phone: "" }]);
-    setRfis([{ rfiNumber: "", description: "", status: "PENDING", responsible: "" }]);
+    setRfis([]); setSelectedRfis([]);
     setDeliverables([
       { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
       { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
@@ -283,6 +303,117 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   };
 
   const openNew = () => { resetForm(); setView("new"); };
+
+  const loadRfiCandidates = async () => {
+    if (selectorMeetingId === undefined) return;
+    setSelectorLoading(true); setSelectorError("");
+    try {
+      const params = new URLSearchParams();
+      if (selectorQuery.trim()) params.set("q", selectorQuery.trim());
+      if (selectorMeetingId !== null) params.set("meeting_id", String(selectorMeetingId));
+      const response = await fetch(`${API}/projects/${projectId}/meetings/rfi-candidates?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error(t("Could not load project RFIs.", "No se pudieron cargar los RFI del proyecto."));
+      const rows = await response.json() as RfiCandidate[];
+      const locallySelected = new Set(selectedRfis.map(rfi => rfi.rfiId));
+      const normalizedRows = rows.map(row => ({ ...row, alreadyAdded: row.alreadyAdded || (selectorMeetingId === null && locallySelected.has(row.id)) }));
+      setSelectorCandidates(normalizedRows);
+      setSelectorCandidateCache(previous => {
+        const next = new Map(previous);
+        normalizedRows.forEach(row => next.set(row.id, row));
+        return next;
+      });
+    } catch (err) {
+      setSelectorError(err instanceof Error ? err.message : t("Could not load project RFIs.", "No se pudieron cargar los RFI del proyecto."));
+    } finally { setSelectorLoading(false); }
+  };
+
+  useEffect(() => {
+    if (selectorMeetingId === undefined) return;
+    const timer = window.setTimeout(() => { void loadRfiCandidates(); }, 200);
+    return () => window.clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectorMeetingId, selectorQuery, projectId]);
+
+  const openRfiSelector = (meetingId: number | null) => {
+    setSelectorQuery(""); setSelectorSelectedIds(new Set()); setSelectorCandidates([]); setSelectorCandidateCache(new Map()); setSelectorError("");
+    setSelectorMeetingId(meetingId);
+  };
+
+  const closeRfiSelector = () => { if (!selectorSaving) setSelectorMeetingId(undefined); };
+
+  const addSelectedExistingRfis = async () => {
+    const ids = [...selectorSelectedIds];
+    if (!ids.length) return;
+    setSelectorSaving(true); setSelectorError("");
+    try {
+      if (selectorMeetingId === null) {
+        const byId = selectorCandidateCache;
+        setSelectedRfis(prev => {
+          const existing = new Set(prev.map(row => row.rfiId));
+          return [...prev, ...ids.filter(id => !existing.has(id)).map(id => {
+            const row = byId.get(id)!;
+            return { rfiId: row.id, rfiNumber: row.number, title: row.title, description: row.description, status: row.status, responsible: row.responsible };
+          })];
+        });
+      } else if (selectorMeetingId !== undefined) {
+        const response = await fetch(`${API}/projects/${projectId}/meetings/${selectorMeetingId}/rfis`, {
+          method: "POST", headers, body: JSON.stringify({ rfi_ids: ids }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.error || t("Could not add the selected RFIs.", "No se pudieron añadir los RFI seleccionados."));
+        }
+        await loadMeetings();
+      }
+      setSelectorMeetingId(undefined);
+    } catch (err) {
+      setSelectorError(err instanceof Error ? err.message : t("Could not add the selected RFIs.", "No se pudieron añadir los RFI seleccionados."));
+    } finally { setSelectorSaving(false); }
+  };
+
+  const removeMeetingRfi = async (meetingId: number, rfiId: number) => {
+    const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}/rfis/${rfiId}`, { method: "DELETE", headers });
+    if (!response.ok) { setError(t("Could not remove the meeting link.", "No se pudo quitar el enlace del acta.")); return; }
+    await loadMeetings();
+  };
+
+  const openOriginalRfi = (rfiId: number) => window.location.assign(`/projects/${projectId}/rfis?rfi=${rfiId}`);
+
+  const RfiSelectorModal = () => selectorMeetingId !== undefined ? (
+    <div role="dialog" aria-modal="true" aria-label={t("Add Existing RFI", "Añadir RFI existente")}
+      style={{ position: "fixed", inset: 0, zIndex: 1100, background: "rgba(15,23,42,0.58)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
+      <div style={{ background: "white", borderRadius: 12, width: "min(720px, calc(100vw - 24px))", maxHeight: "calc(100vh - 24px)", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,.25)" }}>
+        <div style={{ padding: "16px 16px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <div><div style={{ fontSize: 17, fontWeight: 800 }}>{t("Add Existing RFI", "Añadir RFI existente")}</div><div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{t("Select one or more RFIs from this project.", "Seleccione uno o más RFI de este proyecto.")}</div></div>
+          <button aria-label={t("Close", "Cerrar")} onClick={closeRfiSelector} style={{ border: 0, background: "transparent", cursor: "pointer", padding: 6 }}><X size={18} /></button>
+        </div>
+        <div style={{ padding: "0 16px 12px", position: "relative" }}>
+          <Search size={15} style={{ position: "absolute", left: 28, top: 11, color: "#6B7280" }} />
+          <input autoFocus className="input" value={selectorQuery} onChange={e => setSelectorQuery(e.target.value)} placeholder={t("Search RFI number, title, or description", "Buscar número, título o descripción del RFI")} style={{ width: "100%", paddingLeft: 34, margin: 0 }} />
+        </div>
+        <div style={{ overflowY: "auto", padding: "0 16px", minHeight: 160 }}>
+          {selectorLoading && <div style={{ padding: 32, textAlign: "center", color: "#6B7280" }}>{t("Loading RFIs…", "Cargando RFI…")}</div>}
+          {!selectorLoading && selectorError && <div style={{ padding: 24, textAlign: "center", color: "#B91C1C" }}><div>{selectorError}</div><button className="btn btn-sm btn-outline" onClick={() => void loadRfiCandidates()} style={{ marginTop: 10 }}><RefreshCw size={12} style={{ marginRight: 5 }} />{t("Retry", "Reintentar")}</button></div>}
+          {!selectorLoading && !selectorError && selectorCandidates.length === 0 && <div style={{ padding: 32, textAlign: "center", color: "#6B7280" }}>{selectorQuery ? t("No matching RFIs.", "No hay RFI coincidentes.") : t("No RFIs exist in this project.", "No existen RFI en este proyecto.")}</div>}
+          {!selectorLoading && !selectorError && selectorCandidates.map(rfi => {
+            const checked = selectorSelectedIds.has(rfi.id);
+            return <label key={rfi.id} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "12px 4px", borderBottom: "1px solid #E5E7EB", cursor: rfi.alreadyAdded ? "default" : "pointer", opacity: rfi.alreadyAdded ? .65 : 1 }}>
+              <input type="checkbox" checked={checked || rfi.alreadyAdded} disabled={rfi.alreadyAdded} onChange={() => setSelectorSelectedIds(prev => { const next = new Set(prev); checked ? next.delete(rfi.id) : next.add(rfi.id); return next; })} style={{ marginTop: 3 }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 7, alignItems: "center" }}><strong style={{ fontSize: 13 }}>{rfi.number}</strong><span style={{ fontSize: 13 }}>{rfi.title}</span>{rfi.alreadyAdded && <span style={{ fontSize: 10, color: "#166534", background: "#DCFCE7", padding: "2px 6px", borderRadius: 10 }}>{t("Already added", "Ya añadido")}</span>}</div>
+                {rfi.description && rfi.description !== rfi.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 3, overflowWrap: "anywhere" }}>{rfi.description}</div>}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, fontSize: 11, color: "#6B7280", marginTop: 5 }}><span>{t("Status", "Estado")}: {rfi.status}</span><span>{t("Responsible", "Responsable")}: {rfi.responsible || "—"}</span></div>
+              </div>
+            </label>;
+          })}
+        </div>
+        <div style={{ padding: 16, display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8, borderTop: "1px solid #E5E7EB" }}>
+          <button className="btn btn-outline" onClick={closeRfiSelector}>{t("Cancel", "Cancelar")}</button>
+          <button className="btn btn-primary" onClick={() => void addSelectedExistingRfis()} disabled={!selectorSelectedIds.size || selectorSaving}>{selectorSaving ? t("Adding…", "Añadiendo…") : t(`Add Selected (${selectorSelectedIds.size})`, `Añadir seleccionados (${selectorSelectedIds.size})`)}</button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   const buildNotes = () => {
     const parts: string[] = [];
@@ -314,6 +445,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           full_name: a.fullName, company: a.company,
           role: a.role, external_email: a.email || undefined,
         })),
+        rfi_ids: selectedRfis.map(rfi => rfi.rfiId),
       };
       const r = await fetch(`${API}/projects/${projectId}/meetings`, {
         method: "POST", headers, body: JSON.stringify(body),
@@ -425,10 +557,10 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           : <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {meetings.map(m => (
                 <div key={m.id} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16,
-                  display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ flex: 1 }}>
+                  display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ flex: "1 1 260px" }}>
                     <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{m.title}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280", display: "flex", gap: 12 }}>
+                    <div style={{ fontSize: 12, color: "#6B7280", display: "flex", flexWrap: "wrap", gap: 12 }}>
                       <span><Calendar size={11} style={{ marginRight: 3 }} />{new Date(m.meetingDate).toLocaleDateString()} {new Date(m.meetingDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                       {m.location && <span><MapPin size={11} style={{ marginRight: 3 }} />{m.location}</span>}
                       <span><Users size={11} style={{ marginRight: 3 }} />{m.attendeeCount} {t("attendees", "asistentes")}</span>
@@ -436,6 +568,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
+                    {canWrite && <button className="btn btn-sm btn-outline" onClick={() => openRfiSelector(m.id)}><Plus size={12} style={{ marginRight: 4 }} />{t("Add Existing RFI", "Añadir RFI existente")}</button>}
                     {canWrite && (
                       <button
                         title={t("Delete meeting", "Eliminar reunión")}
@@ -446,6 +579,8 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                       </button>
                     )}
                   </div>
+                  {!!m.linkedRfis?.length && <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>{m.linkedRfis.map(rfi => <div key={rfi.rfiId} style={{ border: "1px solid #DBEAFE", background: "#F8FAFC", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}><div style={{ flex: "1 1 220px", minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{rfi.rfiNumber} · {rfi.title}</div>{rfi.description && rfi.description !== rfi.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2 }}>{rfi.description}</div>}<div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>{t("Status", "Estado")}: {rfi.status} · {t("Responsible", "Responsable")}: {rfi.responsible || "—"}</div></div><button className="btn btn-sm btn-outline" onClick={() => openOriginalRfi(rfi.rfiId)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Original RFI", "Abrir RFI original")}</button>{canWrite && <button className="btn btn-sm btn-outline" onClick={() => void removeMeetingRfi(m.id, rfi.rfiId)}>{t("Remove link", "Quitar enlace")}</button>}</div>)}</div>}
+                  {!!m.legacyRfis?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual RFI notes", "Notas RFI manuales anteriores")}</div>{m.legacyRfis.map((row, index) => <div key={`${row.rfiNumber}-${index}`} style={{ fontSize: 12 }}>{[row.rfiNumber, row.description, row.status, row.responsible].filter(Boolean).join(" · ")}</div>)}</div>}
                 </div>
               ))}
             </div>
@@ -507,6 +642,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
               </table>
             </div>
       )}
+      <RfiSelectorModal />
     </div>
   );
 
@@ -747,7 +883,9 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
         <SectionHeader label="RFIs" sectionKey="rfis" />
         {expandedSections.rfis && (
           <div style={{ background: "white", border: "1px solid #E5E7EB", borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            {selectedRfis.map(rfi => <div key={rfi.rfiId} style={{ padding: 10, borderBottom: "1px solid #E5E7EB", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}><div style={{ flex: "1 1 220px" }}><div style={{ fontSize: 13, fontWeight: 700 }}>{rfi.rfiNumber} · {rfi.title}</div>{rfi.description && rfi.description !== rfi.title && <div style={{ fontSize: 12, color: "#4B5563" }}>{rfi.description}</div>}<div style={{ fontSize: 11, color: "#6B7280" }}>{rfi.status} · {rfi.responsible || "—"}</div></div><button className="btn btn-sm btn-outline" onClick={() => setSelectedRfis(prev => prev.filter(item => item.rfiId !== rfi.rfiId))}>{t("Remove", "Quitar")}</button></div>)}
+            {rfis.length > 0 && <div style={{ padding: "8px 10px", fontSize: 11, fontWeight: 700, color: "#6B7280", background: "#F9FAFB" }}>{t("Imported manual RFI notes (preserved as legacy text)", "Notas RFI manuales importadas (conservadas como texto anterior)")}</div>}
+            {rfis.length > 0 && <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   {["RFI #", t("Description","Descripción"), t("Status","Estado"), t("Responsible","Responsable"), ""].map(h => (
@@ -759,15 +897,15 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                 {rfis.map((r, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #F3F4F6" }}>
                     <td style={{ ...CELL_STYLE, width: 100 }}>
-                      <input value={r.rfiNumber} onChange={e => { const arr = [...rfis]; arr[i].rfiNumber = e.target.value; setRfis(arr); }}
+                      <input readOnly value={r.rfiNumber}
                         placeholder="EAST-15" style={{ border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" }} />
                     </td>
                     <td style={CELL_STYLE}>
-                      <input value={r.description} onChange={e => { const arr = [...rfis]; arr[i].description = e.target.value; setRfis(arr); }}
+                      <input readOnly value={r.description}
                         style={{ border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" }} />
                     </td>
                     <td style={{ ...CELL_STYLE, width: 120 }}>
-                      <select value={r.status} onChange={e => { const arr = [...rfis]; arr[i].status = e.target.value; setRfis(arr); }}
+                      <select disabled value={r.status}
                         style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px",
                           background: r.status === "COMPLETE" ? "#DCFCE7" : r.status === "SUBMITTED" ? "#DBEAFE" : "#FEF3C7",
                           color: r.status === "COMPLETE" ? "#16A34A" : r.status === "SUBMITTED" ? "#1D4ED8" : "#D97706",
@@ -779,19 +917,19 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                       </select>
                     </td>
                     <td style={CELL_STYLE}>
-                      <input value={r.responsible} onChange={e => { const arr = [...rfis]; arr[i].responsible = e.target.value; setRfis(arr); }}
+                      <input readOnly value={r.responsible}
                         style={{ border: "none", outline: "none", width: "100%", fontSize: 12, background: "transparent" }} />
                     </td>
                     <td style={CELL_STYLE}>
-                      <button onClick={() => setRfis(rfis.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}><Trash2 size={12} /></button>
+                      <span aria-hidden="true">—</span>
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table>}
             <div style={{ padding: 10 }}>
-              <button className="btn btn-sm btn-outline" onClick={() => setRfis([...rfis, { rfiNumber: "", description: "", status: "PENDING", responsible: "" }])}>
-                <Plus size={12} style={{ marginRight: 4 }} />Add RFI
+              <button className="btn btn-sm btn-outline" onClick={() => openRfiSelector(null)}>
+                <Plus size={12} style={{ marginRight: 4 }} />{t("Add Existing RFI", "Añadir RFI existente")}
               </button>
             </div>
           </div>
@@ -939,6 +1077,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
           </div>
         </div>
       )}
+      <RfiSelectorModal />
     </div>
   );
 }
