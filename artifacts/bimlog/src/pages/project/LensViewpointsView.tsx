@@ -137,7 +137,7 @@ function issueAgeLabel(v?: string | null): string {
   return days == null ? "-" : `${days}d`;
 }
 
-export function LensViewpointsView({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { projectId: number; canWrite: boolean; focusViewpointId?: number }) {
   const { token } = useAuthStore();
   const { lang } = useI18n();
   const t = (en: string, es: string) => (lang === "es" ? es : en);
@@ -775,6 +775,18 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
     return max;
   }, null);
 
+  useEffect(() => {
+    if (!focusViewpointId || viewpoints.length === 0) return;
+    const timer = window.setTimeout(() => {
+      const row = document.querySelector(`[data-lens-viewpoint-id="${focusViewpointId}"]`) as HTMLElement | null;
+      if (!row) return;
+      row.scrollIntoView({ block: "center" });
+      row.style.outline = "3px solid #2563EB";
+      row.style.outlineOffset = "-3px";
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [focusViewpointId, viewpoints]);
+
   const exportExcel = async () => {
     const params = new URLSearchParams({
       trade: fTrade,
@@ -1104,7 +1116,7 @@ export function LensViewpointsView({ projectId, canWrite }: { projectId: number;
             <tbody>
               {filtered.map(v => (
                 <Fragment key={v.id}>
-                  <tr style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
+                  <tr data-lens-viewpoint-id={v.id} style={{ borderTop: "1px solid #F3F4F6", verticalAlign: "top" }}>
                     {canWrite && (
                       <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
                         <input

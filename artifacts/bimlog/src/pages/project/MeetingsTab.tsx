@@ -286,6 +286,30 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
 
   useEffect(() => { loadMeetings(); }, [projectId]);
 
+  useEffect(() => {
+    if (loading || actionItems.length === 0) return;
+    const actionId = Number(new URLSearchParams(window.location.search).get("action"));
+    if (!Number.isInteger(actionId) || actionId <= 0 || !actionItems.some(item => item.id === actionId)) return;
+    setView("actions");
+    const timer = window.setTimeout(() => {
+      const row = document.querySelector(`[data-meeting-action-id="${actionId}"]`) as HTMLElement | null;
+      if (row) { row.scrollIntoView({ block: "center" }); row.style.outline = "3px solid #2563EB"; }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loading, actionItems]);
+
+  useEffect(() => {
+    if (loading || meetings.length === 0) return;
+    const meetingId = Number(new URLSearchParams(window.location.search).get("meeting"));
+    if (!Number.isInteger(meetingId) || meetingId <= 0 || !meetings.some(meeting => meeting.id === meetingId)) return;
+    setView("list");
+    const timer = window.setTimeout(() => {
+      const row = document.querySelector(`[data-meeting-id="${meetingId}"]`) as HTMLElement | null;
+      if (row) { row.scrollIntoView({ block: "center" }); row.style.outline = "3px solid #2563EB"; }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loading, meetings]);
+
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -806,7 +830,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
             </div>
           : <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {meetings.map(m => (
-                <div key={m.id} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16,
+                <div key={m.id} data-meeting-id={m.id} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, padding: 16,
                   display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
                   <div style={{ flex: "1 1 260px" }}>
                     <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{m.title}</div>
@@ -915,7 +939,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                 </thead>
                 <tbody>
                   {actionItems.map(ai => (
-                    <tr key={ai.id} style={{ background: ai.isOverdue ? "#FEF2F2" : "white", borderBottom: "1px solid #F3F4F6" }}>
+                    <tr key={ai.id} data-meeting-action-id={ai.id} style={{ background: ai.isOverdue ? "#FEF2F2" : "white", borderBottom: "1px solid #F3F4F6" }}>
                       <td style={{ padding: "10px 12px" }}>
                         <div style={{ fontWeight: 500, fontSize: 13 }}>{ai.description}</div>
                         {ai.isOverdue && <div style={{ fontSize: 11, color: "#DC2626", display: "flex", alignItems: "center", gap: 3, marginTop: 2 }}><AlertTriangle size={10} /> {t("Overdue","Vencido")}</div>}

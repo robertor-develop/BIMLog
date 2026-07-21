@@ -63,6 +63,7 @@
   "project.create.descPlaceholder": "Optional project description",
 
   "project.tabs.files": "Files",
+  "project.tabs.commandCenter": "Coordinator Command Center",
   "project.tabs.rfis": "RFIs",
   "project.tabs.submittals": "Submittals",
   "project.tabs.submittalTracker": "Submittal Tracker",

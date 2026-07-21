@@ -104,11 +104,13 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       return "clash";
     }
   };
-  const [activeTab, setActiveTab] = useState<"clash" | "lens">(() => readSavedTab(tabStorageKey));
+  const requestedLensId = Number(new URLSearchParams(window.location.search).get("viewpoint"));
+  const requestedLensView = new URLSearchParams(window.location.search).get("view") === "lens";
+  const [activeTab, setActiveTab] = useState<"clash" | "lens">(() => requestedLensView ? "lens" : readSavedTab(tabStorageKey));
   // Rehydrate when the project changes (the component instance can be reused
   // across projects, so the lazy initializer alone is not enough).
   useEffect(() => {
-    setActiveTab(readSavedTab(tabStorageKey));
+    setActiveTab(requestedLensView ? "lens" : readSavedTab(tabStorageKey));
   }, [tabStorageKey]);
   // Persist on explicit user selection (not via an effect) to avoid writing a
   // stale tab into the new project's key during a project switch.
@@ -844,7 +846,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       </>)}
 
       {activeTab === "lens" && (
-        <LensViewpointsView projectId={projectId} canWrite={canWrite} />
+        <LensViewpointsView projectId={projectId} canWrite={canWrite} focusViewpointId={Number.isInteger(requestedLensId) && requestedLensId > 0 ? requestedLensId : undefined} />
       )}
     </div>
     </>

@@ -8,7 +8,8 @@
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
-    "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts"
+    "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
+    "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

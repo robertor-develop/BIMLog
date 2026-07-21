@@ -63,6 +63,7 @@
   "project.create.descPlaceholder": "Descripción opcional del proyecto",
 
   "project.tabs.files": "Archivos",
+  "project.tabs.commandCenter": "Centro de Control de Coordinación",
   "project.tabs.rfis": "RFIs",
   "project.tabs.submittals": "Entregables",
   "project.tabs.submittalTracker": "Registro de Submittals",

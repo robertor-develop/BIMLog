@@ -22,6 +22,7 @@ import { MeetingsTab } from "./project/MeetingsTab";
 import { ScheduleTab } from "./project/ScheduleTab";
 import { ClashReportsTab } from "./project/ClashReportsTab";
 import { CoordinationHub } from "./project/CoordinationHub";
+import { CoordinatorCommandCenter } from "./project/CoordinatorCommandCenter";
 import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
@@ -143,6 +144,7 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
+          {tab === "command-center" && <CoordinatorCommandCenter projectId={projectId} />}
           {tab === "coordination"   && <CoordinationHub  projectId={projectId} canWrite={canWrite} currentUserRole={memberRole} members={members ?? []} />}
           {tab === "analytics"      && <AnalyticsTab     projectId={projectId} />}
           {tab === "files"          && <FilesTab          projectId={projectId} canWrite={canWrite} />}
