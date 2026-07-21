@@ -6,7 +6,7 @@ export type NotificationLanguage = "en" | "es";
 export type NotificationFrequency = "immediate" | "daily_digest" | "weekly_digest" | "off";
 
 export const MODULE_CATALOG = [
-  { key: "rfi", en: "RFI", es: "RFI", available: false },
+  { key: "rfi", en: "RFI", es: "RFI", available: true },
   { key: "submittals", en: "Submittals / Shop Drawings", es: "Submittals / Planos de Taller", available: false },
   { key: "schedule", en: "Schedule", es: "Cronograma", available: false },
   { key: "change_orders", en: "Change Orders", es: "Órdenes de Cambio", available: false },
@@ -19,6 +19,18 @@ export const MODULE_CATALOG = [
 ] as const;
 
 export const EVENT_CATALOG = [
+  ["rfi_created", "RFI created", "RFI creado"],
+  ["rfi_issued", "RFI issued / sent", "RFI emitido / enviado"],
+  ["rfi_assigned", "RFI assigned / BIC changed", "RFI asignado / responsabilidad actualizada"],
+  ["rfi_response_added", "RFI response added", "Respuesta de RFI agregada"],
+  ["rfi_response_final", "RFI final response", "Respuesta final de RFI"],
+  ["rfi_due_soon", "RFI due soon", "RFI próximo a vencer"],
+  ["rfi_overdue", "RFI overdue", "RFI vencido"],
+  ["rfi_date_required_changed", "RFI required date changed", "Fecha requerida de RFI actualizada"],
+  ["rfi_closed", "RFI closed", "RFI cerrado"],
+  ["rfi_reopened", "RFI reopened", "RFI reabierto"],
+  ["rfi_revised", "RFI revised", "RFI revisado"],
+  ["rfi_complete_package_ready", "Complete RFI package ready", "Paquete completo de RFI listo"],
   ["assigned_to_me", "Assigned to me", "Asignado a mí"],
   ["responsibility_transferred", "Responsibility transferred to me", "Responsabilidad transferida a mí"],
   ["response_received", "Response received", "Respuesta recibida"],
@@ -88,6 +100,7 @@ export async function ensureTelegramNotificationSchema(): Promise<void> {
     `CREATE TABLE IF NOT EXISTS telegram_notification_module_preferences (
       id bigserial PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id), module_key text NOT NULL, enabled boolean NOT NULL,
       updated_by_user_id integer REFERENCES users(id), update_source text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now())`,
+    `ALTER TABLE telegram_notification_module_preferences ADD COLUMN IF NOT EXISTS delivery_frequency text`,
     `CREATE UNIQUE INDEX IF NOT EXISTS telegram_notification_module_user_uidx ON telegram_notification_module_preferences(user_id,module_key)`,
     `CREATE TABLE IF NOT EXISTS telegram_notification_event_preferences (
       id bigserial PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id), event_key text NOT NULL, enabled boolean NOT NULL,
@@ -140,20 +153,20 @@ export async function getNotificationPreferenceCenter(userId: number) {
       overdue_frequency,project_mode,updated_at,update_source FROM notification_preferences WHERE user_id=$1 AND adapter_id=$2 AND channel='telegram'`, [userId, adapterId]),
     pool.query(`SELECT p.id,p.name,p.code,pm.role FROM projects p JOIN project_members pm ON pm.project_id=p.id WHERE pm.user_id=$1 AND pm.status='active' AND p.status='active' ORDER BY p.name`, [userId]),
     pool.query(`SELECT project_id,enabled FROM telegram_notification_project_preferences WHERE user_id=$1`, [userId]),
-    pool.query(`SELECT module_key,enabled FROM telegram_notification_module_preferences WHERE user_id=$1`, [userId]),
+    pool.query(`SELECT module_key,enabled,delivery_frequency FROM telegram_notification_module_preferences WHERE user_id=$1`, [userId]),
     pool.query(`SELECT event_key,enabled FROM telegram_notification_event_preferences WHERE user_id=$1`, [userId]),
     pool.query(`SELECT state,provider_acknowledgement_id,failure_category,delivered_at,updated_at FROM telegram_notification_outbox WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50`, [userId]),
   ]);
   const row = settings.rows[0];
   const projectMap = new Map(projectOverrides.rows.map((r: any) => [Number(r.project_id), r.enabled === true]));
-  const moduleMap = new Map(modules.rows.map((r: any) => [r.module_key, r.enabled === true]));
+  const moduleMap = new Map(modules.rows.map((r: any) => [r.module_key, { enabled:r.enabled === true, frequency:r.delivery_frequency || "inherit" }]));
   const eventMap = new Map(events.rows.map((r: any) => [r.event_key, r.enabled === true]));
   const nextDigest = await pool.query(`SELECT scheduled_for FROM telegram_notification_digest_windows WHERE user_id=$1 AND state='pending' ORDER BY scheduled_for LIMIT 1`, [userId]);
   return {
     settings: { ...row, enabled: row?.enabled === true, paused: row?.paused === true, telegramEnabled: row?.telegram_enabled === true, emailEnabled: row?.email_enabled === true,
       emailAvailable: false, emailUnavailableReason: "Encrypted notification email provider credentials are not yet available.", nextScheduledDigest: nextDigest.rows[0]?.scheduled_for || null },
     projects: projects.rows.map((p: any) => ({ id: p.id, name: p.name, code: p.code, role: p.role, enabled: projectMap.has(Number(p.id)) ? projectMap.get(Number(p.id)) : true, inherited: !projectMap.has(Number(p.id)) })),
-    modules: MODULE_CATALOG.map(m => ({ ...m, enabled: m.available && (moduleMap.get(m.key) ?? true), inherited: !moduleMap.has(m.key) })),
+    modules: MODULE_CATALOG.map(m => { const override:any=moduleMap.get(m.key); return ({ ...m, enabled: m.available && (override?.enabled ?? true), frequency: override?.frequency || "inherit", inherited: !override || override.frequency === "inherit" }); }),
     events: EVENT_CATALOG.map(([key,en,es]) => ({ key,en,es,enabled: eventMap.get(key) ?? true,inherited: !eventMap.has(key) })),
     history: status.rows,
   };
@@ -192,8 +205,9 @@ export async function updateNotificationPreferenceCenter(userId: number, input: 
       const catalog = MODULE_CATALOG.find(m => m.key === item.key);
       if (!catalog) throw new TelegramProductError(400,"MODULE_INVALID","Notification module is invalid.");
       if (item.enabled === true && !catalog.available) throw new TelegramProductError(409,"MODULE_NOT_CONNECTED","This module adapter is coming later.");
-      await client.query(`INSERT INTO telegram_notification_module_preferences(user_id,module_key,enabled,updated_by_user_id,update_source) VALUES($1,$2,$3,$1,$4)
-        ON CONFLICT(user_id,module_key) DO UPDATE SET enabled=EXCLUDED.enabled,updated_by_user_id=$1,update_source=$4,updated_at=now()`, [userId,item.key,item.enabled === true,source]);
+      const moduleFrequency=item.key==="rfi"&&FREQUENCIES.has(item.frequency)?item.frequency:item.frequency==="inherit"?null:null;
+      await client.query(`INSERT INTO telegram_notification_module_preferences(user_id,module_key,enabled,delivery_frequency,updated_by_user_id,update_source) VALUES($1,$2,$3,$4,$1,$5)
+        ON CONFLICT(user_id,module_key) DO UPDATE SET enabled=EXCLUDED.enabled,delivery_frequency=EXCLUDED.delivery_frequency,updated_by_user_id=$1,update_source=$5,updated_at=now()`, [userId,item.key,item.enabled === true,moduleFrequency,source]);
     }
     for (const item of Array.isArray(input.events) ? input.events : []) {
       if (!EVENT_CATALOG.some(e => e[0] === item.key)) throw new TelegramProductError(400,"EVENT_INVALID","Notification event is invalid.");
@@ -247,7 +261,12 @@ async function transition(client: any, id: string, from: string | null, to: stri
   await client.query(`INSERT INTO telegram_notification_outbox_events(id,notification_id,from_state,to_state,event_type,reason,safe_details) VALUES($1,$2,$3,$4,'state_changed',$5,$6::jsonb)`, [crypto.randomUUID(),id,from,to,reason,JSON.stringify(details)]);
 }
 
-export async function acceptNotificationEvent(input: { canonicalEventId:string; companyId:number; projectId?:number|null; userId:number; moduleKey:string; eventKey:string; sourceRecordType:string; sourceRecordId:string; templateData:{en:string;es:string}; securityCritical?:boolean }) {
+function effectiveFrequencyFor(prefs:any,moduleKey:string):NotificationFrequency {
+  const module=(prefs.modules as any[]).find(item=>item.key===moduleKey);
+  return ((module?.frequency&&module.frequency!=="inherit")?module.frequency:prefs.settings.delivery_frequency||"off") as NotificationFrequency;
+}
+
+export async function acceptNotificationEvent(input: { canonicalEventId:string; companyId:number; projectId?:number|null; userId:number; moduleKey:string; eventKey:string; sourceRecordType:string; sourceRecordId:string; templateData:{en:string;es:string}; securityCritical?:boolean; watchRequired?:boolean }) {
   const moduleItem=MODULE_CATALOG.find(m=>m.key===input.moduleKey);
   if(!moduleItem?.available) throw new TelegramProductError(409,"MODULE_NOT_CONNECTED","The module adapter is not connected.");
   if(!EVENT_CATALOG.some(e=>e[0]===input.eventKey)) throw new TelegramProductError(400,"EVENT_INVALID","Notification event is invalid.");
@@ -256,21 +275,32 @@ export async function acceptNotificationEvent(input: { canonicalEventId:string; 
   if(Number(user.rows[0]?.company_id)!==Number(input.companyId)) throw new TelegramProductError(403,"TENANT_ACCESS_REJECTED","Notification tenant does not match the user.");
   let authorized=true;
   if(input.projectId){const a=await pool.query(`SELECT 1 FROM project_members WHERE user_id=$1 AND project_id=$2 AND status='active'`,[input.userId,input.projectId]);authorized=Boolean(a.rowCount);}
-  const modulePref=(prefs.modules as any[]).find(m=>m.key===input.moduleKey)?.enabled===true;
+  const moduleSetting=(prefs.modules as any[]).find(m=>m.key===input.moduleKey);const modulePref=moduleSetting?.enabled===true;
   const eventPref=(prefs.events as any[]).find(e=>e.key===input.eventKey)?.enabled===true;
   const projectPref=!input.projectId||(prefs.projects as any[]).find(p=>Number(p.id)===Number(input.projectId))?.enabled===true;
+  let overdueCadenceAllowed=true;
+  if(input.eventKey==="rfi_overdue"){
+    const cadence=String(s.overdue_frequency||"off");
+    if(cadence==="off")overdueCadenceAllowed=false;
+    else if(cadence==="once"||cadence==="weekly"){
+      const previous=await pool.query(`SELECT 1 FROM telegram_notification_outbox WHERE user_id=$1 AND module_key='rfi' AND event_key='rfi_overdue' AND source_record_id=$2
+        AND state NOT IN ('suppressed_by_preference','suppressed_by_authorization','cancelled','expired') AND ($3='once' OR created_at>=now()-interval '7 days') LIMIT 1`,[input.userId,safeText(input.sourceRecordId,160),cadence]);
+      overdueCadenceAllowed=!previous.rowCount;
+    }
+  }
   let state="scheduled"; let reason="accepted";
   if(!authorized){state="suppressed_by_authorization";reason="project_access_missing";}
-  else if(!s.enabled||s.paused||!s.telegramEnabled||s.delivery_frequency==="off"||!modulePref||!eventPref||!projectPref){state="suppressed_by_preference";reason="preference_disabled";}
-  else if(s.delivery_frequency!=="immediate"){state="digest_pending";reason="digest_selected";}
-  else if(!input.securityCritical&&isQuietNow(new Date(),s.timezone,s.quiet_hours_start,s.quiet_hours_end)){state="deferred_quiet_hours";reason="quiet_hours";}
-  const frequency=(s.delivery_frequency||"off") as NotificationFrequency;
+  const effectiveFrequency=((moduleSetting?.frequency&&moduleSetting.frequency!=="inherit")?moduleSetting.frequency:s.delivery_frequency) as NotificationFrequency;
+  if(state==="scheduled"&&(!s.enabled||s.paused||!s.telegramEnabled||effectiveFrequency==="off"||!modulePref||!eventPref||!projectPref||!overdueCadenceAllowed)){state="suppressed_by_preference";reason=overdueCadenceAllowed?"preference_disabled":"overdue_cadence_suppressed";}
+  else if(state==="scheduled"&&effectiveFrequency!=="immediate"){state="digest_pending";reason="digest_selected";}
+  else if(state==="scheduled"&&!input.securityCritical&&isQuietNow(new Date(),s.timezone,s.quiet_hours_start,s.quiet_hours_end)){state="deferred_quiet_hours";reason="quiet_hours";}
+  const frequency=(effectiveFrequency||"off") as NotificationFrequency;
   const windowKey=frequency.includes("digest")?digestWindowKey(new Date(),s.timezone,frequency):"";
   const id=crypto.randomUUID(); const canonical=safeText(input.canonicalEventId,200); if(!canonical)throw new TelegramProductError(400,"EVENT_ID_REQUIRED","Stable event ID is required.");
   const client=await pool.connect();
   try{await client.query("BEGIN");const inserted=await client.query(`INSERT INTO telegram_notification_outbox(id,canonical_event_id,company_id,project_id,user_id,module_key,event_key,source_record_type,source_record_id,channel,delivery_frequency,digest_window_key,template_data,authorization_snapshot,preference_decision,state,security_critical)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'telegram',$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15,$16)
-      ON CONFLICT(user_id,canonical_event_id,channel,delivery_frequency,digest_window_key) DO NOTHING RETURNING *`,[id,canonical,input.companyId,input.projectId||null,input.userId,input.moduleKey,input.eventKey,safeText(input.sourceRecordType,80),safeText(input.sourceRecordId,160),frequency,windowKey,JSON.stringify({en:safeText(input.templateData.en,500),es:safeText(input.templateData.es,500)}),JSON.stringify({authorizedAt:new Date().toISOString(),projectId:input.projectId||null}),JSON.stringify({enabled:s.enabled,paused:s.paused,module:modulePref,event:eventPref,project:projectPref}),state,input.securityCritical===true]);
+      ON CONFLICT(user_id,canonical_event_id,channel,delivery_frequency,digest_window_key) DO NOTHING RETURNING *`,[id,canonical,input.companyId,input.projectId||null,input.userId,input.moduleKey,input.eventKey,safeText(input.sourceRecordType,80),safeText(input.sourceRecordId,160),frequency,windowKey,JSON.stringify({en:safeText(input.templateData.en,500),es:safeText(input.templateData.es,500)}),JSON.stringify({authorizedAt:new Date().toISOString(),projectId:input.projectId||null}),JSON.stringify({enabled:s.enabled,paused:s.paused,module:modulePref,event:eventPref,project:projectPref,watchRequired:input.watchRequired===true,overdueCadenceAllowed}),state,input.securityCritical===true]);
     if(!inserted.rowCount){await client.query("ROLLBACK");return (await pool.query(`SELECT * FROM telegram_notification_outbox WHERE user_id=$1 AND canonical_event_id=$2 AND channel='telegram' AND delivery_frequency=$3 AND digest_window_key=$4`,[input.userId,canonical,frequency,windowKey])).rows[0];}
     await transition(client,id,null,state,reason);
     if(state==="digest_pending") { const b=digestBounds(new Date(),s.timezone,frequency);const digestId=crypto.randomUUID();const window=await client.query(`INSERT INTO telegram_notification_digest_windows(id,user_id,frequency,timezone,window_key,starts_at,ends_at,scheduled_for) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(user_id,frequency,window_key) DO UPDATE SET updated_at=now() RETURNING id`,[digestId,input.userId,frequency,s.timezone,b.key,b.start,b.end,b.scheduledFor]);await client.query(`INSERT INTO telegram_notification_digest_members(digest_id,notification_id) VALUES($1,$2) ON CONFLICT(notification_id) DO NOTHING`,[window.rows[0].id,id]);}
@@ -284,9 +314,11 @@ export async function processNotificationOutbox(limit=25) {
     for(const row of rows.rows){
       if(row.state==="deferred_quiet_hours"){const p=await getNotificationPreferenceCenter(row.user_id);const s:any=p.settings;if(isQuietNow(new Date(),s.timezone,s.quiet_hours_start,s.quiet_hours_end))continue;}
       const access=row.project_id?await client.query(`SELECT 1 FROM project_members WHERE user_id=$1 AND project_id=$2 AND status='active'`,[row.user_id,row.project_id]):{rowCount:1};
-      const channel=await client.query(`SELECT 1 FROM notification_channels WHERE user_id=$1 AND status='connected'`,[row.user_id]);
+      const channel=await client.query(`SELECT 1 FROM notification_channels WHERE user_id=$1 AND adapter_id=$2 AND provider='telegram' AND status='connected'`,[row.user_id,getTelegramProductConfig().adapterId]);
       if(!access.rowCount||!channel.rowCount){const next=!access.rowCount?"suppressed_by_authorization":"cancelled";await client.query(`UPDATE telegram_notification_outbox SET state=$2,updated_at=now(),failure_category=$3 WHERE id=$1`,[row.id,next,!access.rowCount?"AUTHORIZATION_REVOKED":"CHANNEL_REVOKED"]);await transition(client,row.id,row.state,next,"delivery_recheck_failed");continue;}
-      const p=await getNotificationPreferenceCenter(row.user_id);const s:any=p.settings;if(!s.enabled||s.paused||!s.telegramEnabled){await client.query(`UPDATE telegram_notification_outbox SET state='suppressed_by_preference',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,row.state,"suppressed_by_preference","preference_recheck_failed");continue;}
+      const p=await getNotificationPreferenceCenter(row.user_id);const s:any=p.settings;const module=(p.modules as any[]).find(x=>x.key===row.module_key);const event=(p.events as any[]).find(x=>x.key===row.event_key);const project=!row.project_id||(p.projects as any[]).find(x=>Number(x.id)===Number(row.project_id))?.enabled===true;const watchRequired=row.preference_decision?.watchRequired===true;const watch=watchRequired?await client.query(`SELECT 1 FROM telegram_rfi_notification_watches WHERE user_id=$1 AND rfi_id=$2 AND enabled=true`,[row.user_id,Number(row.source_record_id)]):{rowCount:1};
+      const frequencyMatches=effectiveFrequencyFor(p,row.module_key)===row.delivery_frequency;
+      if(!s.enabled||s.paused||!s.telegramEnabled||module?.enabled!==true||event?.enabled!==true||!project||!watch.rowCount||!frequencyMatches){await client.query(`UPDATE telegram_notification_outbox SET state='suppressed_by_preference',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,row.state,"suppressed_by_preference","preference_recheck_failed",{module:module?.enabled===true,event:event?.enabled===true,project,watch:Boolean(watch.rowCount),frequencyMatches});continue;}
       await client.query(`UPDATE telegram_notification_outbox SET state='delivering',attempt_count=attempt_count+1,updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,row.state,"delivering","transactional_claim");claimed.push({...row,attempt_number:Number(row.attempt_count)+1,language:s.language});
     } await client.query("COMMIT");
   }catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
@@ -304,7 +336,7 @@ export async function processNotificationDigests(limit=10) {
   const windows=await pool.query(`SELECT * FROM telegram_notification_digest_windows WHERE state='pending' AND scheduled_for<=now() ORDER BY scheduled_for,id LIMIT $1`,[limit]);let delivered=0;
   for(const window of windows.rows as any[]){const client=await pool.connect();let members:any[]=[];try{await client.query("BEGIN");const claimed=await client.query(`UPDATE telegram_notification_digest_windows SET state='delivering',updated_at=now() WHERE id=$1 AND state='pending' RETURNING *`,[window.id]);if(!claimed.rowCount){await client.query("ROLLBACK");continue;}
       const rows=await client.query(`SELECT o.* FROM telegram_notification_digest_members m JOIN telegram_notification_outbox o ON o.id=m.notification_id WHERE m.digest_id=$1 AND o.state='digest_pending' ORDER BY o.project_id,o.module_key,o.created_at,o.id FOR UPDATE`,[window.id]);
-      for(const row of rows.rows as any[]){const access=row.project_id?await client.query(`SELECT 1 FROM project_members WHERE user_id=$1 AND project_id=$2 AND status='active'`,[row.user_id,row.project_id]):{rowCount:1};if(!access.rowCount){await client.query(`UPDATE telegram_notification_outbox SET state='suppressed_by_authorization',failure_category='AUTHORIZATION_REVOKED',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,"digest_pending","suppressed_by_authorization","digest_authorization_recheck");}else members.push(row);}
+      for(const row of rows.rows as any[]){const access=row.project_id?await client.query(`SELECT 1 FROM project_members WHERE user_id=$1 AND project_id=$2 AND status='active'`,[row.user_id,row.project_id]):{rowCount:1};if(!access.rowCount){await client.query(`UPDATE telegram_notification_outbox SET state='suppressed_by_authorization',failure_category='AUTHORIZATION_REVOKED',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,"digest_pending","suppressed_by_authorization","digest_authorization_recheck");continue;}const channel=await client.query(`SELECT 1 FROM notification_channels WHERE user_id=$1 AND adapter_id=$2 AND provider='telegram' AND status='connected'`,[row.user_id,getTelegramProductConfig().adapterId]);if(!channel.rowCount){await client.query(`UPDATE telegram_notification_outbox SET state='cancelled',failure_category='CHANNEL_REVOKED',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,"digest_pending","cancelled","digest_channel_recheck");continue;}const p=await getNotificationPreferenceCenter(row.user_id);const s:any=p.settings;const module=(p.modules as any[]).find(x=>x.key===row.module_key);const event=(p.events as any[]).find(x=>x.key===row.event_key);const project=!row.project_id||(p.projects as any[]).find(x=>Number(x.id)===Number(row.project_id))?.enabled===true;const watchRequired=row.preference_decision?.watchRequired===true;const watch=watchRequired?await client.query(`SELECT 1 FROM telegram_rfi_notification_watches WHERE user_id=$1 AND rfi_id=$2 AND enabled=true`,[row.user_id,Number(row.source_record_id)]):{rowCount:1};const frequencyMatches=effectiveFrequencyFor(p,row.module_key)===row.delivery_frequency;if(!s.enabled||!s.telegramEnabled||module?.enabled!==true||event?.enabled!==true||!project||!watch.rowCount||!frequencyMatches){await client.query(`UPDATE telegram_notification_outbox SET state='suppressed_by_preference',updated_at=now() WHERE id=$1`,[row.id]);await transition(client,row.id,"digest_pending","suppressed_by_preference","digest_preference_recheck",{frequencyMatches});continue;}members.push(row);}
       await client.query("COMMIT");
     }catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
     if(!members.length){await pool.query(`UPDATE telegram_notification_digest_windows SET state='cancelled',updated_at=now() WHERE id=$1`,[window.id]);continue;}

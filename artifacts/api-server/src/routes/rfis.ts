@@ -32,6 +32,7 @@ import {
   type CompletePackageInputItem,
 } from "../lib/rfi-complete-package";
 import { buildRfiRegisterWorkbook } from "../lib/rfi-register-export";
+import { recordRfiNotificationSourceEvent } from "../lib/telegram-rfi-notifications";
 const router: IRouter = Router();
 
 type RfiPackageItem = {
@@ -1240,6 +1241,7 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
       }, req.user!, tx);
       if (!created.ok) return created;
       await bindStagedRfiFiles(tx, normalized.fileRows, created.rfi.id, req.user!.userId);
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${created.rfi.id}:created`,companyId:req.user!.companyId,projectId,rfiId:created.rfi.id,eventKey:"rfi_created",actorUserId:req.user!.userId});
       return created;
     });
 
@@ -1375,6 +1377,7 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
           storagePath,
           linkedRfiId: created.rfi.id,
         });
+        await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${created.rfi.id}:created`,companyId:req.user!.companyId,projectId,rfiId:created.rfi.id,eventKey:"rfi_created",actorUserId:req.user!.userId});
         return created;
       });
 
@@ -1535,6 +1538,9 @@ router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermissi
         entityId: rfiId,
         details: JSON.stringify({ event: "rfi.updated", number: updatedRfi.number, changedAt: updates.updatedAt, changes, imageEvents }),
       });
+      const version=(updates.updatedAt as Date).toISOString();
+      if(body.assignedToId!==undefined&&body.assignedToId!==existing[0].assignedToId)await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:assigned:${version}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_assigned",actorUserId:req.user!.userId});
+      if(body.dateRequired!==undefined&&String(updatedRfi.dateRequired||"")!==String(existing[0].dateRequired||""))await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:required:${version}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_date_required_changed",actorUserId:req.user!.userId});
       return { updated: updatedRfi };
     });
 
@@ -1648,6 +1654,7 @@ router.post("/projects/:projectId/rfis/:rfiId/close", authMiddleware, requirePer
         actionType: "close", entityType: "rfi", entityId: rfiId,
         details: JSON.stringify({ event: "rfi.closed", number: existing.number, closedAt: closedAt.toISOString(), closedBy: req.user!.fullName, priorStatus: existing.status, priorCustody: openCustody ? { heldBy: openCustody.heldBy, heldByCompany: openCustody.heldByCompany } : null }),
       });
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:closed:${closedAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_closed",actorUserId:req.user!.userId});
       return { status: 200 as const, rfi: updated };
     });
     if (outcome.status !== 200) { res.status(outcome.status).json({ error: outcome.error }); return; }
@@ -1687,6 +1694,7 @@ router.post("/projects/:projectId/rfis/:rfiId/reopen", authMiddleware, requirePe
         actionType: "reopen", entityType: "rfi", entityId: rfiId,
         details: JSON.stringify({ event: "rfi.reopened", number: existing.number, reopenedAt: reopenedAt.toISOString(), reopenedBy: req.user!.fullName, priorStatus: existing.status, restoredCustody: canRestoreCustody ? { heldBy: priorCustody.heldBy, heldByCompany: priorCustody.heldByCompany } : null, unsentAuthorHeld: !wasSent }),
       });
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:reopened:${reopenedAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_reopened",actorUserId:req.user!.userId});
       return { status: 200 as const, rfi: updated };
     });
     if (outcome.status !== 200) { res.status(outcome.status).json({ error: outcome.error }); return; }
@@ -1745,6 +1753,7 @@ router.post("/projects/:projectId/rfis/:rfiId/revise", authMiddleware, requirePe
         { projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "revise", entityType: "rfi", entityId: source.id, details: JSON.stringify({ ...lineage, perspective: "source" }) },
         { projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "create", entityType: "rfi", entityId: newRfi.id, details: JSON.stringify({ ...lineage, perspective: "revision" }) },
       ]);
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${newRfi.id}:revision:${source.id}:${revNum}`,companyId:req.user!.companyId,projectId,rfiId:newRfi.id,eventKey:"rfi_revised",actorUserId:req.user!.userId});
       return { status: 201 as const, rfi: newRfi };
     });
     if (outcome.status !== 201) { res.status(outcome.status).json({ error: outcome.error }); return; }
@@ -1931,16 +1940,11 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
     });
 
     const includedItemCount = packageInputs.filter(item => item.include).length;
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName || "User",
-      userCompanyName: req.user!.companyName || "",
-      actionType: "export",
-      entityType: "rfi",
-      entityId: rfiId,
+    await db.transaction(async tx=>{await tx.insert(activityLogTable).values({
+      projectId, userId: req.user!.userId, userFullName: req.user!.fullName || "User", userCompanyName: req.user!.companyName || "",
+      actionType: "export", entityType: "rfi", entityId: rfiId,
       details: JSON.stringify({ event: "rfi.complete_pdf_exported", number: rfi.number, includedItemCount, logicalPackageFingerprint: result.logicalFingerprint, success: true }),
-    });
+    });await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:complete-package:${result.logicalFingerprint}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_complete_package_ready",actorUserId:req.user!.userId,requestingUserOnly:true});});
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${rfi.number} - Complete RFI Package`)}"`);
@@ -2148,6 +2152,8 @@ router.post("/projects/:projectId/rfis/:rfiId/mark-sent", authMiddleware, requir
         entityId: rfiId,
         details: `Manually marked RFI ${existing.number} as sent to ${recipientCompany}`,
       });
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:issued:${sentAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_issued",actorUserId:req.user!.userId});
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:custody:${sentAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_assigned",actorUserId:req.user!.userId});
 
       const [creator] = await tx.select({ fullName: usersTable.fullName }).from(usersTable)
         .where(eq(usersTable.id, existing.createdById)).limit(1);
@@ -2268,6 +2274,8 @@ router.post("/projects/:projectId/rfis/:rfiId/send", authMiddleware, requirePerm
         actionType: "update", entityType: "rfi", entityId: rfiId,
         details: `Sent RFI ${existing.number} to ${to} via SendGrid`,
       });
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:issued:${sentAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_issued",actorUserId:req.user!.userId});
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:custody:${sentAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_assigned",actorUserId:req.user!.userId});
       const [creator] = await tx.select({ fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, existing.createdById)).limit(1);
       return { status: 200 as const, body: rfiToJson(updated, { createdByName: creator?.fullName }) };
     });
@@ -2888,6 +2896,8 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
         attachments: responseAttachments.map(attachmentLabel),
       }),
       });
+      await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:response:${inserted.id}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:closesRfi?"rfi_response_final":"rfi_response_added",actorUserId:userId});
+      if(!closesRfi&&submitterCompany)await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:custody:response:${inserted.id}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_assigned",actorUserId:userId});
 
       return { status: 201 as const, response: inserted, rfi: updatedRfi };
     });
@@ -3037,18 +3047,12 @@ ${chunk}`
         const finalNum = getDrfNumber(proposed);
         if (finalNum !== proposed) renamedItems.push({ original: proposed, renamed: finalNum });
         usedNumbers.add(finalNum);
-        await db.insert(rfisTable).values({
-          projectId,
-          number: finalNum,
-          subject: r.subject || "Imported RFI",
-          description: r.description || null,
-          status: r.status || "open",
-          priority: r.priority || "medium",
-          createdById: req.user!.userId,
-          submittedByCompany: r.submittedByCompany || null,
-          submittedByContact: r.submittedByContact || null,
+        await db.transaction(async tx=>{const [created]=await tx.insert(rfisTable).values({
+          projectId, number: finalNum, subject: r.subject || "Imported RFI", description: r.description || null,
+          status: r.status || "open", priority: r.priority || "medium", createdById: req.user!.userId,
+          submittedByCompany: r.submittedByCompany || null, submittedByContact: r.submittedByContact || null,
           dueDate: r.dueDate ? new Date(r.dueDate) : null,
-        });
+        }).returning();await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${created.id}:created`,companyId:req.user!.companyId,projectId,rfiId:created.id,eventKey:"rfi_created",actorUserId:req.user!.userId});});
         imported++;
       }
       await db.insert(activityLogTable).values({

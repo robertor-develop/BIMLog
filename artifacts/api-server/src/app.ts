@@ -6,6 +6,7 @@ import { startOverdueNotifier } from "./lib/overdue-notifier";
 import { ensureTelegramProductConversationSchema, startTelegramProductWorker } from "./lib/telegram-product";
 import { ensureTelegramProductDeliverySchema, recoverAbandonedDeliveryAttempts } from "./lib/telegram-product-delivery";
 import { ensureTelegramNotificationSchema, recoverNotificationOutbox, startNotificationOutboxWorker } from "./lib/telegram-product-notifications";
+import { ensureTelegramRfiNotificationSchema, startRfiNotificationWorker } from "./lib/telegram-rfi-notifications";
 import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
@@ -478,6 +479,7 @@ void rfiMigrationReady.then((ready) => {
     await ensureTelegramProductConversationSchema();
     await ensureTelegramProductDeliverySchema();
     await ensureTelegramNotificationSchema();
+    await ensureTelegramRfiNotificationSchema();
     const recoveredUnknownDeliveries = await recoverAbandonedDeliveryAttempts();
     const recoveredUnknownNotifications = await recoverNotificationOutbox();
     if (recoveredUnknownDeliveries) console.warn(`[telegram-product] recovered ${recoveredUnknownDeliveries} abandoned delivery attempt(s) as delivery_unknown`);
@@ -485,6 +487,7 @@ void rfiMigrationReady.then((ready) => {
     console.log("[migration] telegram product notification tables ensured");
     startTelegramProductWorker();
     startNotificationOutboxWorker();
+    startRfiNotificationWorker();
   } catch (e) {
     console.error("[migration] telegram product notification migration failed:", e);
   }

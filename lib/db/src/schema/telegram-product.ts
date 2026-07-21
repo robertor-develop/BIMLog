@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { usersTable } from "./users";
 import { companiesTable } from "./users";
 import { projectsTable } from "./projects";
+import { rfisTable } from "./rfis";
 import { aiRunsTable } from "./ai-control-plane";
 
 export const notificationChannelsTable = pgTable("notification_channels", {
@@ -78,7 +79,7 @@ export const telegramNotificationProjectPreferencesTable = pgTable("telegram_not
 }, (t) => ({ userProjectUnique: uniqueIndex("telegram_notification_project_user_uidx").on(t.userId,t.projectId), projectIdx: index("telegram_notification_project_project_idx").on(t.projectId,t.userId) }));
 
 export const telegramNotificationModulePreferencesTable = pgTable("telegram_notification_module_preferences", {
-  id: bigserial("id", { mode: "number" }).primaryKey(), userId: integer("user_id").references(() => usersTable.id).notNull(), moduleKey: text("module_key").notNull(), enabled: boolean("enabled").notNull(),
+  id: bigserial("id", { mode: "number" }).primaryKey(), userId: integer("user_id").references(() => usersTable.id).notNull(), moduleKey: text("module_key").notNull(), enabled: boolean("enabled").notNull(), deliveryFrequency:text("delivery_frequency"),
   updatedByUserId: integer("updated_by_user_id").references(() => usersTable.id), updateSource: text("update_source").notNull(), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(), updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({ userModuleUnique: uniqueIndex("telegram_notification_module_user_uidx").on(t.userId,t.moduleKey) }));
 
@@ -110,6 +111,18 @@ export const telegramNotificationDigestWindowsTable = pgTable("telegram_notifica
 export const telegramNotificationDigestMembersTable = pgTable("telegram_notification_digest_members", {
   digestId:text("digest_id").references(()=>telegramNotificationDigestWindowsTable.id).notNull(), notificationId:text("notification_id").references(()=>telegramNotificationOutboxTable.id).notNull(), createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(),
 }, (t)=>({pk:primaryKey({name:"telegram_notification_digest_members_pkey", columns:[t.digestId,t.notificationId]}), notificationUnique:unique("telegram_notification_digest_members_notification_id_key").on(t.notificationId)}));
+
+export const telegramRfiNotificationSourceEventsTable = pgTable("telegram_rfi_notification_source_events", {
+  id:text("id").primaryKey(), canonicalEventId:text("canonical_event_id").notNull(), companyId:integer("company_id").references(()=>companiesTable.id).notNull(), projectId:integer("project_id").references(()=>projectsTable.id).notNull(), rfiId:integer("rfi_id").references(()=>rfisTable.id).notNull(), eventKey:text("event_key").notNull(), actorUserId:integer("actor_user_id").references(()=>usersTable.id).notNull(), requestingUserOnly:boolean("requesting_user_only").notNull().default(false), safeDetails:jsonb("safe_details").$type<Record<string,unknown>>().notNull().default({}), state:text("state").notNull().default("pending"), attemptCount:integer("attempt_count").notNull().default(0), failureCategory:text("failure_category"), createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(), updatedAt:timestamp("updated_at",{withTimezone:true}).defaultNow().notNull(), processedAt:timestamp("processed_at",{withTimezone:true}),
+},(t)=>({canonicalUnique:uniqueIndex("telegram_rfi_source_canonical_uidx").on(t.canonicalEventId),claimIdx:index("telegram_rfi_source_claim_idx").on(t.state,t.createdAt),rfiIdx:index("telegram_rfi_source_rfi_idx").on(t.rfiId,t.createdAt)}));
+
+export const telegramRfiNotificationSourceHistoryTable = pgTable("telegram_rfi_notification_source_history", {
+  id:text("id").primaryKey(),sourceEventId:text("source_event_id").references(()=>telegramRfiNotificationSourceEventsTable.id).notNull(),fromState:text("from_state"),toState:text("to_state").notNull(),reason:text("reason").notNull(),safeDetails:jsonb("safe_details").$type<Record<string,unknown>>().notNull().default({}),createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(),
+},(t)=>({sourceIdx:index("telegram_rfi_source_history_idx").on(t.sourceEventId,t.createdAt)}));
+
+export const telegramRfiNotificationWatchesTable = pgTable("telegram_rfi_notification_watches", {
+  id:text("id").primaryKey(),userId:integer("user_id").references(()=>usersTable.id).notNull(),projectId:integer("project_id").references(()=>projectsTable.id).notNull(),rfiId:integer("rfi_id").references(()=>rfisTable.id).notNull(),enabled:boolean("enabled").notNull().default(true),createdAt:timestamp("created_at",{withTimezone:true}).defaultNow().notNull(),updatedAt:timestamp("updated_at",{withTimezone:true}).defaultNow().notNull(),
+},(t)=>({userRfiUnique:uniqueIndex("telegram_rfi_watch_user_rfi_uidx").on(t.userId,t.rfiId),rfiIdx:index("telegram_rfi_watch_rfi_idx").on(t.rfiId,t.userId)}));
 
 export const consentRecordsTable = pgTable("consent_records", {
   id: serial("id").primaryKey(),

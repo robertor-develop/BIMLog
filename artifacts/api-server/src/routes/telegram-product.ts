@@ -31,6 +31,7 @@ import {
   setNotificationsPaused,
   updateNotificationPreferenceCenter,
 } from "../lib/telegram-product-notifications";
+import { getRfiNotificationContext, setRfiModuleFrequency, setRfiWatch } from "../lib/telegram-rfi-notifications";
 
 const router: Router = Router();
 
@@ -113,6 +114,21 @@ router.post("/integrations/telegram/notification-settings/resume", authMiddlewar
 
 router.post("/integrations/telegram/notification-settings/test", authMiddleware, async (req, res) => {
   try { res.json(await sendTestNotification(req.user!.userId)); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.put("/integrations/telegram/notification-settings/modules/rfi", authMiddleware, async (req, res) => {
+  try { res.json(await setRfiModuleFrequency(req.user!.userId, String(req.body?.frequency || ""))); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.get("/projects/:projectId/rfis/:rfiId/notification-context", authMiddleware, async (req, res) => {
+  try { res.json(await getRfiNotificationContext(req.user!.userId, Number(req.params.projectId), Number(req.params.rfiId))); }
+  catch (err) { sendTelegramError(res, err); }
+});
+
+router.put("/projects/:projectId/rfis/:rfiId/notification-watch", authMiddleware, async (req, res) => {
+  try { res.json(await setRfiWatch(req.user!.userId, Number(req.params.projectId), Number(req.params.rfiId), req.body?.enabled === true)); }
   catch (err) { sendTelegramError(res, err); }
 });
 
