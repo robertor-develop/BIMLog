@@ -4,6 +4,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-21
 
+### Living Brief Credential Persistence and Terminal-Turn Governance Accepted
+
+- Integration commit `c3a7c809643022abb04b8fe58db043ccd5d828ff` cleanly reconciles the accepted Living Brief
+  credential/governance candidate onto Coordinator master `81007cafddd1d59880259af2255863986715ed56`, without
+  importing superseded candidate ancestry or overwriting Coordinator Build 1 source/acceptance truth.
+- The accepted source correction preserves the durable Living Brief gate credential authority, fail-closed missing
+  state, Super Administrator revalidated recovery, version-bound sessions, locked-screen reset removal, responsive
+  UI fix, owner credential-continuity exception, safe defensive-security guidance, terminal-turn notification rule,
+  and the atomic `legacy_migrated` audit fix.
+- The atomic audit correction ties `legacy_migrated` evidence to the actual successful one-time legacy credential
+  insert and prevents false or duplicate migration audit rows during fresh bootstrap or concurrent startup.
+- This is source acceptance only. It does not publish, deploy, access production/customer data, rotate/test/print
+  credentials, or verify the live production mirror. Production rollout remains a separate controlled action.
+- Ready Telegram Message ID 52 referenced superseded local candidate `27c4b318be4ee2f4371d30633a82b0b448c8d339`;
+  it is not a completion notification and was not resent. The current terminal turn requires a separate sanitized
+  Completed notification after push and remote verification.
+
 ### Coordinator Command Center Build 1 Accepted
 
 - Candidate `c3e8fb030ed544ede6e4f83ea2cd4dab656d01f3` was independently reviewed and applied as

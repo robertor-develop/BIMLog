@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `81007cafddd1d59880259af2255863986715ed56`
+Accepted source reconciled through: `c3a7c809643022abb04b8fe58db043ccd5d828ff`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -9,9 +9,10 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
-Current urgent local candidate: Living Brief credential persistence and controlled recovery. It is based on
-accepted `origin/master` `81007cafddd1d59880259af2255863986715ed56`, is not reviewed, pushed, published, or
-deployed, and must not be treated as production truth until independent review and controlled rollout.
+Living Brief credential persistence and controlled recovery are accepted in source at
+`c3a7c809643022abb04b8fe58db043ccd5d828ff` after reconciliation onto Coordinator master
+`81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror
+verified until the separate controlled rollout completes.
 
 Current governance amendment in the same local candidate: safe defensive security execution and Batch A reconciliation
 order. Security Batch A candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent

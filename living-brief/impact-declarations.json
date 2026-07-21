@@ -617,6 +617,76 @@
         "scripts/test-living-brief-gate.mjs"
       ],
       "reviewedChangeSha256": "9fe53cd6927e1d9fd5e5fe4c1bcbffc4af3eee43dafd7c60e9479e23b5b95248"
+    },
+    {
+      "taskId": "living-brief-credential-persistence-source-acceptance",
+      "reviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "reviewedAt": "2026-07-21T21:20:00.000Z",
+      "status": "accepted_source_pending_push_verification",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not change ecosystem doctrine beyond the already reviewed credential governance candidate."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted operating rules are already captured in the integration commit; this records acceptance state only."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted quality controls and terminal-turn enforcement are already captured; this records acceptance state only."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance of credential governance does not alter BIMLog vision or roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PLATFORM was generated deterministically in the integration commit and no structural change is added by acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not alter Navisworks plugin source, packaging, baseline, or field acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not change report artifacts, exports, delivery boundaries, or report design authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard is adopted or changed by this acceptance record."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Updated source truth to identify the accepted integration commit while preserving deployment and production-verification boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded source acceptance, superseded Ready message disclosure, non-actions, and remaining production rollout boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Audit findings were already appended in the integration commit; acceptance adds no new incident finding."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f766e8ef469dcea229d2bcc90531ac39c6627996a22029f09b4f6ce5ffe53a50"
     }
   ]
 }

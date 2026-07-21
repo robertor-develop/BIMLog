@@ -1,38 +1,18 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
+  "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
   "catalogSha256": "0d224ffe68041854931adb288f6a1ed0525ac8d29e41f21aa8f6d1bb2e1cbd55",
-  "bundleSha256": "1ba4a4790d7157596154a6e6b9a467dbc049f60974a18f2adfe5a9fdb401810b",
+  "bundleSha256": "8ea4e19ba8a57c2db5910ffcb32e918f82ea1d1c09b28b355fc4025975c4b3c1",
   "impact": {
-    "baselineCommit": "81007cafddd1d59880259af2255863986715ed56",
+    "baselineCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
     "changedPaths": [
-      "artifacts/api-server/src/app.ts",
-      "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
-      "artifacts/api-server/src/lib/living-brief-gate.ts",
-      "artifacts/api-server/src/lib/living-brief-migration.ts",
-      "artifacts/api-server/src/lib/living-brief-runtime.behavior.ts",
-      "artifacts/api-server/src/middlewares/auth.ts",
-      "artifacts/api-server/src/routes/living_brief.ts",
-      "artifacts/bimlog/src/living-brief-harness.tsx",
-      "artifacts/bimlog/src/pages/LivingBrief.tsx",
-      "lib/db/src/schema/index.ts",
-      "lib/db/src/schema/living-brief-gate.ts",
-      "living-brief/AUDIT.md",
-      "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
-      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
-      "living-brief/catalog.json",
-      "living-brief/impact-declarations.json",
-      "scripts/check-living-brief.mjs",
-      "scripts/test-living-brief-architecture.mjs",
-      "scripts/test-living-brief-gate.mjs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -43,35 +23,35 @@
       "sha256": "95fc786414057f0a9eb5ccc7aef636458e779bfc74648a0ccfa4f36934e7ada0",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
       "sha256": "66cf02a30dd24135e535aecefe2ec02448ba95d9f7ab165221150fb874a2692c",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
       "sha256": "c56cfc88de510991182a9a5d824a391b33f017cbd417b4c21e8e03b258319d49",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "vision",
@@ -79,23 +59,23 @@
       "sha256": "6b4ba280e7b08d6579fdef263bfc0f7f0823bcce5fc08fffdfb0fbc7d8f2740c",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "5c249b18c1610a1338cbf67d5b3c6b7fab2321a9b8c59761ca35d242695ad85b",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "plugin",
@@ -103,11 +83,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -115,11 +95,11 @@
       "sha256": "9a174a369ff2f2cf9ab179df411a86e4002dab209ed373334a839a801b4a6c12",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "standards_register",
@@ -127,47 +107,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "b1640ab73cba68a660d2a94b19a5d663b4325d8f170a81b642ec69f6f9a51bab",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
+      "sha256": "fde1b7335703f7a2a87f0333e791c749a914cba000a3fc3faa3567a9ac60e34a",
+      "sourceChangedAt": "2026-07-21T21:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "0fc3b7a12665e0cc08bf3dc66a6d0513850432a1d7bdee0fee05ebf652cdd448",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
+      "sha256": "ed2365212b4a244072c5539dbe0371d10eb15b225fa6611bc8ee5f8437983a09",
+      "sourceChangedAt": "2026-07-21T21:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "a1230b9d73eb962d4171037ae3fb4ac51edb6dd10b99e50e41deacd2e8d39f8a",
-      "sourceChangedAt": "2026-07-21T21:17:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "semanticReviewTask": "living-brief-terminal-turn-notification-governance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:17:00.000Z"
+      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
     }
   ]
 }
