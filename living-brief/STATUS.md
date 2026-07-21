@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `97e32503a641c37ff55c0e96806c1cf58af57ae1`
+Accepted source reconciled through: `6f9c3f18d524723361f5f0ab45cf18f160566311`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -20,6 +20,14 @@ master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
 The accepted correction is not published, deployed, production verified, customer verified, or extended to
 SheetJS/Batches B-I.
 
+Portability Phase 1A is accepted in source at integration commit
+`6f9c3f18d524723361f5f0ab45cf18f160566311`, directly based on authoritative master
+`988b5cef9312737f1d64447aa6b5b642b927e4ab`. It reapplies only the two corrected files from reviewed candidate
+`63ab0f873e9294a1c0ce7e3cee9b7a3119bd848d` without importing candidate ancestry: the non-secret continuity
+exception record and a value-blind protected-configuration guard. The protected configuration and credential behavior
+remain unchanged. Normal push/remote verification is the remaining source gate; publication, deployment, production,
+customer, provider, callback, authentication, credential mutation, and Phase 1B remain separate and unstarted.
+
 Owner credential continuity decision in the same local candidate: current working integration credential material must
 remain operational and unchanged during ongoing platform development. This temporary owner-approved exception is not
 launch architecture. It blocks any credential rotation, revocation, deletion, replacement, relocation, regeneration,
@@ -33,6 +41,9 @@ is reserved for genuine completion.
 
 ## Shipped and accepted in source
 
+- Portability Phase 1A: owner-approved temporary credential continuity exception, value-blind credential-category and
+  recovery ownership inventory, future managed-secret cutover design, mandatory public-launch blocker, and a
+  byte-preserving guard that prints no protected value or fingerprint.
 - Coordinator Command Center Build 1: a Lens/Viewpoints-first read-only project action register for
   actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks. Canonical
   modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,

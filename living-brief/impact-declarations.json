@@ -846,6 +846,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d784dbd9a75501923c66abf2d98b1831254cfed00f97f8d63009ffc55da250f1"
+    },
+    {
+      "taskId": "platform-portability-phase1a-source-acceptance",
+      "reviewedThroughCommit": "6f9c3f18d524723361f5f0ab45cf18f160566311",
+      "reviewedAt": "2026-07-21T22:08:22.465Z",
+      "status": "accepted_source_pending_push_verification",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Phase 1A implements the already accepted owner continuity exception without changing BIMLog product doctrine or human authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Recorded the canonical Phase 1A continuity document and the value-blind guard requirement for later portability candidates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality authority already defines the temporary continuity gate and launch blocker; the accepted guard implements that rule without changing it."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Credential-preservation documentation and a non-mutating guard do not alter BIMLog product direction, roadmap, or market positioning."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime, route, service, package, deployment topology, generated structural inventory, or credential-bearing platform configuration changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or Sync Agent source, package, endpoint, credential behavior, compatibility, or field-acceptance state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Phase 1A does not change report artifacts, exports, presentation, storage, delivery, or report-design authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability decision, compliance claim, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the content-only integration commit, exact two-file scope, protected behavior, pending push gate, and non-production boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded Phase 1A source acceptance, validation, remaining push verification, mandatory launch blocker, and unchanged Phase 1B status."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The owner exception and Step 0 findings are already captured; this source acceptance adds no new incident or historical audit fact."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e032d433747e891a1a9f245df995bbb784810fbb5bb2028e30184bfab7efc495"
     }
   ]
 }

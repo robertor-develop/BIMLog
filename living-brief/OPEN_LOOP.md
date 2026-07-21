@@ -4,6 +4,27 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-21
 
+### Portability Phase 1A accepted in source; push verification pending
+
+- Corrected candidate `63ab0f873e9294a1c0ce7e3cee9b7a3119bd848d` was reapplied as content only to authoritative
+  master `988b5cef9312737f1d64447aa6b5b642b927e4ab`; candidate ancestry was not imported. Clean integration commit:
+  `6f9c3f18d524723361f5f0ab45cf18f160566311`.
+- Exact integration scope is `docs/portability/PHASE_1A_CREDENTIAL_CONTINUITY_EXCEPTION.md` plus
+  `scripts/check-credential-continuity.mjs`. The document records Roberto's temporary exception, recovery ownership,
+  non-mutating safeguards, future one-time launch-hardening design, and mandatory public-launch blocker.
+- The guard remains byte-identical to the accepted candidate, compares the complete protected Replit configuration
+  value-blind, emits generic pass/fail output only, and passed against the current configuration plus its synthetic
+  self-test. The protected file/blob and credential behavior remain unchanged.
+- Focused source gates passed: accepted-content equality, exact two-file integration allowlist, protected-file/blob
+  identity, guard, self-test, and raw diff check. Living Brief semantic, state, encoding, and diff gates are rerun in
+  the separate acceptance commit; no broad build is required because no runtime/application behavior changed.
+- Remaining source gate is normal push followed by exact remote equality and ancestry verification. No force-push,
+  publication, deployment, production/customer/provider access, callback/authentication change, credential mutation,
+  default-branch change, history rewrite, or Phase 1B work is authorized or performed.
+- Public/production launch remains blocked until Roberto separately approves and verifies managed-secret migration,
+  backup/recovery, appropriate rotation/revocation, callback continuity, rollback, history remediation, and independent
+  verification.
+
 ### Living Brief Credential Persistence and Terminal-Turn Governance Accepted
 
 - Integration commit `c3a7c809643022abb04b8fe58db043ccd5d828ff` cleanly reconciles the accepted Living Brief

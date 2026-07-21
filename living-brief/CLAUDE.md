@@ -282,6 +282,12 @@ hardening, no task may rotate, revoke, delete, replace, relocate, regenerate, in
 or test those credentials, nor change provider, callback, or authentication behavior. No build or correction may require
 Roberto to re-enter credentials. Future credential mutation requires fresh explicit Roberto approval.
 
+The accepted Phase 1A continuity record lives at
+`docs/portability/PHASE_1A_CREDENTIAL_CONTINUITY_EXCEPTION.md`. Before and after later portability work, run
+`node scripts/check-credential-continuity.mjs`. The guard compares the complete protected Replit configuration with
+the owner-approved baseline, emits generic pass/fail output only, and stops on mismatch, absence, or read failure.
+Never print either fingerprint or inspect/replace values to resolve a guard failure; return the mismatch to Roberto.
+
 Before public/production launch, this exception becomes a mandatory blocker requiring a separately approved
 managed-secret migration, durable backup/recovery, controlled rotation/revocation as appropriate, callback continuity,
 rollback proof, history remediation, and independent verification. Evidence and summaries remain value-blind: never
