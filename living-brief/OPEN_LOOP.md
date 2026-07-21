@@ -2,6 +2,27 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Living Brief Freshness Architecture Accepted
+
+- Independently accepted on 2026-07-21 and applied as reviewed content only to clean
+  `origin/master` baseline `8022b894bf8650c9a02384f2d187e0f84f476d55`; candidate ancestry was not imported.
+  The clean integration commit is the immediate parent of this acceptance record.
+- The authority-ordered 11-document catalog now drives validation, deterministic PLATFORM
+  generation, the authenticated API, exact database mirror, responsive bilingual UI, Copy Full
+  Brief, and export. Arbitrary pasted or database-only doctrine mutation was removed.
+- Independent disposable PostgreSQL/API evidence passed 18/18 for exact mirror metadata,
+  idempotency, mismatch preservation, observed-hash reconciliation, locking, concurrent source
+  change detection, rollback, authentication, restart persistence, privacy, and cleanup.
+- Freshness negatives passed 9/9; architecture passed 25/25; desktop English and exact 390px
+  Spanish browser evidence showed 11 tabs, 11 copied/exported documents plus manifest, no page
+  overflow, and zero console errors. Current Meeting Minutes M4 and Finance Build 2 regressions,
+  full typecheck, production build, encoding, privacy, and deterministic generation also passed.
+- This acceptance does not claim deployment, publication, production database reconciliation, or
+  production browser verification. Those remain controlled later gates. No new Living Brief build
+  starts automatically.
+- The earlier Ready notification referenced superseded pre-amend commit `a4990da41cf2036fe09f80f03cb7b3db4211bf94`;
+  it was disclosed and was not resent.
+
 ## Cost & Financial Control Build 2 Accepted
 
 - Independently accepted on 2026-07-21 from candidate `51edf32a106b2b4a82a6f55fe1a7b2de40440fb5`, applied as content only to baseline `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`.
