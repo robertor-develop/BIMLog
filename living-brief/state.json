@@ -1,42 +1,20 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55",
+  "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c",
   "catalogSha256": "11e96448db13e7ce5aa73ff10e2b462ef2997c23d08473978fac7e6d4ef13523",
-  "bundleSha256": "88e76a007a2caaad20566fd539de796dd9666413f799ce17301432577afeec58",
+  "bundleSha256": "c699416e9ec63eada1cdd496f022a00e9c0496382c77533ca69bc8c8233c9cb9",
   "impact": {
-    "baselineCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55",
+    "baselineCommit": "9297740955336971b6aa9b4b120b0f2b6054185c",
     "changedPaths": [
-      "artifacts/api-server/build.ts",
-      "artifacts/api-server/scripts/generate-platform-md.ts",
-      "artifacts/api-server/src/app.ts",
-      "artifacts/api-server/src/lib/living-brief-migration.ts",
-      "artifacts/api-server/src/lib/living-brief-mirror.ts",
-      "artifacts/api-server/src/lib/living-brief-runtime.behavior.ts",
-      "artifacts/api-server/src/lib/living-brief-source.ts",
-      "artifacts/api-server/src/routes/living_brief.ts",
-      "artifacts/bimlog/living-brief-harness.html",
-      "artifacts/bimlog/src/living-brief-harness.tsx",
-      "artifacts/bimlog/src/pages/LivingBrief.tsx",
-      "lib/db/src/schema/index.ts",
-      "lib/db/src/schema/living-brief-documents.ts",
-      "living-brief/AUDIT.md",
       "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
-      "living-brief/PLUGIN.md",
+      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
-      "living-brief/catalog.json",
-      "living-brief/impact-declarations.json",
-      "package.json",
-      "scripts/check-living-brief.mjs",
-      "scripts/test-living-brief-architecture.mjs",
-      "scripts/test-living-brief-gate.mjs",
-      "scripts/update-living-brief-state.mjs"
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml"
     ],
     "affectedDocuments": [
-      "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -47,23 +25,23 @@
       "sha256": "257b18fbad98e0eb6a04d723bc638592e5a8ec9e5eebb06b5dcf3049aaca0301",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "827f3666a03dd7e87ddaf972d8cc51b296f338df5043cabb2a13eb0036f84db3",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
+      "sha256": "08d8b74fee27b0876aa987bc7544ad578ec2f8299c3200af3e8bbf203fee8528",
+      "sourceChangedAt": "2026-07-21T16:56:16.121Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "2bc672291860bcde48b90ec6e9f694301206b2c0daee66813286101dd0a3a18f",
-      "sourceChangedAt": "2026-07-13T20:02:26-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "sha256": "9d24be63d03674e9178c00c6d1776edd396de95b316839106ba69f2314e2a4c3",
+      "sourceChangedAt": "2026-07-21T16:56:16.121Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "vision",
@@ -71,23 +49,23 @@
       "sha256": "6e69742e91754ac06a83db72594bc7df3e266a92e69fd196915ce9cb0021c263",
       "sourceChangedAt": "2026-07-13T19:43:03-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "702607827438cbc956cf64bd8f655f96608f93307f28cf75203552fa7a01445a",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "sourceChangedAt": "2026-07-21T11:18:43-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "plugin",
       "file": "PLUGIN.md",
       "sha256": "f84d1edd1cbb725ce445573b19c6f591f566e9cb5ec7f9ab46b1017fc8b34a04",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "sourceChangedAt": "2026-07-21T11:18:43-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "report_design_system",
@@ -95,7 +73,7 @@
       "sha256": "b9c773c6154d5afc98ba5c3ff5b3aa589ea363f5dfdf205c1cc9fa24ab9bd8dd",
       "sourceChangedAt": "2026-07-13T19:43:03-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "standards_register",
@@ -103,31 +81,31 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "c33b7681d28a233b4f10c67a588df8e1ec5606274f4f797ce4ce3404e850b6e6",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
+      "sha256": "e1f8575a90d71748d37bd97f3aa00f37b31e5670bccf0c7560c6d83fe51c047c",
+      "sourceChangedAt": "2026-07-21T16:56:16.121Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "4feed7c1c725df1f04b58df987dbf9d623a517b613a7756bed5ec837686314ad",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
+      "sha256": "c8415bc28c97e158e107dda43ca0bf5ec066748e5ba52387b9f7cab7ef2626ee",
+      "sourceChangedAt": "2026-07-21T16:56:16.121Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "ac3dc422c034c06a8d0ba5e1f74fd5ddeeedacb0da18ad28624631701dfa9cbd",
-      "sourceChangedAt": "2026-07-21T15:10:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8022b894bf8650c9a02384f2d187e0f84f476d55"
+      "sourceChangedAt": "2026-07-21T11:18:43-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "9297740955336971b6aa9b4b120b0f2b6054185c"
     }
   ]
 }

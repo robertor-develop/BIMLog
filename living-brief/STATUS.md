@@ -1,12 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Last reconciled accepted integration commit: `8022b894bf8650c9a02384f2d187e0f84f476d55`
+Last reconciled accepted integration commit: `9297740955336971b6aa9b4b120b0f2b6054185c`
 Accepted integration date: 2026-07-21
 
 This document states accepted `origin/master` truth. A local candidate, review result, build, package,
 deployment, production mirror, and customer field verification are separate states. Nothing in this
-document treats the current Living Brief freshness candidate as accepted, pushed, published, or live.
+document treats a local release candidate as accepted, pushed, published, or live.
 
 ## Accepted platform foundation
 
@@ -63,13 +63,13 @@ document treats the current Living Brief freshness candidate as accepted, pushed
   and several module/governance documents had not been reconciled with the accepted integration
   history. The browser served a mixed disk/database view, exposed only eight tabs, and labeled mirror
   or filesystem update time as if it were document freshness.
-- The current local Living Brief candidate introduces cross-platform deterministic source hashes
-  over canonical UTF-8/LF text, impact metadata, a completeness/freshness gate, a verified database
-  mirror model, and all 11 API/UI documents. Independent local review has exercised the real
-  migration, authenticated API, transactional synchronization, observed-hash reconciliation,
-  advisory-lock serialization, concurrent-source-change detection, restart behavior, and rollback
-  against disposable localhost PostgreSQL only. It remains unaccepted until clean integration,
-  push, and remote verification; deployment and production mirror verification remain later gates.
+- The Living Brief freshness architecture is accepted on `origin/master` and includes canonical
+  UTF-8/LF source hashes, impact metadata, completeness/freshness gates, the verified database
+  mirror model, and all 11 API/UI documents. Deployment and production mirror verification remain
+  separate later gates.
+- The production-schema reconciliation commit `9297740` is accepted and pushed. It aligns the
+  reviewed Drizzle declarations without destructive migration operations. Replit publication is
+  still a separate operator-controlled state.
 
 ## Pending and under review
 
@@ -77,6 +77,10 @@ document treats the current Living Brief freshness candidate as accepted, pushed
 - Plans/Entitlements Step 3, Telegram Product Build 6, and RFI Build 8.
 - Production deployment, production database mirror reconciliation, and browser verification against
   the deployed production bundle for this Living Brief architecture.
+- A local release-safety candidate replaces the Replit-blocked transitive `tar@7.5.11` with
+  `tar@7.5.20` through the existing workspace override authority. It is not accepted, pushed, or
+  published until its frozen install, semantic lockfile review, affected package build, independent
+  review, and normal integration gates pass.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for the detailed accepted, pending, blocked, and future register.
 Historical audits and production row counts remain evidence for their dated observations only in

@@ -23,6 +23,29 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - The earlier Ready notification referenced superseded pre-amend commit `a4990da41cf2036fe09f80f03cb7b3db4211bf94`;
   it was disclosed and was not resent.
 
+## Replit Publish / Dependency Incident - Active Release Gate
+
+- The schema reconciliation is accepted and pushed at `9297740955336971b6aa9b4b120b0f2b6054185c`.
+  Replit's subsequent publish failed during dependency installation, before migration or application
+  build, because its supply-chain firewall rejected transitive `tar@7.5.11`.
+- A rejected Replit-local correction placed a second override authority in root `package.json`.
+  That silently dropped the established `pnpm-workspace.yaml` overrides, added unrelated deprecated
+  tooling and foreign-platform binaries, and produced a 1,269-line lockfile rewrite. It was not
+  pushed or published and must never be reused.
+- The controlled replacement is being built from exact pushed baseline `9297740`: add only
+  `tar: 7.5.20` to the existing workspace override map, regenerate with pnpm 10.26.1, prove a
+  tar-only semantic lockfile delta, run a frozen install and affected Electron/API/frontend gates,
+  independently review, commit once, push normally, and send one terminal Telegram notification.
+- Permanent boundary: Codex owns source edits, dependency/lockfile work, Git integration, commits,
+  and pushes in clean worktrees. Replit pulls reviewed commits, reports the exact migration preview,
+  builds, and publishes only after Roberto approves. Every Replit instruction requires both a
+  capability/state preflight and a complete terminal summary.
+- The full registry audit on the accepted baseline plus this tar-only correction reports 94
+  pre-existing findings (7 low, 47 moderate, 40 high) across packages including XLSX, Electron,
+  Express tooling, upload/archive dependencies, and build tooling. The removed `tar@7.5.11` is not
+  among the remaining findings. Those findings require a separately scoped dependency-security
+  review with behavior/regression evidence; they are not silently bundled into this publish fix.
+
 ## Cost & Financial Control Build 2 Accepted
 
 - Independently accepted on 2026-07-21 from candidate `51edf32a106b2b4a82a6f55fe1a7b2de40440fb5`, applied as content only to baseline `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`.

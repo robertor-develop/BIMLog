@@ -197,6 +197,25 @@ workspace state better than an outside prompt. Exception: hard correctness const
 are fine to state explicitly, such as "Edit must not consume a fresh sequence number; it
 must inherit the old one."
 
+## Standing Rule - Replit release operations and mandatory summaries
+- Replit is the deployment operator, not the source-integration authority. Normal source edits,
+  dependency changes, lockfile regeneration, rebases, conflict resolution, history cleanup,
+  commits, and pushes belong in a clean Codex worktree based on current `origin/master`.
+- Replit may pull the reviewed pushed commit, generate and explain the actual migration preview,
+  build, publish after Roberto's approval, and report deployed behavior. It must not create a
+  parallel source fix or perform Git surgery unless Roberto explicitly authorizes an emergency.
+- Every Replit instruction starts with a capability/state preflight and ends with a complete
+  terminal summary: starting and final commits, branch/working-tree state, exact files changed,
+  commands and validations, migration operations, production reads/writes, push/publish state,
+  blockers, and Telegram EventId/message ID when delivery was required.
+- Before changing dependencies, read `pnpm-workspace.yaml`, `package.json`, `.npmrc`, and the
+  existing lockfile. Workspace dependency overrides belong in the existing
+  `pnpm-workspace.yaml` `overrides` map. Never add a second root override authority that replaces
+  the established aliases, version pins, or excluded platform binaries.
+- A regenerated lockfile must receive a semantic diff review before build or publish: list added,
+  removed, and version-changed packages; prove existing overrides remain; reject unexplained
+  platform-binary expansion or unrelated dependency churn.
+
 ## Standing Rule - platform and plugin share one display contract
 The Navisworks plugin and the platform web UI display the SAME underlying lifecycle/chain
 data: revisionNumber, supersedesId, lifecycleStatus, issueGroupId.

@@ -80,6 +80,23 @@ Required BIMLog behavior:
 - Deleted test data must not contaminate real reports.
 - Lineage must be preserved whenever an item is edited, reassigned, voided, resolved, or superseded.
 
+## Release and Dependency Quality
+Release tooling is part of product quality. A publish failure must be classified at the exact
+stage (dependency install, migration, build, bundle, promote, or runtime) before anyone changes
+application code or database schema.
+
+Required behavior:
+- Preserve one authoritative package-manager configuration; do not introduce competing override
+  blocks that silently replace existing aliases, pins, or platform exclusions.
+- Regenerate lockfiles with the repository's reviewed package-manager version.
+- Review lockfiles semantically, not by line count alone. A security override must change only the
+  intended package and dependency paths unless every additional change is explained and accepted.
+- Run a frozen clean install and the affected package build before declaring a dependency fix safe.
+- Replit must provide a complete preflight and terminal summary for every pull, migration preview,
+  build, and publish attempt so repeated Git and deployment failures become evidence, not folklore.
+- Never retry a failed publish blindly. Diagnose the failed stage, preserve the logs, correct the
+  root cause in a clean Codex branch, push the reviewed commit, then let Replit pull and retry.
+
 ## Traceability and Auditability
 The source material repeatedly connects Quality 4.0 with traceability, transparency,
 cybersecurity, ethics, and reliable evidence.
