@@ -1,17 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
 import type { ReactElement } from "react";
 import { useLocation } from "wouter";
-import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, FilePen, Download } from "lucide-react";
+import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, Download } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const BRIEF_TOKEN_KEY = "bimlog-brief-token";
-// Only these docs are hand-editable from the UI (CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, OPEN_LOOP.md):
-// PLATFORM.md auto-regenerates from the build and STATUS.md/AUDIT.md are maintained
-// in the repo after features ship.
-const EDITABLE = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md", "OPEN_LOOP.md"];
-
-type Doc = { name: string; content: string; updatedAt: string };
+type FreshnessStatus = "Current" | "Stale" | "Mismatch" | "Missing";
+type Doc = {
+  key: string;
+  name: string;
+  label: { en: string; es: string };
+  scope: string;
+  content: string;
+  sourceCommit: string;
+  contentSha256: string;
+  reconciledThroughCommit: string;
+  sourceChangedAt: string;
+  mirrorSyncedAt: string | null;
+  mirrorContentSha256: string | null;
+  status: FreshnessStatus;
+};
+type BriefPayload = { catalog: unknown[]; manifest: Record<string, unknown>; docs: Doc[] };
 type AccessUser = {
   id: number;
   email: string;
@@ -76,6 +87,7 @@ function renderMarkdown(md: string): ReactElement[] {
 
 export function LivingBrief() {
   const { token } = useAuthStore();
+  const { tt } = useI18n();
   const [, setLocation] = useLocation();
 
   const [eligible, setEligible] = useState<boolean | null>(null);
@@ -92,9 +104,6 @@ export function LivingBrief() {
   const [adminMsg, setAdminMsg] = useState("");
 
   const [toast, setToast] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [editContent, setEditContent] = useState("");
-
   const showToast = (m: string) => { setToast(m); window.setTimeout(() => setToast(""), 1800); };
 
   const briefToken = () => sessionStorage.getItem(BRIEF_TOKEN_KEY) || "";
@@ -155,6 +164,29 @@ export function LivingBrief() {
     if (r.ok) loadAccess();
   };
 
+  const reconcileMirror = async () => {
+    if (!token) return;
+    setAdminMsg("");
+    const expectedMirrorHashes = Object.fromEntries(
+      docs.filter((document) => document.mirrorContentSha256).map((document) => [document.key, document.mirrorContentSha256]),
+    );
+    if (Object.keys(expectedMirrorHashes).length !== docs.length) {
+      setAdminMsg(tt("Reload after startup synchronization before reconciling.", "Recargue despu\u00e9s de la sincronizaci\u00f3n inicial antes de reconciliar."));
+      return;
+    }
+    const response = await apiFetch("/living-brief/reconcile", token, {
+      method: "POST",
+      body: JSON.stringify({ expectedMirrorHashes }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      setAdminMsg(body.error || tt("Reconciliation blocked; reload verified mirror status.", "Reconciliaci\u00f3n bloqueada; recargue el estado verificado del espejo."));
+      return;
+    }
+    setAdminMsg(tt("Verified source mirror reconciled.", "Espejo de fuente verificada reconciliado."));
+    await loadDocs();
+  };
+
   const copyFullBrief = async () => {
     if (!docs.length) return;
     const now = new Date();
@@ -173,57 +205,31 @@ export function LivingBrief() {
     }
   };
 
-  // Export the latest editable docs as one text file so the edits can be
-  // pasted back into the repo during a dev session. Fetches fresh from the
-  // DB-backed endpoint on click so a concurrent edit by another admin is
-  // reflected rather than stale local state.
+  // Export the complete verified source bundle and its deterministic metadata.
   const exportDocs = async () => {
     if (!token) return;
     const r = await apiFetch("/living-brief/docs", token, { headers: { "X-Brief-Token": briefToken() } });
     if (!r.ok) { showToast("Export failed"); return; }
-    const data = await r.json();
+    const data: BriefPayload = await r.json();
     const fresh: Doc[] = data.docs ?? [];
     setDocs(fresh);
-    const wanted = ["CLAUDE.md", "VISION.md", "PLUGIN.md", "QUALITY.md", "OPEN_LOOP.md"];
-    const present = wanted.filter((n) => fresh.some((d) => d.name === n));
-    if (!present.length) { showToast("Nothing to export"); return; }
-    const body = present
-      .map((n) => {
-        const d = fresh.find((x) => x.name === n)!;
-        return `===== ${n} =====\n\n${d.content.trim()}`;
-      })
-      .join(`\n\n${"=".repeat(60)}\n\n`);
+    if (!fresh.length) { showToast(tt("Nothing to export", "No hay documentos para exportar")); return; }
+    const body = JSON.stringify({
+      exportedFormat: "bimlog-living-brief-v1",
+      manifest: data.manifest,
+      catalog: data.catalog,
+      documents: fresh,
+    }, null, 2);
     const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `living-brief-docs-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `living-brief-source-bundle-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    showToast("Exported");
-  };
-
-  const startEdit = () => { setEditContent(docs[activeDoc]?.content ?? ""); setEditing(true); };
-  const cancelEdit = () => { setEditing(false); setEditContent(""); };
-  const saveEdit = async () => {
-    if (!token) return;
-    const name = docs[activeDoc]?.name;
-    if (!name) return;
-    const r = await apiFetch(`/living-brief/docs/${encodeURIComponent(name)}`, token, {
-      method: "POST",
-      body: JSON.stringify({ content: editContent }),
-    });
-    if (r.ok) {
-      setEditing(false);
-      setEditContent("");
-      await loadDocs();
-      showToast("Saved");
-    } else {
-      const d = await r.json().catch(() => ({}));
-      showToast(d.error || "Save failed");
-    }
+    showToast(tt("Exported", "Exportado"));
   };
 
   const changePassword = async () => {
@@ -292,24 +298,25 @@ export function LivingBrief() {
   }
 
   return (
-    <div style={{ maxWidth: 1000, margin: "28px auto", padding: "0 20px 60px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+    <div data-testid="living-brief-page" style={{ width: "100%", maxWidth: 1100, minWidth: 0, boxSizing: "border-box", overflowX: "hidden", margin: "28px auto", padding: "0 16px 60px" }}>
+      <style>{`@media (max-width:600px){.living-brief-header{align-items:flex-start!important}.living-brief-actions{width:100%;min-width:0;flex-direction:column}.living-brief-actions button{width:100%;justify-content:center}}`}</style>
+      <div className="living-brief-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Living Brief</h1>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="living-brief-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", maxWidth: "100%" }}>
           <button onClick={loadDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            <RefreshCw size={14} /> Reload
+            <RefreshCw size={14} /> {tt("Reload", "Recargar")}
           </button>
           <button onClick={copyFullBrief} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            <Copy size={14} /> Copy Full Brief
+            <Copy size={14} /> {tt("Copy Full Brief", "Copiar Brief completo")}
           </button>
           {isSuperAdmin && (
             <button onClick={exportDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-              <Download size={14} /> Export current docs
+              <Download size={14} /> {tt("Export current docs", "Exportar documentos actuales")}
             </button>
           )}
           {isSuperAdmin && (
             <button onClick={() => { setShowAdmin((s) => !s); if (!showAdmin) loadAccess(); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-              <ShieldCheck size={14} /> Admin
+              <ShieldCheck size={14} /> {tt("Admin", "Administrar")}
             </button>
           )}
         </div>
@@ -346,49 +353,52 @@ export function LivingBrief() {
               ))}
             </div>
           </div>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><ShieldCheck size={15} /> {tt("Controlled mirror reconciliation", "Reconciliaci\u00f3n controlada del espejo")}</div>
+            <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "hsl(var(--muted-foreground))", marginBottom: 8 }}>
+              {tt(
+                "Copies only the verified deployed source after checking every mirror hash observed on the last reload. It never accepts pasted or database-only doctrine.",
+                "Copia \u00fanicamente la fuente desplegada verificada despu\u00e9s de comprobar cada hash del espejo observado en la \u00faltima recarga. Nunca acepta doctrina pegada o exclusiva de la base de datos.",
+              )}
+            </div>
+            <button onClick={reconcileMirror} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+              {tt("Reconcile verified source", "Reconciliar fuente verificada")}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Tabs render from docs[] returned by GET /docs. OPEN_LOOP.md is editable;
-          AUDIT.md is read-only because it is not in EDITABLE. */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+      <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))", marginBottom: 12, lineHeight: 1.5 }}>
+        {tt(
+          "Freshness is based on the deployed Git source, its SHA-256, reconciliation commit, and verified database mirror. Mirror sync time is not document freshness.",
+          "La vigencia se basa en la fuente Git desplegada, su SHA-256, el commit de reconciliación y el espejo verificado de la base de datos. La hora de sincronización del espejo no es la vigencia del documento.",
+        )}
+      </div>
+
+      {/* The API returns documents in the authority order from living-brief/catalog.json. */}
+      <div role="tablist" aria-label={tt("Living Brief documents", "Documentos del Living Brief")} style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", maxWidth: "100%", paddingBottom: 6 }}>
         {docs.map((d, i) => (
-          <button key={d.name} onClick={() => { setActiveDoc(i); setEditing(false); setEditContent(""); }} style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-            {d.name.replace(".md", "")}
+          <button role="tab" aria-selected={i === activeDoc} data-testid={`living-brief-tab-${d.key}`} key={d.key} onClick={() => setActiveDoc(i)} style={{ flex: "0 0 auto", whiteSpace: "nowrap", padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>
+            {tt(d.label.en, d.label.es)}
           </button>
         ))}
       </div>
 
       {docs[activeDoc] && (
-        <div style={card}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
-            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-              Updated {new Date(docs[activeDoc].updatedAt).toLocaleString()}
+        <div style={{ ...card, minWidth: 0, maxWidth: "100%", overflowWrap: "anywhere" }}>
+          <div style={{ display: "grid", gap: 8, marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid hsl(var(--border))" }}>
+            <div data-testid="living-brief-status" style={{ fontSize: 13, fontWeight: 800 }}>
+              {tt("Status", "Estado")}: {{ Current: tt("Current", "Vigente"), Stale: tt("Stale", "Desactualizado"), Mismatch: tt("Mismatch", "No coincide"), Missing: tt("Missing", "Faltante") }[docs[activeDoc].status]}
             </div>
-            {isSuperAdmin && EDITABLE.includes(docs[activeDoc].name) && !editing && (
-              <button onClick={startEdit} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 11px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12.5, fontWeight: 600, cursor: "pointer" }}>
-                <FilePen size={14} /> Paste to Update
-              </button>
-            )}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 6, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+              <div><strong>{tt("Source commit", "Commit de origen")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].sourceCommit}</code></div>
+              <div><strong>SHA-256:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].contentSha256}</code></div>
+              <div><strong>{tt("Reconciled through", "Reconciliado hasta")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].reconciledThroughCommit}</code></div>
+              <div><strong>{tt("Source last changed", "Último cambio de fuente")}:</strong> {new Date(docs[activeDoc].sourceChangedAt).toLocaleString()}</div>
+              <div><strong>{tt("Database mirror synced", "Espejo de base sincronizado")}:</strong> {docs[activeDoc].mirrorSyncedAt ? new Date(docs[activeDoc].mirrorSyncedAt).toLocaleString() : tt("Missing", "Faltante")}</div>
+            </div>
           </div>
-          {editing ? (
-            <div style={{ display: "grid", gap: 10 }}>
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                placeholder="Paste new content here"
-                autoFocus
-                spellCheck
-                style={{ width: "100%", minHeight: 380, padding: 12, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13, fontFamily: "monospace", lineHeight: 1.5, resize: "vertical" }}
-              />
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveEdit} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
-                <button onClick={cancelEdit} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancel</button>
-              </div>
-            </div>
-          ) : (
-            <div>{renderMarkdown(docs[activeDoc].content)}</div>
-          )}
+          <div>{renderMarkdown(docs[activeDoc].content)}</div>
         </div>
       )}
 

@@ -1,3 +1,15 @@
+# AUDIT.md - Historical Evidence Register
+
+Status: Active append-only historical record
+
+Every finding and production row count below is scoped to its stated observation date. It is not a
+claim about the current platform unless a later current-state reconciliation explicitly re-verifies
+it. Current accepted product truth belongs in [STATUS.md](./STATUS.md); unfinished work belongs in
+[OPEN_LOOP.md](./OPEN_LOOP.md). In particular, the July 3 findings and counts are historical and must
+not be presented in the Living Brief UI as present-day production facts.
+
+## Historical audit - June 14, 2026
+
 INTERNAL WIRING AUDIT — June 14 2026
 Verified against production database. Every claim confirmed by grep on actual route and frontend code plus live prod row counts.
 
@@ -225,7 +237,7 @@ system-generated PDFs and returns 501 for binary uploads because the disk path w
 the DB. This is pre-existing and affects every user upload today; it was not introduced by this
 feature and needs a small follow-up to extend the download route.
 
-FULL RE-AUDIT — July 3 2026
+## Historical full re-audit - July 3, 2026
 
 Method: fresh grep verification of every wiring claim against current route and frontend code,
 plus live read-only row counts queried today against the production Neon database. Append-only —

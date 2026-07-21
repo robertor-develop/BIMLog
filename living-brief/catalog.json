@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "impactRules": [
+    { "pattern": "^(artifacts/api-server|artifacts/bimlog|lib/db)/", "documents": ["PLATFORM.md"] },
+    { "pattern": "^(artifacts/api-server/src/(lib/pdf|routes/(reports|rfis|submittals|submittal_reports|schedule|transmittals|change_orders|files))|living-brief/REPORT_DESIGN_SYSTEM.md)", "documents": ["REPORT_DESIGN_SYSTEM.md"] },
+    { "pattern": "^(scripts/|living-brief/(catalog|state|impact-declarations)\\.)", "documents": ["CLAUDE.md"] }
+  ],
+  "documents": [
+    { "key": "ecosystem_doctrine", "file": "ECOSYSTEM_DOCTRINE.md", "label": { "en": "Ecosystem Doctrine", "es": "Doctrina del Ecosistema" }, "scope": "governance" },
+    { "key": "claude", "file": "CLAUDE.md", "label": { "en": "AI Development", "es": "Desarrollo con IA" }, "scope": "governance" },
+    { "key": "quality", "file": "QUALITY.md", "label": { "en": "Quality", "es": "Calidad" }, "scope": "governance" },
+    { "key": "vision", "file": "VISION.md", "label": { "en": "Vision", "es": "Visión" }, "scope": "product" },
+    { "key": "platform", "file": "PLATFORM.md", "label": { "en": "Platform", "es": "Plataforma" }, "scope": "platform" },
+    { "key": "plugin", "file": "PLUGIN.md", "label": { "en": "Plugin", "es": "Plugin" }, "scope": "plugin" },
+    { "key": "report_design_system", "file": "REPORT_DESIGN_SYSTEM.md", "label": { "en": "Report Design", "es": "Diseño de Informes" }, "scope": "reports" },
+    { "key": "standards_register", "file": "STANDARDS_REGISTER.md", "label": { "en": "Standards Register", "es": "Registro de Normas" }, "scope": "standards" },
+    { "key": "status", "file": "STATUS.md", "label": { "en": "Status", "es": "Estado" }, "scope": "governance" },
+    { "key": "open_loop", "file": "OPEN_LOOP.md", "label": { "en": "Open Loop", "es": "Pendientes" }, "scope": "governance" },
+    { "key": "audit", "file": "AUDIT.md", "label": { "en": "Audit", "es": "Auditoría" }, "scope": "governance" }
+  ]
+}

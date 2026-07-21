@@ -11,6 +11,8 @@ import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
+import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
+import { ensureLivingBriefMirrorSchema } from "./lib/living-brief-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -200,15 +202,6 @@ app.use("/api/v1", router);
     console.log("[migration] feature policy control tables ensured");
   } catch {
     console.error("[migration] feature policy control migration failed");
-  }
-})();
-
-(async () => {
-  try {
-    await startFinancialControlMigration();
-    console.log("[migration] financial authority control tables ensured");
-  } catch {
-    console.error("[migration] financial authority control migration failed");
   }
 })();
 
@@ -758,6 +751,7 @@ void rfiMigrationReady.then((ready) => {
       value text NOT NULL,
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
+    await ensureLivingBriefMirrorSchema();
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS can_access_living_brief boolean NOT NULL DEFAULT false`);
     const defaultHash = bcrypt.hashSync("BIMAI360", 10);
     await pool.query(
@@ -774,6 +768,7 @@ void rfiMigrationReady.then((ready) => {
       const r = await pool.query(`UPDATE users SET is_super_admin = true WHERE email = 'robertor@rryasociados.com'`);
       if (r.rowCount) console.log("[migration] bootstrapped initial super admin");
     }
+    await synchronizeLivingBriefMirror();
     console.log("[migration] living_brief settings ensured");
   } catch (e) {
     console.error("[migration] living_brief migration failed:", e);

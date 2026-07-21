@@ -1,7 +1,7 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
-Owned/hand-edited. This disk copy is the seed; the in-app Living Brief serves PLUGIN.md from
-the DB, so after editing here also "Paste to Update" in-app to refresh the shown version.
+Owned/hand-edited in Git. The in-app Living Brief serves the verified deployed source bundle;
+the database is an exact status-bearing mirror and must never override this document.
 
 ## Governance and acceptance
 
@@ -107,6 +107,13 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (a collision-skip returns id:null).
 
 ## Open items / known limitations
+- **Navisworks v1.60.18 remains Pending / Under Review.** It is concurrent candidate work and is
+  not accepted in `origin/master` at reconciliation commit
+  `13f9fe994ed662552c16f028f4ec21c5143071ea`. Do not describe it as integrated, deployed,
+  installed, or field verified until independent review and clean integration establish those facts.
+- The separately authored Protected Navisworks v1.60.7 Behavioral Baseline documentation had not
+  landed on `origin/master` at this reconciliation point. Preserve it if it integrates; do not
+  silently replace its physical saved-viewpoint mutation rules with this freshness work.
 - v1.60.13 is the project-28 preserve-first Reconcile candidate. In v1.60.12,
   `CleanBIMLogViewsAgainstPlatform` deleted a physical local viewpoint when `MatchPlatformRow`
   returned null and local metadata contained `serverId`. Reconcile could also rebuild only matched

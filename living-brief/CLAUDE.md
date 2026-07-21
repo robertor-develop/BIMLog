@@ -239,6 +239,22 @@ inline badge. If one side's design changes, the other side must be reviewed too.
   production build. The root build runs it automatically after the mojibake check.
 - Do not publish while the integrity check fails; fix the reported document, link, authority, or
   standards-source error first.
+- `living-brief/catalog.json` is the single authoritative document catalog. The checker,
+  deterministic PLATFORM generator, API, database mirror, frontend tabs, Copy Full Brief, and
+  Export current docs must consume that catalog rather than maintain separate filename lists.
+- `living-brief/state.json` records deterministic hashes, the accepted reconciled-through commit,
+  source-change metadata, and the reviewed implementation impact set. Update it with
+  `pnpm run living-brief:state -- --reconciled-through <full-accepted-commit>
+  --candidate-changed-at <fixed-ISO-time>` only after the narrative documents are truthful.
+  The command updates metadata only; it never invents or auto-writes narrative.
+- Living Brief text hashes use canonical UTF-8 with LF line endings. They must remain identical
+  across Windows and Linux checkouts; never hash checkout-specific CRLF bytes as source identity.
+- A clean integration that changes implementation must reconcile `OPEN_LOOP.md`, `STATUS.md`, and
+  every module document required by the catalog impact rules. A bounded audited not-applicable
+  declaration may replace a module edit only when the change truly has no module-document impact.
+- Production source without `.git` is validated from committed catalog/state hashes. The runtime
+  must receive `BIMLOG_SOURCE_COMMIT` so the database mirror records the exact deployed commit;
+  it must not invent a commit from a database timestamp.
 
 ## Architecture rules
 - Monorepo: pnpm workspaces. See PLATFORM.md for the full map.
@@ -267,16 +283,28 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - bcryptjs is already installed. Use it for all password hashing.
 
 ## Living Brief specifics
-- CLAUDE.md, VISION.md, PLUGIN.md, QUALITY.md, and OPEN_LOOP.md are owned/hand-edited by AI partners and Roberto.
-- PLATFORM.md and STATUS.md may be generated/updated by Replit or build tooling.
-- AUDIT.md is append-only audit history.
+- All 11 catalog documents are Git-controlled authorities. Database content is an exact verified
+  mirror of the deployed source bundle, never an independent doctrine authority.
+- Doctrine and narrative documents are owned/hand-edited by Roberto and authorized development
+  partners. `STATUS.md` is reconciled manually from accepted evidence. `AUDIT.md` is append-only
+  history and must label dated findings as historical rather than present truth.
 - PLATFORM.md is AUTO-GENERATED at build time by
-  `artifacts/api-server/scripts/generate-platform-md.ts`. Do not hand-edit PLATFORM.md.
-  Edit the generator instead; manual edits are overwritten on build.
+  `artifacts/api-server/scripts/generate-platform-md.ts`. It contains only structural facts and
+  writes only when those facts change; builds must not create timestamp-only churn. Do not hand-edit
+  PLATFORM.md. Edit the generator instead.
 - Living Brief docs are served by `artifacts/api-server/src/routes/living_brief.ts` under
   `/api/v1/living-brief/*`, gated by password plus eligibility check:
   super admin OR `users.can_access_living_brief`.
 - Only a super admin can change the gate password or grant/revoke access.
+- Ordinary read access always receives the verified deployed source bundle. Admin reconciliation
+  may copy that exact bundle to a mismatched database mirror only with observed current hashes and
+  one transaction. The service takes and rechecks the complete source identity before and after its
+  transaction-scoped advisory lock so a concurrent source change cannot be reported as success.
+  Arbitrary pasted database-only doctrine is prohibited.
+- The additive Living Brief mirror migration is the reusable
+  `ensureLivingBriefMirrorSchema()` operation. Runtime evidence must exercise that exact operation
+  and the real authenticated API against an isolated localhost PostgreSQL database; static mocks do
+  not establish mirror acceptance.
 - F5 ONLY routes eligible admins to `/living-brief`; Ctrl+R / Cmd+R remains normal refresh.
 - PLUGIN.md holds the full Navisworks plugin reference and is not auto-generated.
 - QUALITY.md holds the BIMLog Quality 4.0 doctrine derived from the Calidad 4.0 source

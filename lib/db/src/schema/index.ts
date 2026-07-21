@@ -44,3 +44,4 @@ export * from "./feature-catalog";
 export * from "./feature-policies";
 export * from "./financial-controls";
 export * from "./financial-budgets";
+export * from "./living-brief-documents";

@@ -1,22 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 
 const repoRoot = process.cwd();
 const livingBriefRoot = path.join(repoRoot, "living-brief");
 
-const requiredDocuments = [
-  "AUDIT.md",
-  "CLAUDE.md",
-  "ECOSYSTEM_DOCTRINE.md",
-  "OPEN_LOOP.md",
-  "PLATFORM.md",
-  "PLUGIN.md",
-  "QUALITY.md",
-  "REPORT_DESIGN_SYSTEM.md",
-  "STANDARDS_REGISTER.md",
-  "STATUS.md",
-  "VISION.md",
-];
+const catalogPath = path.join(livingBriefRoot, "catalog.json");
+let catalog;
+try {
+  catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+} catch (error) {
+  console.error(`Living Brief integrity check failed: catalog.json is missing or invalid: ${error.message}`);
+  process.exit(1);
+}
+const requiredDocuments = catalog.documents.map((document) => document.file);
 
 const requiredClaudeReferences = [
   "ECOSYSTEM_DOCTRINE.md",
@@ -60,7 +58,19 @@ function relativeName(filePath) {
 }
 
 function readText(filePath) {
-  return fs.readFileSync(filePath, "utf8");
+  return canonicalText(fs.readFileSync(filePath));
+}
+
+function sha256(value) {
+  return crypto.createHash("sha256").update(canonicalText(value)).digest("hex");
+}
+
+function canonicalText(value) {
+  return (Buffer.isBuffer(value) ? value.toString("utf8") : value).replace(/\r\n?/g, "\n");
+}
+
+function git(args) {
+  return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8" }).trim();
 }
 
 function listFiles(root) {
@@ -314,6 +324,133 @@ function validateStandardsLinks() {
   }
 }
 
+function validateCatalogAndFreshness() {
+  if (catalog.schemaVersion !== 1) report("living-brief/catalog.json", "unsupported schemaVersion");
+  if (!Array.isArray(catalog.documents) || catalog.documents.length !== 11) {
+    report("living-brief/catalog.json", "must contain exactly 11 required documents in authority order");
+    return;
+  }
+  const keys = new Set();
+  const files = new Set();
+  for (const document of catalog.documents) {
+    if (!document.key || keys.has(document.key)) report("living-brief/catalog.json", `duplicate or missing key '${document.key ?? ""}'`);
+    if (!document.file || files.has(document.file)) report("living-brief/catalog.json", `duplicate or missing file '${document.file ?? ""}'`);
+    if (!document.label?.en || !document.label?.es) report("living-brief/catalog.json", `${document.file} needs English and Spanish labels`);
+    keys.add(document.key);
+    files.add(document.file);
+  }
+
+  const statePath = path.join(livingBriefRoot, "state.json");
+  if (!fs.existsSync(statePath)) {
+    report("living-brief/state.json", "deterministic freshness manifest is missing");
+    return;
+  }
+  let state;
+  try { state = JSON.parse(readText(statePath)); }
+  catch (error) { report("living-brief/state.json", `invalid JSON: ${error.message}`); return; }
+  if (state.schemaVersion !== 1) report("living-brief/state.json", "unsupported schemaVersion");
+  if (!/^[0-9a-f]{40}$/.test(state.reconciledThroughCommit ?? "")) {
+    report("living-brief/state.json", "reconciledThroughCommit must be a full Git commit");
+  }
+  if (state.catalogSha256 !== sha256(fs.readFileSync(catalogPath))) {
+    report("living-brief/state.json", "catalogSha256 does not match catalog.json");
+  }
+  const metadata = new Map((state.documents ?? []).map((document) => [document.key, document]));
+  for (const document of catalog.documents) {
+    const entry = metadata.get(document.key);
+    if (!entry || entry.file !== document.file) {
+      report("living-brief/state.json", `metadata missing for ${document.key}`);
+      continue;
+    }
+    const sourcePath = path.join(livingBriefRoot, document.file);
+    if (fs.existsSync(sourcePath) && entry.sha256 !== sha256(fs.readFileSync(sourcePath))) {
+      report(`living-brief/${document.file}`, "content SHA-256 does not match state.json; run living-brief:state after reconciling narrative truth");
+    }
+    if (entry.reconciledThroughCommit !== state.reconciledThroughCommit) {
+      report("living-brief/state.json", `${document.file} has a stale reconciled-through marker`);
+    }
+    const changedAt = Date.parse(entry.sourceChangedAt);
+    if (!Number.isFinite(changedAt) || changedAt > Date.now() + 300000) {
+      report("living-brief/state.json", `${document.file} has an invalid or future sourceChangedAt`);
+    }
+  }
+  if (metadata.size !== catalog.documents.length) report("living-brief/state.json", "contains missing or unknown document metadata");
+
+  const apiSource = readText(path.join(repoRoot, "artifacts/api-server/src/routes/living_brief.ts"));
+  const uiSource = readText(path.join(repoRoot, "artifacts/bimlog/src/pages/LivingBrief.tsx"));
+  const generatorSource = readText(path.join(repoRoot, "artifacts/api-server/scripts/generate-platform-md.ts"));
+  if (!apiSource.includes("source.documents.map")) report("artifacts/api-server/src/routes/living_brief.ts", "API must enumerate the canonical source catalog");
+  if (!uiSource.includes("docs.map")) report("artifacts/bimlog/src/pages/LivingBrief.tsx", "UI tabs must enumerate API catalog documents");
+  if (!uiSource.includes("documents: fresh")) report("artifacts/bimlog/src/pages/LivingBrief.tsx", "export must include every catalog document");
+  if (!generatorSource.includes("living-brief/catalog.json")) report("artifacts/api-server/scripts/generate-platform-md.ts", "generator must consume the canonical catalog");
+
+  try {
+    git(["cat-file", "-e", `${state.reconciledThroughCommit}^{commit}`]);
+    const comparisonHead = process.env.LIVING_BRIEF_TEST_HEAD || "HEAD";
+    try { git(["merge-base", "--is-ancestor", state.reconciledThroughCommit, comparisonHead]); }
+    catch { report("living-brief/state.json", `reconciledThroughCommit is not an ancestor of ${comparisonHead}`); }
+    const actualChangedPaths = git(["diff", "--name-only", state.reconciledThroughCommit, "--", "."])
+      .split(/\r?\n/).filter(Boolean).map((value) => value.replaceAll("\\", "/"))
+      .filter((value) => value !== "living-brief/state.json").sort();
+    const declaredChangedPaths = (state.impact?.changedPaths ?? []).filter((value) => value !== "living-brief/state.json").sort();
+    if (JSON.stringify(actualChangedPaths) !== JSON.stringify(declaredChangedPaths)) {
+      report("living-brief/state.json", "impact.changedPaths is stale; run living-brief:state after reviewing module impact");
+    }
+    const changedSet = new Set(actualChangedPaths);
+    const requiredAffected = new Set(["STATUS.md", "OPEN_LOOP.md"]);
+    for (const changedPath of actualChangedPaths) {
+      for (const rule of catalog.impactRules ?? []) {
+        if (new RegExp(rule.pattern).test(changedPath)) for (const document of rule.documents) requiredAffected.add(document);
+      }
+    }
+    const declarationsPath = path.join(livingBriefRoot, "impact-declarations.json");
+    const declarations = fs.existsSync(declarationsPath) ? JSON.parse(readText(declarationsPath)).notApplicable ?? [] : [];
+    for (const affectedDocument of requiredAffected) {
+      if (changedSet.has(`living-brief/${affectedDocument}`)) continue;
+      const declaration = declarations.find((item) => item.document === affectedDocument && typeof item.reason === "string" && item.reason.trim().length >= 20);
+      if (!declaration) report("living-brief/state.json", `changed implementation requires ${affectedDocument} or an audited not-applicable declaration`);
+    }
+    const commits = git(["rev-list", "--reverse", `${state.reconciledThroughCommit}..${comparisonHead}`]).split(/\r?\n/).filter(Boolean);
+    const units = commits.map((commit) => ({
+      id: commit,
+      paths: git(["diff-tree", "--no-commit-id", "--name-only", "-r", commit]).split(/\r?\n/).filter(Boolean),
+    }));
+    const workingPaths = git(["diff", "--name-only", comparisonHead, "--", "."]).split(/\r?\n/).filter(Boolean);
+    if (workingPaths.length) units.push({ id: "WORKTREE", paths: workingPaths });
+    const latestImplementation = new Map();
+    const latestDocument = new Map();
+    units.forEach((unit, index) => {
+      for (const changedPath of unit.paths) {
+        if (changedPath.startsWith("living-brief/") && changedPath.endsWith(".md")) latestDocument.set(path.basename(changedPath), index);
+        for (const rule of catalog.impactRules ?? []) {
+          if (new RegExp(rule.pattern).test(changedPath)) for (const document of rule.documents) latestImplementation.set(document, { index, unit: unit.id });
+        }
+        if (!changedPath.startsWith("living-brief/") && !changedPath.startsWith("scripts/")) {
+          latestImplementation.set("STATUS.md", { index, unit: unit.id });
+          latestImplementation.set("OPEN_LOOP.md", { index, unit: unit.id });
+        }
+      }
+    });
+    for (const [document, implementation] of latestImplementation) {
+      if ((latestDocument.get(document) ?? -1) >= implementation.index) continue;
+      const declaration = declarations.find((item) => item.document === document && item.commit === implementation.unit && typeof item.reason === "string" && item.reason.trim().length >= 20);
+      if (!declaration) report("living-brief/state.json", `${document} was not reconciled at or after implementation unit ${implementation.unit}`);
+    }
+  } catch (error) {
+    if (fs.existsSync(path.join(repoRoot, ".git"))) report("living-brief/state.json", `Git freshness validation failed: ${error.message}`);
+  }
+
+  const snapshotPath = process.env.LIVING_BRIEF_MIRROR_SNAPSHOT;
+  if (snapshotPath) {
+    const snapshot = JSON.parse(fs.readFileSync(path.resolve(snapshotPath), "utf8"));
+    for (const key of Object.keys(snapshot)) if (!keys.has(key)) report(snapshotPath, `unknown database document key '${key}'`);
+    for (const document of catalog.documents) {
+      if (!snapshot[document.key]) report(snapshotPath, `missing database mirror row '${document.key}'`);
+      else if (snapshot[document.key].sourceSha256 !== metadata.get(document.key)?.sha256) report(snapshotPath, `source/mirror hash mismatch for '${document.key}'`);
+    }
+  }
+}
+
 if (!fs.existsSync(livingBriefRoot) || !fs.statSync(livingBriefRoot).isDirectory()) {
   console.error("Living Brief integrity check failed:");
   console.error("living-brief: required directory is missing");
@@ -344,6 +481,7 @@ validateActiveDocument(
 );
 validateRequiredReferences();
 validateStandardsLinks();
+validateCatalogAndFreshness();
 
 if (errors.length > 0) {
   console.error(`Living Brief integrity check failed with ${errors.length} error(s):`);

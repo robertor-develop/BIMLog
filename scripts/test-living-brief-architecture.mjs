@@ -1,0 +1,42 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const read = (file) => fs.readFileSync(file, "utf8");
+const catalog = JSON.parse(read("living-brief/catalog.json"));
+const route = read("artifacts/api-server/src/routes/living_brief.ts");
+const mirror = read("artifacts/api-server/src/lib/living-brief-mirror.ts");
+const migration = read("artifacts/api-server/src/app.ts") + read("artifacts/api-server/src/lib/living-brief-migration.ts");
+const schema = read("lib/db/src/schema/living-brief-documents.ts");
+const ui = read("artifacts/bimlog/src/pages/LivingBrief.tsx");
+const generator = read("artifacts/api-server/scripts/generate-platform-md.ts");
+const checks = [];
+const check = (name, condition) => { assert.ok(condition, name); checks.push(name); };
+
+check("canonical catalog has all 11 documents", catalog.documents.length === 11);
+check("API enumerates source catalog", route.includes("source.documents.map"));
+check("legacy database-only document overrides removed", !route.includes("DOC_KEY_PREFIX") && !route.includes("EDITABLE_DOCS"));
+check("arbitrary document paste mutation removed", !route.includes('router.post("/living-brief/docs/:name"'));
+check("controlled reconciliation is admin-only", route.includes('router.post("/living-brief/reconcile", authMiddleware, isSuperAdminMiddleware'));
+check("mirror stores required metadata", ["document_key", "deployed_source_commit", "reconciled_through_commit", "source_sha256", "source_changed_at", "mirror_synced_at", "synchronization_result"].every((field) => migration.includes(field)));
+check("Drizzle mirror schema exists", schema.includes("livingBriefDocumentsTable"));
+check("unknown keys are rejected", mirror.includes("assertKnownDocumentKey(row.document_key, knownKeys)"));
+check("concurrent synchronization serializes", mirror.includes("pg_advisory_xact_lock") && mirror.includes("FOR UPDATE"));
+check("synchronization is transactional", mirror.includes('client.query("BEGIN")') && mirror.includes('client.query("COMMIT")') && mirror.includes('client.query("ROLLBACK")'));
+check("identical synchronization is idempotent", mirror.includes('if (status === "Current") continue'));
+check("mismatch is recorded without startup overwrite", mirror.includes("SET synchronization_result=$2") && mirror.includes("mismatch_detected_at=CASE WHEN $2='mismatch'"));
+check("stale and mismatch remain distinct", migration.includes("'current','stale','mismatch','missing'") && mirror.includes('return "Stale"'));
+check("controlled reconciliation detects concurrent changes", mirror.includes("Mirror changed concurrently"));
+check("source snapshot changes abort synchronization and reconciliation", mirror.includes("source changed concurrently during synchronization") && mirror.includes("source changed concurrently during reconciliation"));
+check("controlled reconciliation updates exact source atomically", mirror.includes("SET content=$2, deployed_source_commit=$3"));
+check("frontend tabs consume API order", ui.includes("docs.map") && ui.includes('role="tablist"'));
+check("mobile layout prevents page overflow", ui.includes('overflowX: "hidden"') && ui.includes('overflowX: "auto"'));
+check("copy includes every returned document", /const full =[\s\S]*\+ docs\s*\.map\(\(d\)/.test(ui));
+check("export includes catalog, manifest, and all documents", ui.includes("manifest: data.manifest") && ui.includes("catalog: data.catalog") && ui.includes("documents: fresh"));
+check("paste-to-update control is absent", !ui.includes("Paste to Update") && !ui.includes("Pegar para actualizar"));
+check("freshness labels separate source and mirror time", ui.includes("sourceChangedAt") && ui.includes("mirrorSyncedAt") && ui.includes("Mirror sync time is not document freshness"));
+check("PLATFORM generator consumes catalog", generator.includes("living-brief/catalog.json"));
+check("PLATFORM generator contains no volatile clock", !generator.includes("new Date()") && !generator.includes("Last generated:"));
+check("PLATFORM generator writes only structural changes", generator.includes("if (prior === content)"));
+
+console.log(`Living Brief architecture matrix passed: ${checks.length}/${checks.length}`);
+for (const value of checks) console.log(`- ${value}`);

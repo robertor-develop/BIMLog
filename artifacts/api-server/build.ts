@@ -42,9 +42,8 @@ async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
 
-  // Regenerate the auto-generated Living Brief PLATFORM.md from the live codebase
-  // so it never goes stale. Runs as a pre-build step on every api-server build.
-  console.log("regenerating PLATFORM.md...");
+  // Generate deterministic structural documentation. It writes only when structure changes.
+  console.log("checking deterministic PLATFORM.md...");
   generatePlatformMd();
 
   console.log("building server...");

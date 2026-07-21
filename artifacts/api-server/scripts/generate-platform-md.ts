@@ -14,7 +14,7 @@ function listFiles(dir: string, ext: string): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...listFiles(full, ext));
-    else if (entry.name.endsWith(ext)) out.push(path.relative(REPO_ROOT, full));
+    else if (entry.name.endsWith(ext)) out.push(path.relative(REPO_ROOT, full).split(path.sep).join("/"));
   }
   return out.sort();
 }
@@ -49,15 +49,21 @@ export function generatePlatformMd(): void {
   const libFiles = listFiles(path.join(REPO_ROOT, "artifacts/api-server/src/lib"), ".ts");
   const middlewareFiles = listFiles(path.join(REPO_ROOT, "artifacts/api-server/src/middlewares"), ".ts");
 
-  const generatedAt = new Date().toISOString();
+  const catalog = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "living-brief/catalog.json"), "utf8")) as {
+    documents: Array<{ file: string }>;
+  };
 
   const content = `# PLATFORM.md
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: ${generatedAt}
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
+It changes only when the code structure or curated architectural facts change.
+
+## Living Brief authoritative catalog
+${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
+- Document and catalog SHA-256 values use canonical UTF-8 text with LF line endings so Windows and Linux checkouts verify identically.
 
 ## Critical Database Facts — Read Before Every Session
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
@@ -112,17 +118,25 @@ ${appRoutes()}
 - Soft-delete DELETE routes live inside their feature route files (see routes/index.ts comments).
 - Clash reports support a Navisworks plugin sync round-trip (fingerprint dedup; pull uses
   updatedAt > lastPluginSyncAt). Lens viewpoints use a manual refresh banner (polling removed).
-- Living Brief: four docs in /living-brief served via /api/v1/living-brief/*, gated by a hashed
-  password (default BIMAI360) plus eligibility (users.is_super_admin OR users.can_access_living_brief).
-  Only super admins change the password or grant access. This PLATFORM.md is regenerated on build.
+- Living Brief: all documents in living-brief/catalog.json are served in authority order through
+  /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
+  exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin
+  reconciliation requires observed mirror hashes. Only super admins change the password, grant
+  access, or reconcile a mismatched mirror.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(path.join(outDir, "PLATFORM.md"), content, "utf-8");
-  console.log(`[generate-platform-md] wrote living-brief/PLATFORM.md (${generatedAt})`);
+  const outputPath = path.join(outDir, "PLATFORM.md");
+  const prior = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf8") : null;
+  if (prior === content) {
+    console.log("[generate-platform-md] living-brief/PLATFORM.md unchanged");
+    return;
+  }
+  fs.writeFileSync(outputPath, content, "utf-8");
+  console.log("[generate-platform-md] wrote living-brief/PLATFORM.md (structural change)");
 }
 
 const invokedDirectly =

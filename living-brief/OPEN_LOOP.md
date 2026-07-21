@@ -42,6 +42,30 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Living Brief Freshness Architecture - Local Review Candidate
+
+- Accepted truth is reconciled through `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`.
+- This isolated candidate replaces the mixed disk/database eight-tab implementation with one
+  authority-ordered 11-document catalog, cross-platform deterministic source hashes over canonical
+  UTF-8/LF text and impact metadata, a
+  source-controlled read model, an exact database mirror with controlled reconciliation, and
+  responsive bilingual freshness evidence.
+- Local implementation and verification do not make this accepted. Required later states remain:
+  independent review, clean integration, push, remote verification, publish, deployed source-commit
+  configuration, production mirror reconciliation, and production browser verification.
+- No production database, Replit publish, customer data, plugin source, DLL, package, or dirty primary
+  checkout is part of this candidate.
+- Independent local review uses only disposable localhost PostgreSQL. It verifies the exact startup
+  migration and authenticated API, all 11 exact source mirrors and metadata, unknown/missing-key
+  rejection, mismatch preservation, observed-hash reconciliation, idempotency, advisory-lock
+  serialization, concurrent source-change detection, rollback, restart persistence, ordinary-user
+  read-only boundaries, admin authority, privacy, and complete cleanup. These results support clean
+  integration review but do not claim deployment or production reconciliation.
+
+### Concurrent candidates kept pending
+
+- Navisworks v1.60.18: Pending / Under Review; do not claim accepted or deployed.
+
 ### Meeting Minutes M4 Schedule Bucket Links Accepted
 
 - Accepted local candidate `6726240a21d7e23ee4199e906aed32c61f8800a6` was independently reviewed and applied as content only to clean `origin/master` baseline `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`, without importing candidate ancestry. Clean integration commit: `1b8fff74a42ef291dba0a7f0d92f1f5dd5744cf0`.
