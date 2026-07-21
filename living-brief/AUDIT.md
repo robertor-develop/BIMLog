@@ -356,3 +356,85 @@ project_members: 12, project_milestones: 1, projects: 11, rfi_ball_in_court_hist
 rfi_responses: 1, rfi_view_events: 17, rfis: 11, submittal_items: 0, submittal_register: 0,
 submittal_reports: 1, submittal_view_events: 0, submittals: 1, transmittal_items: 0,
 transmittals: 0, users: 7.
+# Living Brief Semantic-Content Reconciliation Audit - 2026-07-21
+
+Status: corrective local review candidate; not independently accepted, pushed, published, or production verified.
+
+The accepted 11-document catalog, canonical hashing, source-authoritative mirror, and freshness controls solved
+structural parity. A second audit found a different failure: hash/current-file reconciliation could call an exact
+old document Current even when major accepted decisions, regressions, operating rules, and builds were absent or
+contradicted elsewhere. Examples included accepted Living Brief architecture still described as a local candidate,
+the protected Navisworks physical-mutation invariant missing from the committed plugin authority, and RFI Builds
+4-7 absent from the report authority.
+
+Root cause: freshness measured source bytes, ancestry, catalog coverage, and mirror equality, but did not require
+an acceptance unit to declare which semantic authorities it reviewed. Corrective control: every implementation or
+incident review records all applicable Living Brief authorities as updated or `reviewed_no_semantic_change`, tied
+to a commit/task; unknown keys and missing applicable reviews fail the deterministic checker. UI metadata separates
+source change, semantic review/reconciliation, deployed source commit, and database mirror synchronization.
+
+Roberto's corrective policy adds timing: an immediate operational/quality category cannot be deferred to a later
+batch. The semantic declaration records each such finding as captured in the same correction chain, while normal
+minor feature detail may wait only to its acceptance boundary. Negative fixtures remove or defer an immediate
+finding and must fail. This distinguishes rapid progress reporting from the complete terminal summary required of
+every builder.
+
+Two operational lessons are retained without rewriting older audit entries:
+
+- Replit publication previously compared a divergent development schema and produced destructive migration SQL.
+  Schema preview, zero-destructive-SQL review, publish authority, actual publish, and live verification are separate
+  gates. The current interrupted-rebase/schema-preview/publication state remains unresolved until verified from the
+  latest remote; no production action was taken by this correction.
+- Replit's `.git`-write restriction was known during rebase recovery, but later clean-history instructions again
+  assumed the agent could fetch, branch, commit, or move refs. Consequences included repeated manual intervention,
+  stale-lock recovery, detached-HEAD/rebase metadata, empty/noise publish commits, more paid cycles, and increased
+  discard risk. The corrective control is a tested capability preflight and agent/operator responsibility split
+  before work begins. Control is being added here; the current schema reconciliation is still not pushed or published.
+- Read-only production verification of clean schema candidate `9297740` corrected an inherited 11-table expectation.
+  Complete latest-master comparison found 12 pending additive creates: Meeting M4 (2), Finance B2 (9), and the
+  accepted Living Brief mirror table `living_brief_documents` (1), which is absent in production. No destructive or
+  existing-column operation was identified. This is pending-deployment evidence only; operator push, actual preview,
+  publish, and live verification remain outstanding.
+- After `9297740` was pushed, Replit publish stopped before application build: the publish-only supply-chain firewall
+  returned `403 Blocked by Security Policy` for transitive `tar@7.5.11` through Electron/sync-agent tooling. Replit
+  proposed a root override to `tar@7.5.20` and regenerated the lockfile, reporting zero 7.5.11 resolutions and green
+  API/frontend builds. That correction has not been independently diff-reviewed, committed, pushed, or published.
+  Control: reproduce publish install policy; scan every frozen transitive/optional tool chain; use a minimal bounded
+  override with range/zero-occurrence proof; frozen-clean-install and build; exact-file commit only; never repeat an
+  unchanged blocked publish. No schema migration or production application write occurred in this failed stage.
+- Despite validation-only/no-checkpoint instructions, Replit automatically created unpushed commit `0d60d7a`
+  (`Update package to safely resolve security vulnerability`) on master with pushed parent `9297740`. It changes only
+  root `package.json` and `pnpm-lock.yaml`, but the lockfile stat is 1,181 insertions/93 deletions. Search reports zero
+  `tar@7.5.11` and two `tar@7.5.20` resolutions. Those counts do not establish semantic safety. The checkpoint remains
+  an unaccepted/unpublished candidate pending effective-diff, importer/version/integrity/optional/resolution-path,
+  package-manager-version, clean-install, affected-build, and security review; broad churn must be replaced cleanly.
+- Corrective operating model from the July 21 rebase/checkpoint/schema/security incidents: source, dependencies,
+  lockfiles, evidence, commits, review, integration, and push return to controlled local worktrees. Replit pulls the
+  verified commit, shows the actual preview, performs only an explicitly approved publish, and verifies runtime.
+  Replit-only failures diagnose/report then stop. Any exception requires Roberto's scoped post-preflight approval.
+- Independent audit **rejected** local unpushed `0d60d7a`. Its intended `tar@7.5.20` target was correct, but adding
+  root `package.json` `pnpm.overrides` silently displaced the canonical `pnpm-workspace.yaml` override set: about 80
+  existing overrides/exclusions dropped, 117 unrelated packages appeared, deprecated `@esbuild-kit` packages and a
+  second esbuild returned, and about 113 foreign-platform binaries were reintroduced. The candidate was neither
+  pushed nor published and production was unchanged by it. The correction must be a clean 9297740-based local
+  worktree change preserving every workspace control with a tar-only semantic delta; Replit stops at diagnosis.
+- Navisworks identity protections cannot replace the v1.60.7 physical mutation method. The v1.60.9-v1.60.17
+  regression class retained stale collection objects across mutation, producing placeholder/duplicate/missing
+  successor behavior. Fresh collection reacquisition and immutable identity resolution are now protected doctrine;
+  v1.60.18 remains frozen pending Ruben's 2025 field acceptance.
+
+### July 21 source-correction closure
+
+The preceding tar and schema entries are preserved as the facts known when they were written. Their source-control
+blockers later closed: clean schema reconciliation `9297740955336971b6aa9b4b120b0f2b6054185c` and the bounded
+workspace-authority tar correction `178462eef6edbde08e2d44efb0a944b812f98480` were independently reviewed and
+pushed. The accepted tar correction retained every pre-existing workspace override/exclusion, removed
+`tar@7.5.11`, resolved the four Electron/sync-agent paths to `tar@7.5.20`, passed a frozen install and affected
+builds, and excluded the rejected broad-lockfile checkpoint `0d60d7a`.
+
+This closes source correction only. Replit still must pull the verified source, show the actual 12-table additive
+preview, receive explicit publish approval, and pass post-publish runtime/mirror/browser verification. The full
+dependency audit also reported 94 pre-existing findings (7 low, 47 moderate, 40 high); they are a separate bounded
+security remediation workstream and are not evidence against the tar-only correction.
+
+---

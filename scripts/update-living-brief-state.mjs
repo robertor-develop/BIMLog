@@ -25,17 +25,35 @@ function canonicalText(value) {
 function sha256Text(value) {
   return crypto.createHash("sha256").update(canonicalText(value)).digest("hex");
 }
+function reviewedChangeDigest(paths) {
+  const excluded = new Set(["living-brief/state.json", "living-brief/impact-declarations.json"]);
+  return crypto.createHash("sha256").update(paths.filter((value) => !excluded.has(value)).sort().map((relativePath) => {
+    const absolutePath = path.join(root, relativePath);
+    return `${relativePath}:${fs.existsSync(absolutePath) ? sha256Text(fs.readFileSync(absolutePath)) : "DELETED"}`;
+  }).join("\n")).digest("hex");
+}
 git("cat-file", "-e", `${reconciledThroughCommit}^{commit}`);
 const catalogBytes = fs.readFileSync(path.join(briefRoot, "catalog.json"));
 const catalog = JSON.parse(catalogBytes.toString("utf8"));
+const impactDeclarations = JSON.parse(fs.readFileSync(path.join(briefRoot, "impact-declarations.json"), "utf8"));
+const semanticReview = impactDeclarations.reviews?.at(-1);
+if (!semanticReview || semanticReview.reviewedThroughCommit !== reconciledThroughCommit) {
+  throw new Error("The latest semantic review must cover the reconciled-through commit");
+}
+const authorityReviews = new Map(semanticReview.authorities.map((entry) => [entry.key, entry]));
 const changedPaths = git("diff", "--name-only", reconciledThroughCommit, "--", ".")
   .split(/\r?\n/).filter(Boolean).map((value) => value.replaceAll("\\", "/"))
   .filter((value) => value !== "living-brief/state.json").sort();
 const changedSet = new Set(changedPaths);
+semanticReview.reviewedChangedPaths = changedPaths;
+semanticReview.reviewedChangeSha256 = reviewedChangeDigest(changedPaths);
+fs.writeFileSync(path.join(briefRoot, "impact-declarations.json"), `${JSON.stringify(impactDeclarations, null, 2)}\n`, "utf8");
 const documents = catalog.documents.map((entry) => {
   const relativePath = `living-brief/${entry.file}`;
   const content = fs.readFileSync(path.join(briefRoot, entry.file));
   const changed = changedSet.has(relativePath);
+  const authorityReview = authorityReviews.get(entry.key);
+  if (!authorityReview) throw new Error(`Semantic review missing catalog authority ${entry.key}`);
   const sourceChangedAt = changed
     ? new Date(candidateChangedAt).toISOString()
     : git("log", "-1", "--format=%cI", reconciledThroughCommit, "--", relativePath);
@@ -46,6 +64,10 @@ const documents = catalog.documents.map((entry) => {
     sourceChangedAt,
     changeState: changed ? "candidate" : "accepted",
     reconciledThroughCommit,
+    semanticReviewedThroughCommit: semanticReview.reviewedThroughCommit,
+    semanticReviewTask: semanticReview.taskId,
+    semanticReviewResult: authorityReview.result,
+    semanticReviewedAt: semanticReview.reviewedAt,
   };
 });
 const affected = new Set(["STATUS.md", "OPEN_LOOP.md"]);

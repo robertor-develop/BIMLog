@@ -118,6 +118,11 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
       contentSha256: document.sha256,
       reconciledThroughCommit: document.reconciledThroughCommit,
       sourceChangedAt: document.sourceChangedAt,
+      semanticReviewedThroughCommit: document.semanticReviewedThroughCommit,
+      semanticReviewTask: document.semanticReviewTask,
+      semanticReviewResult: document.semanticReviewResult,
+      semanticReviewedAt: document.semanticReviewedAt,
+      deployedSourceCommit,
       mirrorSyncedAt: mirror?.mirror_synced_at?.toISOString() ?? null,
       mirrorContentSha256: mirror ? sha256(mirror.content) : null,
       status: mirrorStatus(mirror, {

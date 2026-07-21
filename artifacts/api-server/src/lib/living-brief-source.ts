@@ -18,6 +18,10 @@ export type LivingBriefManifestDocument = {
   sourceChangedAt: string;
   changeState: "accepted" | "candidate";
   reconciledThroughCommit: string;
+  semanticReviewedThroughCommit: string;
+  semanticReviewTask: string;
+  semanticReviewResult: "updated" | "reviewed_no_semantic_change";
+  semanticReviewedAt: string;
 };
 
 export type LivingBriefManifest = {
@@ -121,6 +125,9 @@ export function loadLivingBriefSource(): LivingBriefSourceBundle {
     const metadata = metadataByKey.get(entry.key);
     if (!metadata || metadata.file !== entry.file) throw new Error(`Living Brief metadata missing for ${entry.key}`);
     if (metadata.reconciledThroughCommit !== manifest.reconciledThroughCommit) throw new Error(`Living Brief stale reconciled-through marker for ${entry.file}`);
+    if (metadata.semanticReviewedThroughCommit !== manifest.reconciledThroughCommit) throw new Error(`Living Brief stale semantic review for ${entry.file}`);
+    if (!metadata.semanticReviewTask || !["updated", "reviewed_no_semantic_change"].includes(metadata.semanticReviewResult)) throw new Error(`Living Brief semantic review metadata is invalid for ${entry.file}`);
+    if (!Number.isFinite(Date.parse(metadata.semanticReviewedAt)) || Date.parse(metadata.semanticReviewedAt) > Date.now() + 5 * 60_000) throw new Error(`Living Brief future semantic-review claim for ${entry.file}`);
     if (Date.parse(metadata.sourceChangedAt) > Date.now() + 5 * 60_000) throw new Error(`Living Brief future source-change claim for ${entry.file}`);
     const content = canonicalLivingBriefText(fs.readFileSync(path.join(directory, entry.file)));
     if (sha256(content) !== metadata.sha256) throw new Error(`Living Brief source hash mismatch for ${entry.file}`);

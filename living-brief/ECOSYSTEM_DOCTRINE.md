@@ -85,6 +85,21 @@ Names, organizations, brands, products, frameworks, components, and initiatives 
 boundaries. A shared data path or future integration does not prove common ownership, legal
 identity, certification, or product equivalence.
 
+## Durable record and automation doctrine
+
+- **Link authoritative records; do not duplicate them.** Meetings, schedules, reports, financial
+  controls, notifications, model viewpoints, and future dimensions must reference the canonical
+  project record and preserve the relationship snapshot needed for history. A convenience copy must
+  never become a second silent authority.
+- **Consequential automation remains controlled.** Automation may prepare, classify, remind, route,
+  or propose. Issuance, external delivery, approval, financial commitment, destructive reconciliation,
+  and other consequential actions require the authorized human confirmation appropriate to the action.
+- **Preserve evidence through correction.** A correction retains factual history, source identity,
+  decision relationships, and audit evidence. Replacing inconvenient history is not reconciliation.
+- **Construction and financial dimensions share traceability.** BIMLog's verified construction record
+  and Cost & Financial Control dimension connect through explicit project relationships and exact
+  evidence; neither may infer authority, identity, approval, or value from labels alone.
+
 ## BIMLog's permanent product laws
 
 1. **Human authority.** BIMLog logs, preserves, connects, and presents the record; it does not

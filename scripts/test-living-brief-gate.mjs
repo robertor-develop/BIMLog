@@ -11,15 +11,17 @@ const cases = [];
 function fixture() {
   const target = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-living-brief-gate-"));
   fs.cpSync(path.join(root, "living-brief"), path.join(target, "living-brief"), { recursive: true });
-  const requiredSources = [
+  const state = JSON.parse(fs.readFileSync(path.join(root, "living-brief/state.json"), "utf8"));
+  const requiredSources = new Set([
     "artifacts/api-server/src/routes/living_brief.ts",
     "artifacts/api-server/scripts/generate-platform-md.ts",
     "artifacts/bimlog/src/pages/LivingBrief.tsx",
-  ];
+    ...(state.impact?.changedPaths ?? []).filter((value) => !value.startsWith("living-brief/")),
+  ]);
   for (const relative of requiredSources) {
     const output = path.join(target, relative);
     fs.mkdirSync(path.dirname(output), { recursive: true });
-    fs.copyFileSync(path.join(root, relative), output);
+    if (fs.existsSync(path.join(root, relative))) fs.copyFileSync(path.join(root, relative), output);
   }
   return target;
 }
@@ -94,6 +96,55 @@ expectFailure("future claim fails", (target) => {
   state.documents[0].sourceChangedAt = "2999-01-01T00:00:00.000Z";
   fs.writeFileSync(file, JSON.stringify(state));
 }, /future sourceChangedAt/);
+
+expectFailure("immediate quality incident cannot be deferred", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  declarations.reviews.at(-1).immediateFindings[0].disposition = "deferred_minor_note";
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /cannot be deferred/);
+
+expectFailure("immediate semantic category cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  catalog.semanticImpactPolicy.immediateCategories.pop();
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /all eight immediate categories/);
+
+expectFailure("Git-write limitation requires capability preflight", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete declarations.reviews.at(-1).capabilityPreflight;
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /before-execution capability preflight/);
+
+expectFailure("semantic no-change approval cannot be reused after reviewed content changes", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  declarations.reviews.at(-1).reviewedChangeSha256 = "0".repeat(64);
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /semantic review content digest is missing or stale/);
+
+expectFailure("publish supply-chain checkpoint audit cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.deploymentSupplyChainPreflight.automaticCheckpointEffectiveDiffAudit;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /deployment supply-chain preflight/);
+
+expectFailure("competing root override authority is rejected", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  catalog.deploymentSupplyChainPreflight.canonicalOverrideAuthority = "package.json";
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /deployment supply-chain preflight/);
+
+expectFailure("Replit source-edit boundary cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.toolResponsibilityBoundary.replitDiagnoseThenStopOnSourceCorrection;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /tool responsibility boundary/);
 
 {
   const target = fixture();

@@ -1,4 +1,187 @@
 {
-  "schemaVersion": 1,
-  "notApplicable": []
+  "schemaVersion": 2,
+  "reviews": [
+    {
+      "taskId": "living-brief-content-reconciliation-build-2-integration",
+      "reviewedThroughCommit": "178462eef6edbde08e2d44efb0a944b812f98480",
+      "reviewedAt": "2026-07-21T17:22:05.076Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "reconcile_in_clean_worktree",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_operation"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "audit",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Hash-valid documents lacked material accepted semantic history."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "plugin",
+            "audit"
+          ],
+          "summary": "Navisworks v1.60.7 physical mutation behavior must survive later identity protections."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Replit recovery is closed in source: schema reconciliation 9297740 and tar correction 178462e are pushed. The actual 12-table preview, authorized publish, and post-publish verification remain pending."
+        },
+        {
+          "category": "repeated_permanent_instruction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Every builder and every Replit instruction must require a complete terminal summary distinct from progress updates."
+        },
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "audit",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Replit Git-write restrictions require capability preflight and an agent/operator responsibility split before paid implementation begins."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "audit",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Publish-only policy blocked tar 7.5.11; rejected checkpoint 0d60d7a dropped canonical workspace controls. Clean tar-only correction 178462e is pushed and verified; 94 pre-existing audit findings remain a separate security workstream."
+        }
+      ],
+      "workstreams": [
+        "rfi-builds-3-7",
+        "telegram-product-builds-1-5",
+        "plans-entitlements-steps-1-2",
+        "finance-builds-1-2",
+        "meeting-minutes-m1-m4",
+        "shop-drawing-filter-correction",
+        "navisworks-v1.60.7-baseline-and-v1.60.18-candidate",
+        "replit-schema-publish-incident",
+        "terminal-notifier-control",
+        "publish-dependency-correction-178462e"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "updated",
+          "reason": "Added durable canonical-linking, controlled-automation, evidence-preservation, and financial/construction traceability doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Added preserve-first reading, identity, clean-integration, evidence, field-gate, notifier, and Replit operating rules."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Added current migration, finance, concurrency, bilingual, privacy, canonical-link, artifact, and plugin acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Added status-qualified 10D, connected meeting/schedule, Telegram, entitlements, and financial-dimension direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current accepted code structure is regenerated deterministically; this task changes semantic governance and UI metadata only."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Recorded protected v1.60.7 mutation architecture, v1.60.9-v1.60.17 regression class, and frozen v1.60.18 evidence/status."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Recorded accepted RFI professional output, Complete PDF, Excel, crop/replacement/visibility, and delivery boundaries."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new or changed external standard was adopted or verified by the accepted workstreams reviewed in this task."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Reconciled accepted source through current master and separated accepted, deployment-pending, candidate, and field-pending states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the Build 2 candidate, Replit publication recovery blocker, Ruben field gate, and not-started build sequence."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appended the semantic-freshness gap, corrective control, Replit incident, and protected-baseline regression lesson."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/living-brief-source.ts",
+        "artifacts/api-server/src/routes/living_brief.ts",
+        "artifacts/bimlog/src/living-brief-harness.tsx",
+        "artifacts/bimlog/src/pages/LivingBrief.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/ECOSYSTEM_DOCTRINE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/QUALITY.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/VISION.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-living-brief-gate.mjs",
+        "scripts/update-living-brief-state.mjs"
+      ],
+      "reviewedChangeSha256": "d641ca63615fa4ece15405d22ee3d37fd53e51351508b68eab9c4f5c00891992"
+    }
+  ]
 }

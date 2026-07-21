@@ -26,7 +26,7 @@ behavior.
 - Semantic versioning v1.6.x. Package with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
-  README revision + write a per-revision update .txt covering the delta. Current review candidate: v1.60.13.
+  README revision + write a per-revision update .txt covering the delta. Current frozen review candidate: v1.60.18.
   Shared logic in `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` must be reviewed in both physical
   copies for every shared change; preserve intentional version-specific differences.
 
@@ -107,13 +107,32 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (a collision-skip returns id:null).
 
 ## Open items / known limitations
-- **Navisworks v1.60.18 remains Pending / Under Review.** It is concurrent candidate work and is
-  not accepted in `origin/master` at reconciliation commit
-  `13f9fe994ed662552c16f028f4ec21c5143071ea`. Do not describe it as integrated, deployed,
-  installed, or field verified until independent review and clean integration establish those facts.
-- The separately authored Protected Navisworks v1.60.7 Behavioral Baseline documentation had not
-  landed on `origin/master` at this reconciliation point. Preserve it if it integrates; do not
-  silently replace its physical saved-viewpoint mutation rules with this freshness work.
+- **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,
+  `Guid.Empty`, ambiguity, and preserve-first protections must surround rather than replace the physical
+  mutation sequence: make `CreateUniqueCopy` while detached, set the final display name on that copy,
+  `AddCopy` into the intended current/source folder, then reacquire `Document.SavedViewpoints` after every
+  insert, metadata write, rename, move, or removal. Never carry mutable viewpoint/group/parent/target wrappers,
+  indexes, or reference-equality assumptions across a mutation or `await`. Identify an inserted successor from
+  a fresh post-insert inventory and stamp immutable identity before further work.
+- **v1.60.9-v1.60.17 regression class.** Successive fixes correctly added server identity, lineage, strict
+  matching, project boundaries, import/rebind, and preserve-first reconciliation, but repeatedly retained or
+  rediscovered stale Navisworks object wrappers after collection mutation. This caused placeholder names,
+  missing or duplicated physical successors, or later cleanup treating an unresolved row as deletion authority.
+  The factual correction is architectural: fresh reacquisition after mutation plus identity-based resolution;
+  labels, cached indexes, object reference equality, and absence from a pull response are never deletion proof.
+- **v1.60.18 is frozen and field-acceptance pending, not Completed.** The Navisworks 2021 exact-model gate
+  preserved the original NWD SHA-256 `8A73356DA75150B50A64DFCF182761E65477FC6E40184D2500EF0F60CA8DA27F`,
+  created successors 362/363 exactly once, repeated Pull without duplicates, reconciled twice without crash,
+  and saved/reopened with 59 physical viewpoints and persisted identities. Frozen 2021 DLL SHA-256 is
+  `B12BE2113DC6A2367310E821185043D3C5B3D37D8D9EE6E5AC4135780C2D1D7A`; final verified 2025 handoff DLL is
+  `FD4B3C3D20E5C7F8759CFCC250DE4BCA598D29E465C6361ACA8A91E9EA3BECE2`; shared source parity is
+  `14FCD66A552987EE773D231F2F35BB46F10A35A78D0EE232E384BFE20D921808`. Package provenance and the 2025
+  handoff were verified, but Ruben's exact Navisworks 2025 install, workflow, save/reopen, and field acceptance
+  remain pending. No integration, deployment, installation, or customer verification is implied here.
+- **Navisworks v1.60.18 remains Pending / Under Review.** Its frozen local artifacts and exact-model
+  evidence are recorded here, but Ruben's Navisworks 2025 field acceptance remains mandatory before Completed status.
+  Do not describe it as integrated, deployed, installed, or field verified until independent review,
+  clean integration, and the required Ruben 2025 field gate establish those facts.
 - v1.60.13 is the project-28 preserve-first Reconcile candidate. In v1.60.12,
   `CleanBIMLogViewsAgainstPlatform` deleted a physical local viewpoint when `MatchPlatformRow`
   returned null and local metadata contained `serverId`. Reconcile could also rebuild only matched

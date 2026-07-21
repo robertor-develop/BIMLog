@@ -69,6 +69,15 @@ function canonicalText(value) {
   return (Buffer.isBuffer(value) ? value.toString("utf8") : value).replace(/\r\n?/g, "\n");
 }
 
+function reviewedChangeDigest(paths) {
+  const excluded = new Set(["living-brief/state.json", "living-brief/impact-declarations.json"]);
+  const rows = paths.filter((value) => !excluded.has(value)).sort().map((relativePath) => {
+    const absolutePath = path.join(repoRoot, relativePath);
+    return `${relativePath}:${fs.existsSync(absolutePath) ? sha256(fs.readFileSync(absolutePath)) : "DELETED"}`;
+  });
+  return crypto.createHash("sha256").update(rows.join("\n")).digest("hex");
+}
+
 function git(args) {
   return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8" }).trim();
 }
@@ -339,6 +348,60 @@ function validateCatalogAndFreshness() {
     keys.add(document.key);
     files.add(document.file);
   }
+  const immediateCategories = catalog.semanticImpactPolicy?.immediateCategories;
+  if (!Array.isArray(immediateCategories) || immediateCategories.length !== 8 || new Set(immediateCategories).size !== 8 || catalog.semanticImpactPolicy?.normalAcceptanceAllowedOnlyWhenNoImmediateCategoryApplies !== true) {
+    report("living-brief/catalog.json", "semantic impact policy must define all eight immediate categories and restrict normal acceptance-time capture");
+  }
+  const supplyChainPolicy = catalog.deploymentSupplyChainPreflight;
+  const requiredSupplyChainControls = ["required", "fullFrozenLockfile", "allWorkspacesAndOptionalTooling", "blockedVersionMustResolveZeroTimes", "minimalBoundedOverrideAndRangeProof", "frozenCleanInstallAndAffectedBuilds", "exactAuthorizedPackageFilesOnly", "automaticCheckpointEffectiveDiffAudit", "largeLockfileSemanticDeltaAudit"];
+  if (!supplyChainPolicy || supplyChainPolicy.canonicalOverrideAuthority !== "pnpm-workspace.yaml" || supplyChainPolicy.targetedFixMustPreserveAllExistingOverridesAndExclusions !== true || supplyChainPolicy.tarFixRequiresTarOnlySemanticDelta !== true || requiredSupplyChainControls.some((control) => supplyChainPolicy[control] !== true)) {
+    report("living-brief/catalog.json", "deployment supply-chain preflight must cover publish policy, full lockfile, bounded override, builds, exact files, checkpoints, and semantic lockfile delta");
+  }
+  const toolBoundary = catalog.toolResponsibilityBoundary;
+  if (!toolBoundary || Object.values(toolBoundary).length !== 4 || Object.values(toolBoundary).some((value) => value !== true)) {
+    report("living-brief/catalog.json", "tool responsibility boundary must keep source/Git work local and Replit limited to verified pull, preview, approved publish, and runtime verification");
+  }
+
+  const declarationsPath = path.join(livingBriefRoot, "impact-declarations.json");
+  let semanticReviews = [];
+  try {
+    const declarationFile = JSON.parse(readText(declarationsPath));
+    if (declarationFile.schemaVersion !== 2 || !Array.isArray(declarationFile.reviews) || !declarationFile.reviews.length) {
+      report("living-brief/impact-declarations.json", "schemaVersion 2 requires at least one semantic review");
+    } else {
+      semanticReviews = declarationFile.reviews;
+      for (const review of semanticReviews) {
+        if (!review.taskId || !/^[0-9a-f]{40}$/.test(review.reviewedThroughCommit ?? "") || !Array.isArray(review.authorities)) {
+          report("living-brief/impact-declarations.json", "each review needs taskId, full reviewedThroughCommit, and authorities");
+          continue;
+        }
+        const reviewedKeys = new Set();
+        if (review.captureTiming === "immediate_same_task_chain") {
+          if (!Array.isArray(review.immediateFindings) || !review.immediateFindings.length) report("living-brief/impact-declarations.json", "immediate capture review requires findings");
+          for (const finding of review.immediateFindings ?? []) {
+            if (!immediateCategories?.includes(finding.category)) report("living-brief/impact-declarations.json", `unknown immediate category '${finding.category}'`);
+            if (finding.disposition !== "captured_immediately") report("living-brief/impact-declarations.json", `immediate finding '${finding.category}' cannot be deferred`);
+            if (!Array.isArray(finding.authorities) || !finding.authorities.length || finding.authorities.some((key) => !keys.has(key))) report("living-brief/impact-declarations.json", `immediate finding '${finding.category}' has missing or unknown authorities`);
+            if (typeof finding.summary !== "string" || finding.summary.trim().length < 20) report("living-brief/impact-declarations.json", `immediate finding '${finding.category}' needs a summary`);
+          }
+          const needsCapabilityPreflight = review.immediateFindings.some((finding) => ["migration_git_publish_deployment_or_rollback_hazard", "future_builder_workflow_correction"].includes(finding.category));
+          if (needsCapabilityPreflight && (review.capabilityPreflight?.checkedBeforeExecution !== true || !review.capabilityPreflight.agentCapable?.length || !review.capabilityPreflight.operatorOnly?.length)) {
+            report("living-brief/impact-declarations.json", "Git/deployment operational findings require a before-execution capability preflight and agent/operator split");
+          }
+        }
+        for (const authority of review.authorities) {
+          if (!keys.has(authority.key)) report("living-brief/impact-declarations.json", `unknown authority key '${authority.key}'`);
+          if (reviewedKeys.has(authority.key)) report("living-brief/impact-declarations.json", `duplicate authority key '${authority.key}'`);
+          if (!["updated", "reviewed_no_semantic_change"].includes(authority.result)) report("living-brief/impact-declarations.json", `invalid semantic result for '${authority.key}'`);
+          if (typeof authority.reason !== "string" || authority.reason.trim().length < 20) report("living-brief/impact-declarations.json", `semantic reason is missing for '${authority.key}'`);
+          reviewedKeys.add(authority.key);
+        }
+        for (const key of keys) if (!reviewedKeys.has(key)) report("living-brief/impact-declarations.json", `semantic review is missing authority '${key}'`);
+      }
+    }
+  } catch (error) {
+    report("living-brief/impact-declarations.json", `invalid semantic review file: ${error.message}`);
+  }
 
   const statePath = path.join(livingBriefRoot, "state.json");
   if (!fs.existsSync(statePath)) {
@@ -369,12 +432,27 @@ function validateCatalogAndFreshness() {
     if (entry.reconciledThroughCommit !== state.reconciledThroughCommit) {
       report("living-brief/state.json", `${document.file} has a stale reconciled-through marker`);
     }
+    if (entry.semanticReviewedThroughCommit !== state.reconciledThroughCommit || !entry.semanticReviewTask || !["updated", "reviewed_no_semantic_change"].includes(entry.semanticReviewResult)) {
+      report("living-brief/state.json", `${document.file} has missing or stale semantic-review metadata`);
+    }
+    const semanticReviewedAt = Date.parse(entry.semanticReviewedAt);
+    if (!Number.isFinite(semanticReviewedAt) || semanticReviewedAt > Date.now() + 300000) {
+      report("living-brief/state.json", `${document.file} has an invalid or future semantic-review time`);
+    }
     const changedAt = Date.parse(entry.sourceChangedAt);
     if (!Number.isFinite(changedAt) || changedAt > Date.now() + 300000) {
       report("living-brief/state.json", `${document.file} has an invalid or future sourceChangedAt`);
     }
   }
   if (metadata.size !== catalog.documents.length) report("living-brief/state.json", "contains missing or unknown document metadata");
+  const latestSemanticReview = semanticReviews.at(-1);
+  const reviewedChangedPaths = (latestSemanticReview?.reviewedChangedPaths ?? []).slice().sort();
+  const digestPaths = (state.impact?.changedPaths ?? []).filter((value) => value !== "living-brief/state.json").sort();
+  if (JSON.stringify(reviewedChangedPaths) !== JSON.stringify(digestPaths)) {
+    report("living-brief/impact-declarations.json", "semantic review is not bound to the exact reviewed changed-path set");
+  } else if (!/^[0-9a-f]{64}$/.test(latestSemanticReview?.reviewedChangeSha256 ?? "") || latestSemanticReview.reviewedChangeSha256 !== reviewedChangeDigest(digestPaths)) {
+    report("living-brief/impact-declarations.json", "semantic review content digest is missing or stale");
+  }
 
   const apiSource = readText(path.join(repoRoot, "artifacts/api-server/src/routes/living_brief.ts"));
   const uiSource = readText(path.join(repoRoot, "artifacts/bimlog/src/pages/LivingBrief.tsx"));
@@ -403,8 +481,12 @@ function validateCatalogAndFreshness() {
         if (new RegExp(rule.pattern).test(changedPath)) for (const document of rule.documents) requiredAffected.add(document);
       }
     }
-    const declarationsPath = path.join(livingBriefRoot, "impact-declarations.json");
-    const declarations = fs.existsSync(declarationsPath) ? JSON.parse(readText(declarationsPath)).notApplicable ?? [] : [];
+    const declarations = (latestSemanticReview?.authorities ?? [])
+      .filter((item) => item.result === "reviewed_no_semantic_change")
+      .map((item) => ({ document: catalog.documents.find((doc) => doc.key === item.key)?.file, reason: item.reason }));
+    if (latestSemanticReview?.reviewedThroughCommit !== state.reconciledThroughCommit) {
+      report("living-brief/impact-declarations.json", "latest semantic review must use the state reconciled-through commit");
+    }
     for (const affectedDocument of requiredAffected) {
       if (changedSet.has(`living-brief/${affectedDocument}`)) continue;
       const declaration = declarations.find((item) => item.document === affectedDocument && typeof item.reason === "string" && item.reason.trim().length >= 20);
@@ -433,7 +515,7 @@ function validateCatalogAndFreshness() {
     });
     for (const [document, implementation] of latestImplementation) {
       if ((latestDocument.get(document) ?? -1) >= implementation.index) continue;
-      const declaration = declarations.find((item) => item.document === document && item.commit === implementation.unit && typeof item.reason === "string" && item.reason.trim().length >= 20);
+      const declaration = declarations.find((item) => item.document === document && typeof item.reason === "string" && item.reason.trim().length >= 20);
       if (!declaration) report("living-brief/state.json", `${document} was not reconciled at or after implementation unit ${implementation.unit}`);
     }
   } catch (error) {

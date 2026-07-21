@@ -166,7 +166,100 @@ unavailable, report the missing evidence honestly. Never manufacture substitute 
 - Work may be implementation-complete but validation-pending; label that distinction accurately.
 - "Blocked" does not mean "nothing completed."
 
+## Preserve-first development and terminal reporting rules
+
+### Immediate Living Brief capture - do not batch hazards
+
+In the same task or correction chain, update the applicable Living Brief authority or record an explicit semantic
+review for: customer-impacting defects/regressions; repeated or systemic failure classes; protected working
+baselines; migration, Git/rebase/publish/deployment/production/rollback hazards; security, privacy, tenancy,
+authorization, idempotency, concurrency, evidence-integrity, or financial-control findings; a permanent instruction
+Roberto has had to repeat; a blocker/correction that changes future builder behavior; or field findings that
+contradict automated evidence. Small isolated same-session details may wait only until normal Ready/acceptance, and
+still require a semantic-impact declaration before acceptance or push.
+
+Progress updates are not terminal summaries. Every Replit, Codex, Claude, or other builder task ends with objective
+and outcome; starting/final commit and ancestry; exact changed files; root cause/correction; validation/evidence and
+limitations; clean/dirty status and push/publish/deploy/production-access state; blockers, pending acceptance, exact
+next action; and Telegram EventId/message ID or explicit delivery reason. Prompt for the full summary if missing.
+Every Replit instruction explicitly requests it. Git/publish work must additionally report actual HEAD/origin,
+dirty/stash/rebase state, exact migration preview/operations, production reads/writes, and push/publish state.
+
+### Mandatory capability preflight
+
+Before work needing Git writes, deployment controls, production-schema inspection, external notifications,
+administrator rights, GUI interaction, or protected filesystem access, test and report whether the active environment
+can perform each operation. Split agent-capable and operator-only steps at the start. If Replit cannot write `.git`,
+it prepares a reviewed patch/content set and safe operator commands; it does not start a rebase or promise commit/push.
+Never send a background isolated copy to rewrite the main environment's history.
+
+Prefer a clean latest-origin branch/worktree and one reviewed integration commit. Exclude empty publish commits,
+pasted instructions, generated noise, and cosmetic lockfile churn before push. Before any user-run Git command verify
+HEAD/origin, dirty/stash/rebase/lock state, authorized files, rollback/backup, and discard risk. Replit instructions
+name operator-only steps up front; terminal summaries disclose platform-blocked and manually performed actions.
+
+### Publish supply-chain preflight
+
+Deployment preflight reproduces the production/publish dependency-install policy; a development install is not a
+proxy. Before republish, scan the complete frozen transitive lockfile across every workspace, including Electron,
+native rebuild, `node-gyp`, packaging, optional, and other build tooling. Classify the dependency as runtime,
+development, packaging, or optional tooling so unrelated schema/application work is not blamed.
+
+A security override is minimal, explicit, version-bounded, explained, verified in the lockfile against every
+dependent range, and followed by proof that the blocked version resolves zero times and the approved version resolves
+consistently. Run a frozen clean install and all affected builds before push/publish. Never use broad `git commit -am`;
+preflight exact dirty files and commit only authorized `package.json`/`pnpm-lock.yaml` changes after independent diff
+review. A blocked publish gets an immediate terminal summary naming stage, artifact/version, cause, correction,
+validation, Git/production effects, and next action. Do not retry an identical blocked publish without validated
+dependency-state change.
+
+This monorepo's sole pnpm override authority is `pnpm-workspace.yaml`. Never add a competing root
+`package.json` `pnpm.overrides` block. A targeted security fix preserves the complete existing override/exclusion set
+and proves a tar-only semantic delta: zero lost controls and zero unrelated importer, version, integrity, optional,
+platform-binary, or resolution changes. Removing the target vulnerability does not justify weakening another
+supply-chain control. Preserve rejected Replit checkpoint evidence; make the correction from clean pushed master,
+without `git reset --soft` or further Replit Git surgery.
+
+Replit may create an automatic checkpoint despite an explicit validation-only/no-commit instruction. Every Replit
+terminal summary therefore includes fresh `git status`, HEAD, `origin/master`, last-commit stat, and effective diff;
+the requested boundary is never trusted without verification. A checkpoint is an unaccepted candidate. Large
+lockfile churn requires semantic audit of workspace importers, package versions, integrity data, optional dependencies,
+and resolution behavior—not only a text search. Regenerate with the repository-pinned package manager/workspace
+configuration and record tool/version. If a checkpoint is mechanically broad, replace it with one clean reviewed
+commit instead of appending a cleanup commit.
+
+### Default tool-responsibility boundary
+
+Codex/controlled local clean worktrees own source investigation/edits, dependency and lockfile changes,
+tests/evidence, clean commits, independent review/integration/normal GitHub push, Living Brief semantics, and
+package/plugin builds and reviewed artifacts. Replit owns only pulling an already verified/pushed `origin/master`,
+showing the actual publish migration preview, publishing after explicit approval, runtime health/log verification,
+explicitly authorized read-only production diagnostics, and the complete terminal deployment summary.
+
+By default Replit performs no source fix, dependency edit, lockfile regeneration, Git surgery/rebase/ref movement,
+cleanup commit, automatic product-outbox test, development-to-production data copy, destructive migration approval,
+or acceptance of an automatic checkpoint as history. If publish-only evidence identifies a source/dependency fix,
+Replit diagnoses and reports, then stops. A controlled local task implements, reviews, and pushes the correction;
+Replit pulls that verified commit and retries. An exception needs Roberto's explicit scoped approval after preflight.
+
+- Read the complete relevant implementation, authority documents, and protected behavioral baselines before
+  editing. Preserve working behavior and surround a protected invariant with new safeguards; never replace it
+  from an incomplete excerpt.
+- Never guess customer, company, project, model, file, or record identity from a label or chat shorthand.
+  Resolve it from authorized canonical evidence or stop at the field-acceptance boundary.
+- Start integration from a clean worktree at the latest fetched `origin/master`; apply only the reviewed
+  change, preserve newer accepted history, and never use destructive Git operations to simplify reconciliation.
+- A build, hash, response, screenshot, or local automation result proves only what it observed. Use real
+  artifact/runtime evidence, report exact terminal states, and require field acceptance when local automation
+  cannot prove the saved/reopened model or customer workflow.
+- Every genuine terminal outcome requires the explicitly requested sanitized Telegram notification and an
+  exact summary of commit, evidence, delivery/publish state, remaining gates, and failures. Ready is not Completed.
+- Replit instructions inspect current workspace and schema state, forbid destructive publish SQL, avoid
+  interrupted-history guesses, and separate build, schema preview, publish, and live verification. Production
+  or customer access, mutation, publish, deployment, and external contact require explicit authority.
+
 ## Explicit authorization boundaries
+
 Roberto must explicitly approve before directing system/global dependency installation, Windows
 service creation or modification, database creation, a new test environment or harness,
 administrator/elevated operation, process termination, firewall or network exposure,
@@ -196,25 +289,6 @@ column names, or transaction patterns to follow verbatim. Replit may know the ru
 workspace state better than an outside prompt. Exception: hard correctness constraints
 are fine to state explicitly, such as "Edit must not consume a fresh sequence number; it
 must inherit the old one."
-
-## Standing Rule - Replit release operations and mandatory summaries
-- Replit is the deployment operator, not the source-integration authority. Normal source edits,
-  dependency changes, lockfile regeneration, rebases, conflict resolution, history cleanup,
-  commits, and pushes belong in a clean Codex worktree based on current `origin/master`.
-- Replit may pull the reviewed pushed commit, generate and explain the actual migration preview,
-  build, publish after Roberto's approval, and report deployed behavior. It must not create a
-  parallel source fix or perform Git surgery unless Roberto explicitly authorizes an emergency.
-- Every Replit instruction starts with a capability/state preflight and ends with a complete
-  terminal summary: starting and final commits, branch/working-tree state, exact files changed,
-  commands and validations, migration operations, production reads/writes, push/publish state,
-  blockers, and Telegram EventId/message ID when delivery was required.
-- Before changing dependencies, read `pnpm-workspace.yaml`, `package.json`, `.npmrc`, and the
-  existing lockfile. Workspace dependency overrides belong in the existing
-  `pnpm-workspace.yaml` `overrides` map. Never add a second root override authority that replaces
-  the established aliases, version pins, or excluded platform binaries.
-- A regenerated lockfile must receive a semantic diff review before build or publish: list added,
-  removed, and version-changed packages; prove existing overrides remain; reject unexplained
-  platform-binary expansion or unrelated dependency churn.
 
 ## Standing Rule - platform and plugin share one display contract
 The Navisworks plugin and the platform web UI display the SAME underlying lifecycle/chain

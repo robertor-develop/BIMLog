@@ -21,7 +21,27 @@ coordination, document, RFI, submittal, field, and handover data is messy. BIMLo
 making that data clean, traceable, simple to use, and useful before the owner ever asks for
 a full digital twin.
 
+## 10D connected-record direction and delivery boundaries
+
+BIMLog's approved direction extends the verified construction record across BIGDOTS 4D-through-10D+
+dimensions. This is a connected-record strategy, not permission to clone records into parallel modules.
+Meeting decisions should become traceable scheduled work by linking the meeting, its immutable decision
+snapshot, the canonical source record, and the canonical Schedule Bucket/task. Cost & Financial Control is
+the financial dimension: exact values, authority, approval, budget history, and construction relationships
+must remain explainable together.
+
+Telegram is an approved assistant, notification, and Delivery Concierge channel. Users control language,
+AI use, notification preferences, channels, quiet hours, and each consequential external delivery. Accepted
+Builds 1-5 provide secure linking, controlled AI foundations, bilingual support, delivery preparation, and
+the Notification Center/outbox foundation; module adapters marked coming later are not shipped.
+
+Tiered plans, add-ons, and user-controlled AI/channel preferences are approved product direction. Accepted
+Entitlements Steps 1-2 provide the advisory catalog, resolver, policies, preferences, and support matrix;
+they do not prove billing enforcement, Step 3, or every planned entitlement. Future dimensions must keep
+one canonical identity, explicit relationships, and the verified record visible to the user.
+
 ## Roadmap design principle: spreadsheet-simple, twin-ready
+
 BIMLog must stay as easy to understand as a spreadsheet with a matching folder of PDFs, while
 quietly producing structured data that can power advanced BIM, AI, and owner operations.
 

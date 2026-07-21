@@ -2,6 +2,47 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Current terminal truth - 2026-07-21
+
+### Integration candidate: Living Brief Content Reconciliation Build 2
+
+- Candidate `6146c136ce33f9828edb16fddf9c4fffa1b7b839` was based on `9297740` and correctly expanded
+  semantic governance, but its tar and deployment status became stale when master advanced.
+- Independent reconciliation is now based on accepted `origin/master` commit
+  `178462eef6edbde08e2d44efb0a944b812f98480`. Candidate ancestry is not accepted as deployment
+  history; only reviewed content is retained and stale operational claims are corrected.
+- Scope is the 11-document semantic review model, enforcement, API/UI freshness metadata, and current
+  narrative truth. It does not publish Replit, mutate production/customer data, deploy a plugin, or
+  start another product build.
+
+### Replit publication recovery and verification
+
+- Schema reconciliation `9297740` and clean publish dependency correction `178462e` are accepted and
+  pushed. The latter uses the sole workspace override authority, removes all `tar@7.5.11` resolutions,
+  resolves the four Electron packaging paths to `tar@7.5.20`, preserves every existing override and
+  platform exclusion, and passed frozen install, full production build, and Windows Sync Agent packaging.
+- Rejected unpushed Replit checkpoint `0d60d7a` remains evidence only. It displaced the canonical override
+  set and introduced unrelated packages/platform binaries; never merge, cherry-pick, or reuse it.
+- The pending production preview remains 12 additive `CREATE TABLE` operations: Meeting M4 (2), Finance
+  Build 2 (9), and `living_brief_documents` (1). No destructive or existing-column operation is expected,
+  but only the actual preview generated after Replit pulls current master can authorize publication.
+- Replit's next role is limited to verified pull, capability/state preflight, actual migration preview,
+  explicitly approved publish, runtime/mirror/browser verification, and the complete terminal summary.
+  It does not perform source edits, lockfile regeneration, Git surgery, or another checkpoint correction.
+- The full dependency audit found 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
+  tar-only correction. They remain a separately scoped security workstream with regression evidence.
+
+### Field-acceptance pending: Navisworks v1.60.18
+
+- Frozen 2021 exact-model evidence and final 2025 handoff provenance are verified. Ruben must install the
+  exact frozen DLL in Navisworks Manage 2025, run the affected workflow, repeat Pull/Reconcile, save/reopen,
+  and confirm physical viewpoints and identities. Until then v1.60.18 is not Completed.
+
+### Approved sequence, not started
+
+- RFI Build 8; Telegram Product Build 6; Plans/Entitlements Step 3; Meeting Minutes M5; Cost & Financial
+  Control Build 3. Each requires a new focused latest-master task; none starts automatically.
+
 ## Living Brief Freshness Architecture Accepted
 
 - Independently accepted on 2026-07-21 and applied as reviewed content only to clean
@@ -23,7 +64,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - The earlier Ready notification referenced superseded pre-amend commit `a4990da41cf2036fe09f80f03cb7b3db4211bf94`;
   it was disclosed and was not resent.
 
-## Replit Publish / Dependency Incident - Active Release Gate
+## Replit Publish / Dependency Incident - Source Correction Closed
 
 - The schema reconciliation is accepted and pushed at `9297740955336971b6aa9b4b120b0f2b6054185c`.
   Replit's subsequent publish failed during dependency installation, before migration or application
@@ -32,10 +73,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   That silently dropped the established `pnpm-workspace.yaml` overrides, added unrelated deprecated
   tooling and foreign-platform binaries, and produced a 1,269-line lockfile rewrite. It was not
   pushed or published and must never be reused.
-- The controlled replacement is being built from exact pushed baseline `9297740`: add only
-  `tar: 7.5.20` to the existing workspace override map, regenerate with pnpm 10.26.1, prove a
-  tar-only semantic lockfile delta, run a frozen install and affected Electron/API/frontend gates,
-  independently review, commit once, push normally, and send one terminal Telegram notification.
+- Clean correction `178462eef6edbde08e2d44efb0a944b812f98480` was built from exact pushed
+  baseline `9297740`: `tar: 7.5.20` was added only to the existing workspace override map and the
+  lockfile was regenerated with pnpm 10.26.1. The semantic delta is tar-only, frozen install and
+  Electron/API/frontend gates passed, and local HEAD was verified equal to `origin/master`.
 - Permanent boundary: Codex owns source edits, dependency/lockfile work, Git integration, commits,
   and pushes in clean worktrees. Replit pulls reviewed commits, reports the exact migration preview,
   builds, and publishes only after Roberto approves. Every Replit instruction requires both a
@@ -86,7 +127,7 @@ After the repo is confirmed, read:
 
 ## Active Now
 
-### Living Brief Freshness Architecture - Local Review Candidate
+### Superseded record: Living Brief Freshness Architecture local candidate (accepted above)
 
 - Accepted truth is reconciled through `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`.
 - This isolated candidate replaces the mixed disk/database eight-tab implementation with one

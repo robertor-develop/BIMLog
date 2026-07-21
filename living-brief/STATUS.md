@@ -1,87 +1,77 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Last reconciled accepted integration commit: `9297740955336971b6aa9b4b120b0f2b6054185c`
-Accepted integration date: 2026-07-21
+Accepted source reconciled through: `178462eef6edbde08e2d44efb0a944b812f98480`
+Reconciliation date: 2026-07-21
 
-This document states accepted `origin/master` truth. A local candidate, review result, build, package,
-deployment, production mirror, and customer field verification are separate states. Nothing in this
-document treats a local release candidate as accepted, pushed, published, or live.
+This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
+synchronization, and field/customer verification are separate states. The current semantic-content
+reconciliation is an independent integration candidate and does not become accepted or deployed truth until
+its review, clean commit, push, and later deployment gates pass.
 
-## Accepted platform foundation
+## Shipped and accepted in source
 
-- BIMLog remains a pnpm monorepo with the React/Vite web application, Express API, shared Drizzle
-  schema, PostgreSQL runtime, authenticated project boundaries, activity history, reports, files,
-  conventions, coordination modules, and Navisworks integration paths described by
-  [PLATFORM.md](./PLATFORM.md).
-- RFI Builds 1 through 7 are accepted in the source history. The canonical RFI workflow, lifecycle
-  integrity, attachment identity, non-destructive image handling, professional PDF/DOCX/audit
-  outputs, native-fidelity Complete PDF package, and canonical four-sheet Excel register are present.
-  RFI Build 8 is not accepted.
-- Telegram Product Builds 1 through 5 are accepted. Secure linking, AI control-plane foundations,
-  bilingual conversation/support, Delivery Concierge foundations, and the canonical Notification
-  Center/outbox are present. Module notification adapters still marked coming later remain unavailable.
-  Telegram Product Build 6 is not accepted.
-- Plans, Entitlements, and Feature Controls Steps 1 and 2 are accepted. The canonical feature
-  catalog, advisory entitlement resolver, explicit company/project/user policies, user preferences,
-  support matrix, and append-only project-company binding history are present. Step 3 is not accepted.
-- Meeting Minutes M1 through M4 are accepted. Meetings link immutable meeting-time snapshots to
-  existing same-project RFIs, Submittals, and canonical Clashes while preserving canonical records,
-  legacy notes, and user-removal intent. M4 adds controlled creation and synchronization of canonical
-  Schedule Buckets and tasks from already-linked Submittals without creating or mutating the canonical
-  Submittals. Meeting Minutes M5 is not accepted.
-- Cost and Financial Control Builds 1 and 2 are accepted. Build 1 establishes explicit effective-dated
-  financial authorities, exact decimal/currency controls, approval policy boundaries, maker/checker
-  separation, suspension, and append-only evidence. Build 2 adds versioned company cost libraries,
-  project cost structures, exact-decimal budgets, maker-checker workflow, immutable approved
-  snapshots/history, bounded import/export, controlled authorization, and bilingual responsive UI.
-  Finance Build 3 is not accepted.
-- Shop Drawing Control filter correction is accepted. Visible results and PDF/Excel exports share
-  normalized comparison semantics while preserving human labels and stored customer data.
-- The report design system Phase 1 and Phase 2 source history remains accepted; route-specific
-  artifact quality and deployment/field verification remain separate acceptance gates.
+- RFI Builds 1-7: canonical lifecycle and attachments; non-destructive crop/replacement/show-hide;
+  Standard PDF, editable DOCX, factual Audit PDF, native-fidelity Complete PDF, and four-sheet RFI
+  Register Excel. Build 8 has not started.
+- Telegram Product Builds 1-5: secure account linking, controlled AI foundations, bilingual
+  assistant/support, Delivery Concierge foundation, user preferences, reliable outbox, and Notification
+  Center. Module adapters shown as coming later remain unavailable; Build 6 has not started.
+- Plans, Entitlements, and Feature Controls Steps 1-2: advisory catalog/resolver,
+  company/project/user policies and preferences, support matrix, and append-only project-company history.
+  Step 3 has not started; tiered billing and add-ons remain approved direction rather than shipped enforcement.
+- Meeting Minutes M1-M4: immutable links to canonical same-project RFIs, Submittals, and Clashes; M4
+  links and synchronizes canonical Schedule Buckets/tasks from linked Submittals without duplicating them.
+- Cost & Financial Control Builds 1-2: effective-dated authorities, exact-decimal/currency controls,
+  versioned cost structures, budgets, maker/checker approval, immutable snapshots/history, bounded
+  import/export, and bilingual UI.
+- Shop Drawing Control filter correction: UI and PDF/Excel outputs share normalized filter semantics.
+- The source-authoritative 11-document Living Brief architecture is accepted: one catalog drives checks,
+  deterministic PLATFORM generation, authenticated API, exact mirror, bilingual UI, copy, and export.
+- Schema reconciliation `9297740` is accepted and pushed. It aligns reviewed Drizzle declarations and
+  preserves an additive-only expected production migration boundary.
+- Publish dependency correction `178462e` is accepted and pushed. The canonical
+  `pnpm-workspace.yaml` override resolves all four affected Electron packaging paths to `tar@7.5.20`,
+  removes `tar@7.5.11`, preserves every existing override/exclusion, and passed semantic lockfile review,
+  frozen install, full build, and Windows Sync Agent packaging.
 
-## Accepted Navisworks history and current boundary
+## Deployment and operational boundary
 
-- The platform contains the accepted Navisworks project Import/Rebind correction, including scoped
-  idempotency, controlled conflicts, project boundaries, queryable physical identity, and Pull parity.
-- Preserve-first reconciliation source is present on accepted master. Normal Pull/Reconcile must not
-  treat omission, ambiguity, incomplete metadata, duplicate labels, historical state, or `Guid.Empty`
-  as deletion authority. Exact field/package acceptance remains governed by [PLUGIN.md](./PLUGIN.md).
-- The v1.60.7 physical saved-viewpoint behavior is a protected compatibility baseline when the
-  separately reviewed baseline documentation lands. This status record does not claim an unintegrated
-  documentation candidate is accepted.
-- Navisworks v1.60.18 is a concurrent candidate and remains **Pending / Under Review**. It is not part
-  of accepted `origin/master` at this reconciliation point and must not be reported as deployed or
-  customer verified.
+- Replit has not published `9297740` or `178462e`. The latest failed publish stopped during dependency
+  installation before migration or application build because the supply-chain policy rejected
+  `tar@7.5.11`; that source blocker is corrected, but the publish must be retried from verified pulled
+  `178462e` only after the actual preview is reviewed and Roberto approves.
+- Rejected Replit checkpoint `0d60d7a` remains unpushed and undeployed evidence. Its competing root
+  override authority removed established workspace controls and introduced unrelated packages/platform
+  binaries. It must never be merged, cherry-picked, or reused.
+- Read-only production comparison establishes a pending 12-table additive deployment inventory:
+  Meeting Minutes M4 (2), Finance Build 2 (9), and `living_brief_documents` (1). No existing-column
+  change, drop, type conversion, data copy, or destructive constraint/index replacement is expected;
+  only the actual final Replit preview can authorize publication.
+- Production Living Brief source-commit configuration, mirror synchronization, runtime health, and
+  deployed browser verification remain controlled later gates. Source or local mirror timestamps must
+  not be labeled deployed truth.
+- The full dependency audit records 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
+  tar-only correction. They require a separately scoped dependency-security review and are not silently
+  folded into the publish unblock.
+- July 3 production counts/findings in `AUDIT.md` are dated historical evidence, not a current audit.
 
-## Living Brief current condition
+## Navisworks boundary
 
-- The authoritative set is the 11 Git-controlled documents in `living-brief/catalog.json`, in the
-  authority order defined there.
-- Before this candidate, `OPEN_LOOP.md` contained accepted history through commit `8022b894`, while `STATUS.md`, `AUDIT.md`,
-  and several module/governance documents had not been reconciled with the accepted integration
-  history. The browser served a mixed disk/database view, exposed only eight tabs, and labeled mirror
-  or filesystem update time as if it were document freshness.
-- The Living Brief freshness architecture is accepted on `origin/master` and includes canonical
-  UTF-8/LF source hashes, impact metadata, completeness/freshness gates, the verified database
-  mirror model, and all 11 API/UI documents. Deployment and production mirror verification remain
-  separate later gates.
-- The production-schema reconciliation commit `9297740` is accepted and pushed. It aligns the
-  reviewed Drizzle declarations without destructive migration operations. Replit publication is
-  still a separate operator-controlled state.
+- Accepted platform history includes Project Import/Rebind with scoped idempotency, project boundaries,
+  physical identity persistence, controlled conflicts, and Pull parity.
+- v1.60.7 is the protected physical mutation baseline. Later identity safeguards surround its
+  detached-copy, final-name, insert, and fresh-reacquisition sequence; they do not replace it.
+- v1.60.18 is a frozen local candidate. Its 2021 exact-model and final 2025 handoff evidence are verified,
+  but Ruben's 2025 install, exact workflow, Pull/Reconcile repetition, save/reopen, and field acceptance
+  remain pending. It is not Completed.
 
-## Pending and under review
+## Current candidates and next work
 
-- Navisworks v1.60.18.
-- Plans/Entitlements Step 3, Telegram Product Build 6, and RFI Build 8.
-- Production deployment, production database mirror reconciliation, and browser verification against
-  the deployed production bundle for this Living Brief architecture.
-- A local release-safety candidate replaces the Replit-blocked transitive `tar@7.5.11` with
-  `tar@7.5.20` through the existing workspace override authority. It is not accepted, pushed, or
-  published until its frozen install, semantic lockfile review, affected package build, independent
-  review, and normal integration gates pass.
+- Living Brief Content Reconciliation Build 2: independently reconciled review candidate only.
+- Replit verified pull of `178462e`, actual 12-table preview, explicitly approved publish, runtime/mirror
+  reconciliation, and deployed browser verification.
+- Navisworks v1.60.18: Ruben 2025 field acceptance pending.
+- RFI Build 8, Telegram Build 6, Entitlements Step 3, Meeting Minutes M5, and Finance Build 3: not started.
 
-See [OPEN_LOOP.md](./OPEN_LOOP.md) for the detailed accepted, pending, blocked, and future register.
-Historical audits and production row counts remain evidence for their dated observations only in
-[AUDIT.md](./AUDIT.md).
+See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.

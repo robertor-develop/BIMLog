@@ -1,5 +1,38 @@
 {
   "schemaVersion": 1,
+  "semanticImpactPolicy": {
+    "immediateCategories": [
+      "customer_defect_or_regression",
+      "systemic_quality_failure",
+      "protected_behavioral_baseline",
+      "migration_git_publish_deployment_or_rollback_hazard",
+      "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+      "repeated_permanent_instruction",
+      "future_builder_workflow_correction",
+      "field_acceptance_contradicts_automation"
+    ],
+    "normalAcceptanceAllowedOnlyWhenNoImmediateCategoryApplies": true
+  },
+  "deploymentSupplyChainPreflight": {
+    "canonicalOverrideAuthority": "pnpm-workspace.yaml",
+    "required": true,
+    "fullFrozenLockfile": true,
+    "allWorkspacesAndOptionalTooling": true,
+    "blockedVersionMustResolveZeroTimes": true,
+    "minimalBoundedOverrideAndRangeProof": true,
+    "frozenCleanInstallAndAffectedBuilds": true,
+    "exactAuthorizedPackageFilesOnly": true,
+    "automaticCheckpointEffectiveDiffAudit": true,
+    "largeLockfileSemanticDeltaAudit": true
+    ,"targetedFixMustPreserveAllExistingOverridesAndExclusions": true
+    ,"tarFixRequiresTarOnlySemanticDelta": true
+  },
+  "toolResponsibilityBoundary": {
+    "controlledLocalOwnsSourceDependencyEvidenceCommitReviewAndPush": true,
+    "replitOwnsVerifiedPullPreviewApprovedPublishAndRuntimeVerification": true,
+    "replitDiagnoseThenStopOnSourceCorrection": true,
+    "exceptionRequiresRobertoScopedApprovalAfterPreflight": true
+  },
   "impactRules": [
     { "pattern": "^(artifacts/api-server|artifacts/bimlog|lib/db)/", "documents": ["PLATFORM.md"] },
     { "pattern": "^(artifacts/api-server/src/(lib/pdf|routes/(reports|rfis|submittals|submittal_reports|schedule|transmittals|change_orders|files))|living-brief/REPORT_DESIGN_SYSTEM.md)", "documents": ["REPORT_DESIGN_SYSTEM.md"] },

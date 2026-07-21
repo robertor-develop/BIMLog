@@ -80,23 +80,6 @@ Required BIMLog behavior:
 - Deleted test data must not contaminate real reports.
 - Lineage must be preserved whenever an item is edited, reassigned, voided, resolved, or superseded.
 
-## Release and Dependency Quality
-Release tooling is part of product quality. A publish failure must be classified at the exact
-stage (dependency install, migration, build, bundle, promote, or runtime) before anyone changes
-application code or database schema.
-
-Required behavior:
-- Preserve one authoritative package-manager configuration; do not introduce competing override
-  blocks that silently replace existing aliases, pins, or platform exclusions.
-- Regenerate lockfiles with the repository's reviewed package-manager version.
-- Review lockfiles semantically, not by line count alone. A security override must change only the
-  intended package and dependency paths unless every additional change is explained and accepted.
-- Run a frozen clean install and the affected package build before declaring a dependency fix safe.
-- Replit must provide a complete preflight and terminal summary for every pull, migration preview,
-  build, and publish attempt so repeated Git and deployment failures become evidence, not folklore.
-- Never retry a failed publish blindly. Diagnose the failed stage, preserve the logs, correct the
-  root cause in a clean Codex branch, push the reviewed commit, then let Replit pull and retry.
-
 ## Traceability and Auditability
 The source material repeatedly connects Quality 4.0 with traceability, transparency,
 cybersecurity, ethics, and reliable evidence.
@@ -246,6 +229,73 @@ Before calling a feature done, verify:
 - It does not create dirty historical report data.
 
 ## Evidence and Release Quality Gate
+
+### Capability quality gate
+
+Capability assumptions require evidence. Before Git, publish, deployment, production schema, external notification,
+administrator, GUI, or protected-filesystem work, record tested capability and the operator-only split. Review fails
+if a known `.git`-write restriction is discovered only after paid work, an isolated background copy is asked to change
+main history, or empty/noise commits are postponed to a cleanup commit. User-run Git commands require verified
+ancestry/state, authorized scope, backup/rollback, and discard-risk review. Acceptance evidence identifies every
+platform-blocked and manually performed operation.
+
+Expected migration inventories are derived from the complete latest-master schema and compared read-only with the
+actual target immediately before approval. A carried-forward numeric expectation is not an authority; fresh evidence
+must correct it when incomplete. Approval uses the exact final preview and classifies every create/alter/drop,
+constraint/index action, conversion, copy, and data write. Candidate `9297740` demonstrates the rule: 12 additive
+creates are pending, including `living_brief_documents`; this observation is not proof they were deployed.
+
+Publish supply-chain acceptance uses the actual publish firewall/policy and the entire frozen transitive lockfile,
+not a development-only install. It covers all workspaces and optional packaging/build chains, proves the prohibited
+version has zero resolutions, proves the bounded replacement satisfies every dependent range, and runs a frozen clean
+install plus affected builds. Security diffs are exact-file reviewed; broad `commit -am` and identical blocked retries
+fail the gate. Runtime, development, packaging, and optional-tooling provenance remain explicit.
+
+Automatic Replit checkpoints are never accepted by existence. Review records status, HEAD/origin, last-commit stat,
+and effective diff. A large lockfile delta must prove semantic changes for importers, versions, integrities, optional
+dependencies, and resolution paths using the pinned package-manager version. Required supply-chain evidence includes
+the exact override diff; lockfile semantic delta; zero blocked-version count; replacement resolution count; dependency
+path/range compatibility; frozen clean install; supported Electron/sync-agent build; API/frontend builds; and security
+scan. Broad checkpoint churn is replaced before push, not followed by a cleanup commit.
+
+Tool ownership is a quality control. Controlled local worktrees own edits, dependency resolution, evidence, review,
+commits, integration, and push. Replit owns verified pull, actual preview, explicitly approved publish, runtime
+verification, authorized read-only diagnostics, and terminal deployment reporting. A publish-only failure that needs
+source change returns to local review; Replit does not improvise the correction. Exceptions require Roberto's scoped
+approval after capability preflight.
+
+`pnpm-workspace.yaml` is the canonical override/exclusion authority. Override review proves the entire previous set
+survives and the semantic lockfile delta is limited to the intended dependency path. A fix is rejected if it removes
+the blocked version while adding unrelated packages, changing importers/resolutions, restoring excluded platform
+binaries, or weakening other controls. Tar remediation specifically requires zero dropped controls and a tar-only
+delta plus frozen install/package/build proof.
+
+### Immediate versus acceptance-time semantic evidence
+
+An immediate-category finding is part of the quality correction itself, not later documentation cleanup. Customer
+regressions, repeated/systemic failures, protected baselines, release/data hazards, security/privacy/tenancy/control
+findings, repeated permanent instructions, builder-workflow corrections, and field evidence contradicting automation
+must be captured or explicitly reviewed in the same chain. The gate rejects an immediate finding labeled as a
+deferred minor note. Only small isolated feature detail with no immediate category may wait until the normal
+Ready/acceptance boundary, where its semantic declaration is still mandatory before acceptance/push.
+
+### Current cross-cutting acceptance controls
+
+- Database migrations are additive, idempotent, restart-safe, and transactionally tested. Replit publish
+  previews must contain zero destructive SQL; unexpected drop, rebuild, rename, or divergence blocks publish.
+- Financial values use exact decimals and explicit currencies. Authorization, tenancy, maker/checker
+  separation, idempotency, concurrency, rollback, and immutable approved history are tested at database and API.
+- Desktop and 390px mobile workflows are bilingual, readable, free of page overflow, browser exceptions, and
+  failed requests. Provider execution is never fabricated; fixtures are labeled and real delivery requires a
+  real provider acknowledgement.
+- Attachments preserve original bytes, visibility/replacement/crop intent, custody, and privacy. Exports and APIs
+  do not disclose storage paths, signed URLs, credentials, or unrelated content.
+- Relationships point to canonical records and preserve needed historical snapshots; they do not create competing
+  RFI, Submittal, Clash, Schedule, Meeting, financial, or notification authorities.
+- Audit and evidence remain attributable through correction. Completion waits for the appropriate artifact,
+  deployment, save/reopen, exact-model, or customer field gate.
+- Navisworks mutation is preserve-first: create a detached unique copy, apply final identity, insert it, and
+  reacquire the saved-viewpoint collection after every mutation. Later identity safeguards surround this rule.
 Evidence-based decision-making is part of Quality 4.0, not a reporting formality. Synthetic
 evidence is itself a quality failure because it hides the actual condition of the product and
 prevents sound corrective action. Human oversight remains mandatory: the builder supplies

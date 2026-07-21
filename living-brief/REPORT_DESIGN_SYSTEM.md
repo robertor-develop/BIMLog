@@ -108,3 +108,23 @@ Business queries, filters, database schema, and record mutation behavior were no
 - Shop Drawing Control Report
 
 Phase 2 did not change database schema, filters, report record selection, or module business logic.
+
+## Accepted RFI professional record outputs (Builds 4-7)
+
+- Standard RFI PDF, editable native RFI DOCX, and factual RFI Audit PDF share one canonical field inventory.
+  Audit output reports evidence and history without implying certification.
+- `showInRfi` controls Standard PDF/DOCX presentation. Original bytes remain evidence; crop metadata,
+  replacement selection, and show/hide intent affect presentation without overwriting the original.
+  `includeInCompletePdf` is an independent packaging choice.
+- Complete RFI PDF starts with the canonical record page and merges selected native PDFs at native page size.
+  Supported Office/image inputs use controlled conversion; unsupported inputs fail explicitly. The record page
+  does not duplicate the standard attachment image.
+- RFI Register Excel is the accepted four-sheet workbook (Register, Responses, Attachments, Distribution),
+  driven by active normalized filters. Numeric cost/day values remain numeric, formula-like text is inert, and
+  current custody comes only from the open canonical history row.
+
+## Delivery boundary
+
+Report design owns the factual artifact, canonical title, native fidelity, filename, manifest, and privacy.
+Telegram Delivery Concierge and notification preferences own user-confirmed channel preparation and delivery;
+they may not rewrite the report, bypass authorization, or present an unavailable adapter as connected.

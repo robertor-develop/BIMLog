@@ -18,6 +18,11 @@ type Doc = {
   contentSha256: string;
   reconciledThroughCommit: string;
   sourceChangedAt: string;
+  semanticReviewedThroughCommit: string;
+  semanticReviewTask: string;
+  semanticReviewResult: "updated" | "reviewed_no_semantic_change";
+  semanticReviewedAt: string;
+  deployedSourceCommit: string;
   mirrorSyncedAt: string | null;
   mirrorContentSha256: string | null;
   status: FreshnessStatus;
@@ -369,9 +374,10 @@ export function LivingBrief() {
       )}
 
       <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))", marginBottom: 12, lineHeight: 1.5 }}>
+        {/* Mirror sync time is not document freshness; deployment and semantic review are separate facts. */}
         {tt(
-          "Freshness is based on the deployed Git source, its SHA-256, reconciliation commit, and verified database mirror. Mirror sync time is not document freshness.",
-          "La vigencia se basa en la fuente Git desplegada, su SHA-256, el commit de reconciliación y el espejo verificado de la base de datos. La hora de sincronización del espejo no es la vigencia del documento.",
+          "Four facts are separate: source content changed, semantic authorities reviewed, source commit deployed, and database mirror synchronized. A source or mirror timestamp never proves deployment.",
+          "Cuatro hechos son distintos: cambió el contenido fuente, se revisaron las autoridades semánticas, se desplegó el commit fuente y se sincronizó el espejo. Una fecha de fuente o espejo nunca prueba el despliegue.",
         )}
       </div>
 
@@ -394,6 +400,10 @@ export function LivingBrief() {
               <div><strong>{tt("Source commit", "Commit de origen")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].sourceCommit}</code></div>
               <div><strong>SHA-256:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].contentSha256}</code></div>
               <div><strong>{tt("Reconciled through", "Reconciliado hasta")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].reconciledThroughCommit}</code></div>
+              <div><strong>{tt("Semantically reviewed through", "Revisión semántica hasta")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].semanticReviewedThroughCommit}</code></div>
+              <div><strong>{tt("Semantic review", "Revisión semántica")}:</strong> {docs[activeDoc].semanticReviewResult === "updated" ? tt("Content updated", "Contenido actualizado") : tt("Reviewed - no semantic change", "Revisado - sin cambio semántico")}<br /><code style={{ wordBreak: "break-all" }}>{docs[activeDoc].semanticReviewTask}</code></div>
+              <div><strong>{tt("Semantic review time", "Hora de revisión semántica")}:</strong> {new Date(docs[activeDoc].semanticReviewedAt).toLocaleString()}</div>
+              <div><strong>{tt("Deployed source commit", "Commit fuente desplegado")}:</strong> <code style={{ display: "block", wordBreak: "break-all" }}>{docs[activeDoc].deployedSourceCommit}</code></div>
               <div><strong>{tt("Source last changed", "Último cambio de fuente")}:</strong> {new Date(docs[activeDoc].sourceChangedAt).toLocaleString()}</div>
               <div><strong>{tt("Database mirror synced", "Espejo de base sincronizado")}:</strong> {docs[activeDoc].mirrorSyncedAt ? new Date(docs[activeDoc].mirrorSyncedAt).toLocaleString() : tt("Missing", "Faltante")}</div>
             </div>
