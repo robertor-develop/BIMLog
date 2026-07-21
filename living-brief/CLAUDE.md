@@ -185,6 +185,14 @@ next action; and Telegram EventId/message ID or explicit delivery reason. Prompt
 Every Replit instruction explicitly requests it. Git/publish work must additionally report actual HEAD/origin,
 dirty/stash/rebase state, exact migration preview/operations, production reads/writes, and push/publish state.
 
+Telegram is the terminal-turn return-to-computer alert, not only a completion notice. Every explicitly assigned task
+work cycle sends exactly one structured sanitized Telegram notification immediately before its final response or idle
+state whenever autonomous work stops: Completed, Ready/local candidate, partial safe stop, Blocked, Needs Input,
+Failed, Paused/Held, or no-change audit. Use the honest supported status; reserve Completed for genuine completion,
+otherwise use Info/Blocked/Failed/Needs Input with a clear terminal outcome and next action. Ready and Completed are
+separate stopped work cycles and may each notify once with different EventIds. Do not send periodic noise while work
+continues. If delivery is blocked, the final response prominently states the exact non-sensitive blocker.
+
 ### Mandatory capability preflight
 
 Before work needing Git writes, deployment controls, production-schema inspection, external notifications,
@@ -241,6 +249,45 @@ cleanup commit, automatic product-outbox test, development-to-production data co
 or acceptance of an automatic checkpoint as history. If publish-only evidence identifies a source/dependency fix,
 Replit diagnoses and reports, then stops. A controlled local task implements, reviews, and pushes the correction;
 Replit pulls that verified commit and retries. An exception needs Roberto's explicit scoped approval after preflight.
+
+### Defensive security execution boundary
+
+BIMLog security work is authorized only when it is explicitly defensive, bounded, and limited to BIMLog-owned source
+or disposable local fixtures. Default validation uses source review plus small deterministic below-limit and
+just-above-limit fixtures. Do not request or generate exploit payloads, unbounded resource-exhaustion tests,
+credential theft, external targeting, persistence, evasion, destructive behavior, or live-customer testing.
+
+If a model or product safety notice blocks or hides security output, stop repeating or trying to circumvent that
+specific blocked request/output and preserve state. Do not repeatedly retry, bypass, obfuscate, seek a more permissive
+model, weaken safeguards, duplicate tasks, discard clean candidates, or rerun expensive unchanged gates. Rephrase
+toward legitimate bounded defensive application-quality verification and continue other safe engineering steps.
+Trusted Access may help legitimate advanced security research if it is misclassified, but it is optional and never
+replaces OpenAI policy or BIMLog security controls. Never infer account suspension or product compromise from one
+persistent safety notice; report only the visible fact and use official support/account channels if an actual account
+notice appears.
+
+Security summaries and Telegram notifications are sanitized: no exploit instructions, vulnerability internals,
+sensitive architecture, repository metadata, secrets, credentials, customer data, or private billing information.
+Living Brief impact enforcement remains strict and composable: a security candidate may not fabricate declarations for
+unrelated pending Living Brief edits, and the gate is never disabled, bypassed, loosened, or falsified to make a build
+pass. Integrate the owning Living Brief corrections first; then rebase or reapply the preserved security candidate and
+declare only its effective changed paths and genuinely affected authorities.
+
+### Temporary owner credential continuity exception
+
+During ongoing platform development, Roberto has approved a temporary continuity exception: current working integration
+credential material remains operational and unchanged because prior rebuilds repeatedly lost or replaced configuration
+and forced manual re-entry. This is not the desired launch architecture. Until Roberto separately approves final launch
+hardening, no task may rotate, revoke, delete, replace, relocate, regenerate, invalidate, print, copy, quote, transmit,
+or test those credentials, nor change provider, callback, or authentication behavior. No build or correction may require
+Roberto to re-enter credentials. Future credential mutation requires fresh explicit Roberto approval.
+
+Before public/production launch, this exception becomes a mandatory blocker requiring a separately approved
+managed-secret migration, durable backup/recovery, controlled rotation/revocation as appropriate, callback continuity,
+rollback proof, history remediation, and independent verification. Evidence and summaries remain value-blind: never
+record secret values. This exception does not weaken the separate Living Brief gate-password durability correction,
+which still requires durable database authority, no reseed/overwrite, controlled Super Administrator recovery, and
+independent rollout verification.
 
 - Read the complete relevant implementation, authority documents, and protected behavioral baselines before
   editing. Preserve working behavior and surround a protected invariant with new safeguards; never replace it
@@ -378,6 +425,14 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 ## Living Brief specifics
 - All 11 catalog documents are Git-controlled authorities. Database content is an exact verified
   mirror of the deployed source bundle, never an independent doctrine authority.
+- Living Brief gate credentials are durable database security state. A build, startup, restart,
+  migration, source mirror reconciliation, or Replit publication must never create, replace,
+  rotate, clear, reseed, or invalidate an existing gate credential. Startup may migrate an
+  existing legacy hash into the dedicated gate table once; otherwise it fails closed until a
+  currently authenticated, revalidated Super Administrator performs the controlled bootstrap/reset
+  workflow with reason and audit. Never seed a hardcoded/default gate password or place a gate
+  credential in source, generated files, browser storage, process memory, deployment filesystem, or
+  a build-time default.
 - Doctrine and narrative documents are owned/hand-edited by Roberto and authorized development
   partners. `STATUS.md` is reconciled manually from accepted evidence. `AUDIT.md` is append-only
   history and must label dated findings as historical rather than present truth.
@@ -388,7 +443,11 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - Living Brief docs are served by `artifacts/api-server/src/routes/living_brief.ts` under
   `/api/v1/living-brief/*`, gated by password plus eligibility check:
   super admin OR `users.can_access_living_brief`.
-- Only a super admin can change the gate password or grant/revoke access.
+- Only a currently authenticated, currently revalidated Super Administrator can change the gate
+  credential. Project Admin and Company Admin authority never imply this power. Reset requires
+  bounded input, explicit confirmation, rate limiting, a reason, immutable audit history, and
+  controlled Living Brief session invalidation. The locked public screen must not expose a reset
+  form or reveal credential metadata.
 - Ordinary read access always receives the verified deployed source bundle. Admin reconciliation
   may copy that exact bundle to a mismatched database mirror only with observed current hashes and
   one transaction. The service takes and rechecks the complete source identity before and after its

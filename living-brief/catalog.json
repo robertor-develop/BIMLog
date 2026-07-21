@@ -33,6 +33,55 @@
     "replitDiagnoseThenStopOnSourceCorrection": true,
     "exceptionRequiresRobertoScopedApprovalAfterPreflight": true
   },
+  "defensiveSecurityExecutionPolicy": {
+    "authorizedBoundedDefensiveBimlogOwnedOnly": true,
+    "defaultValidationUsesSmallDeterministicFixtures": true,
+    "forbidsExploitPayloadsExternalTargetsAndLiveCustomerTesting": true,
+    "safetyNoticeStopsBlockedRequestOnlyWithoutCircumvention": true,
+    "trustedAccessOptionalNotRequiredForOrdinaryDefensiveEngineering": true,
+    "persistentSafetyNoticeIsNotAccountSuspensionEvidence": true,
+    "sanitizedSecuritySummariesAndNotifications": true,
+    "noDuplicateTasksOrUnchangedExpensiveRerunsAfterFilter": true,
+    "livingBriefGateRemainsStrictAndComposable": true,
+    "securityCandidateWaitsForOwningLivingBriefCorrections": true
+  },
+  "ownerCredentialContinuityException": {
+    "temporaryOwnerApprovedContinuityOnly": true,
+    "notLaunchArchitecture": true,
+    "workingIntegrationCredentialsRemainOperationalAndUnchanged": true,
+    "noCredentialMutationWithoutFreshRobertoApproval": true,
+    "noPrintCopyQuoteTransmitOrTestSecretValues": true,
+    "noProviderCallbackOrAuthenticationBehaviorChange": true,
+    "noForcedCredentialReentryDuringDevelopment": true,
+    "launchHardeningIsMandatoryBlocker": true,
+    "requiresManagedSecretMigrationBackupRecoveryRotationRollbackHistoryAndVerification": true,
+    "evidenceAndSummariesRemainValueBlind": true,
+    "doesNotWeakenLivingBriefGatePasswordDurability": true
+  },
+  "credentialPersistencePolicy": {
+    "durableDatabaseAuthorityRequired": true,
+    "startupBuildPublishMirrorMustNotSeedRotateOverwriteOrClear": true,
+    "legacyHashMayBeMigratedOnceWithoutOverwrite": true,
+    "missingStateFailsClosedWithoutDefaultPassword": true,
+    "resetRequiresRevalidatedSuperAdministrator": true,
+    "projectOrCompanyAdminNotSufficient": true,
+    "resetRequiresReasonConfirmationAuditRateLimitAndSessionInvalidation": true,
+    "lockedScreenMustNotExposeResetForm": true
+  },
+  "terminalTurnNotificationPolicy": {
+    "requiredWhenAssignedTaskCycleStops": true,
+    "appliesToCompletedReadyPartialBlockedNeedsInputFailedPausedNoChange": true,
+    "meansReturnToComputerNotOverallCompletion": true,
+    "honestNotifierStatusRequired": true,
+    "completedOnlyForGenuineCompletion": true,
+    "sanitizedTaskOutcomeReasonAndNextActionOnly": true,
+    "uniqueIdempotentEventIdPerWorkCycle": true,
+    "readyAndCompletedAreSeparateCycles": true,
+    "noPeriodicNoiseWhileWorkContinues": true,
+    "undeliveredMustBeProminentInFinalSummary": true,
+    "futureDirectivesMustIncludeTerminalTurnRule": true,
+    "terminalSummaryReportsEventIdDeliveryAndMessageIdOrBlocker": true
+  },
   "impactRules": [
     { "pattern": "^(artifacts/api-server|artifacts/bimlog|lib/db)/", "documents": ["PLATFORM.md"] },
     { "pattern": "^(artifacts/api-server/src/(lib/pdf|routes/(reports|rfis|submittals|submittal_reports|schedule|transmittals|change_orders|files))|living-brief/REPORT_DESIGN_SYSTEM.md)", "documents": ["REPORT_DESIGN_SYSTEM.md"] },

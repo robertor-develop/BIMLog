@@ -100,7 +100,8 @@ expectFailure("future claim fails", (target) => {
 expectFailure("immediate quality incident cannot be deferred", (target) => {
   const file = path.join(target, "living-brief/impact-declarations.json");
   const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
-  declarations.reviews.at(-1).immediateFindings[0].disposition = "deferred_minor_note";
+  const immediateReview = declarations.reviews.find((review) => Array.isArray(review.immediateFindings) && review.immediateFindings.length > 0);
+  immediateReview.immediateFindings[0].disposition = "deferred_minor_note";
   fs.writeFileSync(file, JSON.stringify(declarations));
 }, /cannot be deferred/);
 
@@ -114,7 +115,8 @@ expectFailure("immediate semantic category cannot be omitted", (target) => {
 expectFailure("Git-write limitation requires capability preflight", (target) => {
   const file = path.join(target, "living-brief/impact-declarations.json");
   const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
-  delete declarations.reviews.at(-1).capabilityPreflight;
+  const review = declarations.reviews.find((entry) => entry.immediateFindings?.some((finding) => finding.category === "future_builder_workflow_correction"));
+  delete review.capabilityPreflight;
   fs.writeFileSync(file, JSON.stringify(declarations));
 }, /before-execution capability preflight/);
 
@@ -145,6 +147,59 @@ expectFailure("Replit source-edit boundary cannot be omitted", (target) => {
   delete catalog.toolResponsibilityBoundary.replitDiagnoseThenStopOnSourceCorrection;
   fs.writeFileSync(file, JSON.stringify(catalog));
 }, /tool responsibility boundary/);
+
+expectFailure("defensive security safety notice cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.defensiveSecurityExecutionPolicy.safetyNoticeStopsBlockedRequestOnlyWithoutCircumvention;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /defensive security execution policy/);
+
+expectFailure("owner credential continuity exception cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.ownerCredentialContinuityException.noCredentialMutationWithoutFreshRobertoApproval;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /owner credential continuity exception/);
+
+expectFailure("credential no-reseed policy cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.credentialPersistencePolicy.startupBuildPublishMirrorMustNotSeedRotateOverwriteOrClear;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /credential persistence policy/);
+
+expectFailure("terminal-turn notification policy cannot be omitted", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.terminalTurnNotificationPolicy.requiredWhenAssignedTaskCycleStops;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /terminal-turn notification policy/);
+
+expectFailure("credential incident cannot be omitted from impact review", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  const review = declarations.reviews.find((entry) => entry.taskId === "living-brief-credential-persistence");
+  review.immediateFindings = [];
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /credential persistence review/);
+
+expectFailure("security Batch A safety notice cannot be omitted from impact review", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  const review = declarations.reviews.find((entry) => entry.taskId === "living-brief-credential-persistence");
+  review.immediateFindings = review.immediateFindings.filter((finding) => !/security batch a|safety notice|defensive security/i.test(finding.summary ?? ""));
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /defensive security Batch A safety-notice control/);
+
+expectFailure("owner credential continuity exception cannot be omitted from impact review", (target) => {
+  const file = path.join(target, "living-brief/impact-declarations.json");
+  const declarations = JSON.parse(fs.readFileSync(file, "utf8"));
+  const review = declarations.reviews.find((entry) => entry.taskId === "living-brief-credential-persistence");
+  review.immediateFindings = review.immediateFindings.filter((finding) => !/owner credential continuity|launch hardening|working integration credential/i.test(finding.summary ?? ""));
+  fs.writeFileSync(file, JSON.stringify(declarations));
+}, /owner credential continuity exception/);
+
 
 {
   const target = fixture();

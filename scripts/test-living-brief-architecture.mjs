@@ -7,6 +7,9 @@ const route = read("artifacts/api-server/src/routes/living_brief.ts");
 const mirror = read("artifacts/api-server/src/lib/living-brief-mirror.ts");
 const migration = read("artifacts/api-server/src/app.ts") + read("artifacts/api-server/src/lib/living-brief-migration.ts");
 const schema = read("lib/db/src/schema/living-brief-documents.ts");
+const gateSchema = read("lib/db/src/schema/living-brief-gate.ts");
+const gateService = read("artifacts/api-server/src/lib/living-brief-gate.ts");
+const auth = read("artifacts/api-server/src/middlewares/auth.ts");
 const ui = read("artifacts/bimlog/src/pages/LivingBrief.tsx");
 const generator = read("artifacts/api-server/scripts/generate-platform-md.ts");
 const checks = [];
@@ -37,6 +40,17 @@ check("freshness labels separate source and mirror time", ui.includes("sourceCha
 check("PLATFORM generator consumes catalog", generator.includes("living-brief/catalog.json"));
 check("PLATFORM generator contains no volatile clock", !generator.includes("new Date()") && !generator.includes("Last generated:"));
 check("PLATFORM generator writes only structural changes", generator.includes("if (prior === content)"));
+check("Living Brief gate has dedicated durable credential authority", gateSchema.includes("livingBriefGateCredentialsTable") && migration.includes("CREATE TABLE IF NOT EXISTS living_brief_gate_credentials"));
+check("legacy credential migration audit is tied to actual one-time insert", migration.includes("WITH migrated AS") && migration.includes("ON CONFLICT (credential_key) DO NOTHING") && migration.includes("RETURNING version") && migration.includes("FROM migrated"));
+check("startup does not seed hardcoded Living Brief password", !migration.includes("bcrypt.hashSync(\"BIMAI360\"") && !migration.includes("VALUES ('living_brief_password_hash'"));
+check("credential reset is transactional and serialized", gateService.includes("BEGIN") && gateService.includes("pg_advisory_xact_lock") && gateService.includes("FOR UPDATE") && gateService.includes("ROLLBACK"));
+check("credential reset requires super admin account revalidation", gateService.includes("is_super_admin") && gateService.includes("bcrypt.compare(currentAccountPassword"));
+check("credential reset requires reason and exact confirmation", gateService.includes("RESET_LIVING_BRIEF_GATE") && gateService.includes("INVALID_REASON"));
+check("credential reset writes immutable audit", gateService.includes("living_brief_gate_audit") && gateService.includes("credential_version"));
+check("credential reset rejects stale observed version", gateService.includes("STALE_GATE_CREDENTIAL_VERSION") && route.includes("observedCredentialVersion"));
+check("brief access tokens carry credential version", auth.includes("credentialVersion") && route.includes("payload.credentialVersion !== credential.version"));
+check("locked screen has no forgot/reset form", !ui.includes("Forgot it? Reset the gate password") && !ui.includes("New password (min 4 chars)"));
+check("admin reset form requires revalidation fields", ui.includes("currentAccountPassword") && ui.includes("resetReason") && ui.includes("RESET_LIVING_BRIEF_GATE"));
 
 console.log(`Living Brief architecture matrix passed: ${checks.length}/${checks.length}`);
 for (const value of checks) console.log(`- ${value}`);

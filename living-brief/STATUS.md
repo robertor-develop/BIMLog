@@ -1,13 +1,35 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `7fb3a1b54dc378bba38cf79a2747766b62baa741`
+Accepted source reconciled through: `81007cafddd1d59880259af2255863986715ed56`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
 synchronization, and field/customer verification are separate states. The current semantic-content
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
+
+Current urgent local candidate: Living Brief credential persistence and controlled recovery. It is based on
+accepted `origin/master` `81007cafddd1d59880259af2255863986715ed56`, is not reviewed, pushed, published, or
+deployed, and must not be treated as production truth until independent review and controlled rollout.
+
+Current governance amendment in the same local candidate: safe defensive security execution and Batch A reconciliation
+order. Security Batch A candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent
+`2c1ffc4b5c08618610cdb70b42fcb08556726f1c` remains preserved, clean, local, and unpushed. It is not Ready only
+because the root production build stopped at the Living Brief semantic-impact gate while separate Living Brief edits
+were pending. The safety notice shown after its terminal result is a content-safety interruption, not evidence of
+account suspension, product compromise, or a failed code correction.
+
+Owner credential continuity decision in the same local candidate: current working integration credential material must
+remain operational and unchanged during ongoing platform development. This temporary owner-approved exception is not
+launch architecture. It blocks any credential rotation, revocation, deletion, replacement, relocation, regeneration,
+invalidation, disclosure, testing, provider/callback/authentication behavior change, or forced credential re-entry
+unless Roberto gives fresh explicit approval. Before public/production launch, it becomes a mandatory hardening blocker.
+
+Terminal-turn notification governance in the same local candidate: every explicitly assigned work cycle that stops
+sends one honest sanitized Telegram return-to-computer alert before the final response. Ready, partial safe stop,
+Blocked, Needs Input, Failed, Paused/Held, no-change audit, and Completed are distinct terminal outcomes; Completed
+is reserved for genuine completion.
 
 ## Shipped and accepted in source
 
@@ -56,9 +78,24 @@ its review, clean commit, push, and later deployment gates pass.
 - Production Living Brief source-commit configuration, mirror synchronization, runtime health, and
   deployed browser verification remain controlled later gates. Source or local mirror timestamps must
   not be labeled deployed truth.
+- Roberto reports a fifth recurrence where the deployed Living Brief gate rejected the existing password
+  after Replit publication and displayed a reset form. Source audit shows the current accepted startup path
+  seeds a hardcoded gate hash if the legacy `platform_settings` row is absent. The local correction moves
+  authority to a dedicated durable credential table, migrates any existing legacy hash once, removes default
+  seeding, removes the locked-screen reset form, and requires revalidated Super Administrator reset with audit.
+  Production credential preservation still requires later controlled migration/publish verification; no
+  production credential, secret, or database was accessed by this candidate.
 - The full dependency audit records 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
   tar-only correction. They require a separately scoped dependency-security review and are not silently
   folded into the publish unblock.
+- Security Batch A remains a preserved local candidate, not accepted source. It must wait until the credential
+  persistence and cost-control/governance Living Brief corrections are independently reviewed and, if authorized,
+  integrated. Then it may be rebased/reapplied onto accepted master, reconcile only its effective security/report
+  design impact, rerun only invalidated gates, and return as a clean Ready candidate. SheetJS/Batches B-I remain
+  unstarted.
+- The owner credential continuity exception is active only during ongoing platform development. Public/production
+  launch requires separately approved managed-secret migration, durable backup/recovery, controlled rotation/revocation
+  as appropriate, callback continuity, rollback proof, history remediation, and independent verification.
 - July 3 production counts/findings in `AUDIT.md` are dated historical evidence, not a current audit.
 
 ## Navisworks boundary

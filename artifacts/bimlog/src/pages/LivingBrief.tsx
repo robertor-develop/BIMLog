@@ -97,6 +97,7 @@ export function LivingBrief() {
 
   const [eligible, setEligible] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [credentialConfigured, setCredentialConfigured] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -104,7 +105,10 @@ export function LivingBrief() {
   const [activeDoc, setActiveDoc] = useState(0);
 
   const [showAdmin, setShowAdmin] = useState(false);
+  const [currentAccountPassword, setCurrentAccountPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [resetReason, setResetReason] = useState("");
+  const [resetConfirmation, setResetConfirmation] = useState("");
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
   const [adminMsg, setAdminMsg] = useState("");
 
@@ -136,6 +140,7 @@ export function LivingBrief() {
         if (!active) return;
         setEligible(!!d.eligible);
         setIsSuperAdmin(!!d.isSuperAdmin);
+        setCredentialConfigured(d.credentialConfigured !== false);
         if (d.eligible && briefToken()) loadDocs();
       })
       .catch(() => { if (active) setEligible(false); });
@@ -240,9 +245,28 @@ export function LivingBrief() {
   const changePassword = async () => {
     if (!token) return;
     setAdminMsg("");
-    const r = await apiFetch("/living-brief/password", token, { method: "POST", body: JSON.stringify({ newPassword }) });
-    if (r.ok) { setNewPassword(""); setAdminMsg("Password updated."); }
-    else { const d = await r.json().catch(() => ({})); setAdminMsg(d.error || "Update failed"); }
+    const r = await apiFetch("/living-brief/password", token, {
+      method: "POST",
+      headers: { "X-Brief-Token": briefToken() },
+      body: JSON.stringify({
+        currentAccountPassword,
+        newPassword,
+        reason: resetReason,
+        confirmation: resetConfirmation,
+      }),
+    });
+    if (r.ok) {
+      sessionStorage.removeItem(BRIEF_TOKEN_KEY);
+      setCurrentAccountPassword("");
+      setNewPassword("");
+      setResetReason("");
+      setResetConfirmation("");
+      setAdminMsg(tt("Gate credential updated; existing Living Brief sessions were invalidated.", "Credencial de puerta actualizada; las sesiones existentes del Living Brief fueron invalidadas."));
+      setUnlocked(false);
+    } else {
+      const d = await r.json().catch(() => ({}));
+      setAdminMsg(d.error || tt("Update failed", "Actualizacion fallida"));
+    }
   };
 
   const card: React.CSSProperties = { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20 };
@@ -253,7 +277,7 @@ export function LivingBrief() {
 
   if (!eligible) {
     return (
-      <div style={{ maxWidth: 560, margin: "80px auto", padding: 24 }}>
+      <div style={{ width: "100%", maxWidth: 560, margin: "80px auto", padding: 24, boxSizing: "border-box" }}>
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief</h1>
@@ -268,7 +292,7 @@ export function LivingBrief() {
 
   if (!unlocked) {
     return (
-      <div style={{ maxWidth: 480, margin: "80px auto", padding: 24 }}>
+      <div style={{ width: "100%", maxWidth: 480, margin: "80px auto", padding: 24, boxSizing: "border-box" }}>
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
             <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief - Locked</h1>
@@ -280,23 +304,20 @@ export function LivingBrief() {
             onKeyDown={(e) => { if (e.key === "Enter") unlock(); }}
             placeholder="Enter password"
             autoFocus
-            style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 14, marginBottom: 10 }}
+            style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 14, marginBottom: 10 }}
           />
           {error && <div style={{ color: "#DC2626", fontSize: 13, marginBottom: 10 }}>{error}</div>}
-          <button onClick={unlock} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-            Unlock
-          </button>
-          {isSuperAdmin && (
-            <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid hsl(var(--border))" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700, fontSize: 13 }}><KeyRound size={14} /> Forgot it? Reset the gate password</div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") changePassword(); }} placeholder="New password (min 4 chars)" style={{ flex: 1, minWidth: 180, padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-                <button onClick={changePassword} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Set</button>
-              </div>
-              {adminMsg && <div style={{ fontSize: 12.5, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
-              <div style={{ fontSize: 12, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>Then enter the new password above to unlock.</div>
+          {!credentialConfigured && (
+            <div style={{ color: "#B45309", fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>
+              {tt(
+                "The Living Brief gate has no durable credential configured. Super Administrator recovery requires authenticated account revalidation and an audit reason through the controlled admin endpoint.",
+                "La puerta del Living Brief no tiene una credencial duradera configurada. La recuperacion de Super Administrador requiere revalidacion de cuenta autenticada y un motivo auditado mediante el endpoint administrativo controlado.",
+              )}
             </div>
           )}
+          <button onClick={unlock} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+            Unlock
+          </button>
         </div>
       </div>
     );
@@ -331,9 +352,18 @@ export function LivingBrief() {
         <div style={{ ...card, marginBottom: 16, display: "grid", gap: 18 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><KeyRound size={15} /> Change gate password</div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" style={{ flex: 1, minWidth: 200, padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <button onClick={changePassword} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Update</button>
+            <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" }}>
+              <input type="password" value={currentAccountPassword} onChange={(e) => setCurrentAccountPassword(e.target.value)} placeholder={tt("Confirm account password", "Confirme la contrasena de cuenta")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={tt("New gate password (12+ chars)", "Nueva contrasena de puerta (12+ caracteres)")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input value={resetReason} onChange={(e) => setResetReason(e.target.value)} placeholder={tt("Audit reason", "Motivo de auditoria")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input value={resetConfirmation} onChange={(e) => setResetConfirmation(e.target.value)} placeholder="RESET_LIVING_BRIEF_GATE" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <button onClick={changePassword} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Update</button>
+            </div>
+            <div style={{ fontSize: 12, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>
+              {tt(
+                "Reset requires current Super Administrator account revalidation, explicit confirmation, and an immutable audit entry.",
+                "El restablecimiento requiere revalidacion actual de cuenta de Super Administrador, confirmacion explicita y un registro de auditoria inmutable.",
+              )}
             </div>
             {adminMsg && <div style={{ fontSize: 12.5, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
           </div>

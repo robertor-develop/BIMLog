@@ -169,6 +169,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
+- artifacts/api-server/src/lib/living-brief-gate.behavior.ts
+- artifacts/api-server/src/lib/living-brief-gate.ts
 - artifacts/api-server/src/lib/living-brief-migration.ts
 - artifacts/api-server/src/lib/living-brief-mirror.ts
 - artifacts/api-server/src/lib/living-brief-runtime.behavior.ts
@@ -225,6 +227,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/lens-viewpoints.ts
 - lib/db/src/schema/linked-items.ts
 - lib/db/src/schema/living-brief-documents.ts
+- lib/db/src/schema/living-brief-gate.ts
 - lib/db/src/schema/meeting-minutes.ts
 - lib/db/src/schema/notifications.ts
 - lib/db/src/schema/platform-settings.ts

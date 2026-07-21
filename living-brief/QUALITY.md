@@ -270,6 +270,46 @@ the blocked version while adding unrelated packages, changing importers/resoluti
 binaries, or weakening other controls. Tar remediation specifically requires zero dropped controls and a tar-only
 delta plus frozen install/package/build proof.
 
+### Defensive security quality gate
+
+Security work is quality work only when it stays authorized, defensive, bounded, and local to BIMLog-owned code or
+disposable fixtures. The default proof pattern is source review plus finite below-limit and just-above-limit tests,
+not exploit reproduction, unbounded payloads, resource-exhaustion benchmarking, external targets, credential-theft
+flows, persistence/evasion behavior, destructive behavior, production data, or customer systems. If an automated
+safety notice interrupts output, the correct response is to stop repeating or circumventing that specific blocked
+request/output, preserve the candidate, rephrase toward bounded defensive application-quality verification, and
+continue other safe engineering steps. Repeated retries, circumvention, model shopping, duplicate tasks, and unchanged
+expensive reruns are quality failures.
+
+Security candidates remain separate from pending Living Brief corrections. A security build may fail the semantic
+impact gate because an owning Living Brief candidate has stale declarations; that does not justify fabricating impact
+records or weakening the gate. Preserve the security candidate, accept the governing Living Brief correction first,
+then rebase/reapply and declare only the security candidate's effective changed paths and genuinely affected
+authorities. Sanitized summaries and notifications omit exploit instructions, vulnerability internals, sensitive
+architecture, repository metadata, secrets, credentials, customer data, and private billing information.
+
+### Terminal-turn notification gate
+
+Every assigned work cycle that stops must produce exactly one structured Telegram terminal-turn notification before
+the final response or idle state. The alert means Roberto should return to the computer and review the task; it does
+not by itself mean the overall build is complete. Quality review fails silent terminal stops, duplicate EventIds for
+the same stopped cycle, Completed status on anything short of genuine completion, unsanitized summaries, periodic
+noise during active work, or a final report that omits provider acknowledgement/message ID or the exact delivery
+blocker. Future orchestration directives include this rule explicitly.
+
+### Temporary credential continuity gate
+
+Roberto-approved working integration credentials are temporarily preserved as operational continuity, not as launch
+architecture. During this exception, quality review fails any task that rotates, revokes, deletes, replaces, relocates,
+regenerates, invalidates, prints, copies, quotes, transmits, tests, or changes the provider/callback/authentication
+behavior for those credentials without fresh explicit Roberto approval. A build may not require Roberto to re-enter
+them. Evidence remains value-blind.
+
+Before public/production launch, the exception is a mandatory blocker. Launch hardening requires a separately approved
+managed-secret migration, durable backup/recovery, controlled rotation/revocation as appropriate, callback continuity,
+rollback proof, history remediation, and independent verification. This continuity rule is separate from and does not
+weaken the Living Brief gate-password durability correction.
+
 ### Immediate versus acceptance-time semantic evidence
 
 An immediate-category finding is part of the quality correction itself, not later documentation cleanup. Customer
@@ -283,6 +323,12 @@ Ready/acceptance boundary, where its semantic declaration is still mandatory bef
 
 - Database migrations are additive, idempotent, restart-safe, and transactionally tested. Replit publish
   previews must contain zero destructive SQL; unexpected drop, rebuild, rename, or divergence blocks publish.
+- Durable credentials and other security authorities are never reseeded by build, startup, restart, publish,
+  source-mirror synchronization, or migration. Initialization is create-if-absent only through a controlled
+  authenticated bootstrap or one-time migration of existing durable state. Reset requires current Super
+  Administrator revalidation, bounded input, explicit reason/confirmation, rate limiting, audit history,
+  session invalidation, and authorization proof that ordinary, Project Admin, and Company Admin users are denied.
+  Missing durable credential state fails closed without a hardcoded/default password fallback.
 - Financial values use exact decimals and explicit currencies. Authorization, tenancy, maker/checker
   separation, idempotency, concurrency, rollback, and immutable approved history are tested at database and API.
 - Desktop and 390px mobile workflows are bilingual, readable, free of page overflow, browser exceptions, and

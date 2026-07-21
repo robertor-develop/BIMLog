@@ -103,12 +103,12 @@ export function requireProjectMember(...allowedRoles: string[]) {
   };
 }
 
-export function signBriefAccessToken(userId: number): string {
-  return jwt.sign({ userId, scope: "living_brief" }, JWT_SECRET, { expiresIn: "1h" });
+export function signBriefAccessToken(userId: number, credentialVersion: number): string {
+  return jwt.sign({ userId, scope: "living_brief", credentialVersion }, JWT_SECRET, { expiresIn: "1h" });
 }
 
-export function verifyBriefAccessToken(token: string): { userId: number; scope: string } {
-  return jwt.verify(token, JWT_SECRET) as { userId: number; scope: string };
+export function verifyBriefAccessToken(token: string): { userId: number; scope: string; credentialVersion?: number } {
+  return jwt.verify(token, JWT_SECRET) as { userId: number; scope: string; credentialVersion?: number };
 }
 
 // Short-lived signed state for OAuth connect flows. Carries the user identity

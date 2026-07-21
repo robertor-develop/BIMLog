@@ -42,6 +42,64 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   narrative truth. It does not publish Replit, mutate production/customer data, deploy a plugin, or
   start another product build.
 
+### Urgent local candidate: Living Brief credential persistence
+
+- Roberto reports the fifth recurrence of the Living Brief gate password failing after Replit publication,
+  with the locked page exposing a visible reset form. Current accepted source seeds a hardcoded gate hash
+  only when the legacy `platform_settings` row is absent; that does not overwrite an existing row, but it
+  makes missing durable state look like a reset instead of failing closed.
+- Local correction in progress from `origin/master` `2c1ffc4b5c08618610cdb70b42fcb08556726f1c`: dedicated
+  durable gate credential table, one-time migration of the legacy hash, no hardcoded/default seeding, locked
+  page without reset form, Super Administrator revalidated reset with reason/audit/rate limit/session
+  invalidation, and structural tests. No production access, publish, deployment, push, or customer data access.
+- Remaining gates before acceptance: disposable database/API/browser proof; focused regressions; typecheck/build;
+  privacy and diff checks; independent review; then separate controlled production migration/publish that
+  preserves the current valid production credential.
+
+### Preserved security Batch A and safe execution boundary
+
+- Security Batch A candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent
+  `2c1ffc4b5c08618610cdb70b42fcb08556726f1c` remains preserved, local, and unpushed. It performed defensive,
+  bounded BIMLog source/dependency hardening with finite local fixtures and did not reproduce exploits, use unbounded
+  payloads, target external systems, access production/customer data, push, or publish.
+- It is not Ready only because the root production build stopped at the Living Brief semantic-impact gate: changed
+  paths and STATUS/OPEN_LOOP/REPORT_DESIGN_SYSTEM reconciliation conflicted with separate pending Living Brief
+  candidates. The security task correctly refused to fabricate declarations or weaken the gate. The subsequent
+  one persistent OpenAI safety notice is recorded only as a content-safety interruption, not account suspension or
+  product compromise.
+- Reconciliation order: finish this credential-persistence correction; preserve and independently review the
+  cost-control candidate `8cec667...` with this credential/governance correction; integrate/push Living Brief changes
+  only after independent acceptance and Roberto authorization; then rebase/reapply Security Batch A onto the accepted
+  master and reconcile only its actual security/report-design impact. SheetJS/Batches B-I remain unstarted.
+- If a safety notice interrupts security output, stop repeating or trying to circumvent that specific blocked
+  request/output; do not halt the entire legitimate defensive workstream because of the banner alone. Preserve state,
+  rephrase toward bounded defensive application-quality verification, sanitize summaries, avoid duplicate tasks and
+  unchanged expensive reruns, and continue other safe engineering steps. Living Brief enforcement remains strict and
+  composable; never disable, bypass, loosen, or fabricate it to make a security build pass.
+
+### Terminal-turn Telegram notification rule
+
+- Every explicitly assigned task work cycle that stops must send one sanitized structured Telegram terminal-turn
+  notification immediately before the final response or idle state. This is a return-to-computer alert for Roberto,
+  not a claim that the full build is complete.
+- Honest status is mandatory: Completed only for genuine completion; otherwise Info, Blocked, Failed, or Needs Input
+  with the current outcome and next action. Ready/local-candidate and later Completed notifications are separate
+  work cycles with separate EventIds. No duplicate EventId, periodic noise, or silent omission is allowed.
+
+### Temporary owner credential continuity exception
+
+- Roberto has explicitly approved a temporary continuity exception: current working integration credential material
+  remains operational and unchanged during ongoing platform development because prior rebuilds repeatedly lost/replaced
+  configuration and forced manual re-entry. This is not final launch architecture.
+- Until Roberto separately approves launch hardening, no task may rotate, revoke, delete, replace, relocate,
+  regenerate, invalidate, print, copy, quote, transmit, test, or change provider/callback/authentication behavior for
+  those credentials. No build or correction may require Roberto to re-enter them. Evidence and summaries must remain
+  value-blind.
+- Public/production launch blocker: separately approved managed-secret migration, durable backup/recovery, controlled
+  rotation/revocation as appropriate, callback continuity, rollback proof, history remediation, and independent
+  verification. Future credential mutation requires fresh explicit Roberto approval.
+- This exception does not weaken the separate Living Brief gate-password durability correction in this candidate.
+
 ### Replit publication recovery and verification
 
 - Schema reconciliation `9297740` and clean publish dependency correction `178462e` are accepted and

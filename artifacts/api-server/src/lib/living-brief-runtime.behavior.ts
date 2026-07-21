@@ -19,7 +19,7 @@ fs.cpSync(path.join(repoRoot, "living-brief"), sourceFixture, { recursive: true 
 process.env.BIMLOG_LIVING_BRIEF_SOURCE_DIR = sourceFixture;
 
 const { pool } = await import("@workspace/db");
-const { ensureLivingBriefMirrorSchema } = await import("./living-brief-migration");
+const { ensureLivingBriefGateSchema, ensureLivingBriefMirrorSchema } = await import("./living-brief-migration");
 const mirror = await import("./living-brief-mirror");
 const sourceModule = await import("./living-brief-source");
 const { default: livingBriefRouter } = await import("../routes/living_brief");
@@ -32,6 +32,8 @@ const canonical = (value: string) => value.replace(/\r\n?/g, "\n");
 const hash = (value: string) => crypto.createHash("sha256").update(canonical(value)).digest("hex");
 
 await pool.query(`DROP TABLE IF EXISTS living_brief_documents CASCADE`);
+await pool.query(`DROP TABLE IF EXISTS living_brief_gate_audit CASCADE`);
+await pool.query(`DROP TABLE IF EXISTS living_brief_gate_credentials CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS platform_settings CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS users CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS companies CASCADE`);
@@ -47,6 +49,8 @@ await pool.query(`CREATE TABLE platform_settings (
 )`);
 await ensureLivingBriefMirrorSchema();
 await ensureLivingBriefMirrorSchema();
+await ensureLivingBriefGateSchema();
+await ensureLivingBriefGateSchema();
 check("additive idempotent migration", true);
 
 await pool.query(`INSERT INTO companies(id,name) VALUES (910001,'Living Brief Runtime')`);
@@ -198,7 +202,7 @@ const base = `http://127.0.0.1:${address.port}/api/v1`;
 const auth = (userId: number, email: string, isSuperAdmin = false) => signToken({ userId, email, companyId: 910001, fullName: "Runtime", companyName: "Runtime", isSuperAdmin });
 const readerToken = auth(910002, "living-brief-reader@example.test");
 const adminToken = auth(910001, "living-brief-admin@example.test", true);
-const readerBrief = signBriefAccessToken(910002);
+const readerBrief = signBriefAccessToken(910002, 1);
 const api = async (pathname: string, token?: string, init: RequestInit = {}) => {
   const response = await fetch(`${base}${pathname}`, { ...init, headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}), ...init.headers } });
   return { status: response.status, body: await response.json() as Record<string, unknown> };

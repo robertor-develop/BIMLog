@@ -437,4 +437,99 @@ preview, receive explicit publish approval, and pass post-publish runtime/mirror
 dependency audit also reported 94 pre-existing findings (7 low, 47 moderate, 40 high); they are a separate bounded
 security remediation workstream and are not evidence against the tar-only correction.
 
+## Living Brief Credential Persistence Audit - 2026-07-21
+
+Status: urgent local review candidate; not independently accepted, pushed, published, or production verified.
+
+Roberto reported the fifth recurrence of the Living Brief gate credential failing after Replit publication, with the
+locked page showing a visible reset form. No production credential, hash, environment value, token, customer data, or
+database row was accessed for this audit.
+
+Source root cause in accepted code: the Living Brief gate password was stored as a generic
+`platform_settings` row named `living_brief_password_hash`. Startup created `platform_settings`, then inserted a
+hardcoded default hash when that row was absent. The `ON CONFLICT DO NOTHING` clause preserved an existing row, so the
+code did not overwrite a present credential; the defect was that missing durable state after publish/schema drift was
+silently reseeded to a default instead of failing closed or preserving a dedicated credential authority. The locked UI
+also presented Super Administrators with a reset form before the gate was unlocked.
+
+Corrective control: Living Brief gate credentials move to a dedicated durable table with one-way migration from the
+legacy row, no hardcoded/default seeding, versioned brief-access tokens, and reset/bootstrap only by a currently
+authenticated and currently revalidated Super Administrator. Reset requires bounded input, exact confirmation, a
+reason, rate limiting, transaction/advisory-lock serialization, immutable audit history, and session invalidation.
+Anonymous users, ordinary users, Project Admins, and Company Admins have no reset authority. Startup, mirror
+reconciliation, deployment-source changes, and publication must never create, rotate, clear, or overwrite an existing
+credential. Missing durable state is an operational error, not permission to invent a password.
+
+Deployment truth remains pending: production must later migrate the existing valid credential without disclosure,
+publish only after Roberto's approval, and verify restart/publish persistence against the real deployed system.
+
+---
+
+## Defensive Security Execution and Batch A Reconciliation Audit - 2026-07-21
+
+Status: governance amendment in the active Living Brief credential candidate; not independently accepted, pushed,
+published, or production verified.
+
+Security Batch A produced preserved local candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent
+`2c1ffc4b5c08618610cdb70b42fcb08556726f1c`. Its work was defensive, bounded, and local to BIMLog source and finite
+fixtures. It did not reproduce exploits, run unbounded payload/resource-exhaustion tests, target external systems,
+access production or customer data, push, or publish. It remained not Ready because the root production build stopped
+at the Living Brief semantic-impact gate while separate Living Brief corrections were pending. The task correctly
+preserved the candidate instead of fabricating declarations or weakening the gate.
+
+Roberto reported that one Batch A response displayed a persistent "content cannot be displayed" cybersecurity safety
+notice after the terminal result. This audit records the visible fact only: one persistent safety notice was visible
+while legitimate bounded implementation continued. It is not evidence of account
+suspension, product compromise, or failed defensive source correction unless an official account/product notice later
+states that. The corrective control is safe defensive security execution: stop repeating or circumventing the specific
+blocked request/output, preserve state, rephrase toward bounded defensive application-quality verification, keep
+summaries sanitized, avoid duplicate tasks or unchanged expensive reruns, and continue other safe engineering steps
+under OpenAI and BIMLog policy.
+
+Reconciliation control: Living Brief impact enforcement remains strict but composable. Owning Living Brief
+credential/governance and cost-control corrections must be independently reviewed and integrated first if Roberto
+authorizes them. Then Security Batch A may be rebased or reapplied onto the accepted master and may declare only its
+effective changed paths and genuinely affected authorities. SheetJS and Batches B-I remain unstarted.
+
+---
+
+## Owner Credential Continuity Exception Audit - 2026-07-21
+
+Status: temporary owner-approved continuity exception recorded in the active Living Brief credential/governance
+candidate; not final launch architecture.
+
+Roberto decided that current working integration credential material must remain operational and unchanged during
+ongoing platform development because prior Replit rebuilds repeatedly lost or replaced configuration and forced manual
+re-entry. This audit is value-blind: no credential value, token, secret, callback secret, hash, or private provider
+configuration was recorded, printed, copied, tested, or transmitted.
+
+Control: until Roberto separately approves launch hardening, no task may rotate, revoke, delete, replace, relocate,
+regenerate, invalidate, print, copy, quote, transmit, test, or change provider/callback/authentication behavior for the
+working integration credentials, and no build/correction may require Roberto to re-enter them. Future credential
+mutation requires fresh explicit Roberto approval.
+
+Launch blocker: before public/production launch, this exception requires a separately approved managed-secret
+migration, durable backup/recovery, controlled rotation/revocation as appropriate, callback continuity, rollback
+proof, history remediation, and independent verification. The exception does not weaken the separate Living Brief
+gate-password durability correction, which still requires durable authority and controlled recovery.
+
+---
+
+## Terminal-Turn Telegram Notification Audit - 2026-07-21
+
+Status: permanent governance control added during the active Living Brief credential reconciliation.
+
+Roberto clarified that Telegram task notifications are operational return-to-computer alerts, not only completion
+notices. A task may stop at Ready, partial safe boundary, Blocked, Needs Input, Failed, Paused/Held, no-change audit,
+or Completed; each stopped work cycle still requires one structured sanitized terminal-turn notification so Roberto
+knows to return and review the exact current state.
+
+Corrective control: terminal notifications use honest status. Completed is reserved for genuine completion; otherwise
+Info, Blocked, Failed, or Needs Input must state the terminal outcome and next action without secrets, security
+internals, customer data, private paths, billing details, or sensitive repository metadata. EventIds are unique and
+idempotent per stopped work cycle. Ready and Completed notifications are not duplicates because they represent
+different terminal turns. No periodic five-minute noise is sent while useful autonomous work continues. If delivery is
+blocked, the final report prominently states that the terminal notification was not delivered and gives the exact
+non-sensitive reason.
+
 ---

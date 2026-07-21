@@ -361,6 +361,71 @@ function validateCatalogAndFreshness() {
   if (!toolBoundary || Object.values(toolBoundary).length !== 4 || Object.values(toolBoundary).some((value) => value !== true)) {
     report("living-brief/catalog.json", "tool responsibility boundary must keep source/Git work local and Replit limited to verified pull, preview, approved publish, and runtime verification");
   }
+  const defensiveSecurityPolicy = catalog.defensiveSecurityExecutionPolicy;
+  const defensiveSecurityControls = [
+    "authorizedBoundedDefensiveBimlogOwnedOnly",
+    "defaultValidationUsesSmallDeterministicFixtures",
+    "forbidsExploitPayloadsExternalTargetsAndLiveCustomerTesting",
+    "safetyNoticeStopsBlockedRequestOnlyWithoutCircumvention",
+    "trustedAccessOptionalNotRequiredForOrdinaryDefensiveEngineering",
+    "persistentSafetyNoticeIsNotAccountSuspensionEvidence",
+    "sanitizedSecuritySummariesAndNotifications",
+    "noDuplicateTasksOrUnchangedExpensiveRerunsAfterFilter",
+    "livingBriefGateRemainsStrictAndComposable",
+    "securityCandidateWaitsForOwningLivingBriefCorrections",
+  ];
+  if (!defensiveSecurityPolicy || defensiveSecurityControls.some((control) => defensiveSecurityPolicy[control] !== true)) {
+    report("living-brief/catalog.json", "defensive security execution policy must keep security work bounded, sanitized, non-circumventing, and composable with Living Brief impact gates");
+  }
+  const ownerCredentialException = catalog.ownerCredentialContinuityException;
+  const ownerCredentialControls = [
+    "temporaryOwnerApprovedContinuityOnly",
+    "notLaunchArchitecture",
+    "workingIntegrationCredentialsRemainOperationalAndUnchanged",
+    "noCredentialMutationWithoutFreshRobertoApproval",
+    "noPrintCopyQuoteTransmitOrTestSecretValues",
+    "noProviderCallbackOrAuthenticationBehaviorChange",
+    "noForcedCredentialReentryDuringDevelopment",
+    "launchHardeningIsMandatoryBlocker",
+    "requiresManagedSecretMigrationBackupRecoveryRotationRollbackHistoryAndVerification",
+    "evidenceAndSummariesRemainValueBlind",
+    "doesNotWeakenLivingBriefGatePasswordDurability",
+  ];
+  if (!ownerCredentialException || ownerCredentialControls.some((control) => ownerCredentialException[control] !== true)) {
+    report("living-brief/catalog.json", "owner credential continuity exception must preserve current working credentials value-blind and make launch hardening a mandatory blocker");
+  }
+  const credentialPolicy = catalog.credentialPersistencePolicy;
+  const credentialControls = [
+    "durableDatabaseAuthorityRequired",
+    "startupBuildPublishMirrorMustNotSeedRotateOverwriteOrClear",
+    "legacyHashMayBeMigratedOnceWithoutOverwrite",
+    "missingStateFailsClosedWithoutDefaultPassword",
+    "resetRequiresRevalidatedSuperAdministrator",
+    "projectOrCompanyAdminNotSufficient",
+    "resetRequiresReasonConfirmationAuditRateLimitAndSessionInvalidation",
+    "lockedScreenMustNotExposeResetForm",
+  ];
+  if (!credentialPolicy || credentialControls.some((control) => credentialPolicy[control] !== true)) {
+    report("living-brief/catalog.json", "credential persistence policy must prevent reseed/overwrite and require controlled Super Administrator recovery");
+  }
+  const terminalTurnPolicy = catalog.terminalTurnNotificationPolicy;
+  const terminalTurnControls = [
+    "requiredWhenAssignedTaskCycleStops",
+    "appliesToCompletedReadyPartialBlockedNeedsInputFailedPausedNoChange",
+    "meansReturnToComputerNotOverallCompletion",
+    "honestNotifierStatusRequired",
+    "completedOnlyForGenuineCompletion",
+    "sanitizedTaskOutcomeReasonAndNextActionOnly",
+    "uniqueIdempotentEventIdPerWorkCycle",
+    "readyAndCompletedAreSeparateCycles",
+    "noPeriodicNoiseWhileWorkContinues",
+    "undeliveredMustBeProminentInFinalSummary",
+    "futureDirectivesMustIncludeTerminalTurnRule",
+    "terminalSummaryReportsEventIdDeliveryAndMessageIdOrBlocker",
+  ];
+  if (!terminalTurnPolicy || terminalTurnControls.some((control) => terminalTurnPolicy[control] !== true)) {
+    report("living-brief/catalog.json", "terminal-turn notification policy must require one sanitized honest Telegram alert whenever an assigned task work cycle stops");
+  }
 
   const declarationsPath = path.join(livingBriefRoot, "impact-declarations.json");
   let semanticReviews = [];
@@ -387,6 +452,24 @@ function validateCatalogAndFreshness() {
           const needsCapabilityPreflight = review.immediateFindings.some((finding) => ["migration_git_publish_deployment_or_rollback_hazard", "future_builder_workflow_correction"].includes(finding.category));
           if (needsCapabilityPreflight && (review.capabilityPreflight?.checkedBeforeExecution !== true || !review.capabilityPreflight.agentCapable?.length || !review.capabilityPreflight.operatorOnly?.length)) {
             report("living-brief/impact-declarations.json", "Git/deployment operational findings require a before-execution capability preflight and agent/operator split");
+          }
+          const credentialFinding = review.immediateFindings.some((finding) => finding.summary?.toLowerCase().includes("living brief gate") || finding.summary?.toLowerCase().includes("credential"));
+          if (review.taskId === "living-brief-credential-persistence" && !credentialFinding) {
+            report("living-brief/impact-declarations.json", "credential persistence review must record the Living Brief gate incident as an immediate finding");
+          }
+          const defensiveSecurityFinding = review.immediateFindings.some((finding) => {
+            const summary = finding.summary?.toLowerCase() ?? "";
+            return summary.includes("defensive security") || summary.includes("safety notice") || summary.includes("security batch a");
+          });
+          if (review.taskId === "living-brief-credential-persistence" && !defensiveSecurityFinding) {
+            report("living-brief/impact-declarations.json", "credential/governance review must record the defensive security Batch A safety-notice control as an immediate finding");
+          }
+          const ownerCredentialFinding = review.immediateFindings.some((finding) => {
+            const summary = finding.summary?.toLowerCase() ?? "";
+            return summary.includes("owner credential continuity") || summary.includes("launch hardening") || summary.includes("working integration credential");
+          });
+          if (review.taskId === "living-brief-credential-persistence" && !ownerCredentialFinding) {
+            report("living-brief/impact-declarations.json", "credential/governance review must record the owner credential continuity exception as an immediate finding");
           }
         }
         for (const authority of review.authorities) {

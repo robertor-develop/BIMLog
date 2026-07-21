@@ -262,6 +262,361 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "38a3bd0ff48928da1ed545aa1104ed2a55b56d4d20feb6172cdf0ff3057fd2bc"
+    },
+    {
+      "taskId": "living-brief-credential-persistence",
+      "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
+      "reviewedAt": "2026-07-21T19:00:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "create_clean_worktree",
+          "edit_source",
+          "run_local_validation",
+          "create_clean_commit"
+        ],
+        "operatorOnly": [
+          "production_credential_migration_verification",
+          "authorized_replit_publish",
+          "production_runtime_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Living Brief gate credential failed after publication for the fifth reported time and must not be reseeded or overwritten by startup, build, mirror sync, or publish."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Living Brief gate reset authority requires durable credential storage, fail-closed missing state, revalidated Super Administrator reset, immutable audit, rate limiting, and session invalidation."
+        },
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Security Batch A and the related persistent safety notice require defensive security work to stay bounded, sanitized, non-circumventing, and composable with strict Living Brief impact gates."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Owner credential continuity exception preserves current working integration credential material value-blind during development and makes final launch hardening a mandatory blocker."
+        }
+      ],
+      "workstreams": [
+        "living-brief-credential-persistence",
+        "living-brief-authentication-gate",
+        "replit-publish-persistence",
+        "safe-defensive-security-execution",
+        "security-batch-a-reconciliation-order",
+        "owner-credential-continuity-exception"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing product laws already require controlled human authority, truthful evidence, and closed-loop quality; this correction adds operational credential controls below doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Added durable Living Brief gate credential authority, controlled recovery, bounded defensive security execution, and the temporary owner credential continuity exception."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Added credential persistence/reset controls plus safe defensive security, safety-notice, owner credential continuity, and composable semantic-impact acceptance controls."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction affects operational access security rather than BIMLog roadmap, market direction, agents, or future product positioning."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PLATFORM is generated deterministically from structure; any structural change is handled by the official generator rather than narrative editing."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The defect is the platform Living Brief web gate and does not alter Navisworks plugin source, packaging, baseline, or field acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Security Batch A is preserved but not integrated here; this correction changes governance and does not alter accepted formal report inventory, artifact presentation, export fidelity, or report delivery boundaries."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard was adopted or verified by this credential persistence correction."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the current local candidate, root cause, non-production status, preserved Security Batch A state, owner credential continuity exception, and remaining production/review rollout boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the urgent credential persistence candidate, Security Batch A reconciliation order, owner credential continuity exception, and remaining database/API/browser, review, and production rollout gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appended the fifth credential recurrence, defensive security safety-notice audit, and owner credential continuity exception with pending deployment/review truth."
+        }
+      ],
+      "reviewedChangedPaths": [],
+      "reviewedChangeSha256": "pending"
+    },
+    {
+      "taskId": "living-brief-credential-persistence-audit-integrity-correction",
+      "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
+      "reviewedAt": "2026-07-21T19:30:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This narrow correction fixes audit-row creation mechanics and does not change ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing operating rule already requires truthful audit evidence; no new builder instruction is introduced."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted credential quality requirement already covers immutable truthful audit evidence; this only enforces it atomically."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction is internal credential audit integrity and does not alter BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The platform structure remains the same; the migration implementation now binds audit history to actual migrated rows."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The web Living Brief gate audit fix does not affect Navisworks plugin behavior, packaging, or field acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact, export design, delivery boundary, or report authority changes in this correction."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard was adopted, removed, or reinterpreted by this audit mechanics correction."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate remains local and unpushed; the status truth does not change beyond the corrected candidate hash."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The remaining review, rollout, production verification, and field blockers stay unchanged by this focused audit fix."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The already recorded audit-integrity principle remains accurate; this fix prevents false or duplicate legacy migration rows."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+        "artifacts/api-server/src/lib/living-brief-gate.ts",
+        "artifacts/api-server/src/lib/living-brief-migration.ts",
+        "artifacts/api-server/src/lib/living-brief-runtime.behavior.ts",
+        "artifacts/api-server/src/middlewares/auth.ts",
+        "artifacts/api-server/src/routes/living_brief.ts",
+        "artifacts/bimlog/src/living-brief-harness.tsx",
+        "artifacts/bimlog/src/pages/LivingBrief.tsx",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/living-brief-gate.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-living-brief-architecture.mjs",
+        "scripts/test-living-brief-gate.mjs"
+      ],
+      "reviewedChangeSha256": "0dcd1b02d42bc457afc43599858752c7c9ca1688a1f01269b2284d670e811fa7"
+    },
+    {
+      "taskId": "living-brief-terminal-turn-notification-governance",
+      "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
+      "reviewedAt": "2026-07-21T21:17:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "update_living_brief_authorities",
+          "run_deterministic_checks",
+          "send_terminal_turn_notification"
+        ],
+        "operatorOnly": [
+          "production_operation",
+          "publication"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "repeated_permanent_instruction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Telegram notifications are terminal-turn return-to-computer alerts for every stopped assigned work cycle, not only completion notices."
+        },
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Future orchestration directives and terminal summaries must report one honest sanitized notification EventId, delivery result, and message ID or exact blocker."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The doctrine already requires closed-loop accountability; this adds operational notification mechanics below doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Added the terminal-turn return-to-computer notification rule for all stopped assigned work cycles."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Added quality enforcement for honest status, one EventId per stopped work cycle, delivery acknowledgement, and sanitized notification content."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The notification rule is an operating control and does not change BIMLog product direction or roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform route, service, UI, or generated structural map behavior is changed by this governance rule."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The rule does not affect Navisworks plugin source, packaging, baseline behavior, or field acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact, export, delivery boundary, or design-system requirement changes in this rule."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard was adopted or changed by this terminal-turn notification governance update."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the terminal-turn notification rule as current candidate governance and corrected the candidate baseline to current master."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the operating rule that every stopped work cycle sends one honest sanitized return-to-computer alert."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appended the dated audit finding explaining the notification purpose, status honesty, idempotency, and delivery-blocker reporting."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+        "artifacts/api-server/src/lib/living-brief-gate.ts",
+        "artifacts/api-server/src/lib/living-brief-migration.ts",
+        "artifacts/api-server/src/lib/living-brief-runtime.behavior.ts",
+        "artifacts/api-server/src/middlewares/auth.ts",
+        "artifacts/api-server/src/routes/living_brief.ts",
+        "artifacts/bimlog/src/living-brief-harness.tsx",
+        "artifacts/bimlog/src/pages/LivingBrief.tsx",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/living-brief-gate.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-living-brief-architecture.mjs",
+        "scripts/test-living-brief-gate.mjs"
+      ],
+      "reviewedChangeSha256": "9fe53cd6927e1d9fd5e5fe4c1bcbffc4af3eee43dafd7c60e9479e23b5b95248"
     }
   ]
 }

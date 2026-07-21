@@ -12,7 +12,7 @@ import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
-import { ensureLivingBriefMirrorSchema } from "./lib/living-brief-migration";
+import { ensureLivingBriefGateSchema, ensureLivingBriefMirrorSchema } from "./lib/living-brief-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -744,20 +744,15 @@ void rfiMigrationReady.then((ready) => {
   }
 
   try {
-    const bcrypt = (await import("bcryptjs")).default;
     await pool.query(`CREATE TABLE IF NOT EXISTS platform_settings (
       id serial PRIMARY KEY,
       key text NOT NULL UNIQUE,
       value text NOT NULL,
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
+    await ensureLivingBriefGateSchema();
     await ensureLivingBriefMirrorSchema();
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS can_access_living_brief boolean NOT NULL DEFAULT false`);
-    const defaultHash = bcrypt.hashSync("BIMAI360", 10);
-    await pool.query(
-      `INSERT INTO platform_settings (key, value) VALUES ('living_brief_password_hash', $1) ON CONFLICT (key) DO NOTHING`,
-      [defaultHash],
-    );
     // One-time bootstrap only: if the platform has NO super admin yet, elevate the
     // owner account so the Living Brief can be managed. Guarded so it never
     // re-asserts privilege on subsequent boots (no identity-by-email escalation).
