@@ -38,6 +38,7 @@ import aiControlPlaneRouter from "./ai-control-plane";
 import featuresRouter from "./features";
 import featurePoliciesRouter from "./feature-policies";
 import financialControlsRouter from "./financial-controls";
+import financialBudgetsRouter from "./financial-budgets";
 
 const router: IRouter = Router();
 
@@ -80,6 +81,7 @@ router.use(aiControlPlaneRouter);
 router.use(featurePoliciesRouter);
 router.use(featuresRouter);
 router.use(financialControlsRouter);
+router.use(financialBudgetsRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId

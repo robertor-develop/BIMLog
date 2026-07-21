@@ -62,9 +62,12 @@ const date = (value: unknown, fallback?: Date) => {
 };
 const iso = (v: unknown) => new Date(String(v)).toISOString();
 
-export async function financialActor(userId: number): Promise<Actor> {
+export async function financialActor(
+  userId: number,
+  client: Queryable = pool,
+): Promise<Actor> {
   await waitForFinancialControlMigration();
-  const result = await pool.query(
+  const result = await client.query(
     `SELECT id,company_id,is_super_admin FROM users WHERE id=$1`,
     [userId],
   );
@@ -85,6 +88,7 @@ async function scopeFor(
   actor: Actor,
   projectIdValue?: unknown,
   companyIdValue?: unknown,
+  client: Queryable = pool,
 ): Promise<Scope> {
   const companyId =
     companyIdValue == null
@@ -99,7 +103,7 @@ async function scopeFor(
   if (projectIdValue == null)
     return { companyId, projectId: null, scopeType: "company" };
   const projectId = positive(projectIdValue, "projectId");
-  const binding = await pool.query(
+  const binding = await client.query(
     `SELECT company_id FROM project_company_binding_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,
     [projectId],
   );
@@ -172,8 +176,11 @@ async function hasAdmin(
       (g.projectId === null || g.projectId === scope.projectId),
   );
 }
-async function suspended(scope: Scope): Promise<boolean> {
-  const r = await pool.query(
+async function suspended(
+  scope: Scope,
+  client: Queryable = pool,
+): Promise<boolean> {
+  const r = await client.query(
     `SELECT project_id,action,occurred_at FROM financial_suspension_events WHERE company_id=$1 AND (project_id IS NULL OR project_id=$2) ORDER BY occurred_at DESC,id DESC`,
     [scope.companyId, scope.projectId],
   );
@@ -185,6 +192,75 @@ async function suspended(scope: Scope): Promise<boolean> {
     })),
     scope.projectId ?? undefined,
   );
+}
+
+/**
+ * Canonical execution gate for financial product services.  Callers may pass
+ * their transaction client so authority, suspension, scope, and approval-limit
+ * checks are re-read in the same transaction as the controlled mutation.
+ */
+export async function authorizeFinancialOperation(input: {
+  actorUserId: number;
+  projectId: unknown;
+  featureKey: string;
+  operation: FinancialOperation;
+  makerUserId?: number;
+  category?: string;
+  amount?: { amount: string; currency: string };
+  trustedConfirmations?: string[];
+  client?: Queryable;
+}) {
+  const client = input.client ?? pool;
+  const actor = await financialActor(input.actorUserId, client);
+  const scope = await scopeFor(actor, input.projectId, undefined, client);
+  const entitlement = await resolveEffectiveEntitlement({
+    featureKey: input.featureKey,
+    userId: actor.userId,
+    companyId: scope.companyId,
+    projectId: scope.projectId ?? undefined,
+    trustedConfirmations: input.trustedConfirmations,
+  });
+  const policiesResult = await client.query(
+    `SELECT * FROM financial_approval_policy_versions WHERE company_id=$1 AND (project_id IS NULL OR project_id=$2)`,
+    [scope.companyId, scope.projectId],
+  );
+  const policies: ApprovalPolicy[] = policiesResult.rows.map((r) => ({
+    id: String(r.id),
+    scopeType: r.scope_type,
+    companyId: Number(r.company_id),
+    projectId: r.project_id == null ? null : Number(r.project_id),
+    category: String(r.transaction_category),
+    money: {
+      amount: parseDecimal(String(r.max_amount)),
+      currency: parseCurrency(r.currency),
+    },
+    effectiveFrom: new Date(r.effective_from),
+    effectiveTo: r.effective_to ? new Date(r.effective_to) : null,
+    state: r.state,
+    version: Number(r.version),
+  }));
+  const decision = evaluateFinancialAuthorization({
+    operation: input.operation,
+    userId: actor.userId,
+    companyId: scope.companyId,
+    projectId: scope.projectId ?? undefined,
+    makerUserId: input.makerUserId,
+    category: input.category,
+    amount: input.amount ? parseMoney(input.amount) : undefined,
+    entitlementDecision: entitlement.decision === "allow" ? "allow" : "deny",
+    companyCurrent: actor.companyId === scope.companyId,
+    membershipActive: await membershipActive(actor.userId, scope, client),
+    suspended: await suspended(scope, client),
+    grants: await grantsFor(actor.userId, scope, client),
+    policies,
+  });
+  if (decision.decision !== "allow")
+    throw new FinancialControlError(
+      403,
+      decision.code,
+      decision.explanation.en,
+    );
+  return { actor, scope, decision, entitlement };
 }
 async function requireNotSuspended(scope: Scope) {
   if (await suspended(scope))

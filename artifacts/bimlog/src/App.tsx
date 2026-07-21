@@ -19,6 +19,7 @@ import { Profile } from "@/pages/Profile";
 import { CompanyProfile } from "@/pages/CompanyProfile";
 import { NotificationSettings } from "@/pages/NotificationSettings";
 import { FinancialControlsSettings } from "@/pages/FinancialControlsSettings";
+import { FinancialBudgetWorkspace } from "@/pages/FinancialBudgetWorkspace";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
@@ -105,6 +106,18 @@ function Router() {
       </Route>
       <Route path="/pending">
         {() => <ProtectedRoute component={PendingItems} />}
+      </Route>
+      <Route path="/projects/:id/financial/cost-structure">
+        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="structure" />} />}
+      </Route>
+      <Route path="/projects/:id/financial/budget">
+        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="budget" />} />}
+      </Route>
+      <Route path="/projects/:id/financial/history">
+        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="history" />} />}
+      </Route>
+      <Route path="/projects/:id/financial/snapshots/:snapshotId">
+        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="snapshot" />} />}
       </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}

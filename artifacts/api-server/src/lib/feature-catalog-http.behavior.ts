@@ -53,7 +53,7 @@ const request = async(path:string,email?:string,init:RequestInit={}) => {
 const checks:Record<string,string|number|boolean>={};
 try {
   assert.equal((await request("/features/catalog")).status,401);checks.unauthenticatedRejected=true;
-  const catalog=await request("/features/catalog","member@example.test");assert.equal(catalog.status,200);assert.equal(catalog.body.features.length,19);checks.authenticatedCatalog=19;
+  const catalog=await request("/features/catalog","member@example.test");assert.equal(catalog.status,200);assert.equal(catalog.body.features.length,27);checks.authenticatedCatalog=27;
   const detail=await request("/features/catalog/ai.file_reading_control","member@example.test");assert.equal(detail.status,200);assert.equal(detail.body.feature.aiClassification,"file_reading_ai");checks.authenticatedDetail=true;
   const before=await pool.query(`SELECT (SELECT count(*) FROM feature_catalog_versions) versions,(SELECT count(*) FROM feature_catalog_activations) activations,(SELECT count(*) FROM feature_catalog_audit) audits,(SELECT count(*) FROM platform_capability_versions) platform`);
   await request("/features/catalog","member@example.test");await request("/features/catalog/rfi.core","member@example.test");

@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
-> Last generated: 2026-07-21T00:32:30.956Z
+> Last generated: 2026-07-21T14:44:24.673Z
 
 This is the structural map of the BIMLog monorepo, generated from the actual codebase.
 
@@ -44,6 +44,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\routes\features.ts
 - artifacts\api-server\src\routes\feedback.ts
 - artifacts\api-server\src\routes\files.ts
+- artifacts\api-server\src\routes\financial-budgets.ts
 - artifacts\api-server\src\routes\financial-controls.ts
 - artifacts\api-server\src\routes\health.ts
 - artifacts\api-server\src\routes\index.ts
@@ -104,6 +105,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - featurePoliciesRouter
 - featuresRouter
 - financialControlsRouter
+- financialBudgetsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts\api-server\src\middlewares\auth.ts
@@ -131,6 +133,16 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\api-server\src\lib\feature-policy-service.ts
 - artifacts\api-server\src\lib\feature-policy-support-matrix.ts
 - artifacts\api-server\src\lib\feature-policy.behavior.ts
+- artifacts\api-server\src\lib\financial-budget-browser.behavior.ts
+- artifacts\api-server\src\lib\financial-budget-contract.ts
+- artifacts\api-server\src\lib\financial-budget-db.behavior.ts
+- artifacts\api-server\src\lib\financial-budget-export.ts
+- artifacts\api-server\src\lib\financial-budget-http.behavior.ts
+- artifacts\api-server\src\lib\financial-budget-import.behavior.ts
+- artifacts\api-server\src\lib\financial-budget-import.ts
+- artifacts\api-server\src\lib\financial-budget-migration.ts
+- artifacts\api-server\src\lib\financial-budget-service.ts
+- artifacts\api-server\src\lib\financial-budget.behavior.ts
 - artifacts\api-server\src\lib\financial-control-browser.behavior.ts
 - artifacts\api-server\src\lib\financial-control-contract.ts
 - artifacts\api-server\src\lib\financial-control-db.behavior.ts
@@ -182,6 +194,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - lib\db\src\schema\feature-policies.ts
 - lib\db\src\schema\feedback-items.ts
 - lib\db\src\schema\files.ts
+- lib\db\src\schema\financial-budgets.ts
 - lib\db\src\schema\financial-controls.ts
 - lib\db\src\schema\index.ts
 - lib\db\src\schema\invitations.ts
@@ -219,6 +232,7 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - artifacts\bimlog\src\pages\DataRetention.tsx
 - artifacts\bimlog\src\pages\Disclaimer.tsx
 - artifacts\bimlog\src\pages\Features.tsx
+- artifacts\bimlog\src\pages\FinancialBudgetWorkspace.tsx
 - artifacts\bimlog\src\pages\FinancialControlsSettings.tsx
 - artifacts\bimlog\src\pages\Landing.tsx
 - artifacts\bimlog\src\pages\LivingBrief.tsx
@@ -267,6 +281,10 @@ This is the structural map of the BIMLog monorepo, generated from the actual cod
 - /data-retention
 - /dashboard
 - /pending
+- /projects/:id/financial/cost-structure
+- /projects/:id/financial/budget
+- /projects/:id/financial/history
+- /projects/:id/financial/snapshots/:snapshotId
 - /projects/:id/:tab?
 - /setup-guide
 - /profile

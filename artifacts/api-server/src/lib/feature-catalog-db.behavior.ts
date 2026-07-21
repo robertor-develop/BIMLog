@@ -39,7 +39,7 @@ await startFeatureCatalogMigration();
 
 const checks: Record<string,string|number|boolean> = {};
 const catalog = await listEffectiveCatalog();
-assert.equal(catalog.length,19); checks.seededCatalogEntries=catalog.length;
+assert.equal(catalog.length,27); checks.seededCatalogEntries=catalog.length;
 assert.equal((await resolveEffectiveEntitlement({featureKey:"rfi.core",userId:byEmail.get("member@example.test")!,companyId,projectId})).decision,"allow"); checks.activeMembership="allow";
 assert.equal((await resolveEffectiveEntitlement({featureKey:"rfi.core",userId:byEmail.get("inactive@example.test")!,companyId,projectId})).decision,"deny"); checks.inactiveMembership="deny";
 assert.equal((await resolveEffectiveEntitlement({featureKey:"rfi.core",userId:byEmail.get("missing@example.test")!,companyId,projectId})).state,"project_membership_missing"); checks.missingMembership="deny";
@@ -86,7 +86,7 @@ for (const [name,sql] of [
 const assistant = await resolveEffectiveEntitlement({featureKey:"telegram.assistant",userId:byEmail.get("member@example.test")!,companyId});
 assert.equal(assistant.decision,"confirm"); assert.ok(assistant.sources.some((item)=>item.authority==="ai_control_plane"&&item.version===7)); checks.aiAdapter="confirm:version-7";
 const audit = await setup.query(`SELECT event_type,count(*)::int count FROM feature_catalog_audit GROUP BY event_type ORDER BY event_type`);
-assert.ok(audit.rows.some((row)=>row.event_type==="catalog_activated"&&row.count===20));
+assert.ok(audit.rows.some((row)=>row.event_type==="catalog_activated"&&row.count===28));
 assert.ok(audit.rows.some((row)=>row.event_type==="platform_capability_changed"&&row.count===3)); checks.sanitizedAuditRows=23;
 
 console.log(JSON.stringify({suite:"canonical-entitlement-local-db",database:{host:"127.0.0.1",port:55434,name:"bimlog_step1_entitlements",disposable:true},passed:Object.keys(checks).length,checks},null,2));

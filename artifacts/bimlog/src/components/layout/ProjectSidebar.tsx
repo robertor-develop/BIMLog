@@ -180,6 +180,12 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             );
           })}
 
+          <span className="sidebar-section-label" style={{ marginTop: 8 }}>{tr("Financial Controls", "Controles Financieros")}</span>
+          <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => navigate(`/projects/${projectId}/financial/budget`)}>
+            <div className="nav-dot" />
+            {tr("Project Budget", "Presupuesto del Proyecto")}
+          </button>
+
           <span className="sidebar-section-label" style={{ marginTop: 8 }}>{getLabel("integrations-section", "project.section.integrations")}</span>
 
           <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => navigate(`/projects/${projectId}/files`)}>

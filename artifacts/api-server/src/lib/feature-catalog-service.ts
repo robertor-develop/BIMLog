@@ -94,7 +94,7 @@ const advisoryDenial = (featureKey: string, state: string, now: Date): Entitleme
   evaluation: { mode: "advisory_read_only", authorizesExecution: false },
 });
 
-export async function resolveEffectiveEntitlement(input: { featureKey: string; userId: number; companyId: number; projectId?: number }): Promise<EntitlementDecision> {
+export async function resolveEffectiveEntitlement(input: { featureKey: string; userId: number; companyId: number; projectId?: number; trustedConfirmations?: string[] }): Promise<EntitlementDecision> {
   const now = new Date();
   if (!FEATURE_KEY_PATTERN.test(input.featureKey)) throw new FeatureCatalogError(400, "FEATURE_KEY_INVALID", "Feature key is invalid.");
   const currentUser = await pool.query(`SELECT company_id FROM users WHERE id=$1 LIMIT 1`, [input.userId]);
@@ -103,7 +103,7 @@ export async function resolveEffectiveEntitlement(input: { featureKey: string; u
   const feature = await getEffectiveFeature(input.featureKey, now);
   if (!feature) return { decision: "deny", state: "feature_not_found", code: "ENT_UNAVAILABLE", featureKey: input.featureKey,
     explanation: ENTITLEMENT_EXPLANATIONS.ENT_UNAVAILABLE, sources: [], evaluatedAt: now.toISOString(), evaluation: { mode: "advisory_read_only", authorizesExecution: false } };
-  const context: ResolverContext = { now, platform: await platformContext(feature.featureKey, now) };
+  const context: ResolverContext = { now, platform: await platformContext(feature.featureKey, now), trustedConfirmations: input.trustedConfirmations ?? [] };
   context.dependencies = [];
   for (const dependencyKey of feature.capabilityDependencies) {
     const dependency = await getEffectiveFeature(dependencyKey, now);
