@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import {
   projectsTable, rfisTable, submittalsTable, filesTable,
   activityLogTable, transmittalsTable, changeOrdersTable,
-  meetingMinutesTable, meetingSubmittalLinksTable, actionItemsTable, projectMembersTable, usersTable,
+  meetingMinutesTable, meetingSubmittalLinksTable, meetingClashLinksTable, actionItemsTable, projectMembersTable, usersTable,
   namingConventionsTable, namingFieldsTable, namingConventionVersionsTable,
 } from "@workspace/db/schema";
 import { eq, and, inArray, desc, ne } from "drizzle-orm";
@@ -309,6 +309,12 @@ router.get("/projects/:projectId/reports/meeting-minutes/pdf", async (req, res) 
   try {
     const project = await getProject(projectId);
     if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+    const [viewer] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!viewer?.isSuperAdmin) {
+      const [membership] = await db.select({ userId: projectMembersTable.userId }).from(projectMembersTable)
+        .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId))).limit(1);
+      if (!membership) { res.status(403).json({ error: "Not a member of this project" }); return; }
+    }
     const meetings = await db.select().from(meetingMinutesTable)
       .where(eq(meetingMinutesTable.projectId, projectId)).orderBy(desc(meetingMinutesTable.meetingDate));
     const doc = createPdfDocument({ size: "LETTER", margin: 50 });
@@ -339,6 +345,20 @@ router.get("/projects/:projectId/reports/meeting-minutes/pdf", async (req, res) 
             .text(`${link.numberSnapshot} — ${link.titleSnapshot}${link.descriptionSnapshot && link.descriptionSnapshot !== link.titleSnapshot ? `: ${link.descriptionSnapshot}` : ""}${details ? ` (${details})` : ""}`, { indent: 16 });
         });
       }
+      const linkedClashes = await db.select().from(meetingClashLinksTable)
+        .where(and(eq(meetingClashLinksTable.projectId, projectId), eq(meetingClashLinksTable.meetingId, m.id)))
+        .orderBy(meetingClashLinksTable.id);
+      const renderClashes = (heading: string, links: typeof linkedClashes) => {
+        if (!links.length) return;
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("#111").text(heading, { indent: 10 });
+        links.forEach(link => {
+          const details = [link.floorSnapshot, link.disciplineSnapshot, link.responsibleSnapshot, link.groupSnapshot, link.statusSnapshot.replace(/[_-]+/g, " "), link.deadlineSnapshot ? `Due ${new Date(link.deadlineSnapshot).toLocaleDateString()}` : null].filter(Boolean).join(" · ");
+          const notes = link.meetingNotes ? ` Meeting notes: ${link.meetingNotes}` : "";
+          doc.fontSize(8).font("Helvetica").fillColor("#374151").text(`${link.clashNumberSnapshot || `Clash ${link.clashId}`} — ${link.descriptionSnapshot || "No description"}${details ? ` (${details})` : ""}.${notes}`, { indent: 16 });
+        });
+      };
+      renderClashes("Linked Clashes (explicitly refreshed meeting snapshots)", linkedClashes.filter(link => link.linkState === "active"));
+      renderClashes("Clash link history (not in active discussion)", linkedClashes.filter(link => link.linkState !== "active"));
       if (m.aiSummary) doc.fontSize(8).font("Helvetica-Oblique").fillColor("#2563EB").text(`AI Summary: ${m.aiSummary}`, { indent: 10 });
       doc.moveDown(0.5);
     }

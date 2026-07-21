@@ -164,7 +164,25 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
   useEffect(() => { loadReports(); }, [projectId]);
 
-  const loadClashes = async (report: ClashReport) => {
+  // Stable deep-link used by Meeting Minutes. The report and Clash are resolved
+  // by database IDs; displayed clash numbers are never used as identity.
+  useEffect(() => {
+    if (selectedReport || reports.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const reportId = Number(params.get("report"));
+    if (!Number.isInteger(reportId)) return;
+    const report = reports.find(item => item.id === reportId);
+    if (report) { selectTab("clash"); void loadClashes(report); }
+  }, [reports, selectedReport]);
+
+  useEffect(() => {
+    const clashId = Number(new URLSearchParams(window.location.search).get("clash"));
+    if (!Number.isInteger(clashId) || clashLoading) return;
+    const element = document.querySelector(`[data-clash-id="${clashId}"]`) as HTMLElement | null;
+    if (element) { element.scrollIntoView({ block: "center" }); element.style.outline = "3px solid #2563EB"; }
+  }, [clashes, clashLoading]);
+
+  async function loadClashes(report: ClashReport) {
     loadLinkableItems();
     setSelectedReport(report);
     setClashLoading(true);
@@ -181,7 +199,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         if (updated) setSelectedReport(updated);
       }
     } finally { setClashLoading(false); }
-  };
+  }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -431,7 +449,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                                   <span style={{ fontSize: 11, color: "#6B7280", fontWeight: 600 }}>{rows.length}</span>
                                 </div>
                                 {rows.map(c => (
-                                  <div key={c.id} style={{ display: "grid", gridTemplateColumns: "70px 1fr 130px 120px 110px", gap: 10, alignItems: "center", padding: "8px 20px", borderTop: "1px solid #F3F4F6", fontSize: 12 }}>
+                                  <div key={c.id} data-clash-id={c.id} style={{ display: "grid", gridTemplateColumns: "70px 1fr 130px 120px 110px", gap: 10, alignItems: "center", padding: "8px 20px", borderTop: "1px solid #F3F4F6", fontSize: 12 }}>
                                     <PBadge p={c.priority} />
                                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.description || c.clashIdOriginal || `Clash #${c.id}`}>{c.description || c.clashIdOriginal || `Clash #${c.id}`}</span>
                                     <StatusBadge status={c.status} />
@@ -476,7 +494,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
               <tbody>
                 {filteredClashes.map(c => (
                   <Fragment key={c.id}>
-                    <tr style={{ borderBottom: "1px solid #F3F4F6", background: c.status === "resolved" ? "#F0FDF4" : "white" }}>
+                    <tr data-clash-id={c.id} style={{ borderBottom: "1px solid #F3F4F6", background: c.status === "resolved" ? "#F0FDF4" : "white" }}>
                       <td style={{ padding: "4px 8px", whiteSpace: "nowrap" }}>
                         <select value={c.priority || ""} onChange={e => updateClash(c.id, { priority: e.target.value })}
                           style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 700,

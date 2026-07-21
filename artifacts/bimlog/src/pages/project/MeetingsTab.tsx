@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Trash2, Search, ExternalLink, RefreshCw, X } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { isDebug } from "@/lib/debug";
+import { MeetingClashesPanel } from "./MeetingClashesPanel";
 import {
   ClipboardList, CheckCircle2, Calendar, MapPin, Users,
   Sparkles, AlertTriangle, Plus, Download, ChevronDown,
@@ -20,6 +21,7 @@ interface Meeting {
   openActionItems: number; actionItemCount: number; createdAt: string;
   linkedRfis?: LinkedRfi[]; legacyRfis?: RFIRow[];
   linkedSubmittals?: LinkedSubmittal[]; legacyDeliverables?: LegacyDeliverableRow[];
+  linkedClashes?: LinkedClash[]; legacyViewpoints?: LegacyViewpointRow[];
 }
 
 interface Attendee {
@@ -55,6 +57,20 @@ interface SubmittalCandidate extends Omit<LinkedSubmittal, "submittalId"> {
 }
 
 interface LegacyDeliverableRow { raw: string; }
+interface LegacyViewpointRow { raw: string; }
+
+interface LinkedClash {
+  id: number; clashId: number; clashReportId: number; number?: string | null;
+  description?: string | null; floor?: string | null; discipline?: string | null;
+  responsible?: string | null; group?: string | null; status: string;
+  deadline?: string | null; meetingNotes?: string | null;
+  linkState: "active" | "removed_by_user" | "source_closed_or_excluded";
+}
+
+interface ClashSyncSummary {
+  reviewed: number; added: number; updated: number; unchanged: number;
+  sourceExcluded: number; userExcluded: number; failures: number; open: number; followUp: number;
+}
 
 interface DeliverableRow {
   floor: string; description: string; plumbing: string; hvac: string;
@@ -193,9 +209,9 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
     { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
     { floor: "1ST FLOOR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
   ]);
-  const [viewpoints, setViewpoints] = useState<ViewpointRow[]>([
-    { floor: "", responsible: "", holdUps: "", viewpoint: "", description: "", deadline: "" }
-  ]);
+  // Only imported/manual legacy rows enter this buffer. New Clash discussion
+  // records are loaded from the canonical Clash Log after the Meeting is saved.
+  const [viewpoints, setViewpoints] = useState<ViewpointRow[]>([]);
   const [aiSummaryText, setAiSummaryText] = useState("");
   const [audioUploading, setAudioUploading] = useState(false);
   const [showNoKeyModal, setShowNoKeyModal] = useState(false);
@@ -316,7 +332,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
       { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
       { floor: "1ST FLOOR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
     ]);
-    setViewpoints([{ floor: "", responsible: "", holdUps: "", viewpoint: "", description: "", deadline: "" }]);
+    setViewpoints([]);
     setAiSummaryText("");
     setError("");
   };
@@ -717,6 +733,8 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                   {!!m.linkedSubmittals?.length && <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>{m.linkedSubmittals.map(submittal => <div key={submittal.submittalId} style={{ border: "1px solid #C7D2FE", background: "#F8FAFC", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}><div style={{ flex: "1 1 240px", minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{submittal.number} · {submittal.title}</div>{submittal.description && submittal.description !== submittal.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2 }}>{submittal.description}</div>}<div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>{[submittal.floor, submittal.discipline, humanLabel(submittal.status), submittal.responsible, submittal.deadline ? new Date(submittal.deadline).toLocaleDateString() : null].filter(Boolean).join(" · ")}</div></div><button className="btn btn-sm btn-outline" onClick={() => openOriginalSubmittal(submittal.submittalId)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Original Submittal", "Abrir Submittal original")}</button>{canWrite && <button className="btn btn-sm btn-outline" onClick={() => void removeMeetingSubmittal(m.id, submittal.submittalId)}>{t("Remove link", "Quitar enlace")}</button>}</div>)}</div>}
                   {!!m.legacyRfis?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual RFI notes", "Notas RFI manuales anteriores")}</div>{m.legacyRfis.map((row, index) => <div key={`${row.rfiNumber}-${index}`} style={{ fontSize: 12 }}>{[row.rfiNumber, row.description, row.status, row.responsible].filter(Boolean).join(" · ")}</div>)}</div>}
                   {!!m.legacyDeliverables?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Deliverable notes", "Notas manuales anteriores de Entregables")}</div>{m.legacyDeliverables.map((row, index) => <div key={`${row.raw}-${index}`} style={{ fontSize: 12, overflowWrap: "anywhere" }}>{row.raw}</div>)}</div>}
+                  <MeetingClashesPanel projectId={projectId} meetingId={m.id} links={m.linkedClashes ?? []} canWrite={canWrite} reload={loadMeetings} />
+                  {!!m.legacyViewpoints?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Viewpoint / Clash rows", "Filas manuales anteriores de Viewpoints / Clashes")}</div>{m.legacyViewpoints.map((row, index) => <div key={`${row.raw}-${index}`} style={{ fontSize: 12, overflowWrap: "anywhere" }}>{row.raw}</div>)}</div>}
                 </div>
               ))}
             </div>
@@ -1134,11 +1152,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                 ))}
               </tbody>
             </table>
-            <div style={{ padding: 10 }}>
-              <button className="btn btn-sm btn-outline" onClick={() => setViewpoints([...viewpoints, { floor: "", responsible: "", holdUps: "", viewpoint: "", description: "", deadline: "" }])}>
-                <Plus size={12} style={{ marginRight: 4 }} />{t("Add Row", "Agregar Fila")}
-              </button>
-            </div>
+            <div style={{ padding: 10, color: "#6B7280", fontSize: 11 }}>{t("Imported legacy rows remain here. Save the Meeting, then use Load Open & Follow-Up Clashes for canonical records.", "Las filas anteriores importadas permanecen aquí. Guarde la reunión y luego use Cargar Clashes Abiertos y de Seguimiento para registros canónicos.")}</div>
           </div>
         )}
       </div>

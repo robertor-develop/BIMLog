@@ -4,6 +4,7 @@ import {
   meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
   activityLogTable, usersTable, rfisTable, meetingRfiLinksTable,
   submittalsTable, meetingSubmittalLinksTable,
+  clashesTable, clashReportsTable, meetingClashLinksTable, meetingClashRefreshEventsTable,
   linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
 import { eq, and, desc, ne, isNull, or, ilike, inArray, asc } from "drizzle-orm";
@@ -32,6 +33,13 @@ const parseLegacyRfiRows = (notes: string | null) => {
 const parseLegacyDeliverableRows = (notes: string | null) => {
   if (!notes) return [];
   const block = notes.match(/(?:^|\n\n)DELIVERABLES:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  if (!block) return [];
+  return block.split("\n").filter(Boolean).map((line) => ({ raw: line }));
+};
+
+const parseLegacyViewpointRows = (notes: string | null) => {
+  if (!notes) return [];
+  const block = notes.match(/(?:^|\n\n)VIEWPOINTS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
   if (!block) return [];
   return block.split("\n").filter(Boolean).map((line) => ({ raw: line }));
 };
@@ -111,6 +119,61 @@ async function getMeetingRfiLinks(meetingId: number) {
     .where(eq(meetingRfiLinksTable.meetingId, meetingId))
     .orderBy(asc(meetingRfiLinksTable.id));
   return links.map(serializeMeetingRfiLink);
+}
+
+const ELIGIBLE_CLASH_STATUSES = ["open", "follow_up"] as const;
+
+function clashDiscipline(clash: typeof clashesTable.$inferSelect) {
+  return [cleanLabel(clash.discipline1), cleanLabel(clash.discipline2)].filter(Boolean).filter((value, index, all) => all.indexOf(value) === index).join(" / ") || null;
+}
+
+function clashSnapshot(clash: typeof clashesTable.$inferSelect) {
+  return {
+    clashReportIdSnapshot: clash.clashReportId,
+    clashNumberSnapshot: clash.clashIdOriginal?.trim() || `Clash ${clash.id}`,
+    descriptionSnapshot: cleanLabel(clash.description || clash.name),
+    floorSnapshot: cleanLabel(clash.level || clash.gridLocation),
+    disciplineSnapshot: clashDiscipline(clash),
+    responsibleSnapshot: cleanLabel(clash.assignedToName),
+    groupSnapshot: cleanLabel(clash.testName),
+    statusSnapshot: clash.status || "open",
+    deadlineSnapshot: clash.dueDate,
+  };
+}
+
+const serializeMeetingClashLink = (link: typeof meetingClashLinksTable.$inferSelect) => ({
+  id: link.id, clashId: link.clashId, clashReportId: link.clashReportIdSnapshot,
+  number: link.clashNumberSnapshot, description: link.descriptionSnapshot,
+  floor: link.floorSnapshot, discipline: link.disciplineSnapshot,
+  responsible: link.responsibleSnapshot, group: link.groupSnapshot,
+  status: link.statusSnapshot, deadline: link.deadlineSnapshot,
+  meetingNotes: link.meetingNotes, linkState: link.linkState,
+  firstLoadedAt: link.firstLoadedAt, lastRefreshedAt: link.lastRefreshedAt,
+  valuesMode: "explicit_snapshot" as const,
+});
+
+async function getMeetingClashLinks(meetingId: number) {
+  const links = await db.select().from(meetingClashLinksTable)
+    .where(eq(meetingClashLinksTable.meetingId, meetingId)).orderBy(asc(meetingClashLinksTable.id));
+  const events = await db.select().from(meetingClashRefreshEventsTable)
+    .where(eq(meetingClashRefreshEventsTable.meetingId, meetingId)).orderBy(desc(meetingClashRefreshEventsTable.createdAt));
+  return { links: links.map(serializeMeetingClashLink), events: events.map(event => ({
+    eventType: event.eventType, added: event.addedCount, updated: event.updatedCount,
+    unchanged: event.unchangedCount, sourceExcluded: event.excludedCount,
+    userExcluded: event.userExcludedCount, failures: event.failureCount,
+    open: event.openCount, followUp: event.followUpCount,
+    changedFields: JSON.parse(event.changedFields || "[]"), createdAt: event.createdAt,
+  })) };
+}
+
+async function requireMeeting(executor: any, projectId: number, meetingId: number) {
+  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+  if (!meeting) throw new MeetingClashLinkError(404, "meeting_not_found");
+}
+
+class MeetingClashLinkError extends Error {
+  constructor(public status: number, public code: string) { super(code); }
 }
 
 class MeetingRfiLinkError extends Error {
@@ -200,7 +263,8 @@ router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember
       const actionItems = await db.select({ id: actionItemsTable.id, status: actionItemsTable.status }).from(actionItemsTable).where(eq(actionItemsTable.meetingId, m.id));
       const linkedRfis = await getMeetingRfiLinks(m.id);
       const linkedSubmittals = await getMeetingSubmittalLinks(m.id);
-      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes) };
+      const clashes = await getMeetingClashLinks(m.id);
+      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, linkedClashes: clashes.links, clashRefreshEvents: clashes.events, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes), legacyViewpoints: parseLegacyViewpointRows(m.notes) };
     }));
     res.json(result);
   } catch (err) {
@@ -423,6 +487,107 @@ router.delete("/projects/:projectId/meetings/:meetingId/submittals/:submittalId"
 });
 
 // ── GET /projects/:projectId/meetings/:meetingId ──────────────────────────────
+type ClashSyncMode = "initial_load" | "refresh";
+
+async function syncMeetingClashes(projectId: number, meetingId: number, actor: { userId: number; fullName?: string; companyName?: string }, mode: ClashSyncMode) {
+  return db.transaction(async (tx) => {
+    await requireMeeting(tx, projectId, meetingId);
+    const now = new Date();
+    const canonical = await tx.select().from(clashesTable).where(eq(clashesTable.projectId, projectId));
+    const reportIds = new Set((await tx.select({ id: clashReportsTable.id }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId))).map(report => report.id));
+    const eligible = canonical.filter(clash => reportIds.has(clash.clashReportId) && !clash.deletedAt && ELIGIBLE_CLASH_STATUSES.includes((clash.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number]));
+    const existing = await tx.select().from(meetingClashLinksTable).where(and(eq(meetingClashLinksTable.projectId, projectId), eq(meetingClashLinksTable.meetingId, meetingId)));
+    const existingByClash = new Map(existing.map(link => [link.clashId, link]));
+    const canonicalById = new Map(canonical.map(clash => [clash.id, clash]));
+    const changedFields = new Set<string>();
+    let updated = 0, unchanged = 0, sourceExcluded = 0;
+    let userExcluded = existing.filter(link => link.linkState === "removed_by_user").length;
+
+    if (mode === "refresh") for (const link of existing) {
+      if (link.linkState === "removed_by_user") continue;
+      const source = canonicalById.get(link.clashId);
+      const sourceEligible = !!source && reportIds.has(source.clashReportId) && !source.deletedAt && ELIGIBLE_CLASH_STATUSES.includes((source.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number]);
+      if (!sourceEligible) {
+        sourceExcluded++;
+        if (link.linkState === "source_closed_or_excluded") unchanged++;
+        else {
+          await tx.update(meetingClashLinksTable).set({ linkState: "source_closed_or_excluded", lastRefreshedAt: now, updatedAt: now }).where(eq(meetingClashLinksTable.id, link.id));
+          updated++; changedFields.add("link_state");
+        }
+        continue;
+      }
+      const snapshot = clashSnapshot(source!);
+      const changes: Record<string, unknown> = {};
+      const pairs: Array<[keyof typeof snapshot, keyof typeof link, string]> = [
+        ["clashReportIdSnapshot", "clashReportIdSnapshot", "clash_report"], ["clashNumberSnapshot", "clashNumberSnapshot", "number"],
+        ["descriptionSnapshot", "descriptionSnapshot", "description"], ["floorSnapshot", "floorSnapshot", "floor"],
+        ["disciplineSnapshot", "disciplineSnapshot", "discipline"], ["responsibleSnapshot", "responsibleSnapshot", "responsible"],
+        ["groupSnapshot", "groupSnapshot", "group"], ["statusSnapshot", "statusSnapshot", "status"],
+      ];
+      for (const [snapshotKey, linkKey, label] of pairs) if ((snapshot[snapshotKey] ?? null) !== (link[linkKey] ?? null)) { changes[snapshotKey] = snapshot[snapshotKey]; changedFields.add(label); }
+      if ((snapshot.deadlineSnapshot?.getTime() ?? null) !== (link.deadlineSnapshot?.getTime() ?? null)) { changes.deadlineSnapshot = snapshot.deadlineSnapshot; changedFields.add("deadline"); }
+      if (link.linkState !== "active") { changes.linkState = "active"; changedFields.add("link_state"); }
+      if (Object.keys(changes).length) { await tx.update(meetingClashLinksTable).set({ ...changes, lastRefreshedAt: now, updatedAt: now }).where(eq(meetingClashLinksTable.id, link.id)); updated++; }
+      else unchanged++;
+    }
+
+    const toInsert = eligible.filter(clash => !existingByClash.has(clash.id));
+    const inserted = toInsert.length ? await tx.insert(meetingClashLinksTable).values(toInsert.map(clash => ({
+      projectId, meetingId, clashId: clash.id, ...clashSnapshot(clash), linkState: "active", firstLoadedAt: now, lastRefreshedAt: now, createdById: actor.userId, updatedAt: now,
+    }))).onConflictDoNothing({ target: [meetingClashLinksTable.meetingId, meetingClashLinksTable.clashId] }).returning({ id: meetingClashLinksTable.id }) : [];
+
+    if (mode === "initial_load") {
+      const linkedEligible = eligible.map(clash => existingByClash.get(clash.id)).filter(Boolean);
+      unchanged = linkedEligible.filter(link => link!.linkState === "active").length;
+      userExcluded = linkedEligible.filter(link => link!.linkState === "removed_by_user").length;
+      sourceExcluded = linkedEligible.filter(link => link!.linkState === "source_closed_or_excluded").length;
+    }
+    const summary = { reviewed: canonical.length, added: inserted.length, updated, unchanged, sourceExcluded, userExcluded, failures: 0,
+      open: eligible.filter(clash => clash.status === "open").length, followUp: eligible.filter(clash => clash.status === "follow_up").length, changedFields: [...changedFields].sort() };
+    await tx.insert(meetingClashRefreshEventsTable).values({ projectId, meetingId, actorId: actor.userId, eventType: mode, addedCount: summary.added, updatedCount: summary.updated, unchangedCount: summary.unchanged, excludedCount: summary.sourceExcluded, userExcludedCount: summary.userExcluded, failureCount: 0, openCount: summary.open, followUpCount: summary.followUp, changedFields: JSON.stringify(summary.changedFields), createdAt: now });
+    await tx.insert(activityLogTable).values({ projectId, userId: actor.userId, userFullName: actor.fullName ?? "", userCompanyName: actor.companyName ?? "", actionType: mode === "initial_load" ? "load_clashes" : "refresh_clashes", entityType: "meeting", entityId: meetingId, details: JSON.stringify(summary) });
+    return summary;
+  });
+}
+
+router.post("/projects/:projectId/meetings/:meetingId/clashes/load", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try { const summary = await syncMeetingClashes(Number(req.params.projectId), Number(req.params.meetingId), req.user!, "initial_load"); res.json({ summary, ...(await getMeetingClashLinks(Number(req.params.meetingId))) }); }
+  catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "clash_load_failed" }); }
+});
+
+router.post("/projects/:projectId/meetings/:meetingId/clashes/refresh", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try { const summary = await syncMeetingClashes(Number(req.params.projectId), Number(req.params.meetingId), req.user!, "refresh"); res.json({ summary, ...(await getMeetingClashLinks(Number(req.params.meetingId))) }); }
+  catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "clash_refresh_failed" }); }
+});
+
+router.patch("/projects/:projectId/meetings/:meetingId/clashes/:clashId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId), meetingId = Number(req.params.meetingId), clashId = Number(req.params.clashId);
+  const action = req.body?.action, meetingNotes = req.body?.meeting_notes;
+  if (action !== undefined && action !== "remove" && action !== "restore") { res.status(400).json({ error: "invalid_action" }); return; }
+  if (meetingNotes !== undefined && typeof meetingNotes !== "string") { res.status(400).json({ error: "invalid_meeting_notes" }); return; }
+  try {
+    const result = await db.transaction(async tx => {
+      await requireMeeting(tx, projectId, meetingId);
+      const [link] = await tx.select().from(meetingClashLinksTable).where(and(eq(meetingClashLinksTable.projectId, projectId), eq(meetingClashLinksTable.meetingId, meetingId), eq(meetingClashLinksTable.clashId, clashId))).limit(1);
+      if (!link) throw new MeetingClashLinkError(404, "meeting_clash_link_not_found");
+      const updates: Record<string, unknown> = { updatedAt: new Date() };
+      if (meetingNotes !== undefined) updates.meetingNotes = meetingNotes.trim() || null;
+      if (action === "remove") updates.linkState = "removed_by_user";
+      if (action === "restore") {
+        const [source] = await tx.select().from(clashesTable).where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId), isNull(clashesTable.deletedAt))).limit(1);
+        if (!source || !ELIGIBLE_CLASH_STATUSES.includes((source.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number])) throw new MeetingClashLinkError(409, "clash_not_eligible_for_restore");
+        const [report] = await tx.select({ id: clashReportsTable.id }).from(clashReportsTable).where(and(eq(clashReportsTable.id, source.clashReportId), eq(clashReportsTable.projectId, projectId))).limit(1);
+        if (!report) throw new MeetingClashLinkError(404, "clash_not_accessible");
+        Object.assign(updates, clashSnapshot(source), { linkState: "active", lastRefreshedAt: new Date() });
+      }
+      const [updatedLink] = await tx.update(meetingClashLinksTable).set(updates).where(eq(meetingClashLinksTable.id, link.id)).returning();
+      if (action) await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "", actionType: action === "remove" ? "remove_clash_from_meeting" : "restore_clash_to_meeting", entityType: "meeting", entityId: meetingId, details: JSON.stringify({ clashId }) });
+      return updatedLink;
+    });
+    res.json(serializeMeetingClashLink(result));
+  } catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "meeting_clash_update_failed" }); }
+});
+
 router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const meetingId = Number(req.params.meetingId);
@@ -432,7 +597,8 @@ router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requirePr
     if (!meeting) { res.status(404).json({ error: "Not found" }); return; }
     const attendees = await db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
     const actionItems = await db.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId));
-    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes) });
+    const clashes = await getMeetingClashLinks(meetingId);
+    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), linkedClashes: clashes.links, clashRefreshEvents: clashes.events, legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes), legacyViewpoints: parseLegacyViewpointRows(meeting.notes) });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }

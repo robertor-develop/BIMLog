@@ -2655,6 +2655,21 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
   }
 );
 
+// Minimal stable-ID resolver used by Meeting Minutes before navigating to the
+// original Clash. It deliberately excludes model elements, coordinates,
+// attachment/storage data, emails, notes, and audit payloads.
+router.get("/projects/:projectId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const clashId = Number(req.params.clashId);
+  try {
+    const [row] = await db.select({ id: clashesTable.id, reportId: clashesTable.clashReportId })
+      .from(clashesTable).innerJoin(clashReportsTable, and(eq(clashReportsTable.id, clashesTable.clashReportId), eq(clashReportsTable.projectId, projectId)))
+      .where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId), isNull(clashesTable.deletedAt))).limit(1);
+    if (!row) { res.status(404).json({ error: "clash_not_accessible" }); return; }
+    res.json(row);
+  } catch { res.status(500).json({ error: "clash_lookup_failed" }); }
+});
+
 router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res, next) => {
   const reportIdParam = Array.isArray(req.params.reportId) ? req.params.reportId[0] : req.params.reportId;
   if (!/^\d+$/.test(reportIdParam)) {

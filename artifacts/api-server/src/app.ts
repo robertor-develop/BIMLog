@@ -146,6 +146,55 @@ app.use("/api/v1", router);
 
 (async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_clash_links (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      clash_id integer NOT NULL REFERENCES clashes(id),
+      clash_report_id_snapshot integer NOT NULL REFERENCES clash_reports(id),
+      clash_number_snapshot text,
+      description_snapshot text,
+      floor_snapshot text,
+      discipline_snapshot text,
+      responsible_snapshot text,
+      group_snapshot text,
+      status_snapshot text NOT NULL,
+      deadline_snapshot timestamp,
+      meeting_notes text,
+      link_state text NOT NULL DEFAULT 'active',
+      first_loaded_at timestamp NOT NULL DEFAULT now(),
+      last_refreshed_at timestamp NOT NULL DEFAULT now(),
+      created_by_id integer NOT NULL REFERENCES users(id),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_clash_links_meeting_clash_uidx ON meeting_clash_links (meeting_id, clash_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_clash_links_project_meeting_idx ON meeting_clash_links (project_id, meeting_id)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_clash_refresh_events (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      actor_id integer NOT NULL REFERENCES users(id),
+      event_type text NOT NULL,
+      added_count integer NOT NULL DEFAULT 0,
+      updated_count integer NOT NULL DEFAULT 0,
+      unchanged_count integer NOT NULL DEFAULT 0,
+      excluded_count integer NOT NULL DEFAULT 0,
+      user_excluded_count integer NOT NULL DEFAULT 0,
+      failure_count integer NOT NULL DEFAULT 0,
+      open_count integer NOT NULL DEFAULT 0,
+      follow_up_count integer NOT NULL DEFAULT 0,
+      changed_fields text,
+      created_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_clash_refresh_events_meeting_idx ON meeting_clash_refresh_events (project_id, meeting_id, created_at)`);
+    console.log("[migration] meeting Clash links ensured");
+  } catch (e) {
+    console.error("[migration] meeting Clash link migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await startFeaturePolicyMigration();
     console.log("[migration] feature policy control tables ensured");
   } catch {
