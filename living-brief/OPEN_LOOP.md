@@ -2,6 +2,16 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Cost & Financial Control Build 2 Accepted
+
+- Independently accepted on 2026-07-21 from candidate `51edf32a106b2b4a82a6f55fe1a7b2de40440fb5`, applied as content only to baseline `a6d3b1916319bfd0f473d9ec9e1978f166f407dc`.
+- Clean integration commit: `be42d94`.
+- Accepted scope: versioned company cost libraries, project cost structures, exact-decimal budgets, maker-checker workflow, immutable approved snapshots/history, bounded import/export, controlled authorization, and bilingual responsive UI.
+- Independent corrections closed changed-payload idempotency conflicts, atomic import confirmation, gross approval exposure for negative offsets, trusted exact-budget confirmation, and complete additive Drizzle schema coverage.
+- Real isolated database, authenticated HTTP, concurrency, rollback, append-only, browser, Build 1, Plans/Entitlements, Meeting Minutes M1-M4, Living Brief, typecheck, production build, encoding, privacy, and secret gates passed.
+- Retained evidence manifest SHA-256: `7014f75ef182fa78656a536794d4c393ce491a03403baadc302237f01f86e099` (18 retained files, all hashes verified).
+- No deployment or publication occurred. Finance Build 3 has not started.
+
 ## Mandatory New Task Startup Rule
 
 Every new BIMLog Codex, Claude, or Replit task must start with this repository check:
