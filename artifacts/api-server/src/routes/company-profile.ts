@@ -3,14 +3,11 @@ import { db } from "@workspace/db";
 import { companyProfilesTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 
 const router: IRouter = Router();
 
-const uploadMiddleware = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-});
+const uploadMiddleware = singleFileUpload({ fileSize: 2 * 1024 * 1024 }, "logo");
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/svg+xml"]);
 
@@ -73,7 +70,7 @@ router.post("/users/me/company-profile", authMiddleware, async (req, res) => {
 });
 
 router.post("/users/me/company-logo", authMiddleware, (req, res) => {
-  uploadMiddleware.single("logo")(req, res, async (err: unknown) => {
+  uploadMiddleware(req, res, async (err?: unknown) => {
     if (err) {
       res.status(400).json({ error: err instanceof Error ? err.message : "Upload error" });
       return;

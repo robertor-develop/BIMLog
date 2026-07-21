@@ -73,27 +73,21 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   privacy and diff checks; independent review; then separate controlled production migration/publish that
   preserves the current valid production credential.
 
-### Preserved security Batch A and safe execution boundary
+### Security Batch A integration candidate
 
-- Security Batch A candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent
-  `2c1ffc4b5c08618610cdb70b42fcb08556726f1c` remains preserved, local, and unpushed. It performed defensive,
-  bounded BIMLog source/dependency hardening with finite local fixtures and did not reproduce exploits, use unbounded
-  payloads, target external systems, access production/customer data, push, or publish.
-- It is not Ready only because the root production build stopped at the Living Brief semantic-impact gate: changed
-  paths and STATUS/OPEN_LOOP/REPORT_DESIGN_SYSTEM reconciliation conflicted with separate pending Living Brief
-  candidates. The security task correctly refused to fabricate declarations or weaken the gate. The subsequent
-  one persistent OpenAI safety notice is recorded only as a content-safety interruption, not account suspension or
-  product compromise.
-- Reconciliation order: finish this credential-persistence correction; preserve and independently review the
-  cost-control candidate `8cec667...` with this credential/governance correction; integrate/push Living Brief changes
-  only after independent acceptance and Roberto authorization; then rebase/reapply Security Batch A onto the accepted
-  master and reconcile only its actual security/report-design impact. SheetJS/Batches B-I remain unstarted.
-- If a safety notice interrupts security output, stop repeating or trying to circumvent that specific blocked
-  request/output; do not halt the entire legitimate defensive workstream because of the banner alone. Preserve state,
-  rephrase toward bounded defensive application-quality verification, sanitize summaries, avoid duplicate tasks and
-  unchanged expensive reruns, and continue other safe engineering steps. Living Brief enforcement remains strict and
-  composable; never disable, bypass, loosen, or fabricate it to make a security build pass.
-
+- Preserved candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` was reapplied as content only onto accepted
+  `origin/master` `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`; its original ancestry was not imported.
+- The bounded scope is exact Multer 2.2.0 resolution, centralized finite multipart limits across 20 accepted upload
+  endpoints, bilingual controlled parser failures, and storage compensation for canonical Files and Submittal
+  attachment uploads. Authentication, membership/permission order, route-specific file sizes, MIME/extension
+  validation, storage isolation, and product behavior remain in place.
+- `pnpm-workspace.yaml` remains the sole override authority; every accepted override and platform exclusion, including
+  `tar: 7.5.20`, is preserved. Multer 2.1.1 must resolve zero times. SheetJS and Batches B-I remain unstarted.
+- Remaining integration gates are the exact semantic-impact/state reconciliation, invalidated focused verification,
+  one final root build, clean integration and acceptance commits, normal push, and exact remote equality verification.
+  No publish, deployment, production/customer access, or external security testing is authorized.
+- The one persistent UI safety notice remains a single visible notice, not multiple warnings, account suspension,
+  product compromise, or evidence that the bounded source correction failed.
 ### Terminal-turn Telegram notification rule
 
 - Every explicitly assigned task work cycle that stops must send one sanitized structured Telegram terminal-turn

@@ -533,3 +533,25 @@ blocked, the final report prominently states that the terminal notification was 
 non-sensitive reason.
 
 ---
+
+---
+
+## Security Batch A Reconciliation Audit - 2026-07-21
+
+Status: integration candidate on accepted source baseline; final gates and push pending.
+
+The preserved Batch A content from candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` was applied without
+importing its original ancestry onto accepted master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`, preserving Coordinator
+Build 1 and the accepted Living Brief credential-continuity, defensive-security, and terminal-notification governance.
+The effective source delta is limited to the API server's exact Multer 2.2.0 dependency, centralized bounded
+multipart middleware, a finite local regression harness, 13 route modules covering 20 upload endpoints, and the
+strictly necessary lockfile delta.
+
+The correction preserves route authorization order and route-specific input allowances, maps parser failures to
+bounded bilingual client responses, rejects unsupported nested and duplicate fields, and retains storage cleanup
+compensation at durable upload boundaries. It does not modify SheetJS/xlsx, root package overrides, workspace
+override policy, report presentation, plugin behavior, publication, deployment, production/customer data, or any
+other remediation batch. The one persistent UI safety notice remains recorded as one visible notice only.
+
+Final evidence must distinguish source integration and push from publication, deployment, production verification,
+and independent acceptance. SheetJS and Batches B-I remain deferred pending separate authorization.

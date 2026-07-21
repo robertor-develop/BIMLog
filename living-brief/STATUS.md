@@ -14,12 +14,12 @@ Living Brief credential persistence and controlled recovery are accepted in sour
 `81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror
 verified until the separate controlled rollout completes.
 
-Current governance amendment in the same local candidate: safe defensive security execution and Batch A reconciliation
-order. Security Batch A candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` on parent
-`2c1ffc4b5c08618610cdb70b42fcb08556726f1c` remains preserved, clean, local, and unpushed. It is not Ready only
-because the root production build stopped at the Living Brief semantic-impact gate while separate Living Brief edits
-were pending. The safety notice shown after its terminal result is a content-safety interruption, not evidence of
-account suspension, product compromise, or a failed code correction.
+Security Batch A is now an integration candidate reapplied as content only onto accepted master
+`b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
+`01c60a1bc24649153afd70b5c061b4cb01d79789` and its original parent remain provenance evidence; their old
+ancestry was not imported. The candidate changes only bounded multipart intake, Multer's exact API resolution,
+and associated local regression evidence. It does not start SheetJS or Batches B-I and is not published, deployed,
+production verified, or customer verified.
 
 Owner credential continuity decision in the same local candidate: current working integration credential material must
 remain operational and unchanged during ongoing platform development. This temporary owner-approved exception is not
@@ -89,11 +89,12 @@ is reserved for genuine completion.
 - The full dependency audit records 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
   tar-only correction. They require a separately scoped dependency-security review and are not silently
   folded into the publish unblock.
-- Security Batch A remains a preserved local candidate, not accepted source. It must wait until the credential
-  persistence and cost-control/governance Living Brief corrections are independently reviewed and, if authorized,
-  integrated. Then it may be rebased/reapplied onto accepted master, reconcile only its effective security/report
-  design impact, rerun only invalidated gates, and return as a clean Ready candidate. SheetJS/Batches B-I remain
-  unstarted.
+- Security Batch A has been reapplied as content only onto accepted master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`.
+  Its source scope is Multer 2.2.0, centralized bounded multipart parsing across 20 accepted upload endpoints,
+  controlled bilingual parser responses, and storage compensation at the canonical Files and Submittal attachment
+  boundaries. Final acceptance requires the reconciled Living Brief gate, invalidated focused checks, one full root
+  build, clean integration and acceptance commits, normal push, and exact remote verification. SheetJS/Batches B-I
+  remain unstarted.
 - The owner credential continuity exception is active only during ongoing platform development. Public/production
   launch requires separately approved managed-secret migration, durable backup/recovery, controlled rotation/revocation
   as appropriate, callback continuity, rollback proof, history remediation, and independent verification.

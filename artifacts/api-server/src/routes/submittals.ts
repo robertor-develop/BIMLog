@@ -12,7 +12,7 @@ import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod"
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
@@ -1850,14 +1850,16 @@ Check for: missing required fields, spec section format (XX XX XX), naming conve
 router.post("/projects/:projectId/submittals/attachments/upload",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    let pendingStoragePath: string | null = null;
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
       const fileName = req.file.originalname || "attachment";
       const ext = (fileName.split(".").pop() || "").toLowerCase();
       const storagePath = await storage.upload(req.file.buffer, projectId, `submittal-attach-${Date.now()}-${fileName}`);
+      pendingStoragePath = storagePath;
       const defaultFileStatus = await getDefaultValue("file_status");
       const [row] = await db.insert(filesTable).values({
         projectId,
@@ -1869,9 +1871,22 @@ router.post("/projects/:projectId/submittals/attachments/upload",
         source: "submittal-attachment",
         storagePath,
       }).returning();
+      pendingStoragePath = null;
       res.json({ fileId: row.id, fileName, downloadUrl: `/api/v1/projects/${projectId}/files/${row.id}/download?name=${encodeURIComponent(fileName)}` });
     } catch (error) {
-      res.status(500).json({ error: error instanceof Error ? error.message : "Upload failed" });
+      if (pendingStoragePath) {
+        await storage.delete(pendingStoragePath).catch(() => {
+          console.error("[submittals] failed to compensate an incomplete attachment upload");
+        });
+      }
+      console.error("[submittals] attachment upload failed");
+      res.status(500).json({
+        code: "SUBMITTAL_ATTACHMENT_UPLOAD_FAILED",
+        error: {
+          en: "The attachment upload could not be completed.",
+          es: "No se pudo completar la carga del archivo adjunto.",
+        },
+      });
     }
   }
 );
@@ -1879,7 +1894,7 @@ router.post("/projects/:projectId/submittals/attachments/upload",
 router.post("/projects/:projectId/submittals/import",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {

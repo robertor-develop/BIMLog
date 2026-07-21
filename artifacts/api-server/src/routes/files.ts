@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { db } from "@workspace/db";
 import { filesTable, namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, activityLogTable, usersTable, companiesTable, rfisTable, projectsTable, projectMembersTable } from "@workspace/db/schema";
 import { sendEmail, makeNamingViolationEmail, getUserLang, notifEnabled } from "../lib/email";
@@ -22,7 +22,13 @@ async function pdfParse(buffer: Buffer) {
 
 const router: IRouter = Router();
 
-const uploadMiddleware = multer({ storage: multer.memoryStorage() });
+const uploadMiddleware = singleFileUpload({
+  fileSize: 500 * 1024 * 1024,
+  files: 1,
+  fields: 2,
+  parts: 3,
+  fieldSize: 4 * 1024,
+});
 
 type FileRow = typeof filesTable.$inferSelect;
 
@@ -826,8 +832,9 @@ router.post(
   "/projects/:projectId/files",
   authMiddleware,
   requirePermission("admin", "write"),
-  (req, res, next) => uploadMiddleware.single("file")(req, res, next),
+  uploadMiddleware,
   async (req, res) => {
+    let pendingStoragePath: string | null = null;
     try {
       const { projectId } = ListFilesParams.parse({ projectId: req.params.projectId });
       const fileName: string = (req.body.fileName as string) || req.file?.originalname || "";
@@ -841,13 +848,21 @@ router.post(
       let filePath: string;
       try {
         filePath = await storage.upload(req.file.buffer, projectId, req.file.originalname);
+        pendingStoragePath = filePath;
       } catch (err) {
-        res.status(500).json({ error: err instanceof Error ? err.message : "Storage write failed" });
+        res.status(500).json({
+          code: "FILE_UPLOAD_STORAGE_FAILED",
+          error: {
+            en: "The file could not be stored.",
+            es: "No se pudo almacenar el archivo.",
+          },
+        });
         return;
       }
 
       if (!documentRelationship) {
         await storage.delete(filePath);
+        pendingStoragePath = null;
         res.status(400).json({
           error: "document_relationship is required. Declare whether this document is 'created', 'modified', 'reference', or 'supporting'.",
         });
@@ -884,6 +899,7 @@ router.post(
           source: "user-uploaded",
           rejectionDetails: validation.details ?? [],
         }).returning();
+        pendingStoragePath = null;
 
         await db.insert(activityLogTable).values({
           projectId,
@@ -955,6 +971,7 @@ router.post(
         .limit(1);
       if (duplicates.length > 0) {
         await storage.delete(filePath);
+        pendingStoragePath = null;
         res.status(409).json({
           error: "Duplicate file detected",
           details: `An identical file already exists in this project: "${duplicates[0].fileName}" (file ID ${duplicates[0].id}). The uploaded content matches an existing document.`,
@@ -995,6 +1012,7 @@ router.post(
         fileTypeTier,
         source: "user-uploaded",
       }).returning();
+      pendingStoragePath = null;
 
       await processFileFromDisk(file.id, filePath, fileName, projectId, req.user!.userId);
 
@@ -1040,8 +1058,19 @@ router.post(
         documentRelationshipDeclaredAt: file.documentRelationshipDeclaredAt?.toISOString() ?? null,
       }));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Bad request";
-      res.status(400).json({ error: message });
+      if (pendingStoragePath) {
+        await storage.delete(pendingStoragePath).catch(() => {
+          console.error("[files] failed to compensate an incomplete upload");
+        });
+      }
+      console.error("[files] upload request failed");
+      res.status(400).json({
+        code: "FILE_UPLOAD_FAILED",
+        error: {
+          en: "The file upload could not be completed.",
+          es: "No se pudo completar la carga del archivo.",
+        },
+      });
     }
   },
 );

@@ -687,6 +687,95 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f766e8ef469dcea229d2bcc90531ac39c6627996a22029f09b4f6ce5ffe53a50"
+    },
+    {
+      "taskId": "security-dependency-remediation-batch-a-integration",
+      "reviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "reviewedAt": "2026-07-21T21:44:08.350Z",
+      "status": "integration_candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dependency correction follows existing human-authority, truthful-evidence, and closed-loop quality doctrine without changing product identity or permanent laws."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted execution rules already govern bounded defensive security, strict Living Brief reconciliation, credential continuity, and terminal-turn notification; this candidate complies without amending them."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted quality controls already require finite fixtures, cleanup, authorization preservation, truthful evidence, and composable semantic review; no quality authority change is needed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Multer correction changes preventive input handling only and does not alter BIMLog product direction, roadmap, or market positioning."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform map is regenerated to include the new centralized API multipart middleware in the accepted structural inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Navisworks and Lens endpoints remain JSON or plugin-contract consumers and receive no source, packaging, behavior, or field-acceptance change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report-adjacent route modules retain their report generation, presentation, export fidelity, and delivery behavior; only multipart intake construction is centralized and bounded."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability rule, compliance claim, or evidence requirement changes in Batch A."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the content-only reconciliation baseline, exact Batch A scope, pending final gates, and separate publication, deployment, production, and customer-verification boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaced the preserved-candidate blocker with the active integration sequence while retaining SheetJS and Batches B-I as separately authorized deferred work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appended the immutable reconciliation record, content-only ancestry boundary, exact scope, exclusions, and remaining evidence and acceptance states."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/test-multipart-security.ts",
+        "artifacts/api-server/src/middlewares/multipart.ts",
+        "artifacts/api-server/src/routes/change_orders.ts",
+        "artifacts/api-server/src/routes/clash_reports.ts",
+        "artifacts/api-server/src/routes/company-profile.ts",
+        "artifacts/api-server/src/routes/conventions.ts",
+        "artifacts/api-server/src/routes/coordination.ts",
+        "artifacts/api-server/src/routes/files.ts",
+        "artifacts/api-server/src/routes/financial-budgets.ts",
+        "artifacts/api-server/src/routes/meeting_minutes.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/api-server/src/routes/submittal_reports.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/api-server/src/routes/transmittals.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "pnpm-lock.yaml"
+      ],
+      "reviewedChangeSha256": "0d0477f6890b89e26ac33317782452bc3a2779c16f2f03f2db1317dcd2879e98"
     }
   ]
 }

@@ -9,7 +9,7 @@ import { eq, and, desc, count, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { createPdfDocument, drawBrandedHeader, drawFooter, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
@@ -260,7 +260,7 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
 router.post("/projects/:projectId/transmittals/import",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {

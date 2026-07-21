@@ -9,7 +9,7 @@ import {
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createHash, randomUUID } from "crypto";
@@ -145,7 +145,7 @@ async function assignTradeFloorSeq(
   return { seq, correction };
 }
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+const upload = singleFileUpload({ fileSize: 50 * 1024 * 1024 });
 
 router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
@@ -199,7 +199,7 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
 router.post("/projects/:projectId/clash-reports/upload",
   authMiddleware,
   requirePermission("admin", "write"),
-  upload.single("file"),
+  upload,
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {

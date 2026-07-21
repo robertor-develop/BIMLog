@@ -1,6 +1,6 @@
 import { Router } from "express";
 import crypto from "crypto";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { pool } from "@workspace/db";
 import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
@@ -25,9 +25,12 @@ import {
 import { boundedText, positiveId } from "../lib/financial-budget-contract";
 
 const router = Router(),
-  upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  upload = singleFileUpload({
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+    fields: 3,
+    parts: 4,
+    fieldSize: 4 * 1024,
   });
 router.use("/projects/:projectId/financial", authMiddleware);
 const run =
@@ -42,18 +45,6 @@ const run =
           .json({
             code: error.code,
             error: { en: error.message, es: error.message },
-          });
-        return;
-      }
-      if (error instanceof multer.MulterError) {
-        res
-          .status(400)
-          .json({
-            code: "BUDGET_IMPORT_INVALID",
-            error: {
-              en: "The import upload is invalid.",
-              es: "La carga de importación no es válida.",
-            },
           });
         return;
       }
@@ -177,7 +168,7 @@ router.post(
 );
 router.post(
   "/projects/:projectId/financial/imports/preview",
-  upload.single("file"),
+  upload,
   run(async (req, res) => {
     if (!req.file)
       throw new FinancialControlError(
@@ -341,17 +332,4 @@ router.get(
     res.send(output);
   }),
 );
-router.use((error: unknown, _req: any, res: any, next: (error: unknown) => void) => {
-  if (error instanceof multer.MulterError) {
-    res.status(400).json({
-      code: "BUDGET_IMPORT_INVALID",
-      error: {
-        en: "The import upload is invalid.",
-        es: "La carga de importación no es válida.",
-      },
-    });
-    return;
-  }
-  next(error);
-});
 export default router;

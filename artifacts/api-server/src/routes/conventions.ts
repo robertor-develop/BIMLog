@@ -6,7 +6,7 @@ import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } fro
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import multer from "multer";
+import { boundedMultipart, createMemoryUpload } from "../middlewares/multipart";
 import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
 
@@ -561,26 +561,24 @@ Return ONLY this JSON structure (no markdown, no explanation):
   }
 });
 
-const uploadMiddleware = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 },
+const uploadMiddleware = boundedMultipart(createMemoryUpload({
+  fileSize: 50 * 1024 * 1024,
+  files: 120,
+  fields: 12,
+  parts: 132,
+  fieldSize: 1024 * 1024,
 }).fields([
   { name: "pdf", maxCount: 30 },
   { name: "spreadsheet", maxCount: 30 },
   { name: "screenshot", maxCount: 30 },
   { name: "sample", maxCount: 30 },
-]);
+]));
 
 router.post(
   "/projects/:projectId/convention/discover-upload",
   authMiddleware,
   requireProjectMember(),
-  (req, res, next) => {
-    uploadMiddleware(req, res, (err) => {
-      if (err) { res.status(400).json({ error: `File upload error: ${err instanceof Error ? err.message : String(err)}` }); return; }
-      next();
-    });
-  },
+  uploadMiddleware,
   async (req, res) => {
     try {
       const projectId = parseInt(String(req.params.projectId), 10);
@@ -938,12 +936,7 @@ router.post(
   "/projects/:projectId/convention/reanalyze",
   authMiddleware,
   requireProjectMember(),
-  (req, res, next) => {
-    uploadMiddleware(req, res, (err) => {
-      if (err) { res.status(400).json({ error: `File upload error: ${err instanceof Error ? err.message : String(err)}` }); return; }
-      next();
-    });
-  },
+  uploadMiddleware,
   async (req, res) => {
     try {
       const projectId = parseInt(String(req.params.projectId), 10);

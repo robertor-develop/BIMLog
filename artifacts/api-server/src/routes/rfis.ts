@@ -7,7 +7,7 @@ import { eq, and, count, max, isNull, or, ne, asc, desc, sql, inArray } from "dr
 import { CreateRfiBody, ListRfisParams, UpdateRfiParams, UpdateRfiBody } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../middlewares/config-validator";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import crypto from "crypto";
 import path from "path";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
@@ -255,20 +255,7 @@ async function storeRfiAttachment(params: {
   }
 }
 
-const rfiAttachmentUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: RFI_ATTACHMENT_LIMIT_BYTES } });
-function acceptRfiAttachmentUpload(req: any, res: any, next: any) {
-  rfiAttachmentUpload.single("file")(req, res, (error: unknown) => {
-    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
-      res.status(413).json({ error: `File exceeds the ${RFI_ATTACHMENT_LIMIT_BYTES / 1024 / 1024} MB upload limit.` });
-      return;
-    }
-    if (error) {
-      res.status(400).json({ error: "The attachment upload could not be processed." });
-      return;
-    }
-    next();
-  });
-}
+const acceptRfiAttachmentUpload = singleFileUpload({ fileSize: RFI_ATTACHMENT_LIMIT_BYTES });
 
 function daysSince(d: Date | string): number {
   return Math.floor((Date.now() - new Date(d).getTime()) / 86_400_000);
@@ -2590,7 +2577,7 @@ router.post("/projects/:projectId/rfis/attachments/from-cloud",
 router.post("/projects/:projectId/rfis/import-prefill",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({ fileSize: 25 * 1024 * 1024 }),
   async (req, res) => {
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
@@ -2960,7 +2947,13 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
 router.post("/projects/:projectId/rfis/import",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({
+    fileSize: 50 * 1024 * 1024,
+    files: 1,
+    fields: 1,
+    parts: 2,
+    fieldSize: 1024,
+  }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {

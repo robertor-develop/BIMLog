@@ -126,6 +126,7 @@ It changes only when the code structure or curated architectural facts change.
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
 - artifacts/api-server/src/middlewares/config-validator.ts
+- artifacts/api-server/src/middlewares/multipart.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
 - artifacts/api-server/src/lib/ai-control-plane-migration.ts

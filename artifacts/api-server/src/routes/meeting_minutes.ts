@@ -15,13 +15,12 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { extractFileText } from "../lib/extract-file-text";
 
 const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
 
 const router: Router = Router();
-const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 const parseLegacyRfiRows = (notes: string | null) => {
   if (!notes) return [];
@@ -1079,7 +1078,7 @@ router.patch("/projects/:projectId/action-items/:itemId", authMiddleware, requir
 // ── POST /projects/:projectId/meetings/transcribe-audio ───────────────────────
 router.post("/projects/:projectId/meetings/transcribe-audio",
   authMiddleware,
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } }).single("audio"),
+  singleFileUpload({ fileSize: 500 * 1024 * 1024 }, "audio"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
@@ -1246,7 +1245,7 @@ If information is not mentioned use empty string or empty array.`
 router.post("/projects/:projectId/meetings/import",
   authMiddleware,
   requirePermission("admin", "write"),
-  multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } }).single("file"),
+  singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {

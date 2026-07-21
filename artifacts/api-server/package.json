@@ -7,6 +7,7 @@
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts"
@@ -32,7 +33,7 @@
     "express": "^5",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
-    "multer": "^2.1.1",
+    "multer": "2.2.0",
     "openai": "^6.38.0",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",

@@ -14,7 +14,7 @@ import { createHash } from "crypto";
 import { eq, desc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
 import { randomUUID } from "crypto";
@@ -40,10 +40,7 @@ function pruneCache() {
   }
 }
 
-const uploadMiddleware = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 },
-}).single("file");
+const uploadMiddleware = singleFileUpload({ fileSize: 50 * 1024 * 1024 });
 
 function detectFileType(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
@@ -124,12 +121,7 @@ router.post(
   "/projects/:projectId/coordination/intake",
   authMiddleware,
   requireProjectMember(),
-  (req, res, next) => {
-    uploadMiddleware(req, res, (err) => {
-      if (err) { res.status(400).json({ error: `File upload error: ${err instanceof Error ? err.message : String(err)}` }); return; }
-      next();
-    });
-  },
+  uploadMiddleware,
   async (req, res) => {
     try {
       pruneCache();

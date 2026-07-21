@@ -1,18 +1,39 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+  "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
   "catalogSha256": "0d224ffe68041854931adb288f6a1ed0525ac8d29e41f21aa8f6d1bb2e1cbd55",
-  "bundleSha256": "8ea4e19ba8a57c2db5910ffcb32e918f82ea1d1c09b28b355fc4025975c4b3c1",
+  "bundleSha256": "1bf2efbf1fef95e38f146be1e207b3236d74a6ba7d813c5947d4ddbf22902b8e",
   "impact": {
-    "baselineCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
+    "baselineCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
     "changedPaths": [
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/scripts/test-multipart-security.ts",
+      "artifacts/api-server/src/middlewares/multipart.ts",
+      "artifacts/api-server/src/routes/change_orders.ts",
+      "artifacts/api-server/src/routes/clash_reports.ts",
+      "artifacts/api-server/src/routes/company-profile.ts",
+      "artifacts/api-server/src/routes/conventions.ts",
+      "artifacts/api-server/src/routes/coordination.ts",
+      "artifacts/api-server/src/routes/files.ts",
+      "artifacts/api-server/src/routes/financial-budgets.ts",
+      "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "artifacts/api-server/src/routes/project_directory.ts",
+      "artifacts/api-server/src/routes/rfis.ts",
+      "artifacts/api-server/src/routes/submittal_reports.ts",
+      "artifacts/api-server/src/routes/submittals.ts",
+      "artifacts/api-server/src/routes/transmittals.ts",
+      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "pnpm-lock.yaml"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
+      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -23,11 +44,11 @@
       "sha256": "95fc786414057f0a9eb5ccc7aef636458e779bfc74648a0ccfa4f36934e7ada0",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "claude",
@@ -35,11 +56,11 @@
       "sha256": "66cf02a30dd24135e535aecefe2ec02448ba95d9f7ab165221150fb874a2692c",
       "sourceChangedAt": "2026-07-21T17:25:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "quality",
@@ -47,11 +68,11 @@
       "sha256": "c56cfc88de510991182a9a5d824a391b33f017cbd417b4c21e8e03b258319d49",
       "sourceChangedAt": "2026-07-21T17:25:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "vision",
@@ -59,23 +80,23 @@
       "sha256": "6b4ba280e7b08d6579fdef263bfc0f7f0823bcce5fc08fffdfb0fbc7d8f2740c",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "5c249b18c1610a1338cbf67d5b3c6b7fab2321a9b8c59761ca35d242695ad85b",
-      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "sha256": "d0d43808060007fa1247c32551986c74e04c7d2b68a45ebeb6ca32337e7d21ac",
+      "sourceChangedAt": "2026-07-21T21:44:08.350Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "plugin",
@@ -83,11 +104,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +116,11 @@
       "sha256": "9a174a369ff2f2cf9ab179df411a86e4002dab209ed373334a839a801b4a6c12",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "standards_register",
@@ -107,47 +128,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "fde1b7335703f7a2a87f0333e791c749a914cba000a3fc3faa3567a9ac60e34a",
-      "sourceChangedAt": "2026-07-21T21:20:00.000Z",
+      "sha256": "9db901e305b11b301104d5fb1dc1aaa40e9ab0a99a7a8a19c62fe29afc3db81e",
+      "sourceChangedAt": "2026-07-21T21:44:08.350Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "ed2365212b4a244072c5539dbe0371d10eb15b225fa6611bc8ee5f8437983a09",
-      "sourceChangedAt": "2026-07-21T21:20:00.000Z",
+      "sha256": "cfbc54b52d24d1a13d4098d2a7bac92d373f440ed1ea0b2b7535d8be5f7cd158",
+      "sourceChangedAt": "2026-07-21T21:44:08.350Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "a1230b9d73eb962d4171037ae3fb4ac51edb6dd10b99e50e41deacd2e8d39f8a",
-      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "semanticReviewTask": "living-brief-credential-persistence-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-21T21:20:00.000Z"
+      "sha256": "90ecb5362912fc896007da14b8c69336535d6620733e9c2c0ea0a966ede8f6a1",
+      "sourceChangedAt": "2026-07-21T21:44:08.350Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+      "semanticReviewTask": "security-dependency-remediation-batch-a-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-21T21:44:08.350Z"
     }
   ]
 }

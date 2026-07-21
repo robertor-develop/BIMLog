@@ -5,7 +5,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import { projectsTable, usersTable, companiesTable, activityLogTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import multer from "multer";
+import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken";
 import { extractFileText } from "../lib/extract-file-text";
 
 const router: Router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 }, fileFilter: (_req: any, _file: any, cb: any) => cb(null, true) });
+const upload = singleFileUpload({ fileSize: 50 * 1024 * 1024 });
 
 // GET all reports
 router.get("/projects/:projectId/submittal-reports", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -68,7 +68,7 @@ router.post("/projects/:projectId/submittal-reports", authMiddleware, requirePer
 router.post("/projects/:projectId/submittal-reports/upload",
   authMiddleware,
   requirePermission("admin", "write"),
-  upload.single("file"),
+  upload,
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
