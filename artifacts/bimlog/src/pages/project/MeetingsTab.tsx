@@ -22,6 +22,7 @@ interface Meeting {
   linkedRfis?: LinkedRfi[]; legacyRfis?: RFIRow[];
   linkedSubmittals?: LinkedSubmittal[]; legacyDeliverables?: LegacyDeliverableRow[];
   linkedClashes?: LinkedClash[]; legacyViewpoints?: LegacyViewpointRow[];
+  scheduleBuckets?: MeetingScheduleBucket[];
 }
 
 interface Attendee {
@@ -58,6 +59,19 @@ interface SubmittalCandidate extends Omit<LinkedSubmittal, "submittalId"> {
 
 interface LegacyDeliverableRow { raw: string; }
 interface LegacyViewpointRow { raw: string; }
+
+interface MeetingScheduleBucket {
+  id: number; bucketId: number; bucketName: string; openPath: string;
+  deadline?: string | null; responsible?: string | null; updatedAt: string;
+  summary?: { selected?: number; created?: number; linked?: number; updated?: number; skipped?: number; conflicts?: number };
+  tasks?: { milestoneId: number; number: string; title: string; openTaskPath: string }[];
+}
+
+interface SchedulePreview {
+  summary: { selected: number; create: number; link: number; update: number; skipped: number; conflicts: number };
+}
+
+type BucketOption = { id: number; name: string; bucketType: string };
 
 interface LinkedClash {
   id: number; clashId: number; clashReportId: number; number?: string | null;
@@ -204,6 +218,16 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
   const [submittalLoading, setSubmittalLoading] = useState(false);
   const [submittalError, setSubmittalError] = useState("");
   const [submittalSaving, setSubmittalSaving] = useState(false);
+  const [scheduleDialogMeeting, setScheduleDialogMeeting] = useState<Meeting | null>(null);
+  const [scheduleBuckets, setScheduleBuckets] = useState<BucketOption[]>([]);
+  const [schedulePreview, setSchedulePreview] = useState<SchedulePreview | null>(null);
+  const [scheduleBusy, setScheduleBusy] = useState(false);
+  const [scheduleError, setScheduleError] = useState("");
+  const [scheduleForm, setScheduleForm] = useState({
+    bucketName: "", generalDeadline: "", targetBucketId: "", responsibleUserId: "", responsibleCompany: "",
+    includeMode: "all", selectedLinkIds: [] as number[], createMissing: true, linkExisting: true, updateExisting: false,
+    idempotencyKey: "",
+  });
   const [deliverables, setDeliverables] = useState<DeliverableRow[]>([
     { floor: "UNDERGROUND", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
     { floor: "CELLAR", description: "", plumbing: "", hvac: "", fireProt: "", electrical: "", other: "", coordinator: "", deadline: "" },
@@ -528,6 +552,83 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
 
   const openOriginalSubmittal = (submittalId: number) => window.location.assign(`/projects/${projectId}/submittals?submittal=${submittalId}`);
 
+  const openScheduleDialog = async (meeting: Meeting) => {
+    const defaultDate = meeting.meetingDate ? new Date(meeting.meetingDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    setScheduleDialogMeeting(meeting);
+    setSchedulePreview(null);
+    setScheduleError("");
+    setScheduleForm({
+      bucketName: `Meeting Follow-Up - ${new Date(meeting.meetingDate).toLocaleDateString("en-US")}`,
+      generalDeadline: defaultDate,
+      targetBucketId: "",
+      responsibleUserId: "",
+      responsibleCompany: "",
+      includeMode: "all",
+      selectedLinkIds: (meeting.linkedSubmittals ?? []).map(link => link.id).filter(Boolean) as number[],
+      createMissing: true,
+      linkExisting: true,
+      updateExisting: false,
+      idempotencyKey: `m4-${meeting.id}-${Date.now()}`,
+    });
+    const response = await fetch(`${API}/projects/${projectId}/schedule/buckets`, { headers: { Authorization: `Bearer ${token}` } });
+    if (response.ok) setScheduleBuckets(await response.json());
+  };
+
+  const schedulePayload = () => ({
+    idempotency_key: scheduleForm.idempotencyKey,
+    bucket_name: scheduleForm.bucketName,
+    target_bucket_id: scheduleForm.targetBucketId ? Number(scheduleForm.targetBucketId) : undefined,
+    general_deadline: scheduleForm.generalDeadline,
+    responsible_user_id: scheduleForm.responsibleUserId ? Number(scheduleForm.responsibleUserId) : undefined,
+    responsible_company: scheduleForm.responsibleCompany || undefined,
+    include_mode: scheduleForm.includeMode,
+    selected_meeting_submittal_link_ids: scheduleForm.selectedLinkIds,
+    create_missing_tasks: scheduleForm.createMissing,
+    link_existing_tasks: scheduleForm.linkExisting,
+    update_existing_tasks: scheduleForm.updateExisting,
+  });
+
+  const loadSchedulePreview = async () => {
+    if (!scheduleDialogMeeting) return;
+    setScheduleBusy(true); setScheduleError("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/${scheduleDialogMeeting.id}/schedule-bucket/preview`, { method: "POST", headers, body: JSON.stringify(schedulePayload()) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) { setScheduleError(data.error || t("Could not preview Schedule work.", "No se pudo previsualizar el trabajo de planificacion.")); return; }
+      setSchedulePreview(data);
+    } finally { setScheduleBusy(false); }
+  };
+
+  const createScheduleBucket = async () => {
+    if (!scheduleDialogMeeting) return;
+    setScheduleBusy(true); setScheduleError("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/${scheduleDialogMeeting.id}/schedule-bucket`, { method: "POST", headers, body: JSON.stringify(schedulePayload()) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) { setScheduleError(data.error || t("Could not create Schedule Bucket.", "No se pudo crear el grupo de planificacion.")); return; }
+      await loadMeetings();
+      setScheduleDialogMeeting(null);
+    } finally { setScheduleBusy(false); }
+  };
+
+  const syncScheduleBucket = async (meetingId: number, bucketLinkId: number) => {
+    const meeting = meetings.find(row => row.id === meetingId);
+    const bucketLink = meeting?.scheduleBuckets?.find(row => row.id === bucketLinkId);
+    if (!meeting || !bucketLink) return;
+    const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}/schedule-bucket/${bucketLinkId}/sync`, {
+      method: "POST", headers, body: JSON.stringify({
+        general_deadline: bucketLink.deadline ? new Date(bucketLink.deadline).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+        include_mode: "all",
+        selected_meeting_submittal_link_ids: (meeting.linkedSubmittals ?? []).map(link => link.id).filter(Boolean),
+        create_missing_tasks: true,
+        link_existing_tasks: true,
+        update_existing_tasks: false,
+      }),
+    });
+    if (!response.ok) { setError(t("Could not sync Schedule Bucket.", "No se pudo sincronizar el grupo de planificacion.")); return; }
+    await loadMeetings();
+  };
+
   const SubmittalSelectorModal = () => submittalSelectorMeetingId !== undefined ? (
     <div role="dialog" aria-modal="true" aria-label={t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}
       style={{ position: "fixed", inset: 0, zIndex: 1100, background: "rgba(15,23,42,0.58)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
@@ -719,6 +820,7 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                   <div style={{ display: "flex", gap: 6 }}>
                     {canWrite && <button className="btn btn-sm btn-outline" onClick={() => openRfiSelector(m.id)}><Plus size={12} style={{ marginRight: 4 }} />{t("Add Existing RFI", "Añadir RFI existente")}</button>}
                     {canWrite && <button className="btn btn-sm btn-outline" onClick={() => openSubmittalSelector(m.id)}><Plus size={12} style={{ marginRight: 4 }} />{t("Add from Submittal Log", "Añadir desde el Registro de Submittals")}</button>}
+                    {canWrite && !!m.linkedSubmittals?.length && <button className="btn btn-sm btn-primary" onClick={() => void openScheduleDialog(m)}><Calendar size={12} style={{ marginRight: 4 }} />{t("Create Schedule Bucket", "Crear grupo de planificacion")}</button>}
                     {canWrite && (
                       <button
                         title={t("Delete meeting", "Eliminar reunión")}
@@ -733,11 +835,53 @@ export function MeetingsTab({ projectId, canWrite }: { projectId: number; canWri
                   {!!m.linkedSubmittals?.length && <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>{m.linkedSubmittals.map(submittal => <div key={submittal.submittalId} style={{ border: "1px solid #C7D2FE", background: "#F8FAFC", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}><div style={{ flex: "1 1 240px", minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 700 }}>{submittal.number} · {submittal.title}</div>{submittal.description && submittal.description !== submittal.title && <div style={{ fontSize: 12, color: "#4B5563", marginTop: 2 }}>{submittal.description}</div>}<div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>{[submittal.floor, submittal.discipline, humanLabel(submittal.status), submittal.responsible, submittal.deadline ? new Date(submittal.deadline).toLocaleDateString() : null].filter(Boolean).join(" · ")}</div></div><button className="btn btn-sm btn-outline" onClick={() => openOriginalSubmittal(submittal.submittalId)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Original Submittal", "Abrir Submittal original")}</button>{canWrite && <button className="btn btn-sm btn-outline" onClick={() => void removeMeetingSubmittal(m.id, submittal.submittalId)}>{t("Remove link", "Quitar enlace")}</button>}</div>)}</div>}
                   {!!m.legacyRfis?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual RFI notes", "Notas RFI manuales anteriores")}</div>{m.legacyRfis.map((row, index) => <div key={`${row.rfiNumber}-${index}`} style={{ fontSize: 12 }}>{[row.rfiNumber, row.description, row.status, row.responsible].filter(Boolean).join(" · ")}</div>)}</div>}
                   {!!m.legacyDeliverables?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Deliverable notes", "Notas manuales anteriores de Entregables")}</div>{m.legacyDeliverables.map((row, index) => <div key={`${row.raw}-${index}`} style={{ fontSize: 12, overflowWrap: "anywhere" }}>{row.raw}</div>)}</div>}
+                  {!!m.scheduleBuckets?.length && (
+                    <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>
+                      {m.scheduleBuckets.map(bucket => (
+                        <div key={bucket.id} style={{ border: "1px solid #A7F3D0", background: "#F0FDF4", borderRadius: 8, padding: 10, display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+                          <div style={{ flex: "1 1 240px", minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 800 }}>{t("Schedule Bucket", "Grupo de planificacion")}: {bucket.bucketName}</div>
+                            <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>{t("Tasks", "Tareas")}: {bucket.tasks?.length ?? 0} - {t("Last outcome", "Ultimo resultado")}: {bucket.summary?.created ?? 0} {t("created", "creadas")}, {bucket.summary?.linked ?? 0} {t("linked", "enlazadas")}, {bucket.summary?.updated ?? 0} {t("updated", "actualizadas")}, {bucket.summary?.skipped ?? 0} {t("skipped", "omitidas")}</div>
+                          </div>
+                          <button className="btn btn-sm btn-outline" onClick={() => window.location.assign(bucket.openPath)}><ExternalLink size={12} style={{ marginRight: 4 }} />{t("Open Schedule Bucket", "Abrir grupo de planificacion")}</button>
+                          {canWrite && <button className="btn btn-sm btn-outline" onClick={() => void syncScheduleBucket(m.id, bucket.id)}><RefreshCw size={12} style={{ marginRight: 4 }} />{t("Sync Schedule Bucket", "Sincronizar grupo")}</button>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <MeetingClashesPanel projectId={projectId} meetingId={m.id} links={m.linkedClashes ?? []} canWrite={canWrite} reload={loadMeetings} />
                   {!!m.legacyViewpoints?.length && <div style={{ flexBasis: "100%", padding: 10, border: "1px dashed #D1D5DB", borderRadius: 8 }}><div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 5 }}>{t("Legacy manual Viewpoint / Clash rows", "Filas manuales anteriores de Viewpoints / Clashes")}</div>{m.legacyViewpoints.map((row, index) => <div key={`${row.raw}-${index}`} style={{ fontSize: 12, overflowWrap: "anywhere" }}>{row.raw}</div>)}</div>}
                 </div>
               ))}
             </div>
+      )}
+
+      {scheduleDialogMeeting && (
+        <div role="dialog" aria-modal="true" aria-label={t("Create Schedule Bucket", "Crear grupo de planificacion")} style={{ position: "fixed", inset: 0, zIndex: 1200, background: "rgba(15,23,42,0.58)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
+          <div style={{ background: "white", borderRadius: 12, width: "min(920px, calc(100vw - 24px))", maxHeight: "calc(100vh - 24px)", overflow: "auto", boxShadow: "0 24px 80px rgba(0,0,0,.25)" }}>
+            <div style={{ padding: 16, display: "flex", justifyContent: "space-between", gap: 12, borderBottom: "1px solid #E5E7EB" }}>
+              <div><div style={{ fontSize: 17, fontWeight: 900 }}>{t("Create Schedule Bucket", "Crear grupo de planificacion")}</div><div style={{ fontSize: 12, color: "#6B7280", marginTop: 3 }}>{t("Review linked Submittals, choose Create/Link/Update behavior, then create traceable Schedule tasks.", "Revise Submittals enlazados, elija Crear/Enlazar/Actualizar y cree tareas trazables.")}</div></div>
+              <button aria-label={t("Close", "Cerrar")} onClick={() => setScheduleDialogMeeting(null)} style={{ border: 0, background: "transparent", cursor: "pointer", padding: 6 }}><X size={18} /></button>
+            </div>
+            <div style={{ padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 10 }}>
+              <label><span className="label">{t("Bucket name", "Nombre del grupo")}</span><input className="input" value={scheduleForm.bucketName} onChange={e => setScheduleForm(f => ({ ...f, bucketName: e.target.value }))} /></label>
+              <label><span className="label">{t("General deadline", "Fecha limite general")}</span><input className="input" type="date" value={scheduleForm.generalDeadline} onChange={e => setScheduleForm(f => ({ ...f, generalDeadline: e.target.value }))} /></label>
+              <label><span className="label">{t("Target Schedule / Sprint", "Cronograma / Sprint destino")}</span><select className="input" value={scheduleForm.targetBucketId} onChange={e => setScheduleForm(f => ({ ...f, targetBucketId: e.target.value }))}><option value="">{t("Create named bucket", "Crear grupo con este nombre")}</option>{scheduleBuckets.map(bucket => <option key={bucket.id} value={bucket.id}>{bucket.name}</option>)}</select></label>
+              <label><span className="label">{t("Default responsible", "Responsable por defecto")}</span><select className="input" value={scheduleForm.responsibleUserId} onChange={e => setScheduleForm(f => ({ ...f, responsibleUserId: e.target.value, responsibleCompany: memberList.find(m => String(m.userId) === e.target.value)?.userCompanyName || f.responsibleCompany }))}><option value="">{t("Needs user review", "Requiere revision")}</option>{memberList.map(m => <option key={m.userId} value={m.userId}>{m.userFullName} - {m.userCompanyName || m.userEmail}</option>)}</select></label>
+              <label><span className="label">{t("Responsible company", "Empresa responsable")}</span><input className="input" list="meeting-schedule-companies" value={scheduleForm.responsibleCompany} onChange={e => setScheduleForm(f => ({ ...f, responsibleCompany: e.target.value }))} /><datalist id="meeting-schedule-companies">{uniqueCompanies.map(company => <option key={company} value={company} />)}</datalist></label>
+              <label><span className="label">{t("Include", "Incluir")}</span><select className="input" value={scheduleForm.includeMode} onChange={e => setScheduleForm(f => ({ ...f, includeMode: e.target.value }))}><option value="all">{t("All linked Submittals", "Todos los Submittals enlazados")}</option><option value="pending">{t("Only pending meeting actions", "Solo acciones pendientes")}</option><option value="selected">{t("Selected only", "Solo seleccionados")}</option></select></label>
+              <label style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={scheduleForm.createMissing} onChange={e => setScheduleForm(f => ({ ...f, createMissing: e.target.checked }))} />{t("Create missing tasks", "Crear tareas faltantes")}</label>
+              <label style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={scheduleForm.linkExisting} onChange={e => setScheduleForm(f => ({ ...f, linkExisting: e.target.checked }))} />{t("Link existing tasks", "Enlazar tareas existentes")}</label>
+              <label style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={scheduleForm.updateExisting} onChange={e => setScheduleForm(f => ({ ...f, updateExisting: e.target.checked }))} />{t("Update existing deadlines/assignments", "Actualizar fechas/asignaciones existentes")}</label>
+            </div>
+            <div style={{ padding: "0 16px 12px", display: "grid", gap: 8 }}>
+              {(scheduleDialogMeeting.linkedSubmittals ?? []).map(link => <label key={link.id || link.submittalId} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 8, border: "1px solid #E5E7EB", borderRadius: 8 }}><input type="checkbox" checked={scheduleForm.selectedLinkIds.includes(link.id!)} onChange={e => setScheduleForm(f => ({ ...f, selectedLinkIds: e.target.checked ? [...f.selectedLinkIds, link.id!] : f.selectedLinkIds.filter(id => id !== link.id) }))} /><span style={{ minWidth: 0 }}><strong>{link.number}</strong> {link.title}<div style={{ fontSize: 11, color: "#6B7280" }}>{[link.floor, link.discipline, link.responsible || t("Needs user review", "Requiere revision"), link.deadline ? new Date(link.deadline).toLocaleDateString() : null].filter(Boolean).join(" - ")}</div></span></label>)}
+            </div>
+            {scheduleError && <div style={{ margin: "0 16px 12px", color: "#B91C1C", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: 10 }}>{scheduleError} <button className="btn btn-sm btn-outline" onClick={() => void loadSchedulePreview()}>{t("Retry", "Reintentar")}</button></div>}
+            {schedulePreview && <div style={{ margin: "0 16px 12px", border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 8, padding: 10 }}><strong>{schedulePreview.summary.selected} {t("selected", "seleccionados")}</strong>: {schedulePreview.summary.create} {t("new tasks will be created", "tareas nuevas seran creadas")}, {schedulePreview.summary.link} {t("existing tasks linked", "tareas existentes enlazadas")}, {schedulePreview.summary.update} {t("updated", "actualizadas")}, {schedulePreview.summary.skipped} {t("skipped", "omitidas")}, {schedulePreview.summary.conflicts} {t("need review", "requieren revision")}.</div>}
+            <div style={{ padding: 16, display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 8, borderTop: "1px solid #E5E7EB" }}><button className="btn btn-outline" onClick={() => setScheduleDialogMeeting(null)}>{t("Cancel", "Cancelar")}</button><button className="btn btn-outline" disabled={scheduleBusy} onClick={() => void loadSchedulePreview()}>{scheduleBusy ? t("Loading...", "Cargando...") : t("Preview", "Vista previa")}</button><button className="btn btn-primary" disabled={scheduleBusy || !schedulePreview} onClick={() => void createScheduleBucket()}>{scheduleBusy ? t("Creating...", "Creando...") : t("Create Schedule Bucket", "Crear grupo de planificacion")}</button></div>
+          </div>
+        </div>
       )}
 
       {deleteTarget && (

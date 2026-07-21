@@ -1,13 +1,16 @@
 import { Router } from "express";
+import crypto from "crypto";
 import { db } from "@workspace/db";
 import {
   meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
   activityLogTable, usersTable, rfisTable, meetingRfiLinksTable,
   submittalsTable, meetingSubmittalLinksTable,
   clashesTable, clashReportsTable, meetingClashLinksTable, meetingClashRefreshEventsTable,
-  linkedItemsTable, agentInsightsTable,
+  linkedItemsTable, agentInsightsTable, projectMembersTable,
+  projectMilestonesTable, scheduleBucketsTable, scheduleItemPlacementsTable,
+  meetingScheduleBucketLinksTable, meetingScheduleTaskLinksTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, ne, isNull, or, ilike, inArray, asc } from "drizzle-orm";
+import { eq, and, desc, ne, isNull, or, ilike, inArray, asc, sql } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
@@ -184,6 +187,289 @@ class MeetingSubmittalLinkError extends Error {
   constructor(public status: number, public code: string) { super(code); }
 }
 
+class MeetingScheduleBucketError extends Error {
+  constructor(public status: number, public code: string) { super(code); }
+}
+
+type ScheduleBucketPolicy = {
+  createMissingTasks: boolean;
+  linkExistingTasks: boolean;
+  updateExistingTasks: boolean;
+};
+
+type ScheduleBucketInput = {
+  idempotencyKey?: string;
+  bucketName?: string;
+  targetBucketId?: number | null;
+  generalDeadline?: string;
+  responsibleUserId?: number | null;
+  responsibleCompany?: string | null;
+  includeMode: "all" | "pending" | "selected";
+  selectedMeetingSubmittalLinkIds: number[];
+  policy: ScheduleBucketPolicy;
+};
+
+function dayInput(value: Date | string | null | undefined) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function defaultMeetingBucketName(meeting: typeof meetingMinutesTable.$inferSelect) {
+  return `Meeting Follow-Up – ${new Date(meeting.meetingDate).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}`;
+}
+
+function safeText(value: unknown, fallback = "") {
+  return typeof value === "string" ? value.trim() : fallback;
+}
+
+function parseScheduleBucketInput(body: any, meeting: typeof meetingMinutesTable.$inferSelect): ScheduleBucketInput {
+  const includeMode = ["all", "pending", "selected"].includes(body?.include_mode) ? body.include_mode : "all";
+  const selected: number[] = Array.isArray(body?.selected_meeting_submittal_link_ids)
+    ? Array.from(new Set<number>(body.selected_meeting_submittal_link_ids.map(Number).filter(Number.isInteger)))
+    : [];
+  const deadlineText = safeText(body?.general_deadline, dayInput(meeting.meetingDate));
+  if (!deadlineText || Number.isNaN(new Date(`${deadlineText}T00:00:00`).getTime())) throw new MeetingScheduleBucketError(400, "schedule_deadline_invalid");
+  if (includeMode === "selected" && !selected.length) throw new MeetingScheduleBucketError(400, "schedule_selection_required");
+  return {
+    idempotencyKey: safeText(body?.idempotency_key) || undefined,
+    bucketName: safeText(body?.bucket_name, defaultMeetingBucketName(meeting)),
+    targetBucketId: body?.target_bucket_id === undefined || body?.target_bucket_id === null || body?.target_bucket_id === "" ? null : Number(body.target_bucket_id),
+    generalDeadline: deadlineText,
+    responsibleUserId: body?.responsible_user_id === undefined || body?.responsible_user_id === null || body?.responsible_user_id === "" ? null : Number(body.responsible_user_id),
+    responsibleCompany: safeText(body?.responsible_company) || null,
+    includeMode,
+    selectedMeetingSubmittalLinkIds: selected,
+    policy: {
+      createMissingTasks: body?.create_missing_tasks !== false,
+      linkExistingTasks: body?.link_existing_tasks !== false,
+      updateExistingTasks: body?.update_existing_tasks === true,
+    },
+  };
+}
+
+function requestFingerprint(input: ScheduleBucketInput) {
+  return crypto.createHash("sha256").update(JSON.stringify({
+    bucketName: input.bucketName,
+    targetBucketId: input.targetBucketId ?? null,
+    generalDeadline: input.generalDeadline,
+    responsibleUserId: input.responsibleUserId ?? null,
+    responsibleCompany: input.responsibleCompany ?? null,
+    includeMode: input.includeMode,
+    selectedMeetingSubmittalLinkIds: [...input.selectedMeetingSubmittalLinkIds].sort((a, b) => a - b),
+    policy: input.policy,
+  })).digest("hex");
+}
+
+async function scheduleBucketPreview(executor: any, projectId: number, meeting: typeof meetingMinutesTable.$inferSelect, input: ScheduleBucketInput) {
+  type ExistingMilestone = { id: number; linkedId: number | null };
+  type ExistingTaskLink = { milestoneId: number; meetingSubmittalLinkId: number };
+  type PreviewRow = { action: string };
+  const links = await executor.select().from(meetingSubmittalLinksTable)
+    .where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meeting.id)))
+    .orderBy(asc(meetingSubmittalLinksTable.id));
+  const linkIds = links.map((link: any) => link.id);
+  if (input.selectedMeetingSubmittalLinkIds.some(id => !linkIds.includes(id))) throw new MeetingScheduleBucketError(404, "meeting_submittal_link_not_accessible");
+  const openActions = await executor.select({ linkedSubmittalId: actionItemsTable.linkedSubmittalId }).from(actionItemsTable)
+    .where(and(eq(actionItemsTable.projectId, projectId), eq(actionItemsTable.meetingId, meeting.id), ne(actionItemsTable.status, "completed"), ne(actionItemsTable.status, "cancelled")));
+  const pendingSubmittalIds = new Set(openActions.map((row: any) => row.linkedSubmittalId).filter(Boolean));
+  const selectedLinks = links.filter((link: any) => {
+    if (input.includeMode === "selected") return input.selectedMeetingSubmittalLinkIds.includes(link.id);
+    if (input.includeMode === "pending") return pendingSubmittalIds.has(link.submittalId);
+    return true;
+  });
+  const submittalIds = selectedLinks.map((link: any) => link.submittalId);
+  const submittals = submittalIds.length ? await executor.select().from(submittalsTable)
+    .where(and(inArray(submittalsTable.id, submittalIds), eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))) : [];
+  if (submittals.length !== submittalIds.length) throw new MeetingScheduleBucketError(404, "submittal_not_accessible");
+  const milestones = submittalIds.length ? await executor.select().from(projectMilestonesTable)
+    .where(and(eq(projectMilestonesTable.projectId, projectId), eq(projectMilestonesTable.linkedModule, "submittal"), inArray(projectMilestonesTable.linkedId, submittalIds))) : [];
+  const taskLinks = selectedLinks.length ? await executor.select().from(meetingScheduleTaskLinksTable)
+    .where(and(eq(meetingScheduleTaskLinksTable.projectId, projectId), eq(meetingScheduleTaskLinksTable.meetingId, meeting.id), inArray(meetingScheduleTaskLinksTable.meetingSubmittalLinkId, selectedLinks.map((link: any) => link.id)))) : [];
+  const milestoneBySubmittal = new Map<number, ExistingMilestone>(milestones.map((m: ExistingMilestone) => [m.linkedId ?? 0, m]));
+  const taskLinkByMeetingLink = new Map<number, ExistingTaskLink>(taskLinks.map((link: ExistingTaskLink) => [link.meetingSubmittalLinkId, link]));
+  const rows = selectedLinks.map((link: any) => {
+    const existingTaskLink = taskLinkByMeetingLink.get(link.id);
+    const existingMilestone = milestoneBySubmittal.get(link.submittalId);
+    const action = existingTaskLink
+      ? (input.policy.updateExistingTasks ? "update_existing" : "skip_existing")
+      : existingMilestone && input.policy.linkExistingTasks
+        ? (input.policy.updateExistingTasks ? "link_and_update_existing" : "link_existing")
+        : existingMilestone
+          ? "needs_user_review"
+          : input.policy.createMissingTasks
+          ? "create_task"
+          : "needs_user_review";
+    const existingTaskId = existingTaskLink?.milestoneId || (action === "link_existing" || action === "link_and_update_existing" ? existingMilestone?.id : null);
+    return {
+      meetingSubmittalLinkId: link.id,
+      submittalId: link.submittalId,
+      number: link.numberSnapshot,
+      title: link.titleSnapshot,
+      floor: link.floorSnapshot,
+      discipline: link.disciplineSnapshot,
+      responsible: input.responsibleCompany || link.responsibleSnapshot || "Needs user review",
+      status: link.statusSnapshot,
+      deadline: input.generalDeadline,
+      action,
+      existingTaskId,
+    };
+  });
+  const summary = {
+    selected: rows.length,
+    create: rows.filter((row: PreviewRow) => row.action === "create_task").length,
+    link: rows.filter((row: PreviewRow) => row.action === "link_existing" || row.action === "link_and_update_existing").length,
+    update: rows.filter((row: PreviewRow) => row.action === "update_existing" || row.action === "link_and_update_existing").length,
+    skipped: rows.filter((row: PreviewRow) => row.action === "skip_existing").length,
+    conflicts: rows.filter((row: PreviewRow) => row.action === "needs_user_review").length,
+  };
+  return { bucketName: input.bucketName, targetBucketId: input.targetBucketId, generalDeadline: input.generalDeadline, includeMode: input.includeMode, policy: input.policy, summary, rows };
+}
+
+async function resolveScheduleBucket(executor: any, projectId: number, input: ScheduleBucketInput, userId: number) {
+  if (input.targetBucketId) {
+    const [bucket] = await executor.select().from(scheduleBucketsTable)
+      .where(and(eq(scheduleBucketsTable.id, input.targetBucketId), eq(scheduleBucketsTable.projectId, projectId))).limit(1);
+    if (!bucket) throw new MeetingScheduleBucketError(404, "schedule_bucket_not_accessible");
+    return bucket;
+  }
+  const name = input.bucketName || "Meeting Follow-Up";
+  const inserted = await executor.insert(scheduleBucketsTable).values({ projectId, name, bucketType: "meeting_follow_up", sortOrder: 110, createdById: userId })
+    .onConflictDoNothing({ target: [scheduleBucketsTable.projectId, scheduleBucketsTable.name] }).returning();
+  if (inserted[0]) return inserted[0];
+  const [bucket] = await executor.select().from(scheduleBucketsTable)
+    .where(and(eq(scheduleBucketsTable.projectId, projectId), eq(scheduleBucketsTable.name, name))).limit(1);
+  if (!bucket) throw new MeetingScheduleBucketError(409, "schedule_bucket_conflict");
+  return bucket;
+}
+
+async function applyMeetingScheduleBucket(projectId: number, meetingId: number, actor: { userId: number; fullName?: string; companyName?: string }, input: ScheduleBucketInput, mode: "create" | "sync") {
+  if (!input.idempotencyKey && mode === "create") throw new MeetingScheduleBucketError(400, "idempotency_key_required");
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(${projectId}, ${meetingId})`);
+    const [meeting] = await tx.select().from(meetingMinutesTable)
+      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+    if (!meeting) throw new MeetingScheduleBucketError(404, "meeting_not_found");
+    const normalized = { ...input, bucketName: input.bucketName || defaultMeetingBucketName(meeting) };
+    const fingerprint = requestFingerprint(normalized);
+    if (normalized.responsibleUserId) {
+      const [assignee] = await tx.select({ id: usersTable.id }).from(usersTable)
+        .innerJoin(projectMembersTable, and(eq(projectMembersTable.userId, usersTable.id), eq(projectMembersTable.projectId, projectId)))
+        .where(and(eq(usersTable.id, normalized.responsibleUserId), eq(projectMembersTable.status, "active"))).limit(1);
+      if (!assignee) throw new MeetingScheduleBucketError(404, "assignee_not_accessible");
+    }
+    if (mode === "create" && normalized.idempotencyKey) {
+      const [existingByKey] = await tx.select().from(meetingScheduleBucketLinksTable)
+        .where(and(eq(meetingScheduleBucketLinksTable.projectId, projectId), eq(meetingScheduleBucketLinksTable.meetingId, meetingId), eq(meetingScheduleBucketLinksTable.idempotencyKey, normalized.idempotencyKey))).limit(1);
+      if (existingByKey) {
+        if (existingByKey.requestFingerprint !== fingerprint) throw new MeetingScheduleBucketError(409, "idempotency_payload_conflict");
+        return { idempotent: true, summary: existingByKey.lastSummary, links: await getMeetingScheduleBucketLinks(meetingId) };
+      }
+    }
+    const preview = await scheduleBucketPreview(tx, projectId, meeting, normalized);
+    const bucket = await resolveScheduleBucket(tx, projectId, normalized, actor.userId);
+    const existingMeetingBucket = await tx.select().from(meetingScheduleBucketLinksTable)
+      .where(and(eq(meetingScheduleBucketLinksTable.meetingId, meetingId), eq(meetingScheduleBucketLinksTable.bucketId, bucket.id))).limit(1);
+    let bucketLink = existingMeetingBucket[0];
+    if (!bucketLink) {
+      [bucketLink] = await tx.insert(meetingScheduleBucketLinksTable).values({
+        projectId, meetingId, bucketId: bucket.id,
+        idempotencyKey: normalized.idempotencyKey || `sync-${meetingId}-${bucket.id}`,
+        requestFingerprint: fingerprint,
+        bucketNameSnapshot: bucket.name,
+        targetScheduleSnapshot: bucket.bucketType,
+        generalDeadlineSnapshot: new Date(`${normalized.generalDeadline}T00:00:00`),
+        responsibleSnapshot: normalized.responsibleCompany,
+        assignedUserIdSnapshot: normalized.responsibleUserId,
+        includeModeSnapshot: normalized.includeMode,
+        syncPolicySnapshot: normalized.policy,
+        lastSummary: {},
+        createdById: actor.userId,
+        lastSyncedById: actor.userId,
+      }).returning();
+    }
+    const counts = { created: 0, linked: 0, updated: 0, skipped: 0, conflicts: 0 };
+    for (const row of preview.rows) {
+      const [meetingLink] = await tx.select().from(meetingSubmittalLinksTable)
+        .where(and(eq(meetingSubmittalLinksTable.id, row.meetingSubmittalLinkId), eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meetingId))).limit(1);
+      if (!meetingLink) throw new MeetingScheduleBucketError(404, "meeting_submittal_link_not_accessible");
+      let milestoneId = row.existingTaskId;
+      const taskTitle = `${meetingLink.numberSnapshot}: ${meetingLink.titleSnapshot}`;
+      const taskNotes = [`Meeting ${meeting.title}`, meetingLink.descriptionSnapshot, meeting.notes ? `Meeting notes: ${meeting.notes.slice(0, 500)}` : null].filter(Boolean).join("\n");
+      if (!milestoneId && normalized.policy.createMissingTasks) {
+        const [created] = await tx.insert(projectMilestonesTable).values({
+          projectId, title: taskTitle, dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
+          itemType: "meeting_submittal_task", buildingLevel: meetingLink.floorSnapshot,
+          trade: meetingLink.disciplineSnapshot, responsibleCompany: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+          assignedUserId: normalized.responsibleUserId ?? null, notes: taskNotes,
+          linkedModule: "submittal", linkedId: meetingLink.submittalId,
+          createdById: actor.userId, status: "pending",
+        }).returning();
+        milestoneId = created.id; counts.created++;
+      } else if (milestoneId && normalized.policy.updateExistingTasks) {
+        await tx.update(projectMilestonesTable).set({
+          dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
+          assignedUserId: normalized.responsibleUserId ?? null,
+          responsibleCompany: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+          updatedAt: new Date(),
+        }).where(and(eq(projectMilestonesTable.id, milestoneId), eq(projectMilestonesTable.projectId, projectId)));
+        counts.updated++;
+      } else if (milestoneId && row.action !== "skip_existing") counts.linked++;
+      else if (row.action === "skip_existing") counts.skipped++;
+      else { counts.conflicts++; continue; }
+
+      const placement = await tx.select().from(scheduleItemPlacementsTable)
+        .where(and(eq(scheduleItemPlacementsTable.projectId, projectId), eq(scheduleItemPlacementsTable.sourceType, "milestone"), eq(scheduleItemPlacementsTable.sourceId, milestoneId))).limit(1);
+      if (placement[0]) await tx.update(scheduleItemPlacementsTable).set({ bucketId: bucket.id, updatedById: actor.userId, updatedAt: new Date() }).where(eq(scheduleItemPlacementsTable.id, placement[0].id));
+      else await tx.insert(scheduleItemPlacementsTable).values({ projectId, sourceType: "milestone", sourceId: milestoneId, bucketId: bucket.id, updatedById: actor.userId });
+
+      const existingTaskLink = await tx.select().from(meetingScheduleTaskLinksTable)
+        .where(and(eq(meetingScheduleTaskLinksTable.projectId, projectId), eq(meetingScheduleTaskLinksTable.meetingId, meetingId), eq(meetingScheduleTaskLinksTable.meetingSubmittalLinkId, meetingLink.id))).limit(1);
+      const snapshot = {
+        meetingScheduleBucketLinkId: bucketLink.id, bucketId: bucket.id, milestoneId,
+        numberSnapshot: meetingLink.numberSnapshot, titleSnapshot: meetingLink.titleSnapshot,
+        floorSnapshot: meetingLink.floorSnapshot, disciplineSnapshot: meetingLink.disciplineSnapshot,
+        responsibleSnapshot: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+        statusSnapshot: meetingLink.statusSnapshot,
+        deadlineSnapshot: new Date(`${normalized.generalDeadline}T00:00:00`),
+        meetingNotesSnapshot: meeting.notes || null, lastSyncedById: actor.userId, updatedAt: new Date(),
+      };
+      if (existingTaskLink[0]) await tx.update(meetingScheduleTaskLinksTable).set(snapshot).where(eq(meetingScheduleTaskLinksTable.id, existingTaskLink[0].id));
+      else await tx.insert(meetingScheduleTaskLinksTable).values({ projectId, meetingId, meetingSubmittalLinkId: meetingLink.id, submittalId: meetingLink.submittalId, createdById: actor.userId, ...snapshot });
+    }
+    const summary = { selected: preview.summary.selected, ...counts, bucketId: bucket.id, bucketName: bucket.name, openBucketPath: `/projects/${projectId}/schedule?bucket=${bucket.id}` };
+    await tx.update(meetingScheduleBucketLinksTable).set({ lastSummary: summary, lastSyncedById: actor.userId, updatedAt: new Date() }).where(eq(meetingScheduleBucketLinksTable.id, bucketLink.id));
+    await tx.insert(activityLogTable).values({ projectId, userId: actor.userId, userFullName: actor.fullName ?? "", userCompanyName: actor.companyName ?? "", actionType: mode === "create" ? "create_meeting_schedule_bucket" : "sync_meeting_schedule_bucket", entityType: "meeting", entityId: meetingId, details: JSON.stringify(summary) });
+    return { idempotent: false, summary, links: await getMeetingScheduleBucketLinks(meetingId) };
+  });
+}
+
+async function getMeetingScheduleBucketLinks(meetingId: number) {
+  const bucketLinks = await db.select().from(meetingScheduleBucketLinksTable).where(eq(meetingScheduleBucketLinksTable.meetingId, meetingId)).orderBy(desc(meetingScheduleBucketLinksTable.updatedAt));
+  if (!bucketLinks.length) return [];
+  const tasks = await db.select().from(meetingScheduleTaskLinksTable).where(inArray(meetingScheduleTaskLinksTable.meetingScheduleBucketLinkId, bucketLinks.map(link => link.id))).orderBy(asc(meetingScheduleTaskLinksTable.id));
+  const taskByBucket = new Map<number, typeof tasks>();
+  for (const task of tasks) taskByBucket.set(task.meetingScheduleBucketLinkId, [...(taskByBucket.get(task.meetingScheduleBucketLinkId) || []), task]);
+  return bucketLinks.map(link => ({
+    id: link.id, bucketId: link.bucketId, bucketName: link.bucketNameSnapshot,
+    deadline: link.generalDeadlineSnapshot, responsible: link.responsibleSnapshot,
+    includeMode: link.includeModeSnapshot, summary: link.lastSummary,
+    openPath: `/projects/${link.projectId}/schedule?bucket=${link.bucketId}`,
+    updatedAt: link.updatedAt,
+    tasks: (taskByBucket.get(link.id) || []).map(task => ({
+      id: task.id, milestoneId: task.milestoneId, meetingSubmittalLinkId: task.meetingSubmittalLinkId,
+      submittalId: task.submittalId, number: task.numberSnapshot, title: task.titleSnapshot,
+      floor: task.floorSnapshot, discipline: task.disciplineSnapshot, responsible: task.responsibleSnapshot,
+      status: task.statusSnapshot, deadline: task.deadlineSnapshot,
+      openTaskPath: `/projects/${link.projectId}/schedule?bucket=${link.bucketId}&task=${task.milestoneId}`,
+    })),
+  }));
+}
+
 async function insertMeetingSubmittalLinks(executor: any, projectId: number, meetingId: number, rawSubmittalIds: number[], userId: number) {
   const submittalIds = [...new Set(rawSubmittalIds.filter(Number.isInteger))];
   if (!submittalIds.length) return { requested: 0, added: 0 };
@@ -264,7 +550,8 @@ router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember
       const linkedRfis = await getMeetingRfiLinks(m.id);
       const linkedSubmittals = await getMeetingSubmittalLinks(m.id);
       const clashes = await getMeetingClashLinks(m.id);
-      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, linkedClashes: clashes.links, clashRefreshEvents: clashes.events, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes), legacyViewpoints: parseLegacyViewpointRows(m.notes) };
+      const scheduleBuckets = await getMeetingScheduleBucketLinks(m.id);
+      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, linkedClashes: clashes.links, clashRefreshEvents: clashes.events, scheduleBuckets, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes), legacyViewpoints: parseLegacyViewpointRows(m.notes) };
     }));
     res.json(result);
   } catch (err) {
@@ -486,6 +773,56 @@ router.delete("/projects/:projectId/meetings/:meetingId/submittals/:submittalId"
   }
 });
 
+router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket/preview", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  try {
+    const [meeting] = await db.select().from(meetingMinutesTable)
+      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+    const input = parseScheduleBucketInput(req.body ?? {}, meeting);
+    res.json(await scheduleBucketPreview(db, projectId, meeting, input));
+  } catch (err) {
+    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: "schedule_bucket_preview_failed" });
+  }
+});
+
+router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  try {
+    const [meeting] = await db.select().from(meetingMinutesTable)
+      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+    const result = await applyMeetingScheduleBucket(projectId, meetingId, req.user!, parseScheduleBucketInput(req.body ?? {}, meeting), "create");
+    res.status(result.idempotent ? 200 : 201).json(result);
+  } catch (err) {
+    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: "schedule_bucket_create_failed" });
+  }
+});
+
+router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket/:bucketLinkId/sync", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const meetingId = Number(req.params.meetingId);
+  const bucketLinkId = Number(req.params.bucketLinkId);
+  try {
+    const [meeting, bucketLink] = await Promise.all([
+      db.select().from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1),
+      db.select().from(meetingScheduleBucketLinksTable).where(and(eq(meetingScheduleBucketLinksTable.id, bucketLinkId), eq(meetingScheduleBucketLinksTable.projectId, projectId), eq(meetingScheduleBucketLinksTable.meetingId, meetingId))).limit(1),
+    ]);
+    if (!meeting[0]) { res.status(404).json({ error: "meeting_not_found" }); return; }
+    if (!bucketLink[0]) { res.status(404).json({ error: "schedule_bucket_link_not_found" }); return; }
+    const body = { ...req.body, target_bucket_id: bucketLink[0].bucketId, bucket_name: bucketLink[0].bucketNameSnapshot, idempotency_key: undefined };
+    const result = await applyMeetingScheduleBucket(projectId, meetingId, req.user!, parseScheduleBucketInput(body, meeting[0]), "sync");
+    res.json(result);
+  } catch (err) {
+    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
+    res.status(500).json({ error: "schedule_bucket_sync_failed" });
+  }
+});
+
 // ── GET /projects/:projectId/meetings/:meetingId ──────────────────────────────
 type ClashSyncMode = "initial_load" | "refresh";
 
@@ -598,7 +935,7 @@ router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requirePr
     const attendees = await db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
     const actionItems = await db.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId));
     const clashes = await getMeetingClashLinks(meetingId);
-    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), linkedClashes: clashes.links, clashRefreshEvents: clashes.events, legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes), legacyViewpoints: parseLegacyViewpointRows(meeting.notes) });
+    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), linkedClashes: clashes.links, clashRefreshEvents: clashes.events, scheduleBuckets: await getMeetingScheduleBucketLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes), legacyViewpoints: parseLegacyViewpointRows(meeting.notes) });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }

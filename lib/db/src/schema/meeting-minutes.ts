@@ -1,9 +1,11 @@
-import { pgTable, serial, text, timestamp, integer, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 import { rfisTable } from "./rfis";
 import { submittalsTable } from "./submittals";
 import { clashesTable, clashReportsTable } from "./clash_reports";
+import { projectMilestonesTable } from "./project-milestones";
+import { scheduleBucketsTable } from "./schedule-planner";
 
 export const meetingMinutesTable = pgTable("meeting_minutes", {
   id: serial("id").primaryKey(),
@@ -114,9 +116,65 @@ export const meetingClashRefreshEventsTable = pgTable("meeting_clash_refresh_eve
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Meeting M4: durable Schedule Bucket creation/sync relationship. The idempotency
+// key and request fingerprint make retries deterministic without relying on a
+// bucket name, Submittal number, or mutable task title.
+export const meetingScheduleBucketLinksTable = pgTable("meeting_schedule_bucket_links", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+  bucketId: integer("bucket_id").references(() => scheduleBucketsTable.id).notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  requestFingerprint: text("request_fingerprint").notNull(),
+  bucketNameSnapshot: text("bucket_name_snapshot").notNull(),
+  targetScheduleSnapshot: text("target_schedule_snapshot"),
+  generalDeadlineSnapshot: timestamp("general_deadline_snapshot").notNull(),
+  responsibleSnapshot: text("responsible_snapshot"),
+  assignedUserIdSnapshot: integer("assigned_user_id_snapshot").references(() => usersTable.id),
+  includeModeSnapshot: text("include_mode_snapshot").notNull(),
+  syncPolicySnapshot: jsonb("sync_policy_snapshot").$type<Record<string, unknown>>().notNull().default({}),
+  lastSummary: jsonb("last_summary").$type<Record<string, unknown>>().notNull().default({}),
+  createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+  lastSyncedById: integer("last_synced_by_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  meetingKeyUnique: uniqueIndex("meeting_schedule_bucket_links_meeting_key_uidx").on(t.projectId, t.meetingId, t.idempotencyKey),
+  meetingBucketUnique: uniqueIndex("meeting_schedule_bucket_links_meeting_bucket_uidx").on(t.meetingId, t.bucketId),
+}));
+
+export const meetingScheduleTaskLinksTable = pgTable("meeting_schedule_task_links", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  meetingScheduleBucketLinkId: integer("meeting_schedule_bucket_link_id").references(() => meetingScheduleBucketLinksTable.id).notNull(),
+  meetingId: integer("meeting_id").references(() => meetingMinutesTable.id).notNull(),
+  meetingSubmittalLinkId: integer("meeting_submittal_link_id").references(() => meetingSubmittalLinksTable.id).notNull(),
+  submittalId: integer("submittal_id").references(() => submittalsTable.id).notNull(),
+  milestoneId: integer("milestone_id").references(() => projectMilestonesTable.id).notNull(),
+  bucketId: integer("bucket_id").references(() => scheduleBucketsTable.id).notNull(),
+  numberSnapshot: text("number_snapshot").notNull(),
+  titleSnapshot: text("title_snapshot").notNull(),
+  floorSnapshot: text("floor_snapshot"),
+  disciplineSnapshot: text("discipline_snapshot"),
+  responsibleSnapshot: text("responsible_snapshot"),
+  statusSnapshot: text("status_snapshot").notNull(),
+  deadlineSnapshot: timestamp("deadline_snapshot").notNull(),
+  meetingNotesSnapshot: text("meeting_notes_snapshot"),
+  linkState: text("link_state").notNull().default("active"),
+  createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+  lastSyncedById: integer("last_synced_by_id").references(() => usersTable.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  meetingSubmittalUnique: uniqueIndex("meeting_schedule_task_links_meeting_submittal_uidx").on(t.projectId, t.meetingId, t.meetingSubmittalLinkId),
+  meetingMilestoneUnique: uniqueIndex("meeting_schedule_task_links_meeting_milestone_uidx").on(t.projectId, t.meetingId, t.milestoneId),
+}));
+
 export type MeetingMinutes = typeof meetingMinutesTable.$inferSelect;
 export type MeetingAttendee = typeof meetingAttendeesTable.$inferSelect;
 export type MeetingRfiLink = typeof meetingRfiLinksTable.$inferSelect;
 export type MeetingSubmittalLink = typeof meetingSubmittalLinksTable.$inferSelect;
 export type MeetingClashLink = typeof meetingClashLinksTable.$inferSelect;
 export type MeetingClashRefreshEvent = typeof meetingClashRefreshEventsTable.$inferSelect;
+export type MeetingScheduleBucketLink = typeof meetingScheduleBucketLinksTable.$inferSelect;
+export type MeetingScheduleTaskLink = typeof meetingScheduleTaskLinksTable.$inferSelect;

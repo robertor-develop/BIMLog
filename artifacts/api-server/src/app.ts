@@ -546,6 +546,62 @@ void rfiMigrationReady.then((ready) => {
 
 (async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_schedule_bucket_links (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      bucket_id integer NOT NULL REFERENCES schedule_buckets(id),
+      idempotency_key text NOT NULL,
+      request_fingerprint text NOT NULL,
+      bucket_name_snapshot text NOT NULL,
+      target_schedule_snapshot text,
+      general_deadline_snapshot timestamp NOT NULL,
+      responsible_snapshot text,
+      assigned_user_id_snapshot integer REFERENCES users(id),
+      include_mode_snapshot text NOT NULL,
+      sync_policy_snapshot jsonb NOT NULL DEFAULT '{}'::jsonb,
+      last_summary jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_by_id integer NOT NULL REFERENCES users(id),
+      last_synced_by_id integer REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_key_uidx ON meeting_schedule_bucket_links (project_id, meeting_id, idempotency_key)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_bucket_uidx ON meeting_schedule_bucket_links (meeting_id, bucket_id)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_schedule_task_links (
+      id serial PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_schedule_bucket_link_id integer NOT NULL REFERENCES meeting_schedule_bucket_links(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      meeting_submittal_link_id integer NOT NULL REFERENCES meeting_submittal_links(id),
+      submittal_id integer NOT NULL REFERENCES submittals(id),
+      milestone_id integer NOT NULL REFERENCES project_milestones(id),
+      bucket_id integer NOT NULL REFERENCES schedule_buckets(id),
+      number_snapshot text NOT NULL,
+      title_snapshot text NOT NULL,
+      floor_snapshot text,
+      discipline_snapshot text,
+      responsible_snapshot text,
+      status_snapshot text NOT NULL,
+      deadline_snapshot timestamp NOT NULL,
+      meeting_notes_snapshot text,
+      link_state text NOT NULL DEFAULT 'active',
+      created_by_id integer NOT NULL REFERENCES users(id),
+      last_synced_by_id integer REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT now(),
+      updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_submittal_uidx ON meeting_schedule_task_links (project_id, meeting_id, meeting_submittal_link_id)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_milestone_uidx ON meeting_schedule_task_links (project_id, meeting_id, milestone_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_schedule_task_links_bucket_idx ON meeting_schedule_task_links (project_id, bucket_id)`);
+    console.log("[migration] meeting Schedule bucket links ensured");
+  } catch (e) {
+    console.error("[migration] meeting Schedule bucket link migration failed:", e);
+  }
+})();
+
+(async () => {
+  try {
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_items (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),

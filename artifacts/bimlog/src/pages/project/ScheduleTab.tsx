@@ -253,6 +253,18 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     void load();
   }, [projectId, token]);
 
+  useEffect(() => {
+    if (loading || !items.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const bucketId = Number(params.get("bucket") || 0);
+    const taskId = Number(params.get("task") || 0);
+    if (bucketId) setViewMode("board");
+    if (taskId) {
+      const task = items.find(item => item.source === "milestone" && item.id === taskId);
+      if (task) setSelected(task);
+    }
+  }, [loading, items]);
+
   const linkOptions =
     form.linked_module === "rfi" ? rfis :
     form.linked_module === "submittal" ? submittals :

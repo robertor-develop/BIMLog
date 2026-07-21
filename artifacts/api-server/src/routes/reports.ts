@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import {
   projectsTable, rfisTable, submittalsTable, filesTable,
   activityLogTable, transmittalsTable, changeOrdersTable,
-  meetingMinutesTable, meetingSubmittalLinksTable, meetingClashLinksTable, actionItemsTable, projectMembersTable, usersTable,
+  meetingMinutesTable, meetingSubmittalLinksTable, meetingClashLinksTable, meetingScheduleBucketLinksTable, meetingScheduleTaskLinksTable, actionItemsTable, projectMembersTable, usersTable,
   namingConventionsTable, namingFieldsTable, namingConventionVersionsTable,
 } from "@workspace/db/schema";
 import { eq, and, inArray, desc, ne } from "drizzle-orm";
@@ -343,6 +343,23 @@ router.get("/projects/:projectId/reports/meeting-minutes/pdf", async (req, res) 
           ].filter(Boolean).join(" · ");
           doc.fontSize(8).font("Helvetica").fillColor("#374151")
             .text(`${link.numberSnapshot} — ${link.titleSnapshot}${link.descriptionSnapshot && link.descriptionSnapshot !== link.titleSnapshot ? `: ${link.descriptionSnapshot}` : ""}${details ? ` (${details})` : ""}`, { indent: 16 });
+        });
+      }
+      const scheduleBuckets = await db.select().from(meetingScheduleBucketLinksTable)
+        .where(and(eq(meetingScheduleBucketLinksTable.projectId, projectId), eq(meetingScheduleBucketLinksTable.meetingId, m.id)))
+        .orderBy(meetingScheduleBucketLinksTable.id);
+      for (const bucket of scheduleBuckets) {
+        const tasks = await db.select().from(meetingScheduleTaskLinksTable)
+          .where(eq(meetingScheduleTaskLinksTable.meetingScheduleBucketLinkId, bucket.id))
+          .orderBy(meetingScheduleTaskLinksTable.id);
+        const summary = bucket.lastSummary as Record<string, unknown>;
+        doc.fontSize(8).font("Helvetica-Bold").fillColor("#111").text(`Schedule Bucket: ${bucket.bucketNameSnapshot}`, { indent: 10 });
+        doc.fontSize(8).font("Helvetica").fillColor("#374151")
+          .text(`Created/Synced task links: ${tasks.length}. Deadline ${new Date(bucket.generalDeadlineSnapshot).toLocaleDateString()}. Summary: created ${summary.created ?? 0}, linked ${summary.linked ?? 0}, updated ${summary.updated ?? 0}, skipped ${summary.skipped ?? 0}, conflicts ${summary.conflicts ?? 0}.`, { indent: 16 });
+        tasks.forEach(task => {
+          const details = [task.floorSnapshot, task.disciplineSnapshot, task.responsibleSnapshot, task.statusSnapshot.replace(/[_-]+/g, " "), `Due ${new Date(task.deadlineSnapshot).toLocaleDateString()}`].filter(Boolean).join(" - ");
+          doc.fontSize(8).font("Helvetica").fillColor("#374151")
+            .text(`${task.numberSnapshot} - ${task.titleSnapshot}${details ? ` (${details})` : ""}. Schedule task #${task.milestoneId}.`, { indent: 16 });
         });
       }
       const linkedClashes = await db.select().from(meetingClashLinksTable)
