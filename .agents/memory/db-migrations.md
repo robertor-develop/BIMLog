@@ -25,3 +25,11 @@ The publish diff also proposes `DROP INDEX` for any prod index missing from heli
 
 ## Stale db types after a schema edit
 `@workspace/db` is consumed by api-server via TS **project references** (composite, `emitDeclarationOnly`, outDir `lib/db/dist`). `tsc --noEmit` in api-server reads db's *built* `.d.ts`, NOT the source — so after editing `lib/db/src/schema/*.ts` you get phantom `Property 'X' does not exist on type` errors until you rebuild the declarations: `npx tsc -b lib/db --force`. The esbuild `pnpm build` bundles from source so it is unaffected, but rebuild the refs to get a clean typecheck.
+
+## Prod objects created by runtime SQL must be mirrored by name in drizzle
+Prod tables born from ensure*Schema runtime blocks carry Postgres-default object names (id bigserial -> bigint, UNIQUE constraints named *_key, composite *_pkey, raw CREATE INDEX names). Drizzle must declare the SAME names/shapes (unique("..._key"), primaryKey({name}), uniqueIndex().where(sql), bigserial) or publish preview proposes DROPs/renames, and a serial-vs-bigint mismatch generates invalid `ALTER COLUMN id SET DATA TYPE serial`.
+**Why:** publish diff (drizzle-kit push vs prod) keys unique/PK/index objects by name; FK constraint names (_fkey vs _fk) are the known tolerated exception (prod kept _fkey through many publishes).
+**How to apply:** when reconciling drift, snapshot pg_indexes + pg_constraint from both DBs and match names exactly; fix dev additively (ADD CONSTRAINT/CREATE INDEX), let db-dev-sync push-force clean dev-only leftovers. drizzle .desc() emits DESC NULLS LAST while raw SQL DESC is NULLS FIRST — for byte parity use `.desc().nullsFirst()` in the drizzle index def — it emits plain DESC semantics matching raw SQL, and survives push-force resyncs (manual recreates get reverted).
+
+## CHECK constraint textual parity limit
+Postgres normalizes/flattens parentheses in CHECK expressions at parse time, so byte-exact `pg_get_constraintdef` parity with an old prod constraint may be impossible (e.g. financial_journal_explanation_chk). Compare constraints semantically; a paren-only delta is not drift. FK name-only diffs (drizzle `_fk` vs prod `_fkey`) are historically tolerated by publish.

@@ -7,6 +7,8 @@ import {
   numeric,
   index,
   uniqueIndex,
+  unique,
+  check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { usersTable, companiesTable } from "./users";
@@ -52,6 +54,10 @@ export const financialContextVersionsTable = pgTable(
       t.effectiveFrom,
       t.effectiveTo,
     ),
+    check("financial_context_scope_chk", sql`${t.scopeType} = ANY (ARRAY['company'::text, 'project'::text])`),
+    check("financial_context_project_chk", sql`(${t.scopeType} = 'company' AND ${t.projectId} IS NULL) OR (${t.scopeType} = 'project' AND ${t.projectId} IS NOT NULL)`),
+    check("financial_context_dates_chk", sql`${t.effectiveTo} IS NULL OR ${t.effectiveTo} > ${t.effectiveFrom}`),
+    check("financial_context_reason_chk", sql`length(${t.reason}) >= 3 AND length(${t.reason}) <= 1000`),
   ],
 );
 
@@ -96,6 +102,11 @@ export const financialAuthorityGrantsTable = pgTable(
       t.effectiveFrom,
       t.effectiveTo,
     ),
+    check("financial_grant_scope_chk", sql`${t.scopeType} = ANY (ARRAY['company'::text, 'project'::text])`),
+    check("financial_grant_project_chk", sql`(${t.scopeType} = 'company' AND ${t.projectId} IS NULL) OR (${t.scopeType} = 'project' AND ${t.projectId} IS NOT NULL)`),
+    check("financial_grant_authority_chk", sql`${t.authority} = ANY (ARRAY['financial_viewer'::text, 'cost_preparer'::text, 'cost_reviewer'::text, 'cost_approver'::text, 'financial_administrator'::text, 'auditor'::text])`),
+    check("financial_grant_dates_chk", sql`${t.effectiveTo} IS NULL OR ${t.effectiveTo} > ${t.effectiveFrom}`),
+    check("financial_grant_reason_chk", sql`length(${t.reason}) >= 3 AND length(${t.reason}) <= 1000`),
   ],
 );
 
@@ -114,7 +125,10 @@ export const financialAuthorityRevocationsTable = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (t) => [uniqueIndex("financial_grant_revocation_uidx").on(t.grantId)],
+  (t) => [
+    unique("financial_authority_revocations_grant_id_key").on(t.grantId),
+    check("financial_revocation_reason_chk", sql`length(${t.reason}) >= 3 AND length(${t.reason}) <= 1000`),
+  ],
 );
 
 export const financialApprovalPolicyVersionsTable = pgTable(
@@ -160,6 +174,13 @@ export const financialApprovalPolicyVersionsTable = pgTable(
       t.effectiveFrom,
       t.effectiveTo,
     ),
+    check("financial_policy_scope_chk", sql`${t.scopeType} = ANY (ARRAY['company'::text, 'project'::text])`),
+    check("financial_policy_project_chk", sql`(${t.scopeType} = 'company' AND ${t.projectId} IS NULL) OR (${t.scopeType} = 'project' AND ${t.projectId} IS NOT NULL)`),
+    check("financial_policy_currency_chk", sql`${t.currency} ~ '^[A-Z]{3}$'::text`),
+    check("financial_policy_amount_chk", sql`${t.maxAmount} >= (0)::numeric`),
+    check("financial_policy_state_chk", sql`${t.state} = ANY (ARRAY['active'::text, 'revoked'::text])`),
+    check("financial_policy_dates_chk", sql`${t.effectiveTo} IS NULL OR ${t.effectiveTo} > ${t.effectiveFrom}`),
+    check("financial_policy_reason_chk", sql`length(${t.reason}) >= 3 AND length(${t.reason}) <= 1000`),
   ],
 );
 
@@ -187,6 +208,10 @@ export const financialSuspensionEventsTable = pgTable(
       t.projectId,
       t.occurredAt,
     ),
+    check("financial_suspension_scope_chk", sql`${t.scopeType} = ANY (ARRAY['company'::text, 'project'::text])`),
+    check("financial_suspension_project_chk", sql`(${t.scopeType} = 'company' AND ${t.projectId} IS NULL) OR (${t.scopeType} = 'project' AND ${t.projectId} IS NOT NULL)`),
+    check("financial_suspension_action_chk", sql`${t.action} = ANY (ARRAY['activate'::text, 'release'::text])`),
+    check("financial_suspension_reason_chk", sql`length(${t.reason}) >= 3 AND length(${t.reason}) <= 1000`),
   ],
 );
 
@@ -228,5 +253,7 @@ export const financialAuthorityJournalTable = pgTable(
       t.subjectUserId,
       t.occurredAt,
     ),
+    check("financial_journal_decision_chk", sql`${t.decision} IS NULL OR ${t.decision} = ANY (ARRAY['allow'::text, 'deny'::text])`),
+    check("financial_journal_explanation_chk", sql`(length(${t.explanationEn}) >= 1 AND length(${t.explanationEn}) <= 1000) AND (length(${t.explanationEs}) >= 1 AND length(${t.explanationEs}) <= 1000)`),
   ],
 );

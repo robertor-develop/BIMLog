@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, uniqueIndex, index, jsonb } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 import { rfisTable } from "./rfis";
@@ -48,6 +48,7 @@ export const meetingRfiLinksTable = pgTable("meeting_rfi_links", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   meetingRfiUnique: uniqueIndex("meeting_rfi_links_meeting_rfi_uidx").on(t.meetingId, t.rfiId),
+  projectMeetingIdx: index("meeting_rfi_links_project_meeting_idx").on(t.projectId, t.meetingId),
 }));
 
 // Canonical Submittal identity plus immutable meeting-time display snapshots.
@@ -70,6 +71,7 @@ export const meetingSubmittalLinksTable = pgTable("meeting_submittal_links", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   meetingSubmittalUnique: uniqueIndex("meeting_submittal_links_meeting_submittal_uidx").on(t.meetingId, t.submittalId),
+  projectMeetingIdx: index("meeting_submittal_links_project_meeting_idx").on(t.projectId, t.meetingId),
 }));
 
 // Stable Clash Log identity plus an explicitly refreshed meeting snapshot.
@@ -96,6 +98,7 @@ export const meetingClashLinksTable = pgTable("meeting_clash_links", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
   meetingClashUnique: uniqueIndex("meeting_clash_links_meeting_clash_uidx").on(t.meetingId, t.clashId),
+  projectMeetingIdx: index("meeting_clash_links_project_meeting_idx").on(t.projectId, t.meetingId),
 }));
 
 export const meetingClashRefreshEventsTable = pgTable("meeting_clash_refresh_events", {
@@ -114,7 +117,9 @@ export const meetingClashRefreshEventsTable = pgTable("meeting_clash_refresh_eve
   followUpCount: integer("follow_up_count").default(0).notNull(),
   changedFields: text("changed_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  meetingIdx: index("meeting_clash_refresh_events_meeting_idx").on(t.projectId, t.meetingId, t.createdAt),
+}));
 
 // Meeting M4: durable Schedule Bucket creation/sync relationship. The idempotency
 // key and request fingerprint make retries deterministic without relying on a
