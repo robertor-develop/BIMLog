@@ -32,6 +32,19 @@ After the repo is confirmed, read:
 
 ## Active Now
 
+### Meeting Minutes M3 Canonical Clash Links Accepted
+
+- Accepted candidate `683e9c304ac16d59041c973d40d04f97476dda37` was independently reviewed and applied as content only to clean `origin/master` baseline `13f9fe994ed662552c16f028f4ec21c5143071ea`, without importing candidate ancestry. Clean integration commit: `4b68ade86be7aa0ef7eed4435baff12511ffcd1f`.
+- Meeting Minutes now links existing canonical same-project Clashes by stable `clash_id`. The additive `meeting_clash_links` table stores `meeting_id`, `clash_id`, project/report identity, current link state, removal metadata, user meeting notes, and immutable meeting-time snapshots for clash number, description, floor, discipline, responsible party, group, status, deadline, and source update time. The unique `(meeting_id, clash_id)` index is the duplicate and concurrency boundary.
+- Initial Load Open & Follow-Up imports only eligible Open and Follow Up clashes, excludes Closed, Resolved, Approved, Voided, Superseded, deleted, and inaccessible records, skips existing links, and reports Open/Follow-Up counts. Refresh updates active linked snapshots when canonical status, responsibility, deadline, floor, discipline, or group changes; adds newly eligible clashes; archives links whose source becomes excluded; and never restores a user-removed clash unless explicitly restored.
+- Removing a clash changes only the meeting association state. The canonical Clash record is never created, deleted, or mutated from Meeting Minutes. Open Original Clash resolves the current canonical Clash through same-project authorization. Meeting exports use immutable meeting-time snapshots, while legacy manual `VIEWPOINTS:` rows remain readable and exported separately.
+- Authenticated project membership, meeting access, Clash access, and exact same-project ownership are rechecked server-side. Cross-project and inaccessible Clashes fail safely. Selector/detail/export payloads exclude attachment contents, raw URLs, storage paths, private audit payloads, credentials, and internal filesystem details.
+- Independent M3 focused proof passed 26/26, including Open/Follow-Up loading, all five filters, duplicate/concurrent duplicate protection, concurrent Refresh idempotency, refresh snapshot updates, source-closed archiving, user-removal preservation, explicit restore, Open Original, cross-project rejection, privacy, export snapshots, legacy preservation, reload persistence, and no canonical create/delete. M1 regression passed 17/17 and M2 regression passed 26/26.
+- Real browser evidence passed on English desktop and Spanish 390px mobile with no horizontal overflow, no browser exceptions, and no failed API requests. Finance Build 1 regression passed focused, database, and browser checks. Plans/Entitlements regression passed resolver, database/API, and browser checks. Notification Center/Telegram foundation proof and Build 5 regression passed 132/132.
+- Required validation passed: `git diff --check`, mojibake scan, Living Brief integrity, complete typecheck, and production build. `PLATFORM.md` was regenerated only by the official production build, not copied from the candidate. Isolated database cleanup left zero M1/M2/M3/Build5 test identities.
+- Sanitized external evidence: `C:\Dev\bimlog-tools\evidence\meeting-minutes-m3-integration\20260720-193600`; manifest SHA-256 `9add15111769cf40fd12030071ea5dcd073da8926efd03272de608a8a59b0991`.
+- Nothing was published. M4 was not started.
+
 ### Cost & Financial Control Build 1 Accepted
 
 - Accepted candidate `67b248fc5f158a5a84d2369ef574883f5d0e334d` was independently reviewed and applied as content only to clean `origin/master` baseline `12f5ab3947b0ebd38eed059ad59a72196674f314`, without importing its older ancestry. Clean integration commit: `893bb0b99e1305fc6d722032094b4e08fd75cc3a`.
