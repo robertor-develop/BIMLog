@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `c3a7c809643022abb04b8fe58db043ccd5d828ff`
+Accepted source reconciled through: `97e32503a641c37ff55c0e96806c1cf58af57ae1`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -14,12 +14,11 @@ Living Brief credential persistence and controlled recovery are accepted in sour
 `81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror
 verified until the separate controlled rollout completes.
 
-Security Batch A is now an integration candidate reapplied as content only onto accepted master
-`b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
-`01c60a1bc24649153afd70b5c061b4cb01d79789` and its original parent remain provenance evidence; their old
-ancestry was not imported. The candidate changes only bounded multipart intake, Multer's exact API resolution,
-and associated local regression evidence. It does not start SheetJS or Batches B-I and is not published, deployed,
-production verified, or customer verified.
+Security Batch A is accepted in source at integration commit `97e32503a641c37ff55c0e96806c1cf58af57ae1`, directly based on accepted
+master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
+`01c60a1bc24649153afd70b5c061b4cb01d79789` remains provenance evidence only; its ancestry was not imported.
+The accepted correction is not published, deployed, production verified, customer verified, or extended to
+SheetJS/Batches B-I.
 
 Owner credential continuity decision in the same local candidate: current working integration credential material must
 remain operational and unchanged during ongoing platform development. This temporary owner-approved exception is not
@@ -89,12 +88,11 @@ is reserved for genuine completion.
 - The full dependency audit records 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
   tar-only correction. They require a separately scoped dependency-security review and are not silently
   folded into the publish unblock.
-- Security Batch A has been reapplied as content only onto accepted master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`.
-  Its source scope is Multer 2.2.0, centralized bounded multipart parsing across 20 accepted upload endpoints,
-  controlled bilingual parser responses, and storage compensation at the canonical Files and Submittal attachment
-  boundaries. Final acceptance requires the reconciled Living Brief gate, invalidated focused checks, one full root
-  build, clean integration and acceptance commits, normal push, and exact remote verification. SheetJS/Batches B-I
-  remain unstarted.
+- Security Batch A is accepted in source at `97e32503a641c37ff55c0e96806c1cf58af57ae1`. It uses exact Multer 2.2.0 and centralized
+  bounded multipart parsing across 20 accepted upload endpoints with controlled bilingual failures and durable
+  storage compensation. Frozen install, finite multipart and Living Brief matrices, typecheck, one complete build
+  sequence, semantic lock audit, encoding, privacy, and diff gates passed. Normal push and exact remote equality
+  verification remain the release boundary. SheetJS/Batches B-I remain unstarted.
 - The owner credential continuity exception is active only during ongoing platform development. Public/production
   launch requires separately approved managed-secret migration, durable backup/recovery, controlled rotation/revocation
   as appropriate, callback continuity, rollback proof, history remediation, and independent verification.

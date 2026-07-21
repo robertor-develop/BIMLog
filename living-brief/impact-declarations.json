@@ -776,6 +776,76 @@
         "pnpm-lock.yaml"
       ],
       "reviewedChangeSha256": "0d0477f6890b89e26ac33317782452bc3a2779c16f2f03f2db1317dcd2879e98"
+    },
+    {
+      "taskId": "security-dependency-remediation-batch-a-source-acceptance",
+      "reviewedThroughCommit": "97e32503a641c37ff55c0e96806c1cf58af57ae1",
+      "reviewedAt": "2026-07-21T21:53:24.099Z",
+      "status": "accepted_source_pending_push_verification",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to ecosystem doctrine beyond the already reviewed integration commit."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to claude beyond the already reviewed integration commit."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to quality beyond the already reviewed integration commit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to vision beyond the already reviewed integration commit."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to platform beyond the already reviewed integration commit."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to plugin beyond the already reviewed integration commit."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to report design system beyond the already reviewed integration commit."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to standards register beyond the already reviewed integration commit."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Batch A source acceptance at the integration commit while preserving separate push, publication, deployment, production, and customer-verification states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded passed validation, current residual audit counts, remaining normal-push verification, and continued deferral of SheetJS and Batches B-I."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further semantic change to audit beyond the already reviewed integration commit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d784dbd9a75501923c66abf2d98b1831254cfed00f97f8d63009ffc55da250f1"
     }
   ]
 }

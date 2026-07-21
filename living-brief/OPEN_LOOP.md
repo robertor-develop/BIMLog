@@ -73,21 +73,22 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   privacy and diff checks; independent review; then separate controlled production migration/publish that
   preserves the current valid production credential.
 
-### Security Batch A integration candidate
+### Security Batch A accepted in source
 
-- Preserved candidate `01c60a1bc24649153afd70b5c061b4cb01d79789` was reapplied as content only onto accepted
-  `origin/master` `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`; its original ancestry was not imported.
-- The bounded scope is exact Multer 2.2.0 resolution, centralized finite multipart limits across 20 accepted upload
-  endpoints, bilingual controlled parser failures, and storage compensation for canonical Files and Submittal
-  attachment uploads. Authentication, membership/permission order, route-specific file sizes, MIME/extension
-  validation, storage isolation, and product behavior remain in place.
-- `pnpm-workspace.yaml` remains the sole override authority; every accepted override and platform exclusion, including
-  `tar: 7.5.20`, is preserved. Multer 2.1.1 must resolve zero times. SheetJS and Batches B-I remain unstarted.
-- Remaining integration gates are the exact semantic-impact/state reconciliation, invalidated focused verification,
-  one final root build, clean integration and acceptance commits, normal push, and exact remote equality verification.
-  No publish, deployment, production/customer access, or external security testing is authorized.
-- The one persistent UI safety notice remains a single visible notice, not multiple warnings, account suspension,
-  product compromise, or evidence that the bounded source correction failed.
+- Integration commit `97e32503a641c37ff55c0e96806c1cf58af57ae1` applies the preserved Batch A content directly to accepted master
+  `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6` without importing the old candidate ancestry.
+- Source acceptance covers exact Multer 2.2.0, centralized finite multipart limits across 20 upload endpoints,
+  controlled bilingual parser failures, authorization-order preservation, and durable storage compensation.
+- Validation passed: frozen install; finite multipart and Living Brief matrices; shared-library, API, and full-root
+  typecheck; the complete workspace build with the documented PORT setting; semantic lock, diff, encoding, privacy,
+  and exact-candidate-content checks. The initial build invocation stopped only because PORT was omitted; already
+  passed checks were not rerun, and the unfinished workspace build phase then passed with `PORT=3000`.
+- Current registry audit remains 94 records: 0 critical, 41 high, 46 moderate, and 7 low. Multer contributes zero
+  remaining records. These counts do not claim SheetJS or Batches B-I were corrected; those batches remain unstarted
+  and require separate authorization.
+- Remaining boundary: normal push of the integration and acceptance commits plus exact remote ancestry/equality
+  verification. No publish, deployment, production/customer access, or external security testing occurred.
+- The one persistent UI safety notice remains one visible notice only and is excluded from Telegram.
 ### Terminal-turn Telegram notification rule
 
 - Every explicitly assigned task work cycle that stops must send one sanitized structured Telegram terminal-turn
