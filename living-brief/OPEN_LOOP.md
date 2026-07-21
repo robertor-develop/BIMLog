@@ -4,6 +4,33 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-21
 
+### Coordinator Command Center Build 1 Accepted
+
+- Candidate `c3e8fb030ed544ede6e4f83ea2cd4dab656d01f3` was independently reviewed and applied as
+  content only to clean `origin/master` baseline `2c1ffc4b5c08618610cdb70b42fcb08556726f1c`, without
+  importing candidate ancestry. Clean integration commit:
+  `7fb3a1b54dc378bba38cf79a2747766b62baa741`.
+- One read-only Lens-first project action register presents current actionable `lens_viewpoints`,
+  RFIs, Submittals, Meeting actions, and canonical Schedule milestones. It retains source module and
+  ID, project ID, display identity, original and presentation status, responsibility, deadline,
+  floor, discipline, real priority, source update time, authoritative deep link, and bounded related
+  Meeting, Schedule, and Lens identities without creating or mutating a second authority.
+- Lens eligibility is active Open, Follow Up, and Waiting Design only. Its safe identity includes
+  server, display, viewpoint, Navisworks GUID, BIMLog physical ID, lifecycle, revision, supersession,
+  grouping, source-project/server/physical/display lineage, and imported-lineage status. No Clash
+  table is queried, aggregated, substituted, or presented as current coordination truth.
+- The bounded deterministic endpoint rechecks the latest project-company binding, active membership,
+  scoped read authority, current Lens/RFI entitlements, and a reasoned exact-project super-admin rule.
+  Five bounded source queries run without row-by-row expansion; failed or unauthorized sources remain
+  visibly partial with null counts, and an honest zero result never falls back to all records.
+- Independent review corrected Spanish presentation and original-status labels. Focused proof passed
+  35/35, Lens identity regression 15/15, entitlement resolver 41/41, API/frontend typechecks, and real
+  production-component English desktop plus exact 390px Spanish mobile behavior for loading, populated,
+  partial-failure, retry, deep-link, and honest-empty states.
+- This acceptance is source-only until the separately reported push gate. It does not claim publication,
+  deployment, production/customer access, or field verification. Build 2, Clash aggregation, saved views,
+  bulk actions, notifications/digests, AI, feedback capture, canonical mutations, and sync writes remain deferred.
+
 ### Integration candidate: Living Brief Content Reconciliation Build 2
 
 - Candidate `6146c136ce33f9828edb16fddf9c4fffa1b7b839` was based on `9297740` and correctly expanded

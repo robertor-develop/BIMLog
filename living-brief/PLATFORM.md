@@ -51,6 +51,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/contact.ts
 - artifacts/api-server/src/routes/conventions.ts
 - artifacts/api-server/src/routes/coordination.ts
+- artifacts/api-server/src/routes/coordinator-actions.ts
 - artifacts/api-server/src/routes/dashboard_briefing.ts
 - artifacts/api-server/src/routes/documents.ts
 - artifacts/api-server/src/routes/downloads.ts
@@ -120,6 +121,7 @@ It changes only when the code structure or curated architectural facts change.
 - featuresRouter
 - financialControlsRouter
 - financialBudgetsRouter
+- coordinatorActionsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -133,6 +135,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-control-plane.ui-fixture.ts
 - artifacts/api-server/src/lib/ai-usage.ts
 - artifacts/api-server/src/lib/cloud-files.ts
+- artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/entitlement-contract.ts
 - artifacts/api-server/src/lib/entitlement-resolver.behavior.ts
@@ -274,6 +277,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
 - artifacts/bimlog/src/pages/project/ConventionBuilder.tsx
 - artifacts/bimlog/src/pages/project/CoordinationHub.tsx
+- artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx
 - artifacts/bimlog/src/pages/project/DirectoryTab.tsx
 - artifacts/bimlog/src/pages/project/FilesTab.tsx
 - artifacts/bimlog/src/pages/project/IntegrationsTab.tsx

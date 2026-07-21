@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `178462eef6edbde08e2d44efb0a944b812f98480`
+Accepted source reconciled through: `7fb3a1b54dc378bba38cf79a2747766b62baa741`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -11,6 +11,11 @@ its review, clean commit, push, and later deployment gates pass.
 
 ## Shipped and accepted in source
 
+- Coordinator Command Center Build 1: a Lens/Viewpoints-first read-only project action register for
+  actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks. Canonical
+  modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,
+  bounded deterministic pagination, visible partial-source failures, honest empty results, bilingual
+  desktop/mobile behavior, and zero mutation/AI use are accepted. Clash aggregation and Build 2 remain deferred.
 - RFI Builds 1-7: canonical lifecycle and attachments; non-destructive crop/replacement/show-hide;
   Standard PDF, editable DOCX, factual Audit PDF, native-fidelity Complete PDF, and four-sheet RFI
   Register Excel. Build 8 has not started.
