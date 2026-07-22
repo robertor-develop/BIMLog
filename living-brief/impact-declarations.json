@@ -1124,6 +1124,77 @@
         "newParent": "e67ca65be7ff633aa888241c941c557818c446d9",
         "scope": "Semantic union of accepted Telegram Product Build 6 truth and Living Brief lockout hotfix truth."
       }
+    },
+    {
+      "taskId": "living-brief-lockout-recovery-hotfix-source-acceptance",
+      "reviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "reviewedAt": "2026-07-22T00:24:00.000Z",
+      "status": "source_accepted_pending_deployment_verification",
+      "captureTiming": "normal_acceptance_review",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not change ecosystem doctrine beyond the already reviewed hotfix."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further AI/development operating rule beyond the already reviewed non-circular recovery rule."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance adds no further quality doctrine beyond the already reviewed recovery gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not change product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source acceptance does not change deterministic platform structure beyond the reviewed integration commit."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, behavior, packaging, or field state changes in this acceptance record."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact, delivery, or report design behavior changes in this acceptance record."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard was adopted or changed by this acceptance record."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the hotfix as accepted in source while keeping publication, deployment, production verification, and field access confirmation pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Moved the lockout hotfix from local candidate to accepted source with rollout verification still open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Updated the dated audit finding from urgent candidate to accepted source hotfix without claiming deployment."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cfada32a7f4cf340320c9eeadb88bae16507a59ad640622dc1b40d9bf3e262fb"
     }
   ]
 }

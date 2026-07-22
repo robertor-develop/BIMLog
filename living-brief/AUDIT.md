@@ -536,7 +536,7 @@ non-sensitive reason.
 
 ## Living Brief Lockout Recovery Audit - 2026-07-21
 
-Status: urgent hotfix candidate; source-only until review, push, deployment, and production verification.
+Status: accepted source hotfix at `3da420d9068e26d80169aa74aefca67eba860b47`; publication, deployment, production verification, and field access confirmation remain pending.
 
 Roberto reported that the deployed Living Brief still rejected the expected gate password. Independent code review
 found a circular recovery path in accepted source: `POST /living-brief/password` required the observed credential

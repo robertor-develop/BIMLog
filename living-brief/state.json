@@ -1,30 +1,19 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+  "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "db9ea388f60d21e35723f9c6d494700780f0a79df54b871e91a03f17092121d6",
+  "bundleSha256": "db714a06a6ba26e5f396b7ceaf75620ed46a389f763803b0b5999014cc93776c",
   "impact": {
-    "baselineCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+    "baselineCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
     "changedPaths": [
-      "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
-      "artifacts/api-server/src/routes/living_brief.ts",
-      "artifacts/bimlog/src/living-brief-harness.tsx",
-      "artifacts/bimlog/src/pages/LivingBrief.tsx",
       "living-brief/AUDIT.md",
-      "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
-      "living-brief/catalog.json",
-      "living-brief/impact-declarations.json",
-      "scripts/check-living-brief.mjs",
-      "scripts/test-living-brief-architecture.mjs",
-      "scripts/test-living-brief-gate.mjs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -35,35 +24,35 @@
       "sha256": "95fc786414057f0a9eb5ccc7aef636458e779bfc74648a0ccfa4f36934e7ada0",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
       "sha256": "deadf4105bc28ab666d379299aa44e178cf462a171f37f6910fe787c15cced9c",
-      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "sourceChangedAt": "2026-07-21T20:15:13-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
       "sha256": "4681e2365fd115664a7f8f850aa30cc21134d06be2d9a9756cf13ba465888292",
-      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "sourceChangedAt": "2026-07-21T20:15:13-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "vision",
@@ -71,11 +60,11 @@
       "sha256": "6b4ba280e7b08d6579fdef263bfc0f7f0823bcce5fc08fffdfb0fbc7d8f2740c",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "platform",
@@ -83,11 +72,11 @@
       "sha256": "7854e7806a3878cedc7829c6bc757a3c034fec8ffee7fc4a14144d7e7ea3bf9c",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "plugin",
@@ -95,11 +84,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -107,11 +96,11 @@
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "standards_register",
@@ -119,47 +108,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "14f0b7025a33a3aa07bc77d9ce268c649a2a39fc2a10024befb6c2c8da84b1b3",
-      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
+      "sha256": "f2da163b956bd8677ae546cff3ba3baed450b38e53eeb52ced880f5c51bf5754",
+      "sourceChangedAt": "2026-07-22T00:24:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "091442628a380ccc160a65df17dd0ee0efe41f546aa1709e8bd754d1f4107b12",
-      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
+      "sha256": "8625cb5fd64bbe7efdb4c06a9d1bc12fd0566294e879e454d5590af1b5f0ea9e",
+      "sourceChangedAt": "2026-07-22T00:24:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "07bc8fea67caa1e632051b9a601192460b79d0ecc7326e1308c4f90bed4e9a16",
-      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
+      "sha256": "db3b1b38acf7c259d98db23bed00d7f813ac99ee3b02d2971993bb570ed44539",
+      "sourceChangedAt": "2026-07-22T00:24:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "reconciledThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:24:00.000Z"
     }
   ]
 }

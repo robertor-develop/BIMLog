@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `6f9c3f18d524723361f5f0ab45cf18f160566311`
+Accepted source reconciled through: `3da420d9068e26d80169aa74aefca67eba860b47`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -14,11 +14,13 @@ Living Brief credential persistence and controlled recovery are accepted in sour
 `81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror
 verified until the separate controlled rollout completes.
 
-Urgent lockout hotfix candidate: Roberto reports the deployed Living Brief still rejects the gate password. Accepted
-source contained a circular Super Administrator recovery path because reset required a brief-access token that could
-only be obtained with the unavailable gate password. The hotfix candidate removes that circular dependency for
-authenticated, transaction-time revalidated Super Administrators while preserving audit, version, rate-limit,
-rollback, and session-invalidation controls. This is source work only until reviewed, pushed, deployed, and verified.
+Urgent lockout hotfix accepted in source at `3da420d9068e26d80169aa74aefca67eba860b47` on Telegram Build 6 master
+`e67ca65be7ff633aa888241c941c557818c446d9`: Roberto reported the deployed Living Brief still rejected the gate
+password, and source review found a circular Super Administrator recovery path because reset required a brief-access
+token that could only be obtained with the unavailable gate password. The accepted source fix removes that circular
+dependency for authenticated, transaction-time revalidated Super Administrators while preserving audit, version,
+rate-limit, rollback, and session-invalidation controls. Publication, deployment, production verification, and
+Roberto's field access confirmation remain separate pending rollout steps.
 
 Security Batch A is accepted in source at integration commit `97e32503a641c37ff55c0e96806c1cf58af57ae1`, directly based on accepted
 master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
