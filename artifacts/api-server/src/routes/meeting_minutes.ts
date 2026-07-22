@@ -2,51 +2,111 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "@workspace/db";
 import {
-  meetingMinutesTable, meetingAttendeesTable, actionItemsTable,
-  activityLogTable, usersTable, rfisTable, meetingRfiLinksTable,
-  submittalsTable, meetingSubmittalLinksTable,
-  clashesTable, clashReportsTable, meetingClashLinksTable, meetingClashRefreshEventsTable,
-  linkedItemsTable, agentInsightsTable, projectMembersTable,
-  projectMilestonesTable, scheduleBucketsTable, scheduleItemPlacementsTable,
-  meetingScheduleBucketLinksTable, meetingScheduleTaskLinksTable,
+  meetingMinutesTable,
+  meetingAttendeesTable,
+  actionItemsTable,
+  activityLogTable,
+  usersTable,
+  rfisTable,
+  meetingRfiLinksTable,
+  submittalsTable,
+  meetingSubmittalLinksTable,
+  clashesTable,
+  clashReportsTable,
+  meetingClashLinksTable,
+  meetingClashRefreshEventsTable,
+  lensViewpointsTable,
+  meetingLensViewpointLinksTable,
+  linkedItemsTable,
+  agentInsightsTable,
+  projectMembersTable,
+  projectMilestonesTable,
+  scheduleBucketsTable,
+  scheduleItemPlacementsTable,
+  meetingScheduleBucketLinksTable,
+  meetingScheduleTaskLinksTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, ne, isNull, or, ilike, inArray, asc, sql } from "drizzle-orm";
-import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import {
+  eq,
+  and,
+  desc,
+  ne,
+  isNull,
+  or,
+  ilike,
+  inArray,
+  asc,
+  sql,
+} from "drizzle-orm";
+import {
+  authMiddleware,
+  requireProjectMember,
+  requirePermission,
+} from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { singleFileUpload } from "../middlewares/multipart";
 import { extractFileText } from "../lib/extract-file-text";
 
-const FFMPEG_PATH = (() => { try { const { execSync } = require("child_process"); return execSync("which ffmpeg").toString().trim() || "ffmpeg"; } catch { return "ffmpeg"; } })();
+const FFMPEG_PATH = (() => {
+  try {
+    const { execSync } = require("child_process");
+    return execSync("which ffmpeg").toString().trim() || "ffmpeg";
+  } catch {
+    return "ffmpeg";
+  }
+})();
 
 const router: Router = Router();
 
 const parseLegacyRfiRows = (notes: string | null) => {
   if (!notes) return [];
-  const block = notes.match(/(?:^|\n\n)RFIS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  const block = notes.match(
+    /(?:^|\n\n)RFIS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/,
+  )?.[1];
   if (!block) return [];
-  return block.split("\n").filter(Boolean).map((line) => {
-    const [rfiNumber = "", description = "", status = "", responsible = ""] = line.split("|").map((value) => value.trim());
-    return { rfiNumber, description, status, responsible };
-  });
+  return block
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const [rfiNumber = "", description = "", status = "", responsible = ""] =
+        line.split("|").map((value) => value.trim());
+      return { rfiNumber, description, status, responsible };
+    });
 };
 
 const parseLegacyDeliverableRows = (notes: string | null) => {
   if (!notes) return [];
-  const block = notes.match(/(?:^|\n\n)DELIVERABLES:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  const block = notes.match(
+    /(?:^|\n\n)DELIVERABLES:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/,
+  )?.[1];
   if (!block) return [];
-  return block.split("\n").filter(Boolean).map((line) => ({ raw: line }));
+  return block
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => ({ raw: line }));
 };
 
 const parseLegacyViewpointRows = (notes: string | null) => {
   if (!notes) return [];
-  const block = notes.match(/(?:^|\n\n)VIEWPOINTS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/)?.[1];
+  const block = notes.match(
+    /(?:^|\n\n)VIEWPOINTS:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/,
+  )?.[1];
   if (!block) return [];
-  return block.split("\n").filter(Boolean).map((line) => ({ raw: line }));
+  return block
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => ({ raw: line }));
 };
 
-type DisciplineBucket = "plumbing" | "hvac" | "fireProtection" | "electrical" | "other" | null;
+type DisciplineBucket =
+  | "plumbing"
+  | "hvac"
+  | "fireProtection"
+  | "electrical"
+  | "other"
+  | null;
 
 function cleanLabel(value: string | null | undefined) {
   return value?.trim().replace(/[_-]+/g, " ").replace(/\s+/g, " ") || null;
@@ -54,34 +114,61 @@ function cleanLabel(value: string | null | undefined) {
 
 function titleLabel(value: string | null | undefined) {
   const cleaned = cleanLabel(value);
-  return cleaned ? cleaned.replace(/\b\w/g, character => character.toUpperCase()) : null;
+  return cleaned
+    ? cleaned.replace(/\b\w/g, (character) => character.toUpperCase())
+    : null;
 }
 
 function submittalDiscipline(submittal: typeof submittalsTable.$inferSelect) {
   if (cleanLabel(submittal.trade)) return titleLabel(submittal.trade);
-  const fallback = `${submittal.submittalCategory || ""} ${submittal.submittalType || ""}`.toLowerCase();
+  const fallback =
+    `${submittal.submittalCategory || ""} ${submittal.submittalType || ""}`.toLowerCase();
   if (fallback.includes("plumb")) return "Plumbing";
-  if (fallback.includes("hvac") || fallback.includes("mechanical")) return "HVAC";
-  if (fallback.includes("fire protection") || fallback.includes("fire suppression") || fallback.includes("sprinkler")) return "Fire Protection";
+  if (fallback.includes("hvac") || fallback.includes("mechanical"))
+    return "HVAC";
+  if (
+    fallback.includes("fire protection") ||
+    fallback.includes("fire suppression") ||
+    fallback.includes("sprinkler")
+  )
+    return "Fire Protection";
   if (fallback.includes("electr")) return "Electrical";
   return null;
 }
 
-function submittalDisciplineBucket(discipline: string | null): DisciplineBucket {
+function submittalDisciplineBucket(
+  discipline: string | null,
+): DisciplineBucket {
   const key = discipline?.toLowerCase() || "";
   if (!key) return null;
   if (key.includes("plumb")) return "plumbing";
   if (key.includes("hvac") || key.includes("mechanical")) return "hvac";
-  if (key.includes("fire protection") || key.includes("fire suppression") || key.includes("sprinkler")) return "fireProtection";
+  if (
+    key.includes("fire protection") ||
+    key.includes("fire suppression") ||
+    key.includes("sprinkler")
+  )
+    return "fireProtection";
   if (key.includes("electr")) return "electrical";
   return "other";
 }
 
-function submittalResponsible(submittal: typeof submittalsTable.$inferSelect, assignedToName?: string | null) {
-  return cleanLabel(submittal.ballInCourt || assignedToName || submittal.responsibleCompany || submittal.submittedToPerson || submittal.submittedToCompany);
+function submittalResponsible(
+  submittal: typeof submittalsTable.$inferSelect,
+  assignedToName?: string | null,
+) {
+  return cleanLabel(
+    submittal.ballInCourt ||
+      assignedToName ||
+      submittal.responsibleCompany ||
+      submittal.submittedToPerson ||
+      submittal.submittedToCompany,
+  );
 }
 
-const serializeMeetingSubmittalLink = (link: typeof meetingSubmittalLinksTable.$inferSelect) => ({
+const serializeMeetingSubmittalLink = (
+  link: typeof meetingSubmittalLinksTable.$inferSelect,
+) => ({
   id: link.id,
   submittalId: link.submittalId,
   number: link.numberSnapshot,
@@ -98,13 +185,17 @@ const serializeMeetingSubmittalLink = (link: typeof meetingSubmittalLinksTable.$
 });
 
 async function getMeetingSubmittalLinks(meetingId: number) {
-  const links = await db.select().from(meetingSubmittalLinksTable)
+  const links = await db
+    .select()
+    .from(meetingSubmittalLinksTable)
     .where(eq(meetingSubmittalLinksTable.meetingId, meetingId))
     .orderBy(asc(meetingSubmittalLinksTable.id));
   return links.map(serializeMeetingSubmittalLink);
 }
 
-const serializeMeetingRfiLink = (link: typeof meetingRfiLinksTable.$inferSelect) => ({
+const serializeMeetingRfiLink = (
+  link: typeof meetingRfiLinksTable.$inferSelect,
+) => ({
   id: link.id,
   rfiId: link.rfiId,
   rfiNumber: link.rfiNumberSnapshot,
@@ -117,7 +208,9 @@ const serializeMeetingRfiLink = (link: typeof meetingRfiLinksTable.$inferSelect)
 });
 
 async function getMeetingRfiLinks(meetingId: number) {
-  const links = await db.select().from(meetingRfiLinksTable)
+  const links = await db
+    .select()
+    .from(meetingRfiLinksTable)
     .where(eq(meetingRfiLinksTable.meetingId, meetingId))
     .orderBy(asc(meetingRfiLinksTable.id));
   return links.map(serializeMeetingRfiLink);
@@ -126,7 +219,12 @@ async function getMeetingRfiLinks(meetingId: number) {
 const ELIGIBLE_CLASH_STATUSES = ["open", "follow_up"] as const;
 
 function clashDiscipline(clash: typeof clashesTable.$inferSelect) {
-  return [cleanLabel(clash.discipline1), cleanLabel(clash.discipline2)].filter(Boolean).filter((value, index, all) => all.indexOf(value) === index).join(" / ") || null;
+  return (
+    [cleanLabel(clash.discipline1), cleanLabel(clash.discipline2)]
+      .filter(Boolean)
+      .filter((value, index, all) => all.indexOf(value) === index)
+      .join(" / ") || null
+  );
 }
 
 function clashSnapshot(clash: typeof clashesTable.$inferSelect) {
@@ -143,51 +241,167 @@ function clashSnapshot(clash: typeof clashesTable.$inferSelect) {
   };
 }
 
-const serializeMeetingClashLink = (link: typeof meetingClashLinksTable.$inferSelect) => ({
-  id: link.id, clashId: link.clashId, clashReportId: link.clashReportIdSnapshot,
-  number: link.clashNumberSnapshot, description: link.descriptionSnapshot,
-  floor: link.floorSnapshot, discipline: link.disciplineSnapshot,
-  responsible: link.responsibleSnapshot, group: link.groupSnapshot,
-  status: link.statusSnapshot, deadline: link.deadlineSnapshot,
-  meetingNotes: link.meetingNotes, linkState: link.linkState,
-  firstLoadedAt: link.firstLoadedAt, lastRefreshedAt: link.lastRefreshedAt,
+const serializeMeetingClashLink = (
+  link: typeof meetingClashLinksTable.$inferSelect,
+) => ({
+  id: link.id,
+  clashId: link.clashId,
+  clashReportId: link.clashReportIdSnapshot,
+  number: link.clashNumberSnapshot,
+  description: link.descriptionSnapshot,
+  floor: link.floorSnapshot,
+  discipline: link.disciplineSnapshot,
+  responsible: link.responsibleSnapshot,
+  group: link.groupSnapshot,
+  status: link.statusSnapshot,
+  deadline: link.deadlineSnapshot,
+  meetingNotes: link.meetingNotes,
+  linkState: link.linkState,
+  firstLoadedAt: link.firstLoadedAt,
+  lastRefreshedAt: link.lastRefreshedAt,
   valuesMode: "explicit_snapshot" as const,
 });
 
 async function getMeetingClashLinks(meetingId: number) {
-  const links = await db.select().from(meetingClashLinksTable)
-    .where(eq(meetingClashLinksTable.meetingId, meetingId)).orderBy(asc(meetingClashLinksTable.id));
-  const events = await db.select().from(meetingClashRefreshEventsTable)
-    .where(eq(meetingClashRefreshEventsTable.meetingId, meetingId)).orderBy(desc(meetingClashRefreshEventsTable.createdAt));
-  return { links: links.map(serializeMeetingClashLink), events: events.map(event => ({
-    eventType: event.eventType, added: event.addedCount, updated: event.updatedCount,
-    unchanged: event.unchangedCount, sourceExcluded: event.excludedCount,
-    userExcluded: event.userExcludedCount, failures: event.failureCount,
-    open: event.openCount, followUp: event.followUpCount,
-    changedFields: JSON.parse(event.changedFields || "[]"), createdAt: event.createdAt,
-  })) };
+  const links = await db
+    .select()
+    .from(meetingClashLinksTable)
+    .where(eq(meetingClashLinksTable.meetingId, meetingId))
+    .orderBy(asc(meetingClashLinksTable.id));
+  const events = await db
+    .select()
+    .from(meetingClashRefreshEventsTable)
+    .where(eq(meetingClashRefreshEventsTable.meetingId, meetingId))
+    .orderBy(desc(meetingClashRefreshEventsTable.createdAt));
+  return {
+    links: links.map(serializeMeetingClashLink),
+    events: events.map((event) => ({
+      eventType: event.eventType,
+      added: event.addedCount,
+      updated: event.updatedCount,
+      unchanged: event.unchangedCount,
+      sourceExcluded: event.excludedCount,
+      userExcluded: event.userExcludedCount,
+      failures: event.failureCount,
+      open: event.openCount,
+      followUp: event.followUpCount,
+      changedFields: JSON.parse(event.changedFields || "[]"),
+      createdAt: event.createdAt,
+    })),
+  };
 }
 
-async function requireMeeting(executor: any, projectId: number, meetingId: number) {
-  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+async function requireMeeting(
+  executor: any,
+  projectId: number,
+  meetingId: number,
+) {
+  const [meeting] = await executor
+    .select({ id: meetingMinutesTable.id })
+    .from(meetingMinutesTable)
+    .where(
+      and(
+        eq(meetingMinutesTable.id, meetingId),
+        eq(meetingMinutesTable.projectId, projectId),
+        isNull(meetingMinutesTable.deletedAt),
+      ),
+    )
+    .limit(1);
   if (!meeting) throw new MeetingClashLinkError(404, "meeting_not_found");
 }
 
 class MeetingClashLinkError extends Error {
-  constructor(public status: number, public code: string) { super(code); }
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
 }
 
 class MeetingRfiLinkError extends Error {
-  constructor(public status: number, public code: string) { super(code); }
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
 }
 
 class MeetingSubmittalLinkError extends Error {
-  constructor(public status: number, public code: string) { super(code); }
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
 }
 
 class MeetingScheduleBucketError extends Error {
-  constructor(public status: number, public code: string) { super(code); }
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
+}
+
+class MeetingLensViewpointLinkError extends Error {
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
+}
+
+const lensDisplayCode = (
+  viewpoint: typeof lensViewpointsTable.$inferSelect,
+) => {
+  if (viewpoint.displayId) return viewpoint.displayId;
+  if (viewpoint.tradeFloorSeq != null) {
+    const trade = (viewpoint.trade || "??").slice(0, 2).toUpperCase();
+    const suffix =
+      viewpoint.tradeFloorSeqCorrection != null
+        ? `-R${viewpoint.tradeFloorSeqCorrection}`
+        : "";
+    return `${trade}-${String(viewpoint.tradeFloorSeq).padStart(3, "0")}${suffix}`;
+  }
+  return viewpoint.viewpointId;
+};
+
+const serializeMeetingLensViewpointLink = (
+  link: typeof meetingLensViewpointLinksTable.$inferSelect,
+) => ({
+  id: link.id,
+  lensViewpointId: link.lensViewpointId,
+  viewpointId: link.viewpointIdSnapshot,
+  displayId: link.displayIdSnapshot,
+  code: link.displayIdSnapshot || link.viewpointIdSnapshot,
+  navisworksGuid: link.navisworksGuidSnapshot,
+  bimlogPhysicalId: link.bimlogPhysicalIdSnapshot,
+  sourcePhysicalId: link.sourcePhysicalIdSnapshot,
+  sourceDisplayLabel: link.sourceDisplayLabelSnapshot,
+  issueGroupId: link.issueGroupIdSnapshot,
+  note: link.noteSnapshot,
+  floor: link.floorSnapshot,
+  trade: link.tradeSnapshot,
+  responsible: link.responsibleSnapshot,
+  status: link.statusSnapshot,
+  lifecycleStatus: link.lifecycleStatusSnapshot,
+  revisionNumber: link.revisionNumberSnapshot,
+  capturedAt: link.capturedAtSnapshot,
+  linkedAt: link.createdAt,
+  valuesMode: "snapshot" as const,
+});
+
+async function getMeetingLensViewpointLinks(meetingId: number) {
+  const links = await db
+    .select()
+    .from(meetingLensViewpointLinksTable)
+    .where(eq(meetingLensViewpointLinksTable.meetingId, meetingId))
+    .orderBy(asc(meetingLensViewpointLinksTable.id));
+  return links.map(serializeMeetingLensViewpointLink);
 }
 
 type ScheduleBucketPolicy = {
@@ -218,7 +432,9 @@ function dayInput(value: Date | string | null | undefined) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function defaultMeetingBucketName(meeting: typeof meetingMinutesTable.$inferSelect) {
+function defaultMeetingBucketName(
+  meeting: typeof meetingMinutesTable.$inferSelect,
+) {
   return `Meeting Follow-Up – ${new Date(meeting.meetingDate).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}`;
 }
 
@@ -226,20 +442,53 @@ function safeText(value: unknown, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
 }
 
-function parseScheduleBucketInput(body: any, meeting: typeof meetingMinutesTable.$inferSelect): ScheduleBucketInput {
-  const includeMode = ["all", "pending", "selected"].includes(body?.include_mode) ? body.include_mode : "all";
-  const selected: number[] = Array.isArray(body?.selected_meeting_submittal_link_ids)
-    ? Array.from(new Set<number>(body.selected_meeting_submittal_link_ids.map(Number).filter(Number.isInteger)))
+function parseScheduleBucketInput(
+  body: any,
+  meeting: typeof meetingMinutesTable.$inferSelect,
+): ScheduleBucketInput {
+  const includeMode = ["all", "pending", "selected"].includes(
+    body?.include_mode,
+  )
+    ? body.include_mode
+    : "all";
+  const selected: number[] = Array.isArray(
+    body?.selected_meeting_submittal_link_ids,
+  )
+    ? Array.from(
+        new Set<number>(
+          body.selected_meeting_submittal_link_ids
+            .map(Number)
+            .filter(Number.isInteger),
+        ),
+      )
     : [];
-  const deadlineText = safeText(body?.general_deadline, dayInput(meeting.meetingDate));
-  if (!deadlineText || Number.isNaN(new Date(`${deadlineText}T00:00:00`).getTime())) throw new MeetingScheduleBucketError(400, "schedule_deadline_invalid");
-  if (includeMode === "selected" && !selected.length) throw new MeetingScheduleBucketError(400, "schedule_selection_required");
+  const deadlineText = safeText(
+    body?.general_deadline,
+    dayInput(meeting.meetingDate),
+  );
+  if (
+    !deadlineText ||
+    Number.isNaN(new Date(`${deadlineText}T00:00:00`).getTime())
+  )
+    throw new MeetingScheduleBucketError(400, "schedule_deadline_invalid");
+  if (includeMode === "selected" && !selected.length)
+    throw new MeetingScheduleBucketError(400, "schedule_selection_required");
   return {
     idempotencyKey: safeText(body?.idempotency_key) || undefined,
     bucketName: safeText(body?.bucket_name, defaultMeetingBucketName(meeting)),
-    targetBucketId: body?.target_bucket_id === undefined || body?.target_bucket_id === null || body?.target_bucket_id === "" ? null : Number(body.target_bucket_id),
+    targetBucketId:
+      body?.target_bucket_id === undefined ||
+      body?.target_bucket_id === null ||
+      body?.target_bucket_id === ""
+        ? null
+        : Number(body.target_bucket_id),
     generalDeadline: deadlineText,
-    responsibleUserId: body?.responsible_user_id === undefined || body?.responsible_user_id === null || body?.responsible_user_id === "" ? null : Number(body.responsible_user_id),
+    responsibleUserId:
+      body?.responsible_user_id === undefined ||
+      body?.responsible_user_id === null ||
+      body?.responsible_user_id === ""
+        ? null
+        : Number(body.responsible_user_id),
     responsibleCompany: safeText(body?.responsible_company) || null,
     includeMode,
     selectedMeetingSubmittalLinkIds: selected,
@@ -252,58 +501,146 @@ function parseScheduleBucketInput(body: any, meeting: typeof meetingMinutesTable
 }
 
 function requestFingerprint(input: ScheduleBucketInput) {
-  return crypto.createHash("sha256").update(JSON.stringify({
-    bucketName: input.bucketName,
-    targetBucketId: input.targetBucketId ?? null,
-    generalDeadline: input.generalDeadline,
-    responsibleUserId: input.responsibleUserId ?? null,
-    responsibleCompany: input.responsibleCompany ?? null,
-    includeMode: input.includeMode,
-    selectedMeetingSubmittalLinkIds: [...input.selectedMeetingSubmittalLinkIds].sort((a, b) => a - b),
-    policy: input.policy,
-  })).digest("hex");
+  return crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        bucketName: input.bucketName,
+        targetBucketId: input.targetBucketId ?? null,
+        generalDeadline: input.generalDeadline,
+        responsibleUserId: input.responsibleUserId ?? null,
+        responsibleCompany: input.responsibleCompany ?? null,
+        includeMode: input.includeMode,
+        selectedMeetingSubmittalLinkIds: [
+          ...input.selectedMeetingSubmittalLinkIds,
+        ].sort((a, b) => a - b),
+        policy: input.policy,
+      }),
+    )
+    .digest("hex");
 }
 
-async function scheduleBucketPreview(executor: any, projectId: number, meeting: typeof meetingMinutesTable.$inferSelect, input: ScheduleBucketInput) {
+async function scheduleBucketPreview(
+  executor: any,
+  projectId: number,
+  meeting: typeof meetingMinutesTable.$inferSelect,
+  input: ScheduleBucketInput,
+) {
   type ExistingMilestone = { id: number; linkedId: number | null };
-  type ExistingTaskLink = { milestoneId: number; meetingSubmittalLinkId: number };
+  type ExistingTaskLink = {
+    milestoneId: number;
+    meetingSubmittalLinkId: number;
+  };
   type PreviewRow = { action: string };
-  const links = await executor.select().from(meetingSubmittalLinksTable)
-    .where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meeting.id)))
+  const links = await executor
+    .select()
+    .from(meetingSubmittalLinksTable)
+    .where(
+      and(
+        eq(meetingSubmittalLinksTable.projectId, projectId),
+        eq(meetingSubmittalLinksTable.meetingId, meeting.id),
+      ),
+    )
     .orderBy(asc(meetingSubmittalLinksTable.id));
   const linkIds = links.map((link: any) => link.id);
-  if (input.selectedMeetingSubmittalLinkIds.some(id => !linkIds.includes(id))) throw new MeetingScheduleBucketError(404, "meeting_submittal_link_not_accessible");
-  const openActions = await executor.select({ linkedSubmittalId: actionItemsTable.linkedSubmittalId }).from(actionItemsTable)
-    .where(and(eq(actionItemsTable.projectId, projectId), eq(actionItemsTable.meetingId, meeting.id), ne(actionItemsTable.status, "completed"), ne(actionItemsTable.status, "cancelled")));
-  const pendingSubmittalIds = new Set(openActions.map((row: any) => row.linkedSubmittalId).filter(Boolean));
+  if (input.selectedMeetingSubmittalLinkIds.some((id) => !linkIds.includes(id)))
+    throw new MeetingScheduleBucketError(
+      404,
+      "meeting_submittal_link_not_accessible",
+    );
+  const openActions = await executor
+    .select({ linkedSubmittalId: actionItemsTable.linkedSubmittalId })
+    .from(actionItemsTable)
+    .where(
+      and(
+        eq(actionItemsTable.projectId, projectId),
+        eq(actionItemsTable.meetingId, meeting.id),
+        ne(actionItemsTable.status, "completed"),
+        ne(actionItemsTable.status, "cancelled"),
+      ),
+    );
+  const pendingSubmittalIds = new Set(
+    openActions.map((row: any) => row.linkedSubmittalId).filter(Boolean),
+  );
   const selectedLinks = links.filter((link: any) => {
-    if (input.includeMode === "selected") return input.selectedMeetingSubmittalLinkIds.includes(link.id);
-    if (input.includeMode === "pending") return pendingSubmittalIds.has(link.submittalId);
+    if (input.includeMode === "selected")
+      return input.selectedMeetingSubmittalLinkIds.includes(link.id);
+    if (input.includeMode === "pending")
+      return pendingSubmittalIds.has(link.submittalId);
     return true;
   });
   const submittalIds = selectedLinks.map((link: any) => link.submittalId);
-  const submittals = submittalIds.length ? await executor.select().from(submittalsTable)
-    .where(and(inArray(submittalsTable.id, submittalIds), eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))) : [];
-  if (submittals.length !== submittalIds.length) throw new MeetingScheduleBucketError(404, "submittal_not_accessible");
-  const milestones = submittalIds.length ? await executor.select().from(projectMilestonesTable)
-    .where(and(eq(projectMilestonesTable.projectId, projectId), eq(projectMilestonesTable.linkedModule, "submittal"), inArray(projectMilestonesTable.linkedId, submittalIds))) : [];
-  const taskLinks = selectedLinks.length ? await executor.select().from(meetingScheduleTaskLinksTable)
-    .where(and(eq(meetingScheduleTaskLinksTable.projectId, projectId), eq(meetingScheduleTaskLinksTable.meetingId, meeting.id), inArray(meetingScheduleTaskLinksTable.meetingSubmittalLinkId, selectedLinks.map((link: any) => link.id)))) : [];
-  const milestoneBySubmittal = new Map<number, ExistingMilestone>(milestones.map((m: ExistingMilestone) => [m.linkedId ?? 0, m]));
-  const taskLinkByMeetingLink = new Map<number, ExistingTaskLink>(taskLinks.map((link: ExistingTaskLink) => [link.meetingSubmittalLinkId, link]));
+  const submittals = submittalIds.length
+    ? await executor
+        .select()
+        .from(submittalsTable)
+        .where(
+          and(
+            inArray(submittalsTable.id, submittalIds),
+            eq(submittalsTable.projectId, projectId),
+            isNull(submittalsTable.deletedAt),
+          ),
+        )
+    : [];
+  if (submittals.length !== submittalIds.length)
+    throw new MeetingScheduleBucketError(404, "submittal_not_accessible");
+  const milestones = submittalIds.length
+    ? await executor
+        .select()
+        .from(projectMilestonesTable)
+        .where(
+          and(
+            eq(projectMilestonesTable.projectId, projectId),
+            eq(projectMilestonesTable.linkedModule, "submittal"),
+            inArray(projectMilestonesTable.linkedId, submittalIds),
+          ),
+        )
+    : [];
+  const taskLinks = selectedLinks.length
+    ? await executor
+        .select()
+        .from(meetingScheduleTaskLinksTable)
+        .where(
+          and(
+            eq(meetingScheduleTaskLinksTable.projectId, projectId),
+            eq(meetingScheduleTaskLinksTable.meetingId, meeting.id),
+            inArray(
+              meetingScheduleTaskLinksTable.meetingSubmittalLinkId,
+              selectedLinks.map((link: any) => link.id),
+            ),
+          ),
+        )
+    : [];
+  const milestoneBySubmittal = new Map<number, ExistingMilestone>(
+    milestones.map((m: ExistingMilestone) => [m.linkedId ?? 0, m]),
+  );
+  const taskLinkByMeetingLink = new Map<number, ExistingTaskLink>(
+    taskLinks.map((link: ExistingTaskLink) => [
+      link.meetingSubmittalLinkId,
+      link,
+    ]),
+  );
   const rows = selectedLinks.map((link: any) => {
     const existingTaskLink = taskLinkByMeetingLink.get(link.id);
     const existingMilestone = milestoneBySubmittal.get(link.submittalId);
     const action = existingTaskLink
-      ? (input.policy.updateExistingTasks ? "update_existing" : "skip_existing")
+      ? input.policy.updateExistingTasks
+        ? "update_existing"
+        : "skip_existing"
       : existingMilestone && input.policy.linkExistingTasks
-        ? (input.policy.updateExistingTasks ? "link_and_update_existing" : "link_existing")
+        ? input.policy.updateExistingTasks
+          ? "link_and_update_existing"
+          : "link_existing"
         : existingMilestone
           ? "needs_user_review"
           : input.policy.createMissingTasks
-          ? "create_task"
-          : "needs_user_review";
-    const existingTaskId = existingTaskLink?.milestoneId || (action === "link_existing" || action === "link_and_update_existing" ? existingMilestone?.id : null);
+            ? "create_task"
+            : "needs_user_review";
+    const existingTaskId =
+      existingTaskLink?.milestoneId ||
+      (action === "link_existing" || action === "link_and_update_existing"
+        ? existingMilestone?.id
+        : null);
     return {
       meetingSubmittalLinkId: link.id,
       submittalId: link.submittalId,
@@ -311,7 +648,10 @@ async function scheduleBucketPreview(executor: any, projectId: number, meeting: 
       title: link.titleSnapshot,
       floor: link.floorSnapshot,
       discipline: link.disciplineSnapshot,
-      responsible: input.responsibleCompany || link.responsibleSnapshot || "Needs user review",
+      responsible:
+        input.responsibleCompany ||
+        link.responsibleSnapshot ||
+        "Needs user review",
       status: link.statusSnapshot,
       deadline: input.generalDeadline,
       action,
@@ -320,203 +660,576 @@ async function scheduleBucketPreview(executor: any, projectId: number, meeting: 
   });
   const summary = {
     selected: rows.length,
-    create: rows.filter((row: PreviewRow) => row.action === "create_task").length,
-    link: rows.filter((row: PreviewRow) => row.action === "link_existing" || row.action === "link_and_update_existing").length,
-    update: rows.filter((row: PreviewRow) => row.action === "update_existing" || row.action === "link_and_update_existing").length,
-    skipped: rows.filter((row: PreviewRow) => row.action === "skip_existing").length,
-    conflicts: rows.filter((row: PreviewRow) => row.action === "needs_user_review").length,
+    create: rows.filter((row: PreviewRow) => row.action === "create_task")
+      .length,
+    link: rows.filter(
+      (row: PreviewRow) =>
+        row.action === "link_existing" ||
+        row.action === "link_and_update_existing",
+    ).length,
+    update: rows.filter(
+      (row: PreviewRow) =>
+        row.action === "update_existing" ||
+        row.action === "link_and_update_existing",
+    ).length,
+    skipped: rows.filter((row: PreviewRow) => row.action === "skip_existing")
+      .length,
+    conflicts: rows.filter(
+      (row: PreviewRow) => row.action === "needs_user_review",
+    ).length,
   };
-  return { bucketName: input.bucketName, targetBucketId: input.targetBucketId, generalDeadline: input.generalDeadline, includeMode: input.includeMode, policy: input.policy, summary, rows };
+  return {
+    bucketName: input.bucketName,
+    targetBucketId: input.targetBucketId,
+    generalDeadline: input.generalDeadline,
+    includeMode: input.includeMode,
+    policy: input.policy,
+    summary,
+    rows,
+  };
 }
 
-async function resolveScheduleBucket(executor: any, projectId: number, input: ScheduleBucketInput, userId: number) {
+async function resolveScheduleBucket(
+  executor: any,
+  projectId: number,
+  input: ScheduleBucketInput,
+  userId: number,
+) {
   if (input.targetBucketId) {
-    const [bucket] = await executor.select().from(scheduleBucketsTable)
-      .where(and(eq(scheduleBucketsTable.id, input.targetBucketId), eq(scheduleBucketsTable.projectId, projectId))).limit(1);
-    if (!bucket) throw new MeetingScheduleBucketError(404, "schedule_bucket_not_accessible");
+    const [bucket] = await executor
+      .select()
+      .from(scheduleBucketsTable)
+      .where(
+        and(
+          eq(scheduleBucketsTable.id, input.targetBucketId),
+          eq(scheduleBucketsTable.projectId, projectId),
+        ),
+      )
+      .limit(1);
+    if (!bucket)
+      throw new MeetingScheduleBucketError(
+        404,
+        "schedule_bucket_not_accessible",
+      );
     return bucket;
   }
   const name = input.bucketName || "Meeting Follow-Up";
-  const inserted = await executor.insert(scheduleBucketsTable).values({ projectId, name, bucketType: "meeting_follow_up", sortOrder: 110, createdById: userId })
-    .onConflictDoNothing({ target: [scheduleBucketsTable.projectId, scheduleBucketsTable.name] }).returning();
+  const inserted = await executor
+    .insert(scheduleBucketsTable)
+    .values({
+      projectId,
+      name,
+      bucketType: "meeting_follow_up",
+      sortOrder: 110,
+      createdById: userId,
+    })
+    .onConflictDoNothing({
+      target: [scheduleBucketsTable.projectId, scheduleBucketsTable.name],
+    })
+    .returning();
   if (inserted[0]) return inserted[0];
-  const [bucket] = await executor.select().from(scheduleBucketsTable)
-    .where(and(eq(scheduleBucketsTable.projectId, projectId), eq(scheduleBucketsTable.name, name))).limit(1);
-  if (!bucket) throw new MeetingScheduleBucketError(409, "schedule_bucket_conflict");
+  const [bucket] = await executor
+    .select()
+    .from(scheduleBucketsTable)
+    .where(
+      and(
+        eq(scheduleBucketsTable.projectId, projectId),
+        eq(scheduleBucketsTable.name, name),
+      ),
+    )
+    .limit(1);
+  if (!bucket)
+    throw new MeetingScheduleBucketError(409, "schedule_bucket_conflict");
   return bucket;
 }
 
-async function applyMeetingScheduleBucket(projectId: number, meetingId: number, actor: { userId: number; fullName?: string; companyName?: string }, input: ScheduleBucketInput, mode: "create" | "sync") {
-  if (!input.idempotencyKey && mode === "create") throw new MeetingScheduleBucketError(400, "idempotency_key_required");
+async function applyMeetingScheduleBucket(
+  projectId: number,
+  meetingId: number,
+  actor: { userId: number; fullName?: string; companyName?: string },
+  input: ScheduleBucketInput,
+  mode: "create" | "sync",
+) {
+  if (!input.idempotencyKey && mode === "create")
+    throw new MeetingScheduleBucketError(400, "idempotency_key_required");
   return db.transaction(async (tx) => {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(${projectId}, ${meetingId})`);
-    const [meeting] = await tx.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-    if (!meeting) throw new MeetingScheduleBucketError(404, "meeting_not_found");
-    const normalized = { ...input, bucketName: input.bucketName || defaultMeetingBucketName(meeting) };
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(${projectId}, ${meetingId})`,
+    );
+    const [meeting] = await tx
+      .select()
+      .from(meetingMinutesTable)
+      .where(
+        and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (!meeting)
+      throw new MeetingScheduleBucketError(404, "meeting_not_found");
+    const normalized = {
+      ...input,
+      bucketName: input.bucketName || defaultMeetingBucketName(meeting),
+    };
     const fingerprint = requestFingerprint(normalized);
     if (normalized.responsibleUserId) {
-      const [assignee] = await tx.select({ id: usersTable.id }).from(usersTable)
-        .innerJoin(projectMembersTable, and(eq(projectMembersTable.userId, usersTable.id), eq(projectMembersTable.projectId, projectId)))
-        .where(and(eq(usersTable.id, normalized.responsibleUserId), eq(projectMembersTable.status, "active"))).limit(1);
-      if (!assignee) throw new MeetingScheduleBucketError(404, "assignee_not_accessible");
+      const [assignee] = await tx
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .innerJoin(
+          projectMembersTable,
+          and(
+            eq(projectMembersTable.userId, usersTable.id),
+            eq(projectMembersTable.projectId, projectId),
+          ),
+        )
+        .where(
+          and(
+            eq(usersTable.id, normalized.responsibleUserId),
+            eq(projectMembersTable.status, "active"),
+          ),
+        )
+        .limit(1);
+      if (!assignee)
+        throw new MeetingScheduleBucketError(404, "assignee_not_accessible");
     }
     if (mode === "create" && normalized.idempotencyKey) {
-      const [existingByKey] = await tx.select().from(meetingScheduleBucketLinksTable)
-        .where(and(eq(meetingScheduleBucketLinksTable.projectId, projectId), eq(meetingScheduleBucketLinksTable.meetingId, meetingId), eq(meetingScheduleBucketLinksTable.idempotencyKey, normalized.idempotencyKey))).limit(1);
+      const [existingByKey] = await tx
+        .select()
+        .from(meetingScheduleBucketLinksTable)
+        .where(
+          and(
+            eq(meetingScheduleBucketLinksTable.projectId, projectId),
+            eq(meetingScheduleBucketLinksTable.meetingId, meetingId),
+            eq(
+              meetingScheduleBucketLinksTable.idempotencyKey,
+              normalized.idempotencyKey,
+            ),
+          ),
+        )
+        .limit(1);
       if (existingByKey) {
-        if (existingByKey.requestFingerprint !== fingerprint) throw new MeetingScheduleBucketError(409, "idempotency_payload_conflict");
-        return { idempotent: true, summary: existingByKey.lastSummary, links: await getMeetingScheduleBucketLinks(meetingId) };
+        if (existingByKey.requestFingerprint !== fingerprint)
+          throw new MeetingScheduleBucketError(
+            409,
+            "idempotency_payload_conflict",
+          );
+        return {
+          idempotent: true,
+          summary: existingByKey.lastSummary,
+          links: await getMeetingScheduleBucketLinks(meetingId),
+        };
       }
     }
-    const preview = await scheduleBucketPreview(tx, projectId, meeting, normalized);
-    const bucket = await resolveScheduleBucket(tx, projectId, normalized, actor.userId);
-    const existingMeetingBucket = await tx.select().from(meetingScheduleBucketLinksTable)
-      .where(and(eq(meetingScheduleBucketLinksTable.meetingId, meetingId), eq(meetingScheduleBucketLinksTable.bucketId, bucket.id))).limit(1);
+    const preview = await scheduleBucketPreview(
+      tx,
+      projectId,
+      meeting,
+      normalized,
+    );
+    const bucket = await resolveScheduleBucket(
+      tx,
+      projectId,
+      normalized,
+      actor.userId,
+    );
+    const existingMeetingBucket = await tx
+      .select()
+      .from(meetingScheduleBucketLinksTable)
+      .where(
+        and(
+          eq(meetingScheduleBucketLinksTable.meetingId, meetingId),
+          eq(meetingScheduleBucketLinksTable.bucketId, bucket.id),
+        ),
+      )
+      .limit(1);
     let bucketLink = existingMeetingBucket[0];
     if (!bucketLink) {
-      [bucketLink] = await tx.insert(meetingScheduleBucketLinksTable).values({
-        projectId, meetingId, bucketId: bucket.id,
-        idempotencyKey: normalized.idempotencyKey || `sync-${meetingId}-${bucket.id}`,
-        requestFingerprint: fingerprint,
-        bucketNameSnapshot: bucket.name,
-        targetScheduleSnapshot: bucket.bucketType,
-        generalDeadlineSnapshot: new Date(`${normalized.generalDeadline}T00:00:00`),
-        responsibleSnapshot: normalized.responsibleCompany,
-        assignedUserIdSnapshot: normalized.responsibleUserId,
-        includeModeSnapshot: normalized.includeMode,
-        syncPolicySnapshot: normalized.policy,
-        lastSummary: {},
-        createdById: actor.userId,
-        lastSyncedById: actor.userId,
-      }).returning();
+      [bucketLink] = await tx
+        .insert(meetingScheduleBucketLinksTable)
+        .values({
+          projectId,
+          meetingId,
+          bucketId: bucket.id,
+          idempotencyKey:
+            normalized.idempotencyKey || `sync-${meetingId}-${bucket.id}`,
+          requestFingerprint: fingerprint,
+          bucketNameSnapshot: bucket.name,
+          targetScheduleSnapshot: bucket.bucketType,
+          generalDeadlineSnapshot: new Date(
+            `${normalized.generalDeadline}T00:00:00`,
+          ),
+          responsibleSnapshot: normalized.responsibleCompany,
+          assignedUserIdSnapshot: normalized.responsibleUserId,
+          includeModeSnapshot: normalized.includeMode,
+          syncPolicySnapshot: normalized.policy,
+          lastSummary: {},
+          createdById: actor.userId,
+          lastSyncedById: actor.userId,
+        })
+        .returning();
     }
-    const counts = { created: 0, linked: 0, updated: 0, skipped: 0, conflicts: 0 };
+    const counts = {
+      created: 0,
+      linked: 0,
+      updated: 0,
+      skipped: 0,
+      conflicts: 0,
+    };
     for (const row of preview.rows) {
-      const [meetingLink] = await tx.select().from(meetingSubmittalLinksTable)
-        .where(and(eq(meetingSubmittalLinksTable.id, row.meetingSubmittalLinkId), eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meetingId))).limit(1);
-      if (!meetingLink) throw new MeetingScheduleBucketError(404, "meeting_submittal_link_not_accessible");
+      const [meetingLink] = await tx
+        .select()
+        .from(meetingSubmittalLinksTable)
+        .where(
+          and(
+            eq(meetingSubmittalLinksTable.id, row.meetingSubmittalLinkId),
+            eq(meetingSubmittalLinksTable.projectId, projectId),
+            eq(meetingSubmittalLinksTable.meetingId, meetingId),
+          ),
+        )
+        .limit(1);
+      if (!meetingLink)
+        throw new MeetingScheduleBucketError(
+          404,
+          "meeting_submittal_link_not_accessible",
+        );
       let milestoneId = row.existingTaskId;
       const taskTitle = `${meetingLink.numberSnapshot}: ${meetingLink.titleSnapshot}`;
-      const taskNotes = [`Meeting ${meeting.title}`, meetingLink.descriptionSnapshot, meeting.notes ? `Meeting notes: ${meeting.notes.slice(0, 500)}` : null].filter(Boolean).join("\n");
+      const taskNotes = [
+        `Meeting ${meeting.title}`,
+        meetingLink.descriptionSnapshot,
+        meeting.notes ? `Meeting notes: ${meeting.notes.slice(0, 500)}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
       if (!milestoneId && normalized.policy.createMissingTasks) {
-        const [created] = await tx.insert(projectMilestonesTable).values({
-          projectId, title: taskTitle, dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
-          itemType: "meeting_submittal_task", buildingLevel: meetingLink.floorSnapshot,
-          trade: meetingLink.disciplineSnapshot, responsibleCompany: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
-          assignedUserId: normalized.responsibleUserId ?? null, notes: taskNotes,
-          linkedModule: "submittal", linkedId: meetingLink.submittalId,
-          createdById: actor.userId, status: "pending",
-        }).returning();
-        milestoneId = created.id; counts.created++;
+        const [created] = await tx
+          .insert(projectMilestonesTable)
+          .values({
+            projectId,
+            title: taskTitle,
+            dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
+            itemType: "meeting_submittal_task",
+            buildingLevel: meetingLink.floorSnapshot,
+            trade: meetingLink.disciplineSnapshot,
+            responsibleCompany:
+              normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+            assignedUserId: normalized.responsibleUserId ?? null,
+            notes: taskNotes,
+            linkedModule: "submittal",
+            linkedId: meetingLink.submittalId,
+            createdById: actor.userId,
+            status: "pending",
+          })
+          .returning();
+        milestoneId = created.id;
+        counts.created++;
       } else if (milestoneId && normalized.policy.updateExistingTasks) {
-        await tx.update(projectMilestonesTable).set({
-          dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
-          assignedUserId: normalized.responsibleUserId ?? null,
-          responsibleCompany: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
-          updatedAt: new Date(),
-        }).where(and(eq(projectMilestonesTable.id, milestoneId), eq(projectMilestonesTable.projectId, projectId)));
+        await tx
+          .update(projectMilestonesTable)
+          .set({
+            dueDate: new Date(`${normalized.generalDeadline}T00:00:00`),
+            assignedUserId: normalized.responsibleUserId ?? null,
+            responsibleCompany:
+              normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(projectMilestonesTable.id, milestoneId),
+              eq(projectMilestonesTable.projectId, projectId),
+            ),
+          );
         counts.updated++;
       } else if (milestoneId && row.action !== "skip_existing") counts.linked++;
       else if (row.action === "skip_existing") counts.skipped++;
-      else { counts.conflicts++; continue; }
+      else {
+        counts.conflicts++;
+        continue;
+      }
 
-      const placement = await tx.select().from(scheduleItemPlacementsTable)
-        .where(and(eq(scheduleItemPlacementsTable.projectId, projectId), eq(scheduleItemPlacementsTable.sourceType, "milestone"), eq(scheduleItemPlacementsTable.sourceId, milestoneId))).limit(1);
-      if (placement[0]) await tx.update(scheduleItemPlacementsTable).set({ bucketId: bucket.id, updatedById: actor.userId, updatedAt: new Date() }).where(eq(scheduleItemPlacementsTable.id, placement[0].id));
-      else await tx.insert(scheduleItemPlacementsTable).values({ projectId, sourceType: "milestone", sourceId: milestoneId, bucketId: bucket.id, updatedById: actor.userId });
+      const placement = await tx
+        .select()
+        .from(scheduleItemPlacementsTable)
+        .where(
+          and(
+            eq(scheduleItemPlacementsTable.projectId, projectId),
+            eq(scheduleItemPlacementsTable.sourceType, "milestone"),
+            eq(scheduleItemPlacementsTable.sourceId, milestoneId),
+          ),
+        )
+        .limit(1);
+      if (placement[0])
+        await tx
+          .update(scheduleItemPlacementsTable)
+          .set({
+            bucketId: bucket.id,
+            updatedById: actor.userId,
+            updatedAt: new Date(),
+          })
+          .where(eq(scheduleItemPlacementsTable.id, placement[0].id));
+      else
+        await tx
+          .insert(scheduleItemPlacementsTable)
+          .values({
+            projectId,
+            sourceType: "milestone",
+            sourceId: milestoneId,
+            bucketId: bucket.id,
+            updatedById: actor.userId,
+          });
 
-      const existingTaskLink = await tx.select().from(meetingScheduleTaskLinksTable)
-        .where(and(eq(meetingScheduleTaskLinksTable.projectId, projectId), eq(meetingScheduleTaskLinksTable.meetingId, meetingId), eq(meetingScheduleTaskLinksTable.meetingSubmittalLinkId, meetingLink.id))).limit(1);
+      const existingTaskLink = await tx
+        .select()
+        .from(meetingScheduleTaskLinksTable)
+        .where(
+          and(
+            eq(meetingScheduleTaskLinksTable.projectId, projectId),
+            eq(meetingScheduleTaskLinksTable.meetingId, meetingId),
+            eq(
+              meetingScheduleTaskLinksTable.meetingSubmittalLinkId,
+              meetingLink.id,
+            ),
+          ),
+        )
+        .limit(1);
       const snapshot = {
-        meetingScheduleBucketLinkId: bucketLink.id, bucketId: bucket.id, milestoneId,
-        numberSnapshot: meetingLink.numberSnapshot, titleSnapshot: meetingLink.titleSnapshot,
-        floorSnapshot: meetingLink.floorSnapshot, disciplineSnapshot: meetingLink.disciplineSnapshot,
-        responsibleSnapshot: normalized.responsibleCompany || meetingLink.responsibleSnapshot,
+        meetingScheduleBucketLinkId: bucketLink.id,
+        bucketId: bucket.id,
+        milestoneId,
+        numberSnapshot: meetingLink.numberSnapshot,
+        titleSnapshot: meetingLink.titleSnapshot,
+        floorSnapshot: meetingLink.floorSnapshot,
+        disciplineSnapshot: meetingLink.disciplineSnapshot,
+        responsibleSnapshot:
+          normalized.responsibleCompany || meetingLink.responsibleSnapshot,
         statusSnapshot: meetingLink.statusSnapshot,
         deadlineSnapshot: new Date(`${normalized.generalDeadline}T00:00:00`),
-        meetingNotesSnapshot: meeting.notes || null, lastSyncedById: actor.userId, updatedAt: new Date(),
+        meetingNotesSnapshot: meeting.notes || null,
+        lastSyncedById: actor.userId,
+        updatedAt: new Date(),
       };
-      if (existingTaskLink[0]) await tx.update(meetingScheduleTaskLinksTable).set(snapshot).where(eq(meetingScheduleTaskLinksTable.id, existingTaskLink[0].id));
-      else await tx.insert(meetingScheduleTaskLinksTable).values({ projectId, meetingId, meetingSubmittalLinkId: meetingLink.id, submittalId: meetingLink.submittalId, createdById: actor.userId, ...snapshot });
+      if (existingTaskLink[0])
+        await tx
+          .update(meetingScheduleTaskLinksTable)
+          .set(snapshot)
+          .where(eq(meetingScheduleTaskLinksTable.id, existingTaskLink[0].id));
+      else
+        await tx
+          .insert(meetingScheduleTaskLinksTable)
+          .values({
+            projectId,
+            meetingId,
+            meetingSubmittalLinkId: meetingLink.id,
+            submittalId: meetingLink.submittalId,
+            createdById: actor.userId,
+            ...snapshot,
+          });
     }
-    const summary = { selected: preview.summary.selected, ...counts, bucketId: bucket.id, bucketName: bucket.name, openBucketPath: `/projects/${projectId}/schedule?bucket=${bucket.id}` };
-    await tx.update(meetingScheduleBucketLinksTable).set({ lastSummary: summary, lastSyncedById: actor.userId, updatedAt: new Date() }).where(eq(meetingScheduleBucketLinksTable.id, bucketLink.id));
-    await tx.insert(activityLogTable).values({ projectId, userId: actor.userId, userFullName: actor.fullName ?? "", userCompanyName: actor.companyName ?? "", actionType: mode === "create" ? "create_meeting_schedule_bucket" : "sync_meeting_schedule_bucket", entityType: "meeting", entityId: meetingId, details: JSON.stringify(summary) });
-    return { idempotent: false, summary, links: await getMeetingScheduleBucketLinks(meetingId) };
+    const summary = {
+      selected: preview.summary.selected,
+      ...counts,
+      bucketId: bucket.id,
+      bucketName: bucket.name,
+      openBucketPath: `/projects/${projectId}/schedule?bucket=${bucket.id}`,
+    };
+    await tx
+      .update(meetingScheduleBucketLinksTable)
+      .set({
+        lastSummary: summary,
+        lastSyncedById: actor.userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(meetingScheduleBucketLinksTable.id, bucketLink.id));
+    await tx
+      .insert(activityLogTable)
+      .values({
+        projectId,
+        userId: actor.userId,
+        userFullName: actor.fullName ?? "",
+        userCompanyName: actor.companyName ?? "",
+        actionType:
+          mode === "create"
+            ? "create_meeting_schedule_bucket"
+            : "sync_meeting_schedule_bucket",
+        entityType: "meeting",
+        entityId: meetingId,
+        details: JSON.stringify(summary),
+      });
+    return {
+      idempotent: false,
+      summary,
+      links: await getMeetingScheduleBucketLinks(meetingId),
+    };
   });
 }
 
 async function getMeetingScheduleBucketLinks(meetingId: number) {
-  const bucketLinks = await db.select().from(meetingScheduleBucketLinksTable).where(eq(meetingScheduleBucketLinksTable.meetingId, meetingId)).orderBy(desc(meetingScheduleBucketLinksTable.updatedAt));
+  const bucketLinks = await db
+    .select()
+    .from(meetingScheduleBucketLinksTable)
+    .where(eq(meetingScheduleBucketLinksTable.meetingId, meetingId))
+    .orderBy(desc(meetingScheduleBucketLinksTable.updatedAt));
   if (!bucketLinks.length) return [];
-  const tasks = await db.select().from(meetingScheduleTaskLinksTable).where(inArray(meetingScheduleTaskLinksTable.meetingScheduleBucketLinkId, bucketLinks.map(link => link.id))).orderBy(asc(meetingScheduleTaskLinksTable.id));
+  const tasks = await db
+    .select()
+    .from(meetingScheduleTaskLinksTable)
+    .where(
+      inArray(
+        meetingScheduleTaskLinksTable.meetingScheduleBucketLinkId,
+        bucketLinks.map((link) => link.id),
+      ),
+    )
+    .orderBy(asc(meetingScheduleTaskLinksTable.id));
   const taskByBucket = new Map<number, typeof tasks>();
-  for (const task of tasks) taskByBucket.set(task.meetingScheduleBucketLinkId, [...(taskByBucket.get(task.meetingScheduleBucketLinkId) || []), task]);
-  return bucketLinks.map(link => ({
-    id: link.id, bucketId: link.bucketId, bucketName: link.bucketNameSnapshot,
-    deadline: link.generalDeadlineSnapshot, responsible: link.responsibleSnapshot,
-    includeMode: link.includeModeSnapshot, summary: link.lastSummary,
+  for (const task of tasks)
+    taskByBucket.set(task.meetingScheduleBucketLinkId, [
+      ...(taskByBucket.get(task.meetingScheduleBucketLinkId) || []),
+      task,
+    ]);
+  return bucketLinks.map((link) => ({
+    id: link.id,
+    bucketId: link.bucketId,
+    bucketName: link.bucketNameSnapshot,
+    deadline: link.generalDeadlineSnapshot,
+    responsible: link.responsibleSnapshot,
+    includeMode: link.includeModeSnapshot,
+    summary: link.lastSummary,
     openPath: `/projects/${link.projectId}/schedule?bucket=${link.bucketId}`,
     updatedAt: link.updatedAt,
-    tasks: (taskByBucket.get(link.id) || []).map(task => ({
-      id: task.id, milestoneId: task.milestoneId, meetingSubmittalLinkId: task.meetingSubmittalLinkId,
-      submittalId: task.submittalId, number: task.numberSnapshot, title: task.titleSnapshot,
-      floor: task.floorSnapshot, discipline: task.disciplineSnapshot, responsible: task.responsibleSnapshot,
-      status: task.statusSnapshot, deadline: task.deadlineSnapshot,
+    tasks: (taskByBucket.get(link.id) || []).map((task) => ({
+      id: task.id,
+      milestoneId: task.milestoneId,
+      meetingSubmittalLinkId: task.meetingSubmittalLinkId,
+      submittalId: task.submittalId,
+      number: task.numberSnapshot,
+      title: task.titleSnapshot,
+      floor: task.floorSnapshot,
+      discipline: task.disciplineSnapshot,
+      responsible: task.responsibleSnapshot,
+      status: task.statusSnapshot,
+      deadline: task.deadlineSnapshot,
       openTaskPath: `/projects/${link.projectId}/schedule?bucket=${link.bucketId}&task=${task.milestoneId}`,
     })),
   }));
 }
 
-async function insertMeetingSubmittalLinks(executor: any, projectId: number, meetingId: number, rawSubmittalIds: number[], userId: number) {
+async function insertMeetingSubmittalLinks(
+  executor: any,
+  projectId: number,
+  meetingId: number,
+  rawSubmittalIds: number[],
+  userId: number,
+) {
   const submittalIds = [...new Set(rawSubmittalIds.filter(Number.isInteger))];
   if (!submittalIds.length) return { requested: 0, added: 0 };
 
-  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+  const [meeting] = await executor
+    .select({ id: meetingMinutesTable.id })
+    .from(meetingMinutesTable)
+    .where(
+      and(
+        eq(meetingMinutesTable.id, meetingId),
+        eq(meetingMinutesTable.projectId, projectId),
+        isNull(meetingMinutesTable.deletedAt),
+      ),
+    )
+    .limit(1);
   if (!meeting) throw new MeetingSubmittalLinkError(404, "meeting_not_found");
 
-  const rows = await executor.select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
-    .from(submittalsTable).leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
-    .where(and(inArray(submittalsTable.id, submittalIds), eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)));
-  if (rows.length !== submittalIds.length) throw new MeetingSubmittalLinkError(404, "submittal_not_accessible");
+  const rows = await executor
+    .select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
+    .from(submittalsTable)
+    .leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
+    .where(
+      and(
+        inArray(submittalsTable.id, submittalIds),
+        eq(submittalsTable.projectId, projectId),
+        isNull(submittalsTable.deletedAt),
+      ),
+    );
+  if (rows.length !== submittalIds.length)
+    throw new MeetingSubmittalLinkError(404, "submittal_not_accessible");
 
-  const inserted = await executor.insert(meetingSubmittalLinksTable).values(rows.map(({ submittal, assignedToName }: any) => {
-    const discipline = submittalDiscipline(submittal);
-    return {
-      projectId, meetingId, submittalId: submittal.id,
-      numberSnapshot: submittal.number,
-      titleSnapshot: submittal.title,
-      descriptionSnapshot: submittal.description || null,
-      floorSnapshot: cleanLabel(submittal.floor),
-      disciplineSnapshot: discipline,
-      disciplineBucketSnapshot: submittalDisciplineBucket(discipline),
-      statusSnapshot: submittal.status,
-      responsibleSnapshot: submittalResponsible(submittal, assignedToName),
-      deadlineSnapshot: submittal.dateRequired || submittal.dueDate || null,
-      createdById: userId,
-    };
-  })).onConflictDoNothing({ target: [meetingSubmittalLinksTable.meetingId, meetingSubmittalLinksTable.submittalId] })
+  const inserted = await executor
+    .insert(meetingSubmittalLinksTable)
+    .values(
+      rows.map(({ submittal, assignedToName }: any) => {
+        const discipline = submittalDiscipline(submittal);
+        return {
+          projectId,
+          meetingId,
+          submittalId: submittal.id,
+          numberSnapshot: submittal.number,
+          titleSnapshot: submittal.title,
+          descriptionSnapshot: submittal.description || null,
+          floorSnapshot: cleanLabel(submittal.floor),
+          disciplineSnapshot: discipline,
+          disciplineBucketSnapshot: submittalDisciplineBucket(discipline),
+          statusSnapshot: submittal.status,
+          responsibleSnapshot: submittalResponsible(submittal, assignedToName),
+          deadlineSnapshot: submittal.dateRequired || submittal.dueDate || null,
+          createdById: userId,
+        };
+      }),
+    )
+    .onConflictDoNothing({
+      target: [
+        meetingSubmittalLinksTable.meetingId,
+        meetingSubmittalLinksTable.submittalId,
+      ],
+    })
     .returning({ id: meetingSubmittalLinksTable.id });
   return { requested: submittalIds.length, added: inserted.length };
 }
 
-async function insertMeetingRfiLinks(executor: any, projectId: number, meetingId: number, rawRfiIds: number[], userId: number) {
+async function insertMeetingRfiLinks(
+  executor: any,
+  projectId: number,
+  meetingId: number,
+  rawRfiIds: number[],
+  userId: number,
+) {
   const rfiIds = [...new Set(rawRfiIds.filter(Number.isInteger))];
   if (!rfiIds.length) return { requested: 0, added: 0 };
 
-  const [meeting] = await executor.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-    .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+  const [meeting] = await executor
+    .select({ id: meetingMinutesTable.id })
+    .from(meetingMinutesTable)
+    .where(
+      and(
+        eq(meetingMinutesTable.id, meetingId),
+        eq(meetingMinutesTable.projectId, projectId),
+        isNull(meetingMinutesTable.deletedAt),
+      ),
+    )
+    .limit(1);
   if (!meeting) throw new MeetingRfiLinkError(404, "meeting_not_found");
 
-  const rows = await executor.select({
-    id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject,
-    description: rfisTable.description, question: rfisTable.question, status: rfisTable.status,
-    ballInCourt: rfisTable.ballInCourt, submittedToPerson: rfisTable.submittedToPerson,
-    submittedToCompany: rfisTable.submittedToCompany, assignedToName: usersTable.fullName,
-  }).from(rfisTable).leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
-    .where(and(inArray(rfisTable.id, rfiIds), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)));
+  const rows = await executor
+    .select({
+      id: rfisTable.id,
+      number: rfisTable.number,
+      subject: rfisTable.subject,
+      description: rfisTable.description,
+      question: rfisTable.question,
+      status: rfisTable.status,
+      ballInCourt: rfisTable.ballInCourt,
+      submittedToPerson: rfisTable.submittedToPerson,
+      submittedToCompany: rfisTable.submittedToCompany,
+      assignedToName: usersTable.fullName,
+    })
+    .from(rfisTable)
+    .leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
+    .where(
+      and(
+        inArray(rfisTable.id, rfiIds),
+        eq(rfisTable.projectId, projectId),
+        isNull(rfisTable.deletedAt),
+      ),
+    );
 
   if (rows.length !== rfiIds.length) {
     // Deliberately do not reveal whether an inaccessible identity exists in a
@@ -524,581 +1237,1772 @@ async function insertMeetingRfiLinks(executor: any, projectId: number, meetingId
     throw new MeetingRfiLinkError(404, "rfi_not_accessible");
   }
 
-  const inserted = await executor.insert(meetingRfiLinksTable).values(rows.map((r: any) => ({
-    projectId, meetingId, rfiId: r.id,
-    rfiNumberSnapshot: r.number,
-    titleSnapshot: r.subject || r.description || r.question || r.number,
-    descriptionSnapshot: r.description || r.question || null,
-    statusSnapshot: r.status,
-    responsibleSnapshot: r.ballInCourt || r.assignedToName || r.submittedToPerson || r.submittedToCompany || null,
-    createdById: userId,
-  }))).onConflictDoNothing({ target: [meetingRfiLinksTable.meetingId, meetingRfiLinksTable.rfiId] }).returning({ id: meetingRfiLinksTable.id });
+  const inserted = await executor
+    .insert(meetingRfiLinksTable)
+    .values(
+      rows.map((r: any) => ({
+        projectId,
+        meetingId,
+        rfiId: r.id,
+        rfiNumberSnapshot: r.number,
+        titleSnapshot: r.subject || r.description || r.question || r.number,
+        descriptionSnapshot: r.description || r.question || null,
+        statusSnapshot: r.status,
+        responsibleSnapshot:
+          r.ballInCourt ||
+          r.assignedToName ||
+          r.submittedToPerson ||
+          r.submittedToCompany ||
+          null,
+        createdById: userId,
+      })),
+    )
+    .onConflictDoNothing({
+      target: [meetingRfiLinksTable.meetingId, meetingRfiLinksTable.rfiId],
+    })
+    .returning({ id: meetingRfiLinksTable.id });
   return { requested: rfiIds.length, added: inserted.length };
 }
 
-// ── GET /projects/:projectId/meetings ─────────────────────────────────────────
-router.get("/projects/:projectId/meetings", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  try {
-    const meetings = await db.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt)))
-      .orderBy(desc(meetingMinutesTable.meetingDate));
-    const result = await Promise.all(meetings.map(async m => {
-      const attendees = await db.select({ id: meetingAttendeesTable.id }).from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, m.id));
-      const actionItems = await db.select({ id: actionItemsTable.id, status: actionItemsTable.status }).from(actionItemsTable).where(eq(actionItemsTable.meetingId, m.id));
-      const linkedRfis = await getMeetingRfiLinks(m.id);
-      const linkedSubmittals = await getMeetingSubmittalLinks(m.id);
-      const clashes = await getMeetingClashLinks(m.id);
-      const scheduleBuckets = await getMeetingScheduleBucketLinks(m.id);
-      return { ...m, attendeeCount: attendees.length, actionItemCount: actionItems.length, openActionItems: actionItems.filter(a => a.status !== "completed" && a.status !== "cancelled").length, linkedRfis, linkedSubmittals, linkedClashes: clashes.links, clashRefreshEvents: clashes.events, scheduleBuckets, legacyRfis: parseLegacyRfiRows(m.notes), legacyDeliverables: parseLegacyDeliverableRows(m.notes), legacyViewpoints: parseLegacyViewpointRows(m.notes) };
-    }));
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+async function insertMeetingLensViewpointLinks(
+  executor: any,
+  projectId: number,
+  meetingId: number,
+  rawLensViewpointIds: number[],
+  userId: number,
+) {
+  const lensViewpointIds = [
+    ...new Set(rawLensViewpointIds.filter(Number.isInteger)),
+  ];
+  if (!lensViewpointIds.length) return { requested: 0, added: 0 };
+
+  const [meeting] = await executor
+    .select({ id: meetingMinutesTable.id })
+    .from(meetingMinutesTable)
+    .where(
+      and(
+        eq(meetingMinutesTable.id, meetingId),
+        eq(meetingMinutesTable.projectId, projectId),
+        isNull(meetingMinutesTable.deletedAt),
+      ),
+    )
+    .limit(1);
+  if (!meeting)
+    throw new MeetingLensViewpointLinkError(404, "meeting_not_found");
+
+  const rows = await executor
+    .select()
+    .from(lensViewpointsTable)
+    .where(
+      and(
+        inArray(lensViewpointsTable.id, lensViewpointIds),
+        eq(lensViewpointsTable.projectId, projectId),
+      ),
+    );
+  if (rows.length !== lensViewpointIds.length) {
+    throw new MeetingLensViewpointLinkError(
+      404,
+      "lens_viewpoint_not_accessible",
+    );
   }
-});
+  if (
+    rows.some(
+      (row: typeof lensViewpointsTable.$inferSelect) =>
+        (row.lifecycleStatus || "active") !== "active",
+    )
+  ) {
+    throw new MeetingLensViewpointLinkError(409, "lens_viewpoint_not_active");
+  }
+
+  const inserted = await executor
+    .insert(meetingLensViewpointLinksTable)
+    .values(
+      rows.map((viewpoint: typeof lensViewpointsTable.$inferSelect) => ({
+        projectId,
+        meetingId,
+        lensViewpointId: viewpoint.id,
+        viewpointIdSnapshot: viewpoint.viewpointId,
+        displayIdSnapshot: lensDisplayCode(viewpoint),
+        navisworksGuidSnapshot: viewpoint.navisworksGuid || null,
+        bimlogPhysicalIdSnapshot: viewpoint.bimlogPhysicalId || null,
+        sourcePhysicalIdSnapshot: viewpoint.sourcePhysicalId || null,
+        sourceDisplayLabelSnapshot: viewpoint.sourceDisplayLabel || null,
+        issueGroupIdSnapshot: viewpoint.issueGroupId || null,
+        noteSnapshot: viewpoint.note || viewpoint.openItems || null,
+        floorSnapshot: cleanLabel(viewpoint.floor),
+        tradeSnapshot: cleanLabel(viewpoint.trade),
+        responsibleSnapshot: cleanLabel(viewpoint.responsibleCompany),
+        statusSnapshot: viewpoint.status || "open",
+        lifecycleStatusSnapshot: viewpoint.lifecycleStatus || "active",
+        revisionNumberSnapshot: viewpoint.revisionNumber || 1,
+        capturedAtSnapshot: viewpoint.capturedAt || null,
+        createdById: userId,
+      })),
+    )
+    .onConflictDoNothing({
+      target: [
+        meetingLensViewpointLinksTable.meetingId,
+        meetingLensViewpointLinksTable.lensViewpointId,
+      ],
+    })
+    .returning({ id: meetingLensViewpointLinksTable.id });
+  return { requested: lensViewpointIds.length, added: inserted.length };
+}
+
+// ── GET /projects/:projectId/meetings ─────────────────────────────────────────
+router.get(
+  "/projects/:projectId/meetings",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const meetings = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .orderBy(desc(meetingMinutesTable.meetingDate));
+      const result = await Promise.all(
+        meetings.map(async (m) => {
+          const attendees = await db
+            .select({ id: meetingAttendeesTable.id })
+            .from(meetingAttendeesTable)
+            .where(eq(meetingAttendeesTable.meetingId, m.id));
+          const actionItems = await db
+            .select({
+              id: actionItemsTable.id,
+              status: actionItemsTable.status,
+            })
+            .from(actionItemsTable)
+            .where(eq(actionItemsTable.meetingId, m.id));
+          const linkedRfis = await getMeetingRfiLinks(m.id);
+          const linkedSubmittals = await getMeetingSubmittalLinks(m.id);
+          const linkedLensViewpoints = await getMeetingLensViewpointLinks(m.id);
+          const clashes = await getMeetingClashLinks(m.id);
+          const scheduleBuckets = await getMeetingScheduleBucketLinks(m.id);
+          return {
+            ...m,
+            attendeeCount: attendees.length,
+            actionItemCount: actionItems.length,
+            openActionItems: actionItems.filter(
+              (a) => a.status !== "completed" && a.status !== "cancelled",
+            ).length,
+            linkedRfis,
+            linkedSubmittals,
+            linkedLensViewpoints,
+            linkedClashes: clashes.links,
+            clashRefreshEvents: clashes.events,
+            scheduleBuckets,
+            legacyRfis: parseLegacyRfiRows(m.notes),
+            legacyDeliverables: parseLegacyDeliverableRows(m.notes),
+            legacyViewpoints: parseLegacyViewpointRows(m.notes),
+          };
+        }),
+      );
+      res.json(result);
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // ── POST /projects/:projectId/meetings ────────────────────────────────────────
-router.post("/projects/:projectId/meetings", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const body = req.body as {
-    title: string; meeting_date: string; location?: string; notes?: string;
-    attendees?: { user_id?: number; external_email?: string; full_name: string; company?: string; role?: string }[];
-    rfi_ids?: number[];
-    submittal_ids?: number[];
-  };
-  if (!body.title || !body.meeting_date) { res.status(400).json({ error: "title and meeting_date required" }); return; }
-  try {
-    if (body.rfi_ids !== undefined && (!Array.isArray(body.rfi_ids) || body.rfi_ids.some(id => !Number.isInteger(id)))) {
-      res.status(400).json({ error: "valid_rfi_ids_required" }); return;
+router.post(
+  "/projects/:projectId/meetings",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const body = req.body as {
+      title: string;
+      meeting_date: string;
+      location?: string;
+      notes?: string;
+      attendees?: {
+        user_id?: number;
+        external_email?: string;
+        full_name: string;
+        company?: string;
+        role?: string;
+      }[];
+      rfi_ids?: number[];
+      submittal_ids?: number[];
+      lens_viewpoint_ids?: number[];
+    };
+    if (!body.title || !body.meeting_date) {
+      res.status(400).json({ error: "title and meeting_date required" });
+      return;
     }
-    if (body.submittal_ids !== undefined && (!Array.isArray(body.submittal_ids) || body.submittal_ids.some(id => !Number.isInteger(id)))) {
-      res.status(400).json({ error: "valid_submittal_ids_required" }); return;
-    }
-    const meeting = await db.transaction(async (tx) => {
-      const [created] = await tx.insert(meetingMinutesTable).values({
-        projectId, title: body.title,
-        meetingDate: new Date(body.meeting_date),
-        location: body.location ?? null, notes: body.notes ?? null,
-        createdById: req.user!.userId,
-      }).returning();
-
-      if (body.attendees?.length) {
-        await tx.insert(meetingAttendeesTable).values(body.attendees.map(a => ({
-          meetingId: created.id, userId: a.user_id ?? null,
-          externalEmail: a.external_email ?? null, fullName: a.full_name,
-          company: a.company ?? null, role: a.role ?? null,
-        })));
+    try {
+      if (
+        body.rfi_ids !== undefined &&
+        (!Array.isArray(body.rfi_ids) ||
+          body.rfi_ids.some((id) => !Number.isInteger(id)))
+      ) {
+        res.status(400).json({ error: "valid_rfi_ids_required" });
+        return;
       }
-      await insertMeetingRfiLinks(tx, projectId, created.id, body.rfi_ids ?? [], req.user!.userId);
-      await insertMeetingSubmittalLinks(tx, projectId, created.id, body.submittal_ids ?? [], req.user!.userId);
-      await tx.insert(activityLogTable).values({
-        projectId, userId: req.user!.userId,
-        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-        actionType: "create", entityType: "meeting", entityId: created.id,
-        fileNameBefore: null, fileNameAfter: null,
-        details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
+      if (
+        body.submittal_ids !== undefined &&
+        (!Array.isArray(body.submittal_ids) ||
+          body.submittal_ids.some((id) => !Number.isInteger(id)))
+      ) {
+        res.status(400).json({ error: "valid_submittal_ids_required" });
+        return;
+      }
+      if (
+        body.lens_viewpoint_ids !== undefined &&
+        (!Array.isArray(body.lens_viewpoint_ids) ||
+          body.lens_viewpoint_ids.some((id) => !Number.isInteger(id)))
+      ) {
+        res.status(400).json({ error: "valid_lens_viewpoint_ids_required" });
+        return;
+      }
+      const meeting = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(meetingMinutesTable)
+          .values({
+            projectId,
+            title: body.title,
+            meetingDate: new Date(body.meeting_date),
+            location: body.location ?? null,
+            notes: body.notes ?? null,
+            createdById: req.user!.userId,
+          })
+          .returning();
+
+        if (body.attendees?.length) {
+          await tx.insert(meetingAttendeesTable).values(
+            body.attendees.map((a) => ({
+              meetingId: created.id,
+              userId: a.user_id ?? null,
+              externalEmail: a.external_email ?? null,
+              fullName: a.full_name,
+              company: a.company ?? null,
+              role: a.role ?? null,
+            })),
+          );
+        }
+        await insertMeetingRfiLinks(
+          tx,
+          projectId,
+          created.id,
+          body.rfi_ids ?? [],
+          req.user!.userId,
+        );
+        await insertMeetingSubmittalLinks(
+          tx,
+          projectId,
+          created.id,
+          body.submittal_ids ?? [],
+          req.user!.userId,
+        );
+        await insertMeetingLensViewpointLinks(
+          tx,
+          projectId,
+          created.id,
+          body.lens_viewpoint_ids ?? [],
+          req.user!.userId,
+        );
+        await tx.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "create",
+          entityType: "meeting",
+          entityId: created.id,
+          fileNameBefore: null,
+          fileNameAfter: null,
+          details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
+        });
+        return created;
       });
-      return created;
-    });
-    res.status(201).json(meeting);
-  } catch (err) {
-    if (err instanceof MeetingRfiLinkError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+      res.status(201).json(meeting);
+    } catch (err) {
+      if (err instanceof MeetingRfiLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      if (err instanceof MeetingSubmittalLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      if (err instanceof MeetingLensViewpointLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // Selector payload is intentionally minimal: no attachments, URLs, storage
 // locators, or private audit data are exposed.
-router.get("/projects/:projectId/meetings/rfi-candidates", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const q = String(req.query.q ?? "").trim();
-  const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
-  try {
-    let alreadyLinked = new Set<number>();
-    if (meetingId !== null) {
-      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-      alreadyLinked = new Set((await db.select({ rfiId: meetingRfiLinksTable.rfiId }).from(meetingRfiLinksTable)
-        .where(and(eq(meetingRfiLinksTable.projectId, projectId), eq(meetingRfiLinksTable.meetingId, meetingId)))).map(row => row.rfiId));
+router.get(
+  "/projects/:projectId/meetings/rfi-candidates",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const q = String(req.query.q ?? "").trim();
+    const meetingId = req.query.meeting_id
+      ? Number(req.query.meeting_id)
+      : null;
+    try {
+      let alreadyLinked = new Set<number>();
+      if (meetingId !== null) {
+        const [meeting] = await db
+          .select({ id: meetingMinutesTable.id })
+          .from(meetingMinutesTable)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .limit(1);
+        if (!meeting) {
+          res.status(404).json({ error: "meeting_not_found" });
+          return;
+        }
+        alreadyLinked = new Set(
+          (
+            await db
+              .select({ rfiId: meetingRfiLinksTable.rfiId })
+              .from(meetingRfiLinksTable)
+              .where(
+                and(
+                  eq(meetingRfiLinksTable.projectId, projectId),
+                  eq(meetingRfiLinksTable.meetingId, meetingId),
+                ),
+              )
+          ).map((row) => row.rfiId),
+        );
+      }
+      const base = and(
+        eq(rfisTable.projectId, projectId),
+        isNull(rfisTable.deletedAt),
+      );
+      const where = q
+        ? and(
+            base,
+            or(
+              ilike(rfisTable.number, `%${q}%`),
+              ilike(rfisTable.subject, `%${q}%`),
+              ilike(rfisTable.description, `%${q}%`),
+              ilike(rfisTable.question, `%${q}%`),
+            ),
+          )
+        : base;
+      const candidates = await db
+        .select({
+          id: rfisTable.id,
+          number: rfisTable.number,
+          title: rfisTable.subject,
+          description: rfisTable.description,
+          question: rfisTable.question,
+          status: rfisTable.status,
+          ballInCourt: rfisTable.ballInCourt,
+          submittedToPerson: rfisTable.submittedToPerson,
+          submittedToCompany: rfisTable.submittedToCompany,
+          assignedToName: usersTable.fullName,
+        })
+        .from(rfisTable)
+        .leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
+        .where(where)
+        .orderBy(asc(rfisTable.number))
+        .limit(100);
+      res.json(
+        candidates.map((rfi) => ({
+          id: rfi.id,
+          number: rfi.number,
+          title: rfi.title || rfi.description || rfi.question || rfi.number,
+          description: rfi.description || rfi.question || null,
+          status: rfi.status,
+          responsible:
+            rfi.ballInCourt ||
+            rfi.assignedToName ||
+            rfi.submittedToPerson ||
+            rfi.submittedToCompany ||
+            null,
+          alreadyAdded: alreadyLinked.has(rfi.id),
+        })),
+      );
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
     }
-    const base = and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt));
-    const where = q ? and(base, or(
-      ilike(rfisTable.number, `%${q}%`), ilike(rfisTable.subject, `%${q}%`),
-      ilike(rfisTable.description, `%${q}%`), ilike(rfisTable.question, `%${q}%`),
-    )) : base;
-    const candidates = await db.select({
-      id: rfisTable.id, number: rfisTable.number, title: rfisTable.subject,
-      description: rfisTable.description, question: rfisTable.question, status: rfisTable.status,
-      ballInCourt: rfisTable.ballInCourt, submittedToPerson: rfisTable.submittedToPerson,
-      submittedToCompany: rfisTable.submittedToCompany, assignedToName: usersTable.fullName,
-    }).from(rfisTable).leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
-      .where(where).orderBy(asc(rfisTable.number)).limit(100);
-    res.json(candidates.map(rfi => ({
-      id: rfi.id, number: rfi.number,
-      title: rfi.title || rfi.description || rfi.question || rfi.number,
-      description: rfi.description || rfi.question || null,
-      status: rfi.status,
-      responsible: rfi.ballInCourt || rfi.assignedToName || rfi.submittedToPerson || rfi.submittedToCompany || null,
-      alreadyAdded: alreadyLinked.has(rfi.id),
-    })));
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+  },
+);
 
-router.post("/projects/:projectId/meetings/:meetingId/rfis", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const rfiIds = req.body?.rfi_ids;
-  if (!Array.isArray(rfiIds) || rfiIds.length === 0 || rfiIds.some((id: unknown) => !Number.isInteger(id))) {
-    res.status(400).json({ error: "valid_rfi_ids_required" }); return;
-  }
-  try {
-    const result = await db.transaction(tx => insertMeetingRfiLinks(tx, projectId, meetingId, rfiIds, req.user!.userId));
-    res.status(result.added ? 201 : 200).json({ ...result, links: await getMeetingRfiLinks(meetingId) });
-  } catch (err) {
-    if (err instanceof MeetingRfiLinkError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+router.post(
+  "/projects/:projectId/meetings/:meetingId/rfis",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const rfiIds = req.body?.rfi_ids;
+    if (
+      !Array.isArray(rfiIds) ||
+      rfiIds.length === 0 ||
+      rfiIds.some((id: unknown) => !Number.isInteger(id))
+    ) {
+      res.status(400).json({ error: "valid_rfi_ids_required" });
+      return;
+    }
+    try {
+      const result = await db.transaction((tx) =>
+        insertMeetingRfiLinks(
+          tx,
+          projectId,
+          meetingId,
+          rfiIds,
+          req.user!.userId,
+        ),
+      );
+      res
+        .status(result.added ? 201 : 200)
+        .json({ ...result, links: await getMeetingRfiLinks(meetingId) });
+    } catch (err) {
+      if (err instanceof MeetingRfiLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
-router.delete("/projects/:projectId/meetings/:meetingId/rfis/:rfiId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const rfiId = Number(req.params.rfiId);
-  try {
-    const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-    const removed = await db.delete(meetingRfiLinksTable).where(and(
-      eq(meetingRfiLinksTable.projectId, projectId), eq(meetingRfiLinksTable.meetingId, meetingId), eq(meetingRfiLinksTable.rfiId, rfiId),
-    )).returning({ id: meetingRfiLinksTable.id });
-    if (!removed.length) { res.status(404).json({ error: "meeting_rfi_link_not_found" }); return; }
-    res.json({ removed: true, rfiId });
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+router.delete(
+  "/projects/:projectId/meetings/:meetingId/rfis/:rfiId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const rfiId = Number(req.params.rfiId);
+    try {
+      const [meeting] = await db
+        .select({ id: meetingMinutesTable.id })
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!meeting) {
+        res.status(404).json({ error: "meeting_not_found" });
+        return;
+      }
+      const removed = await db
+        .delete(meetingRfiLinksTable)
+        .where(
+          and(
+            eq(meetingRfiLinksTable.projectId, projectId),
+            eq(meetingRfiLinksTable.meetingId, meetingId),
+            eq(meetingRfiLinksTable.rfiId, rfiId),
+          ),
+        )
+        .returning({ id: meetingRfiLinksTable.id });
+      if (!removed.length) {
+        res.status(404).json({ error: "meeting_rfi_link_not_found" });
+        return;
+      }
+      res.json({ removed: true, rfiId });
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // Minimal project-scoped selector payload: attachments, storage locators,
 // contact details, audit data, and all other private fields are excluded.
-router.get("/projects/:projectId/meetings/submittal-candidates", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const q = String(req.query.q ?? "").trim().toLowerCase();
-  const floor = String(req.query.floor ?? "").trim().toLowerCase();
-  const disciplineFilter = String(req.query.discipline ?? "").trim().toLowerCase();
-  const status = String(req.query.status ?? "").trim().toLowerCase();
-  const responsibleFilter = String(req.query.responsible ?? "").trim().toLowerCase();
-  const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
-  try {
-    let alreadyLinked = new Set<number>();
-    if (meetingId !== null) {
-      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-      alreadyLinked = new Set((await db.select({ submittalId: meetingSubmittalLinksTable.submittalId }).from(meetingSubmittalLinksTable)
-        .where(and(eq(meetingSubmittalLinksTable.projectId, projectId), eq(meetingSubmittalLinksTable.meetingId, meetingId)))).map(row => row.submittalId));
+router.get(
+  "/projects/:projectId/meetings/submittal-candidates",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const q = String(req.query.q ?? "")
+      .trim()
+      .toLowerCase();
+    const floor = String(req.query.floor ?? "")
+      .trim()
+      .toLowerCase();
+    const disciplineFilter = String(req.query.discipline ?? "")
+      .trim()
+      .toLowerCase();
+    const status = String(req.query.status ?? "")
+      .trim()
+      .toLowerCase();
+    const responsibleFilter = String(req.query.responsible ?? "")
+      .trim()
+      .toLowerCase();
+    const meetingId = req.query.meeting_id
+      ? Number(req.query.meeting_id)
+      : null;
+    try {
+      let alreadyLinked = new Set<number>();
+      if (meetingId !== null) {
+        const [meeting] = await db
+          .select({ id: meetingMinutesTable.id })
+          .from(meetingMinutesTable)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .limit(1);
+        if (!meeting) {
+          res.status(404).json({ error: "meeting_not_found" });
+          return;
+        }
+        alreadyLinked = new Set(
+          (
+            await db
+              .select({ submittalId: meetingSubmittalLinksTable.submittalId })
+              .from(meetingSubmittalLinksTable)
+              .where(
+                and(
+                  eq(meetingSubmittalLinksTable.projectId, projectId),
+                  eq(meetingSubmittalLinksTable.meetingId, meetingId),
+                ),
+              )
+          ).map((row) => row.submittalId),
+        );
+      }
+      const rows = await db
+        .select({
+          submittal: submittalsTable,
+          assignedToName: usersTable.fullName,
+        })
+        .from(submittalsTable)
+        .leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
+        .where(
+          and(
+            eq(submittalsTable.projectId, projectId),
+            isNull(submittalsTable.deletedAt),
+          ),
+        )
+        .orderBy(asc(submittalsTable.number));
+      const candidates = rows
+        .map(({ submittal, assignedToName }) => {
+          const discipline = submittalDiscipline(submittal);
+          const responsible = submittalResponsible(submittal, assignedToName);
+          return {
+            id: submittal.id,
+            number: submittal.number,
+            title: submittal.title,
+            description: submittal.description || null,
+            floor: cleanLabel(submittal.floor),
+            discipline,
+            disciplineBucket: submittalDisciplineBucket(discipline),
+            status: submittal.status,
+            responsible,
+            deadline: submittal.dateRequired || submittal.dueDate || null,
+            alreadyAdded: alreadyLinked.has(submittal.id),
+          };
+        })
+        .filter((candidate) => {
+          const text =
+            `${candidate.number} ${candidate.title} ${candidate.description || ""}`.toLowerCase();
+          if (q && !text.includes(q)) return false;
+          if (floor && (candidate.floor || "").toLowerCase() !== floor)
+            return false;
+          if (
+            disciplineFilter &&
+            (candidate.discipline || "").toLowerCase() !== disciplineFilter
+          )
+            return false;
+          if (status && candidate.status.toLowerCase() !== status) return false;
+          if (
+            responsibleFilter &&
+            !(candidate.responsible || "")
+              .toLowerCase()
+              .includes(responsibleFilter)
+          )
+            return false;
+          return true;
+        })
+        .slice(0, 200);
+      res.json(candidates);
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
     }
-    const rows = await db.select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
-      .from(submittalsTable).leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
-      .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
-      .orderBy(asc(submittalsTable.number));
-    const candidates = rows.map(({ submittal, assignedToName }) => {
-      const discipline = submittalDiscipline(submittal);
-      const responsible = submittalResponsible(submittal, assignedToName);
-      return {
-        id: submittal.id,
-        number: submittal.number,
-        title: submittal.title,
-        description: submittal.description || null,
-        floor: cleanLabel(submittal.floor),
-        discipline,
-        disciplineBucket: submittalDisciplineBucket(discipline),
-        status: submittal.status,
-        responsible,
-        deadline: submittal.dateRequired || submittal.dueDate || null,
-        alreadyAdded: alreadyLinked.has(submittal.id),
+  },
+);
+
+router.post(
+  "/projects/:projectId/meetings/:meetingId/submittals",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const submittalIds = req.body?.submittal_ids;
+    if (
+      !Array.isArray(submittalIds) ||
+      submittalIds.length === 0 ||
+      submittalIds.some((id: unknown) => !Number.isInteger(id))
+    ) {
+      res.status(400).json({ error: "valid_submittal_ids_required" });
+      return;
+    }
+    try {
+      const result = await db.transaction((tx) =>
+        insertMeetingSubmittalLinks(
+          tx,
+          projectId,
+          meetingId,
+          submittalIds,
+          req.user!.userId,
+        ),
+      );
+      res
+        .status(result.added ? 201 : 200)
+        .json({ ...result, links: await getMeetingSubmittalLinks(meetingId) });
+    } catch (err) {
+      if (err instanceof MeetingSubmittalLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
+
+router.delete(
+  "/projects/:projectId/meetings/:meetingId/submittals/:submittalId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const submittalId = Number(req.params.submittalId);
+    try {
+      const [meeting] = await db
+        .select({ id: meetingMinutesTable.id })
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!meeting) {
+        res.status(404).json({ error: "meeting_not_found" });
+        return;
+      }
+      const removed = await db
+        .delete(meetingSubmittalLinksTable)
+        .where(
+          and(
+            eq(meetingSubmittalLinksTable.projectId, projectId),
+            eq(meetingSubmittalLinksTable.meetingId, meetingId),
+            eq(meetingSubmittalLinksTable.submittalId, submittalId),
+          ),
+        )
+        .returning({ id: meetingSubmittalLinksTable.id });
+      if (!removed.length) {
+        res.status(404).json({ error: "meeting_submittal_link_not_found" });
+        return;
+      }
+      res.json({ removed: true, submittalId });
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
+
+// Project-scoped canonical Lens selector. Screenshots, storage URLs, raw provider
+// payloads, and private audit data are intentionally excluded from this payload.
+router.get(
+  "/projects/:projectId/meetings/lens-viewpoint-candidates",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const q = String(req.query.q ?? "").trim();
+    const meetingId = req.query.meeting_id
+      ? Number(req.query.meeting_id)
+      : null;
+    try {
+      let alreadyLinked = new Set<number>();
+      if (meetingId !== null) {
+        const [meeting] = await db
+          .select({ id: meetingMinutesTable.id })
+          .from(meetingMinutesTable)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .limit(1);
+        if (!meeting) {
+          res.status(404).json({ error: "meeting_not_found" });
+          return;
+        }
+        alreadyLinked = new Set(
+          (
+            await db
+              .select({
+                lensViewpointId: meetingLensViewpointLinksTable.lensViewpointId,
+              })
+              .from(meetingLensViewpointLinksTable)
+              .where(
+                and(
+                  eq(meetingLensViewpointLinksTable.projectId, projectId),
+                  eq(meetingLensViewpointLinksTable.meetingId, meetingId),
+                ),
+              )
+          ).map((row) => row.lensViewpointId),
+        );
+      }
+      const base = and(
+        eq(lensViewpointsTable.projectId, projectId),
+        eq(lensViewpointsTable.lifecycleStatus, "active"),
+      );
+      const where = q
+        ? and(
+            base,
+            or(
+              ilike(lensViewpointsTable.viewpointId, `%${q}%`),
+              ilike(lensViewpointsTable.displayId, `%${q}%`),
+              ilike(lensViewpointsTable.note, `%${q}%`),
+              ilike(lensViewpointsTable.openItems, `%${q}%`),
+              ilike(lensViewpointsTable.floor, `%${q}%`),
+              ilike(lensViewpointsTable.trade, `%${q}%`),
+              ilike(lensViewpointsTable.responsibleCompany, `%${q}%`),
+            ),
+          )
+        : base;
+      const rows = await db
+        .select()
+        .from(lensViewpointsTable)
+        .where(where)
+        .orderBy(desc(lensViewpointsTable.capturedAt))
+        .limit(100);
+      res.json(
+        rows.map((viewpoint) => ({
+          id: viewpoint.id,
+          viewpointId: viewpoint.viewpointId,
+          displayId: lensDisplayCode(viewpoint),
+          code: lensDisplayCode(viewpoint),
+          navisworksGuid: viewpoint.navisworksGuid || null,
+          bimlogPhysicalId: viewpoint.bimlogPhysicalId || null,
+          sourcePhysicalId: viewpoint.sourcePhysicalId || null,
+          sourceDisplayLabel: viewpoint.sourceDisplayLabel || null,
+          issueGroupId: viewpoint.issueGroupId || null,
+          note: viewpoint.note || viewpoint.openItems || null,
+          floor: viewpoint.floor || null,
+          trade: viewpoint.trade || null,
+          responsible: viewpoint.responsibleCompany || null,
+          status: viewpoint.status,
+          lifecycleStatus: viewpoint.lifecycleStatus,
+          revisionNumber: viewpoint.revisionNumber,
+          capturedAt: viewpoint.capturedAt,
+          alreadyAdded: alreadyLinked.has(viewpoint.id),
+        })),
+      );
+    } catch (err) {
+      res.status(500).json({ error: "lens_viewpoint_candidates_failed" });
+    }
+  },
+);
+
+router.post(
+  "/projects/:projectId/meetings/:meetingId/schedule-bucket/preview",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    try {
+      const [meeting] = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!meeting) {
+        res.status(404).json({ error: "meeting_not_found" });
+        return;
+      }
+      const input = parseScheduleBucketInput(req.body ?? {}, meeting);
+      res.json(await scheduleBucketPreview(db, projectId, meeting, input));
+    } catch (err) {
+      if (err instanceof MeetingScheduleBucketError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "schedule_bucket_preview_failed" });
+    }
+  },
+);
+
+router.post(
+  "/projects/:projectId/meetings/:meetingId/schedule-bucket",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    try {
+      const [meeting] = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .limit(1);
+      if (!meeting) {
+        res.status(404).json({ error: "meeting_not_found" });
+        return;
+      }
+      const result = await applyMeetingScheduleBucket(
+        projectId,
+        meetingId,
+        req.user!,
+        parseScheduleBucketInput(req.body ?? {}, meeting),
+        "create",
+      );
+      res.status(result.idempotent ? 200 : 201).json(result);
+    } catch (err) {
+      if (err instanceof MeetingScheduleBucketError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "schedule_bucket_create_failed" });
+    }
+  },
+);
+
+router.post(
+  "/projects/:projectId/meetings/:meetingId/schedule-bucket/:bucketLinkId/sync",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const bucketLinkId = Number(req.params.bucketLinkId);
+    try {
+      const [meeting, bucketLink] = await Promise.all([
+        db
+          .select()
+          .from(meetingMinutesTable)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .limit(1),
+        db
+          .select()
+          .from(meetingScheduleBucketLinksTable)
+          .where(
+            and(
+              eq(meetingScheduleBucketLinksTable.id, bucketLinkId),
+              eq(meetingScheduleBucketLinksTable.projectId, projectId),
+              eq(meetingScheduleBucketLinksTable.meetingId, meetingId),
+            ),
+          )
+          .limit(1),
+      ]);
+      if (!meeting[0]) {
+        res.status(404).json({ error: "meeting_not_found" });
+        return;
+      }
+      if (!bucketLink[0]) {
+        res.status(404).json({ error: "schedule_bucket_link_not_found" });
+        return;
+      }
+      const body = {
+        ...req.body,
+        target_bucket_id: bucketLink[0].bucketId,
+        bucket_name: bucketLink[0].bucketNameSnapshot,
+        idempotency_key: undefined,
       };
-    }).filter(candidate => {
-      const text = `${candidate.number} ${candidate.title} ${candidate.description || ""}`.toLowerCase();
-      if (q && !text.includes(q)) return false;
-      if (floor && (candidate.floor || "").toLowerCase() !== floor) return false;
-      if (disciplineFilter && (candidate.discipline || "").toLowerCase() !== disciplineFilter) return false;
-      if (status && candidate.status.toLowerCase() !== status) return false;
-      if (responsibleFilter && !(candidate.responsible || "").toLowerCase().includes(responsibleFilter)) return false;
-      return true;
-    }).slice(0, 200);
-    res.json(candidates);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
-
-router.post("/projects/:projectId/meetings/:meetingId/submittals", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const submittalIds = req.body?.submittal_ids;
-  if (!Array.isArray(submittalIds) || submittalIds.length === 0 || submittalIds.some((id: unknown) => !Number.isInteger(id))) {
-    res.status(400).json({ error: "valid_submittal_ids_required" }); return;
-  }
-  try {
-    const result = await db.transaction(tx => insertMeetingSubmittalLinks(tx, projectId, meetingId, submittalIds, req.user!.userId));
-    res.status(result.added ? 201 : 200).json({ ...result, links: await getMeetingSubmittalLinks(meetingId) });
-  } catch (err) {
-    if (err instanceof MeetingSubmittalLinkError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
-
-router.delete("/projects/:projectId/meetings/:meetingId/submittals/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const submittalId = Number(req.params.submittalId);
-  try {
-    const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-    const removed = await db.delete(meetingSubmittalLinksTable).where(and(
-      eq(meetingSubmittalLinksTable.projectId, projectId),
-      eq(meetingSubmittalLinksTable.meetingId, meetingId),
-      eq(meetingSubmittalLinksTable.submittalId, submittalId),
-    )).returning({ id: meetingSubmittalLinksTable.id });
-    if (!removed.length) { res.status(404).json({ error: "meeting_submittal_link_not_found" }); return; }
-    res.json({ removed: true, submittalId });
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
-
-router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket/preview", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  try {
-    const [meeting] = await db.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-    const input = parseScheduleBucketInput(req.body ?? {}, meeting);
-    res.json(await scheduleBucketPreview(db, projectId, meeting, input));
-  } catch (err) {
-    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: "schedule_bucket_preview_failed" });
-  }
-});
-
-router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  try {
-    const [meeting] = await db.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-    if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-    const result = await applyMeetingScheduleBucket(projectId, meetingId, req.user!, parseScheduleBucketInput(req.body ?? {}, meeting), "create");
-    res.status(result.idempotent ? 200 : 201).json(result);
-  } catch (err) {
-    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: "schedule_bucket_create_failed" });
-  }
-});
-
-router.post("/projects/:projectId/meetings/:meetingId/schedule-bucket/:bucketLinkId/sync", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const bucketLinkId = Number(req.params.bucketLinkId);
-  try {
-    const [meeting, bucketLink] = await Promise.all([
-      db.select().from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1),
-      db.select().from(meetingScheduleBucketLinksTable).where(and(eq(meetingScheduleBucketLinksTable.id, bucketLinkId), eq(meetingScheduleBucketLinksTable.projectId, projectId), eq(meetingScheduleBucketLinksTable.meetingId, meetingId))).limit(1),
-    ]);
-    if (!meeting[0]) { res.status(404).json({ error: "meeting_not_found" }); return; }
-    if (!bucketLink[0]) { res.status(404).json({ error: "schedule_bucket_link_not_found" }); return; }
-    const body = { ...req.body, target_bucket_id: bucketLink[0].bucketId, bucket_name: bucketLink[0].bucketNameSnapshot, idempotency_key: undefined };
-    const result = await applyMeetingScheduleBucket(projectId, meetingId, req.user!, parseScheduleBucketInput(body, meeting[0]), "sync");
-    res.json(result);
-  } catch (err) {
-    if (err instanceof MeetingScheduleBucketError) { res.status(err.status).json({ error: err.code }); return; }
-    res.status(500).json({ error: "schedule_bucket_sync_failed" });
-  }
-});
+      const result = await applyMeetingScheduleBucket(
+        projectId,
+        meetingId,
+        req.user!,
+        parseScheduleBucketInput(body, meeting[0]),
+        "sync",
+      );
+      res.json(result);
+    } catch (err) {
+      if (err instanceof MeetingScheduleBucketError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "schedule_bucket_sync_failed" });
+    }
+  },
+);
 
 // ── GET /projects/:projectId/meetings/:meetingId ──────────────────────────────
 type ClashSyncMode = "initial_load" | "refresh";
 
-async function syncMeetingClashes(projectId: number, meetingId: number, actor: { userId: number; fullName?: string; companyName?: string }, mode: ClashSyncMode) {
+async function syncMeetingClashes(
+  projectId: number,
+  meetingId: number,
+  actor: { userId: number; fullName?: string; companyName?: string },
+  mode: ClashSyncMode,
+) {
   return db.transaction(async (tx) => {
     await requireMeeting(tx, projectId, meetingId);
     const now = new Date();
-    const canonical = await tx.select().from(clashesTable).where(eq(clashesTable.projectId, projectId));
-    const reportIds = new Set((await tx.select({ id: clashReportsTable.id }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId))).map(report => report.id));
-    const eligible = canonical.filter(clash => reportIds.has(clash.clashReportId) && !clash.deletedAt && ELIGIBLE_CLASH_STATUSES.includes((clash.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number]));
-    const existing = await tx.select().from(meetingClashLinksTable).where(and(eq(meetingClashLinksTable.projectId, projectId), eq(meetingClashLinksTable.meetingId, meetingId)));
-    const existingByClash = new Map(existing.map(link => [link.clashId, link]));
-    const canonicalById = new Map(canonical.map(clash => [clash.id, clash]));
+    const canonical = await tx
+      .select()
+      .from(clashesTable)
+      .where(eq(clashesTable.projectId, projectId));
+    const reportIds = new Set(
+      (
+        await tx
+          .select({ id: clashReportsTable.id })
+          .from(clashReportsTable)
+          .where(eq(clashReportsTable.projectId, projectId))
+      ).map((report) => report.id),
+    );
+    const eligible = canonical.filter(
+      (clash) =>
+        reportIds.has(clash.clashReportId) &&
+        !clash.deletedAt &&
+        ELIGIBLE_CLASH_STATUSES.includes(
+          (clash.status || "") as (typeof ELIGIBLE_CLASH_STATUSES)[number],
+        ),
+    );
+    const existing = await tx
+      .select()
+      .from(meetingClashLinksTable)
+      .where(
+        and(
+          eq(meetingClashLinksTable.projectId, projectId),
+          eq(meetingClashLinksTable.meetingId, meetingId),
+        ),
+      );
+    const existingByClash = new Map(
+      existing.map((link) => [link.clashId, link]),
+    );
+    const canonicalById = new Map(canonical.map((clash) => [clash.id, clash]));
     const changedFields = new Set<string>();
-    let updated = 0, unchanged = 0, sourceExcluded = 0;
-    let userExcluded = existing.filter(link => link.linkState === "removed_by_user").length;
+    let updated = 0,
+      unchanged = 0,
+      sourceExcluded = 0;
+    let userExcluded = existing.filter(
+      (link) => link.linkState === "removed_by_user",
+    ).length;
 
-    if (mode === "refresh") for (const link of existing) {
-      if (link.linkState === "removed_by_user") continue;
-      const source = canonicalById.get(link.clashId);
-      const sourceEligible = !!source && reportIds.has(source.clashReportId) && !source.deletedAt && ELIGIBLE_CLASH_STATUSES.includes((source.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number]);
-      if (!sourceEligible) {
-        sourceExcluded++;
-        if (link.linkState === "source_closed_or_excluded") unchanged++;
-        else {
-          await tx.update(meetingClashLinksTable).set({ linkState: "source_closed_or_excluded", lastRefreshedAt: now, updatedAt: now }).where(eq(meetingClashLinksTable.id, link.id));
-          updated++; changedFields.add("link_state");
+    if (mode === "refresh")
+      for (const link of existing) {
+        if (link.linkState === "removed_by_user") continue;
+        const source = canonicalById.get(link.clashId);
+        const sourceEligible =
+          !!source &&
+          reportIds.has(source.clashReportId) &&
+          !source.deletedAt &&
+          ELIGIBLE_CLASH_STATUSES.includes(
+            (source.status || "") as (typeof ELIGIBLE_CLASH_STATUSES)[number],
+          );
+        if (!sourceEligible) {
+          sourceExcluded++;
+          if (link.linkState === "source_closed_or_excluded") unchanged++;
+          else {
+            await tx
+              .update(meetingClashLinksTable)
+              .set({
+                linkState: "source_closed_or_excluded",
+                lastRefreshedAt: now,
+                updatedAt: now,
+              })
+              .where(eq(meetingClashLinksTable.id, link.id));
+            updated++;
+            changedFields.add("link_state");
+          }
+          continue;
         }
-        continue;
+        const snapshot = clashSnapshot(source!);
+        const changes: Record<string, unknown> = {};
+        const pairs: Array<[keyof typeof snapshot, keyof typeof link, string]> =
+          [
+            ["clashReportIdSnapshot", "clashReportIdSnapshot", "clash_report"],
+            ["clashNumberSnapshot", "clashNumberSnapshot", "number"],
+            ["descriptionSnapshot", "descriptionSnapshot", "description"],
+            ["floorSnapshot", "floorSnapshot", "floor"],
+            ["disciplineSnapshot", "disciplineSnapshot", "discipline"],
+            ["responsibleSnapshot", "responsibleSnapshot", "responsible"],
+            ["groupSnapshot", "groupSnapshot", "group"],
+            ["statusSnapshot", "statusSnapshot", "status"],
+          ];
+        for (const [snapshotKey, linkKey, label] of pairs)
+          if ((snapshot[snapshotKey] ?? null) !== (link[linkKey] ?? null)) {
+            changes[snapshotKey] = snapshot[snapshotKey];
+            changedFields.add(label);
+          }
+        if (
+          (snapshot.deadlineSnapshot?.getTime() ?? null) !==
+          (link.deadlineSnapshot?.getTime() ?? null)
+        ) {
+          changes.deadlineSnapshot = snapshot.deadlineSnapshot;
+          changedFields.add("deadline");
+        }
+        if (link.linkState !== "active") {
+          changes.linkState = "active";
+          changedFields.add("link_state");
+        }
+        if (Object.keys(changes).length) {
+          await tx
+            .update(meetingClashLinksTable)
+            .set({ ...changes, lastRefreshedAt: now, updatedAt: now })
+            .where(eq(meetingClashLinksTable.id, link.id));
+          updated++;
+        } else unchanged++;
       }
-      const snapshot = clashSnapshot(source!);
-      const changes: Record<string, unknown> = {};
-      const pairs: Array<[keyof typeof snapshot, keyof typeof link, string]> = [
-        ["clashReportIdSnapshot", "clashReportIdSnapshot", "clash_report"], ["clashNumberSnapshot", "clashNumberSnapshot", "number"],
-        ["descriptionSnapshot", "descriptionSnapshot", "description"], ["floorSnapshot", "floorSnapshot", "floor"],
-        ["disciplineSnapshot", "disciplineSnapshot", "discipline"], ["responsibleSnapshot", "responsibleSnapshot", "responsible"],
-        ["groupSnapshot", "groupSnapshot", "group"], ["statusSnapshot", "statusSnapshot", "status"],
-      ];
-      for (const [snapshotKey, linkKey, label] of pairs) if ((snapshot[snapshotKey] ?? null) !== (link[linkKey] ?? null)) { changes[snapshotKey] = snapshot[snapshotKey]; changedFields.add(label); }
-      if ((snapshot.deadlineSnapshot?.getTime() ?? null) !== (link.deadlineSnapshot?.getTime() ?? null)) { changes.deadlineSnapshot = snapshot.deadlineSnapshot; changedFields.add("deadline"); }
-      if (link.linkState !== "active") { changes.linkState = "active"; changedFields.add("link_state"); }
-      if (Object.keys(changes).length) { await tx.update(meetingClashLinksTable).set({ ...changes, lastRefreshedAt: now, updatedAt: now }).where(eq(meetingClashLinksTable.id, link.id)); updated++; }
-      else unchanged++;
-    }
 
-    const toInsert = eligible.filter(clash => !existingByClash.has(clash.id));
-    const inserted = toInsert.length ? await tx.insert(meetingClashLinksTable).values(toInsert.map(clash => ({
-      projectId, meetingId, clashId: clash.id, ...clashSnapshot(clash), linkState: "active", firstLoadedAt: now, lastRefreshedAt: now, createdById: actor.userId, updatedAt: now,
-    }))).onConflictDoNothing({ target: [meetingClashLinksTable.meetingId, meetingClashLinksTable.clashId] }).returning({ id: meetingClashLinksTable.id }) : [];
+    const toInsert = eligible.filter((clash) => !existingByClash.has(clash.id));
+    const inserted = toInsert.length
+      ? await tx
+          .insert(meetingClashLinksTable)
+          .values(
+            toInsert.map((clash) => ({
+              projectId,
+              meetingId,
+              clashId: clash.id,
+              ...clashSnapshot(clash),
+              linkState: "active",
+              firstLoadedAt: now,
+              lastRefreshedAt: now,
+              createdById: actor.userId,
+              updatedAt: now,
+            })),
+          )
+          .onConflictDoNothing({
+            target: [
+              meetingClashLinksTable.meetingId,
+              meetingClashLinksTable.clashId,
+            ],
+          })
+          .returning({ id: meetingClashLinksTable.id })
+      : [];
 
     if (mode === "initial_load") {
-      const linkedEligible = eligible.map(clash => existingByClash.get(clash.id)).filter(Boolean);
-      unchanged = linkedEligible.filter(link => link!.linkState === "active").length;
-      userExcluded = linkedEligible.filter(link => link!.linkState === "removed_by_user").length;
-      sourceExcluded = linkedEligible.filter(link => link!.linkState === "source_closed_or_excluded").length;
+      const linkedEligible = eligible
+        .map((clash) => existingByClash.get(clash.id))
+        .filter(Boolean);
+      unchanged = linkedEligible.filter(
+        (link) => link!.linkState === "active",
+      ).length;
+      userExcluded = linkedEligible.filter(
+        (link) => link!.linkState === "removed_by_user",
+      ).length;
+      sourceExcluded = linkedEligible.filter(
+        (link) => link!.linkState === "source_closed_or_excluded",
+      ).length;
     }
-    const summary = { reviewed: canonical.length, added: inserted.length, updated, unchanged, sourceExcluded, userExcluded, failures: 0,
-      open: eligible.filter(clash => clash.status === "open").length, followUp: eligible.filter(clash => clash.status === "follow_up").length, changedFields: [...changedFields].sort() };
-    await tx.insert(meetingClashRefreshEventsTable).values({ projectId, meetingId, actorId: actor.userId, eventType: mode, addedCount: summary.added, updatedCount: summary.updated, unchangedCount: summary.unchanged, excludedCount: summary.sourceExcluded, userExcludedCount: summary.userExcluded, failureCount: 0, openCount: summary.open, followUpCount: summary.followUp, changedFields: JSON.stringify(summary.changedFields), createdAt: now });
-    await tx.insert(activityLogTable).values({ projectId, userId: actor.userId, userFullName: actor.fullName ?? "", userCompanyName: actor.companyName ?? "", actionType: mode === "initial_load" ? "load_clashes" : "refresh_clashes", entityType: "meeting", entityId: meetingId, details: JSON.stringify(summary) });
+    const summary = {
+      reviewed: canonical.length,
+      added: inserted.length,
+      updated,
+      unchanged,
+      sourceExcluded,
+      userExcluded,
+      failures: 0,
+      open: eligible.filter((clash) => clash.status === "open").length,
+      followUp: eligible.filter((clash) => clash.status === "follow_up").length,
+      changedFields: [...changedFields].sort(),
+    };
+    await tx
+      .insert(meetingClashRefreshEventsTable)
+      .values({
+        projectId,
+        meetingId,
+        actorId: actor.userId,
+        eventType: mode,
+        addedCount: summary.added,
+        updatedCount: summary.updated,
+        unchangedCount: summary.unchanged,
+        excludedCount: summary.sourceExcluded,
+        userExcludedCount: summary.userExcluded,
+        failureCount: 0,
+        openCount: summary.open,
+        followUpCount: summary.followUp,
+        changedFields: JSON.stringify(summary.changedFields),
+        createdAt: now,
+      });
+    await tx
+      .insert(activityLogTable)
+      .values({
+        projectId,
+        userId: actor.userId,
+        userFullName: actor.fullName ?? "",
+        userCompanyName: actor.companyName ?? "",
+        actionType:
+          mode === "initial_load" ? "load_clashes" : "refresh_clashes",
+        entityType: "meeting",
+        entityId: meetingId,
+        details: JSON.stringify(summary),
+      });
     return summary;
   });
 }
 
-router.post("/projects/:projectId/meetings/:meetingId/clashes/load", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  try { const summary = await syncMeetingClashes(Number(req.params.projectId), Number(req.params.meetingId), req.user!, "initial_load"); res.json({ summary, ...(await getMeetingClashLinks(Number(req.params.meetingId))) }); }
-  catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "clash_load_failed" }); }
-});
-
-router.post("/projects/:projectId/meetings/:meetingId/clashes/refresh", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  try { const summary = await syncMeetingClashes(Number(req.params.projectId), Number(req.params.meetingId), req.user!, "refresh"); res.json({ summary, ...(await getMeetingClashLinks(Number(req.params.meetingId))) }); }
-  catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "clash_refresh_failed" }); }
-});
-
-router.patch("/projects/:projectId/meetings/:meetingId/clashes/:clashId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId), meetingId = Number(req.params.meetingId), clashId = Number(req.params.clashId);
-  const action = req.body?.action, meetingNotes = req.body?.meeting_notes;
-  if (action !== undefined && action !== "remove" && action !== "restore") { res.status(400).json({ error: "invalid_action" }); return; }
-  if (meetingNotes !== undefined && typeof meetingNotes !== "string") { res.status(400).json({ error: "invalid_meeting_notes" }); return; }
-  try {
-    const result = await db.transaction(async tx => {
-      await requireMeeting(tx, projectId, meetingId);
-      const [link] = await tx.select().from(meetingClashLinksTable).where(and(eq(meetingClashLinksTable.projectId, projectId), eq(meetingClashLinksTable.meetingId, meetingId), eq(meetingClashLinksTable.clashId, clashId))).limit(1);
-      if (!link) throw new MeetingClashLinkError(404, "meeting_clash_link_not_found");
-      const updates: Record<string, unknown> = { updatedAt: new Date() };
-      if (meetingNotes !== undefined) updates.meetingNotes = meetingNotes.trim() || null;
-      if (action === "remove") updates.linkState = "removed_by_user";
-      if (action === "restore") {
-        const [source] = await tx.select().from(clashesTable).where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId), isNull(clashesTable.deletedAt))).limit(1);
-        if (!source || !ELIGIBLE_CLASH_STATUSES.includes((source.status || "") as typeof ELIGIBLE_CLASH_STATUSES[number])) throw new MeetingClashLinkError(409, "clash_not_eligible_for_restore");
-        const [report] = await tx.select({ id: clashReportsTable.id }).from(clashReportsTable).where(and(eq(clashReportsTable.id, source.clashReportId), eq(clashReportsTable.projectId, projectId))).limit(1);
-        if (!report) throw new MeetingClashLinkError(404, "clash_not_accessible");
-        Object.assign(updates, clashSnapshot(source), { linkState: "active", lastRefreshedAt: new Date() });
+router.post(
+  "/projects/:projectId/meetings/:meetingId/clashes/load",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    try {
+      const summary = await syncMeetingClashes(
+        Number(req.params.projectId),
+        Number(req.params.meetingId),
+        req.user!,
+        "initial_load",
+      );
+      res.json({
+        summary,
+        ...(await getMeetingClashLinks(Number(req.params.meetingId))),
+      });
+    } catch (err) {
+      if (err instanceof MeetingClashLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
       }
-      const [updatedLink] = await tx.update(meetingClashLinksTable).set(updates).where(eq(meetingClashLinksTable.id, link.id)).returning();
-      if (action) await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "", actionType: action === "remove" ? "remove_clash_from_meeting" : "restore_clash_to_meeting", entityType: "meeting", entityId: meetingId, details: JSON.stringify({ clashId }) });
-      return updatedLink;
-    });
-    res.json(serializeMeetingClashLink(result));
-  } catch (err) { if (err instanceof MeetingClashLinkError) { res.status(err.status).json({ error: err.code }); return; } res.status(500).json({ error: "meeting_clash_update_failed" }); }
-});
+      res.status(500).json({ error: "clash_load_failed" });
+    }
+  },
+);
 
-router.get("/projects/:projectId/meetings/:meetingId", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  try {
-    const [meeting] = await db.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
-    if (!meeting) { res.status(404).json({ error: "Not found" }); return; }
-    const attendees = await db.select().from(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
-    const actionItems = await db.select().from(actionItemsTable).where(eq(actionItemsTable.meetingId, meetingId));
-    const clashes = await getMeetingClashLinks(meetingId);
-    res.json({ ...meeting, attendees, actionItems, linkedRfis: await getMeetingRfiLinks(meetingId), linkedSubmittals: await getMeetingSubmittalLinks(meetingId), linkedClashes: clashes.links, clashRefreshEvents: clashes.events, scheduleBuckets: await getMeetingScheduleBucketLinks(meetingId), legacyRfis: parseLegacyRfiRows(meeting.notes), legacyDeliverables: parseLegacyDeliverableRows(meeting.notes), legacyViewpoints: parseLegacyViewpointRows(meeting.notes) });
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+router.post(
+  "/projects/:projectId/meetings/:meetingId/clashes/refresh",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    try {
+      const summary = await syncMeetingClashes(
+        Number(req.params.projectId),
+        Number(req.params.meetingId),
+        req.user!,
+        "refresh",
+      );
+      res.json({
+        summary,
+        ...(await getMeetingClashLinks(Number(req.params.meetingId))),
+      });
+    } catch (err) {
+      if (err instanceof MeetingClashLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "clash_refresh_failed" });
+    }
+  },
+);
+
+router.patch(
+  "/projects/:projectId/meetings/:meetingId/clashes/:clashId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId),
+      meetingId = Number(req.params.meetingId),
+      clashId = Number(req.params.clashId);
+    const action = req.body?.action,
+      meetingNotes = req.body?.meeting_notes;
+    if (action !== undefined && action !== "remove" && action !== "restore") {
+      res.status(400).json({ error: "invalid_action" });
+      return;
+    }
+    if (meetingNotes !== undefined && typeof meetingNotes !== "string") {
+      res.status(400).json({ error: "invalid_meeting_notes" });
+      return;
+    }
+    try {
+      const result = await db.transaction(async (tx) => {
+        await requireMeeting(tx, projectId, meetingId);
+        const [link] = await tx
+          .select()
+          .from(meetingClashLinksTable)
+          .where(
+            and(
+              eq(meetingClashLinksTable.projectId, projectId),
+              eq(meetingClashLinksTable.meetingId, meetingId),
+              eq(meetingClashLinksTable.clashId, clashId),
+            ),
+          )
+          .limit(1);
+        if (!link)
+          throw new MeetingClashLinkError(404, "meeting_clash_link_not_found");
+        const updates: Record<string, unknown> = { updatedAt: new Date() };
+        if (meetingNotes !== undefined)
+          updates.meetingNotes = meetingNotes.trim() || null;
+        if (action === "remove") updates.linkState = "removed_by_user";
+        if (action === "restore") {
+          const [source] = await tx
+            .select()
+            .from(clashesTable)
+            .where(
+              and(
+                eq(clashesTable.id, clashId),
+                eq(clashesTable.projectId, projectId),
+                isNull(clashesTable.deletedAt),
+              ),
+            )
+            .limit(1);
+          if (
+            !source ||
+            !ELIGIBLE_CLASH_STATUSES.includes(
+              (source.status || "") as (typeof ELIGIBLE_CLASH_STATUSES)[number],
+            )
+          )
+            throw new MeetingClashLinkError(
+              409,
+              "clash_not_eligible_for_restore",
+            );
+          const [report] = await tx
+            .select({ id: clashReportsTable.id })
+            .from(clashReportsTable)
+            .where(
+              and(
+                eq(clashReportsTable.id, source.clashReportId),
+                eq(clashReportsTable.projectId, projectId),
+              ),
+            )
+            .limit(1);
+          if (!report)
+            throw new MeetingClashLinkError(404, "clash_not_accessible");
+          Object.assign(updates, clashSnapshot(source), {
+            linkState: "active",
+            lastRefreshedAt: new Date(),
+          });
+        }
+        const [updatedLink] = await tx
+          .update(meetingClashLinksTable)
+          .set(updates)
+          .where(eq(meetingClashLinksTable.id, link.id))
+          .returning();
+        if (action)
+          await tx
+            .insert(activityLogTable)
+            .values({
+              projectId,
+              userId: req.user!.userId,
+              userFullName: req.user!.fullName ?? "",
+              userCompanyName: req.user!.companyName ?? "",
+              actionType:
+                action === "remove"
+                  ? "remove_clash_from_meeting"
+                  : "restore_clash_to_meeting",
+              entityType: "meeting",
+              entityId: meetingId,
+              details: JSON.stringify({ clashId }),
+            });
+        return updatedLink;
+      });
+      res.json(serializeMeetingClashLink(result));
+    } catch (err) {
+      if (err instanceof MeetingClashLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "meeting_clash_update_failed" });
+    }
+  },
+);
+
+router.get(
+  "/projects/:projectId/meetings/:meetingId",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    try {
+      const [meeting] = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+          ),
+        );
+      if (!meeting) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+      const attendees = await db
+        .select()
+        .from(meetingAttendeesTable)
+        .where(eq(meetingAttendeesTable.meetingId, meetingId));
+      const actionItems = await db
+        .select()
+        .from(actionItemsTable)
+        .where(eq(actionItemsTable.meetingId, meetingId));
+      const clashes = await getMeetingClashLinks(meetingId);
+      res.json({
+        ...meeting,
+        attendees,
+        actionItems,
+        linkedRfis: await getMeetingRfiLinks(meetingId),
+        linkedSubmittals: await getMeetingSubmittalLinks(meetingId),
+        linkedLensViewpoints: await getMeetingLensViewpointLinks(meetingId),
+        linkedClashes: clashes.links,
+        clashRefreshEvents: clashes.events,
+        scheduleBuckets: await getMeetingScheduleBucketLinks(meetingId),
+        legacyRfis: parseLegacyRfiRows(meeting.notes),
+        legacyDeliverables: parseLegacyDeliverableRows(meeting.notes),
+        legacyViewpoints: parseLegacyViewpointRows(meeting.notes),
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // ── PATCH /projects/:projectId/meetings/:meetingId ────────────────────────────
-router.patch("/projects/:projectId/meetings/:meetingId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const body = req.body as Partial<{ title: string; notes: string; location: string; ai_summary: string }>;
-  try {
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (body.title !== undefined)      updates.title      = body.title;
-    if (body.notes !== undefined)      updates.notes      = body.notes;
-    if (body.location !== undefined)   updates.location   = body.location;
-    if (body.ai_summary !== undefined) updates.aiSummary  = body.ai_summary;
-    const [updated] = await db.update(meetingMinutesTable).set(updates as any)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId))).returning();
-    if (!updated) { res.status(404).json({ error: "Not found" }); return; }
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+router.patch(
+  "/projects/:projectId/meetings/:meetingId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const body = req.body as Partial<{
+      title: string;
+      meeting_date: string;
+      notes: string;
+      location: string;
+      ai_summary: string;
+      expected_updated_at: string;
+      attendees: {
+        user_id?: number;
+        external_email?: string;
+        full_name: string;
+        company?: string;
+        role?: string;
+      }[];
+    }>;
+    if (body.title !== undefined && !body.title.trim()) {
+      res.status(400).json({ error: "title_required" });
+      return;
+    }
+    if (
+      body.meeting_date !== undefined &&
+      Number.isNaN(new Date(body.meeting_date).getTime())
+    ) {
+      res.status(400).json({ error: "valid_meeting_date_required" });
+      return;
+    }
+    try {
+      const updated = await db.transaction(async (tx) => {
+        const [existing] = await tx
+          .select()
+          .from(meetingMinutesTable)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .limit(1);
+        if (!existing)
+          throw new MeetingClashLinkError(404, "meeting_not_found");
+        if (
+          body.expected_updated_at &&
+          new Date(body.expected_updated_at).getTime() !==
+            new Date(existing.updatedAt).getTime()
+        ) {
+          throw new MeetingClashLinkError(409, "meeting_stale_update");
+        }
+        const updates: Record<string, unknown> = { updatedAt: new Date() };
+        if (body.title !== undefined) updates.title = body.title.trim();
+        if (body.meeting_date !== undefined)
+          updates.meetingDate = new Date(body.meeting_date);
+        if (body.notes !== undefined) updates.notes = body.notes;
+        if (body.location !== undefined)
+          updates.location = body.location?.trim() || null;
+        if (body.ai_summary !== undefined) updates.aiSummary = body.ai_summary;
+        const [row] = await tx
+          .update(meetingMinutesTable)
+          .set(updates as any)
+          .where(
+            and(
+              eq(meetingMinutesTable.id, meetingId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            ),
+          )
+          .returning();
+        if (Array.isArray(body.attendees)) {
+          if (body.attendees.some((attendee) => !attendee.full_name?.trim()))
+            throw new MeetingClashLinkError(400, "attendee_name_required");
+          await tx
+            .delete(meetingAttendeesTable)
+            .where(eq(meetingAttendeesTable.meetingId, meetingId));
+          if (body.attendees.length) {
+            await tx.insert(meetingAttendeesTable).values(
+              body.attendees.map((attendee) => ({
+                meetingId,
+                userId: attendee.user_id ?? null,
+                externalEmail: attendee.external_email ?? null,
+                fullName: attendee.full_name.trim(),
+                company: attendee.company?.trim() || null,
+                role: attendee.role?.trim() || null,
+              })),
+            );
+          }
+        }
+        await tx.insert(activityLogTable).values({
+          projectId,
+          userId: req.user!.userId,
+          userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName,
+          actionType: "update",
+          entityType: "meeting",
+          entityId: meetingId,
+          fileNameBefore: null,
+          fileNameAfter: null,
+          details: JSON.stringify({
+            event: "meeting.updated",
+            changedFields: Object.keys(updates)
+              .filter((key) => key !== "updatedAt")
+              .sort(),
+            lifecyclePolicy: "open_records_editable_no_finalized_status_column",
+          }),
+        });
+        return row;
+      });
+      res.json(updated);
+    } catch (err) {
+      if (err instanceof MeetingClashLinkError) {
+        res.status(err.status).json({ error: err.code });
+        return;
+      }
+      res.status(500).json({ error: "meeting_update_failed" });
+    }
+  },
+);
 
 // ── POST /projects/:projectId/meetings/:meetingId/ai-summary ──────────────────
-router.post("/projects/:projectId/meetings/:meetingId/ai-summary", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  try {
-    const [meeting] = await db.select().from(meetingMinutesTable)
-      .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
-    if (!meeting) { res.status(404).json({ error: "Not found" }); return; }
+router.post(
+  "/projects/:projectId/meetings/:meetingId/ai-summary",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    try {
+      const [meeting] = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+          ),
+        );
+      if (!meeting) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
 
-    const prompt = `You are a construction project manager. Summarize these meeting notes and extract action items.
+      const prompt = `You are a construction project manager. Summarize these meeting notes and extract action items.
 Meeting: ${meeting.title} on ${new Date(meeting.meetingDate).toLocaleDateString()}
 Notes: ${meeting.notes ?? "(no notes)"}
 Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "assigned_to_name": "...", "assigned_to_email": "...", "due_date": "YYYY-MM-DD or null" }] }`;
 
-    const anthropic = await getAnthropicClientForUser({
-      userId: req.user!.userId,
-      projectId,
-      feature: "meeting_ai_summary",
-    });
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5", max_tokens: 800,
-      messages: [{ role: "user", content: prompt }],
-    });
-    const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
-    const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
+      const anthropic = await getAnthropicClientForUser({
+        userId: req.user!.userId,
+        projectId,
+        feature: "meeting_ai_summary",
+      });
+      const msg = await anthropic.messages.create({
+        model: "claude-sonnet-4-5",
+        max_tokens: 800,
+        messages: [{ role: "user", content: prompt }],
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
+      const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
 
-    await db.update(meetingMinutesTable).set({ aiSummary: parsed.summary, updatedAt: new Date() })
-      .where(eq(meetingMinutesTable.id, meetingId));
-    res.json(parsed);
-  } catch (err) {
-    if (sendAiUsageError(res, err)) return;
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+      await db
+        .update(meetingMinutesTable)
+        .set({ aiSummary: parsed.summary, updatedAt: new Date() })
+        .where(eq(meetingMinutesTable.id, meetingId));
+      res.json(parsed);
+    } catch (err) {
+      if (sendAiUsageError(res, err)) return;
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // ── POST /projects/:projectId/meetings/:meetingId/action-items ────────────────
-router.post("/projects/:projectId/meetings/:meetingId/action-items", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const meetingId = Number(req.params.meetingId);
-  const body = req.body as { items: { description: string; assigned_to_id?: number; assigned_to_name?: string; assigned_to_email?: string; due_date?: string }[] };
-  if (!body.items?.length) { res.status(400).json({ error: "items required" }); return; }
-  try {
-    const created = await db.insert(actionItemsTable).values(
-      body.items.map(i => ({
-        meetingId, projectId, description: i.description,
-        assignedToId: i.assigned_to_id ?? null,
-        assignedToName: i.assigned_to_name ?? null,
-        assignedToExternalEmail: i.assigned_to_email ?? null,
-        dueDate: i.due_date ? new Date(i.due_date) : null,
-        status: "open" as const,
-      }))
-    ).returning();
-
-    // Notify assigned BIMLog users
-    for (const item of created) {
-      if (item.assignedToId) {
-        await createNotification(item.assignedToId, projectId, "action_item_due",
-          "New Action Item", item.description,
-          `/projects/${projectId}/meetings`);
-      }
+router.post(
+  "/projects/:projectId/meetings/:meetingId/action-items",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = Number(req.params.meetingId);
+    const body = req.body as {
+      items: {
+        description: string;
+        assigned_to_id?: number;
+        assigned_to_name?: string;
+        assigned_to_email?: string;
+        due_date?: string;
+      }[];
+    };
+    if (!body.items?.length) {
+      res.status(400).json({ error: "items required" });
+      return;
     }
+    try {
+      const created = await db
+        .insert(actionItemsTable)
+        .values(
+          body.items.map((i) => ({
+            meetingId,
+            projectId,
+            description: i.description,
+            assignedToId: i.assigned_to_id ?? null,
+            assignedToName: i.assigned_to_name ?? null,
+            assignedToExternalEmail: i.assigned_to_email ?? null,
+            dueDate: i.due_date ? new Date(i.due_date) : null,
+            status: "open" as const,
+          })),
+        )
+        .returning();
 
-    await db.insert(activityLogTable).values({
-      projectId, userId: req.user!.userId,
-      userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-      actionType: "create", entityType: "action_items", entityId: meetingId,
-      fileNameBefore: null, fileNameAfter: null,
-      details: `Created ${created.length} action item(s) for meeting`,
-    });
-    res.status(201).json(created);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+      // Notify assigned BIMLog users
+      for (const item of created) {
+        if (item.assignedToId) {
+          await createNotification(
+            item.assignedToId,
+            projectId,
+            "action_item_due",
+            "New Action Item",
+            item.description,
+            `/projects/${projectId}/meetings`,
+          );
+        }
+      }
+
+      await db.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "create",
+        entityType: "action_items",
+        entityId: meetingId,
+        fileNameBefore: null,
+        fileNameAfter: null,
+        details: `Created ${created.length} action item(s) for meeting`,
+      });
+      res.status(201).json(created);
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // ── GET /projects/:projectId/action-items ─────────────────────────────────────
-router.get("/projects/:projectId/action-items", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  try {
-    const items = await db.select().from(actionItemsTable)
-      .where(and(eq(actionItemsTable.projectId, projectId), ne(actionItemsTable.status, "cancelled")))
-      .orderBy(desc(actionItemsTable.createdAt));
-    const now = Date.now();
-    const withOverdue = items.map(i => ({
-      ...i,
-      isOverdue: i.status !== "completed" && i.dueDate && new Date(i.dueDate).getTime() < now,
-    }));
-    res.json(withOverdue);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+router.get(
+  "/projects/:projectId/action-items",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const items = await db
+        .select()
+        .from(actionItemsTable)
+        .where(
+          and(
+            eq(actionItemsTable.projectId, projectId),
+            ne(actionItemsTable.status, "cancelled"),
+          ),
+        )
+        .orderBy(desc(actionItemsTable.createdAt));
+      const now = Date.now();
+      const withOverdue = items.map((i) => ({
+        ...i,
+        isOverdue:
+          i.status !== "completed" &&
+          i.dueDate &&
+          new Date(i.dueDate).getTime() < now,
+      }));
+      res.json(withOverdue);
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
+    }
+  },
+);
 
 // ── PATCH /projects/:projectId/action-items/:itemId ───────────────────────────
-router.patch("/projects/:projectId/action-items/:itemId", authMiddleware, requireProjectMember(), async (req, res) => {
-  const projectId = Number(req.params.projectId);
-  const itemId = Number(req.params.itemId);
-  const body = req.body as Partial<{ status: string; description: string; due_date: string }>;
-  try {
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
-    if (body.status !== undefined) {
-      updates.status = body.status;
-      if (body.status === "completed") updates.completedAt = new Date();
+router.patch(
+  "/projects/:projectId/action-items/:itemId",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const itemId = Number(req.params.itemId);
+    const body = req.body as Partial<{
+      status: string;
+      description: string;
+      due_date: string;
+    }>;
+    try {
+      const updates: Record<string, unknown> = { updatedAt: new Date() };
+      if (body.status !== undefined) {
+        updates.status = body.status;
+        if (body.status === "completed") updates.completedAt = new Date();
+      }
+      if (body.description !== undefined)
+        updates.description = body.description;
+      if (body.due_date !== undefined)
+        updates.dueDate = body.due_date ? new Date(body.due_date) : null;
+      const [updated] = await db
+        .update(actionItemsTable)
+        .set(updates as any)
+        .where(
+          and(
+            eq(actionItemsTable.id, itemId),
+            eq(actionItemsTable.projectId, projectId),
+          ),
+        )
+        .returning();
+      if (!updated) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+      res.json(updated);
+    } catch (err) {
+      res
+        .status(500)
+        .json({
+          error: err instanceof Error ? err.message : "Internal server error",
+        });
     }
-    if (body.description !== undefined) updates.description = body.description;
-    if (body.due_date !== undefined)    updates.dueDate = body.due_date ? new Date(body.due_date) : null;
-    const [updated] = await db.update(actionItemsTable).set(updates as any)
-      .where(and(eq(actionItemsTable.id, itemId), eq(actionItemsTable.projectId, projectId))).returning();
-    if (!updated) { res.status(404).json({ error: "Not found" }); return; }
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+  },
+);
 
 // ── POST /projects/:projectId/meetings/transcribe-audio ───────────────────────
-router.post("/projects/:projectId/meetings/transcribe-audio",
+router.post(
+  "/projects/:projectId/meetings/transcribe-audio",
   authMiddleware,
   singleFileUpload({ fileSize: 500 * 1024 * 1024 }, "audio"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const [userRow] = await db.select({ openaiApiKey: usersTable.openaiApiKey })
+      const [userRow] = await db
+        .select({ openaiApiKey: usersTable.openaiApiKey })
         .from(usersTable)
         .where(eq(usersTable.id, req.user!.userId));
       if (!userRow?.openaiApiKey) {
-        res.status(400).json({ error: "no_openai_key", message: "OpenAI API key not configured. Add it in your Profile." });
+        res
+          .status(400)
+          .json({
+            error: "no_openai_key",
+            message: "OpenAI API key not configured. Add it in your Profile.",
+          });
         return;
       }
 
       if (!req.file) {
-        res.status(400).json({ error: "no_file", message: "No audio file uploaded." });
+        res
+          .status(400)
+          .json({ error: "no_file", message: "No audio file uploaded." });
         return;
       }
 
       const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
-      const allowedExts = ["mp3","mp4","m4a","wav","webm","ogg"];
+      const allowedExts = ["mp3", "mp4", "m4a", "wav", "webm", "ogg"];
       if (!allowedExts.includes(ext)) {
-        res.status(400).json({ error: "invalid_format", message: "Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG." });
+        res
+          .status(400)
+          .json({
+            error: "invalid_format",
+            message:
+              "Unsupported format. Use MP3, MP4, M4A, WAV, WebM, or OGG.",
+          });
         return;
       }
 
@@ -1106,13 +3010,21 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
       const fileBuffer = req.file.buffer;
       const fileSizeMB = Math.round(fileBuffer.length / 1024 / 1024);
 
-      async function transcribeBuffer(buf: Buffer, filename: string): Promise<string> {
+      async function transcribeBuffer(
+        buf: Buffer,
+        filename: string,
+      ): Promise<string> {
         const fs = await import("fs");
         const path = await import("path");
         const os = await import("os");
         const { OpenAI } = await import("openai");
-        const openaiClient = new OpenAI({ apiKey: userRow.openaiApiKey as string });
-        const tmpPath = path.join(os.tmpdir(), `whisper_${Date.now()}_${filename}`);
+        const openaiClient = new OpenAI({
+          apiKey: userRow.openaiApiKey as string,
+        });
+        const tmpPath = path.join(
+          os.tmpdir(),
+          `whisper_${Date.now()}_${filename}`,
+        );
         fs.writeFileSync(tmpPath, buf);
         try {
           const response = await openaiClient.audio.transcriptions.create({
@@ -1121,8 +3033,15 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
           });
           return response.text ?? "";
         } finally {
-          try { fs.unlinkSync(tmpPath); } catch (cleanupError) {
-            console.warn("[meeting_minutes] Failed to remove transcription temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          try {
+            fs.unlinkSync(tmpPath);
+          } catch (cleanupError) {
+            console.warn(
+              "[meeting_minutes] Failed to remove transcription temp file:",
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : cleanupError,
+            );
           }
         }
       }
@@ -1135,19 +3054,42 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
         const fs = await import("fs");
         const path = await import("path");
         const tmpDir = os.tmpdir();
-        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
-        const outputPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        const inputPath = path.join(
+          tmpDir,
+          `bimlog_audio_${Date.now()}.${ext}`,
+        );
+        const outputPath = path.join(
+          tmpDir,
+          `bimlog_compressed_${Date.now()}.mp3`,
+        );
         fs.writeFileSync(inputPath, fileBuffer);
         try {
-          execSync(`${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y`, { stdio: "pipe" });
+          execSync(
+            `${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y`,
+            { stdio: "pipe" },
+          );
           const compressed = fs.readFileSync(outputPath);
           fullTranscript = await transcribeBuffer(compressed, "audio.mp3");
         } finally {
-          try { fs.unlinkSync(inputPath); } catch (cleanupError) {
-            console.warn("[meeting_minutes] Failed to remove input temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          try {
+            fs.unlinkSync(inputPath);
+          } catch (cleanupError) {
+            console.warn(
+              "[meeting_minutes] Failed to remove input temp file:",
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : cleanupError,
+            );
           }
-          try { fs.unlinkSync(outputPath); } catch (cleanupError) {
-            console.warn("[meeting_minutes] Failed to remove compressed temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          try {
+            fs.unlinkSync(outputPath);
+          } catch (cleanupError) {
+            console.warn(
+              "[meeting_minutes] Failed to remove compressed temp file:",
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : cleanupError,
+            );
           }
         }
       } else {
@@ -1156,16 +3098,28 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
         const fs = await import("fs");
         const path = await import("path");
         const tmpDir = os.tmpdir();
-        const inputPath = path.join(tmpDir, `bimlog_audio_${Date.now()}.${ext}`);
-        const compressedPath = path.join(tmpDir, `bimlog_compressed_${Date.now()}.mp3`);
+        const inputPath = path.join(
+          tmpDir,
+          `bimlog_audio_${Date.now()}.${ext}`,
+        );
+        const compressedPath = path.join(
+          tmpDir,
+          `bimlog_compressed_${Date.now()}.mp3`,
+        );
         fs.writeFileSync(inputPath, fileBuffer);
 
         try {
-          execSync(`${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y`, { stdio: "pipe" });
+          execSync(
+            `${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y`,
+            { stdio: "pipe" },
+          );
           const compressedBuffer = fs.readFileSync(compressedPath);
 
           if (compressedBuffer.length <= CHUNK_SIZE) {
-            fullTranscript = await transcribeBuffer(compressedBuffer, "audio.mp3");
+            fullTranscript = await transcribeBuffer(
+              compressedBuffer,
+              "audio.mp3",
+            );
           } else {
             const numChunks = Math.ceil(compressedBuffer.length / CHUNK_SIZE);
             const transcripts: string[] = [];
@@ -1173,25 +3127,52 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
               const start = i * CHUNK_SIZE;
               const end = Math.min(start + CHUNK_SIZE, compressedBuffer.length);
               const chunk = compressedBuffer.subarray(start, end);
-              const chunkPath = path.join(tmpDir, `bimlog_chunk_${Date.now()}_${i}.mp3`);
+              const chunkPath = path.join(
+                tmpDir,
+                `bimlog_chunk_${Date.now()}_${i}.mp3`,
+              );
               fs.writeFileSync(chunkPath, chunk);
               try {
-                const chunkTranscript = await transcribeBuffer(chunk, `chunk_${i}.mp3`);
+                const chunkTranscript = await transcribeBuffer(
+                  chunk,
+                  `chunk_${i}.mp3`,
+                );
                 transcripts.push(chunkTranscript);
               } finally {
-                try { fs.unlinkSync(chunkPath); } catch (cleanupError) {
-                  console.warn("[meeting_minutes] Failed to remove chunk temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+                try {
+                  fs.unlinkSync(chunkPath);
+                } catch (cleanupError) {
+                  console.warn(
+                    "[meeting_minutes] Failed to remove chunk temp file:",
+                    cleanupError instanceof Error
+                      ? cleanupError.message
+                      : cleanupError,
+                  );
                 }
               }
             }
             fullTranscript = transcripts.join(" ");
           }
         } finally {
-          try { fs.unlinkSync(inputPath); } catch (cleanupError) {
-            console.warn("[meeting_minutes] Failed to remove large input temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          try {
+            fs.unlinkSync(inputPath);
+          } catch (cleanupError) {
+            console.warn(
+              "[meeting_minutes] Failed to remove large input temp file:",
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : cleanupError,
+            );
           }
-          try { fs.unlinkSync(compressedPath); } catch (cleanupError) {
-            console.warn("[meeting_minutes] Failed to remove large compressed temp file:", cleanupError instanceof Error ? cleanupError.message : cleanupError);
+          try {
+            fs.unlinkSync(compressedPath);
+          } catch (cleanupError) {
+            console.warn(
+              "[meeting_minutes] Failed to remove large compressed temp file:",
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : cleanupError,
+            );
           }
         }
       }
@@ -1204,9 +3185,10 @@ router.post("/projects/:projectId/meetings/transcribe-audio",
       const msg = await anthropic.messages.create({
         model: "claude-sonnet-4-5",
         max_tokens: 2000,
-        messages: [{
-          role: "user",
-          content: `You are a construction project coordinator assistant.
+        messages: [
+          {
+            role: "user",
+            content: `You are a construction project coordinator assistant.
 Extract structured meeting information from this transcript.
 Return ONLY valid JSON, no markdown, no explanation.
 
@@ -1225,48 +3207,74 @@ Return this exact JSON structure:
 }
 For deliverable status fields use only: PENDING, COMPLETE, N/A, or empty string.
 For deadlines use MM-DD-YY format if mentioned.
-If information is not mentioned use empty string or empty array.`
-        }],
+If information is not mentioned use empty string or empty array.`,
+          },
+        ],
       });
 
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
       const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
       res.json({ ...parsed, transcript: fullTranscript, fileSizeMB });
-
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       const errMsg = err instanceof Error ? err.message : String(err);
       console.error("[transcribe-audio] FAILED:", errMsg);
       res.status(500).json({ error: "transcription_failed", message: errMsg });
     }
-  }
+  },
 );
 
-router.post("/projects/:projectId/meetings/import",
+router.post(
+  "/projects/:projectId/meetings/import",
   authMiddleware,
   requirePermission("admin", "write"),
   singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
-      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+      if (!req.file) {
+        res.status(400).json({ error: "no_file" });
+        return;
+      }
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(
+        req.file.buffer,
+        req.file.originalname,
+      );
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
         projectId,
         feature: "meeting_import",
       });
-      let data: any = { title: null, meetingDate: null, meetingTime: null, location: null, meetingNumber: null, notes: null, attendees: [], actionItems: [] };
+      let data: any = {
+        title: null,
+        meetingDate: null,
+        meetingTime: null,
+        location: null,
+        meetingNumber: null,
+        notes: null,
+        attendees: [],
+        actionItems: [],
+      };
       if (isPdf && pdfBase64) {
         try {
           const extractMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
             max_tokens: 4000,
-            messages: [{
-              role: "user",
-              content: [
-                { type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } },
-                { type: "text", text: `You are analyzing a construction meeting minutes PDF document.
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "document",
+                    source: {
+                      type: "base64",
+                      media_type: "application/pdf",
+                      data: pdfBase64,
+                    },
+                  },
+                  {
+                    type: "text",
+                    text: `You are analyzing a construction meeting minutes PDF document.
 Extract the meeting information. Return ONLY valid JSON, no markdown. Use null for fields not present:
 {
   "title": "meeting title or null",
@@ -1277,11 +3285,16 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
   "notes": "general notes or null",
   "attendees": [{"trade":"","company":"","fullName":"","role":"","email":"","phone":""}],
   "actionItems": [{"description":"","assignedToName":"","dueDate":"date or null","status":"open"}]
-}` }
-              ] as any
-            }]
+}`,
+                  },
+                ] as any,
+              },
+            ],
           });
-          const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
+          const text =
+            extractMsg.content[0]?.type === "text"
+              ? extractMsg.content[0].text
+              : "{}";
           const clean = text.replace(/```json\n?|```/g, "").trim();
           const parsed = JSON.parse(clean);
           data = {
@@ -1292,21 +3305,29 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
             meetingNumber: parsed.meetingNumber ?? null,
             notes: parsed.notes ?? null,
             attendees: Array.isArray(parsed.attendees) ? parsed.attendees : [],
-            actionItems: Array.isArray(parsed.actionItems) ? parsed.actionItems : [],
+            actionItems: Array.isArray(parsed.actionItems)
+              ? parsed.actionItems
+              : [],
           };
-          console.log("[meeting-import] PDF direct extraction: attendees=", data.attendees.length, "actions=", data.actionItems.length);
+          console.log(
+            "[meeting-import] PDF direct extraction: attendees=",
+            data.attendees.length,
+            "actions=",
+            data.actionItems.length,
+          );
         } catch (e) {
           console.error("[meeting-import] PDF direct extraction failed:", e);
         }
       } else {
-      for (const chunk of chunks) {
-        try {
-          const extractMsg = await anthropic.messages.create({
-            model: "claude-sonnet-4-5",
-            max_tokens: 4000,
-            messages: [{
-              role: "user",
-              content: `You are analyzing a chunk of a construction meeting minutes document.
+        for (const chunk of chunks) {
+          try {
+            const extractMsg = await anthropic.messages.create({
+              model: "claude-sonnet-4-5",
+              max_tokens: 4000,
+              messages: [
+                {
+                  role: "user",
+                  content: `You are analyzing a chunk of a construction meeting minutes document.
 Extract the meeting information from this chunk. Return ONLY valid JSON, no markdown. Use null for fields not present in this chunk:
 {
   "title": "meeting title or null",
@@ -1320,34 +3341,53 @@ Extract the meeting information from this chunk. Return ONLY valid JSON, no mark
 }
 
 Document chunk:
-${chunk}`
-            }]
-          });
-          const text = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "{}";
-          const clean = text.replace(/```json\n?|```/g, "").trim();
-          const chunkData = JSON.parse(clean);
-          data.title = data.title || chunkData.title || null;
-          data.meetingDate = data.meetingDate || chunkData.meetingDate || null;
-          data.meetingTime = data.meetingTime || chunkData.meetingTime || null;
-          data.location = data.location || chunkData.location || null;
-          data.meetingNumber = data.meetingNumber || chunkData.meetingNumber || null;
-          data.notes = [data.notes, chunkData.notes].filter(Boolean).join("\n\n") || null;
-          if (Array.isArray(chunkData.attendees)) data.attendees = [...data.attendees, ...chunkData.attendees];
-          if (Array.isArray(chunkData.actionItems)) data.actionItems = [...data.actionItems, ...chunkData.actionItems];
-        } catch (e) {
-          console.error("[meeting-import] chunk extraction failed:", e);
+${chunk}`,
+                },
+              ],
+            });
+            const text =
+              extractMsg.content[0]?.type === "text"
+                ? extractMsg.content[0].text
+                : "{}";
+            const clean = text.replace(/```json\n?|```/g, "").trim();
+            const chunkData = JSON.parse(clean);
+            data.title = data.title || chunkData.title || null;
+            data.meetingDate =
+              data.meetingDate || chunkData.meetingDate || null;
+            data.meetingTime =
+              data.meetingTime || chunkData.meetingTime || null;
+            data.location = data.location || chunkData.location || null;
+            data.meetingNumber =
+              data.meetingNumber || chunkData.meetingNumber || null;
+            data.notes =
+              [data.notes, chunkData.notes].filter(Boolean).join("\n\n") ||
+              null;
+            if (Array.isArray(chunkData.attendees))
+              data.attendees = [...data.attendees, ...chunkData.attendees];
+            if (Array.isArray(chunkData.actionItems))
+              data.actionItems = [
+                ...data.actionItems,
+                ...chunkData.actionItems,
+              ];
+          } catch (e) {
+            console.error("[meeting-import] chunk extraction failed:", e);
+          }
         }
-      }
       } // end else (non-PDF)
 
-      const [meeting] = await db.insert(meetingMinutesTable).values({
-        projectId,
-        title: data.title || req.file.originalname,
-        meetingDate: data.meetingDate ? new Date(data.meetingDate) : new Date(),
-        location: data.location || null,
-        notes: data.notes || null,
-        createdById: req.user!.userId,
-      }).returning();
+      const [meeting] = await db
+        .insert(meetingMinutesTable)
+        .values({
+          projectId,
+          title: data.title || req.file.originalname,
+          meetingDate: data.meetingDate
+            ? new Date(data.meetingDate)
+            : new Date(),
+          location: data.location || null,
+          notes: data.notes || null,
+          createdById: req.user!.userId,
+        })
+        .returning();
 
       if (data.attendees?.length > 0) {
         const validAttendees = data.attendees.filter((a: any) => a.fullName);
@@ -1360,7 +3400,7 @@ ${chunk}`
               role: a.role || null,
               externalEmail: a.email || null,
               userId: null,
-            }))
+            })),
           );
         }
       }
@@ -1376,7 +3416,7 @@ ${chunk}`
               assignedToName: ai.assignedToName || null,
               dueDate: ai.dueDate ? new Date(ai.dueDate) : null,
               status: ai.status || "open",
-            }))
+            })),
           );
         }
       }
@@ -1392,61 +3432,112 @@ ${chunk}`
         details: `Imported meeting minutes from ${req.file.originalname} — ${data.attendees?.length ?? 0} attendees, ${data.actionItems?.length ?? 0} action items`,
       });
 
-      res.json({ imported: 1, meetingId: meeting.id, title: meeting.title, message: "Meeting imported successfully" });
+      res.json({
+        imported: 1,
+        meetingId: meeting.id,
+        title: meeting.title,
+        message: "Meeting imported successfully",
+      });
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       console.error("[meeting-import]", err);
-      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+      res
+        .status(500)
+        .json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 // ── DELETE meeting (soft delete) ──────────────────────────────────────────────
-router.delete("/projects/:projectId/meetings/:meetingId",
-  authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+router.delete(
+  "/projects/:projectId/meetings/:meetingId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
     const projectId = Number(req.params.projectId);
     const meetingId = Number(req.params.meetingId);
     const reason = (req.body?.reason as string | undefined) ?? null;
     try {
-      const [existing] = await db.select().from(meetingMinutesTable)
-        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
-      if (!existing) { res.status(404).json({ error: "not_found" }); return; }
+      const [existing] = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+          ),
+        );
+      if (!existing) {
+        res.status(404).json({ error: "not_found" });
+        return;
+      }
 
-      await db.update(meetingMinutesTable)
+      await db
+        .update(meetingMinutesTable)
         .set({ deletedAt: new Date(), deleteReason: reason })
-        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId)));
+        .where(
+          and(
+            eq(meetingMinutesTable.id, meetingId),
+            eq(meetingMinutesTable.projectId, projectId),
+          ),
+        );
 
-      await db.delete(meetingAttendeesTable).where(eq(meetingAttendeesTable.meetingId, meetingId));
+      await db
+        .delete(meetingAttendeesTable)
+        .where(eq(meetingAttendeesTable.meetingId, meetingId));
 
-      await db.delete(linkedItemsTable).where(and(
-        eq(linkedItemsTable.projectId, projectId),
-        or(
-          and(eq(linkedItemsTable.fromType, "meeting"), eq(linkedItemsTable.fromId, meetingId)),
-          and(eq(linkedItemsTable.toType, "meeting"), eq(linkedItemsTable.toId, meetingId)),
-        ),
-      ));
+      await db
+        .delete(linkedItemsTable)
+        .where(
+          and(
+            eq(linkedItemsTable.projectId, projectId),
+            or(
+              and(
+                eq(linkedItemsTable.fromType, "meeting"),
+                eq(linkedItemsTable.fromId, meetingId),
+              ),
+              and(
+                eq(linkedItemsTable.toType, "meeting"),
+                eq(linkedItemsTable.toId, meetingId),
+              ),
+            ),
+          ),
+        );
 
       await db.insert(activityLogTable).values({
-        projectId, userId: req.user!.userId,
+        projectId,
+        userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
         userCompanyName: req.user!.companyName ?? "",
-        actionType: "delete", entityType: "meeting", entityId: meetingId,
-        details: JSON.stringify({ reason, title: existing.title, meetingDate: existing.meetingDate }),
+        actionType: "delete",
+        entityType: "meeting",
+        entityId: meetingId,
+        details: JSON.stringify({
+          reason,
+          title: existing.title,
+          meetingDate: existing.meetingDate,
+        }),
       });
 
       await db.insert(agentInsightsTable).values({
-        projectId, agentType: "meeting", entityType: "meeting", entityId: meetingId,
+        projectId,
+        agentType: "meeting",
+        entityType: "meeting",
+        entityId: meetingId,
         insightType: "delete_pattern",
         message: `Meeting "${existing.title}" deleted: ${reason ?? "no reason"}`,
-        recommendation: "Review meeting delete reasons to detect scheduling churn.",
+        recommendation:
+          "Review meeting delete reasons to detect scheduling churn.",
         severity: "info",
       });
 
       res.json({ success: true });
     } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+      res
+        .status(500)
+        .json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  },
 );
 
 export default router;

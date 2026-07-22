@@ -1,23 +1,45 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import express, {
+  type Express,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import cors from "cors";
 import session from "express-session";
 import router from "./routes";
 import { startOverdueNotifier } from "./lib/overdue-notifier";
-import { ensureTelegramProductConversationSchema, startTelegramProductWorker } from "./lib/telegram-product";
-import { ensureTelegramProductDeliverySchema, recoverAbandonedDeliveryAttempts } from "./lib/telegram-product-delivery";
-import { ensureTelegramNotificationSchema, recoverNotificationOutbox, startNotificationOutboxWorker } from "./lib/telegram-product-notifications";
-import { ensureTelegramRfiNotificationSchema, startRfiNotificationWorker } from "./lib/telegram-rfi-notifications";
+import {
+  ensureTelegramProductConversationSchema,
+  startTelegramProductWorker,
+} from "./lib/telegram-product";
+import {
+  ensureTelegramProductDeliverySchema,
+  recoverAbandonedDeliveryAttempts,
+} from "./lib/telegram-product-delivery";
+import {
+  ensureTelegramNotificationSchema,
+  recoverNotificationOutbox,
+  startNotificationOutboxWorker,
+} from "./lib/telegram-product-notifications";
+import {
+  ensureTelegramRfiNotificationSchema,
+  startRfiNotificationWorker,
+} from "./lib/telegram-rfi-notifications";
 import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
-import { ensureLivingBriefGateSchema, ensureLivingBriefMirrorSchema } from "./lib/living-brief-migration";
+import {
+  ensureLivingBriefGateSchema,
+  ensureLivingBriefMirrorSchema,
+} from "./lib/living-brief-migration";
 import { startCoordinatorSavedViewMigration } from "./lib/coordinator-saved-view-migration";
 import { pool } from "@workspace/db";
 
-const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
+const ENV_MODE =
+  process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
 // The banner MUST reflect the ACTUAL runtime connection, which is always
 // PROD_DATABASE_URL (Neon). Do NOT use PGHOST/PGDATABASE — those point at the
 // unused Replit built-in heliumdb and previously made this banner lie about the
@@ -76,29 +98,41 @@ const RAW_BODY_BYPASS_RE = /\/clash-reports\/(plugin-sync|lens-sync)$/;
 const RAW_BODY_BYPASS_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
 const TELEGRAM_WEBHOOK_RE = /^\/api\/v1\/webhooks\/telegram\//;
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.method !== "POST" || !RAW_BODY_BYPASS_RE.test(req.path)) return next();
+  if (req.method !== "POST" || !RAW_BODY_BYPASS_RE.test(req.path))
+    return next();
   const chunks: Buffer[] = [];
   let total = 0;
   let done = false;
-  const finish = (fn: () => void) => { if (done) return; done = true; fn(); };
+  const finish = (fn: () => void) => {
+    if (done) return;
+    done = true;
+    fn();
+  };
   req.on("data", (c: Buffer) => {
     if (done) return;
     total += c.length;
     if (total > RAW_BODY_BYPASS_MAX_BYTES) {
       finish(() => {
         chunks.length = 0; // free what we buffered; further chunks are ignored via the done guard
-        res.status(413).json({ error: "payload_too_large", message: "Request body exceeds 500mb limit" });
+        res
+          .status(413)
+          .json({
+            error: "payload_too_large",
+            message: "Request body exceeds 500mb limit",
+          });
       });
       return;
     }
     chunks.push(Buffer.from(c));
   });
-  req.on("end", () => finish(() => {
-    const buf = Buffer.concat(chunks);
-    if (buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
-    (req as unknown as { _body?: boolean })._body = true;
-    next();
-  }));
+  req.on("end", () =>
+    finish(() => {
+      const buf = Buffer.concat(chunks);
+      if (buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
+      (req as unknown as { _body?: boolean })._body = true;
+      next();
+    }),
+  );
   req.on("aborted", () => finish(() => next()));
   req.on("error", () => finish(() => next()));
 });
@@ -112,9 +146,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
   next();
 });
-app.use("/api/v1/webhooks/telegram", express.json({ limit: "64kb", type: "application/json", verify: captureRawBody }));
-app.use(express.json({ limit: "500mb", type: jsonTypeMatcher, verify: captureRawBody }));
-app.use(express.urlencoded({ extended: true, limit: "500mb", verify: captureRawBody }));
+app.use(
+  "/api/v1/webhooks/telegram",
+  express.json({
+    limit: "64kb",
+    type: "application/json",
+    verify: captureRawBody,
+  }),
+);
+app.use(
+  express.json({
+    limit: "500mb",
+    type: jsonTypeMatcher,
+    verify: captureRawBody,
+  }),
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "500mb",
+    verify: captureRawBody,
+  }),
+);
 
 app.use(
   session({
@@ -127,11 +180,14 @@ app.use(
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24,
     },
-  })
+  }),
 );
 
 app.use("/api/v1", (_req: Request, res: Response, next: NextFunction) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   next();
@@ -181,8 +237,12 @@ app.use("/api/v1", router);
       created_by_id integer NOT NULL REFERENCES users(id),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_clash_links_meeting_clash_uidx ON meeting_clash_links (meeting_id, clash_id)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_clash_links_project_meeting_idx ON meeting_clash_links (project_id, meeting_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_clash_links_meeting_clash_uidx ON meeting_clash_links (meeting_id, clash_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_clash_links_project_meeting_idx ON meeting_clash_links (project_id, meeting_id)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_clash_refresh_events (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),
@@ -200,7 +260,9 @@ app.use("/api/v1", router);
       changed_fields text,
       created_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_clash_refresh_events_meeting_idx ON meeting_clash_refresh_events (project_id, meeting_id, created_at)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_clash_refresh_events_meeting_idx ON meeting_clash_refresh_events (project_id, meeting_id, created_at)`,
+    );
     console.log("[migration] meeting Clash links ensured");
   } catch (e) {
     console.error("[migration] meeting Clash link migration failed:", e);
@@ -220,7 +282,9 @@ app.use("/api/v1", router);
   try {
     await startFinancialControlMigration();
     await startFinancialBudgetMigration();
-    console.log("[migration] financial cost structure and budget tables ensured");
+    console.log(
+      "[migration] financial cost structure and budget tables ensured",
+    );
   } catch {
     console.error("[migration] financial budget migration failed");
   }
@@ -237,8 +301,12 @@ app.use("/api/v1", router);
 
 (async () => {
   try {
-    await pool.query(`ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`);
-    await pool.query(`UPDATE naming_conventions SET setup_status = 'completed' WHERE setup_status = 'not_started' AND id IN (SELECT DISTINCT convention_id FROM naming_fields)`);
+    await pool.query(
+      `ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`,
+    );
+    await pool.query(
+      `UPDATE naming_conventions SET setup_status = 'completed' WHERE setup_status = 'not_started' AND id IN (SELECT DISTINCT convention_id FROM naming_fields)`,
+    );
     console.log("[migration] setup_status column ensured");
   } catch (e) {
     console.error("[migration] setup_status migration failed:", e);
@@ -248,18 +316,42 @@ app.use("/api/v1", router);
 (async () => {
   try {
     await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS name text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS test_name text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS fingerprint text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_layer text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_layer text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_id text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_id text`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS distance double precision`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_x double precision`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_y double precision`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_z double precision`);
-    await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS last_plugin_sync_at timestamp`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS clashes_project_fingerprint_idx ON clashes (project_id, fingerprint)`);
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS test_name text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS fingerprint text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_layer text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_layer text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_1_id text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS element_2_id text`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS distance double precision`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_x double precision`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_y double precision`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS position_z double precision`,
+    );
+    await pool.query(
+      `ALTER TABLE clashes ADD COLUMN IF NOT EXISTS last_plugin_sync_at timestamp`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS clashes_project_fingerprint_idx ON clashes (project_id, fingerprint)`,
+    );
     console.log("[migration] clashes plugin-sync columns ensured");
   } catch (e) {
     console.error("[migration] clashes plugin-sync migration failed:", e);
@@ -268,27 +360,67 @@ app.use("/api/v1", router);
 
 const rfiMigrationReady = (async () => {
   try {
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_status text DEFAULT 'draft'`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_at timestamp`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_by_id integer`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_method text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_id text`);
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_status text DEFAULT 'draft'`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_at timestamp`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS sent_by_id integer`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_method text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_id text`,
+    );
     await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS rfi_type text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_label text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS attachment_package_json json DEFAULT '[]'::json`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS image_presentation_json json DEFAULT NULL`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_description text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_draft text`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_at timestamp`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_by_id integer`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_at timestamp`);
-    await pool.query(`ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_by_id integer`);
-    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS cost_impact_reason text`);
-    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS schedule_impact_reason text`);
-    await pool.query(`ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS response_attachments_json json NOT NULL DEFAULT '[]'::json`);
-    await pool.query(`ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`);
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS source_viewpoint_label text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS cost_impact_reason text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS schedule_impact_reason text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS attachment_package_json json DEFAULT '[]'::json`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS image_presentation_json json DEFAULT NULL`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_description text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS email_draft text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_at timestamp`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS closed_by_id integer`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_at timestamp`,
+    );
+    await pool.query(
+      `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS reopened_by_id integer`,
+    );
+    await pool.query(
+      `ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS cost_impact_reason text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS schedule_impact_reason text`,
+    );
+    await pool.query(
+      `ALTER TABLE rfi_responses ADD COLUMN IF NOT EXISTS response_attachments_json json NOT NULL DEFAULT '[]'::json`,
+    );
+    await pool.query(
+      `ALTER TABLE files ADD COLUMN IF NOT EXISTS storage_path text`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS user_connections (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -302,7 +434,9 @@ const rfiMigrationReady = (async () => {
       created_at timestamp NOT NULL DEFAULT now(),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS user_connections_user_provider_uidx ON user_connections (user_id, provider)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS user_connections_user_provider_uidx ON user_connections (user_id, provider)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS ai_usage_events (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -313,8 +447,12 @@ const rfiMigrationReady = (async () => {
       estimated_units integer NOT NULL DEFAULT 1,
       created_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS ai_usage_events_user_created_idx ON ai_usage_events (user_id, created_at)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS ai_usage_events_project_created_idx ON ai_usage_events (project_id, created_at)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS ai_usage_events_user_created_idx ON ai_usage_events (user_id, created_at)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS ai_usage_events_project_created_idx ON ai_usage_events (project_id, created_at)`,
+    );
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rfis_sent_by_id_users_id_fk') THEN
         ALTER TABLE rfis ADD CONSTRAINT rfis_sent_by_id_users_id_fk FOREIGN KEY (sent_by_id) REFERENCES users(id);
@@ -328,10 +466,16 @@ const rfiMigrationReady = (async () => {
         ALTER TABLE rfis ADD CONSTRAINT rfis_reopened_by_id_users_id_fk FOREIGN KEY (reopened_by_id) REFERENCES users(id);
       END IF;
     END $$;`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfis_project_revision_family_number_uidx ON rfis (project_id, parent_rfi_id, revision_number) WHERE parent_rfi_id IS NOT NULL`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfi_responses_rfi_number_uidx ON rfi_responses (rfi_id, response_number)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS rfis_project_revision_family_number_uidx ON rfis (project_id, parent_rfi_id, revision_number) WHERE parent_rfi_id IS NOT NULL`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS rfi_responses_rfi_number_uidx ON rfi_responses (rfi_id, response_number)`,
+    );
     // Invariant: at most one OPEN custody row (to_date IS NULL) per RFI.
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL`,
+    );
     console.log("[migration] rfis send-accountability columns ensured");
     return true;
   } catch (e) {
@@ -342,17 +486,29 @@ const rfiMigrationReady = (async () => {
 
 void rfiMigrationReady.then((ready) => {
   if (ready) startOverdueNotifier();
-  else console.error("[overdue-notifier] Not started because the RFI schema migration failed.");
+  else
+    console.error(
+      "[overdue-notifier] Not started because the RFI schema migration failed.",
+    );
 });
 
 (async () => {
   try {
-    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS trade TEXT`);
-    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS floor TEXT`);
-    await pool.query(`ALTER TABLE submittals ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
+    await pool.query(
+      `ALTER TABLE submittals ADD COLUMN IF NOT EXISTS trade TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE submittals ADD COLUMN IF NOT EXISTS floor TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE submittals ADD COLUMN IF NOT EXISTS responsible_company TEXT`,
+    );
     console.log("[migration] submittals tracker columns ensured");
   } catch (e) {
-    console.error("[migration] submittals tracker columns migration failed:", e);
+    console.error(
+      "[migration] submittals tracker columns migration failed:",
+      e,
+    );
   }
 })();
 
@@ -371,8 +527,12 @@ void rfiMigrationReady.then((ready) => {
       created_by_id integer NOT NULL REFERENCES users(id),
       created_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_rfi_links_meeting_rfi_uidx ON meeting_rfi_links (meeting_id, rfi_id)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_rfi_links_project_meeting_idx ON meeting_rfi_links (project_id, meeting_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_rfi_links_meeting_rfi_uidx ON meeting_rfi_links (meeting_id, rfi_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_rfi_links_project_meeting_idx ON meeting_rfi_links (project_id, meeting_id)`,
+    );
     console.log("[migration] meeting RFI links ensured");
   } catch (e) {
     console.error("[migration] meeting RFI link migration failed:", e);
@@ -398,8 +558,12 @@ void rfiMigrationReady.then((ready) => {
       created_by_id integer NOT NULL REFERENCES users(id),
       created_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_submittal_links_meeting_submittal_uidx ON meeting_submittal_links (meeting_id, submittal_id)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_submittal_links_project_meeting_idx ON meeting_submittal_links (project_id, meeting_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_submittal_links_meeting_submittal_uidx ON meeting_submittal_links (meeting_id, submittal_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_submittal_links_project_meeting_idx ON meeting_submittal_links (project_id, meeting_id)`,
+    );
     console.log("[migration] meeting Submittal links ensured");
   } catch (e) {
     console.error("[migration] meeting Submittal link migration failed:", e);
@@ -424,8 +588,12 @@ void rfiMigrationReady.then((ready) => {
       revoked_at timestamptz,
       updated_at timestamptz NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_user_uidx ON notification_channels (adapter_id, user_id) WHERE status = 'connected'`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_telegram_user_uidx ON notification_channels (adapter_id, telegram_user_hash) WHERE status = 'connected'`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_user_uidx ON notification_channels (adapter_id, user_id) WHERE status = 'connected'`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS notification_channels_active_telegram_user_uidx ON notification_channels (adapter_id, telegram_user_hash) WHERE status = 'connected'`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS channel_linking_tokens (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -439,10 +607,18 @@ void rfiMigrationReady.then((ready) => {
       revoked_at timestamptz,
       created_at timestamptz NOT NULL DEFAULT now()
     )`);
-    await pool.query(`ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_version text NOT NULL DEFAULT ''`);
-    await pool.query(`ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_purpose text NOT NULL DEFAULT 'channel_linking'`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS channel_linking_tokens_hmac_uidx ON channel_linking_tokens (adapter_id, token_hmac)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS channel_linking_tokens_user_created_idx ON channel_linking_tokens (user_id, created_at)`);
+    await pool.query(
+      `ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_version text NOT NULL DEFAULT ''`,
+    );
+    await pool.query(
+      `ALTER TABLE channel_linking_tokens ADD COLUMN IF NOT EXISTS consent_purpose text NOT NULL DEFAULT 'channel_linking'`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS channel_linking_tokens_hmac_uidx ON channel_linking_tokens (adapter_id, token_hmac)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS channel_linking_tokens_user_created_idx ON channel_linking_tokens (user_id, created_at)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS notification_preferences (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -455,9 +631,15 @@ void rfiMigrationReady.then((ready) => {
       CONSTRAINT notification_preferences_language_chk CHECK (language IN ('en', 'es')),
       CONSTRAINT notification_preferences_enabled_chk CHECK (enabled IN ('true', 'false'))
     )`);
-    await pool.query(`ALTER TABLE notification_preferences ALTER COLUMN enabled SET DEFAULT 'false'`);
-    await pool.query(`ALTER TABLE notification_preferences ALTER COLUMN topics SET DEFAULT '{}'::jsonb`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS notification_preferences_user_adapter_uidx ON notification_preferences (user_id, adapter_id, channel)`);
+    await pool.query(
+      `ALTER TABLE notification_preferences ALTER COLUMN enabled SET DEFAULT 'false'`,
+    );
+    await pool.query(
+      `ALTER TABLE notification_preferences ALTER COLUMN topics SET DEFAULT '{}'::jsonb`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS notification_preferences_user_adapter_uidx ON notification_preferences (user_id, adapter_id, channel)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS consent_records (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -470,7 +652,9 @@ void rfiMigrationReady.then((ready) => {
       created_at timestamptz NOT NULL DEFAULT now(),
       CONSTRAINT consent_records_status_chk CHECK (status IN ('granted', 'revoked'))
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS consent_records_user_created_idx ON consent_records (user_id, created_at)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS consent_records_user_created_idx ON consent_records (user_id, created_at)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS telegram_inbound_updates (
       id serial PRIMARY KEY,
       adapter_id text NOT NULL,
@@ -484,36 +668,67 @@ void rfiMigrationReady.then((ready) => {
       received_at timestamptz NOT NULL DEFAULT now(),
       processed_at timestamptz
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS telegram_inbound_updates_adapter_update_uidx ON telegram_inbound_updates (adapter_id, update_id)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS telegram_inbound_updates_received_idx ON telegram_inbound_updates (received_at)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS telegram_inbound_updates_adapter_update_uidx ON telegram_inbound_updates (adapter_id, update_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS telegram_inbound_updates_received_idx ON telegram_inbound_updates (received_at)`,
+    );
     await ensureTelegramProductConversationSchema();
     await ensureTelegramProductDeliverySchema();
     await ensureTelegramNotificationSchema();
     await ensureTelegramRfiNotificationSchema();
     const recoveredUnknownDeliveries = await recoverAbandonedDeliveryAttempts();
     const recoveredUnknownNotifications = await recoverNotificationOutbox();
-    if (recoveredUnknownDeliveries) console.warn(`[telegram-product] recovered ${recoveredUnknownDeliveries} abandoned delivery attempt(s) as delivery_unknown`);
-    if (recoveredUnknownNotifications) console.warn(`[telegram-notifications] recovered ${recoveredUnknownNotifications} stale attempt(s) as unknown/manual review`);
+    if (recoveredUnknownDeliveries)
+      console.warn(
+        `[telegram-product] recovered ${recoveredUnknownDeliveries} abandoned delivery attempt(s) as delivery_unknown`,
+      );
+    if (recoveredUnknownNotifications)
+      console.warn(
+        `[telegram-notifications] recovered ${recoveredUnknownNotifications} stale attempt(s) as unknown/manual review`,
+      );
     console.log("[migration] telegram product notification tables ensured");
     startTelegramProductWorker();
     startNotificationOutboxWorker();
     startRfiNotificationWorker();
   } catch (e) {
-    console.error("[migration] telegram product notification migration failed:", e);
+    console.error(
+      "[migration] telegram product notification migration failed:",
+      e,
+    );
   }
 })();
 
 (async () => {
   try {
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`);
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS item_type TEXT NOT NULL DEFAULT 'milestone'`);
-    await pool.query(`ALTER TABLE project_milestones ALTER COLUMN item_type SET DEFAULT 'milestone'`);
-    await pool.query(`UPDATE project_milestones SET item_type = 'milestone' WHERE item_type IS NULL`);
-    await pool.query(`ALTER TABLE project_milestones ALTER COLUMN item_type SET NOT NULL`);
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS trade TEXT`);
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS assigned_user_id INTEGER`);
-    await pool.query(`ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS notes TEXT`);
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS item_type TEXT NOT NULL DEFAULT 'milestone'`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ALTER COLUMN item_type SET DEFAULT 'milestone'`,
+    );
+    await pool.query(
+      `UPDATE project_milestones SET item_type = 'milestone' WHERE item_type IS NULL`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ALTER COLUMN item_type SET NOT NULL`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS trade TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS responsible_company TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS assigned_user_id INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS notes TEXT`,
+    );
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'project_milestones_assigned_user_id_users_id_fk') THEN
         ALTER TABLE project_milestones ADD CONSTRAINT project_milestones_assigned_user_id_users_id_fk FOREIGN KEY (assigned_user_id) REFERENCES users(id);
@@ -529,7 +744,9 @@ void rfiMigrationReady.then((ready) => {
       created_at timestamp NOT NULL DEFAULT now(),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS schedule_buckets_project_name_uidx ON schedule_buckets (project_id, name)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS schedule_buckets_project_name_uidx ON schedule_buckets (project_id, name)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS schedule_item_placements (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),
@@ -541,7 +758,9 @@ void rfiMigrationReady.then((ready) => {
       created_at timestamp NOT NULL DEFAULT now(),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS schedule_item_placements_item_uidx ON schedule_item_placements (project_id, source_type, source_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS schedule_item_placements_item_uidx ON schedule_item_placements (project_id, source_type, source_id)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS schedule_rollover_history (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),
@@ -555,7 +774,9 @@ void rfiMigrationReady.then((ready) => {
       moved_by_name text,
       moved_at timestamp NOT NULL DEFAULT now()
     )`);
-    console.log("[migration] schedule planner tables and milestone columns ensured");
+    console.log(
+      "[migration] schedule planner tables and milestone columns ensured",
+    );
   } catch (e) {
     console.error("[migration] schedule planner migration failed:", e);
   }
@@ -583,8 +804,12 @@ void rfiMigrationReady.then((ready) => {
       created_at timestamp NOT NULL DEFAULT now(),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_key_uidx ON meeting_schedule_bucket_links (project_id, meeting_id, idempotency_key)`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_bucket_uidx ON meeting_schedule_bucket_links (meeting_id, bucket_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_key_uidx ON meeting_schedule_bucket_links (project_id, meeting_id, idempotency_key)`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_bucket_links_meeting_bucket_uidx ON meeting_schedule_bucket_links (meeting_id, bucket_id)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_schedule_task_links (
       id serial PRIMARY KEY,
       project_id integer NOT NULL REFERENCES projects(id),
@@ -608,12 +833,21 @@ void rfiMigrationReady.then((ready) => {
       created_at timestamp NOT NULL DEFAULT now(),
       updated_at timestamp NOT NULL DEFAULT now()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_submittal_uidx ON meeting_schedule_task_links (project_id, meeting_id, meeting_submittal_link_id)`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_milestone_uidx ON meeting_schedule_task_links (project_id, meeting_id, milestone_id)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS meeting_schedule_task_links_bucket_idx ON meeting_schedule_task_links (project_id, bucket_id)`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_submittal_uidx ON meeting_schedule_task_links (project_id, meeting_id, meeting_submittal_link_id)`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_schedule_task_links_meeting_milestone_uidx ON meeting_schedule_task_links (project_id, meeting_id, milestone_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_schedule_task_links_bucket_idx ON meeting_schedule_task_links (project_id, bucket_id)`,
+    );
     console.log("[migration] meeting Schedule bucket links ensured");
   } catch (e) {
-    console.error("[migration] meeting Schedule bucket link migration failed:", e);
+    console.error(
+      "[migration] meeting Schedule bucket link migration failed:",
+      e,
+    );
   }
 })();
 
@@ -634,9 +868,15 @@ void rfiMigrationReady.then((ready) => {
       updated_at timestamp NOT NULL DEFAULT now(),
       resolved_at timestamp
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_status_created_idx ON feedback_items (status, created_at DESC)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_user_created_idx ON feedback_items (user_id, created_at DESC)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_items_project_created_idx ON feedback_items (project_id, created_at DESC)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS feedback_items_status_created_idx ON feedback_items (status, created_at DESC)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS feedback_items_user_created_idx ON feedback_items (user_id, created_at DESC)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS feedback_items_project_created_idx ON feedback_items (project_id, created_at DESC)`,
+    );
     console.log("[migration] feedback_items table ensured");
   } catch (e) {
     console.error("[migration] feedback_items migration failed:", e);
@@ -663,31 +903,69 @@ void rfiMigrationReady.then((ready) => {
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(project_id, viewpoint_id)
     )`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS display_id TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS navisworks_guid TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS responsible_company TEXT`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`);
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS display_id TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS navisworks_guid TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS responsible_company TEXT`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`,
+    );
     console.log("[migration] lens_viewpoints table ensured");
 
     // ── Trade+Floor sequence authority + viewpoint lifecycle ──────────────────
     // New lifecycle/sequence columns on lens_viewpoints (idempotent).
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq_correction INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS issue_group_id TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS supersedes_id INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS revision_number INTEGER NOT NULL DEFAULT 1`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS import_batch_id INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_project_id INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_server_id INTEGER`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_physical_id TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_display_label TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS imported_lineage_status TEXT`);
-    await pool.query(`ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS bimlog_physical_id TEXT`);
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS trade_floor_seq_correction INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS issue_group_id TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS supersedes_id INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS revision_number INTEGER NOT NULL DEFAULT 1`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS import_batch_id INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_project_id INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_server_id INTEGER`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_physical_id TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS source_display_label TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS imported_lineage_status TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS bimlog_physical_id TEXT`,
+    );
     // Backfill: every pre-existing row is revision 1 (the ADD COLUMN default already
     // applies, but make it explicit and null-safe in case the column predates this).
-    await pool.query(`UPDATE lens_viewpoints SET revision_number = 1 WHERE revision_number IS NULL`);
+    await pool.query(
+      `UPDATE lens_viewpoints SET revision_number = 1 WHERE revision_number IS NULL`,
+    );
     await pool.query(`DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'lens_viewpoints_supersedes_id_fk') THEN
         ALTER TABLE lens_viewpoints ADD CONSTRAINT lens_viewpoints_supersedes_id_fk FOREIGN KEY (supersedes_id) REFERENCES lens_viewpoints(id);
@@ -707,13 +985,23 @@ void rfiMigrationReady.then((ready) => {
     // Convert the two unique constraints to PARTIAL unique indexes scoped to
     // active rows, so a superseded row and a new active row can coexist for the
     // same underlying viewpoint/GUID. Drop the old (non-partial) ones first.
-    await pool.query(`ALTER TABLE lens_viewpoints DROP CONSTRAINT IF EXISTS lens_viewpoints_project_id_viewpoint_id_key`);
-    await pool.query(`DROP INDEX IF EXISTS lens_viewpoints_project_guid_unique`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_viewpoint_active_unique ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active'`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_active_unique ON lens_viewpoints (project_id, navisworks_guid) WHERE lifecycle_status = 'active'`);
+    await pool.query(
+      `ALTER TABLE lens_viewpoints DROP CONSTRAINT IF EXISTS lens_viewpoints_project_id_viewpoint_id_key`,
+    );
+    await pool.query(
+      `DROP INDEX IF EXISTS lens_viewpoints_project_guid_unique`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_viewpoint_active_unique ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active'`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_active_unique ON lens_viewpoints (project_id, navisworks_guid) WHERE lifecycle_status = 'active'`,
+    );
     // One active row per display_id within a project — DB backstop for the lens-sync
     // display_id collision guard. Excludes NULL display_ids so they stay distinct.
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_display_active_unique ON lens_viewpoints (project_id, display_id) WHERE lifecycle_status = 'active' AND display_id IS NOT NULL`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_display_active_unique ON lens_viewpoints (project_id, display_id) WHERE lifecycle_status = 'active' AND display_id IS NOT NULL`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_import_batches (
       id SERIAL PRIMARY KEY,
       target_project_id INTEGER NOT NULL,
@@ -730,9 +1018,15 @@ void rfiMigrationReady.then((ready) => {
       created_at TIMESTAMPTZ DEFAULT NOW(),
       completed_at TIMESTAMPTZ
     )`);
-    await pool.query(`ALTER TABLE lens_import_batches ADD COLUMN IF NOT EXISTS request_hash TEXT`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_import_batches_user_target_key_unique ON lens_import_batches (requested_by_id, target_project_id, import_key)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS lens_import_batches_target_created_idx ON lens_import_batches (target_project_id, created_at DESC)`);
+    await pool.query(
+      `ALTER TABLE lens_import_batches ADD COLUMN IF NOT EXISTS request_hash TEXT`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_import_batches_user_target_key_unique ON lens_import_batches (requested_by_id, target_project_id, import_key)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS lens_import_batches_target_created_idx ON lens_import_batches (target_project_id, created_at DESC)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_import_items (
       id SERIAL PRIMARY KEY,
       batch_id INTEGER NOT NULL,
@@ -749,9 +1043,15 @@ void rfiMigrationReady.then((ready) => {
       lineage_status TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_import_items_batch_source_unique ON lens_import_items (batch_id, source_identity_key)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS lens_import_items_target_server_idx ON lens_import_items (target_project_id, target_server_id)`);
-    console.log("[migration] lens_viewpoints lifecycle + sequence-counter migration ensured");
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_import_items_batch_source_unique ON lens_import_items (batch_id, source_identity_key)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS lens_import_items_target_server_idx ON lens_import_items (target_project_id, target_server_id)`,
+    );
+    console.log(
+      "[migration] lens_viewpoints lifecycle + sequence-counter migration ensured",
+    );
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);
   }
@@ -765,7 +1065,9 @@ void rfiMigrationReady.then((ready) => {
     )`);
     await ensureLivingBriefGateSchema();
     await ensureLivingBriefMirrorSchema();
-    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS can_access_living_brief boolean NOT NULL DEFAULT false`);
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS can_access_living_brief boolean NOT NULL DEFAULT false`,
+    );
     // One-time bootstrap only: if the platform has NO super admin yet, elevate the
     // owner account so the Living Brief can be managed. Guarded so it never
     // re-asserts privilege on subsequent boots (no identity-by-email escalation).
@@ -773,8 +1075,11 @@ void rfiMigrationReady.then((ready) => {
       `SELECT COUNT(*)::int AS n FROM users WHERE is_super_admin = true`,
     );
     if (saRows[0]?.n === 0) {
-      const r = await pool.query(`UPDATE users SET is_super_admin = true WHERE email = 'robertor@rryasociados.com'`);
-      if (r.rowCount) console.log("[migration] bootstrapped initial super admin");
+      const r = await pool.query(
+        `UPDATE users SET is_super_admin = true WHERE email = 'robertor@rryasociados.com'`,
+      );
+      if (r.rowCount)
+        console.log("[migration] bootstrapped initial super admin");
     }
     await synchronizeLivingBriefMirror();
     console.log("[migration] living_brief settings ensured");
@@ -804,8 +1109,12 @@ void rfiMigrationReady.then((ready) => {
       superseded_by_report_id INTEGER,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS lens_viewpoint_reports_project_idx ON lens_viewpoint_reports (project_id)`);
-    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoint_reports_project_number_unique ON lens_viewpoint_reports (project_id, report_number)`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS lens_viewpoint_reports_project_idx ON lens_viewpoint_reports (project_id)`,
+    );
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoint_reports_project_number_unique ON lens_viewpoint_reports (project_id, report_number)`,
+    );
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoint_events (
       id SERIAL PRIMARY KEY,
       project_id INTEGER NOT NULL,
@@ -816,10 +1125,57 @@ void rfiMigrationReady.then((ready) => {
       changed_by_id INTEGER,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS lens_viewpoint_events_viewpoint_idx ON lens_viewpoint_events (viewpoint_id)`);
-    console.log("[migration] lens_viewpoint_reports + lens_viewpoint_events tables ensured");
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS lens_viewpoint_events_viewpoint_idx ON lens_viewpoint_events (viewpoint_id)`,
+    );
+    console.log(
+      "[migration] lens_viewpoint_reports + lens_viewpoint_events tables ensured",
+    );
   } catch (e) {
-    console.error("[migration] lens_viewpoint reports/events migration failed:", e);
+    console.error(
+      "[migration] lens_viewpoint reports/events migration failed:",
+      e,
+    );
+  }
+})();
+
+(async () => {
+  try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_lens_viewpoint_links (
+      id SERIAL PRIMARY KEY,
+      project_id integer NOT NULL REFERENCES projects(id),
+      meeting_id integer NOT NULL REFERENCES meeting_minutes(id),
+      lens_viewpoint_id integer NOT NULL REFERENCES lens_viewpoints(id),
+      viewpoint_id_snapshot text NOT NULL,
+      display_id_snapshot text,
+      navisworks_guid_snapshot text,
+      bimlog_physical_id_snapshot text,
+      source_physical_id_snapshot text,
+      source_display_label_snapshot text,
+      issue_group_id_snapshot text,
+      note_snapshot text,
+      floor_snapshot text,
+      trade_snapshot text,
+      responsible_snapshot text,
+      status_snapshot text NOT NULL,
+      lifecycle_status_snapshot text NOT NULL,
+      revision_number_snapshot integer NOT NULL,
+      captured_at_snapshot timestamptz,
+      created_by_id integer NOT NULL REFERENCES users(id),
+      created_at timestamp NOT NULL DEFAULT NOW()
+    )`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS meeting_lens_viewpoint_links_meeting_lens_uidx ON meeting_lens_viewpoint_links (meeting_id, lens_viewpoint_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_lens_viewpoint_links_project_meeting_idx ON meeting_lens_viewpoint_links (project_id, meeting_id)`,
+    );
+    console.log("[migration] meeting_lens_viewpoint_links table ensured");
+  } catch (e) {
+    console.error(
+      "[migration] meeting_lens_viewpoint_links migration failed:",
+      e,
+    );
   }
 })();
 
