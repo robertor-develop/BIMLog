@@ -1195,6 +1195,102 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "cfada32a7f4cf340320c9eeadb88bae16507a59ad640622dc1b40d9bf3e262fb"
+    },
+    {
+      "taskId": "coordinator-command-center-build-2-source-acceptance",
+      "reviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
+      "reviewedAt": "2026-07-22T01:59:07.794Z",
+      "status": "accepted_source_pending_push_verification",
+      "captureTiming": "normal_acceptance_review",
+      "workstreams": [
+        "coordinator-command-center-build-2",
+        "lens-viewpoints",
+        "rfi",
+        "submittal",
+        "meeting-minutes-m1-m4",
+        "schedule",
+        "plans-entitlements-steps-1-2"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Personal filters and saved views link canonical modules without creating a second authority or consequential automation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clean content-only reconciliation, isolated evidence, separate acceptance commit, and no-production boundary follow existing execution governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing tenancy, authorization, idempotency, concurrency, privacy, responsive bilingual, honest-empty, and canonical-link quality rules fully govern Build 2."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 2 implements the already accepted connected coordinator direction without changing the roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The official deterministic generator records the saved-view migration, service, proof scripts, and schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, mutation behavior, or field acceptance changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, spreadsheet, formal report, export, or report-delivery behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Build 2 as accepted source while keeping push, publication, deployment, production, customer, and field verification distinct."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the reconciled candidate provenance, contracts, focused evidence, boundaries, and remaining push verification gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production incident, customer field finding, or permanent audit doctrine change was created by this source integration."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "30e18afb2fe23da51c2c50eb242176ec15fba6b7a64f24f416c93a2029d3d427",
+      "reconciledAfterMasterAdvance": {
+        "preservedCommits": [
+          "97e32503a641c37ff55c0e96806c1cf58af57ae1",
+          "988b5cef9312737f1d64447aa6b5b642b927e4ab",
+          "6f9c3f18d524723361f5f0ab45cf18f160566311",
+          "7cc8447876a731c95771bb6e07ca827202d90ce7",
+          "fdfbdd490ba58ad5070b94c580d374d31007d808",
+          "e67ca65be7ff633aa888241c941c557818c446d9",
+          "3da420d9068e26d80169aa74aefca67eba860b47",
+          "999589c7ed5cf9414cda12b4031ce475e16a5303"
+        ],
+        "previousParent": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
+        "newParent": "999589c7ed5cf9414cda12b4031ce475e16a5303",
+        "integrationCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
+        "scope": "Reviewed Build 2 content only; candidate ancestry excluded and all newer accepted history preserved."
+      }
     }
   ]
 }

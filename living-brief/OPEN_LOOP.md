@@ -4,6 +4,25 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-21
 
+### Coordinator Command Center Build 2 accepted in source; push verification pending
+
+- Preserved candidate `bb2925eb0a2fe45d4bb5e60d2e0d4fe76cd125b8`, originally based on
+  `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`, was independently reviewed and reapplied as content only to
+  authoritative master `999589c7ed5cf9414cda12b4031ce475e16a5303`; candidate ancestry was not imported. Clean product integration:
+  `4572882561684bbfe6472a6a0ecca414a4d4f152`. Newer Security Batch A, Portability Phase 1A, Telegram Build 6, and lockout-hotfix history is preserved.
+- Scope is Build 2 only: bounded server-side operational filters, My Items, This Week, Overdue, Next Coordination Meeting,
+  and All Actionable built-ins; user-and-project-scoped personal saved views/defaults; deterministic configuration,
+  optimistic concurrency, idempotent receipts, rename/delete, and shareable URL navigation that grants no access.
+- Every saved-view operation rechecks current tenant binding, active membership, project read authority, module entitlement,
+  and ownership. Lens retains server/display/viewpoint/Navisworks GUID/physical/revision/lifecycle/lineage identity and
+  canonical deep links. RFIs, Submittals, Meeting actions, and Schedule tasks retain their Build 1 canonical mappings.
+- Focused reconciliation proof passed Build 2 19/19, Build 1 35/35, Lens identity 15/15, entitlement 41/41, multipart
+  security preservation, affected typechecks/build, and real Chrome English desktop plus exact 390px Spanish mobile with
+  no overflow or browser errors. The local browser used the built production component with fixture-controlled API replies.
+- No Clash substitution, canonical record mutation, AI use/usage/charge, new product notification behavior, Build 3,
+  publication, deployment, production/customer access, or field verification is included. Normal push and exact remote
+  ancestry/equality verification remain the source completion gate.
+
 ### Urgent Living Brief lockout hotfix accepted in source; deployment verification pending
 
 - Roberto reported the deployed Living Brief still rejects his gate password. Source review found the accepted recovery
@@ -82,9 +101,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   35/35, Lens identity regression 15/15, entitlement resolver 41/41, API/frontend typechecks, and real
   production-component English desktop plus exact 390px Spanish mobile behavior for loading, populated,
   partial-failure, retry, deep-link, and honest-empty states.
-- This acceptance is source-only until the separately reported push gate. It does not claim publication,
-  deployment, production/customer access, or field verification. Build 2, Clash aggregation, saved views,
-  bulk actions, notifications/digests, AI, feedback capture, canonical mutations, and sync writes remain deferred.
+- Build 1 remains the canonical read-only register foundation. Build 2 is now separately accepted in source at
+  `4572882561684bbfe6472a6a0ecca414a4d4f152`; Clash aggregation, bulk actions, notifications/digests, AI, feedback capture, canonical mutations,
+  sync writes, and Build 3 remain deferred.
 
 ### Integration candidate: Living Brief Content Reconciliation Build 2
 

@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `3da420d9068e26d80169aa74aefca67eba860b47`
+Accepted source reconciled through: `4572882561684bbfe6472a6a0ecca414a4d4f152`
 Reconciliation date: 2026-07-21
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -21,6 +21,14 @@ token that could only be obtained with the unavailable gate password. The accept
 dependency for authenticated, transaction-time revalidated Super Administrators while preserving audit, version,
 rate-limit, rollback, and session-invalidation controls. Publication, deployment, production verification, and
 Roberto's field access confirmation remain separate pending rollout steps.
+
+Coordinator Command Center Build 2 is accepted in source at integration commit `4572882561684bbfe6472a6a0ecca414a4d4f152`, directly based on
+authoritative master `999589c7ed5cf9414cda12b4031ce475e16a5303`. Preserved candidate
+`bb2925eb0a2fe45d4bb5e60d2e0d4fe76cd125b8` was reapplied as reviewed content only; its older ancestry was not
+imported. Build 2 adds personal saved views, operational filters/defaults, and authorized cross-module navigation while
+preserving Build 1 canonical ownership, exact Lens identity, honest empty/partial behavior, and zero canonical mutation or
+AI use. Clash aggregation and Build 3 remain deferred. This source acceptance is not publication, deployment, production
+verification, customer verification, or field acceptance.
 
 Security Batch A is accepted in source at integration commit `97e32503a641c37ff55c0e96806c1cf58af57ae1`, directly based on accepted
 master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
@@ -52,11 +60,12 @@ is reserved for genuine completion.
 - Portability Phase 1A: owner-approved temporary credential continuity exception, value-blind credential-category and
   recovery ownership inventory, future managed-secret cutover design, mandatory public-launch blocker, and a
   byte-preserving guard that prints no protected value or fingerprint.
-- Coordinator Command Center Build 1: a Lens/Viewpoints-first read-only project action register for
-  actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks. Canonical
-  modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,
-  bounded deterministic pagination, visible partial-source failures, honest empty results, bilingual
-  desktop/mobile behavior, and zero mutation/AI use are accepted. Clash aggregation and Build 2 remain deferred.
+- Coordinator Command Center Builds 1-2: a Lens/Viewpoints-first read-only project action register for
+  actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks, plus bounded personal
+  saved views, operational filters, personal defaults, built-in work views, and shareable authorized navigation.
+  Canonical modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,
+  deterministic pagination, visible partial-source failures, honest empty results, bilingual desktop/mobile behavior,
+  and zero canonical mutation/AI use are accepted. Clash aggregation and Build 3 remain deferred.
 - RFI Builds 1-7: canonical lifecycle and attachments; non-destructive crop/replacement/show-hide;
   Standard PDF, editable DOCX, factual Audit PDF, native-fidelity Complete PDF, and four-sheet RFI
   Register Excel. Build 8 has not started.

@@ -137,6 +137,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-usage.ts
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
+- artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
+- artifacts/api-server/src/lib/coordinator-saved-views.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/entitlement-contract.ts
 - artifacts/api-server/src/lib/entitlement-resolver.behavior.ts
@@ -213,6 +215,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/contact-submissions.ts
 - lib/db/src/schema/conventions.ts
 - lib/db/src/schema/coordination_intake_events.ts
+- lib/db/src/schema/coordinator-saved-views.ts
 - lib/db/src/schema/email-log.ts
 - lib/db/src/schema/feature-catalog.ts
 - lib/db/src/schema/feature-flags.ts
