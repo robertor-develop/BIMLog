@@ -84,9 +84,10 @@ is reserved for genuine completion.
   Step 3 has not started; tiered billing and add-ons remain approved direction rather than shipped enforcement.
 - Meeting Minutes M1-M4: immutable links to canonical same-project RFIs, Submittals, and Clashes; M4
   links and synchronizes canonical Schedule Buckets/tasks from linked Submittals without duplicating them.
-- Cost & Financial Control Builds 1-2: effective-dated authorities, exact-decimal/currency controls,
-  versioned cost structures, budgets, maker/checker approval, immutable snapshots/history, bounded
-  import/export, and bilingual UI.
+- Cost & Financial Control Builds 1-3: effective-dated authorities, exact-decimal/currency controls,
+  versioned cost structures, budgets, upstream and downstream contracts/commitments, SOV lines,
+  amendments, separate approval and execution, controlled over-budget escalation, immutable
+  snapshots/history, bounded import/export, searchable PDF/XLSX exports, and bilingual UI.
 - Shop Drawing Control filter correction: UI and PDF/Excel outputs share normalized filter semantics.
 - The source-authoritative 11-document Living Brief architecture is accepted: one catalog drives checks,
   deterministic PLATFORM generation, authenticated API, exact mirror, bilingual UI, copy, and export.
@@ -152,6 +153,6 @@ is reserved for genuine completion.
 - Telegram Product Build 6: clean integration accepted locally on current master with 38/38 final built-runtime
   evidence. It adds only the deterministic RFI notification adapter and saved-RFI contextual controls on the
   Build 5 foundation; normal push verification remains pending, and nothing was published or deployed.
-- RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 3: not started.
+- RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 4: not started.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.

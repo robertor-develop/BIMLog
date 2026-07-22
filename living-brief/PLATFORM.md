@@ -60,6 +60,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/feedback.ts
 - artifacts/api-server/src/routes/files.ts
 - artifacts/api-server/src/routes/financial-budgets.ts
+- artifacts/api-server/src/routes/financial-contracts.ts
 - artifacts/api-server/src/routes/financial-controls.ts
 - artifacts/api-server/src/routes/health.ts
 - artifacts/api-server/src/routes/index.ts
@@ -121,6 +122,7 @@ It changes only when the code structure or curated architectural facts change.
 - featuresRouter
 - financialControlsRouter
 - financialBudgetsRouter
+- financialContractsRouter
 - coordinatorActionsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
@@ -163,6 +165,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-budget-migration.ts
 - artifacts/api-server/src/lib/financial-budget-service.ts
 - artifacts/api-server/src/lib/financial-budget.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-browser.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-contract.ts
+- artifacts/api-server/src/lib/financial-contract-db.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-export.ts
+- artifacts/api-server/src/lib/financial-contract-http.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-import.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-import.ts
+- artifacts/api-server/src/lib/financial-contract-migration.ts
+- artifacts/api-server/src/lib/financial-contract-service.ts
+- artifacts/api-server/src/lib/financial-contract.behavior.ts
 - artifacts/api-server/src/lib/financial-control-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-control-contract.ts
 - artifacts/api-server/src/lib/financial-control-db.behavior.ts
@@ -223,6 +235,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/feedback-items.ts
 - lib/db/src/schema/files.ts
 - lib/db/src/schema/financial-budgets.ts
+- lib/db/src/schema/financial-contracts.ts
 - lib/db/src/schema/financial-controls.ts
 - lib/db/src/schema/index.ts
 - lib/db/src/schema/invitations.ts
@@ -263,6 +276,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/Disclaimer.tsx
 - artifacts/bimlog/src/pages/Features.tsx
 - artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx
+- artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
 - artifacts/bimlog/src/pages/Landing.tsx
 - artifacts/bimlog/src/pages/LivingBrief.tsx
@@ -316,6 +330,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/financial/budget
 - /projects/:id/financial/history
 - /projects/:id/financial/snapshots/:snapshotId
+- /projects/:id/financial/contracts
 - /projects/:id/:tab?
 - /setup-guide
 - /profile

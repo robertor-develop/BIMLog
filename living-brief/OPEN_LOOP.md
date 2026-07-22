@@ -278,6 +278,18 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - Retained evidence manifest SHA-256: `7014f75ef182fa78656a536794d4c393ce491a03403baadc302237f01f86e099` (18 retained files, all hashes verified).
 - No deployment or publication occurred. Finance Build 3 has not started.
 
+## Cost & Financial Control Build 3 Accepted
+
+- Accepted scope: owner/prime contracts, subcontracts, purchase orders, consultant agreements and other commitments, immutable/versioned contract terms, SOV lines mapped to approved cost structures, amendments and amendment lines, separate approval and execution, exact approved-budget reconciliation, controlled over-budget escalation, optional Schedule references, bounded CSV/XLSX SOV preview/confirm, searchable Contract/SOV PDF and native XLSX exports, and internal record-level confidentiality grants.
+- Contract workflow is `draft -> submitted -> under_review -> returned/rejected/withdrawn or approved -> executed -> superseded/terminated/voided/closed`. Amendment workflow is `draft -> submitted -> under_review -> returned/rejected/withdrawn or approved -> executed/voided/superseded`.
+- Executed records pin exact approved budget snapshot, cost-structure version/nodes, currency, and optional Schedule references. Commitment values change only through authorized execution. Approval and execution remain separate authorities and actions.
+- Finance authorities from Builds 1-2 remain explicit. Financial Administrator does not inherit approval or execution. Super Administrator status does not silently bypass the Finance contract. Entitlements, tenancy, project membership, suspension, record grants, maker/checker separation, exact decimal limits, currency scope, stale version, retry, and concurrency are rechecked transactionally.
+- Build 3 adds only construction financial contract/commitment control. It does not add payment applications, bank integration, accounting posting, money movement, external subcontractor/vendor portals, automatic AI, AI calls/charges, Build 4 Cost Event work, ERP exchange, or pricing/change-management expansion.
+- Reused evidence: Build 3 focused behavior, PostgreSQL, authenticated API, import/concurrency, Build 1/2 regressions, typecheck/build checks, and browser acceptance. Browser acceptance passed English desktop and Spanish exact 390px product assertions; the only retained warning was pre-existing blocked `fonts.googleapis.com` CSS, classified as a platform font warning for Localization/UI.
+- Focused current-master shared regression passed 44/44 after stale external harness assertions were corrected without product changes. Reconciliation onto current master preserved Meeting Minutes, Living Brief roadmap/quality-framework content, Telegram Build 6, Security Batch A, Portability, Plans/Entitlements, RFI/Submittals, Navisworks, startup, routing, schema, and sidebar history.
+- Sanitized external evidence remains under the retained Finance Build 3 evidence package; shared-regression completion SHA-256: `369ab08d51160d19f83c4373dad3fa39fbe998f662ff2c48485ac011de66fe4a`.
+- No deployment or publication occurred. Finance Build 4 and Security Batch B were not started.
+
 ## Mandatory New Task Startup Rule
 
 Every new BIMLog Codex, Claude, or Replit task must start with this repository check:
