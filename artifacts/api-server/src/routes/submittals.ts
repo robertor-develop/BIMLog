@@ -8,7 +8,7 @@ import {
 } from "@workspace/db/schema";
 import { sendEmail, makeSubmittalAssignedEmail, makeProcurementAlertEmail, makeRapidApprovalEmail, getUserLang, notifEnabled } from "../lib/email";
 import { eq, and, count, isNull, or } from "drizzle-orm";
-import { ListSubmittalsParams, UpdateSubmittalParams } from "@workspace/api-zod";
+import { ListSubmittalsParams, UpdateSubmittalParams, canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, canonicalSpreadsheetWriteOptions, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
@@ -251,16 +251,7 @@ function cleanCell(value: unknown): string | null {
 }
 
 function parseDateCell(value: unknown): Date | null {
-  if (value === undefined || value === null || value === "") return null;
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-  if (typeof value === "number") {
-    const parsed = XLSX.SSF.parse_date_code(value);
-    if (parsed) return new Date(parsed.y, parsed.m - 1, parsed.d);
-  }
-  const text = String(value).trim();
-  if (!text) return null;
-  const date = new Date(text);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return spreadsheetDateOnlyToUtcDate(value, serial => XLSX.SSF.parse_date_code(serial));
 }
 
 function normalizeImportedStatus(value: unknown): string {
@@ -285,7 +276,7 @@ function normalizeHeader(value: unknown): string {
 }
 
 function readRowsFromSheet(sheet: XLSX.WorkSheet): Record<string, unknown>[] {
-  const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "", raw: false });
+  const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true }));
   const headerIndex = matrix.findIndex((row) => {
     const headers = row.map(normalizeHeader);
     return headers.includes("description") || headers.includes("submittal no") || headers.includes("number");
@@ -310,7 +301,8 @@ function getMappedCell(row: Record<string, unknown>, names: string[]): unknown {
 
 function extractSpreadsheetSubmittals(buffer: Buffer, filename: string) {
   if (!/\.(xlsx|xls|csv)$/i.test(filename)) return [];
-  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const spreadsheet = canonicalSpreadsheetInput(buffer, filename, "buffer", { cellDates: true });
+  const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
   const trackingRows = workbook.Sheets["Tracking Table"] ? readRowsFromSheet(workbook.Sheets["Tracking Table"]) : [];
   const detailsRows = workbook.Sheets["Details"] ? readRowsFromSheet(workbook.Sheets["Details"]) : [];
   let rows: Record<string, unknown>[] = [];
@@ -325,7 +317,7 @@ function extractSpreadsheetSubmittals(buffer: Buffer, filename: string) {
     if (!sheetName) return [];
     rows = readRowsFromSheet(workbook.Sheets[sheetName]);
     if (rows.length === 0) {
-      rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" })
+      rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], canonicalSpreadsheetJsonOptions({ defval: "", raw: true }))
         .map((rawRow) => {
           const row: Record<string, unknown> = {};
           Object.entries(rawRow).forEach(([key, value]) => {
@@ -557,7 +549,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
       }),
     };
     XLSX.utils.book_append_sheet(workbook, worksheet, "Submittal Log");
-    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const buffer = XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }));
     const fileBase = String(project?.code || project?.name || `Project${projectId}`).replace(/[^\w.-]+/g, "-");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", `attachment; filename="${fileBase}-Submittal-Log.xlsx"`);
@@ -749,7 +741,7 @@ router.get("/projects/:projectId/submittals/tracker-excel", authMiddleware, requ
     }));
     XLSX.utils.book_append_sheet(workbook, detailSheet, "Details");
 
-    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const buffer = XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }));
     const projectCode = (project?.code || project?.name || `Project-${projectId}`).replace(/[^A-Za-z0-9_-]/g, "-");
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

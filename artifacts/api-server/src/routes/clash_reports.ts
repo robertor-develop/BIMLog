@@ -11,6 +11,7 @@ import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItem
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, canonicalSpreadsheetWriteOptions, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createHash, randomUUID } from "crypto";
 import { LensImportValidationError, validateAndHashLensImportRequest } from "../lib/lens-import-contract";
@@ -330,7 +331,7 @@ Return ONLY a JSON array, no markdown:
               assignedToName: r.assignedTo || "",
               resolutionNotes: r.resolutionNotes || null,
               status: r.status === "complete" ? "resolved" : "open",
-              dueDate: r.deadline ? new Date(r.deadline) : null,
+              dueDate: spreadsheetDateOnlyToUtcDate(r.deadline),
             }));
           console.log("[clash-upload] AI extracted from non-spreadsheet:", parsed.length, "clashes");
         } catch (e) {
@@ -339,16 +340,17 @@ Return ONLY a JSON array, no markdown:
         }
       } else {
         // Spreadsheet: use column mapping
-        const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+        const spreadsheet = canonicalSpreadsheetInput(req.file.buffer, req.file.originalname, "buffer", {});
+        const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
         let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
         let bestRowCount = 0;
         for (const sheetName of workbook.SheetNames) {
           const s = workbook.Sheets[sheetName];
-          const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+          const r = XLSX.utils.sheet_to_json(s, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
           const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
           if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
         }
-        const allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+        const allRows = XLSX.utils.sheet_to_json(bestSheet, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
         let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
         if (hIdx === -1) hIdx = 0;
         const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
@@ -381,13 +383,7 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
           if (idx < 0 || !row[idx]) return null;
           try {
             const val = row[idx];
-            if (typeof val === "number") {
-              const excelEpoch = new Date(1899, 11, 30);
-              const d = new Date(excelEpoch.getTime() + val * 86400000);
-              return isNaN(d.getTime()) ? null : d;
-            }
-            const d = new Date(val);
-            return isNaN(d.getTime()) ? null : d;
+            return spreadsheetDateOnlyToUtcDate(val, serial => XLSX.SSF.parse_date_code(serial));
           } catch (err) {
             console.warn("[clash-upload] failed to parse date cell:", err);
             return null;
@@ -1263,7 +1259,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Responsible Company", "Responsible Company", row => row.responsibleCompany), "Summary by Company");
       XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Review Status", "Review Status", row => row.status), "Summary by Status");
       XLSX.utils.book_append_sheet(workbook, matrixSheet, "Floor Trade Matrix");
-      const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+      const buffer = XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }));
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
       res.send(buffer);

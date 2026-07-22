@@ -7,6 +7,7 @@ import { projectsTable, usersTable, companiesTable, activityLogTable } from "@wo
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, normalizeSpreadsheetDateOnly } from "@workspace/api-zod";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import jwt from "jsonwebtoken";
@@ -84,7 +85,8 @@ router.post("/projects/:projectId/submittal-reports/upload",
 
       let workbook: any = null;
       if (useXLSX) {
-        workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+        const spreadsheet = canonicalSpreadsheetInput(req.file.buffer, req.file.originalname, "buffer", {});
+        workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
       } else {
         const { text: extractedText } = await extractFileText(req.file.buffer, req.file.originalname);
         fileText = extractedText;
@@ -96,11 +98,11 @@ router.post("/projects/:projectId/submittal-reports/upload",
         let bestRowCount = 0;
         for (const sheetName of workbook.SheetNames) {
           const s = workbook.Sheets[sheetName];
-          const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+          const r = XLSX.utils.sheet_to_json(s, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
           const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
           if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
         }
-        allRows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+        allRows = XLSX.utils.sheet_to_json(bestSheet, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
       }
 
       let parsed: any[] = [];
@@ -187,6 +189,9 @@ CRITICAL RULES:
         }
 
         const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined ? String(row[idx]).trim() : "";
+        const getDateOnly = (row: any[], idx: number) => idx >= 0
+          ? normalizeSpreadsheetDateOnly(row[idx], serial => XLSX.SSF.parse_date_code(serial)) || get(row, idx)
+          : "";
         const getStatus = (row: any[], idx: number) => {
           const raw = get(row, idx).toUpperCase();
           if (raw === "YES" || raw === "OPEN" || raw === "ACTIVE" || raw === "1" || raw === "TRUE") return "open";
@@ -203,7 +208,7 @@ CRITICAL RULES:
             revision: get(row, mapping.revision),
             version: get(row, mapping.version),
             submittalStatus: getStatus(row, mapping.status),
-            date: get(row, mapping.date),
+            date: getDateOnly(row, mapping.date),
             description: get(row, mapping.description),
             openItems: get(row, mapping.openItems),
             rfiOpen: get(row, mapping.rfiOpen),

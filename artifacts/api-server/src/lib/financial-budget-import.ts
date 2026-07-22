@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { authorizeFinancialOperation } from "./financial-control-service";
@@ -89,13 +90,13 @@ export async function previewBudgetImport(input: {
       "BUDGET_SOURCE_HASH_MISMATCH",
       "Uploaded evidence does not match the authenticated file identity.",
     );
-  const workbook = XLSX.read(input.bytes, {
-    type: "buffer",
+  const spreadsheet = canonicalSpreadsheetInput(input.bytes, fileName, "buffer", {
     raw: true,
     cellFormula: true,
     cellNF: true,
     bookVBA: true,
   });
+  const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
   if (workbook.vbaraw)
     throw new FinancialControlError(
       400,
@@ -116,10 +117,10 @@ export async function previewBudgetImport(input: {
         "BUDGET_IMPORT_FORMULA_REJECTED",
         "Formula cells are not accepted.",
       );
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, canonicalSpreadsheetJsonOptions({
     defval: "",
     raw: true,
-  });
+  }));
   if (rows.length > MAX_ROWS)
     throw new FinancialControlError(
       400,

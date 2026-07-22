@@ -17,6 +17,7 @@ import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { singleFileUpload } from "../middlewares/multipart";
 import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetReadOptions } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();
@@ -61,7 +62,7 @@ async function extractText(buffer: Buffer, fileType: string): Promise<string> {
   }
   if (fileType === "xlsx") {
     try {
-      const workbook = XLSX.read(buffer, { type: "buffer" });
+      const workbook = XLSX.read(buffer, canonicalSpreadsheetReadOptions("coordination.xlsx", "buffer", { raw: true }));
       const rows: string[] = [];
       for (const sheetName of workbook.SheetNames.slice(0, 3)) {
         const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName], { blankrows: false });

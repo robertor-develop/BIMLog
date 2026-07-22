@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { authorizeFinancialOperation } from "./financial-control-service";
@@ -23,12 +24,13 @@ export async function previewContractImport(input: { actorUserId: number; projec
   if (!file) throw new FinancialControlError(400, "CONTRACT_SOURCE_FILE_INVALID", "The import source must be an authenticated project file.");
   const fileHash = crypto.createHash("sha256").update(input.bytes).digest("hex");
   if (file.file_hash && String(file.file_hash) !== fileHash) throw new FinancialControlError(409, "CONTRACT_SOURCE_HASH_MISMATCH", "Uploaded import content does not match the authenticated file identity.");
-  const workbook = XLSX.read(input.bytes, { type: "buffer", raw: true, cellFormula: true, cellNF: true, bookVBA: true });
+  const spreadsheet = canonicalSpreadsheetInput(input.bytes, fileName, "buffer", { raw: true, cellFormula: true, cellNF: true, bookVBA: true });
+  const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
   if (workbook.vbaraw) throw new FinancialControlError(400, "CONTRACT_IMPORT_MACRO_REJECTED", "Macro-enabled workbooks are not accepted.");
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   if (!sheet) throw new FinancialControlError(400, "CONTRACT_IMPORT_EMPTY", "The import contains no worksheet.");
   for (const cell of Object.values(sheet)) if (cell && typeof cell === "object" && "f" in cell) throw new FinancialControlError(400, "CONTRACT_IMPORT_FORMULA_REJECTED", "Formula cells are not accepted.");
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "", raw: true });
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, canonicalSpreadsheetJsonOptions({ defval: "", raw: true }));
   if (rows.length > MAX_ROWS) throw new FinancialControlError(400, "CONTRACT_IMPORT_ROW_LIMIT", "Import exceeds 10,000 rows.");
   const snapshotLines = await pool.query(`SELECT l.id,l.project_cost_node_id,n.project_code FROM approved_budget_snapshot_lines l JOIN approved_budget_snapshots s ON s.id=l.snapshot_id JOIN project_cost_nodes n ON n.id=l.project_cost_node_id WHERE s.id=$1 AND s.project_id=$2 AND s.company_id=$3 AND s.currency=$4`, [budgetSnapshotId, projectId, auth.scope.companyId, currency]);
   if (!snapshotLines.rows.length) throw new FinancialControlError(400, "CONTRACT_BUDGET_SNAPSHOT_INVALID", "The selected approved budget snapshot is unavailable in this project and currency.");

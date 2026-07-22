@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions } from "@workspace/api-zod";
 
 const CHUNK_SIZE = 80000;
 
@@ -20,16 +21,17 @@ export async function extractFileText(
 
   if (isSpreadsheet) {
     try {
-      const workbook = XLSX.read(buffer, { type: "buffer" });
+      const spreadsheet = canonicalSpreadsheetInput(buffer, filename, "buffer", {});
+      const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
       let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
       let bestRowCount = 0;
       for (const sheetName of workbook.SheetNames) {
         const s = workbook.Sheets[sheetName];
-        const r = XLSX.utils.sheet_to_json(s, { header: 1, defval: "" }) as any[][];
+        const r = XLSX.utils.sheet_to_json(s, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
         const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
         if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
       }
-      const rows = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: "" }) as any[][];
+      const rows = XLSX.utils.sheet_to_json(bestSheet, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
       const text = rows.map((r: any[]) => r.join("\t")).join("\n");
       const chunks = chunkText(text);
       return { text: chunks[0], isSpreadsheet: true, rows, chunks, isPdf: false };

@@ -75,7 +75,8 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "xlsx": "^0.18.5",
+    "@workspace/api-zod": "workspace:*",
+    "xlsx": "file:../../vendor/sheetjs/xlsx-0.20.3.tgz",
     "zustand": "^5.0.11"
   }
 }

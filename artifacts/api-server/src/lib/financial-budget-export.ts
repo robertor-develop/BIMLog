@@ -1,5 +1,6 @@
 import PDFDocument from "pdfkit";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import AdmZip from "adm-zip";
 import { FinancialControlError } from "./financial-control-contract";
 import { exactSignedDecimal } from "./financial-budget-contract";
@@ -136,7 +137,7 @@ export function buildBaselineXlsx(data: BaselineExport): Buffer {
     ),
   }));
   const wb = XLSX.utils.book_new(),
-    lines = XLSX.utils.json_to_sheet(rows),
+    lines = XLSX.utils.json_to_sheet(rows, canonicalSpreadsheetWriteOptions({})),
     info = XLSX.utils.aoa_to_sheet([
       ["Approved Budget Baseline"],
       ["Project", safe(data.project.name)],
@@ -158,7 +159,7 @@ export function buildBaselineXlsx(data: BaselineExport): Buffer {
         "Boundary",
         "Operational budget only; no accounting actuals, payments, commitments, forecasts, or cash disbursements.",
       ],
-    ]),
+    ], canonicalSpreadsheetWriteOptions({})),
     exactNumericCell = (value: string) => ({
       t: "n" as const,
       v: exactSignedDecimal(value) as unknown as number,
@@ -200,11 +201,11 @@ export function buildBaselineXlsx(data: BaselineExport): Buffer {
   XLSX.utils.book_append_sheet(wb, lines, "Budget Lines");
   XLSX.utils.book_append_sheet(wb, info, "Export Information");
   wb.Workbook = { ...(wb.Workbook ?? {}), Views: [{ RTL: false }] };
-  const output: Buffer = XLSX.write(wb, {
+  const output: Buffer = XLSX.write(wb, canonicalSpreadsheetWriteOptions({
     type: "buffer",
     bookType: "xlsx",
     compression: true,
-  });
+  }));
   // SheetJS Community writes native cells and filters but does not serialize
   // frozen panes. Add the standards-defined pane node without adding formulas
   // or external relationships.

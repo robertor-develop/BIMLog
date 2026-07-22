@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, normalizeSpreadsheetDateOnly } from "@workspace/api-zod";
 import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
   Sparkles, CheckCircle2, Clock, Search, Filter, ExternalLink, Eye, Shield,
@@ -927,9 +928,11 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const data = evt.target?.result;
-      const wb = XLSX.read(data, { type: "binary" });
+      if (!(data instanceof ArrayBuffer)) return;
+      const spreadsheet = canonicalSpreadsheetInput(data, file.name, "array", {});
+      const wb = XLSX.read(spreadsheet.data, spreadsheet.options);
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws);
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, canonicalSpreadsheetJsonOptions({ raw: true, defval: "" }));
       let imported = 0;
       for (const row of rows) {
         const specSection = row["Spec Section"] || row["spec_section"] || row["SpecSection"] || "";
@@ -942,7 +945,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
             specSection, description,
             trade: row["Trade"] || row["trade"] || "",
             submittalType: row["Type"] || row["type"] || row["submittal_type"] || "",
-            requiredByDate: row["Required By"] || row["required_by_date"] || "",
+            requiredByDate: normalizeSpreadsheetDateOnly(row["Required By"] || row["required_by_date"], serial => XLSX.SSF.parse_date_code(serial)) || "",
             responsibleCompany: row["Responsible Company"] || row["responsible_company"] || "",
           }),
         });
@@ -951,7 +954,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
       toast({ title: `${imported} ${w("items imported", "ítems importados", lang)}` });
       void fetchRegister();
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
     e.target.value = "";
   };
 

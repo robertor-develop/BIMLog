@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetJsonOptions, canonicalSpreadsheetReadOptions, canonicalSpreadsheetWriteOptions, classifySpreadsheetTemporalText, explicitSpreadsheetInstant, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
 import AdmZip from "adm-zip";
 
 const EMPTY = "";
@@ -165,8 +166,10 @@ function protectedLabel(value: string): string {
 
 function dateValue(value: Date | string | null | undefined): Date | null {
   if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : new Date(value.getTime());
+  const classified = classifySpreadsheetTemporalText(value);
+  if (classified.kind === "date-only") return spreadsheetDateOnlyToUtcDate(classified.value);
+  return explicitSpreadsheetInstant(value);
 }
 
 function daysBetween(start: Date | string | null | undefined, end: Date | string | null | undefined, generatedAt: Date): number | "" {
@@ -387,7 +390,7 @@ function makeSheet(title: string, projectLabel: string, generatedAt: Date, filte
     ["Filters", filterSummary],
     headers,
     ...rows,
-  ], { cellDates: true });
+  ], canonicalSpreadsheetWriteOptions({ cellDates: true }));
   applySheetSettings(sheet, headers, rows);
   setDateFormats(sheet);
   return sheet;
@@ -395,11 +398,11 @@ function makeSheet(title: string, projectLabel: string, generatedAt: Date, filte
 
 function sheetRows(workbook: XLSX.WorkBook, sheetName: string): unknown[][] {
   const sheet = workbook.Sheets[sheetName];
-  return XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: "" }) as unknown[][];
+  return XLSX.utils.sheet_to_json(sheet, canonicalSpreadsheetJsonOptions({ header: 1, raw: true, defval: "" })) as unknown[][];
 }
 
 export function inspectRfiRegisterWorkbook(buffer: Buffer) {
-  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const workbook = XLSX.read(buffer, canonicalSpreadsheetReadOptions("rfi-register.xlsx", "buffer", { cellDates: true }));
   return {
     sheetNames: workbook.SheetNames,
     dimensions: Object.fromEntries(workbook.SheetNames.map(name => [name, workbook.Sheets[name]["!ref"] || ""])),
@@ -604,7 +607,7 @@ export function buildRfiRegisterWorkbook(input: RfiRegisterWorkbookInput): { buf
   XLSX.utils.book_append_sheet(workbook, makeSheet("Export Information", projectLabel, generatedAt, filterSummary, exportInfoHeaders, exportInfoRows), "Export Information");
   workbook.Workbook = { Views: [{ RTL: false }], Sheets: workbook.SheetNames.map((_name, index) => ({ Hidden: 0, name: workbook.SheetNames[index], sheetId: index + 1, id: `rId${index + 1}` })) };
 
-  const buffer = injectWorksheetXmlSettings(XLSX.write(workbook, { type: "buffer", bookType: "xlsx", cellDates: true }));
+  const buffer = injectWorksheetXmlSettings(XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx", cellDates: true })));
   return {
     buffer,
     filename: `${projectCode}-RFI-Register.xlsx`,

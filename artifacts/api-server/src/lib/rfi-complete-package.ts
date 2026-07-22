@@ -10,6 +10,7 @@ import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { PDFArray, PDFDocument, PDFName } from "pdf-lib";
 import sharp from "sharp";
 import * as XLSX from "xlsx";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import { createPdfDocument } from "./pdf-kit";
 
 const MAX_SOURCE_BYTES = 100 * 1024 * 1024;
@@ -524,7 +525,8 @@ async function renderTextFile(fileName: string, buffer: Buffer, signal?: AbortSi
   if (!buffer.length) throw new CompletePackageError(`${fileName} is empty.`, "corrupt_file", fileName);
   if (extension(fileName) === "csv") {
     try {
-      const workbook = XLSX.read(buffer, { type: "buffer", raw: true, codepage: 65001 });
+      const spreadsheet = canonicalSpreadsheetInput(buffer, fileName, "buffer", { raw: true });
+      const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
       if (!workbook.SheetNames.length) throw new Error("no worksheets");
       for (const sheetName of workbook.SheetNames) {
         const sheet = workbook.Sheets[sheetName];
@@ -538,7 +540,7 @@ async function renderTextFile(fileName: string, buffer: Buffer, signal?: AbortSi
           });
         }
       }
-      return await convertWithLibreOffice("table.xlsx", Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx" })), signal);
+      return await convertWithLibreOffice("table.xlsx", Buffer.from(XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }))), signal);
     } catch (error) {
       if (error instanceof CompletePackageError) throw error;
       throw new CompletePackageError(`${fileName} is not a readable CSV file.`, "corrupt_file", fileName);

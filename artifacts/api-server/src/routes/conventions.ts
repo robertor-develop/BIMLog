@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable, activityLogTable, projectsTable } from "@workspace/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
-import { GetConventionParams, UpsertConventionParams, UpsertConventionBody } from "@workspace/api-zod";
+import { GetConventionParams, UpsertConventionParams, UpsertConventionBody, canonicalSpreadsheetInput } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue } from "../middlewares/config-validator";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
@@ -624,7 +624,8 @@ router.post(
       const sheetTexts: string[] = [];
       for (const f of files.spreadsheet || []) {
         try {
-          const workbook = XLSX.read(f.buffer, { type: "buffer" });
+          const spreadsheet = canonicalSpreadsheetInput(f.buffer, f.originalname, "buffer", { raw: true });
+          const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
           const rows: string[] = [];
           for (const sheetName of workbook.SheetNames.slice(0, 3)) {
             const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName], { blankrows: false });
@@ -988,7 +989,8 @@ router.post(
       const sheetTexts: string[] = [];
       for (const f of files.spreadsheet || []) {
         try {
-          const workbook = XLSX.read(f.buffer, { type: "buffer" });
+          const spreadsheet = canonicalSpreadsheetInput(f.buffer, f.originalname, "buffer", { raw: true });
+          const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
           const rows: string[] = [];
           for (const sheetName of workbook.SheetNames.slice(0, 3)) {
             const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName], { blankrows: false });
