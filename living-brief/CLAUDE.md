@@ -199,6 +199,12 @@ idempotency, delivery-time authorization/preference/watch rechecks, restart/no-r
 and 390px browser behavior, privacy, cleanup, and zero automatic AI use. Local evidence can make a candidate Ready
 for independent review; it cannot mark the build accepted, pushed, published, deployed, or customer-verified.
 
+Living Brief gate recovery must not be circular. A currently authenticated and transaction-time revalidated Super
+Administrator who has lost the gate password must be able to recover without already holding a Living Brief access
+token. Recovery still requires current BIMLog account-password revalidation, exact confirmation, bounded reason,
+rate limiting, advisory/row locking, stale observed-version protection, immutable audit, rollback safety, and
+invalidation of prior brief sessions. Ordinary users, Project Admins, and Company Admins remain denied.
+
 ### Mandatory capability preflight
 
 Before work needing Git writes, deployment controls, production-schema inspection, external notifications,

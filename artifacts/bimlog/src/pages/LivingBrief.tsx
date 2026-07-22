@@ -109,6 +109,7 @@ export function LivingBrief() {
   const [newPassword, setNewPassword] = useState("");
   const [resetReason, setResetReason] = useState("");
   const [resetConfirmation, setResetConfirmation] = useState("");
+  const [recoveryVersion, setRecoveryVersion] = useState<number | null>(null);
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
   const [adminMsg, setAdminMsg] = useState("");
 
@@ -166,6 +167,16 @@ export function LivingBrief() {
     if (!token) return;
     const r = await apiFetch("/living-brief/access", token);
     if (r.ok) setAccessUsers((await r.json()).users ?? []);
+  };
+
+  const loadRecoveryStatus = async () => {
+    if (!token || !isSuperAdmin) return null;
+    const r = await apiFetch("/living-brief/password/recovery", token);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const version = typeof d.expectedCredentialVersion === "number" ? d.expectedCredentialVersion : null;
+    setRecoveryVersion(version);
+    return version;
   };
 
   const toggleAccess = async (userId: number, grant: boolean) => {
@@ -245,14 +256,16 @@ export function LivingBrief() {
   const changePassword = async () => {
     if (!token) return;
     setAdminMsg("");
+    const observedVersion = unlocked ? null : await loadRecoveryStatus();
     const r = await apiFetch("/living-brief/password", token, {
       method: "POST",
-      headers: { "X-Brief-Token": briefToken() },
+      headers: briefToken() ? { "X-Brief-Token": briefToken() } : {},
       body: JSON.stringify({
         currentAccountPassword,
         newPassword,
         reason: resetReason,
         confirmation: resetConfirmation,
+        ...(observedVersion === null ? {} : { expectedCredentialVersion: observedVersion }),
       }),
     });
     if (r.ok) {
@@ -318,6 +331,26 @@ export function LivingBrief() {
           <button onClick={unlock} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
             Unlock
           </button>
+          {isSuperAdmin && (
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(var(--border))", display: "grid", gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>{tt("Super Administrator recovery", "Recuperacion de Super Administrador")}</div>
+              <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))", lineHeight: 1.45 }}>
+                {tt(
+                  "If the gate password is unavailable, a current Super Administrator may set a new gate password after revalidating the BIMLog account password, exact confirmation, and an audited reason.",
+                  "Si la contrasena de puerta no esta disponible, un Super Administrador actual puede establecer una nueva contrasena despues de revalidar la contrasena de cuenta BIMLog, la confirmacion exacta y un motivo auditado.",
+                )}
+              </div>
+              <input type="password" value={currentAccountPassword} onChange={(e) => setCurrentAccountPassword(e.target.value)} placeholder={tt("Confirm account password", "Confirme la contrasena de cuenta")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={tt("New gate password (12+ chars)", "Nueva contrasena de puerta (12+ caracteres)")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input value={resetReason} onChange={(e) => setResetReason(e.target.value)} placeholder={tt("Audit reason", "Motivo de auditoria")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <input value={resetConfirmation} onChange={(e) => setResetConfirmation(e.target.value)} placeholder="RESET_LIVING_BRIEF_GATE" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
+              <button onClick={changePassword} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "9px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                {tt("Recover gate access", "Recuperar acceso de puerta")}
+              </button>
+              {recoveryVersion !== null && <div style={{ fontSize: 11.5, color: "hsl(var(--muted-foreground))" }}>{tt("Recovery state observed for this request.", "Estado de recuperacion observado para esta solicitud.")}</div>}
+              {adminMsg && <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
+            </div>
+          )}
         </div>
       </div>
     );

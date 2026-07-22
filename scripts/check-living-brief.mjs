@@ -402,6 +402,8 @@ function validateCatalogAndFreshness() {
     "missingStateFailsClosedWithoutDefaultPassword",
     "resetRequiresRevalidatedSuperAdministrator",
     "projectOrCompanyAdminNotSufficient",
+    "lockedOutSuperAdminRecoveryMustNotRequireBriefToken",
+    "recoveryRequiresObservedVersionWithoutGrantingAccess",
     "resetRequiresReasonConfirmationAuditRateLimitAndSessionInvalidation",
     "lockedScreenMustNotExposeResetForm",
   ];

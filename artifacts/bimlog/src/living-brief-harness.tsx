@@ -51,6 +51,7 @@ URL.revokeObjectURL = () => undefined;
 HTMLAnchorElement.prototype.click = function fixtureClick() {};
 const fixtureLanguage = new URLSearchParams(window.location.search).get("lang") === "en" ? "en" : "es";
 const fixtureMode = new URLSearchParams(window.location.search).get("mode") === "locked" ? "locked" : "unlocked";
+const fixtureSuperAdmin = new URLSearchParams(window.location.search).get("super") !== "0";
 localStorage.setItem("bimlog-lang", fixtureLanguage);
 if (fixtureMode === "unlocked") {
   sessionStorage.setItem("bimlog-brief-token", "fixture-brief-token");
@@ -62,7 +63,11 @@ useAuthStore.setState({ token: "fixture-auth-token" });
 const payload = { catalog, manifest: { schemaVersion: 1, reconciledThroughCommit: commit }, docs };
 window.fetch = async (input) => {
   const url = String(input);
-  if (url.includes("/living-brief/eligibility")) return new Response(JSON.stringify({ eligible: true, isSuperAdmin: true, credentialConfigured: true }), { status: 200 });
+  if (url.includes("/living-brief/eligibility")) return new Response(JSON.stringify({ eligible: true, isSuperAdmin: fixtureSuperAdmin, credentialConfigured: true }), { status: 200 });
+  if (url.includes("/living-brief/password/recovery")) {
+    return new Response(JSON.stringify(fixtureSuperAdmin ? { credentialConfigured: true, expectedCredentialVersion: 7 } : { error: "Forbidden" }), { status: fixtureSuperAdmin ? 200 : 403 });
+  }
+  if (url.includes("/living-brief/password")) return new Response(JSON.stringify({ ok: true }), { status: 200 });
   if (url.includes("/living-brief/docs")) return new Response(JSON.stringify(payload), { status: 200 });
   if (url.includes("/living-brief/access-users")) return new Response(JSON.stringify({ users: [] }), { status: 200 });
   failedRequests += 1;
@@ -85,7 +90,8 @@ window.setTimeout(async () => {
   const exported = exportedText ? JSON.parse(exportedText) : null;
   const overflow = document.documentElement.scrollWidth > window.innerWidth;
   const pageText = document.body.textContent ?? "";
-  const lockedResetFormPresent = /Forgot it\?|Reset the gate password|New password|Nueva contrase\u00f1a|Restablecer/i.test(pageText);
+  const publicResetFormPresent = /Forgot it\?|Reset the gate password|Restablecer contrase\u00f1a de acceso/i.test(pageText);
+  const superAdminRecoveryPresent = /Super Administrator recovery|Recuperacion de Super Administrador/i.test(pageText);
   document.body.dataset.tabCount = String(tabs.length);
   document.body.dataset.horizontalOverflow = String(overflow);
   document.body.dataset.consoleErrors = String(consoleErrors);
@@ -93,12 +99,13 @@ window.setTimeout(async () => {
   document.body.dataset.copyDocCount = String(copyDocCount);
   document.body.dataset.exportDocCount = String(exported?.documents?.length ?? 0);
   document.body.dataset.exportHasManifest = String(!!exported?.manifest);
-  document.body.dataset.lockedResetFormPresent = String(lockedResetFormPresent);
+  document.body.dataset.publicResetFormPresent = String(publicResetFormPresent);
+  document.body.dataset.superAdminRecoveryPresent = String(superAdminRecoveryPresent);
   const result = document.createElement("div");
   result.id = "living-brief-harness-result";
   result.style.maxWidth = "100%";
   result.style.boxSizing = "border-box";
   result.style.overflowWrap = "anywhere";
-  result.textContent = `mode=${fixtureMode}; tabs=${tabs.length}; copy=${copyDocCount}; export=${exported?.documents?.length ?? 0}; manifest=${!!exported?.manifest}; overflow=${overflow}; consoleErrors=${consoleErrors}; failedRequests=${failedRequests}; lockedReset=${lockedResetFormPresent}; lang=${document.documentElement.lang}`;
+  result.textContent = `mode=${fixtureMode}; tabs=${tabs.length}; copy=${copyDocCount}; export=${exported?.documents?.length ?? 0}; manifest=${!!exported?.manifest}; overflow=${overflow}; consoleErrors=${consoleErrors}; failedRequests=${failedRequests}; publicReset=${publicResetFormPresent}; recovery=${superAdminRecoveryPresent}; lang=${document.documentElement.lang}; super=${fixtureSuperAdmin}`;
   document.body.appendChild(result);
 }, 1000);

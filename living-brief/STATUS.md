@@ -14,6 +14,12 @@ Living Brief credential persistence and controlled recovery are accepted in sour
 `81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror
 verified until the separate controlled rollout completes.
 
+Urgent lockout hotfix candidate: Roberto reports the deployed Living Brief still rejects the gate password. Accepted
+source contained a circular Super Administrator recovery path because reset required a brief-access token that could
+only be obtained with the unavailable gate password. The hotfix candidate removes that circular dependency for
+authenticated, transaction-time revalidated Super Administrators while preserving audit, version, rate-limit,
+rollback, and session-invalidation controls. This is source work only until reviewed, pushed, deployed, and verified.
+
 Security Batch A is accepted in source at integration commit `97e32503a641c37ff55c0e96806c1cf58af57ae1`, directly based on accepted
 master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
 `01c60a1bc24649153afd70b5c061b4cb01d79789` remains provenance evidence only; its ancestry was not imported.

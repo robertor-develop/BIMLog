@@ -169,6 +169,13 @@ expectFailure("credential no-reseed policy cannot be omitted", (target) => {
   fs.writeFileSync(file, JSON.stringify(catalog));
 }, /credential persistence policy/);
 
+expectFailure("locked-out super admin recovery cannot require brief token", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.credentialPersistencePolicy.lockedOutSuperAdminRecoveryMustNotRequireBriefToken;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /credential persistence policy/);
+
 expectFailure("terminal-turn notification policy cannot be omitted", (target) => {
   const file = path.join(target, "living-brief/catalog.json");
   const catalog = JSON.parse(fs.readFileSync(file, "utf8"));

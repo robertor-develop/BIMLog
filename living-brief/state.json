@@ -1,22 +1,30 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-  "catalogSha256": "0d224ffe68041854931adb288f6a1ed0525ac8d29e41f21aa8f6d1bb2e1cbd55",
-  "bundleSha256": "1cbad7f6ace6522e6cd4e80eec6b41253c4483103c689635f09e0ae2c52901e6",
+  "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+  "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
+  "bundleSha256": "db9ea388f60d21e35723f9c6d494700780f0a79df54b871e91a03f17092121d6",
   "impact": {
-    "baselineCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
+    "baselineCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
     "changedPaths": [
+      "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+      "artifacts/api-server/src/routes/living_brief.ts",
+      "artifacts/bimlog/src/living-brief-harness.tsx",
+      "artifacts/bimlog/src/pages/LivingBrief.tsx",
+      "living-brief/AUDIT.md",
       "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
-      "living-brief/REPORT_DESIGN_SYSTEM.md",
+      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/catalog.json",
+      "living-brief/impact-declarations.json",
+      "scripts/check-living-brief.mjs",
+      "scripts/test-living-brief-architecture.mjs",
+      "scripts/test-living-brief-gate.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "REPORT_DESIGN_SYSTEM.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -27,35 +35,35 @@
       "sha256": "95fc786414057f0a9eb5ccc7aef636458e779bfc74648a0ccfa4f36934e7ada0",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "f36282d7cc41e09bc1d0986124b906bea8934f154eebcd5fb05be128309122ec",
-      "sourceChangedAt": "2026-07-22T00:04:00.000Z",
+      "sha256": "deadf4105bc28ab666d379299aa44e178cf462a171f37f6910fe787c15cced9c",
+      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "c56cfc88de510991182a9a5d824a391b33f017cbd417b4c21e8e03b258319d49",
-      "sourceChangedAt": "2026-07-21T17:25:11-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "sha256": "4681e2365fd115664a7f8f850aa30cc21134d06be2d9a9756cf13ba465888292",
+      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "vision",
@@ -63,23 +71,23 @@
       "sha256": "6b4ba280e7b08d6579fdef263bfc0f7f0823bcce5fc08fffdfb0fbc7d8f2740c",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "7854e7806a3878cedc7829c6bc757a3c034fec8ffee7fc4a14144d7e7ea3bf9c",
-      "sourceChangedAt": "2026-07-22T00:04:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "sourceChangedAt": "2026-07-21T20:08:04-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "plugin",
@@ -87,23 +95,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
-      "sourceChangedAt": "2026-07-22T00:04:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "sourceChangedAt": "2026-07-21T20:08:04-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "standards_register",
@@ -111,47 +119,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "84cbd52b333af66180164d6af8ad8da98011ecf7c28a2b40a69d35509cc8db8a",
-      "sourceChangedAt": "2026-07-22T00:04:00.000Z",
+      "sha256": "14f0b7025a33a3aa07bc77d9ce268c649a2a39fc2a10024befb6c2c8da84b1b3",
+      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "c06b91e3dc8327b8c38aeba4b729136f079b3cc3428f7a811ee8084d4b7099bd",
-      "sourceChangedAt": "2026-07-22T00:04:00.000Z",
+      "sha256": "091442628a380ccc160a65df17dd0ee0efe41f546aa1709e8bd754d1f4107b12",
+      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "90ecb5362912fc896007da14b8c69336535d6620733e9c2c0ea0a966ede8f6a1",
-      "sourceChangedAt": "2026-07-21T17:52:24-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "semanticReviewTask": "telegram-product-build-6-clean-integration",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T00:04:00.000Z"
+      "sha256": "07bc8fea67caa1e632051b9a601192460b79d0ecc7326e1308c4f90bed4e9a16",
+      "sourceChangedAt": "2026-07-22T00:12:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "semanticReviewTask": "living-brief-lockout-recovery-hotfix",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T00:12:00.000Z"
     }
   ]
 }

@@ -65,6 +65,8 @@
     "missingStateFailsClosedWithoutDefaultPassword": true,
     "resetRequiresRevalidatedSuperAdministrator": true,
     "projectOrCompanyAdminNotSufficient": true,
+    "lockedOutSuperAdminRecoveryMustNotRequireBriefToken": true,
+    "recoveryRequiresObservedVersionWithoutGrantingAccess": true,
     "resetRequiresReasonConfirmationAuditRateLimitAndSessionInvalidation": true,
     "lockedScreenMustNotExposeResetForm": true
   },

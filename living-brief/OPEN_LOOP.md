@@ -4,6 +4,22 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-21
 
+### Urgent Living Brief lockout hotfix candidate
+
+- Roberto reports the deployed Living Brief still rejects his gate password. Source review found the accepted recovery
+  path was circular: `POST /living-brief/password` required a Living Brief token when a durable credential existed,
+  but obtaining that token required unlocking with the unavailable gate password.
+- Hotfix candidate in progress on accepted master `7cc8447876a731c95771bb6e07ca827202d90ce7`: authenticated current
+  Super Administrators can recover without an existing brief token by using account-password revalidation, exact
+  confirmation, bounded reason, rate limiting, observed-version stale protection, locking, atomic version increment,
+  durable audit, rollback safety, and prior-session invalidation.
+- Ordinary users, Project Admins, Company Admins, anonymous users, stale recovery attempts, replay, wrong account
+  password, and rate-limit excess must fail safely. The locked page may expose recovery only to authenticated current
+  Super Administrators. This is separate from the owner-approved integration-credential continuity exception.
+- Source fix remains a local candidate until focused API/browser proof, final gates, independent review, push, deploy,
+  and production verification. No production/customer data, Replit settings, provider credentials, publication, or
+  manual production reset is accessed or changed by this candidate.
+
 ### Portability Phase 1A accepted in source; push verification pending
 
 - Corrected candidate `63ab0f873e9294a1c0ce7e3cee9b7a3119bd848d` was reapplied as content only to authoritative

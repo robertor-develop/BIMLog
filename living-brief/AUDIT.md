@@ -534,6 +534,27 @@ non-sensitive reason.
 
 ---
 
+## Living Brief Lockout Recovery Audit - 2026-07-21
+
+Status: urgent hotfix candidate; source-only until review, push, deployment, and production verification.
+
+Roberto reported that the deployed Living Brief still rejected the expected gate password. Independent code review
+found a circular recovery path in accepted source: `POST /living-brief/password` required the observed credential
+version from `X-Brief-Token` whenever a durable credential existed, but obtaining that token required unlocking with
+the current gate password. A Super Administrator who had lost the gate password therefore could not use controlled
+recovery even with ordinary application authentication, current BIMLog account-password revalidation, exact
+confirmation, and an audit reason. This could preserve an unusable migrated legacy hash.
+
+Corrective control: locked-out recovery is Super Administrator-only but does not require an existing brief-access
+token. It uses authenticated application identity plus transaction-time Super Administrator and account-password
+revalidation, exact confirmation, bounded reason, rate limiting, stale observed-version protection through a
+recovery status that grants no document access, advisory/row locking, atomic hash update/version increment, durable
+audit, rollback safety, and invalidation of prior brief sessions. Ordinary users, Project Admins, and Company Admins
+remain denied. This Living Brief gate-password recovery is separate from Roberto's owner-approved integration
+credential continuity exception; no provider/callback/integration credential material is touched.
+
+---
+
 ---
 
 ## Security Batch A Reconciliation Audit - 2026-07-21

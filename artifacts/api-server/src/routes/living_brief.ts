@@ -48,7 +48,13 @@ async function observedCredentialVersion(req: Request): Promise<number | null> {
   if (!existingCredential) return null;
   const header = req.headers["x-brief-token"];
   const token = Array.isArray(header) ? header[0] : header;
-  if (!token) throw new LivingBriefGateError(401, "BRIEF_TOKEN_REQUIRED");
+  if (!token) {
+    const observed = Number(req.body?.expectedCredentialVersion ?? req.body?.observedCredentialVersion);
+    if (!Number.isInteger(observed) || observed < 1) {
+      throw new LivingBriefGateError(409, "RECOVERY_VERSION_REQUIRED");
+    }
+    return observed;
+  }
   try {
     const payload = verifyBriefAccessToken(token);
     if (payload.scope !== "living_brief" || payload.userId !== req.user!.userId) throw new Error("invalid");
@@ -169,6 +175,13 @@ router.get("/living-brief/docs", authMiddleware, briefAccessMiddleware, async (_
     };
   });
   res.json({ catalog: source.catalog, manifest: source.manifest, docs });
+});
+
+// Super Administrator locked-out recovery status. This never grants brief access and
+// exposes only the current credential version needed for stale-protected reset.
+router.get("/living-brief/password/recovery", authMiddleware, isSuperAdminMiddleware, async (_req: Request, res: Response) => {
+  const credential = await getLivingBriefGateCredential();
+  res.json({ credentialConfigured: !!credential, expectedCredentialVersion: credential?.version ?? null });
 });
 
 // Controlled admin reconciliation copies only the exact deployed source bundle. It requires the

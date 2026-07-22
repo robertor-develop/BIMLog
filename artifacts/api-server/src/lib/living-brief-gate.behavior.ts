@@ -12,6 +12,7 @@ const checks: string[] = [];
 const marker = `lb-gate-${Date.now()}`;
 const accountPassword = `${marker}-account-password`;
 const legacyGatePassword = `${marker}-legacy-gate-password`;
+const recoveredGatePassword = `${marker}-recovered-gate-password`;
 const nextGatePassword = `${marker}-next-gate-password`;
 const concurrentGatePasswordA = `${marker}-concurrent-a-password`;
 const concurrentGatePasswordB = `${marker}-concurrent-b-password`;
@@ -136,15 +137,38 @@ async function main(): Promise<void> {
 
     const unlock = await api(base, "/living-brief/unlock", superToken, { method: "POST", body: JSON.stringify({ password: legacyGatePassword }) });
     assert.equal(unlock.status, 200);
-    const briefToken = (unlock.body as { briefToken: string }).briefToken;
+    let briefToken = (unlock.body as { briefToken: string }).briefToken;
     assert.equal((await api(base, "/living-brief/docs", superToken, { headers: { "X-Brief-Token": briefToken } })).status, 200);
     check("old migrated gate password unlocks and reads documents");
+
+    const recoveryStatus = await api(base, "/living-brief/password/recovery", superToken);
+    assert.equal(recoveryStatus.status, 200);
+    const observedVersion = (recoveryStatus.body as { expectedCredentialVersion: number }).expectedCredentialVersion;
+    const lockedOutRecovery = await api(base, "/living-brief/password", superToken, {
+      method: "POST",
+      body: JSON.stringify({ currentAccountPassword: accountPassword, newPassword: recoveredGatePassword, reason: "locked out super admin recovery", confirmation: "RESET_LIVING_BRIEF_GATE", expectedCredentialVersion: observedVersion }),
+    });
+    assert.equal(lockedOutRecovery.status, 200);
+    assert.equal((await api(base, "/living-brief/docs", superToken, { headers: { "X-Brief-Token": briefToken } })).status, 401);
+    assert.equal((await api(base, "/living-brief/unlock", superToken, { method: "POST", body: JSON.stringify({ password: legacyGatePassword }) })).status, 401);
+    const recoveredUnlock = await api(base, "/living-brief/unlock", superToken, { method: "POST", body: JSON.stringify({ password: recoveredGatePassword }) });
+    assert.equal(recoveredUnlock.status, 200);
+    briefToken = (recoveredUnlock.body as { briefToken: string }).briefToken;
+    assert.equal((await api(base, "/living-brief/password", superToken, {
+      method: "POST",
+      body: JSON.stringify({ currentAccountPassword: accountPassword, newPassword: `${marker}-stale-recovery-password`, reason: "stale recovery challenge", confirmation: "RESET_LIVING_BRIEF_GATE", expectedCredentialVersion: observedVersion }),
+    })).status, 409);
+    assert.equal((await api(base, "/living-brief/password", superToken, {
+      method: "POST",
+      body: JSON.stringify({ currentAccountPassword: "wrong-account-password", newPassword: `${marker}-wrong-account-password`, reason: "wrong account password", confirmation: "RESET_LIVING_BRIEF_GATE", expectedCredentialVersion: observedVersion + 1 }),
+    })).status, 403);
+    check("locked-out super admin recovery works without brief token and rejects stale or wrong-account attempts");
 
     assert.equal((await api(base, "/living-brief/password", undefined, { method: "POST", body: "{}" })).status, 401);
     assert.equal((await api(base, "/living-brief/password", ordinaryToken, { method: "POST", body: "{}" })).status, 403);
     assert.equal((await api(base, "/living-brief/password", projectAdminToken, { method: "POST", body: "{}" })).status, 403);
     assert.equal((await api(base, "/living-brief/password", companyAdminToken, { method: "POST", body: "{}" })).status, 403);
-    assert.equal((await api(base, "/living-brief/password", superToken, { method: "POST", body: "{}" })).status, 401);
+    assert.equal((await api(base, "/living-brief/password", superToken, { method: "POST", body: "{}" })).status, 409);
     assert.equal((await api(base, "/living-brief/password", superToken, { method: "POST", headers: { "X-Brief-Token": briefToken }, body: JSON.stringify({ currentAccountPassword: accountPassword, newPassword: "short", reason: "too short", confirmation: "wrong" }) })).status, 400);
     check("reset authorization denies anonymous ordinary project admin company admin and weak super-admin requests");
 
@@ -224,7 +248,21 @@ async function main(): Promise<void> {
     check("fresh install bootstrap uses controlled Super Administrator path only");
     check("controlled bootstrap restart creates no legacy migration audit row");
 
-    const responseText = JSON.stringify({ unlock, reset, concurrent, bootstrap });
+    const rateUser = await pool.query<{ id: number; email: string }>(
+      `INSERT INTO users (email,password_hash,full_name,company_id,is_super_admin,can_access_living_brief) VALUES ($1,$2,$3,$4,true,true) RETURNING id,email`,
+      [`${marker}-rate-super@example.test`, accountHash, "Living Brief Rate Super", companyId],
+    );
+    const rateSuper = rateUser.rows[0]!;
+    const rateToken = signToken({ userId: rateSuper.id, email: rateSuper.email, companyId, fullName: "Living Brief Rate Super", companyName: `${marker}-company`, isSuperAdmin: true });
+    const rateStatuses: number[] = [];
+    for (let index = 0; index < 21; index += 1) {
+      const response = await api(base, "/living-brief/password", rateToken, { method: "POST", body: "{}" });
+      rateStatuses.push(response.status);
+    }
+    assert.equal(rateStatuses.at(-1), 429);
+    check("super admin recovery reset attempts are rate limited");
+
+    const responseText = JSON.stringify({ unlock, lockedOutRecovery, reset, concurrent, bootstrap });
     assert.doesNotMatch(responseText, /password_hash|postgres(?:ql)?:\/\/|JWT_SECRET|[A-Z]:\\|node_modules|\.git[\\/]|BEGIN RSA|PRIVATE KEY/i);
     check("API responses and evidence omit credentials internals and filesystem paths");
   } finally {

@@ -310,6 +310,12 @@ managed-secret migration, durable backup/recovery, controlled rotation/revocatio
 rollback proof, history remediation, and independent verification. This continuity rule is separate from and does not
 weaken the Living Brief gate-password durability correction.
 
+Living Brief gate-password durability includes non-circular recovery. Quality fails any reset path that requires a
+brief-access token when the stated purpose is locked-out Super Administrator recovery. The safe recovery contract is
+ordinary app authentication plus transaction-time Super Administrator revalidation, current BIMLog account password,
+exact confirmation, bounded reason, rate limit, stale observed-version protection that does not grant document access,
+locking, atomic update/version increment, durable audit, rollback, and prior-session invalidation.
+
 ### Immediate versus acceptance-time semantic evidence
 
 An immediate-category finding is part of the quality correction itself, not later documentation cleanup. Customer

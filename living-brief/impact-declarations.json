@@ -990,6 +990,140 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "be5292500bed3f27e6a9323346230491f2c920dfebe4992bcf7a66e69a8a6748"
+    },
+    {
+      "taskId": "living-brief-lockout-recovery-hotfix",
+      "reviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
+      "reviewedAt": "2026-07-22T00:12:00.000Z",
+      "status": "local_candidate_rebased_on_telegram_build_6_master",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "source_hotfix_in_clean_worktree",
+          "focused_disposable_api_tests",
+          "local_browser_evidence",
+          "local_review_commit"
+        ],
+        "operatorOnly": [
+          "production_deployment",
+          "production_credential_recovery_verification",
+          "customer_access_confirmation"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The deployed Living Brief still rejects the gate password and accepted source had a circular Super Administrator recovery path."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Locked-out recovery must require authenticated current Super Administrator account revalidation while avoiding a brief-token dependency."
+        }
+      ],
+      "workstreams": [
+        "living-brief-lockout-recovery-hotfix",
+        "living-brief-gate-password-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing doctrine already requires controlled human authority and traceable recovery; this hotfix is operational enforcement."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Added the non-circular Living Brief gate recovery rule and Super Administrator recovery boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Added quality criteria for tokenless locked-out recovery with revalidation, stale-version protection, audit, locking, rollback, and session invalidation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hotfix restores governed access and does not alter BIMLog product vision or roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The route/UI changes are narrow gate recovery behavior and are covered by deterministic platform generation if structural content changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Living Brief web gate hotfix does not affect Navisworks plugin source, packaging, or field acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact, export behavior, report design rule, or delivery boundary changes in this hotfix."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard was adopted or changed by this Living Brief lockout hotfix."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the lockout defect, source/deployed distinction, local-candidate status, and remaining rollout verification boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the urgent lockout candidate, recovery contract, denied roles, non-actions, and remaining proof/review/deploy steps."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appended the dated audit finding for the circular recovery path and corrective non-circular recovery control."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+        "artifacts/api-server/src/routes/living_brief.ts",
+        "artifacts/bimlog/src/living-brief-harness.tsx",
+        "artifacts/bimlog/src/pages/LivingBrief.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-living-brief-architecture.mjs",
+        "scripts/test-living-brief-gate.mjs"
+      ],
+      "reviewedChangeSha256": "326ff1373226ff26aed40538e9abcf0f720574fe5104aa80dc17915a4f5cfe4f",
+      "reconciledAfterMasterAdvance": {
+        "preservedCommits": [
+          "fdfbdd490ba58ad5070b94c580d374d31007d808",
+          "e67ca65be7ff633aa888241c941c557818c446d9"
+        ],
+        "previousParent": "7cc8447876a731c95771bb6e07ca827202d90ce7",
+        "newParent": "e67ca65be7ff633aa888241c941c557818c446d9",
+        "scope": "Semantic union of accepted Telegram Product Build 6 truth and Living Brief lockout hotfix truth."
+      }
     }
   ]
 }
