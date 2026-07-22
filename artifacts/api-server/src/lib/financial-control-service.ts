@@ -208,6 +208,12 @@ export async function authorizeFinancialOperation(input: {
   category?: string;
   amount?: { amount: string; currency: string };
   trustedConfirmations?: string[];
+  relatedRequests?: Array<{
+    makerUserId: number;
+    category: string;
+    amount: { amount: string; currency: string };
+    createdAt: Date;
+  }>;
   client?: Queryable;
 }) {
   const client = input.client ?? pool;
@@ -253,6 +259,10 @@ export async function authorizeFinancialOperation(input: {
     suspended: await suspended(scope, client),
     grants: await grantsFor(actor.userId, scope, client),
     policies,
+    relatedRequests: input.relatedRequests?.map((request) => ({
+      ...request,
+      amount: parseMoney(request.amount),
+    })),
   });
   if (decision.decision !== "allow")
     throw new FinancialControlError(

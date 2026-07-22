@@ -12,6 +12,7 @@ export type FinancialOperation =
   | "prepare"
   | "review"
   | "approve"
+  | "execute"
   | "manage"
   | "audit_read"
   | "export"
@@ -218,6 +219,7 @@ const need: Record<FinancialOperation, FinancialAuthority[]> = {
   prepare: ["cost_preparer"],
   review: ["cost_reviewer"],
   approve: ["cost_approver"],
+  execute: ["cost_approver"],
   manage: ["financial_administrator"],
   audit_read: ["auditor", "financial_administrator"],
   export: ["financial_viewer", "financial_administrator", "auditor"],
@@ -284,15 +286,17 @@ export function evaluateFinancialAuthorization(
       "Ninguna autoridad financiera explícita vigente permite esta operación.",
     );
   if (
-    (input.operation === "review" || input.operation === "approve") &&
+    (input.operation === "review" ||
+      input.operation === "approve" ||
+      input.operation === "execute") &&
     input.makerUserId === input.userId
   )
     return deny(
       "FIN_MAKER_CHECKER_REQUIRED",
-      "The maker cannot review or approve the same request.",
-      "El creador no puede revisar ni aprobar la misma solicitud.",
+      "The maker cannot review, approve, or execute the same request.",
+      "El creador no puede revisar, aprobar ni ejecutar la misma solicitud.",
     );
-  if (input.operation === "approve") {
+  if (input.operation === "approve" || input.operation === "execute") {
     if (!input.amount || !input.category)
       return deny(
         "FIN_APPROVAL_CONTEXT_MISSING",

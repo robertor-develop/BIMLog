@@ -44,6 +44,7 @@ export * from "./feature-catalog";
 export * from "./feature-policies";
 export * from "./financial-controls";
 export * from "./financial-budgets";
+export * from "./financial-contracts";
 export * from "./living-brief-documents";
 export * from "./living-brief-gate";
 export * from "./coordinator-saved-views";

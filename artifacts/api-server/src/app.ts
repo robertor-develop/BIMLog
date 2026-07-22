@@ -30,6 +30,7 @@ import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
+import { startFinancialContractMigration } from "./lib/financial-contract-migration";
 import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
 import {
   ensureLivingBriefGateSchema,
@@ -282,9 +283,8 @@ app.use("/api/v1", router);
   try {
     await startFinancialControlMigration();
     await startFinancialBudgetMigration();
-    console.log(
-      "[migration] financial cost structure and budget tables ensured",
-    );
+    await startFinancialContractMigration();
+    console.log("[migration] financial cost structure, budget, and contract tables ensured");
   } catch {
     console.error("[migration] financial budget migration failed");
   }

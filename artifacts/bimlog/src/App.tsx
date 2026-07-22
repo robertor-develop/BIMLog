@@ -20,6 +20,7 @@ import { CompanyProfile } from "@/pages/CompanyProfile";
 import { NotificationSettings } from "@/pages/NotificationSettings";
 import { FinancialControlsSettings } from "@/pages/FinancialControlsSettings";
 import { FinancialBudgetWorkspace } from "@/pages/FinancialBudgetWorkspace";
+import { FinancialContractWorkspace } from "@/pages/FinancialContractWorkspace";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
@@ -118,6 +119,9 @@ function Router() {
       </Route>
       <Route path="/projects/:id/financial/snapshots/:snapshotId">
         {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="snapshot" />} />}
+      </Route>
+      <Route path="/projects/:id/financial/contracts">
+        {() => <ProtectedRoute component={FinancialContractWorkspace} />}
       </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}

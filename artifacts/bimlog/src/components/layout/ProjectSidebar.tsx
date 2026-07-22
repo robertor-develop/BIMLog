@@ -186,6 +186,10 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             <div className="nav-dot" />
             {tr("Project Budget", "Presupuesto del Proyecto")}
           </button>
+          <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => navigate(`/projects/${projectId}/financial/contracts`)}>
+            <div className="nav-dot" />
+            {tr("Contracts & Commitments", "Contratos y Compromisos")}
+          </button>
 
           <span className="sidebar-section-label" style={{ marginTop: 8 }}>{getLabel("integrations-section", "project.section.integrations")}</span>
 
