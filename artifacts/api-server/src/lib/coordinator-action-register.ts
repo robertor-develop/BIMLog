@@ -16,6 +16,15 @@ export type DeadlineState =
   | "due_this_week"
   | "upcoming"
   | "no_due_date";
+export const COORDINATOR_BUILT_IN_VIEWS = [
+  "my_items",
+  "this_week",
+  "overdue",
+  "next_coordination_meeting",
+  "all_actionable",
+] as const;
+export type CoordinatorBuiltInView =
+  (typeof COORDINATOR_BUILT_IN_VIEWS)[number];
 
 export type LensIdentity = {
   serverId: number;
@@ -76,7 +85,15 @@ export type RegisterQuery = {
   pageSize: number;
   modules: CoordinatorActionModule[];
   statuses: string[];
+  originalStatuses: string[];
+  presentationStatuses: string[];
+  lensStatuses: string[];
   deadline: "all" | DeadlineState;
+  dueFrom: string | null;
+  dueTo: string | null;
+  overdueOnly: boolean;
+  meetingId: number | null;
+  builtInView: CoordinatorBuiltInView;
   search: string | null;
   responsibleCompany: string | null;
   responsiblePerson: string | null;
@@ -85,7 +102,7 @@ export type RegisterQuery = {
   timezone: string;
 };
 
-type AccessContext = {
+export type AccessContext = {
   companyId: number;
   isSuperAdmin: boolean;
   accessMode: "member" | "super_admin_explicit";
@@ -145,6 +162,24 @@ export class CoordinatorRegisterError extends Error {
 const SAFE_TEXT = /^[\p{L}\p{N} _.,:/()&+\-'#]{1,120}$/u;
 const MAX_PAGE = 100;
 const MAX_PAGE_SIZE = 50;
+const LENS_ACTIONABLE_STATUSES = ["open", "follow_up", "waiting_design"];
+
+function dateOnly(value: unknown, field: string): string | null {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  const parsed = new Date(`${text}T12:00:00Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text) || Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== text)
+    throw new CoordinatorRegisterError(400, "REGISTER_DATE_INVALID", `${field} must be YYYY-MM-DD.`);
+  return text;
+}
+
+function optionalPositiveInteger(value: unknown, field: string): number | null {
+  if (value == null || value === "") return null;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0)
+    throw new CoordinatorRegisterError(400, "REGISTER_FILTER_INVALID", `${field} is invalid.`);
+  return parsed;
+}
 
 function boundedText(value: unknown, max = 120): string | null {
   const text = String(value ?? "").trim();
@@ -202,11 +237,13 @@ export function parseRegisterQuery(
       `page must be 1-${MAX_PAGE} and pageSize must be 1-${MAX_PAGE_SIZE}.`,
     );
   }
-  const modules = list(
-    query.modules,
-    COORDINATOR_ACTION_MODULES,
-  ) as CoordinatorActionModule[];
-  const statuses = list(query.statuses);
+  const modules = String(query.modules ?? "").trim().toLowerCase() === "none"
+    ? []
+    : (list(query.modules, COORDINATOR_ACTION_MODULES) as CoordinatorActionModule[]);
+  const legacyStatuses = list(query.statuses);
+  const originalStatuses = list(query.originalStatuses);
+  const presentationStatuses = list(query.presentationStatuses);
+  const lensStatuses = list(query.lensStatuses, LENS_ACTIONABLE_STATUSES);
   const deadline = String(query.deadline ?? "all").toLowerCase();
   if (
     !["all", "overdue", "due_this_week", "upcoming", "no_due_date"].includes(
@@ -229,12 +266,30 @@ export function parseRegisterQuery(
       "timezone must be a valid IANA time zone.",
     );
   }
+  const dueFrom = dateOnly(query.dueFrom, "dueFrom");
+  const dueTo = dateOnly(query.dueTo, "dueTo");
+  if (dueFrom && dueTo && dueFrom > dueTo)
+    throw new CoordinatorRegisterError(400, "REGISTER_DATE_RANGE_INVALID", "dueFrom cannot be after dueTo.");
+  const overdueRaw = String(query.overdue ?? "false").toLowerCase();
+  if (!["true", "false"].includes(overdueRaw))
+    throw new CoordinatorRegisterError(400, "REGISTER_FILTER_INVALID", "overdue must be true or false.");
+  const builtInView = String(query.builtInView ?? "all_actionable").toLowerCase();
+  if (!COORDINATOR_BUILT_IN_VIEWS.includes(builtInView as CoordinatorBuiltInView))
+    throw new CoordinatorRegisterError(400, "REGISTER_VIEW_INVALID", "builtInView is invalid.");
   return {
     page,
     pageSize,
-    modules: modules.length ? modules : [...COORDINATOR_ACTION_MODULES],
-    statuses,
+    modules: query.modules === undefined ? [...COORDINATOR_ACTION_MODULES] : modules,
+    statuses: legacyStatuses,
+    originalStatuses,
+    presentationStatuses,
+    lensStatuses,
     deadline: deadline as RegisterQuery["deadline"],
+    dueFrom,
+    dueTo,
+    overdueOnly: overdueRaw === "true",
+    meetingId: optionalPositiveInteger(query.meetingId, "meetingId"),
+    builtInView: builtInView as CoordinatorBuiltInView,
     search: boundedText(query.search),
     responsibleCompany: boundedText(query.responsibleCompany),
     responsiblePerson: boundedText(query.responsiblePerson),
@@ -310,7 +365,7 @@ export function compareCoordinatorActions(
   return module || a.sourceId - b.sourceId;
 }
 
-async function authorizeProject(input: {
+export async function authorizeCoordinatorProject(input: {
   userId: number;
   projectId: number;
   superAdminAccess?: string;
@@ -366,7 +421,7 @@ async function authorizeProject(input: {
   );
 }
 
-async function authorizeModule(
+export async function authorizeCoordinatorModule(
   module: CoordinatorActionModule,
   input: { access: AccessContext; userId: number; projectId: number },
 ): Promise<{ allowed: boolean; code: string }> {
@@ -393,22 +448,33 @@ function sharedQuery(baseSql: string): string {
     SELECT * FROM source_rows WHERE
       ($2::text IS NULL OR lower(concat_ws(' ',display_identifier,title,responsible_company,responsible_person,floor,discipline)) LIKE $2)
       AND ($3::text[] IS NULL OR lower(original_status)=ANY($3) OR lower(presentation_status)=ANY($3))
-      AND ($4::text IS NULL OR lower(responsible_company)=lower($4))
-      AND ($5::text IS NULL OR lower(responsible_person)=lower($5))
-      AND ($6::text IS NULL OR lower(floor)=lower($6))
-      AND ($7::text IS NULL OR lower(discipline)=lower($7))
-      AND ($8::text='all' OR ($8='no_due_date' AND due_at IS NULL)
-        OR ($8='overdue' AND due_at::date < $9::date)
-        OR ($8='due_this_week' AND due_at::date >= $9::date AND due_at::date <= $10::date)
-        OR ($8='upcoming' AND due_at::date > $10::date))
+      AND ($4::text[] IS NULL OR lower(original_status)=ANY($4))
+      AND ($5::text[] IS NULL OR lower(presentation_status)=ANY($5))
+      AND ($6::text IS NULL OR lower(responsible_company)=lower($6))
+      AND ($7::text IS NULL OR lower(responsible_person)=lower($7))
+      AND ($8::text IS NULL OR lower(floor)=lower($8))
+      AND ($9::text IS NULL OR lower(discipline)=lower($9))
+      AND ($10::text='all' OR ($10='no_due_date' AND due_at IS NULL)
+        OR ($10='overdue' AND due_at::date < $11::date)
+        OR ($10='due_this_week' AND due_at::date >= $11::date AND due_at::date <= $12::date)
+        OR ($10='upcoming' AND due_at::date > $12::date))
+      AND ($13::date IS NULL OR due_at::date >= $13::date)
+      AND ($14::date IS NULL OR due_at::date <= $14::date)
+      AND (NOT $15::boolean OR due_at::date < $11::date)
+      AND ($16::int IS NULL OR EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(related->'meetings','[]'::jsonb)) rel WHERE (rel->>'id')::int=$16))
+      AND ($18::text[] IS NULL OR source_module<>'lens' OR lower(original_status)=ANY($18))
+      AND ($19::text<>'my_items' OR responsible_user_id=$20::int)
+      AND ($19::text<>'this_week' OR (due_at::date >= $11::date AND due_at::date <= $12::date))
+      AND ($19::text<>'overdue' OR due_at::date < $11::date)
+      AND ($19::text<>'next_coordination_meeting' OR ($17::int IS NOT NULL AND EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(related->'meetings','[]'::jsonb)) rel WHERE (rel->>'id')::int=$17)))
   ), selected AS (
     SELECT * FROM filtered ORDER BY
-      CASE WHEN due_at::date < $9::date THEN 0 WHEN due_at::date <= $10::date THEN 1 WHEN due_at IS NULL THEN 3 ELSE 2 END,
-      due_at ASC NULLS LAST, source_updated_at DESC NULLS LAST, source_id ASC LIMIT $11
+      CASE WHEN due_at::date < $11::date THEN 0 WHEN due_at::date <= $12::date THEN 1 WHEN due_at IS NULL THEN 3 ELSE 2 END,
+      due_at ASC NULLS LAST, source_updated_at DESC NULLS LAST, source_id ASC LIMIT $21
   ) SELECT
     (SELECT count(*)::int FROM filtered) AS count,
     COALESCE((SELECT jsonb_agg(to_jsonb(selected) ORDER BY
-      CASE WHEN due_at::date < $9::date THEN 0 WHEN due_at::date <= $10::date THEN 1 WHEN due_at IS NULL THEN 3 ELSE 2 END,
+      CASE WHEN due_at::date < $11::date THEN 0 WHEN due_at::date <= $12::date THEN 1 WHEN due_at IS NULL THEN 3 ELSE 2 END,
       due_at ASC NULLS LAST, source_updated_at DESC NULLS LAST, source_id ASC) FROM selected),'[]'::jsonb) AS rows,
     COALESCE((SELECT jsonb_object_agg(presentation_status,status_count) FROM
       (SELECT presentation_status,count(*)::int AS status_count FROM filtered GROUP BY presentation_status) status_groups),'{}'::jsonb) AS status_counts`;
@@ -418,12 +484,16 @@ function queryParams(
   projectId: number,
   query: RegisterQuery,
   now: Date,
+  userId: number,
+  nextMeetingId: number | null,
 ): unknown[] {
   const today = calendarDateInZone(now, query.timezone);
   return [
     projectId,
     query.search ? `%${query.search.toLowerCase()}%` : null,
     query.statuses.length ? query.statuses : null,
+    query.originalStatuses.length ? query.originalStatuses : null,
+    query.presentationStatuses.length ? query.presentationStatuses : null,
     query.responsibleCompany,
     query.responsiblePerson,
     query.floor,
@@ -431,6 +501,14 @@ function queryParams(
     query.deadline,
     today,
     addCalendarDays(today, 7),
+    query.dueFrom,
+    query.dueTo,
+    query.overdueOnly,
+    query.meetingId,
+    nextMeetingId,
+    query.lensStatuses.length ? query.lensStatuses : null,
+    query.builtInView,
+    userId,
     query.page * query.pageSize,
   ];
 }
@@ -504,10 +582,12 @@ async function loadSource(
   projectId: number,
   query: RegisterQuery,
   now: Date,
+  userId: number,
+  nextMeetingId: number | null,
 ): Promise<AdapterPayload> {
   const result = await pool.query(
     sharedQuery(SOURCE_SQL[module]),
-    queryParams(projectId, query, now),
+    queryParams(projectId, query, now, userId, nextMeetingId),
   );
   const row = result.rows[0] ?? {};
   return {
@@ -598,7 +678,38 @@ export async function loadCoordinatorActionRegister(input: {
       "projectId is invalid.",
     );
   const now = input.now ?? new Date();
-  const access = await authorizeProject(input);
+  const access = await authorizeCoordinatorProject(input);
+  let nextMeetingId: number | null = null;
+  let meetingContext: {
+    status: "not_requested" | "ok" | "none" | "failed";
+    id: number | null;
+    title: string | null;
+    meetingAt: string | null;
+  } = { status: "not_requested", id: null, title: null, meetingAt: null };
+  if (input.query.builtInView === "next_coordination_meeting") {
+    try {
+      const result = await pool.query(
+        `SELECT id,title,meeting_date FROM meeting_minutes
+         WHERE project_id=$1 AND deleted_at IS NULL AND meeting_date >= $2
+         ORDER BY meeting_date ASC,id ASC LIMIT 1`,
+        [input.projectId, now],
+      );
+      const row = result.rows[0];
+      if (row) {
+        nextMeetingId = Number(row.id);
+        meetingContext = {
+          status: "ok",
+          id: nextMeetingId,
+          title: String(row.title),
+          meetingAt: iso(row.meeting_date),
+        };
+      } else {
+        meetingContext = { status: "none", id: null, title: null, meetingAt: null };
+      }
+    } catch {
+      meetingContext = { status: "failed", id: null, title: null, meetingAt: null };
+    }
+  }
   const requested = new Set(input.query.modules);
   const states = new Map<CoordinatorActionModule, SourceState>(
     COORDINATOR_ACTION_MODULES.map((module) => [
@@ -616,7 +727,7 @@ export async function loadCoordinatorActionRegister(input: {
     COORDINATOR_ACTION_MODULES.map(async (module) => {
       if (!requested.has(module)) return;
       try {
-        const authorization = await authorizeModule(module, {
+        const authorization = await authorizeCoordinatorModule(module, {
           access,
           userId: input.userId,
           projectId: input.projectId,
@@ -635,6 +746,8 @@ export async function loadCoordinatorActionRegister(input: {
           input.projectId,
           input.query,
           now,
+          input.userId,
+          nextMeetingId,
         );
         payloads.set(module, payload);
         states.set(module, {
@@ -702,7 +815,7 @@ export async function loadCoordinatorActionRegister(input: {
   );
   const partial = sourceStates.some(
     (state) => requested.has(state.module) && state.status !== "ok",
-  );
+  ) || meetingContext.status === "failed";
   return {
     items: pageItems,
     page: input.query.page,
@@ -723,6 +836,8 @@ export async function loadCoordinatorActionRegister(input: {
     partial,
     timezone: input.query.timezone,
     generatedAt: now.toISOString(),
+    builtInView: input.query.builtInView,
+    meetingContext,
     readOnly: true,
     canonicalModulesRemainAuthoritative: true,
     accessMode: access.accessMode,

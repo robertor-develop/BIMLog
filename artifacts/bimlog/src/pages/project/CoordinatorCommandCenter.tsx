@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  Bookmark,
   CalendarClock,
   CheckCircle2,
   ChevronLeft,
@@ -8,14 +9,52 @@ import {
   ExternalLink,
   Filter,
   Focus,
+  Pencil,
   RefreshCw,
+  RotateCcw,
+  Save,
   Search,
+  Star,
+  Trash2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
 type SourceModule = "lens" | "rfi" | "submittal" | "meeting" | "schedule";
 type DeadlineState = "overdue" | "due_this_week" | "upcoming" | "no_due_date";
+type BuiltInView = "my_items" | "this_week" | "overdue" | "next_coordination_meeting" | "all_actionable";
+
+type SavedViewConfig = {
+  schemaVersion: 1;
+  builtInView: BuiltInView;
+  modules: SourceModule[];
+  lensStatuses: string[];
+  originalStatuses: string[];
+  presentationStatuses: string[];
+  deadline: "all" | DeadlineState;
+  dueFrom: string | null;
+  dueTo: string | null;
+  overdue: boolean;
+  meetingId: number | null;
+  search: string | null;
+  responsibleCompany: string | null;
+  responsiblePerson: string | null;
+  floor: string | null;
+  discipline: string | null;
+  timezone: string;
+};
+
+type SavedView = {
+  id: string;
+  projectId: number;
+  name: string;
+  configuration: SavedViewConfig;
+  version: number;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deleted: boolean;
+};
 
 type RelatedIdentity = { id: number; internalLink: string };
 type LensIdentity = {
@@ -79,6 +118,8 @@ type RegisterResponse = {
   partial: boolean;
   timezone: string;
   generatedAt: string;
+  builtInView: BuiltInView;
+  meetingContext: { status: "not_requested" | "ok" | "none" | "failed"; id: number | null; title: string | null; meetingAt: string | null };
   readOnly: true;
   canonicalModulesRemainAuthoritative: true;
   aiUsed: false;
@@ -91,6 +132,8 @@ const SOURCE_ORDER: SourceModule[] = [
   "meeting",
   "schedule",
 ];
+
+const BUILT_IN_ORDER: BuiltInView[] = ["my_items", "this_week", "overdue", "next_coordination_meeting", "all_actionable"];
 
 function humanStatus(value: string) {
   return value
@@ -148,8 +191,15 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
     [],
   );
   const [modules, setModules] = useState<SourceModule[]>(SOURCE_ORDER);
-  const [status, setStatus] = useState("all");
+  const [builtInView, setBuiltInView] = useState<BuiltInView>("all_actionable");
+  const [lensStatus, setLensStatus] = useState("all");
+  const [originalStatus, setOriginalStatus] = useState("all");
+  const [presentationStatus, setPresentationStatus] = useState("all");
   const [deadline, setDeadline] = useState<"all" | DeadlineState>("all");
+  const [dueFrom, setDueFrom] = useState("");
+  const [dueTo, setDueTo] = useState("");
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [meetingId, setMeetingId] = useState("");
   const [search, setSearch] = useState("");
   const [company, setCompany] = useState("");
   const [person, setPerson] = useState("");
@@ -160,16 +210,102 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [savedViewsLoading, setSavedViewsLoading] = useState(true);
+  const [savedViewError, setSavedViewError] = useState("");
+  const [activeSavedViewId, setActiveSavedViewId] = useState("");
+  const [savedViewBusy, setSavedViewBusy] = useState(false);
+  const urlInitialized = useRef(false);
+  const defaultApplied = useRef(false);
+
+  const builtInLabel = (view: BuiltInView) => ({
+    my_items: tr("My Items", "Mis Elementos"),
+    this_week: tr("This Week", "Esta Semana"),
+    overdue: tr("Overdue", "Vencidos"),
+    next_coordination_meeting: tr("Next Coordination Meeting", "Próxima Reunión de Coordinación"),
+    all_actionable: tr("All Actionable", "Todos los Accionables"),
+  })[view];
+
+  const applyConfiguration = (config: SavedViewConfig) => {
+    setBuiltInView(config.builtInView);
+    setModules(config.modules);
+    setLensStatus(config.lensStatuses[0] ?? "all");
+    setOriginalStatus(config.originalStatuses[0] ?? "all");
+    setPresentationStatus(config.presentationStatuses[0] ?? "all");
+    setDeadline(config.deadline);
+    setDueFrom(config.dueFrom ?? "");
+    setDueTo(config.dueTo ?? "");
+    setOverdueOnly(config.overdue);
+    setMeetingId(config.meetingId ? String(config.meetingId) : "");
+    setSearch(config.search ?? "");
+    setCompany(config.responsibleCompany ?? "");
+    setPerson(config.responsiblePerson ?? "");
+    setFloor(config.floor ?? "");
+    setDiscipline(config.discipline ?? "");
+    setPage(1);
+  };
+
+  const currentConfiguration = (): SavedViewConfig => ({
+    schemaVersion: 1,
+    builtInView,
+    modules,
+    lensStatuses: lensStatus === "all" ? [] : [lensStatus],
+    originalStatuses: originalStatus === "all" ? [] : [originalStatus],
+    presentationStatuses: presentationStatus === "all" ? [] : [presentationStatus],
+    deadline,
+    dueFrom: dueFrom || null,
+    dueTo: dueTo || null,
+    overdue: overdueOnly,
+    meetingId: meetingId ? Number(meetingId) : null,
+    search: search.trim() || null,
+    responsibleCompany: company.trim() || null,
+    responsiblePerson: person.trim() || null,
+    floor: floor.trim() || null,
+    discipline: discipline.trim() || null,
+    timezone,
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hasState = [...params.keys()].some((key) => key.startsWith("cc"));
+    if (hasState) {
+      const selected = (params.get("ccModules") ?? "").split(",").filter((value): value is SourceModule => SOURCE_ORDER.includes(value as SourceModule));
+      setModules(params.get("ccModules") === "none" ? [] : (selected.length ? SOURCE_ORDER.filter((module) => selected.includes(module)) : SOURCE_ORDER));
+      const view = params.get("ccView") as BuiltInView | null;
+      if (view && BUILT_IN_ORDER.includes(view)) setBuiltInView(view);
+      setLensStatus(params.get("ccLensStatus") ?? "all");
+      setOriginalStatus(params.get("ccOriginalStatus") ?? "all");
+      setPresentationStatus(params.get("ccPresentationStatus") ?? "all");
+      setDeadline((params.get("ccDeadline") as "all" | DeadlineState) ?? "all");
+      setDueFrom(params.get("ccDueFrom") ?? "");
+      setDueTo(params.get("ccDueTo") ?? "");
+      setOverdueOnly(params.get("ccOverdue") === "true");
+      setMeetingId(params.get("ccMeeting") ?? "");
+      setSearch(params.get("ccSearch") ?? "");
+      setCompany(params.get("ccCompany") ?? "");
+      setPerson(params.get("ccPerson") ?? "");
+      setFloor(params.get("ccFloor") ?? "");
+      setDiscipline(params.get("ccDiscipline") ?? "");
+    }
+    urlInitialized.current = true;
+  }, [projectId]);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
       page: String(page),
       pageSize: "25",
-      modules: modules.join(","),
+      modules: modules.length ? modules.join(",") : "none",
       timezone,
+      builtInView,
     });
-    if (status !== "all") params.set("statuses", status);
+    if (lensStatus !== "all") params.set("lensStatuses", lensStatus);
+    if (originalStatus !== "all") params.set("originalStatuses", originalStatus);
+    if (presentationStatus !== "all") params.set("presentationStatuses", presentationStatus);
     if (deadline !== "all") params.set("deadline", deadline);
+    if (dueFrom) params.set("dueFrom", dueFrom);
+    if (dueTo) params.set("dueTo", dueTo);
+    if (overdueOnly) params.set("overdue", "true");
+    if (meetingId) params.set("meetingId", meetingId);
     if (search.trim()) params.set("search", search.trim());
     if (company.trim()) params.set("responsibleCompany", company.trim());
     if (person.trim()) params.set("responsiblePerson", person.trim());
@@ -179,8 +315,15 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
   }, [
     page,
     modules,
-    status,
+    builtInView,
+    lensStatus,
+    originalStatus,
+    presentationStatus,
     deadline,
+    dueFrom,
+    dueTo,
+    overdueOnly,
+    meetingId,
     search,
     company,
     person,
@@ -188,6 +331,88 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
     discipline,
     timezone,
   ]);
+
+  useEffect(() => {
+    if (!urlInitialized.current) return;
+    const params = new URLSearchParams(window.location.search);
+    [...params.keys()].filter((key) => key.startsWith("cc")).forEach((key) => params.delete(key));
+    params.set("ccView", builtInView);
+    if (modules.length !== SOURCE_ORDER.length) params.set("ccModules", modules.length ? modules.join(",") : "none");
+    if (lensStatus !== "all") params.set("ccLensStatus", lensStatus);
+    if (originalStatus !== "all") params.set("ccOriginalStatus", originalStatus);
+    if (presentationStatus !== "all") params.set("ccPresentationStatus", presentationStatus);
+    if (deadline !== "all") params.set("ccDeadline", deadline);
+    if (dueFrom) params.set("ccDueFrom", dueFrom);
+    if (dueTo) params.set("ccDueTo", dueTo);
+    if (overdueOnly) params.set("ccOverdue", "true");
+    if (meetingId) params.set("ccMeeting", meetingId);
+    if (search.trim()) params.set("ccSearch", search.trim());
+    if (company.trim()) params.set("ccCompany", company.trim());
+    if (person.trim()) params.set("ccPerson", person.trim());
+    if (floor.trim()) params.set("ccFloor", floor.trim());
+    if (discipline.trim()) params.set("ccDiscipline", discipline.trim());
+    window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}${window.location.hash}`);
+  }, [builtInView, modules, lensStatus, originalStatus, presentationStatus, deadline, dueFrom, dueTo, overdueOnly, meetingId, search, company, person, floor, discipline]);
+
+  const loadSavedViews = async () => {
+    if (!token) return;
+    setSavedViewsLoading(true);
+    setSavedViewError("");
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/coordinator-saved-views`, { headers: { Authorization: `Bearer ${token}` } });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error((lang === "es" ? body.messageEs : body.message) || tr("Saved views could not be loaded.", "No se pudieron cargar las vistas guardadas."));
+      const views = (body.views ?? []) as SavedView[];
+      setSavedViews(views);
+      if (!defaultApplied.current && ![...new URLSearchParams(window.location.search).keys()].some((key) => key.startsWith("cc"))) {
+        const personalDefault = views.find((view) => view.isDefault);
+        if (personalDefault) { applyConfiguration(personalDefault.configuration); setActiveSavedViewId(personalDefault.id); }
+      }
+      defaultApplied.current = true;
+    } catch (loadError) {
+      setSavedViewError(loadError instanceof Error ? loadError.message : tr("Saved views could not be loaded.", "No se pudieron cargar las vistas guardadas."));
+    } finally {
+      setSavedViewsLoading(false);
+    }
+  };
+
+  useEffect(() => { defaultApplied.current = false; void loadSavedViews(); }, [projectId, token, lang]);
+
+  const savedViewRequest = async (path: string, method: "POST" | "PATCH" | "DELETE", body: Record<string, unknown>) => {
+    if (!token) return null;
+    setSavedViewBusy(true);
+    setSavedViewError("");
+    try {
+      const response = await fetch(path, { method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error((lang === "es" ? payload.messageEs : payload.message) || tr("The saved-view operation failed.", "La operación de la vista guardada falló."));
+      await loadSavedViews();
+      return payload.view as SavedView;
+    } catch (saveError) {
+      setSavedViewError(saveError instanceof Error ? saveError.message : tr("The saved-view operation failed.", "La operación de la vista guardada falló."));
+      return null;
+    } finally {
+      setSavedViewBusy(false);
+    }
+  };
+
+  const clearFilters = () => {
+    setBuiltInView("all_actionable"); setModules(SOURCE_ORDER); setLensStatus("all"); setOriginalStatus("all"); setPresentationStatus("all");
+    setDeadline("all"); setDueFrom(""); setDueTo(""); setOverdueOnly(false); setMeetingId(""); setSearch(""); setCompany(""); setPerson(""); setFloor(""); setDiscipline(""); setPage(1); setActiveSavedViewId("");
+  };
+
+  const activeFilterSummary = useMemo(() => {
+    const values = [builtInLabel(builtInView)];
+    if (modules.length !== SOURCE_ORDER.length) values.push(`${modules.length} ${tr("sources", "fuentes")}`);
+    if (lensStatus !== "all") values.push(`Lens: ${statusLabel(lensStatus, lang)}`);
+    if (originalStatus !== "all") values.push(`${tr("Original", "Original")}: ${statusLabel(originalStatus, lang)}`);
+    if (presentationStatus !== "all") values.push(`${tr("Presentation", "Presentación")}: ${statusLabel(presentationStatus, lang)}`);
+    if (deadline !== "all") values.push(deadline.replaceAll("_", " "));
+    if (dueFrom || dueTo) values.push(`${dueFrom || "…"} – ${dueTo || "…"}`);
+    if (meetingId) values.push(`${tr("Meeting", "Reunión")} #${meetingId}`);
+    if (company || person || floor || discipline || search) values.push(tr("Operational details", "Detalles operativos"));
+    return values;
+  }, [builtInView, modules, lensStatus, originalStatus, presentationStatus, deadline, dueFrom, dueTo, meetingId, company, person, floor, discipline, search, lang]);
 
   useEffect(() => {
     if (!token || modules.length === 0) {
@@ -357,9 +582,98 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
       </div>
 
       <div className="ccc-filter-panel">
+        <div className="ccc-view-bar">
+          <label>
+            <span>{tr("Built-in view", "Vista integrada")}</span>
+            <select value={builtInView} onChange={(event) => { setBuiltInView(event.target.value as BuiltInView); setPage(1); setActiveSavedViewId(""); }}>
+              {BUILT_IN_ORDER.map((view) => <option key={view} value={view}>{builtInLabel(view)}</option>)}
+            </select>
+          </label>
+          <label>
+            <span><Bookmark size={12} /> {tr("Personal saved view", "Vista personal guardada")}</span>
+            <select
+              value={activeSavedViewId}
+              disabled={savedViewsLoading}
+              onChange={(event) => {
+                const selected = savedViews.find((view) => view.id === event.target.value);
+                setActiveSavedViewId(event.target.value);
+                if (selected) applyConfiguration(selected.configuration);
+              }}
+            >
+              <option value="">{savedViewsLoading ? tr("Loading…", "Cargando…") : tr("Current filters (unsaved)", "Filtros actuales (sin guardar)")}</option>
+              {savedViews.map((view) => <option key={view.id} value={view.id}>{view.isDefault ? "★ " : ""}{view.name}</option>)}
+            </select>
+          </label>
+          <div className="ccc-saved-actions">
+            <button
+              type="button"
+              disabled={savedViewBusy}
+              onClick={async () => {
+                const name = window.prompt(tr("Name this personal view", "Nombre de esta vista personal"));
+                if (!name) return;
+                const view = await savedViewRequest(`/api/v1/projects/${projectId}/coordinator-saved-views`, "POST", { name, configuration: currentConfiguration(), isDefault: false, idempotencyKey: window.crypto.randomUUID() });
+                if (view) setActiveSavedViewId(view.id);
+              }}
+            ><Save size={13} /> {tr("Save", "Guardar")}</button>
+            <button
+              type="button"
+              disabled={!activeSavedViewId || savedViewBusy}
+              title={tr("Update selected view", "Actualizar vista seleccionada")}
+              onClick={async () => {
+                const selected = savedViews.find((view) => view.id === activeSavedViewId);
+                if (!selected) return;
+                await savedViewRequest(`/api/v1/projects/${projectId}/coordinator-saved-views/${selected.id}`, "PATCH", { configuration: currentConfiguration(), expectedVersion: selected.version, idempotencyKey: window.crypto.randomUUID() });
+              }}
+            ><Save size={13} /><span className="sr-only">{tr("Update selected view", "Actualizar vista seleccionada")}</span></button>
+            <button
+              type="button"
+              disabled={!activeSavedViewId || savedViewBusy}
+              title={tr("Rename", "Renombrar")}
+              onClick={async () => {
+                const selected = savedViews.find((view) => view.id === activeSavedViewId);
+                if (!selected) return;
+                const name = window.prompt(tr("Rename personal view", "Renombrar vista personal"), selected.name);
+                if (!name || name === selected.name) return;
+                await savedViewRequest(`/api/v1/projects/${projectId}/coordinator-saved-views/${selected.id}`, "PATCH", { name, expectedVersion: selected.version, idempotencyKey: window.crypto.randomUUID() });
+              }}
+            ><Pencil size={13} /><span className="sr-only">{tr("Rename", "Renombrar")}</span></button>
+            <button
+              type="button"
+              disabled={!activeSavedViewId || savedViewBusy}
+              title={tr("Make my default", "Establecer como mi predeterminada")}
+              onClick={async () => {
+                const selected = savedViews.find((view) => view.id === activeSavedViewId);
+                if (!selected || selected.isDefault) return;
+                await savedViewRequest(`/api/v1/projects/${projectId}/coordinator-saved-views/${selected.id}`, "PATCH", { isDefault: true, expectedVersion: selected.version, idempotencyKey: window.crypto.randomUUID() });
+              }}
+            ><Star size={13} /><span className="sr-only">{tr("Make my default", "Establecer como mi predeterminada")}</span></button>
+            <button
+              type="button"
+              disabled={!activeSavedViewId || savedViewBusy}
+              title={tr("Delete", "Eliminar")}
+              onClick={async () => {
+                const selected = savedViews.find((view) => view.id === activeSavedViewId);
+                if (!selected || !window.confirm(tr(`Delete “${selected.name}”?`, `¿Eliminar “${selected.name}”?`))) return;
+                const deleted = await savedViewRequest(`/api/v1/projects/${projectId}/coordinator-saved-views/${selected.id}`, "DELETE", { expectedVersion: selected.version, idempotencyKey: window.crypto.randomUUID() });
+                if (deleted) { setActiveSavedViewId(""); clearFilters(); }
+              }}
+            ><Trash2 size={13} /><span className="sr-only">{tr("Delete", "Eliminar")}</span></button>
+          </div>
+        </div>
+
         <div className="ccc-filter-heading">
-          <Filter size={15} />
-          <strong>{tr("Filter the register", "Filtrar el registro")}</strong>
+          <Filter size={15} /> <strong>{tr("Operational filters", "Filtros operativos")}</strong>
+          <div className="ccc-filter-reset">
+            <button type="button" onClick={clearFilters}><RotateCcw size={12} /> {tr("Clear all", "Limpiar todo")}</button>
+            <button
+              type="button"
+              disabled={!savedViews.some((view) => view.isDefault)}
+              onClick={() => {
+                const personalDefault = savedViews.find((view) => view.isDefault);
+                if (personalDefault) { applyConfiguration(personalDefault.configuration); setActiveSavedViewId(personalDefault.id); }
+              }}
+            >{tr("Reset to my default", "Restablecer mi predeterminada")}</button>
+          </div>
         </div>
         <div
           className="ccc-module-filters"
@@ -399,33 +713,38 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
             </div>
           </label>
           <label>
-            <span>{tr("Status", "Estado")}</span>
+            <span>{tr("Lens lifecycle", "Ciclo de vida Lens")}</span>
+            <select value="active" disabled><option value="active">{tr("Active / current only", "Solo activa / vigente")}</option></select>
+          </label>
+          <label>
+            <span>{tr("Lens status", "Estado Lens")}</span>
             <select
-              value={status}
+              value={lensStatus}
               onChange={(event) => {
                 setPage(1);
-                setStatus(event.target.value);
+                setLensStatus(event.target.value);
               }}
             >
-              <option value="all">
-                {tr("All actionable statuses", "Todos los estados accionables")}
-              </option>
-              {(
-                [
-                  "open",
-                  "follow_up",
-                  "waiting_design",
-                  "pending",
-                  "submitted",
-                  "in_review",
-                  "action_required",
-                  "scheduled",
-                ] as const
-              ).map((value) => (
+              <option value="all">{tr("All actionable Lens statuses", "Todos los estados accionables de Lens")}</option>
+              {(["open", "follow_up", "waiting_design"] as const).map((value) => (
                 <option key={value} value={value}>
                   {statusLabel(value, lang)}
                 </option>
               ))}
+            </select>
+          </label>
+          <label>
+            <span>{tr("Original source status", "Estado original de origen")}</span>
+            <select value={originalStatus} onChange={(event) => { setPage(1); setOriginalStatus(event.target.value); }}>
+              <option value="all">{tr("All original statuses", "Todos los estados originales")}</option>
+              {(["open", "follow_up", "waiting_design", "pending", "submitted", "under_review", "in_review", "revise_resubmit", "rejected", "in_progress", "blocked", "delayed", "scheduled"] as const).map((value) => <option key={value} value={value}>{statusLabel(value, lang)}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>{tr("Presentation status", "Estado de presentación")}</span>
+            <select value={presentationStatus} onChange={(event) => { setPage(1); setPresentationStatus(event.target.value); }}>
+              <option value="all">{tr("All presentation statuses", "Todos los estados de presentación")}</option>
+              {(["open", "follow_up", "waiting_design", "pending", "submitted", "in_review", "action_required", "scheduled"] as const).map((value) => <option key={value} value={value}>{statusLabel(value, lang)}</option>)}
             </select>
           </label>
           <label>
@@ -449,6 +768,22 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
                 {tr("No deadline", "Sin fecha límite")}
               </option>
             </select>
+          </label>
+          <label>
+            <span>{tr("Due from", "Vence desde")}</span>
+            <input type="date" value={dueFrom} onChange={(event) => { setPage(1); setDueFrom(event.target.value); }} />
+          </label>
+          <label>
+            <span>{tr("Due through", "Vence hasta")}</span>
+            <input type="date" value={dueTo} onChange={(event) => { setPage(1); setDueTo(event.target.value); }} />
+          </label>
+          <label>
+            <span>{tr("Meeting context", "Contexto de reunión")}</span>
+            <input type="number" min="1" inputMode="numeric" value={meetingId} onChange={(event) => { setPage(1); setMeetingId(event.target.value); }} placeholder={tr("Exact meeting ID", "ID exacto de reunión")} />
+          </label>
+          <label className="ccc-check-filter">
+            <input type="checkbox" checked={overdueOnly} onChange={(event) => { setPage(1); setOverdueOnly(event.target.checked); }} />
+            <span>{tr("Overdue only", "Solo vencidos")}</span>
           </label>
           <label>
             <span>{tr("Responsible company", "Empresa responsable")}</span>
@@ -491,7 +826,29 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
             />
           </label>
         </div>
+        <div className="ccc-active-summary" aria-label={tr("Active filter summary", "Resumen de filtros activos")}>
+          <strong>{tr("Active", "Activos")}:</strong>
+          {activeFilterSummary.map((value, index) => <span key={`${value}-${index}`}>{value}</span>)}
+        </div>
       </div>
+
+      {savedViewError && (
+        <div className="ccc-alert ccc-alert-error" role="alert">
+          <AlertTriangle size={18} /><div><strong>{tr("Personal views unavailable", "Vistas personales no disponibles")}</strong><span>{savedViewError}</span></div>
+          <button type="button" onClick={() => void loadSavedViews()}><RefreshCw size={13} /> {tr("Retry", "Reintentar")}</button>
+        </div>
+      )}
+
+      {builtInView === "next_coordination_meeting" && data?.meetingContext.status === "failed" && (
+        <div className="ccc-alert ccc-alert-warning" role="alert">
+          <AlertTriangle size={18} /><div><strong>{tr("Meeting context unavailable", "Contexto de reunión no disponible")}</strong><span>{tr("The next canonical meeting could not be resolved. Results are intentionally empty and partial.", "No se pudo resolver la próxima reunión canónica. Los resultados están vacíos y parciales intencionalmente.")}</span></div>
+          <button type="button" onClick={() => setRetryKey((value) => value + 1)}><RefreshCw size={13} /> {tr("Retry", "Reintentar")}</button>
+        </div>
+      )}
+
+      {builtInView === "next_coordination_meeting" && data?.meetingContext.status === "ok" && (
+        <div className="ccc-meeting-context"><CalendarClock size={14} /><span><strong>{data.meetingContext.title}</strong> · {formatDate(data.meetingContext.meetingAt)}</span></div>
+      )}
 
       {partialSources.length > 0 && (
         <div className="ccc-alert ccc-alert-warning" role="alert">
@@ -581,10 +938,9 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
             )}
           </strong>
           <span>
-            {tr(
-              "This is an honest filtered result. The register does not fall back to all records.",
-              "Este es un resultado filtrado real. El registro no vuelve a mostrar todos los registros.",
-            )}
+            {builtInView === "next_coordination_meeting" && data.meetingContext.status === "none"
+              ? tr("No future canonical meeting is available. The view remains empty.", "No hay una reunión canónica futura disponible. La vista permanece vacía.")
+              : tr("This is an honest filtered result. The register does not fall back to all records.", "Este es un resultado filtrado real. El registro no vuelve a mostrar todos los registros.")}
           </span>
         </div>
       )}

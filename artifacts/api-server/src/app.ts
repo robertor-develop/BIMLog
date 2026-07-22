@@ -14,6 +14,7 @@ import { startFinancialControlMigration } from "./lib/financial-control-migratio
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
 import { ensureLivingBriefGateSchema, ensureLivingBriefMirrorSchema } from "./lib/living-brief-migration";
+import { startCoordinatorSavedViewMigration } from "./lib/coordinator-saved-view-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE = process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -39,6 +40,15 @@ console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
 console.log("========================================");
 
 const app: Express = express();
+
+(async () => {
+  try {
+    await startCoordinatorSavedViewMigration();
+    console.log("[migration] coordinator saved views ensured");
+  } catch {
+    console.error("[migration] coordinator saved view migration failed");
+  }
+})();
 
 app.disable("etag");
 app.set("trust proxy", 1);
