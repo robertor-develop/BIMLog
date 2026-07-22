@@ -2,7 +2,34 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
-## Current terminal truth - 2026-07-21
+## Current terminal truth - 2026-07-22
+
+### Built-asset lifecycle operating network roadmap validation
+
+- Roberto approved recording the long-term BIMLog roadmap from construction coordination to verified construction
+  record, asset passport, maintenance obligation engine, condition/IoT events, controlled work orchestration,
+  contractor/supplier network, executable contract rules, and circular-material recovery network. This is approved
+  strategy, not implemented product.
+- Validate market assumptions before using them in pricing, fundraising, sales, or product commitments: World Bank
+  world GDP baseline, buildings/construction context, BIM-connected activity percentages, governed-value scenarios,
+  asset value under management, O&M spend orchestrated, willingness to pay, effective take rates, and business-model
+  mix. Do not canonize "3% of world GDP uses BIM" until independently verified.
+- Research standards and interoperability implications before implementation: ISO 19650 operations/handover,
+  ISO 55000/55001 asset management, IFC, COBie, IDS, ICDD, data templates/dictionaries, IoT/BMS/CMMS interfaces,
+  cybersecurity/privacy obligations, contractor qualification, insurance, licensing, payment/settlement, warranty,
+  waste/recycling, carbon, and regional compliance.
+- Pilot discovery required: owner/operator interviews, Ruben field feedback generalized beyond customer-specific
+  needs, asset-passport sample data, warranty/SLA obligation examples, manual inspection workflows, contractor/
+  supplier matching constraints, circular-material recovery evidence, and legal/regulatory review.
+- Near-term product constraint: keep current construction coordination excellence, verified records, handover
+  foundations, and short evidence-backed releases first. Do not start IoT, marketplace, blockchain, payment,
+  provider, production, or schema implementation from this roadmap without a separate scoped directive and
+  capability preflight.
+- Organizational excellence and adoption validation required: verify the current EFQM model/version before any
+  formal adoption claim; confirm Prosci ADKAR trademark/licensing/training/use boundaries before branded templates,
+  commercialization, certification claims, or copied proprietary content; decide which ASQ-recognized tools belong in
+  BIMLog's quality toolkit; define PDCA/PHVA pilot templates; test whether customer pilots actually achieve ADKAR
+  adoption outcomes instead of only shipping software.
 
 ### Coordinator Command Center Build 2 accepted in source; push verification pending
 

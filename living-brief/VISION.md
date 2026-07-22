@@ -21,6 +21,190 @@ coordination, document, RFI, submittal, field, and handover data is messy. BIMLo
 making that data clean, traceable, simple to use, and useful before the owner ever asks for
 a full digital twin.
 
+## Built-asset lifecycle operating network north star
+
+Roberto's approved long-term strategy is for BIMLog to grow from construction coordination into
+the trusted operating, contractual, maintenance, commercial, and circular-economy infrastructure
+for built assets across their complete lifecycle. BIMLog must therefore not be described merely as
+a BIM coordination application. The staged path is:
+
+construction coordination -> verified construction record -> asset passport -> maintenance
+obligation engine -> condition/IoT events -> controlled work orchestration -> contractor/supplier
+network -> executable contract rules -> circular-material recovery network.
+
+The indispensable operations wedge is **BIMLog Asset Passport + Maintenance Obligation Engine**.
+For each installed asset, the future platform should connect canonical BIM/model identity and
+exact location; manufacturer, model, serial, specifications, submittals, approvals, installation,
+commissioning, and evidence; contract, warranty, SLA, maintenance schedule, and responsible party;
+condition from inspection, technician, occupant, and IoT evidence; required labor, qualifications,
+parts, and materials; approved contractor/supplier eligibility, geography, availability, lead time,
+and contract pricing; human authorization thresholds; work order, dispatch, evidence, inspection,
+acceptance, warranty, and payment eligibility; and replacement, deconstruction, reuse, resale,
+recycling, disposal, and chain-of-custody evidence.
+
+Executable contracts mean auditable rules and obligations first, not a blockchain-first promise.
+Distributed ledgers or blockchain are optional future infrastructure only where multi-party
+provenance or trust justifies them. Initial executable rules must not autonomously transfer money,
+control safety-critical equipment, or silently make AI contractual authority. Human approval remains
+based on authority, risk, value, and asset criticality; deterministic permissions, audit, rollback,
+idempotency, and evidence are mandatory. AI may recommend, extract, monitor, and orchestrate, but
+cannot become the contractual authority without explicit approval and controls.
+
+The future circular-economy graph is: model element -> approved product/submittal -> manufacturer
+and material composition -> procurement/cost -> delivery/installation -> embodied-carbon or other
+environmental evidence -> maintenance/replacement -> deconstruction -> reuse/resale/recycling/
+disposal -> certificates and recovered value. Future matching may include contractors, recyclers,
+logistics, chain of custody, waste diversion, carbon avoided, salvage value, and compliance evidence.
+
+### Lifecycle roadmap stages
+
+| Stage | Entry criterion / capability gate | Deliverables | Exit / KPIs | Human approval and non-automation boundary |
+| --- | --- | --- | --- | --- |
+| 0. Construction coordination foundation | Current modules keep clean canonical records, bilingual UI, exports, audit, and source/release discipline. | RFIs, Submittals, Meetings, Schedule, Lens/Navisworks, Finance, Telegram, Plans/Entitlements, Living Brief governance. | Fewer duplicate records, clean exports, accepted evidence gates, customer field feedback. | Do not automate deployment, production data, payments, safety controls, or customer-specific hardcoding. |
+| 1. Construction-to-operations handover and asset passports | Verified construction records can produce owner-ready asset seeds. | Asset identity model, location/system mapping, submittal/commissioning/document links, handover package. | Verified asset-passport count, completeness score, owner review outcomes. | Do not claim owner CMMS/digital-twin replacement or asset-management-system conformity. |
+| 2. Warranty, SLA, and maintenance obligation engine | Contracts/warranties can be converted into reviewable obligations. | Obligation register, responsible party, due dates, evidence requirements, exception workflow. | Obligations detected, warranty value at risk/recovered, SLA compliance. | No legal conclusion or payment eligibility without human authority. |
+| 3. Manual inspection and controlled condition/event intake | Human field evidence can update asset condition. | Inspection forms, photos/files, technician/occupant reports, condition history. | Condition events accepted, defect response time, avoided duplicate inspections. | No autonomous dispatch, equipment control, or safety-critical classification. |
+| 4. Provider-neutral IoT/BMS/CMMS integration | External events are normalized without provider lock-in. | Connector registry, event schema, identity matching, retry/audit, health monitoring. | Matched event rate, false-match rate, connector uptime, security incidents. | No direct control of equipment; ingestion only until safety review approves more. |
+| 5. Maintenance planning, work orders, approvals, evidence, closeout | Obligations and condition events can produce controlled work packages. | Work orders, approvals, dispatch-ready packet, closeout evidence, inspection/acceptance. | Work orders completed, SLA/downtime improvement, closeout completeness. | No unapproved contractor dispatch, spend commitment, or acceptance of work. |
+| 6. Qualified contractor and supplier network | Providers can be qualified and matched by scope/geography/availability. | Qualification, insurance/license evidence, coverage map, parts/materials availability, pricing references. | Network liquidity, response time, quote coverage, completion quality. | No marketplace favoritism, unverified credentials, or automatic award. |
+| 7. Executable contract rules and commercial eligibility | Rules evaluate obligations, evidence, exceptions, and approval thresholds. | Rule engine, eligibility states, exception handling, audit replay, settlement-readiness reports. | Rule accuracy, dispute reduction, audit replay success, exception resolution time. | No autonomous money movement, lien/claims/legal action, or safety override. |
+| 8. Predictive maintenance and portfolio optimization | Historical/condition data can recommend prioritized intervention. | Risk models, portfolio dashboards, forecast explanations, scenario planning. | Failures avoided, downtime avoided, cost avoided, model calibration. | Prediction is advisory until validated; no silent schedule or spend changes. |
+| 9. Material passports, deconstruction planning, circular recovery marketplace | Asset/material identity supports reuse, resale, recycling, disposal, and certificates. | Material passport, deconstruction plan, recycler/contractor matching, chain-of-custody, certificates. | Material reused/recycled, waste diverted, recovered value, carbon avoided. | No environmental, compliance, or resale claim without evidence and authority. |
+| 10. Multi-region ecosystem scaling, standards interoperability, benchmarking | Repeatable lifecycle data works across regions, owners, and standards profiles. | Interoperability profiles, benchmarking, regional rule packs, governance services. | Retention, governed value, gross margin, benchmark confidence, compliance evidence. | No cross-region legal/regulatory claim without local expert review. |
+
+Key dependencies and principal risks by stage:
+
+| Stage | Key dependencies / prerequisites | Principal risks / failure modes |
+| --- | --- | --- |
+| 0 | Stable current modules, canonical identity, evidence discipline, bilingual UX, clean release workflow, customer feedback loop. | Shipping disconnected modules, dirty data, weak evidence, duplicate tasks, cost-producing validation churn, or customer-specific hardcoding. |
+| 1 | Asset identity schema, location/system conventions, submittal/commissioning evidence, owner handover samples, standards mapping. | Incomplete asset identity, document-only handover, owner rejection, false digital-twin/CMMS claims, unusable data quality. |
+| 2 | Contract/warranty/SLA examples, obligation vocabulary, responsible-party model, legal review, exception workflow. | Treating extracted text as legal truth, missed obligations, duplicate obligations, unapproved warranty/payment claims. |
+| 3 | Field inspection workflow, mobile evidence, roles/permissions, condition taxonomy, offline/retry behavior. | Unsafe condition classification, poor photo/evidence custody, technician friction, silent overwrites of verified records. |
+| 4 | Provider-neutral connector model, security review, identity matching, test fixtures, customer-approved systems. | Vendor lock-in, false asset matches, noisy/untrusted telemetry, privacy exposure, direct control before safety approval. |
+| 5 | Obligation/event intake, approval matrix, contractor/provider data, closeout evidence rules, audit and rollback. | Unauthorized dispatch, spend commitment, weak closeout evidence, SLA disputes, acceptance without inspection. |
+| 6 | Qualification evidence, insurance/license checks, geography/availability data, pricing references, neutrality/conflict controls. | Marketplace bias, unverified providers, low liquidity, poor quality, unclear responsibility, regulatory/insurance gaps. |
+| 7 | Versioned rule model, deterministic permissions, replayable audit, exception handling, commercial/legal review. | Autonomous money movement, rule ambiguity, bad inputs, hidden AI authority, non-replayable decisions, legal exposure. |
+| 8 | Sufficient history, calibrated models, explainability, portfolio baselines, owner objectives. | False prediction confidence, optimization against wrong metrics, hidden bias, unapproved spend/schedule changes. |
+| 9 | Material/product composition data, deconstruction partners, logistics, certificate authority, environmental methodology. | Unsupported carbon/waste claims, broken chain of custody, poor recovery economics, regulatory mismatch, greenwashing. |
+| 10 | Standards profiles, regional legal review, scalable governance, benchmark definitions, enterprise controls. | Premature international claims, incomparable benchmarks, privacy/data-residency gaps, standards overclaiming, operational complexity. |
+
+Planning horizons are hypotheses, not delivery promises: 0-12 months emphasizes construction
+coordination excellence, trusted records, handover foundations, and pilot discovery; 12-24 months
+targets asset passports, obligations, manual condition events, and first owner/operator pilots;
+24-48 months targets IoT/CMMS integrations, work orchestration, and qualified provider pilots;
+48-72 months targets controlled executable contracts, predictive operations, and network economics;
+72+ months targets circular recovery, cross-owner ecosystem effects, and international scale. Each
+horizon depends on evidence, capacity, funding, customer pull, legal/regulatory review, and safety gates.
+
+### Market and economic scenarios to validate
+
+These figures are planning scenarios, not promises or accepted pricing. World Bank WDI API
+`NY.GDP.MKTP.CD` for `WLD`, queried 2026-07-22, reported source last update 2026-07-13 and latest
+world GDP values of about $118.35T for 2025 and $111.67T for 2024. UNEP's 2024 Global Status
+Report for Buildings and Construction context records buildings/construction as material to global
+emissions and energy demand; EPA records 600 million tons of U.S. construction and demolition debris
+generated in 2018; WBDG/DOE facility guidance emphasizes that operations and maintenance are a major
+facility-lifecycle responsibility. O&M cost ranges such as 60-85% must remain cited-context ranges,
+not universal 90% claims.
+
+Do not canonize "3% of world GDP uses BIM" until independently verified. Using the sourced 2025
+world-GDP context of approximately $118.35T, the transparent planning math is:
+
+| Scenario | Formula | Rounded governed-value output |
+| --- | --- | --- |
+| Conservative | $118.35T x 1% BIM-connected activity x 1% BIMLog penetration | approximately $11.835B |
+| Base | $118.35T x 3% x 1% | approximately $35.505B |
+| Stretch | $118.35T x 5% x 1% | approximately $59.175B |
+
+The provisional $30B North Star and $50B stretch goal are deliberately rounded planning targets,
+not forecasts, valuation, booked value, or accepted sales commitments. They sit inside the scenario
+range so planning can stay ambitious without pretending precision.
+
+Keep **governed value**, **asset value under management**, **O&M spend orchestrated**, and **BIMLog
+revenue** separate. Monetization sensitivity is a hypothesis table only:
+
+| Governed value scenario | 0.10% | 0.25% | 0.50% | 1.00% |
+| --- | ---: | ---: | ---: | ---: |
+| $30B governed value | $30M | $75M | $150M | $300M |
+| $50B governed value | $50M | $125M | $250M | $500M |
+
+These outputs are not revenue forecasts, accepted pricing, valuation, or booked revenue. Base
+planning may use 0.25% and stretch 0.50% only as hypotheses subject to customer discovery,
+willingness to pay, unit economics, retention, gross margin, and business-model validation.
+
+Business-model options to validate include construction/project subscriptions; owner/operator
+portfolio subscriptions; per active site/asset tiers; handover and asset-passport services;
+IoT/BMS/CMMS/ERP integration; compliance, audit, and warranty recovery; contractor/supplier
+network fees; controlled work-order transaction fees; circular material recovery and verification
+fees; and enterprise/private deployment and data-governance services. No price, take rate, or
+contract form is accepted until discovery and unit economics support it.
+
+### Organizational excellence and adoption operating model
+
+BIMLog's lifecycle roadmap should combine organizational excellence principles, continuous improvement,
+change adoption, and recognized quality-management practices without implying certification, endorsement,
+licensing, partnership, or current implementation.
+
+- **EFQM:** organization-level excellence lens. Use EFQM to ask whether direction, execution, stakeholder
+  value, transformation, performance, and results are aligned. EFQM is not BIMLog product certification, not
+  a substitute for project or technical standards, and not a conformity claim. Verify the current official model
+  and version at https://efqm.org/the-efqm-model/ before any formal adoption claim.
+- **PHVA / PDCA:** PHVA (Planificar-Hacer-Verificar-Actuar) is the Spanish expression of PDCA (Plan-Do-Check-Act).
+  Use it as the process-level continuous-improvement cycle: plan a bounded change, test it, verify evidence/results,
+  then standardize/correct and repeat. ASQ's PDCA reference at https://asq.org/quality-resources/pdca-cycle informs
+  the concept; BIMLog does not own PDCA and ASQ does not certify BIMLog's use.
+- **Prosci ADKAR:** individual change-adoption lens: Awareness, Desire, Knowledge, Ability, Reinforcement. Use the
+  official reference at https://www.prosci.com/methodology/adkar to plan and measure whether coordinators,
+  owners, operators, contractors, suppliers, and field teams actually
+  adopt a BIMLog capability. ADKAR is a Prosci model/trademark; branded operational templates, commercialization,
+  training, certification claims, or copied proprietary content require licensing/trademark/training/use review.
+- **ASQ-recognized practices:** ASQ is a professional quality body/resource authority, not a single competing
+  framework. ASQ-recognized tools and bodies of knowledge may inform root-cause analysis, process measurement,
+  corrective/preventive action, statistical thinking, and evidence discipline. Do not claim ASQ endorsement,
+  certification, partnership, or conformity.
+
+Layered use for lifecycle pilots and releases:
+
+| Layer | BIMLog question |
+| --- | --- |
+| EFQM | Are organizational direction, execution, stakeholder value, and results aligned? |
+| PHVA/PDCA | Are processes improved through bounded evidence-backed cycles? |
+| ADKAR | Are affected individuals aware, willing, knowledgeable, able, and reinforced? |
+| ASQ-recognized practices | Are quality methods, measurements, analysis, corrective action, and evidence rigorous? |
+| BIMLog canonical records | Can every decision, change, adoption result, and improvement outcome be traced to authoritative evidence? |
+
+Apply the model before, during, and after each lifecycle roadmap pilot: before, define the EFQM-aligned objective,
+stakeholder outcome, and ADKAR readiness baseline; during, run a bounded PDCA implementation with quality measures
+and evidence; after, verify operational KPI, adoption outcome, corrective action, reinforcement, and standardized
+accepted practice. Failed adoption must not be mislabeled as product success merely because software shipped.
+
+### North-star metrics
+
+Metrics must be non-overlapping and anti-double-counted:
+
+- **Annual Project Value Under Governance:** current-year construction/project contract value for
+  projects whose records are governed by BIMLog. Source: project contract/budget authority. Do not
+  double-count the same project across modules.
+- **Annual Asset Value Under Management:** owner-approved replacement or insured value of assets
+  with active BIMLog asset passports. Source: owner/asset register. Update at portfolio review.
+- **Annual O&M Spend Orchestrated:** approved maintenance/work-order spend routed through BIMLog
+  workflows. Source: approved work orders/invoices. Exclude project capex already counted above.
+- **Verified asset passports:** assets with required identity, location, document, commissioning,
+  obligation, and evidence fields complete. Source: asset-passport completeness gate.
+- **Active buildings/sites/assets:** active entities with current governance, not archived history.
+- **Maintenance obligations detected:** unique obligations extracted/entered and accepted by an
+  authorized human. Do not count drafts or duplicates.
+- **SLA compliance:** obligations completed within approved SLA, measured per obligation class.
+- **Downtime and failures avoided:** estimated only where baseline, method, and confidence are recorded.
+- **Warranty value recovered:** money/credit accepted under warranty; exclude merely identified claims.
+- **Work orders completed:** accepted closeouts with evidence, inspection, and authorization.
+- **Contractor/supplier network liquidity:** qualified provider coverage, response rate, quote depth,
+  completion quality, and geographic availability.
+- **Material reused/recycled and waste diverted:** measured by certificate/weight/value evidence.
+- **Recovered financial value and carbon avoided:** scenario-based unless supported by verified method.
+- **Recurring revenue, retention, gross margin, and effective monetization:** finance authority owns
+  definitions and cadence; never mix with governed project value.
+
 ## 10D connected-record direction and delivery boundaries
 
 BIMLog's approved direction extends the verified construction record across BIGDOTS 4D-through-10D+

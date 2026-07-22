@@ -1,14 +1,18 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
+  "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "2f7db361b22db7d9a84fd92378dea96bb1dbe53b8a9604257937c2bcaab08a48",
+  "bundleSha256": "db17d78d02a7fa007972a8ec4512e7521f08029958e39c934defa0ac2eb95394",
   "impact": {
-    "baselineCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
+    "baselineCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
     "changedPaths": [
+      "living-brief/AUDIT.md",
+      "living-brief/CLAUDE.md",
+      "living-brief/ECOSYSTEM_DOCTRINE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
+      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
+      "living-brief/VISION.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -21,62 +25,62 @@
     {
       "key": "ecosystem_doctrine",
       "file": "ECOSYSTEM_DOCTRINE.md",
-      "sha256": "95fc786414057f0a9eb5ccc7aef636458e779bfc74648a0ccfa4f36934e7ada0",
-      "sourceChangedAt": "2026-07-21T13:36:32-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "deadf4105bc28ab666d379299aa44e178cf462a171f37f6910fe787c15cced9c",
-      "sourceChangedAt": "2026-07-21T20:15:13-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "4681e2365fd115664a7f8f850aa30cc21134d06be2d9a9756cf13ba465888292",
-      "sourceChangedAt": "2026-07-21T20:15:13-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "vision",
       "file": "VISION.md",
-      "sha256": "6b4ba280e7b08d6579fdef263bfc0f7f0823bcce5fc08fffdfb0fbc7d8f2740c",
-      "sourceChangedAt": "2026-07-21T13:36:32-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "0fc8f4b414a07685fba62045d663889c1655211c0011b82776c9dba28932ee2f",
-      "sourceChangedAt": "2026-07-22T01:59:07.794Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sourceChangedAt": "2026-07-21T22:03:27-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "plugin",
@@ -84,11 +88,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +100,11 @@
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "standards_register",
@@ -108,47 +112,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "396d173fa512725767d3e0a702fd074ae2a0346f8bdc635e1e025059d12f6e75",
-      "sourceChangedAt": "2026-07-22T01:59:07.794Z",
+      "sha256": "ec9c0f63cf3c4f0c690eb3628ae180aca392dafff16d9910f0f4c1ad1b853e73",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "3c9d6159572ef0d8a4452891b7466db593bb5fffd8024b9ab7bf5d83771ed8e1",
-      "sourceChangedAt": "2026-07-22T01:59:07.794Z",
+      "sha256": "328c2b2b0a33ee58f96dd62db2b5b7104d6f7fb4cffa3bcf8c8f3e26fb87a7d3",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "db3b1b38acf7c259d98db23bed00d7f813ac99ee3b02d2971993bb570ed44539",
-      "sourceChangedAt": "2026-07-21T20:31:04-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewedThroughCommit": "4572882561684bbfe6472a6a0ecca414a4d4f152",
-      "semanticReviewTask": "coordinator-command-center-build-2-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T01:59:07.794Z"
+      "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
+      "sourceChangedAt": "2026-07-22T18:38:38.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
+      "semanticReviewTask": "built-asset-lifecycle-operating-network-roadmap",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T18:38:38.000Z"
     }
   ]
 }

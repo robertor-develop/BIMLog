@@ -262,6 +262,35 @@ or acceptance of an automatic checkpoint as history. If publish-only evidence id
 Replit diagnoses and reports, then stops. A controlled local task implements, reviews, and pushes the correction;
 Replit pulls that verified commit and retries. An exception needs Roberto's explicit scoped approval after preflight.
 
+### AI CEO / lifecycle-network execution boundary
+
+BIMLog's approved lifecycle-network roadmap uses Roberto, the master orchestrator, focused product agents,
+research/market agents, security/privacy/quality agents, and human experts as a controlled execution system.
+Roberto retains strategic, financial, legal, safety, production, credential, publish/deploy, and external-action
+authority. No agent may convert a roadmap hypothesis, market scenario, AI recommendation, or executable-rule draft
+into a contractual, financial, safety, production, or customer-facing action without explicit authority.
+
+The master/orchestrator maintains canonical priorities, dependencies, conflict maps, evidence, handoffs, and Living
+Brief reconciliation. Focused product agents build bounded capabilities only after reading the current source and
+governing authorities. Research/market agents validate assumptions, regulations, standards, customer pull, pricing,
+unit economics, and partner requirements before a roadmap claim becomes implementation scope. Security, privacy, and
+quality agents enforce authorization, tenancy, evidence, metric integrity, deployment, and terminal-notification
+gates. Customer feedback from Ruben and future users must be generalized into reusable capabilities; it must not
+become customer-specific hardcoding unless Roberto explicitly approves a scoped exception.
+
+Autonomous action expands only after evidence, controls, reversible scope, and explicit approval. Existing-task-first,
+task/repository preflight, capability preflight, cost-control validation modes, bounded evidence, and terminal-turn
+Telegram notification remain mandatory for lifecycle-roadmap work. Future Replit or Codex instructions for roadmap
+implementation must state the exact task owner, phase, repository, allowed files, stop conditions, validation mode,
+operator-only steps, and terminal summary/notification requirement before paid work begins.
+
+Lifecycle roadmap agents must preserve organizational-excellence and adoption boundaries. EFQM, PHVA/PDCA, Prosci
+ADKAR, and ASQ resources may guide strategy, continuous improvement, adoption planning, and quality analysis, but an
+agent may not claim certification, endorsement, partnership, licensing clearance, or implemented methodology from
+reference text. Before using branded templates, copied proprietary content, formal assessment language, training
+materials, or certification claims, create an explicit licensing/trademark/current-version review item and stop for
+Roberto's approval.
+
 ### Defensive security execution boundary
 
 BIMLog security work is authorized only when it is explicitly defensive, bounded, and limited to BIMLog-owned source

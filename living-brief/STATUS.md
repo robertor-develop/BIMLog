@@ -1,13 +1,20 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `4572882561684bbfe6472a6a0ecca414a4d4f152`
-Reconciliation date: 2026-07-21
+Accepted source reconciled through: `50ce892b51ef1696e6e47740d5e9f4977b6ebf24`
+Reconciliation date: 2026-07-22
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
 synchronization, and field/customer verification are separate states. The current semantic-content
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
+
+Roberto-approved built-asset lifecycle roadmap: approved strategy is being recorded for BIMLog's long-term expansion
+from construction coordination into verified construction records, asset passports, maintenance obligations,
+condition/IoT events, controlled work orchestration, contractor/supplier networks, executable contract rules, and
+circular-material recovery. This is roadmap authority only. No asset-passport module, maintenance engine, IoT/BMS/
+CMMS connector, marketplace, executable contract, payment/settlement, material passport, carbon accounting, or
+circular recovery behavior is implemented, deployed, or customer verified by this documentation build.
 
 Living Brief credential persistence and controlled recovery are accepted in source at
 `c3a7c809643022abb04b8fe58db043ccd5d828ff` after reconciliation onto Coordinator master

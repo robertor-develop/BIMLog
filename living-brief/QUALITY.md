@@ -316,6 +316,50 @@ ordinary app authentication plus transaction-time Super Administrator revalidati
 exact confirmation, bounded reason, rate limit, stale observed-version protection that does not grant document access,
 locking, atomic update/version increment, durable audit, rollback, and prior-session invalidation.
 
+### Built-asset lifecycle quality gate
+
+Lifecycle-roadmap work is documentation strategy until implemented evidence exists. Quality review fails any claim
+that BIMLog already provides asset passports, owner operations, IoT/BMS/CMMS integration, work dispatch, marketplace
+matching, executable contracts, payment settlement, material passports, carbon accounting, recycling verification, or
+asset-management-system conformity unless a named source scope, implementation, evidence, and acceptance record prove
+it.
+
+Future asset passports must preserve lifecycle-data provenance: canonical model/location identity, approved
+product/submittal links, commissioning evidence, warranties, SLAs, responsible parties, condition events, work
+history, replacement/deconstruction/recovery evidence, author, source, timestamp, confidence, and change history.
+Imported owner/operator/IoT/contractor data must be source-labeled and reconciled; it cannot silently overwrite the
+verified construction record.
+
+IoT, BMS, CMMS, ERP, and marketplace integrations are safety- and trust-sensitive. Initial connectors ingest and
+normalize events only. Direct equipment control, safety-critical action, contractor dispatch, spend commitment,
+legal notice, warranty claim, payment eligibility, or settlement requires explicit human approval, authorization,
+rollback behavior, idempotency, rate limiting, audit, privacy review, and field evidence. AI may recommend and
+explain but may not become contractual authority.
+
+Executable-rule quality requires deterministic inputs, versioned rules, replayable outcomes, exception states,
+human approval thresholds, conflict handling, and audit evidence. Blockchain/distributed-ledger anchoring is optional
+future infrastructure only after a multi-party trust requirement is proven; it is not a shortcut around permissions,
+privacy, rollback, or human authority.
+
+Marketplace and circular-economy quality require neutral eligibility, qualification, insurance/license evidence,
+geography, availability, lead time, contract price, conflict checks, chain-of-custody, certificates, and proof for
+waste diversion, recovered value, and carbon avoided. No unverified supplier, contractor, recycler, salvage, carbon,
+or compliance claim may be shown as accepted truth.
+
+North-star metric quality requires exact non-overlapping definitions, source system, owner, update cadence, and
+anti-double-count rules. Governed project value, asset value under management, O&M spend orchestrated, recovered
+value, avoided downtime, and BIMLog revenue are separate measures. Scenario percentages, take rates, and market
+figures remain hypotheses until supported by sourced data, customer discovery, unit economics, and acceptance.
+
+Organizational excellence and adoption quality requires a layered evidence model for lifecycle pilots and releases.
+EFQM-style questions test organization direction, execution, stakeholder value, and results alignment; PHVA/PDCA tests
+whether the change was planned, tried, checked with evidence, standardized or corrected, and repeated; ADKAR tests
+individual adoption through Awareness, Desire, Knowledge, Ability, and Reinforcement; ASQ-recognized practices inform
+rigorous measurement, analysis, root-cause/corrective action, and evidence discipline; BIMLog canonical records preserve
+traceability for every decision, change, adoption result, and improvement outcome. A shipped feature with failed user
+adoption is not a successful lifecycle release until adoption evidence, corrective action, and reinforcement are
+recorded.
+
 ### Immediate versus acceptance-time semantic evidence
 
 An immediate-category finding is part of the quality correction itself, not later documentation cleanup. Customer

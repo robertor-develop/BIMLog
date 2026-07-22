@@ -576,3 +576,70 @@ other remediation batch. The one persistent UI safety notice remains recorded as
 
 Final evidence must distinguish source integration and push from publication, deployment, production verification,
 and independent acceptance. SheetJS and Batches B-I remain deferred pending separate authorization.
+
+---
+
+## Organizational Excellence and Adoption Model Roadmap Audit - 2026-07-22
+
+Status: narrow amendment to the unpushed lifecycle-roadmap documentation candidate; no product behavior,
+certification, licensing, partnership, training, assessment, commercial template, production, customer-data, or
+credential change is made.
+
+Roberto approved preserving this operating principle: BIMLog combines organizational excellence principles,
+continuous improvement, change adoption, and recognized quality-management practices. The references are recorded as
+method lenses only. EFQM is an organization-level management/excellence framework for direction, execution, results,
+transformation, and performance improvement; it is not BIMLog product certification or a substitute for project or
+technical standards. PHVA is the Spanish expression of PDCA and is used as a bounded evidence-backed continuous
+improvement cycle. Prosci ADKAR is an individual change-adoption model; ADKAR is a Prosci model/trademark and branded
+use requires licensing/trademark/training/use review. ASQ is a professional quality body/resource authority; ASQ tools
+may inform quality methods, but no endorsement, certification, partnership, or conformity is claimed.
+
+Corrective roadmap control: future lifecycle pilots evaluate organization alignment (EFQM lens), process improvement
+(PHVA/PDCA), individual adoption (ADKAR), quality-method rigor (ASQ-recognized practices), and canonical BIMLog
+evidence. A release with failed adoption is not a successful product outcome merely because code shipped.
+
+---
+
+## Built-Asset Lifecycle Operating Network Roadmap Audit - 2026-07-22
+
+Status: Roberto-approved strategic roadmap documentation candidate; no application, schema, API, UI, IoT,
+marketplace, blockchain, payment, provider, production, customer-data, deployment, or credential behavior is
+implemented or changed by this audit.
+
+Roberto explicitly approved recording BIMLog's long-term expansion from construction coordination into a complete
+built-asset lifecycle operating, maintenance, commercial, and circular-economy network. The current product truth
+remains construction coordination and verified-record foundations. The strategic destination is staged:
+construction coordination -> verified construction record -> asset passport -> maintenance obligation engine ->
+condition/IoT events -> controlled work orchestration -> contractor/supplier network -> executable contract rules ->
+circular-material recovery network.
+
+Source and claim discipline recorded in this correction:
+
+- World Bank WDI API `NY.GDP.MKTP.CD` for `WLD`, queried 2026-07-22 at
+  `https://api.worldbank.org/v2/country/WLD/indicator/NY.GDP.MKTP.CD?format=json&per_page=5`, returned source
+  last update 2026-07-13 and latest values of about $118.35T for 2025 and $111.67T for 2024. These values are global
+  context only, not BIMLog TAM or revenue.
+- UNEP Global Status Report for Buildings and Construction, page dated 2024-03-07
+  (`https://www.unep.org/resources/report/global-status-report-buildings-and-construction`), was used only as
+  buildings/construction energy, emissions, and climate-context evidence. It does not prove BIM adoption, BIMLog
+  penetration, or pricing.
+- U.S. EPA Sustainable Management of Construction and Demolition Materials
+  (`https://www.epa.gov/smm/sustainable-management-construction-and-demolition-materials`) records U.S. C&D-material
+  context including 600 million tons generated in 2018 and next-use/landfill flows. This supports circular-material
+  recovery research only; it is not a BIMLog market-size claim.
+- WBDG/NIBS cost and value engineering guidance
+  (`https://www.wbdg.org/article/design-objectives/cost-effective/utilize-cost-value-engineering`) and U.S. DOE FEMP
+  O&M guidance (`https://www.energy.gov/cmei/femp/operations-and-maintenance-federal-facilities`) were used to
+  justify O&M as a lifecycle operating concern. Ranges such as 60-85% of facility lifecycle cost must remain
+  cited-context ranges with scope and source, not a universal 90% claim.
+
+Corrective distinction: current capability, approved roadmap, assumptions needing validation, and stretch vision are
+separate. Planning scenarios of 1%, 3%, or 5% BIM-connected global activity with 1% BIMLog penetration are hypotheses
+only. The provisional $30B annual project value under governance and $50B stretch goal are planning targets, not
+booked value. Monetization scenarios of 0.10%, 0.25%, 0.50%, and 1.00% of governed value require customer discovery,
+willingness-to-pay evidence, unit economics, and business-model validation before use as pricing or revenue truth.
+
+Permanent control: lifecycle-roadmap work must move through capability gates, customer pull, standards/regulatory
+research, legal/safety/privacy review, and short evidence-backed releases. The roadmap does not authorize simultaneous
+implementation of IoT, marketplace, executable contracts, blockchain, payment/settlement, production integrations, or
+circular-recovery claims.

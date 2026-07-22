@@ -100,6 +100,51 @@ identity, certification, or product equivalence.
   and Cost & Financial Control dimension connect through explicit project relationships and exact
   evidence; neither may infer authority, identity, approval, or value from labels alone.
 
+## Built-asset lifecycle network doctrine
+
+Roberto has approved BIMLog's long-term identity as the trusted operating, contractual,
+maintenance, commercial, and circular-economy infrastructure for built assets across their full
+lifecycle. This expands the strategic destination without changing current implementation truth.
+BIMLog's durable path remains staged: construction coordination -> verified construction record
+-> asset passport -> maintenance obligation engine -> condition/IoT events -> controlled work
+orchestration -> contractor/supplier network -> executable contract rules -> circular-material
+recovery network.
+
+The first operations wedge is the Asset Passport + Maintenance Obligation Engine. It must remain
+canonical-record driven: one installed asset identity links model/location, approved product and
+submittal evidence, commissioning, contract/warranty/SLA obligations, responsible party, condition
+evidence, work history, and eventual replacement/deconstruction/recovery evidence. Future owner,
+contractor, supplier, recycler, and marketplace functions must use this canonical graph rather
+than creating customer-specific duplicates.
+
+Marketplace neutrality and trust are permanent product laws for the lifecycle network. BIMLog may
+match contractors, suppliers, recyclers, logistics providers, or owner portfolios only through
+explicit eligibility, geography, availability, qualifications, price/contract evidence, human
+approval thresholds, audit, and conflict controls. BIMLog must not silently prefer an ecosystem
+party, present unverified qualifications as accepted, or turn AI recommendations into contractual
+authority.
+
+Executable contracts mean auditable business rules and obligations first. Blockchain or distributed
+ledger anchoring is optional future infrastructure only where multi-party provenance justifies it;
+it is not a current product claim. The initial doctrine forbids autonomous money movement,
+autonomous safety-critical equipment control, and AI-only contractual decisions. Human authority,
+rollback, idempotency, deterministic permissions, and evidence remain mandatory.
+
+The circular-economy direction extends the verified record into a future material passport and
+recovery graph: model element -> approved product/submittal -> manufacturer/material composition
+-> procurement/cost -> delivery/installation -> environmental evidence -> maintenance/replacement
+-> deconstruction -> reuse/resale/recycling/disposal -> certificates and recovered value. Claims
+about waste diversion, carbon avoided, salvage value, or compliance require traceable evidence and
+qualified review; roadmap intent alone is not evidence.
+
+Organizational excellence and adoption are part of the lifecycle network, but they remain method lenses rather than
+product certifications. EFQM may inform organization-level direction/execution/results thinking; PHVA/PDCA may inform
+bounded continuous-improvement cycles; Prosci ADKAR may inform individual adoption readiness and reinforcement; and
+ASQ-recognized practices may inform quality tools, root-cause analysis, measurement, corrective action, and evidence
+discipline. These references do not make BIMLog EFQM-assessed, Prosci-certified, ASQ-endorsed, or compliant with any
+standard. Formal branded use, assessment, certification, training, or copied proprietary material requires separate
+review and approval.
+
 ## BIMLog's permanent product laws
 
 1. **Human authority.** BIMLog logs, preserves, connects, and presents the record; it does not
