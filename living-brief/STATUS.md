@@ -54,7 +54,7 @@ is reserved for genuine completion.
   Register Excel. Build 8 has not started.
 - Telegram Product Builds 1-5: secure account linking, controlled AI foundations, bilingual
   assistant/support, Delivery Concierge foundation, user preferences, reliable outbox, and Notification
-  Center. Module adapters shown as coming later remain unavailable; Build 6 has not started.
+  Center. Module adapters shown as coming later remain unavailable.
 - Plans, Entitlements, and Feature Controls Steps 1-2: advisory catalog/resolver,
   company/project/user policies and preferences, support matrix, and append-only project-company history.
   Step 3 has not started; tiered billing and add-ons remain approved direction rather than shipped enforcement.
@@ -125,6 +125,9 @@ is reserved for genuine completion.
 - Replit verified pull of `178462e`, actual 12-table preview, explicitly approved publish, runtime/mirror
   reconciliation, and deployed browser verification.
 - Navisworks v1.60.18: Ruben 2025 field acceptance pending.
-- RFI Build 8, Telegram Build 6, Entitlements Step 3, Meeting Minutes M5, and Finance Build 3: not started.
+- Telegram Product Build 6: clean integration accepted locally on current master with 38/38 final built-runtime
+  evidence. It adds only the deterministic RFI notification adapter and saved-RFI contextual controls on the
+  Build 5 foundation; normal push verification remains pending, and nothing was published or deployed.
+- RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 3: not started.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.

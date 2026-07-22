@@ -193,6 +193,12 @@ otherwise use Info/Blocked/Failed/Needs Input with a clear terminal outcome and 
 separate stopped work cycles and may each notify once with different EventIds. Do not send periodic noise while work
 continues. If delivery is blocked, the final response prominently states the exact non-sensitive blocker.
 
+Telegram Product Build 6 evidence uses the real built API and production UI components against the existing
+isolated localhost `bimlog_rfi_test` harness only. Its deterministic RFI adapter must prove durable source-event
+idempotency, delivery-time authorization/preference/watch rechecks, restart/no-resend behavior, bilingual desktop
+and 390px browser behavior, privacy, cleanup, and zero automatic AI use. Local evidence can make a candidate Ready
+for independent review; it cannot mark the build accepted, pushed, published, deployed, or customer-verified.
+
 ### Mandatory capability preflight
 
 Before work needing Git writes, deployment controls, production-schema inspection, external notifications,

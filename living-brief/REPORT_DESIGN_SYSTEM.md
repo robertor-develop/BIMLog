@@ -122,6 +122,10 @@ Phase 2 did not change database schema, filters, report record selection, or mod
 - RFI Register Excel is the accepted four-sheet workbook (Register, Responses, Attachments, Distribution),
   driven by active normalized filters. Numeric cost/day values remain numeric, formula-like text is inert, and
   current custody comes only from the open canonical history row.
+- Telegram Product Build 6 does not alter any RFI report model, bytes, naming, fidelity, or authorization.
+  A successful Complete RFI Package response records one deterministic notification source event only after the
+  existing package pipeline succeeds; a failed package response records no success event and no report content is
+  copied into the notification adapter.
 
 ## Delivery boundary
 

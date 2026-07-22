@@ -191,6 +191,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/telegram-product-notifications.ts
 - artifacts/api-server/src/lib/telegram-product-provider-broker.ts
 - artifacts/api-server/src/lib/telegram-product.ts
+- artifacts/api-server/src/lib/telegram-rfi-notifications.ts
 
 ## Agents (artifacts/api-server/src/agents)
 - artifacts/api-server/src/agents/base-agent.ts

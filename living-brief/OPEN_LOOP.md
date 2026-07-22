@@ -914,6 +914,33 @@ Deferred:
 - Clean-integration evidence passed 132/132 against `127.0.0.1:55432/bimlog_rfi_test`, a loopback Telegram provider, the real built API, and real Chrome desktop plus 390px mobile runs. Evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-5-integration\20260716T221823Z`; manifest SHA-256 `1e55d7b7a6119e916351ab143895a3dd9eb1a87ce7faa6c80cc4788e47dfb52a`. Focused regressions passed Plans/Entitlements 41/41, Navisworks import contract 15/15, Telegram Build 3 30/30, and Telegram Build 4 79/79. The first Build 3 regression attempt encountered its known competing-worker claim timing race; its cleanup completed, and the clean rerun passed with delivered-message identity and attempt count unchanged across restart.
 - Production validation passed `git diff --check`, mojibake, Living Brief, typecheck, and build gates. The production build alone regenerated `PLATFORM.md`; it records both the preserved Navisworks import files and the new notification foundation. Privacy/secret scanning passed, and all uniquely timestamped identities created by this integration evidence were removed. Nothing was published, and Telegram Product Build 6 was not started.
 
+### Telegram Product Build 6 - Deterministic RFI Notification Adapter And Contextual Controls
+
+- Clean integration accepted locally, replayed as an audited authorized delta onto authoritative accepted master
+  `7cc8447876a731c95771bb6e07ca827202d90ce7`; the preserved older-baseline worktree and unrelated main checkout
+  were not reset, cleaned, stashed, rebased, or pushed.
+- RFI lifecycle actions record durable, idempotent source events in the same database transaction as the accepted
+  RFI change. A separate worker fans eligible recipients into the existing Build 5 outbox; RFI routes never deliver
+  directly, and deterministic notification processing performs zero automatic AI calls or charges.
+- Delivery eligibility is rechecked against current project membership, authorization, Telegram connection,
+  global/channel/module/event/project preferences, watch state, quiet hours, frequency, overdue cadence, and
+  current outbox state. Unknown or delivered attempts are not resent after restart.
+- The canonical Notification Center owns RFI module frequency. Saved RFI records alone expose contextual
+  watch/unwatch and inherited/effective behavior using the same APIs and settings; unsaved RFIs expose no control.
+  Submittals, Schedule, Change Orders, Transmittals, Lens, and Files remain visibly unavailable/Coming Later.
+- Final local evidence passed 38/38 with zero failures against the safely verified isolated database
+  `bimlog_rfi_test` at `127.0.0.1:55432`. It exercised the built API, real loopback Telegram HTTP acknowledgements,
+  durable transaction rollback, duplicate/concurrent processing, delivery-time authorization and preference
+  changes, quiet hours, immediate/daily/weekly/off behavior, restart recovery without resend, Build 5 outbox
+  regression, zero AI use, English desktop UI, Spanish 390px UI, privacy, and tag-scoped cleanup.
+- Integration evidence corrected the browser fixture's response handling and made its quiet-hours proof stable across
+  the UTC midnight boundary. Final evidence: `C:\Dev\bimlog-tools\evidence\telegram-product-build-6-integration\20260722T000230Z`;
+  manifest SHA-256 `2bbfeaa3e635aff72b2032295d36ecbf3ce1e0df3237d2d2aa455b21ab6f36d6`.
+- Clean integration commit `fdfbdd490ba58ad5070b94c580d374d31007d808` has direct parent
+  `7cc8447876a731c95771bb6e07ca827202d90ce7`. Final repository validation passed; normal push verification remains.
+  Nothing was published or deployed, no production or customer data was accessed, and Telegram Product Build 7
+  has not started.
+
 ### Telegram Product Build 4 - Secure Delivery Concierge Foundation
 
 - Starting baseline: `43497bb8e2db1b8b567ddf6bc060b0afbcadd646`.

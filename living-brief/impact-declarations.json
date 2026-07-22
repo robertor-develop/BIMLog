@@ -917,6 +917,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e032d433747e891a1a9f245df995bbb784810fbb5bb2028e30184bfab7efc495"
+    },
+    {
+      "taskId": "telegram-product-build-6-clean-integration",
+      "reviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
+      "reviewedAt": "2026-07-22T00:04:00.000Z",
+      "status": "clean_integration_accepted_pending_push_verification",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic RFI adapter follows accepted canonical-linking and controlled-automation doctrine without changing human authority or product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Recorded the isolated built-runtime evidence boundary while preserving current credential, security, portability, and terminal-turn governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, idempotency, bilingual, privacy, runtime, restart, cleanup, and browser gates fully govern this clean integration."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Build 6 RFI adapter implements already accepted notification direction and introduces no new product vision or roadmap scope."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Regenerated the structural inventory for the additive RFI notification library while preserving all accepted startup, schema, route, Coordinator, Security, and Portability behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, protocol, version, artifact, installation, grouped-viewpoint behavior, or field state changes in this integration."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Recorded that successful RFI package notification events do not change report models, artifact bytes, fidelity, names, authorization, or delivery behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 6 introduces no external standard, edition, applicability decision, compliance interpretation, or standards-based acceptance claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Build 6 as a clean integration on authoritative master with final evidence, push, publication, deployment, and field-use states kept distinct."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the authoritative integration base, deterministic outbox scope, canonical controls, preserved history, final 38/38 evidence, and remaining normal-push verification."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical record is rewritten; integration evidence remains a separate retained artifact until its final validation and push complete."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "be5292500bed3f27e6a9323346230491f2c920dfebe4992bcf7a66e69a8a6748"
     }
   ]
 }
