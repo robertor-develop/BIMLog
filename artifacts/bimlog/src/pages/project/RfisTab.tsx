@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
-  MessageSquare, Plus, X, FileText, Download,
+  MessageSquare, Plus, X, FileText, Download, Printer,
   LayoutList, Table2, Sparkles, AlertTriangle,
   RefreshCw, Phone, Loader2,
   Search, Calendar, Trash2,
@@ -112,6 +112,13 @@ function formatFileSize(bytes: number | null | undefined) {
 function attachmentLabelFromFiles(value: string, files: ProjectFile[]) {
   const fileId = fileIdFromAttachment(value);
   return (fileId ? files.find(file => file.id === fileId)?.fileName : undefined) || attachLabel(value);
+}
+
+function filenameFromDisposition(disposition: string, fallback: string) {
+  const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  const basicName = disposition.match(/filename="([^"]+)"/i)?.[1];
+  if (encodedName) { try { return decodeURIComponent(encodedName); } catch { /* use fallback */ } }
+  return basicName || fallback;
 }
 
 async function openRfiAttachment(value: string) {
@@ -618,6 +625,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [importMsg, setImportMsg] = useState("");
   const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
   const [exportingRegister, setExportingRegister] = useState(false);
+  const [exportingViewPdf, setExportingViewPdf] = useState(false);
   const rfisQueryClient = useQueryClient();
 
   // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
@@ -727,11 +735,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const disposition = response.headers.get("Content-Disposition") || "";
-      const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-      const basicName = disposition.match(/filename="([^"]+)"/i)?.[1];
-      let downloadName = basicName || `Project-${projectId}-RFI-Register.xlsx`;
-      if (encodedName) { try { downloadName = decodeURIComponent(encodedName); } catch { /* use fallback */ } }
+      const downloadName = filenameFromDisposition(response.headers.get("Content-Disposition") || "", `Project-${projectId}-RFI-Register.xlsx`);
       a.download = downloadName;
       a.click();
       URL.revokeObjectURL(url);
@@ -741,6 +745,43 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       toast({ title: w("RFI Register Excel export failed", "Error al exportar Registro RFI Excel", lang), variant: "destructive" });
     } finally {
       setExportingRegister(false);
+    }
+  };
+
+  const handleRfiViewPdf = async (mode: "download" | "print") => {
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    const params = new URLSearchParams({ view, status: statusFilter, search });
+    if (mode === "print") params.set("disposition", "inline");
+    if (mode === "download") setExportingViewPdf(true);
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/export-pdf?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "RFI PDF export failed");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const filename = filenameFromDisposition(response.headers.get("Content-Disposition") || "", view === "log" ? "RFI-Log-Report.pdf" : "RFI-List-Report.pdf");
+      if (mode === "print") {
+        const opened = window.open(url, "_blank", "noopener,noreferrer");
+        if (!opened) throw new Error("The PDF was generated, but the browser blocked the print window.");
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        toast({ title: w(`${view === "log" ? "RFI Log Report" : "RFI List Report"} ready to print`, `${view === "log" ? "Registro RFI" : "Lista RFI"} listo para imprimir`, lang) });
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w(`${view === "log" ? "RFI Log Report" : "RFI List Report"} exported`, `${view === "log" ? "Registro RFI" : "Lista RFI"} exportado`, lang) });
+    } catch (error) {
+      logClientError("RFI governed view PDF", error);
+      toast({ title: error instanceof Error ? error.message : w("RFI PDF export failed", "Error al exportar PDF RFI", lang), variant: "destructive" });
+    } finally {
+      if (mode === "download") setExportingViewPdf(false);
     }
   };
   const filtered = useMemo(() => {
@@ -896,6 +937,31 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               <Table2 style={{ width: 13, height: 13 }} />{w("Log", "Registro", lang)}
             </button>
           </div>
+          {rfis && rfis.length > 0 && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void handleRfiViewPdf("print")}
+                title={w(`Print governed PDF for the current ${view === "log" ? "RFI Log" : "RFI List"} view, including active filters and search.`, `Imprimir PDF gobernado de la vista actual ${view === "log" ? "Registro RFI" : "Lista RFI"}, con filtros y busqueda activos.`, lang)}
+                style={{ gap: 5, fontSize: 11 }}
+              >
+                <Printer style={{ width: 12, height: 12 }} />
+                {w(`Print ${view === "log" ? "RFI Log" : "RFI List"} PDF`, `Imprimir PDF ${view === "log" ? "Registro RFI" : "Lista RFI"}`, lang)}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void handleRfiViewPdf("download")}
+                disabled={exportingViewPdf}
+                title={w(`Export governed PDF for the current ${view === "log" ? "RFI Log" : "RFI List"} view, including active filters and search.`, `Exportar PDF gobernado de la vista actual ${view === "log" ? "Registro RFI" : "Lista RFI"}, con filtros y busqueda activos.`, lang)}
+                style={{ gap: 5, fontSize: 11 }}
+              >
+                {exportingViewPdf ? <Loader2 className="animate-spin" style={{ width: 12, height: 12 }} /> : <FileText style={{ width: 12, height: 12 }} />}
+                {exportingViewPdf ? w("Exporting PDF...", "Exportando PDF...", lang) : w(`Export ${view === "log" ? "RFI Log" : "RFI List"} PDF`, `Exportar PDF ${view === "log" ? "Registro RFI" : "Lista RFI"}`, lang)}
+              </Button>
+            </>
+          )}
           {rfis && rfis.length > 0 && (
             <Button variant="outline" size="sm" onClick={handleExportAllExcel} disabled={exportingRegister} style={{ gap: 5, fontSize: 11 }}>
               {exportingRegister ? <Loader2 className="animate-spin" style={{ width: 12, height: 12 }} /> : <Download style={{ width: 12, height: 12 }} />}

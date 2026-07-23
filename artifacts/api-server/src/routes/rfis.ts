@@ -10,7 +10,15 @@ import { validateConfigValue, getDefaultValue, getConfigOptionMeta } from "../mi
 import { singleFileUpload } from "../middlewares/multipart";
 import crypto from "crypto";
 import path from "path";
-import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
+import {
+  addPageNumbers,
+  computeContentHash,
+  createPdfDocument,
+  drawBrandedHeader,
+  drawTable,
+  REPORT_THEMES,
+  reportFileName,
+} from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken, providerFromParam } from "../lib/oauth";
 import { downloadCloud } from "../lib/cloud-files";
@@ -1100,6 +1108,151 @@ function makeRfiListPdf(
 }
 
 // ─── GET /projects/:projectId/rfis ──────────────────────────────────────────
+type RfiRegisterView = "list" | "log";
+
+function filterRfisForRegisterPdf(
+  rfis: (typeof rfisTable.$inferSelect)[],
+  filters: { status: string; search: string },
+) {
+  const q = filters.search.trim().toLowerCase();
+  return rfis
+    .filter(rfi => filters.status === "all" || rfi.status === filters.status)
+    .filter(rfi => {
+      if (!q) return true;
+      return [rfi.number, rfi.subject, rfi.submittedByCompany, rfi.submittedToCompany]
+        .some(value => String(value || "").toLowerCase().includes(q));
+    })
+    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime());
+}
+
+export function renderGovernedRfiRegisterPdf(args: {
+  view: RfiRegisterView;
+  rfis: (typeof rfisTable.$inferSelect)[];
+  project: typeof projectsTable.$inferSelect | undefined;
+  generatedAt: Date;
+  generatedBy: string;
+  filters: { status: string; search: string };
+}) {
+  const title = args.view === "log" ? "RFI Log Report" : "RFI List Report";
+  const theme = args.view === "log" ? REPORT_THEMES.rfi.log : REPORT_THEMES.rfi.list;
+  const doc = createPdfDocument({
+    size: "LETTER",
+    layout: "landscape",
+    margins: { top: 0, bottom: 0, left: 36, right: 36 },
+    bufferPages: true,
+  });
+  const chunks: Buffer[] = [];
+  doc.on("data", chunk => chunks.push(Buffer.from(chunk)));
+  const done = new Promise<Buffer>(resolve => doc.on("end", () => resolve(Buffer.concat(chunks))));
+  const projectName = args.project?.name || `Project ${args.project?.id || ""}`.trim() || "Project";
+  const projectCode = args.project?.code || undefined;
+  const reportDate = args.generatedAt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
+  const reportNumber = `${args.view === "log" ? "RFI-LOG" : "RFI-LIST"}-${args.project?.id || "PROJECT"}-${args.generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+  const filterLabel = [
+    `View: ${args.view === "log" ? "Log" : "List"}`,
+    `Status: ${args.filters.status === "all" ? "All" : args.filters.status.replace(/_/g, " ")}`,
+    args.filters.search ? `Search: ${args.filters.search}` : "Search: None",
+    `Rows: ${args.rfis.length}`,
+    `Prepared by: ${args.generatedBy}`,
+  ].join(" | ");
+  const drawHeader = () => {
+    const y = drawBrandedHeader(doc, {
+      companyName: "BIMLog",
+      title,
+      subtitle: filterLabel,
+      projectName,
+      projectCode,
+      reportNumber,
+      reportDate: args.generatedAt,
+      theme,
+    });
+    doc.fontSize(8).font("Helvetica").fillColor("#4B5563")
+      .text(filterLabel, 36, y, { width: doc.page.width - 72, lineBreak: false, ellipsis: true });
+    return y + 16;
+  };
+
+  const fmtD = (d: Date | string | null | undefined) =>
+    d ? new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }) : "-";
+  const clean = (value: string | null | undefined) => String(value || "-").replace(/_/g, " ");
+  const ballInCourt = (rfi: typeof rfisTable.$inferSelect) => {
+    if (rfi.status === "closed") return "Closed";
+    return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+  };
+
+  const columns = args.view === "log"
+    ? [
+        { label: "RFI #", width: 62, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
+        { label: "Description", width: 170, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
+        { label: "Req. By Co.", width: 92, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
+        { label: "Sent To Co.", width: 96, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
+        { label: "Forwarded", width: 64, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequested || r.createdAt) },
+        { label: "Answered", width: 64, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateAnswered || r.respondedAt) },
+        { label: "Status", width: 70, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
+        { label: "Sched. Impact", width: 102, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.scheduleImpact && r.scheduleImpact !== "No Schedule Impact" ? `${r.scheduleImpact}${r.scheduleImpactDays != null ? ` (${r.scheduleImpactDays}d)` : ""}` : "None" },
+      ]
+    : [
+        { label: "RFI #", width: 62, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
+        { label: "Subject", width: 190, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
+        { label: "Status", width: 74, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
+        { label: "Priority", width: 62, format: (r: typeof rfisTable.$inferSelect) => clean(r.priority) },
+        { label: "Ball In Court", width: 122, wrap: true, format: (r: typeof rfisTable.$inferSelect) => ballInCourt(r) },
+        { label: "Submitted By", width: 92, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
+        { label: "Date Req.", width: 62, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequired || r.dueDate) },
+        { label: "Days Out", width: 56, align: "right" as const, format: (r: typeof rfisTable.$inferSelect) => String(daysSince(r.createdAt)) },
+      ];
+
+  drawTable(doc, {
+    x: 36,
+    startY: drawHeader(),
+    columns,
+    rows: args.rfis,
+    fontSize: 7,
+    headerFontSize: 6.5,
+    rowMinHeight: 22,
+    headerHeight: 18,
+    pageBottom: 545,
+    headerFill: theme.primary,
+    onPageBreak: () => {
+      doc.addPage();
+      return drawHeader();
+    },
+  });
+
+  const contentHash = computeContentHash({
+    title,
+    projectId: args.project?.id,
+    filters: args.filters,
+    generatedAt: args.generatedAt.toISOString(),
+    rows: args.rfis.map(rfi => ({
+      id: rfi.id,
+      number: rfi.number,
+      subject: rfi.subject,
+      status: rfi.status,
+      priority: rfi.priority,
+      ballInCourt: rfi.ballInCourt,
+      submittedByCompany: rfi.submittedByCompany,
+      submittedToCompany: rfi.submittedToCompany,
+      dateRequired: rfi.dateRequired,
+      dateRequested: rfi.dateRequested,
+      dateAnswered: rfi.dateAnswered,
+      scheduleImpact: rfi.scheduleImpact,
+      scheduleImpactDays: rfi.scheduleImpactDays,
+      updatedAt: rfi.updatedAt,
+    })),
+  });
+  addPageNumbers(doc, {
+    footerY: 570,
+    fingerprintY: 558,
+    contentHash,
+    companyName: "BIMLog",
+    projectName,
+    reportNumber,
+    timestamp: `Generated ${reportDate}`,
+  });
+  doc.end();
+  return { buffer: done, title, filename: reportFileName(title), reportNumber, contentHash };
+}
+
 router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
@@ -1129,6 +1282,65 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
 });
 
 // ─── POST /projects/:projectId/rfis ─────────────────────────────────────────
+router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
+    const status = String(req.query.status || "all");
+    const search = String(req.query.search || "").trim();
+    const view = String(req.query.view || "list") === "log" ? "log" : "list";
+    if (status !== "all" && !(await validateConfigValue("rfi_status", status))) {
+      res.status(422).json({ error: "Invalid RFI status filter." });
+      return;
+    }
+
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const allRfis = await db.query.rfisTable.findMany({
+      where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
+      orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
+    });
+    const rfis = filterRfisForRegisterPdf(allRfis, { status, search });
+    const generatedAt = new Date();
+    const output = renderGovernedRfiRegisterPdf({
+      view,
+      rfis,
+      project,
+      generatedAt,
+      generatedBy: req.user!.fullName || "BIMLog user",
+      filters: { status, search },
+    });
+    const buffer = await output.buffer;
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName || "User",
+      userCompanyName: req.user!.companyName || "",
+      actionType: "export",
+      entityType: "rfi",
+      entityId: projectId,
+      details: JSON.stringify({
+        event: view === "log" ? "rfi.log_pdf_exported" : "rfi.list_pdf_exported",
+        success: true,
+        title: output.title,
+        filename: output.filename,
+        statusFilter: status,
+        searchApplied: Boolean(search),
+        matchingRfis: rfis.length,
+        totalRfis: allRfis.length,
+        generatedAt: generatedAt.toISOString(),
+        contentHash: output.contentHash,
+      }),
+    });
+    const disposition = String(req.query.disposition || "attachment") === "inline" ? "inline" : "attachment";
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `${disposition}; filename="${output.filename}"`);
+    res.setHeader("Content-Length", buffer.length);
+    res.send(buffer);
+  } catch (error) {
+    console.error("[rfis] RFI governed PDF generation failed:", error instanceof Error ? error.message : error);
+    res.status(500).json({ error: "RFI governed PDF could not be generated." });
+  }
+});
+
 router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });

@@ -58,6 +58,18 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   verification, Build 4 notifications/digests, Build 5 feedback tooling, and any future Clash work. No production or
   customer data was accessed by this source integration.
 
+### RFI List/Log governed PDF correction in local review
+
+- Roberto identified a platform-rule violation: RFI List and RFI Log views were user-facing operational reports
+  without governed Print/PDF actions.
+- Local correction adds visible Print PDF and Export PDF actions to both RFI views. The route preserves active
+  view, status filter, search, project identity, generated timestamp, prepared-by identity, report number,
+  page numbering, repeated table headers, readable landscape column widths, and the RFI module design family.
+- Product distinction is explicit: RFI List uses Ball In Court as current responsibility; RFI Log uses Sent To Co.
+  as historical transmission destination. They are not conflated.
+- Source verification passed locally in the isolated worktree. No publish, deployment, production/customer access,
+  schema change, or Navisworks/plugin change occurred in this cycle.
+
 ### Ruben urgent Meeting workflow correction accepted and pushed in source
 
 - Accepted Meetings source at `bec190ac248fc5134f742b1bafbc673a594e52ec` adds persistent canonical company

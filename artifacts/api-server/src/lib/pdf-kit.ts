@@ -60,7 +60,7 @@ const reserved = (module: ReportModule, primary: string) => family(module, prima
 
 /** Central report theme registry. Routes select a named variant; they never invent colors. */
 export const REPORT_THEMES = {
-  rfi: { detail: rfi("RFI PDF", "solid"), word: rfi("RFI DOCX", "rule"), audit: rfi("RFI Audit", "double-rule"), log: rfi("RFI Log", "grid") },
+  rfi: { detail: rfi("RFI PDF", "solid"), word: rfi("RFI DOCX", "rule"), audit: rfi("RFI Audit", "double-rule"), list: rfi("RFI List", "rule"), log: rfi("RFI Log", "grid") },
   schedule: { calendar: schedule("Schedule Calendar", "grid"), board: schedule("Schedule Board", "dots"), list: schedule("Schedule List", "rule") },
   lens: { coordination: lens("Lens Coordination", "solid"), register: lens("Lens Register", "grid"), audit: lens("Lens Audit", "double-rule") },
   clash: { coordination: clash("Clash Coordination", "solid"), register: clash("Clash Register", "grid") },
