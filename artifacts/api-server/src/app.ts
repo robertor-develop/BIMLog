@@ -478,6 +478,19 @@ const rfiMigrationReady = (async () => {
     await pool.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS rfi_ball_in_court_open_unique ON rfi_ball_in_court_history (rfi_id) WHERE to_date IS NULL`,
     );
+    await pool.query(`CREATE TABLE IF NOT EXISTS rfi_report_settings (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL REFERENCES projects(id),
+      version INTEGER NOT NULL DEFAULT 1,
+      settings JSONB NOT NULL,
+      created_by_id INTEGER NOT NULL REFERENCES users(id),
+      updated_by_id INTEGER NOT NULL REFERENCES users(id),
+      created_at TIMESTAMP NOT NULL DEFAULT now(),
+      updated_at TIMESTAMP NOT NULL DEFAULT now()
+    )`);
+    await pool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS rfi_report_settings_project_uidx ON rfi_report_settings (project_id)`,
+    );
     console.log("[migration] rfis send-accountability columns ensured");
     return true;
   } catch (e) {

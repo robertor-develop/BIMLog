@@ -140,3 +140,15 @@ Connector Governance Phase 1 does not change report bytes, report models, report
 fidelity, or delivery semantics. Its impact on report-adjacent workflows is limited to provider discovery and file
 source availability: RFI attachment import controls may show only server-approved, actually available file-source
 connectors, and a hidden/private connector must not be presented as a valid report delivery or attachment path.
+
+## RFI report template settings candidate
+
+- Local candidate adds one canonical project settings model for Standard RFI PDF and editable RFI DOCX section
+  and field visibility. Existing projects without saved settings retain the full legacy report shape until a
+  project admin saves settings.
+- Mandatory identity/footer/integrity elements remain governed: project/RFI identity, RFI number, subject, RFI
+  type, revision, lifecycle/status, generation timestamp, page identity, and content/settings fingerprint.
+- Ruben lean preset hides the responder-oriented sections by default while retaining Header/RFI Status, Submitted
+  By, Reference Information/Attachments, source viewpoint screenshot, and additional screenshots when configured.
+- Saved exports record the settings version/hash in activity so later evidence can reproduce which template
+  governed the generated PDF/DOCX.

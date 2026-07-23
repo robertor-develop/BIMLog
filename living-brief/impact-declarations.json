@@ -2722,6 +2722,88 @@
         "scripts/test-living-brief-gate.mjs"
       ],
       "reviewedChangeSha256": "0d8050b37a482cb370c47f29d0a3191a9ab409ddb0ccbda208564f2e4c26eadd"
+    },
+    {
+      "taskId": "rfi-report-template-settings-local-review",
+      "reviewedThroughCommit": "3758a3cc5d75db5ee308f76ea75fc4908e64fede",
+      "summary": "Local review candidate for governed per-project RFI report template settings, source/additional report screenshots, export parity, and RFI-only UI/API wiring. Not integrated, pushed, published, deployed, or independently accepted.",
+      "workstreams": [
+        "rfi-report-settings",
+        "rfi-standard-exports",
+        "rfi-report-screenshots"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "RFI report settings preserve BIMLog ecosystem doctrine and project governance boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to agent hierarchy or connector governance doctrine."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds governed project-scoped report settings, snapshot/audit requirements, and validation evidence expectations for RFI exports."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product behavior advances configurable professional RFI reporting without changing roadmap commitments."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds an additive RFI report settings table and idempotent startup migration; no destructive publication or production access."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin code, package, Navisworks installation, Sync/Pull/Reconcile, or field plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "RFI PDF/DOCX now share one canonical settings model with governed section/field visibility and image controls."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local review candidate status and non-integration boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining independent review, browser/evidence, and acceptance blockers."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records source-viewpoint screenshot root cause and local-only non-actions."
+        }
+      ],
+      "reviewedAt": "2026-07-23T23:20:04Z",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/rfi-standard-exports.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/rfis.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c2f86da3f740ed36d2382d8bb27202bfc1f4efe4a376ace51b7f9e3babba9867"
     }
   ]
 }

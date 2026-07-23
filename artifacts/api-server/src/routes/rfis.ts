@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, companiesTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, companiesTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable, rfiReportSettingsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
 import { eq, and, count, max, isNull, or, ne, asc, desc, sql, inArray } from "drizzle-orm";
@@ -29,11 +29,18 @@ import { PDFDocument as PdfLibDocument } from "pdf-lib";
 import {
   buildCanonicalRfiDocx,
   buildCanonicalRfiExportModel,
+  buildDefaultRfiReportSettings,
+  buildLeanRfiReportSettings,
   buildRfiAuditModel,
+  makeRfiReportSettingsSnapshot,
+  normalizeRfiReportSettings,
   renderCanonicalRfiPdf,
   renderRfiAuditPdf,
+  RFI_REPORT_SECTION_INVENTORY,
   type CanonicalRfiExportModel,
   type RfiExportImage,
+  type RfiReportSettingsDocument,
+  type RfiReportSettingsSnapshot,
 } from "../lib/rfi-standard-exports";
 import {
   buildCompleteRfiPackage,
@@ -63,9 +70,20 @@ type RfiImagePresentation = {
   showInRfi?: boolean;
   includeInCompletePdf?: boolean;
   crop?: { x: number; y: number; width: number; height: number } | null;
+  reportScreenshots?: Array<{
+    fileId: number;
+    kind: Exclude<RfiImageKind, "viewpoint">;
+    caption?: string | null;
+    description?: string | null;
+    include?: boolean;
+    order: number;
+  }>;
 } | null;
 
 const RFI_ATTACHMENT_LIMIT_BYTES = 50 * 1024 * 1024;
+const RFI_REPORT_SCREENSHOT_LIMIT_BYTES = 10 * 1024 * 1024;
+const RFI_REPORT_SCREENSHOT_MAX_DIMENSION = 8000;
+const RFI_REPORT_SCREENSHOT_AGGREGATE_BYTES = 60 * 1024 * 1024;
 const INTERNAL_FILE_LOCATOR = /^\/api\/v1\/projects\/(\d+)\/files\/(\d+)\/download(?:\?name=[^#&]*)?$/;
 const UNSAFE_REFERENCE_SCHEME = /^(?:javascript|data|file|vbscript|blob):/i;
 const URI_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
@@ -346,6 +364,24 @@ function normalizeImagePresentation(value: unknown): RfiImagePresentation {
   if (raw.replacementKind != null && (typeof raw.replacementKind !== "string" || !replacementKinds.has(raw.replacementKind as Exclude<RfiImageKind, "viewpoint">))) throw new RfiAttachmentError("Invalid RFI replacement image kind.", 422);
   if (raw.showInRfi != null && typeof raw.showInRfi !== "boolean") throw new RfiAttachmentError("showInRfi must be a boolean.", 422);
   if (raw.includeInCompletePdf != null && typeof raw.includeInCompletePdf !== "boolean") throw new RfiAttachmentError("includeInCompletePdf must be a boolean.", 422);
+  const reportScreenshots = Array.isArray(raw.reportScreenshots) ? raw.reportScreenshots.map((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) throw new RfiAttachmentError("Report screenshot entries must be objects.", 422);
+    const shot = item as Record<string, unknown>;
+    const fileId = shot.fileId;
+    if (typeof fileId !== "number" || !Number.isSafeInteger(fileId) || fileId <= 0) throw new RfiAttachmentError("Report screenshot fileId must be a positive BIMLog file ID.", 422);
+    const kind = shot.kind;
+    if (typeof kind !== "string" || !replacementKinds.has(kind as Exclude<RfiImageKind, "viewpoint">)) throw new RfiAttachmentError("Report screenshot kind must be upload, paste, or screen-snip.", 422);
+    const cleanCaption = typeof shot.caption === "string" ? shot.caption.replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 160) : null;
+    const cleanDescription = typeof shot.description === "string" ? shot.description.replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 800) : null;
+    return {
+      fileId,
+      kind: kind as Exclude<RfiImageKind, "viewpoint">,
+      caption: cleanCaption || null,
+      description: cleanDescription || null,
+      include: shot.include !== false,
+      order: typeof shot.order === "number" && Number.isFinite(shot.order) ? shot.order : index,
+    };
+  }).sort((a, b) => a.order - b.order).slice(0, 12) : [];
   let crop: { x: number; y: number; width: number; height: number } | null = null;
   if (raw.crop != null) {
     if (typeof raw.crop !== "object" || Array.isArray(raw.crop)) throw new RfiAttachmentError("Image crop must be normalized bounds or null.", 422);
@@ -365,6 +401,7 @@ function normalizeImagePresentation(value: unknown): RfiImagePresentation {
     showInRfi: raw.showInRfi !== false,
     includeInCompletePdf: raw.includeInCompletePdf !== false,
     crop,
+    reportScreenshots,
   };
 }
 
@@ -378,6 +415,7 @@ type StoredRfiImage = {
 
 async function decodeStoredRfiImage(file: typeof filesTable.$inferSelect): Promise<StoredRfiImage> {
   if (!file.storagePath || file.fileSize <= 0) throw new RfiAttachmentError(`RFI image ${file.id} has no stored image bytes.`, 422);
+  if (file.fileSize > RFI_REPORT_SCREENSHOT_LIMIT_BYTES) throw new RfiAttachmentError(`RFI image ${file.id} exceeds the 10 MB report screenshot limit.`, 422);
   const buffer = await storage.download(file.storagePath);
   if (buffer.length === 0) throw new RfiAttachmentError(`RFI image ${file.id} is empty.`, 422);
   const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -388,7 +426,7 @@ async function decodeStoredRfiImage(file: typeof filesTable.$inferSelect): Promi
   try {
     const probe = await PdfLibDocument.create();
     const image = type === "png" ? await probe.embedPng(buffer) : await probe.embedJpg(buffer);
-    if (!Number.isFinite(image.width) || !Number.isFinite(image.height) || image.width <= 0 || image.height <= 0) throw new Error("invalid dimensions");
+    if (!Number.isFinite(image.width) || !Number.isFinite(image.height) || image.width <= 0 || image.height <= 0 || image.width > RFI_REPORT_SCREENSHOT_MAX_DIMENSION || image.height > RFI_REPORT_SCREENSHOT_MAX_DIMENSION) throw new Error("invalid dimensions");
     return { file, buffer, type, width: image.width, height: image.height };
   } catch {
     throw new RfiAttachmentError(`File ${file.id} contains corrupt or undecodable image bytes.`, 422);
@@ -410,12 +448,19 @@ async function validateImagePresentationFiles(
 ): Promise<Map<number, StoredRfiImage>> {
   const decoded = new Map<number, StoredRfiImage>();
   if (!presentation) return decoded;
-  const ids = [...new Set([presentation.sourceFileId, presentation.replacementFileId].filter((id): id is number => typeof id === "number"))];
+  const ids = [...new Set([
+    presentation.sourceFileId,
+    presentation.replacementFileId,
+    ...(presentation.reportScreenshots || []).filter(item => item.include !== false).map(item => item.fileId),
+  ].filter((id): id is number => typeof id === "number"))];
   if (!ids.length) return decoded;
   const rows = await dbx.select().from(filesTable).where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, ids)));
   if (rows.length !== ids.length) throw new RfiAttachmentError("An RFI image file is missing or belongs to another project.", 409);
+  const totalImageBytes = rows.reduce((sum, file) => sum + Math.max(0, file.fileSize || 0), 0);
+  if (totalImageBytes > RFI_REPORT_SCREENSHOT_AGGREGATE_BYTES) throw new RfiAttachmentError("RFI report screenshots exceed the 60 MB aggregate limit.", 422);
   for (const file of rows) {
-    const expectedKind = file.id === presentation.replacementFileId ? presentation.replacementKind : presentation.sourceKind;
+    const reportScreenshot = (presentation.reportScreenshots || []).find(item => item.fileId === file.id);
+    const expectedKind = file.id === presentation.replacementFileId ? presentation.replacementKind : reportScreenshot ? reportScreenshot.kind : presentation.sourceKind;
     if (!expectedKind) throw new RfiAttachmentError(`Image provenance is required for file ${file.id}.`, 422);
     const knownKind = storedRfiImageKind(file);
     const persistedKind = file.id === persistedPresentation?.replacementFileId ? persistedPresentation.replacementKind : file.id === persistedPresentation?.sourceFileId ? persistedPresentation.sourceKind : null;
@@ -429,6 +474,7 @@ async function validateImagePresentationFiles(
 }
 
 type ActiveRfiExportImage = StoredRfiImage & { crop: NonNullable<RfiImagePresentation>["crop"] };
+type AdditionalRfiExportImage = StoredRfiImage & { caption?: string | null; description?: string | null; order: number };
 
 async function loadActiveRfiExportImage(rfi: typeof rfisTable.$inferSelect): Promise<ActiveRfiExportImage | null> {
   const presentation = normalizeImagePresentation(rfi.imagePresentationJson);
@@ -441,15 +487,28 @@ async function loadActiveRfiExportImage(rfi: typeof rfisTable.$inferSelect): Pro
   return { ...image, crop: presentation.crop ?? null };
 }
 
+async function loadAdditionalRfiExportImages(rfi: typeof rfisTable.$inferSelect): Promise<AdditionalRfiExportImage[]> {
+  const presentation = normalizeImagePresentation(rfi.imagePresentationJson);
+  const items = (presentation?.reportScreenshots || []).filter(item => item.include !== false).sort((a, b) => a.order - b.order);
+  if (!presentation || !items.length) return [];
+  const decoded = await validateImagePresentationFiles(rfi.projectId, presentation, db, presentation);
+  return items.map(item => {
+    const image = decoded.get(item.fileId);
+    if (!image) throw new RfiAttachmentError(`Additional RFI report screenshot ${item.fileId} is unavailable.`, 409);
+    return { ...image, caption: item.caption, description: item.description, order: item.order };
+  });
+}
+
 async function buildSavedRfiExportModel(params: {
   rfi: typeof rfisTable.$inferSelect;
   responses: (typeof rfiResponsesTable.$inferSelect)[];
   project: typeof projectsTable.$inferSelect | undefined;
   attachmentLabels: Map<string, string>;
   activeImage: ActiveRfiExportImage | null;
+  additionalImages: AdditionalRfiExportImage[];
   generatedAt: Date;
-}): Promise<{ model: CanonicalRfiExportModel; image: RfiExportImage | null }> {
-  const { rfi, responses, project, attachmentLabels, activeImage, generatedAt } = params;
+}): Promise<{ model: CanonicalRfiExportModel; image: RfiExportImage | null; additionalImages: RfiExportImage[] }> {
+  const { rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt } = params;
   const values = (rfi.attachmentsJson as string[] | null) || [];
   const manualReferences = values.filter(value => !parseInternalFileLocator(value)).map(value => attachmentLabels.get(value) || attachmentLabel(value));
   const attachments = values.filter(value => !!parseInternalFileLocator(value)).map(value => attachmentLabels.get(value) || attachmentLabel(value));
@@ -468,6 +527,7 @@ async function buildSavedRfiExportModel(params: {
     .where(and(eq(projectMembersTable.projectId, rfi.projectId), eq(projectMembersTable.status, "active")));
   const imageKind = activeImage ? storedRfiImageKind(activeImage.file) : null;
   const image: RfiExportImage | null = activeImage && imageKind ? {
+    id: activeImage.file.id,
     buffer: activeImage.buffer,
     type: activeImage.type,
     width: activeImage.width,
@@ -476,6 +536,18 @@ async function buildSavedRfiExportModel(params: {
     kind: imageKind,
     crop: activeImage.crop ?? null,
   } : null;
+  const reportImages: RfiExportImage[] = additionalImages.map(item => ({
+    id: item.file.id,
+    buffer: item.buffer,
+    type: item.type,
+    width: item.width,
+    height: item.height,
+    fileName: item.file.fileName,
+    kind: storedRfiImageKind(item.file) as Exclude<RfiImageKind, "viewpoint">,
+    crop: null,
+    caption: item.caption || item.file.fileName,
+    description: item.description || undefined,
+  }));
   return {
     model: buildCanonicalRfiExportModel({
       rfi,
@@ -486,9 +558,11 @@ async function buildSavedRfiExportModel(params: {
       responseAttachments,
       directoryRecipients: directoryRecipients.map(item => ({ ...item, phone: item.phone || undefined })),
       image,
+      additionalImages: reportImages,
       generatedAt,
     }),
     image,
+    additionalImages: reportImages,
   };
 }
 
@@ -542,6 +616,56 @@ async function isProjectAdmin(projectId: number, userId: number, isSuperAdmin?: 
     .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
     .limit(1);
   return member?.role === "project_admin";
+}
+
+function settingsPreview(settings: RfiReportSettingsDocument) {
+  const bySection = new Map(settings.sections.map(section => [section.id, section]));
+  return RFI_REPORT_SECTION_INVENTORY.map(section => {
+    const configured = bySection.get(section.id);
+    const fieldVisibility = new Map((configured?.fields || []).map(field => [field.id, field.visible !== false]));
+    return {
+      id: section.id,
+      label: section.label,
+      labelEs: section.labelEs,
+      visible: configured?.visible !== false,
+      fields: section.fields.map(field => ({
+        id: field.id,
+        label: field.label,
+        labelEs: field.labelEs,
+        mandatory: field.mandatory === true,
+        visible: fieldVisibility.get(field.id) !== false,
+      })),
+    };
+  });
+}
+
+async function loadRfiReportSettingsRow(projectId: number) {
+  const [row] = await db.select().from(rfiReportSettingsTable).where(eq(rfiReportSettingsTable.projectId, projectId)).limit(1);
+  return row || null;
+}
+
+async function loadRfiReportSettingsSnapshot(projectId: number): Promise<RfiReportSettingsSnapshot> {
+  const row = await loadRfiReportSettingsRow(projectId);
+  return row ? makeRfiReportSettingsSnapshot(row.settings as RfiReportSettingsDocument, row.version, "project") : makeRfiReportSettingsSnapshot(null, 0, "legacy_default");
+}
+
+function publicRfiReportSettingsPayload(row: typeof rfiReportSettingsTable.$inferSelect | null) {
+  const currentSettings = row ? normalizeRfiReportSettings(row.settings) : buildDefaultRfiReportSettings();
+  const snapshot = row ? makeRfiReportSettingsSnapshot(currentSettings, row.version, "project") : makeRfiReportSettingsSnapshot(null, 0, "legacy_default");
+  return {
+    inventory: RFI_REPORT_SECTION_INVENTORY,
+    defaultSettings: buildDefaultRfiReportSettings(),
+    leanPreset: buildLeanRfiReportSettings(),
+    current: {
+      exists: !!row,
+      version: row?.version ?? 0,
+      settings: currentSettings,
+      updatedAt: row?.updatedAt?.toISOString?.() ?? null,
+      legacyDefaultActive: !row,
+      snapshotHash: snapshot.snapshotHash,
+      preview: settingsPreview(currentSettings),
+    },
+  };
 }
 
 function nullableText(value: unknown): string | null {
@@ -1477,6 +1601,95 @@ router.post("/projects/:projectId/rfis", authMiddleware, requirePermission("admi
   }
 });
 
+router.get("/projects/:projectId/rfis/report-settings", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = parsePositiveId(req.params.projectId, "project ID");
+    const row = await loadRfiReportSettingsRow(projectId);
+    res.json(publicRfiReportSettingsPayload(row));
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : "Report settings could not be loaded." });
+  }
+});
+
+router.post("/projects/:projectId/rfis/report-settings/preview", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const settings = normalizeRfiReportSettings((req.body as { settings?: unknown })?.settings);
+    const snapshot = makeRfiReportSettingsSnapshot(settings, 0, "project");
+    res.json({ settings, snapshotHash: snapshot.snapshotHash, preview: settingsPreview(settings) });
+  } catch (error) {
+    res.status(422).json({ error: error instanceof Error ? error.message : "Report settings are invalid." });
+  }
+});
+
+router.put("/projects/:projectId/rfis/report-settings", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const projectId = parsePositiveId(req.params.projectId, "project ID");
+    const settings = normalizeRfiReportSettings((req.body as { settings?: unknown })?.settings);
+    const expectedVersion = (req.body as { expectedVersion?: unknown })?.expectedVersion;
+    const result = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT id FROM rfi_report_settings WHERE project_id = ${projectId} FOR UPDATE`);
+      const [existing] = await tx.select().from(rfiReportSettingsTable).where(eq(rfiReportSettingsTable.projectId, projectId)).limit(1);
+      const expected = expectedVersion == null ? null : Number(expectedVersion);
+      if (existing && expected != null && existing.version !== expected) return { status: 409 as const, error: "These RFI report settings changed in another session. Reload before saving." };
+      if (!existing && expected != null && expected !== 0) return { status: 409 as const, error: "These RFI report settings were reset in another session. Reload before saving." };
+      const nextVersion = (existing?.version ?? 0) + 1;
+      const [saved] = existing
+        ? await tx.update(rfiReportSettingsTable).set({ settings, version: nextVersion, updatedById: req.user!.userId, updatedAt: new Date() }).where(eq(rfiReportSettingsTable.id, existing.id)).returning()
+        : await tx.insert(rfiReportSettingsTable).values({ projectId, settings, version: nextVersion, createdById: req.user!.userId, updatedById: req.user!.userId }).returning();
+      const snapshot = makeRfiReportSettingsSnapshot(settings, saved.version, "project");
+      await tx.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName || "User",
+        userCompanyName: req.user!.companyName || "",
+        actionType: "settings",
+        entityType: "rfi_report_settings",
+        entityId: projectId,
+        details: JSON.stringify({ event: "rfi.report_settings_saved", version: saved.version, snapshotHash: snapshot.snapshotHash, preset: settings.preset, emptyFieldMode: settings.emptyFieldMode }),
+      });
+      return { status: 200 as const, row: saved };
+    });
+    if ("error" in result) { res.status(result.status).json({ error: result.error }); return; }
+    res.json(publicRfiReportSettingsPayload(result.row));
+  } catch (error) {
+    res.status(422).json({ error: error instanceof Error ? error.message : "Report settings could not be saved." });
+  }
+});
+
+router.post("/projects/:projectId/rfis/report-settings/reset", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    const projectId = parsePositiveId(req.params.projectId, "project ID");
+    const settings = buildDefaultRfiReportSettings();
+    const expectedVersion = (req.body as { expectedVersion?: unknown })?.expectedVersion;
+    const result = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT id FROM rfi_report_settings WHERE project_id = ${projectId} FOR UPDATE`);
+      const [existing] = await tx.select().from(rfiReportSettingsTable).where(eq(rfiReportSettingsTable.projectId, projectId)).limit(1);
+      const expected = expectedVersion == null ? null : Number(expectedVersion);
+      if (existing && expected != null && existing.version !== expected) return { status: 409 as const, error: "These RFI report settings changed in another session. Reload before resetting." };
+      const nextVersion = (existing?.version ?? 0) + 1;
+      const [saved] = existing
+        ? await tx.update(rfiReportSettingsTable).set({ settings, version: nextVersion, updatedById: req.user!.userId, updatedAt: new Date() }).where(eq(rfiReportSettingsTable.id, existing.id)).returning()
+        : await tx.insert(rfiReportSettingsTable).values({ projectId, settings, version: nextVersion, createdById: req.user!.userId, updatedById: req.user!.userId }).returning();
+      const snapshot = makeRfiReportSettingsSnapshot(settings, saved.version, "project");
+      await tx.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName || "User",
+        userCompanyName: req.user!.companyName || "",
+        actionType: "settings",
+        entityType: "rfi_report_settings",
+        entityId: projectId,
+        details: JSON.stringify({ event: "rfi.report_settings_reset", version: saved.version, snapshotHash: snapshot.snapshotHash }),
+      });
+      return { status: 200 as const, row: saved };
+    });
+    if ("error" in result) { res.status(result.status).json({ error: result.error }); return; }
+    res.json(publicRfiReportSettingsPayload(result.row));
+  } catch (error) {
+    res.status(422).json({ error: error instanceof Error ? error.message : "Report settings could not be reset." });
+  }
+});
+
 // ─── POST /projects/:projectId/rfis/from-viewpoint ──────────────────────────
 // Creates a draft RFI from a Navisworks viewpoint (plugin flow). The screenshot is
 // decoded and stored through the storage adapter as a real filesTable row linked to
@@ -1579,7 +1792,7 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
           tx,
         );
         if (!created.ok) return created;
-        await tx.insert(filesTable).values({
+        const [viewpointFile] = await tx.insert(filesTable).values({
           projectId,
           fileName,
           fileSize: buffer.length,
@@ -1589,9 +1802,19 @@ router.post("/projects/:projectId/rfis/from-viewpoint", authMiddleware, requireP
           source: "lens-viewpoint",
           storagePath,
           linkedRfiId: created.rfi.id,
+        }).returning({ id: filesTable.id });
+        const imagePresentationJson = normalizeImagePresentation({
+          sourceFileId: viewpointFile.id,
+          sourceKind: "viewpoint",
+          showInRfi: true,
+          includeInCompletePdf: true,
         });
+        const [updatedRfi] = await tx.update(rfisTable)
+          .set({ imagePresentationJson })
+          .where(and(eq(rfisTable.id, created.rfi.id), eq(rfisTable.projectId, projectId)))
+          .returning();
         await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${created.rfi.id}:created`,companyId:req.user!.companyId,projectId,rfiId:created.rfi.id,eventKey:"rfi_created",actorUserId:req.user!.userId});
-        return created;
+        return { ...created, rfi: updatedRfi || created.rfi };
       });
 
       if (!result.ok) {
@@ -2018,7 +2241,9 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
     ]);
     const generatedAt = new Date();
     const activeImage = await loadActiveRfiExportImage(rfi);
-    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, generatedAt });
+    const additionalImages = await loadAdditionalRfiExportImages(rfi);
+    const reportSettings = await loadRfiReportSettingsSnapshot(projectId);
+    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -2030,7 +2255,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       res.send(pdfBuffer);
     });
 
-    renderCanonicalRfiPdf(doc, exportData.model, exportData.image);
+    renderCanonicalRfiPdf(doc, exportData.model, exportData.image, reportSettings, exportData.additionalImages);
     doc.end();
 
     db.insert(activityLogTable).values({
@@ -2041,7 +2266,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       actionType: "export",
       entityType: "rfi",
       entityId: rfiId,
-      details: `PDF exported: ${rfi.number}`,
+      details: JSON.stringify({ event: "rfi.standard_pdf_exported", number: rfi.number, reportSettings }),
     }).catch((activityError) => {
       console.error("[rfis] Failed to log PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
     });
@@ -2063,15 +2288,16 @@ async function renderRfiPdfBuffer(
     ...responses.map(response => response.responseAttachmentsJson as string[] | null),
   ]);
   const activeImage = includePresentationImage ? await loadActiveRfiExportImage(rfi) : null;
+  const additionalImages = includePresentationImage ? await loadAdditionalRfiExportImages(rfi) : [];
   const generatedAt = new Date();
-  const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, generatedAt });
+  const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
   const buffer = await new Promise<Buffer>((resolve, reject) => {
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
-    renderCanonicalRfiPdf(doc, exportData.model, exportData.image);
+    renderCanonicalRfiPdf(doc, exportData.model, exportData.image, undefined, exportData.additionalImages);
     doc.end();
   });
   return { buffer, model: exportData.model };
@@ -2583,7 +2809,8 @@ router.get("/projects/:projectId/rfis/:rfiId/audit-certificate", authMiddleware,
     ]);
     const generatedAt = new Date();
     const activeImage = await loadActiveRfiExportImage(rfi);
-    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, generatedAt });
+    const additionalImages = await loadAdditionalRfiExportImages(rfi);
+    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
     const auditModel = buildRfiAuditModel(exportData.model, { activity, custody, views });
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     const chunks: Buffer[] = [];
@@ -3171,15 +3398,17 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
     ]);
     const generatedAt = new Date();
     const activeImage = await loadActiveRfiExportImage(rfi);
-    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, generatedAt });
-    const doc = buildCanonicalRfiDocx(exportData.model, exportData.image);
+    const additionalImages = await loadAdditionalRfiExportImages(rfi);
+    const reportSettings = await loadRfiReportSettingsSnapshot(projectId);
+    const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
+    const doc = buildCanonicalRfiDocx(exportData.model, exportData.image, reportSettings, exportData.additionalImages);
     const buffer = await Packer.toBuffer(doc);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     res.setHeader("Content-Disposition", `attachment; filename="${rfi.number}-Request-for-Information.docx"`);
     res.send(buffer);
     db.insert(activityLogTable).values({
       projectId, userId: req.user!.userId, userFullName: req.user!.fullName || "User", userCompanyName: req.user!.companyName || "",
-      actionType: "export", entityType: "rfi", entityId: rfiId, details: `RFI DOCX exported: ${rfi.number}`,
+      actionType: "export", entityType: "rfi", entityId: rfiId, details: JSON.stringify({ event: "rfi.docx_exported", number: rfi.number, reportSettings }),
     }).catch(error => console.error("[rfis] Failed to log DOCX export activity:", error instanceof Error ? error.message : error));
   } catch (error) {
     console.error("[rfis] RFI DOCX generation failed:", error instanceof Error ? error.message : error);

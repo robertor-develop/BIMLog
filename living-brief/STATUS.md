@@ -227,6 +227,10 @@ is reserved for genuine completion.
 - Telegram Product Build 6: clean integration accepted locally on current master with 38/38 final built-runtime
   evidence. It adds only the deterministic RFI notification adapter and saved-RFI contextual controls on the
   Build 5 foundation; normal push verification remains pending, and nothing was published or deployed.
+- RFI Report Template Settings: local review candidate only. It adds project-scoped RFI PDF/DOCX report
+  template settings, a Ruben lean preset, canonical source/additional screenshot report controls, additive
+  settings storage, and RFI-only UI/API wiring. It is not integrated, pushed, published, deployed, or
+  independently accepted.
 - RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 4: not started.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.

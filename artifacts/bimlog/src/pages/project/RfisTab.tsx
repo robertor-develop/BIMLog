@@ -202,6 +202,7 @@ type RfiImagePresentation = {
   showInRfi?: boolean;
   includeInCompletePdf?: boolean;
   crop?: { x: number; y: number; width: number; height: number } | null;
+  reportScreenshots?: Array<{ fileId: number; kind: "upload" | "paste" | "screen-snip"; caption?: string | null; description?: string | null; include?: boolean; order: number }>;
 } | null;
 
 type PendingImage = {
@@ -606,6 +607,122 @@ function FileSearchDropdown({ files, onSelect, onClose }: {
 
 // ─── main export ─────────────────────────────────────────────────────────────
 
+type RfiReportSettingsPayload = {
+  inventory: Array<{ id: string; label: string; labelEs: string; mandatory?: boolean; fields: Array<{ id: string; label: string; labelEs: string; mandatory?: boolean }> }>;
+  defaultSettings: RfiReportSettingsDocument;
+  leanPreset: RfiReportSettingsDocument;
+  current: { exists: boolean; version: number; settings: RfiReportSettingsDocument; legacyDefaultActive: boolean; snapshotHash: string };
+};
+type RfiReportSettingsDocument = { schemaVersion: 1; preset: "default" | "lean"; emptyFieldMode: "not_recorded" | "hide_empty"; sections: RfiReportSettingsSection[] };
+type RfiReportSettingsSection = { id: string; visible: boolean; order: number; fields: Array<{ id: string; visible: boolean; order: number }> };
+
+function RfiReportScreenshotsEditor({ items = [], files, editable, lang, onChange }: { items?: NonNullable<RfiImagePresentation>["reportScreenshots"]; files: ProjectFile[]; editable: boolean; lang: string; onChange: (items: NonNullable<RfiImagePresentation>["reportScreenshots"]) => void }) {
+  if (!items?.length) return null;
+  const ordered = [...items].sort((a, b) => a.order - b.order);
+  const rename = (fileId: number, patch: Partial<NonNullable<typeof items>[number]>) => onChange(ordered.map((item, index) => item.fileId === fileId ? { ...item, ...patch, order: index } : { ...item, order: index }));
+  const move = (fileId: number, direction: -1 | 1) => {
+    const index = ordered.findIndex(item => item.fileId === fileId);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= ordered.length) return;
+    [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+    onChange(ordered.map((item, order) => ({ ...item, order })));
+  };
+  const remove = (fileId: number) => onChange(ordered.filter(item => item.fileId !== fileId).map((item, order) => ({ ...item, order })));
+  return (
+    <div style={{ marginTop: 10, padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
+      <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Additional report screenshots", "Capturas adicionales del reporte", lang)}</div>
+      <div style={{ display: "grid", gap: 8 }}>
+        {ordered.map((item, index) => {
+          const file = files.find(candidate => candidate.id === item.fileId);
+          const label = file?.fileName || item.caption || `Screenshot ${index + 1}`;
+          return (
+            <div key={item.fileId} style={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto", gap: 8, alignItems: "center", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined, paddingTop: index ? 8 : 0 }}>
+              <input type="checkbox" checked={item.include !== false} disabled={!editable} onChange={event => rename(item.fileId, { include: event.target.checked })} />
+              <div style={{ display: "grid", gap: 5 }}>
+                <div style={{ fontSize: 12, fontWeight: 700 }}>{label}</div>
+                <Input value={item.caption || ""} disabled={!editable} onChange={event => rename(item.fileId, { caption: event.target.value })} placeholder={w("Caption", "Titulo", lang)} style={{ height: 30, fontSize: 12 }} />
+                <Input value={item.description || ""} disabled={!editable} onChange={event => rename(item.fileId, { description: event.target.value })} placeholder={w("Description", "Descripcion", lang)} style={{ height: 30, fontSize: 12 }} />
+              </div>
+              {editable && <div style={{ display: "flex", gap: 4 }}><Button type="button" size="icon" variant="outline" disabled={index === 0} onClick={() => move(item.fileId, -1)}><ChevronUp style={{ width: 14, height: 14 }} /></Button><Button type="button" size="icon" variant="outline" disabled={index === ordered.length - 1} onClick={() => move(item.fileId, 1)}><ChevronDown style={{ width: 14, height: 14 }} /></Button><Button type="button" size="icon" variant="outline" onClick={() => remove(item.fileId)}><Trash2 style={{ width: 14, height: 14 }} /></Button></div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: number; lang: string; onClose: () => void }) {
+  const { toast } = useToast();
+  const [payload, setPayload] = useState<RfiReportSettingsPayload | null>(null);
+  const [settings, setSettings] = useState<RfiReportSettingsDocument | null>(null);
+  const [saving, setSaving] = useState(false);
+  const token = () => JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/v1/projects/${projectId}/rfis/report-settings`, { headers: { Authorization: `Bearer ${token()}` } })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error((data as { error?: string }).error || w("RFI report settings could not be loaded.", "No se pudieron cargar los ajustes de reporte RFI.", lang));
+        if (active) { setPayload(data as RfiReportSettingsPayload); setSettings((data as RfiReportSettingsPayload).current.settings); }
+      })
+      .catch(error => toast({ title: error instanceof Error ? error.message : w("Settings unavailable", "Ajustes no disponibles", lang), variant: "destructive" }));
+    return () => { active = false; };
+  }, [projectId, lang, toast]);
+  const sectionMap = useMemo(() => new Map((settings?.sections || []).map(section => [section.id, section])), [settings]);
+  const setSectionVisible = (sectionId: string, visible: boolean) => setSettings(prev => prev ? { ...prev, sections: prev.sections.map(section => section.id === sectionId ? { ...section, visible } : section) } : prev);
+  const setFieldVisible = (sectionId: string, fieldId: string, visible: boolean) => setSettings(prev => prev ? { ...prev, sections: prev.sections.map(section => section.id === sectionId ? { ...section, fields: section.fields.map(field => field.id === fieldId ? { ...field, visible } : field) } : section) } : prev);
+  const save = async () => {
+    if (!settings) return;
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/report-settings`, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify({ settings, expectedVersion: payload?.current.version ?? 0 }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error((data as { error?: string }).error || w("Settings were not saved.", "No se guardaron los ajustes.", lang));
+      setPayload(data as RfiReportSettingsPayload); setSettings((data as RfiReportSettingsPayload).current.settings); toast({ title: w("RFI report settings saved", "Ajustes de reporte RFI guardados", lang) });
+    } catch (error) { toast({ title: error instanceof Error ? error.message : w("Settings were not saved.", "No se guardaron los ajustes.", lang), variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
+  const reset = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/report-settings/reset`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify({ expectedVersion: payload?.current.version ?? 0 }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error((data as { error?: string }).error || w("Settings were not reset.", "No se restablecieron los ajustes.", lang));
+      setPayload(data as RfiReportSettingsPayload); setSettings((data as RfiReportSettingsPayload).current.settings);
+    } catch (error) { toast({ title: error instanceof Error ? error.message : w("Settings were not reset.", "No se restablecieron los ajustes.", lang), variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
+  if (!payload || !settings) return <div style={{ padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 8, marginBottom: 12 }}>{w("Loading RFI report settings...", "Cargando ajustes de reporte RFI...", lang)}</div>;
+  const visiblePreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible !== false);
+  const hiddenPreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible === false);
+  return (
+    <section aria-label={w("RFI Report Settings", "Ajustes de Reporte RFI", lang)} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 14, marginBottom: 12, background: "hsl(var(--background))" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between", flexWrap: "wrap" }}>
+        <div><strong>{w("Project RFI Report Settings", "Ajustes de Reporte RFI del Proyecto", lang)}</strong><div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{payload.current.legacyDefaultActive ? w("Full BIMLog report remains active until a project setting is saved.", "El reporte BIMLog completo sigue activo hasta guardar un ajuste del proyecto.", lang) : `${w("Settings version", "Version de ajustes", lang)} ${payload.current.version}`}</div></div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.defaultSettings)}>{w("Default", "Predeterminado", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.leanPreset)}>{w("Ruben Lean Preset", "Plantilla Lean Ruben", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => void reset()} disabled={saving}>{w("Reset to Default", "Restablecer", lang)}</Button>
+          <Button type="button" size="sm" onClick={() => void save()} disabled={saving}>{saving ? w("Saving...", "Guardando...", lang) : w("Save Settings", "Guardar Ajustes", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}><X style={{ width: 13, height: 13 }} />{w("Close", "Cerrar", lang)}</Button>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 12 }}>
+        <label style={{ display: "grid", gap: 4, fontSize: 12 }}>{w("Empty fields", "Campos vacios", lang)}<select value={settings.emptyFieldMode} onChange={event => setSettings({ ...settings, emptyFieldMode: event.target.value === "hide_empty" ? "hide_empty" : "not_recorded" })} style={{ height: 34, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "0 8px" }}><option value="not_recorded">{w("Show Not recorded", "Mostrar No registrado", lang)}</option><option value="hide_empty">{w("Hide empty fields", "Ocultar campos vacios", lang)}</option></select></label>
+        <div style={{ fontSize: 12 }}><strong>{w("Preview", "Vista previa", lang)}</strong><div>{w("Included", "Incluido", lang)}: {visiblePreview.map(section => w(section.label, section.labelEs, lang)).join(", ")}</div><div>{w("Omitted", "Omitido", lang)}: {hiddenPreview.length ? hiddenPreview.map(section => w(section.label, section.labelEs, lang)).join(", ") : w("None", "Ninguno", lang)}</div></div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10, marginTop: 12 }}>
+        {payload.inventory.map(section => {
+          const configured = sectionMap.get(section.id);
+          const fieldMap = new Map((configured?.fields || []).map(field => [field.id, field]));
+          return <div key={section.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}><label style={{ display: "flex", gap: 8, alignItems: "center", fontWeight: 700, fontSize: 12 }}><input type="checkbox" checked={configured?.visible !== false} disabled={section.mandatory} onChange={event => setSectionVisible(section.id, event.target.checked)} />{w(section.label, section.labelEs, lang)}</label><div style={{ display: "grid", gap: 5, marginTop: 8 }}>{section.fields.map(field => { const configuredField = fieldMap.get(field.id); return <label key={field.id} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: "hsl(var(--muted-foreground))" }}><input type="checkbox" checked={configuredField?.visible !== false} disabled={field.mandatory} onChange={event => setFieldVisible(section.id, field.id, event.target.checked)} />{w(field.label, field.labelEs, lang)}{field.mandatory ? ` ${w("(required)", "(requerido)", lang)}` : ""}</label>; })}</div></div>;
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
   const { getLabel, getOptions } = useConfig();
@@ -618,6 +735,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreate, setShowCreate] = useState(false);
+  const [showReportSettings, setShowReportSettings] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [meetingDraftReturn, setMeetingDraftReturn] = useState<string | null>(null);
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
@@ -969,6 +1087,12 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             </Button>
           )}
           {canWrite && (
+            <Button variant="outline" size="sm" onClick={() => setShowReportSettings(value => !value)} style={{ gap: 5, fontSize: 11 }}>
+              <FileText style={{ width: 12, height: 12 }} />
+              {w("RFI Report Settings", "Ajustes Reporte RFI", lang)}
+            </Button>
+          )}
+          {canWrite && (
             <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
               <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
               <span className="btn btn-outline btn-sm" style={{ fontSize: 12, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
@@ -988,6 +1112,10 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           )}
         </div>
       </div>
+
+      {showReportSettings && canWrite && (
+        <RfiReportSettingsPanel projectId={projectId} lang={lang} onClose={() => setShowReportSettings(false)} />
+      )}
 
       {overdueCount > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "8px 12px", background: "#FFF1F2", border: "1px solid #FECDD3", borderRadius: 8, fontSize: 12, color: "#BE123C" }}>
@@ -1493,8 +1621,14 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
       setAttachments(prev => prev.includes(downloadUrl) ? prev : [...prev, downloadUrl]);
       setPackageItems(prev => prev.some(item => item.fileId === fileId) ? prev : [...prev, { key: `file:${fileId}`, label: fileName, fileId, attachment: downloadUrl, source: "rfi-attachment", include: true, order: prev.length }]);
       if (file.type.startsWith("image/")) {
-        setImagePresentation({ sourceFileId: fileId, sourceKind: imageKind, showInRfi: true, includeInCompletePdf: true, crop: imageCrop || null });
-        setSavedImagePreviewUrl(prev => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(file); });
+        setImagePresentation(prev => {
+          if (prev?.sourceFileId) {
+            const existing = prev.reportScreenshots || [];
+            return { ...prev, reportScreenshots: [...existing, { fileId, kind: imageKind, caption: fileName, description: null, include: true, order: existing.length }] };
+          }
+          setSavedImagePreviewUrl(old => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(file); });
+          return { sourceFileId: fileId, sourceKind: imageKind, showInRfi: true, includeInCompletePdf: true, crop: imageCrop || null };
+        });
       }
       setUploadResults(prev => prev.map(item => item.name === file.name ? { name: fileName, state: "success", message: w("Attached", "Adjuntado", lang) } : item));
       toast({ title: w("File uploaded and attached", "Archivo subido y adjuntado", lang) });
@@ -1835,7 +1969,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
           { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteCreateImage },
           { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureCreateImage },
         ]}
-        imagePresentationContent={imagePresentation ? <RfiImagePresentationControls lang={lang} imageUrl={savedImagePreviewUrl} label={w(imagePresentation.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation.sourceKind === "paste" ? "Pasted image" : "Uploaded image", imagePresentation.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation.sourceKind === "paste" ? "Imagen pegada" : "Imagen subida", lang)} crop={imagePresentation.crop} showInRfi={imagePresentation.showInRfi !== false} includeInCompletePdf={imagePresentation.includeInCompletePdf !== false} editable onCrop={() => setEditingSavedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} /> : null}
+        imagePresentationContent={imagePresentation ? <><RfiImagePresentationControls lang={lang} imageUrl={savedImagePreviewUrl} label={w(imagePresentation.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation.sourceKind === "paste" ? "Pasted image" : "Uploaded image", imagePresentation.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation.sourceKind === "paste" ? "Imagen pegada" : "Imagen subida", lang)} crop={imagePresentation.crop} showInRfi={imagePresentation.showInRfi !== false} includeInCompletePdf={imagePresentation.includeInCompletePdf !== false} editable onCrop={() => setEditingSavedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} /><RfiReportScreenshotsEditor items={imagePresentation.reportScreenshots} files={files || []} editable lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : prev)} /></> : null}
         actions={{ submit: handleSubmit, cancel: () => { void cancelCreate(); } }}
         onChange={handleCanonicalCreateChange}
         onAddReference={addReference}
@@ -2467,15 +2601,23 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           : prev;
         return [...adjusted, { key: `file:${data.fileId}`, label: data.fileName, fileId: data.fileId, attachment: data.downloadUrl, source: "rfi-attachment", include: true, order: adjusted.length }];
       });
-      setImagePresentation(prev => ({
-        sourceFileId: mode === "source" ? data.fileId : prev?.sourceFileId ?? viewpointFile?.id ?? data.fileId,
-        replacementFileId: mode === "replacement" ? data.fileId : prev?.replacementFileId ?? null,
-        sourceKind: mode === "source" ? kind : prev?.sourceKind ?? (viewpointFile ? "viewpoint" : kind),
-        replacementKind: mode === "replacement" ? kind : prev?.replacementKind ?? null,
-        showInRfi: prev?.showInRfi !== false,
-        includeInCompletePdf: prev?.includeInCompletePdf !== false,
-        crop,
-      }));
+      setImagePresentation(prev => {
+        const sourceFileId = prev?.sourceFileId ?? viewpointFile?.id ?? null;
+        if (mode === "source" && sourceFileId) {
+          const existing = prev?.reportScreenshots || [];
+          return { ...(prev || { sourceFileId, sourceKind: viewpointFile ? "viewpoint" : kind, showInRfi: true, includeInCompletePdf: true, crop: null }), reportScreenshots: [...existing, { fileId: data.fileId, kind, caption: data.fileName, description: null, include: true, order: existing.length }] };
+        }
+        return {
+          sourceFileId: mode === "source" ? data.fileId : sourceFileId ?? data.fileId,
+          replacementFileId: mode === "replacement" ? data.fileId : prev?.replacementFileId ?? null,
+          sourceKind: mode === "source" ? kind : prev?.sourceKind ?? (viewpointFile ? "viewpoint" : kind),
+          replacementKind: mode === "replacement" ? kind : prev?.replacementKind ?? null,
+          showInRfi: prev?.showInRfi !== false,
+          includeInCompletePdf: prev?.includeInCompletePdf !== false,
+          crop,
+          reportScreenshots: prev?.reportScreenshots || [],
+        };
+      });
       setDetailUploadResults(prev => prev.map(item => item.name === file.name ? { name: data.fileName, state: "success", message: w("Attached", "Adjuntado", lang) } : item));
       toast({ title: mode === "replacement" ? w("Replacement image attached. Original evidence preserved.", "Imagen de reemplazo adjuntada. Evidencia original preservada.", lang) : w("Image attached.", "Imagen adjuntada.", lang) });
     } catch (error) {
@@ -2791,7 +2933,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const movePackageItem = (key: string, direction: -1 | 1) => {
     setPackageItems(prev => {
       const ordered = [...prev].sort((a, b) => a.order - b.order);
-      const presentationIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId]
+      const presentationIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId, ...(imagePresentation?.reportScreenshots || []).map(item => item.fileId)]
         .filter((id): id is number => typeof id === "number"));
       const visible = ordered.filter(item => !item.fileId || !presentationIds.has(item.fileId));
       const index = visible.findIndex(item => item.key === key);
@@ -2941,7 +3083,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteImageEvidence },
           { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureScreenImage },
         ] : []}
-        imagePresentationContent={(imagePresentation || viewpointFile) ? <RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} /> : null}
+        imagePresentationContent={(imagePresentation || viewpointFile) ? <><RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} /><RfiReportScreenshotsEditor items={imagePresentation?.reportScreenshots} files={files || []} editable={infoEdit} lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : { sourceFileId: viewpointFile?.id ?? null, sourceKind: viewpointFile ? "viewpoint" : null, showInRfi: true, includeInCompletePdf: true, crop: null, reportScreenshots })} /></> : null}
         actions={{
           back: onClose,
           "export-pdf": () => onExportPdf(rfi),
@@ -3109,7 +3251,7 @@ export function RfiCanonicalForm({
   const costNeedsReason = values.costImpact === "Cost Increase TBD" || values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const costNeedsAmount = values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const scheduleNeedsFields = values.scheduleImpact === "Increase in Calendar Days" || values.scheduleImpact === "Decrease in Calendar Days";
-  const presentationFileIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId].filter((id): id is number => typeof id === "number"));
+  const presentationFileIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId, ...(imagePresentation?.reportScreenshots || []).map(item => item.fileId)].filter((id): id is number => typeof id === "number"));
   const packageDisplayItems = packageItems.filter(item => !item.fileId || !presentationFileIds.has(item.fileId));
   const fileForAttachment = (value: string) => {
     const fileId = fileIdFromAttachment(value);

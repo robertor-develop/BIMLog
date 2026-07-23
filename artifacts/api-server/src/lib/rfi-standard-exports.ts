@@ -24,6 +24,7 @@ const DOCX_CONTENT_WIDTH = 9360;
 const EMPTY_VALUE = "Not recorded";
 
 export type RfiExportImage = {
+  id?: number;
   buffer: Buffer;
   type: "png" | "jpg";
   width: number;
@@ -31,6 +32,8 @@ export type RfiExportImage = {
   fileName: string;
   kind: "viewpoint" | "upload" | "paste" | "screen-snip";
   crop: { x: number; y: number; width: number; height: number } | null;
+  caption?: string;
+  description?: string;
 };
 
 export type RfiExportSource = {
@@ -132,6 +135,7 @@ export type CanonicalRfiExportModel = {
     manualReferences: string[];
     attachments: string[];
     image: { name: string; kind: string } | null;
+    additionalImages: Array<{ name: string; caption: string }>;
   };
   question: string;
   impact: {
@@ -161,6 +165,185 @@ export type CanonicalRfiExportModel = {
     closingStatus: string;
   }>;
 };
+
+export type RfiReportSectionId =
+  | "header"
+  | "submitted_by"
+  | "submitted_to"
+  | "references"
+  | "question"
+  | "impact"
+  | "distribution_email"
+  | "official_responses";
+
+export type RfiReportEmptyFieldMode = "not_recorded" | "hide_empty";
+
+export type RfiReportSettingsField = { id: string; visible: boolean; order: number };
+export type RfiReportSettingsSection = { id: RfiReportSectionId; visible: boolean; order: number; fields: RfiReportSettingsField[] };
+export type RfiReportSettingsDocument = {
+  schemaVersion: 1;
+  preset: "default" | "lean";
+  emptyFieldMode: RfiReportEmptyFieldMode;
+  sections: RfiReportSettingsSection[];
+};
+export type RfiReportSettingsSnapshot = {
+  source: "legacy_default" | "project";
+  version: number;
+  settings: RfiReportSettingsDocument;
+  snapshotHash: string;
+};
+
+type RfiReportFieldInventory = { id: string; label: string; labelEs: string; mandatory?: boolean };
+type RfiReportSectionInventory = { id: RfiReportSectionId; label: string; labelEs: string; fields: RfiReportFieldInventory[]; mandatory?: boolean };
+
+export const RFI_REPORT_SECTION_INVENTORY: RfiReportSectionInventory[] = [
+  { id: "header", label: "Header / RFI Status", labelEs: "Encabezado / Estado RFI", mandatory: true, fields: [
+    { id: "project", label: "Project", labelEs: "Proyecto", mandatory: true },
+    { id: "project_code", label: "Project Code", labelEs: "Codigo del Proyecto" },
+    { id: "rfi_number", label: "RFI Number", labelEs: "Numero RFI", mandatory: true },
+    { id: "revision", label: "Revision", labelEs: "Revision", mandatory: true },
+    { id: "subject", label: "Subject", labelEs: "Asunto", mandatory: true },
+    { id: "rfi_type", label: "RFI Type", labelEs: "Tipo de RFI", mandatory: true },
+    { id: "current_status", label: "Current Status", labelEs: "Estado Actual", mandatory: true },
+    { id: "lifecycle_state", label: "Lifecycle State", labelEs: "Estado del Ciclo", mandatory: true },
+    { id: "priority", label: "Priority", labelEs: "Prioridad" },
+    { id: "date_requested", label: "Date Requested", labelEs: "Fecha Solicitada" },
+    { id: "date_required", label: "Date Required", labelEs: "Fecha Requerida" },
+    { id: "date_answered", label: "Date Answered", labelEs: "Fecha Respondida" },
+    { id: "days_outstanding", label: "Days Outstanding", labelEs: "Dias Pendientes" },
+    { id: "current_ball_in_court", label: "Current Ball in Court", labelEs: "Responsable Actual" },
+  ] },
+  { id: "submitted_by", label: "Submitted By", labelEs: "Enviado Por", fields: [
+    { id: "company", label: "Company", labelEs: "Empresa" },
+    { id: "person", label: "Person", labelEs: "Persona" },
+    { id: "email", label: "Email", labelEs: "Correo" },
+    { id: "phone", label: "Phone", labelEs: "Telefono" },
+    { id: "address", label: "Address", labelEs: "Direccion" },
+  ] },
+  { id: "submitted_to", label: "Submitted To", labelEs: "Enviado A", fields: [
+    { id: "company", label: "Company", labelEs: "Empresa" },
+    { id: "person", label: "Person", labelEs: "Persona" },
+    { id: "email", label: "Email", labelEs: "Correo" },
+    { id: "phone", label: "Phone", labelEs: "Telefono" },
+    { id: "address", label: "Address", labelEs: "Direccion" },
+  ] },
+  { id: "references", label: "Reference Information / Attachments", labelEs: "Referencias / Adjuntos", fields: [
+    { id: "drawing_number", label: "Drawing Number", labelEs: "Numero de Plano" },
+    { id: "drawing_title", label: "Drawing Title", labelEs: "Titulo del Plano" },
+    { id: "specification_section", label: "Specification Section", labelEs: "Seccion de Especificacion" },
+    { id: "detail_number", label: "Detail Number", labelEs: "Numero de Detalle" },
+    { id: "note_number", label: "Note Number", labelEs: "Numero de Nota" },
+    { id: "location", label: "Location", labelEs: "Ubicacion" },
+    { id: "project_address", label: "Project Address", labelEs: "Direccion del Proyecto" },
+    { id: "source_viewpoint", label: "Source Viewpoint", labelEs: "Viewpoint Fuente" },
+    { id: "manual_references", label: "References", labelEs: "Referencias" },
+    { id: "attachments", label: "Attachments", labelEs: "Adjuntos" },
+    { id: "source_viewpoint_image", label: "Source Viewpoint Screenshot", labelEs: "Captura de Viewpoint Fuente" },
+    { id: "additional_screenshots", label: "Additional Screenshots", labelEs: "Capturas Adicionales" },
+  ] },
+  { id: "question", label: "Description of Question", labelEs: "Descripcion de la Pregunta", fields: [
+    { id: "question", label: "Question", labelEs: "Pregunta" },
+  ] },
+  { id: "impact", label: "Impact Assessment", labelEs: "Evaluacion de Impacto", fields: [
+    { id: "cost_impact", label: "Cost Impact", labelEs: "Impacto de Costo" },
+    { id: "cost_amount", label: "Cost Amount", labelEs: "Monto de Costo" },
+    { id: "cost_reason", label: "Cost Reason / Explanation", labelEs: "Razon / Explicacion de Costo" },
+    { id: "schedule_impact", label: "Schedule Impact", labelEs: "Impacto de Programa" },
+    { id: "calendar_days", label: "Calendar Days", labelEs: "Dias Calendario" },
+    { id: "schedule_reason", label: "Schedule Reason / Explanation", labelEs: "Razon / Explicacion de Programa" },
+  ] },
+  { id: "distribution_email", label: "Distribution / Email", labelEs: "Distribucion / Email", fields: [
+    { id: "distribution", label: "Distribution", labelEs: "Distribucion" },
+    { id: "email_description", label: "Description of Email", labelEs: "Descripcion del Email" },
+    { id: "email_draft", label: "Email Draft", labelEs: "Borrador de Email" },
+  ] },
+  { id: "official_responses", label: "Official Responses", labelEs: "Respuestas Oficiales", fields: [
+    { id: "response_text", label: "Response Text", labelEs: "Texto de Respuesta" },
+    { id: "response_accountability", label: "Responder / Date", labelEs: "Respondedor / Fecha" },
+    { id: "response_impact", label: "Response Impact", labelEs: "Impacto de Respuesta" },
+    { id: "response_attachments", label: "Response Attachments", labelEs: "Adjuntos de Respuesta" },
+  ] },
+];
+
+function settingsHash(settings: RfiReportSettingsDocument): string {
+  return computeContentHash(settings);
+}
+
+export function buildDefaultRfiReportSettings(): RfiReportSettingsDocument {
+  return {
+    schemaVersion: 1,
+    preset: "default",
+    emptyFieldMode: "not_recorded",
+    sections: RFI_REPORT_SECTION_INVENTORY.map((section, sectionIndex) => ({
+      id: section.id,
+      visible: true,
+      order: sectionIndex + 1,
+      fields: section.fields.map((field, fieldIndex) => ({ id: field.id, visible: true, order: fieldIndex + 1 })),
+    })),
+  };
+}
+
+export function buildLeanRfiReportSettings(): RfiReportSettingsDocument {
+  const settings = buildDefaultRfiReportSettings();
+  settings.preset = "lean";
+  settings.emptyFieldMode = "hide_empty";
+  const visible = new Set<RfiReportSectionId>(["header", "submitted_by", "references"]);
+  settings.sections = settings.sections.map(section => ({ ...section, visible: visible.has(section.id) }));
+  return settings;
+}
+
+export function buildLegacyRfiReportSettings(): RfiReportSettingsDocument {
+  const settings = buildDefaultRfiReportSettings();
+  settings.sections = settings.sections.map(section => section.id === "official_responses" ? { ...section, visible: false } : section);
+  return settings;
+}
+
+export function normalizeRfiReportSettings(value: unknown): RfiReportSettingsDocument {
+  const base = buildDefaultRfiReportSettings();
+  const input = value && typeof value === "object" ? value as Partial<RfiReportSettingsDocument> : {};
+  const bySection = new Map((Array.isArray(input.sections) ? input.sections : []).map(section => [section.id, section]));
+  const normalized: RfiReportSettingsDocument = {
+    schemaVersion: 1,
+    preset: input.preset === "lean" ? "lean" : "default",
+    emptyFieldMode: input.emptyFieldMode === "hide_empty" ? "hide_empty" : "not_recorded",
+    sections: base.sections.map(section => {
+      const supplied = bySection.get(section.id);
+      const byField = new Map((Array.isArray(supplied?.fields) ? supplied.fields : []).map(field => [field.id, field]));
+      return {
+        id: section.id,
+        visible: supplied?.visible !== false,
+        order: Number.isFinite(supplied?.order) ? Number(supplied?.order) : section.order,
+        fields: section.fields.map(field => {
+          const suppliedField = byField.get(field.id);
+          return {
+            id: field.id,
+            visible: suppliedField?.visible !== false,
+            order: Number.isFinite(suppliedField?.order) ? Number(suppliedField?.order) : field.order,
+          };
+        }),
+      };
+    }).sort((a, b) => a.order - b.order),
+  };
+  validateRfiReportSettings(normalized);
+  return normalized;
+}
+
+export function validateRfiReportSettings(settings: RfiReportSettingsDocument): void {
+  const header = settings.sections.find(section => section.id === "header");
+  if (!header?.visible) throw new Error("Header / RFI Status is required.");
+  const visibleHeaderFields = new Set(header.fields.filter(field => field.visible).map(field => field.id));
+  const requiredHeaderFields = RFI_REPORT_SECTION_INVENTORY.find(section => section.id === "header")!.fields.filter(field => field.mandatory).map(field => field.id);
+  for (const fieldId of requiredHeaderFields) {
+    if (!visibleHeaderFields.has(fieldId)) throw new Error("Project/RFI identity, RFI Type, status, revision, and lifecycle fields are required.");
+  }
+  const hasUsefulBody = settings.sections.some(section => section.id !== "header" && section.visible && section.fields.some(field => field.visible));
+  if (!hasUsefulBody) throw new Error("At least one non-header section must remain visible.");
+}
+
+export function makeRfiReportSettingsSnapshot(settings: RfiReportSettingsDocument | null | undefined, version = 0, source: "legacy_default" | "project" = "legacy_default"): RfiReportSettingsSnapshot {
+  const normalized = normalizeRfiReportSettings(settings || (source === "legacy_default" ? buildLegacyRfiReportSettings() : buildDefaultRfiReportSettings()));
+  return { source, version, settings: normalized, snapshotHash: settingsHash(normalized) };
+}
 
 export type RfiAuditEventSource = {
   actionType: string;
@@ -280,6 +463,7 @@ export function buildCanonicalRfiExportModel(input: {
   responseAttachments: Map<number, string[]>;
   directoryRecipients?: DirectoryRecipient[];
   image?: RfiExportImage | null;
+  additionalImages?: RfiExportImage[];
   generatedAt?: Date;
 }): CanonicalRfiExportModel {
   const { rfi } = input;
@@ -342,6 +526,7 @@ export function buildCanonicalRfiExportModel(input: {
       detailNumber: cleanText(rfi.detailNumber), noteNumber: cleanText(rfi.noteNumber), location: cleanText(rfi.locationDescription),
       projectAddress, sourceViewpoint: cleanText(rfi.sourceViewpointLabel), manualReferences: input.manualReferences,
       attachments: input.attachments, image: input.image ? { name: cleanText(input.image.fileName), kind: humanize(input.image.kind) } : null,
+      additionalImages: (input.additionalImages || []).map(item => ({ name: cleanText(item.fileName), caption: cleanText(item.caption) })),
     },
     question: preserveText(rfi.question || rfi.description),
     impact: {
@@ -508,55 +693,132 @@ function reportTimestamp(model: CanonicalRfiExportModel): string {
   return `Generated ${formatTimestamp(model.generatedAt)}`;
 }
 
-export function renderCanonicalRfiPdf(doc: PDFKit.PDFDocument, model: CanonicalRfiExportModel, image: RfiExportImage | null): void {
+type ReportRenderSection = RfiReportSettingsSection & { inventory: RfiReportSectionInventory };
+
+function visibleSections(settings: RfiReportSettingsDocument): ReportRenderSection[] {
+  return settings.sections
+    .filter(section => section.visible)
+    .map(section => ({ ...section, inventory: RFI_REPORT_SECTION_INVENTORY.find(item => item.id === section.id)! }))
+    .filter(section => !!section.inventory)
+    .sort((a, b) => a.order - b.order);
+}
+
+function fieldVisible(section: RfiReportSettingsSection, fieldId: string): boolean {
+  return section.fields.find(field => field.id === fieldId)?.visible !== false;
+}
+
+function reportValueVisible(value: string, settings: RfiReportSettingsDocument): boolean {
+  return settings.emptyFieldMode !== "hide_empty" || (value !== EMPTY_VALUE && value !== "");
+}
+
+function configuredPairs(settings: RfiReportSettingsDocument, section: RfiReportSettingsSection, pairs: Array<[string, string, string]>): Array<[string, string]> {
+  return pairs
+    .filter(([fieldId, _label, value]) => fieldVisible(section, fieldId) && reportValueVisible(value, settings))
+    .map(([_fieldId, label, value]) => [label, value]);
+}
+
+function sectionNumber(index: number) {
+  return String(index + 1);
+}
+
+function sectionConfigured(settings: RfiReportSettingsDocument, id: RfiReportSectionId): RfiReportSettingsSection {
+  return settings.sections.find(section => section.id === id) || buildDefaultRfiReportSettings().sections.find(section => section.id === id)!;
+}
+
+function addPdfResponses(flow: PdfFlow, model: CanonicalRfiExportModel, section: RfiReportSettingsSection, settings: RfiReportSettingsDocument) {
+  if (!model.responses.length) {
+    if (settings.emptyFieldMode !== "hide_empty") flow.paragraph("No official responses recorded.", { color: PALETTE.MUTED });
+    return;
+  }
+  model.responses.forEach(response => {
+    if (fieldVisible(section, "response_accountability")) flow.subheading(`Response ${response.number} | ${response.responder} | ${response.date}`);
+    if (fieldVisible(section, "response_text") && reportValueVisible(response.text, settings)) flow.paragraph(response.text, { leftRule: true });
+    const responsePairs = configuredPairs(settings, section, [
+      ["response_accountability", "Responder Email", response.responderEmail],
+      ["response_accountability", "Responder Company", response.responderCompany],
+      ["response_impact", "Cost Impact", response.cost],
+      ["response_impact", "Cost Amount", response.costAmount],
+      ["response_impact", "Cost Reason", response.costReason],
+      ["response_impact", "Schedule Impact", response.schedule],
+      ["response_impact", "Calendar Days", response.scheduleDays],
+      ["response_impact", "Schedule Reason", response.scheduleReason],
+      ["response_accountability", "Closing Status", response.closingStatus],
+      ["response_accountability", "Response Date", response.date],
+    ]);
+    if (responsePairs.length) flow.keyValues(responsePairs);
+    if (fieldVisible(section, "response_attachments")) {
+      if (response.attachments.length || settings.emptyFieldMode !== "hide_empty") {
+        flow.subheading(`Response ${response.number} Attachments`);
+        flow.list(response.attachments, "No response attachments recorded.");
+      }
+    }
+  });
+}
+
+export function renderCanonicalRfiPdf(doc: PDFKit.PDFDocument, model: CanonicalRfiExportModel, image: RfiExportImage | null, settingsSnapshot?: RfiReportSettingsSnapshot, additionalImages: RfiExportImage[] = []): void {
+  const snapshot = settingsSnapshot || makeRfiReportSettingsSnapshot(null);
+  const settings = snapshot.settings;
   doc.info.Title = `${model.header.number} - Request for Information`;
   doc.info.Author = "BIMLog by IgniteSmart";
   doc.info.Subject = model.header.subject;
   doc.info.Keywords = "BIMLog, RFI, Request for Information, construction record";
   const flow = new PdfFlow(doc, "REQUEST FOR INFORMATION", model.project.name, model.header.number);
-  flow.section("1", "Header / RFI Status");
-  flow.keyValues([
-    ["Project", model.project.name], ["Project Code", model.project.code], ["RFI Number", model.header.number], ["Revision", model.header.revision],
-    ["Subject", model.header.subject], ["RFI Type", model.header.type], ["Current Status", model.header.status], ["Lifecycle State", model.header.lifecycleState],
-    ["Priority", model.header.priority], ["Date Requested", model.header.dateRequested], ["Date Required", model.header.dateRequired], ["Date Answered", model.header.dateAnswered],
-    ["Days Outstanding", model.header.daysOutstanding], ["Current Ball in Court", model.header.ballInCourt],
-  ]);
-  flow.section("2", "Submitted By"); flow.keyValues(participantFields(model.submittedBy));
-  flow.section("3", "Submitted To"); flow.keyValues(participantFields(model.submittedTo));
-  flow.section("4", "Reference Information / Attachments");
-  flow.keyValues([
-    ["Drawing Number", model.references.drawingNumber], ["Drawing Title", model.references.drawingTitle],
-    ["Specification Section", model.references.specificationSection], ["Detail Number", model.references.detailNumber],
-    ["Note Number", model.references.noteNumber], ["Location", model.references.location],
-    ["Project Address", model.references.projectAddress], ["Source Viewpoint", model.references.sourceViewpoint],
-  ]);
-  flow.subheading("References"); flow.list(model.references.manualReferences, "No manual references recorded.");
-  flow.subheading("Attachments"); flow.list(model.references.attachments, "No files attached.");
-  if (image) { flow.subheading(`Displayed RFI Image - ${model.references.image?.name || image.fileName}`); flow.image(image); }
-  flow.section("5", "Description of Question"); flow.paragraph(model.question, { leftRule: true });
-  flow.section("6", "Impact Assessment");
-  flow.keyValues([
-    ["Cost Impact", model.impact.cost], ["Cost Amount", model.impact.costAmount], ["Cost Reason / Explanation", model.impact.costReason], ["Schedule Impact", model.impact.schedule],
-    ["Calendar Days", model.impact.scheduleDays], ["Schedule Reason / Explanation", model.impact.scheduleReason],
-  ]);
-  flow.section("7", "Distribution / Email / Responses");
-  flow.subheading("Distribution"); flow.list(model.distribution.map(item => item.display), "No distribution recipients recorded.");
-  flow.subheading("Description of Email"); flow.paragraph(model.email.description, { color: model.email.description === EMPTY_VALUE ? PALETTE.MUTED : PALETTE.TEXT });
-  flow.subheading("Email Draft"); flow.paragraph(model.email.draft, { color: model.email.draft === EMPTY_VALUE ? PALETTE.MUTED : PALETTE.TEXT });
-  flow.subheading("Official Responses");
-  if (!model.responses.length) flow.paragraph("No official responses recorded.", { color: PALETTE.MUTED });
-  model.responses.forEach(response => {
-    flow.subheading(`Response ${response.number} | ${response.responder} | ${response.date}`);
-    flow.paragraph(response.text, { leftRule: true });
-    flow.keyValues([
-      ["Responder Email", response.responderEmail], ["Responder Company", response.responderCompany],
-      ["Cost Impact", response.cost], ["Cost Amount", response.costAmount], ["Cost Reason", response.costReason], ["Schedule Impact", response.schedule],
-      ["Calendar Days", response.scheduleDays], ["Schedule Reason", response.scheduleReason], ["Closing Status", response.closingStatus], ["Response Date", response.date],
-    ]);
-    flow.subheading(`Response ${response.number} Attachments`); flow.list(response.attachments, "No response attachments recorded.");
+  visibleSections(settings).forEach((section, index) => {
+    flow.section(sectionNumber(index), section.inventory.label);
+    if (section.id === "header") flow.keyValues(configuredPairs(settings, section, [
+      ["project", "Project", model.project.name], ["project_code", "Project Code", model.project.code],
+      ["rfi_number", "RFI Number", model.header.number], ["revision", "Revision", model.header.revision],
+      ["subject", "Subject", model.header.subject], ["rfi_type", "RFI Type", model.header.type],
+      ["current_status", "Current Status", model.header.status], ["lifecycle_state", "Lifecycle State", model.header.lifecycleState],
+      ["priority", "Priority", model.header.priority], ["date_requested", "Date Requested", model.header.dateRequested],
+      ["date_required", "Date Required", model.header.dateRequired], ["date_answered", "Date Answered", model.header.dateAnswered],
+      ["days_outstanding", "Days Outstanding", model.header.daysOutstanding], ["current_ball_in_court", "Current Ball in Court", model.header.ballInCourt],
+    ]));
+    if (section.id === "submitted_by") flow.keyValues(configuredPairs(settings, section, participantFields(model.submittedBy).map(([label, value]) => [label.toLowerCase(), label, value])));
+    if (section.id === "submitted_to") flow.keyValues(configuredPairs(settings, section, participantFields(model.submittedTo).map(([label, value]) => [label.toLowerCase(), label, value])));
+    if (section.id === "references") {
+      const pairs = configuredPairs(settings, section, [
+        ["drawing_number", "Drawing Number", model.references.drawingNumber], ["drawing_title", "Drawing Title", model.references.drawingTitle],
+        ["specification_section", "Specification Section", model.references.specificationSection], ["detail_number", "Detail Number", model.references.detailNumber],
+        ["note_number", "Note Number", model.references.noteNumber], ["location", "Location", model.references.location],
+        ["project_address", "Project Address", model.references.projectAddress], ["source_viewpoint", "Source Viewpoint", model.references.sourceViewpoint],
+      ]);
+      if (pairs.length) flow.keyValues(pairs);
+      if (fieldVisible(section, "manual_references") && (model.references.manualReferences.length || settings.emptyFieldMode !== "hide_empty")) { flow.subheading("References"); flow.list(model.references.manualReferences, "No manual references recorded."); }
+      if (fieldVisible(section, "attachments") && (model.references.attachments.length || settings.emptyFieldMode !== "hide_empty")) { flow.subheading("Attachments"); flow.list(model.references.attachments, "No files attached."); }
+      if (fieldVisible(section, "source_viewpoint_image") && image) {
+        flow.subheading(`Source Viewpoint Screenshot - ${model.references.image?.name || image.fileName}`);
+        if (image.caption && reportValueVisible(image.caption, settings)) flow.paragraph(image.caption);
+        flow.image(image);
+      }
+      if (fieldVisible(section, "additional_screenshots") && additionalImages.length) {
+        flow.subheading("Additional Screenshots");
+        additionalImages.forEach((item, itemIndex) => {
+          flow.subheading(`${itemIndex + 1}. ${item.caption || item.fileName}`);
+          if (item.description && reportValueVisible(item.description, settings)) flow.paragraph(item.description);
+          flow.image(item);
+        });
+      }
+    }
+    if (section.id === "question" && fieldVisible(section, "question") && reportValueVisible(model.question, settings)) flow.paragraph(model.question, { leftRule: true });
+    if (section.id === "impact") flow.keyValues(configuredPairs(settings, section, [
+      ["cost_impact", "Cost Impact", model.impact.cost], ["cost_amount", "Cost Amount", model.impact.costAmount],
+      ["cost_reason", "Cost Reason / Explanation", model.impact.costReason], ["schedule_impact", "Schedule Impact", model.impact.schedule],
+      ["calendar_days", "Calendar Days", model.impact.scheduleDays], ["schedule_reason", "Schedule Reason / Explanation", model.impact.scheduleReason],
+    ]));
+    if (section.id === "distribution_email") {
+      if (fieldVisible(section, "distribution") && (model.distribution.length || settings.emptyFieldMode !== "hide_empty")) { flow.subheading("Distribution"); flow.list(model.distribution.map(item => item.display), "No distribution recipients recorded."); }
+      if (fieldVisible(section, "email_description") && reportValueVisible(model.email.description, settings)) { flow.subheading("Description of Email"); flow.paragraph(model.email.description, { color: model.email.description === EMPTY_VALUE ? PALETTE.MUTED : PALETTE.TEXT }); }
+      if (fieldVisible(section, "email_draft") && reportValueVisible(model.email.draft, settings)) { flow.subheading("Email Draft"); flow.paragraph(model.email.draft, { color: model.email.draft === EMPTY_VALUE ? PALETTE.MUTED : PALETTE.TEXT }); }
+      if (!sectionConfigured(settings, "official_responses").visible) {
+        flow.subheading("Official Responses");
+        addPdfResponses(flow, model, sectionConfigured(settings, "official_responses"), settings);
+      }
+    }
+    if (section.id === "official_responses") addPdfResponses(flow, model, section, settings);
   });
   addPageNumbers(doc, {
-    margin: PDF_MARGIN, footerY: 768, fingerprintY: 750, contentHash: computeContentHash(model),
+    margin: PDF_MARGIN, footerY: 768, fingerprintY: 750, contentHash: computeContentHash({ model, reportSettings: snapshot, reportImages: [image, ...additionalImages].filter(Boolean).map(item => ({ id: item?.id, fileName: item?.fileName, kind: item?.kind, caption: item?.caption, crop: item?.crop })) }),
     companyName: "BIMLog", projectName: model.project.name, reportNumber: model.header.number, timestamp: reportTimestamp(model),
     watermarkText: model.header.lifecycleState === "Draft" ? "DRAFT" : undefined,
   });
@@ -626,54 +888,94 @@ function docxImage(image: RfiExportImage): Paragraph {
   return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 160 }, children: [new ImageRun(options)] });
 }
 
-export function buildCanonicalRfiDocx(model: CanonicalRfiExportModel, image: RfiExportImage | null): Document {
+function addDocxResponses(children: Array<Paragraph | Table>, model: CanonicalRfiExportModel, section: RfiReportSettingsSection, settings: RfiReportSettingsDocument) {
+  if (!model.responses.length) {
+    if (settings.emptyFieldMode !== "hide_empty") children.push(...docxParagraphs("No official responses recorded.", { muted: true }));
+    return;
+  }
+  model.responses.forEach(response => {
+    if (fieldVisible(section, "response_accountability")) children.push(docxSubheading(`Response ${response.number} | ${response.responder} | ${response.date}`));
+    if (fieldVisible(section, "response_text") && reportValueVisible(response.text, settings)) children.push(...docxParagraphs(response.text, { indent: 120 }));
+    const responsePairs = configuredPairs(settings, section, [
+      ["response_accountability", "Responder Email", response.responderEmail],
+      ["response_accountability", "Responder Company", response.responderCompany],
+      ["response_impact", "Cost Impact", response.cost],
+      ["response_impact", "Cost Amount", response.costAmount],
+      ["response_impact", "Cost Reason", response.costReason],
+      ["response_impact", "Schedule Impact", response.schedule],
+      ["response_impact", "Calendar Days", response.scheduleDays],
+      ["response_impact", "Schedule Reason", response.scheduleReason],
+      ["response_accountability", "Closing Status", response.closingStatus],
+      ["response_accountability", "Response Date", response.date],
+    ]);
+    if (responsePairs.length) children.push(docxKeyValueTable(responsePairs));
+    if (fieldVisible(section, "response_attachments") && (response.attachments.length || settings.emptyFieldMode !== "hide_empty")) {
+      children.push(docxSubheading(`Response ${response.number} Attachments`), ...docxList(response.attachments, "No response attachments recorded."));
+    }
+  });
+}
+
+export function buildCanonicalRfiDocx(model: CanonicalRfiExportModel, image: RfiExportImage | null, settingsSnapshot?: RfiReportSettingsSnapshot, additionalImages: RfiExportImage[] = []): Document {
+  const snapshot = settingsSnapshot || makeRfiReportSettingsSnapshot(null);
+  const settings = snapshot.settings;
   const children: Array<Paragraph | Table> = [
     new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: "BIMLog", bold: true, color: "173F6B", size: 28, font: "Arial" })] }),
     new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: "REQUEST FOR INFORMATION", bold: true, color: "173F6B", size: 34, font: "Arial" })] }),
     new Paragraph({ spacing: { after: 180 }, children: [new TextRun({ text: `${model.header.number} | ${model.header.subject}`, bold: true, color: "2563A6", size: 24, font: "Arial" })] }),
-    docxSection("1", "Header / RFI Status"),
-    docxKeyValueTable([
-      ["Project", model.project.name], ["Project Code", model.project.code], ["RFI Number", model.header.number], ["Revision", model.header.revision],
-      ["Subject", model.header.subject], ["RFI Type", model.header.type], ["Current Status", model.header.status], ["Lifecycle State", model.header.lifecycleState],
-      ["Priority", model.header.priority], ["Date Requested", model.header.dateRequested], ["Date Required", model.header.dateRequired], ["Date Answered", model.header.dateAnswered],
-      ["Days Outstanding", model.header.daysOutstanding], ["Current Ball in Court", model.header.ballInCourt],
-    ]),
-    docxSection("2", "Submitted By"), docxKeyValueTable(participantFields(model.submittedBy)),
-    docxSection("3", "Submitted To"), docxKeyValueTable(participantFields(model.submittedTo)),
-    docxSection("4", "Reference Information / Attachments"),
-    docxKeyValueTable([
-      ["Drawing Number", model.references.drawingNumber], ["Drawing Title", model.references.drawingTitle], ["Specification Section", model.references.specificationSection], ["Detail Number", model.references.detailNumber],
-      ["Note Number", model.references.noteNumber], ["Location", model.references.location], ["Project Address", model.references.projectAddress], ["Source Viewpoint", model.references.sourceViewpoint],
-    ]),
-    docxSubheading("References"), ...docxList(model.references.manualReferences, "No manual references recorded."),
-    docxSubheading("Attachments"), ...docxList(model.references.attachments, "No files attached."),
   ];
-  if (image) children.push(docxSubheading(`Displayed RFI Image - ${model.references.image?.name || image.fileName}`), docxImage(image));
-  children.push(
-    docxSection("5", "Description of Question"), ...docxParagraphs(model.question, { indent: 120 }),
-    docxSection("6", "Impact Assessment"),
-    docxKeyValueTable([
-      ["Cost Impact", model.impact.cost], ["Cost Amount", model.impact.costAmount], ["Cost Reason / Explanation", model.impact.costReason], ["Schedule Impact", model.impact.schedule],
-      ["Calendar Days", model.impact.scheduleDays], ["Schedule Reason / Explanation", model.impact.scheduleReason],
-    ]),
-    docxSection("7", "Distribution / Email / Responses"),
-    docxSubheading("Distribution"), ...docxList(model.distribution.map(item => item.display), "No distribution recipients recorded."),
-    docxSubheading("Description of Email"), ...docxParagraphs(model.email.description, { muted: model.email.description === EMPTY_VALUE }),
-    docxSubheading("Email Draft"), ...docxParagraphs(model.email.draft, { muted: model.email.draft === EMPTY_VALUE }),
-    docxSubheading("Official Responses"),
-  );
-  if (!model.responses.length) children.push(...docxParagraphs("No official responses recorded.", { muted: true }));
-  model.responses.forEach(response => {
-    children.push(
-      docxSubheading(`Response ${response.number} | ${response.responder} | ${response.date}`),
-      ...docxParagraphs(response.text, { indent: 120 }),
-      docxKeyValueTable([
-        ["Responder Email", response.responderEmail], ["Responder Company", response.responderCompany], ["Cost Impact", response.cost], ["Cost Amount", response.costAmount],
-        ["Cost Reason", response.costReason], ["Schedule Impact", response.schedule], ["Calendar Days", response.scheduleDays], ["Schedule Reason", response.scheduleReason],
-        ["Closing Status", response.closingStatus], ["Response Date", response.date],
-      ]),
-      docxSubheading(`Response ${response.number} Attachments`), ...docxList(response.attachments, "No response attachments recorded."),
-    );
+  visibleSections(settings).forEach((section, index) => {
+    children.push(docxSection(sectionNumber(index), section.inventory.label));
+    if (section.id === "header") children.push(docxKeyValueTable(configuredPairs(settings, section, [
+      ["project", "Project", model.project.name], ["project_code", "Project Code", model.project.code],
+      ["rfi_number", "RFI Number", model.header.number], ["revision", "Revision", model.header.revision],
+      ["subject", "Subject", model.header.subject], ["rfi_type", "RFI Type", model.header.type],
+      ["current_status", "Current Status", model.header.status], ["lifecycle_state", "Lifecycle State", model.header.lifecycleState],
+      ["priority", "Priority", model.header.priority], ["date_requested", "Date Requested", model.header.dateRequested],
+      ["date_required", "Date Required", model.header.dateRequired], ["date_answered", "Date Answered", model.header.dateAnswered],
+      ["days_outstanding", "Days Outstanding", model.header.daysOutstanding], ["current_ball_in_court", "Current Ball in Court", model.header.ballInCourt],
+    ])));
+    if (section.id === "submitted_by") children.push(docxKeyValueTable(configuredPairs(settings, section, participantFields(model.submittedBy).map(([label, value]) => [label.toLowerCase(), label, value]))));
+    if (section.id === "submitted_to") children.push(docxKeyValueTable(configuredPairs(settings, section, participantFields(model.submittedTo).map(([label, value]) => [label.toLowerCase(), label, value]))));
+    if (section.id === "references") {
+      const pairs = configuredPairs(settings, section, [
+        ["drawing_number", "Drawing Number", model.references.drawingNumber], ["drawing_title", "Drawing Title", model.references.drawingTitle],
+        ["specification_section", "Specification Section", model.references.specificationSection], ["detail_number", "Detail Number", model.references.detailNumber],
+        ["note_number", "Note Number", model.references.noteNumber], ["location", "Location", model.references.location],
+        ["project_address", "Project Address", model.references.projectAddress], ["source_viewpoint", "Source Viewpoint", model.references.sourceViewpoint],
+      ]);
+      if (pairs.length) children.push(docxKeyValueTable(pairs));
+      if (fieldVisible(section, "manual_references") && (model.references.manualReferences.length || settings.emptyFieldMode !== "hide_empty")) children.push(docxSubheading("References"), ...docxList(model.references.manualReferences, "No manual references recorded."));
+      if (fieldVisible(section, "attachments") && (model.references.attachments.length || settings.emptyFieldMode !== "hide_empty")) children.push(docxSubheading("Attachments"), ...docxList(model.references.attachments, "No files attached."));
+      if (fieldVisible(section, "source_viewpoint_image") && image) {
+        children.push(docxSubheading(`Source Viewpoint Screenshot - ${model.references.image?.name || image.fileName}`));
+        if (image.caption && reportValueVisible(image.caption, settings)) children.push(...docxParagraphs(image.caption));
+        children.push(docxImage(image));
+      }
+      if (fieldVisible(section, "additional_screenshots") && additionalImages.length) {
+        children.push(docxSubheading("Additional Screenshots"));
+        additionalImages.forEach((item, itemIndex) => {
+          children.push(docxSubheading(`${itemIndex + 1}. ${item.caption || item.fileName}`));
+          if (item.description && reportValueVisible(item.description, settings)) children.push(...docxParagraphs(item.description));
+          children.push(docxImage(item));
+        });
+      }
+    }
+    if (section.id === "question" && fieldVisible(section, "question") && reportValueVisible(model.question, settings)) children.push(...docxParagraphs(model.question, { indent: 120 }));
+    if (section.id === "impact") children.push(docxKeyValueTable(configuredPairs(settings, section, [
+      ["cost_impact", "Cost Impact", model.impact.cost], ["cost_amount", "Cost Amount", model.impact.costAmount],
+      ["cost_reason", "Cost Reason / Explanation", model.impact.costReason], ["schedule_impact", "Schedule Impact", model.impact.schedule],
+      ["calendar_days", "Calendar Days", model.impact.scheduleDays], ["schedule_reason", "Schedule Reason / Explanation", model.impact.scheduleReason],
+    ])));
+    if (section.id === "distribution_email") {
+      if (fieldVisible(section, "distribution") && (model.distribution.length || settings.emptyFieldMode !== "hide_empty")) children.push(docxSubheading("Distribution"), ...docxList(model.distribution.map(item => item.display), "No distribution recipients recorded."));
+      if (fieldVisible(section, "email_description") && reportValueVisible(model.email.description, settings)) children.push(docxSubheading("Description of Email"), ...docxParagraphs(model.email.description, { muted: model.email.description === EMPTY_VALUE }));
+      if (fieldVisible(section, "email_draft") && reportValueVisible(model.email.draft, settings)) children.push(docxSubheading("Email Draft"), ...docxParagraphs(model.email.draft, { muted: model.email.draft === EMPTY_VALUE }));
+      if (!sectionConfigured(settings, "official_responses").visible) {
+        children.push(docxSubheading("Official Responses"));
+        addDocxResponses(children, model, sectionConfigured(settings, "official_responses"), settings);
+      }
+    }
+    if (section.id === "official_responses") addDocxResponses(children, model, section, settings);
   });
   return new Document({
     creator: "BIMLog by IgniteSmart", title: `${model.header.number} - Request for Information`, subject: model.header.subject,

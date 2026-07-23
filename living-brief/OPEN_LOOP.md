@@ -1299,6 +1299,18 @@ Future behavior:
 - BIMLog warns that this may use AI credits.
 - The extracted fields must show confidence and require user review.
 
+### RFI Report Template Settings - Local Review Candidate
+
+- Candidate adds governed per-project RFI report settings for Standard PDF and DOCX, including default and
+  Ruben lean presets, hide-empty behavior, stable section/field IDs, preview, stale-version protection, and
+  export activity settings snapshots.
+- Candidate root-cause fix: viewpoint-created RFIs stored the screenshot file but did not persist the file ID
+  into `image_presentation_json`; exports could not select the linked source screenshot.
+- Candidate adds source viewpoint screenshot and additional report screenshot controls to the canonical
+  report settings model. Remaining review must verify browser UX, PDF/DOCX parity, image ordering/captions,
+  Spanish 390px behavior, and independent acceptance evidence before integration.
+- Boundary: not pushed, not published, not deployed, no production/customer data access, no plugin changes.
+
 ## Closed / Shipped
 
 ### RFI List and Log Governed PDFs

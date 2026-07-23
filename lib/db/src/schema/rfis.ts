@@ -75,6 +75,14 @@ export const rfisTable = pgTable("rfis", {
     showInRfi?: boolean;
     includeInCompletePdf?: boolean;
     crop?: { x: number; y: number; width: number; height: number } | null;
+    reportScreenshots?: Array<{
+      fileId: number;
+      kind: "upload" | "paste" | "screen-snip";
+      caption?: string | null;
+      description?: string | null;
+      include?: boolean;
+      order: number;
+    }>;
   } | null>().default(null),
   responseAttachmentsJson: json("response_attachments_json").$type<string[]>().default([]),
 

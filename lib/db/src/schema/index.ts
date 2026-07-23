@@ -12,6 +12,7 @@ export * from "./submittal-view-events";
 export * from "./invitations";
 export * from "./rfi-responses";
 export * from "./rfi-ball-in-court-history";
+export * from "./rfi-report-settings";
 export * from "./email-log";
 export * from "./feature-flags";
 export * from "./admin-actions-log";

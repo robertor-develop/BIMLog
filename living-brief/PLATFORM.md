@@ -263,6 +263,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/project-milestones.ts
 - lib/db/src/schema/projects.ts
 - lib/db/src/schema/rfi-ball-in-court-history.ts
+- lib/db/src/schema/rfi-report-settings.ts
 - lib/db/src/schema/rfi-responses.ts
 - lib/db/src/schema/rfi-view-events.ts
 - lib/db/src/schema/rfis.ts
