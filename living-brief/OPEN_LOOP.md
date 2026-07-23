@@ -1244,6 +1244,13 @@ Future behavior:
 
 ## Closed / Shipped
 
+### RFI List and Log Governed PDFs
+
+Accepted source on 2026-07-23 after replaying reviewed candidate `5e2806c3a36391a32d384bf3913cee54e68b6e07` onto authoritative master without importing old candidate ancestry.
+RFI List and RFI Log now expose governed PDF actions that preserve current view semantics, filters, search, sort, project identity, generated timestamp, prepared-by identity where available, repeated table headers, readable widths, and page numbering.
+List output uses Ball In Court as the current-responsibility field; Log output uses Sent To Co. as historical transmission metadata.
+No schema, Navisworks/plugin, publish, deploy, production/customer access, or unrelated platform PDF build occurred.
+
 ### GitHub Merge Reconciliation
 Resolved and pushed after manual Shell merge.
 Remote master includes the Replit work plus Codex's Replit branding removal commit.

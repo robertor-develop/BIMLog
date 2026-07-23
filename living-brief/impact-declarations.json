@@ -2195,6 +2195,124 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "aee58f3e6909fa424860c30e77281d1ad695c6a285cdb46758c93a1c9ecc4fd1"
+    },
+    {
+      "taskId": "rfi-list-log-governed-pdf-source-acceptance",
+      "reviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
+      "reviewedAt": "2026-07-23T14:07:00-04:00",
+      "status": "accepted_source",
+      "captureTiming": "normal_integration_review",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_current_master_ancestry_verification",
+          "candidate_diff_replay_without_old_ancestry",
+          "living_brief_overlap_reconciliation",
+          "focused_typecheck_build",
+          "normal_push",
+          "remote_equality_verification"
+        ],
+        "operatorOnly": [
+          "publication",
+          "deployment",
+          "production_access",
+          "customer_data_access",
+          "field_acceptance",
+          "unrelated_platform_pdf_builds"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "report_design_system",
+            "status",
+            "open_loop"
+          ],
+          "summary": "RFI List and RFI Log views now have governed PDF actions that preserve active view semantics, filters, search, sort, project identity, generated timestamp, prepared-by identity where available, table headers, readable widths, and page numbering."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "report_design_system",
+            "open_loop"
+          ],
+          "summary": "The accepted RFI report correction preserves the distinction between Ball In Court as current List responsibility and Sent To Co. as historical Log transmission metadata, with no schema, plugin, publish, deployment, or unrelated business-logic change."
+        }
+      ],
+      "workstreams": [
+        "rfi-reports",
+        "platform-report-design-system",
+        "rfi-list-view",
+        "rfi-log-view",
+        "source-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted correction follows existing canonical-source and evidence doctrine without changing ecosystem identity or ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing clean-integration, no-old-ancestry, no-production, no-publish, no-credential, and terminal-notification governance covers this acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Independent reconciliation confirmed the reviewed candidate diff on current master, preserved Coordinator Build 4 and Security Batch C, and retained focused validation requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves current RFI reporting completeness without changing BIMLog roadmap, billing, deployment, or customer commitments."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation uses existing RFI/report route and UI structures without adding a new platform structural doctrine."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, synchronization, installation, Lens identity, or field-acceptance behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Recorded governed RFI List PDF and RFI Log PDF paths plus the Ball In Court versus Sent To Co. presentation distinction."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No broad platform status, deployment state, field acceptance, or unrelated report-build state changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded accepted RFI List/Log governed PDF scope, preserved candidate ancestry boundary, validation scope, and continued deferral of platform-wide report rollout."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new systemic audit doctrine, private audit exposure, credential handling, or security incident finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "10d328b6a80b7b55d4d2db1195431feb33a07ba5926c715e7046906a3c63f99c"
     }
   ]
 }
