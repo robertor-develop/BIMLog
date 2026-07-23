@@ -80,6 +80,29 @@ export type SourceState = {
   code?: string;
 };
 
+export const COORDINATOR_CONTEXT_METRICS = [
+  {
+    key: "actionable",
+    definition:
+      "Current actionable Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks after authorization and filters.",
+  },
+  {
+    key: "overdue",
+    definition:
+      "Actionable records whose canonical due date is before the viewer's project date boundary.",
+  },
+  {
+    key: "dueSoon",
+    definition:
+      "Actionable records whose canonical due date is today through seven calendar days in the viewer's timezone.",
+  },
+  {
+    key: "blocked",
+    definition:
+      "Actionable records normalized to blocked/action-required presentation status by the canonical source adapter.",
+  },
+] as const;
+
 export type RegisterQuery = {
   page: number;
   pageSize: number;
@@ -146,6 +169,7 @@ type AdapterPayload = {
   count: number;
   rows: Record<string, unknown>[];
   statusCounts: Record<string, number>;
+  deadlineCounts: Record<DeadlineState, number>;
 };
 
 export class CoordinatorRegisterError extends Error {
@@ -477,7 +501,15 @@ function sharedQuery(baseSql: string): string {
       CASE WHEN due_at::date < $11::date THEN 0 WHEN due_at::date <= $12::date THEN 1 WHEN due_at IS NULL THEN 3 ELSE 2 END,
       due_at ASC NULLS LAST, source_updated_at DESC NULLS LAST, source_id ASC) FROM selected),'[]'::jsonb) AS rows,
     COALESCE((SELECT jsonb_object_agg(presentation_status,status_count) FROM
-      (SELECT presentation_status,count(*)::int AS status_count FROM filtered GROUP BY presentation_status) status_groups),'{}'::jsonb) AS status_counts`;
+      (SELECT presentation_status,count(*)::int AS status_count FROM filtered GROUP BY presentation_status) status_groups),'{}'::jsonb) AS status_counts,
+    COALESCE((SELECT jsonb_object_agg(deadline_state,deadline_count) FROM
+      (SELECT
+        CASE WHEN due_at IS NULL THEN 'no_due_date'
+          WHEN due_at::date < $11::date THEN 'overdue'
+          WHEN due_at::date <= $12::date THEN 'due_this_week'
+          ELSE 'upcoming' END AS deadline_state,
+        count(*)::int AS deadline_count
+       FROM filtered GROUP BY deadline_state) deadline_groups),'{}'::jsonb) AS deadline_counts`;
 }
 
 function queryParams(
@@ -596,6 +628,10 @@ async function loadSource(
     statusCounts:
       row.status_counts && typeof row.status_counts === "object"
         ? row.status_counts
+        : {},
+    deadlineCounts:
+      row.deadline_counts && typeof row.deadline_counts === "object"
+        ? row.deadline_counts
         : {},
   };
 }
@@ -770,6 +806,12 @@ export async function loadCoordinatorActionRegister(input: {
   const items: CoordinatorActionItem[] = [];
   const seen = new Set<string>();
   const statusCounts: Record<string, number> = {};
+  const deadlineCounts: Record<DeadlineState, number> = {
+    overdue: 0,
+    due_this_week: 0,
+    upcoming: 0,
+    no_due_date: 0,
+  };
   for (const module of COORDINATOR_ACTION_MODULES) {
     const payload = payloads.get(module);
     if (!payload) continue;
@@ -801,6 +843,10 @@ export async function loadCoordinatorActionRegister(input: {
     }
     for (const [status, count] of Object.entries(payload.statusCounts))
       statusCounts[status] = (statusCounts[status] ?? 0) + Number(count);
+    for (const [state, count] of Object.entries(payload.deadlineCounts)) {
+      if (state in deadlineCounts)
+        deadlineCounts[state as DeadlineState] += Number(count);
+    }
     items.push(...moduleItems);
   }
   items.sort(compareCoordinatorActions);
@@ -831,6 +877,16 @@ export async function loadCoordinatorActionRegister(input: {
         ]),
       ),
       byPresentationStatus: statusCounts,
+      byDeadlineState: deadlineCounts,
+      context: {
+        actionable: total,
+        overdue: deadlineCounts.overdue,
+        dueSoon: deadlineCounts.due_this_week,
+        blocked:
+          Number(statusCounts.blocked ?? 0) +
+          Number(statusCounts.action_required ?? 0),
+      },
+      definitions: COORDINATOR_CONTEXT_METRICS,
     },
     sources: sourceStates,
     partial,

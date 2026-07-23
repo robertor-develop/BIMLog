@@ -17,6 +17,7 @@ import {
   executeCoordinatorMeetingLinks,
   previewCoordinatorMeetingLinks,
 } from "../lib/coordinator-bulk-actions";
+import { loadProjectInsightsSummary } from "../lib/project-insights-metrics";
 
 const router: IRouter = Router();
 
@@ -105,6 +106,46 @@ router.get(
           error: "COORDINATOR_REGISTER_FAILED",
           message: "The action register could not be loaded.",
         });
+    }
+  },
+);
+
+router.get(
+  "/projects/:projectId/project-insights",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const timezone =
+        typeof req.query.timezone === "string" && req.query.timezone.trim()
+          ? req.query.timezone.trim()
+          : "UTC";
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json(
+        await loadProjectInsightsSummary({
+          userId: req.user!.userId,
+          projectId: Number(req.params.projectId),
+          timezone,
+          superAdminAccess: String(
+            req.header("x-bimlog-super-admin-access") ?? "",
+          ),
+          superAdminReason: String(
+            req.header("x-bimlog-super-admin-reason") ?? "",
+          ),
+        }),
+      );
+    } catch (error) {
+      if (error instanceof CoordinatorRegisterError) {
+        res
+          .status(error.status)
+          .json({ error: error.code, message: error.message });
+        return;
+      }
+      res.status(500).json({
+        error: "PROJECT_INSIGHTS_FAILED",
+        message: "Project Insights & Reports could not be loaded.",
+        messageEs:
+          "No se pudieron cargar las Perspectivas e Informes del Proyecto.",
+      });
     }
   },
 );

@@ -14,7 +14,9 @@
     "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts",
     "test:coordinator-build2": "tsx ./scripts/coordinator-command-center-build2-proof.ts",
     "test:coordinator-build2-browser": "tsx ./scripts/coordinator-command-center-build2-browser-evidence.ts",
-    "test:coordinator-build3": "tsx ./scripts/coordinator-command-center-build3-proof.ts"
+    "test:coordinator-build3": "tsx ./scripts/coordinator-command-center-build3-proof.ts",
+    "test:coordinator-build4-boundary": "tsx ./scripts/coordinator-command-center-build4-boundary-proof.ts",
+    "test:coordinator-build4-browser": "tsx ./scripts/coordinator-command-center-build4-browser-evidence.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

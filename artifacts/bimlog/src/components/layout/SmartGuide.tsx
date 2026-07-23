@@ -24,9 +24,9 @@ const TIPS: Record<string, { title: string; body: string; nextStep?: string }> =
     nextStep: "confirma un archivo en Coordination Hub y aparecerá aquí automáticamente.",
   },
   analytics: {
-    title: "Analytics",
-    body: "You are in Analytics. This dashboard shows your project naming compliance in real time. Files processed through Coordination Hub and Files both feed into these charts. No data here means no files have been processed yet.",
-    nextStep: "cuando tengas 5+ archivos confirmados, revisa los patrones de actividad.",
+    title: "Project Insights & Reports",
+    body: "You are in Project Insights & Reports. This is the Understand/Report surface for trends, compliance, bottlenecks, RFI aging, company performance, and governed exports. Use Coordinator Command Center to act on current records; actionable insight links take you there with filters preserved.",
+    nextStep: "abre el Centro de Control para actuar sobre cualquier elemento vencido, próximo o bloqueado.",
   },
   rfis: {
     title: "RFIs",

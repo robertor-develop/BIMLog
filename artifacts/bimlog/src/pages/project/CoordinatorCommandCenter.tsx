@@ -114,6 +114,13 @@ type RegisterResponse = {
     complete: boolean;
     byModule: Record<SourceModule, number | null>;
     byPresentationStatus: Record<string, number>;
+    byDeadlineState: Record<DeadlineState, number>;
+    context: {
+      actionable: number;
+      overdue: number;
+      dueSoon: number;
+      blocked: number;
+    };
   };
   sources: SourceState[];
   partial: boolean;
@@ -525,12 +532,7 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
     data?.sources.filter(
       (source) => modules.includes(source.module) && source.status !== "ok",
     ) ?? [];
-  const overdueCount = data?.counts.byPresentationStatus
-    ? data.items.filter((item) => item.deadlineState === "overdue").length
-    : 0;
-  const dueWeekCount =
-    data?.items.filter((item) => item.deadlineState === "due_this_week")
-      .length ?? 0;
+  const contextCounts = data?.counts.context;
 
   return (
     <section className="ccc-shell" aria-labelledby="ccc-title">
@@ -583,30 +585,20 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
         )}
       >
         <div>
-          <span>{tr("Filtered actions", "Acciones filtradas")}</span>
-          <strong>{data?.total ?? "—"}</strong>
+          <span>{tr("Actionable", "Accionables")}</span>
+          <strong>{contextCounts?.actionable ?? "—"}</strong>
         </div>
         <div className="ccc-kpi-danger">
-          <span>{tr("Overdue on this page", "Vencidas en esta página")}</span>
-          <strong>{overdueCount}</strong>
+          <span>{tr("Overdue", "Vencidas")}</span>
+          <strong>{contextCounts?.overdue ?? "—"}</strong>
         </div>
         <div className="ccc-kpi-warning">
-          <span>
-            {tr(
-              "Due this week on this page",
-              "Vencen esta semana en esta página",
-            )}
-          </span>
-          <strong>{dueWeekCount}</strong>
+          <span>{tr("Due soon", "Vencen pronto")}</span>
+          <strong>{contextCounts?.dueSoon ?? "—"}</strong>
         </div>
         <div>
-          <span>{tr("Sources reporting", "Fuentes disponibles")}</span>
-          <strong>
-            {data
-              ? data.sources.filter((source) => source.status === "ok").length
-              : "—"}
-            /{modules.length}
-          </strong>
+          <span>{tr("Blocked", "Bloqueadas")}</span>
+          <strong>{contextCounts?.blocked ?? "—"}</strong>
         </div>
       </div>
 
