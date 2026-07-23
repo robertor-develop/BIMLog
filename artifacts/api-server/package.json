@@ -12,7 +12,8 @@
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts",
     "test:coordinator-build2": "tsx ./scripts/coordinator-command-center-build2-proof.ts",
-    "test:coordinator-build2-browser": "tsx ./scripts/coordinator-command-center-build2-browser-evidence.ts"
+    "test:coordinator-build2-browser": "tsx ./scripts/coordinator-command-center-build2-browser-evidence.ts",
+    "test:coordinator-build3": "tsx ./scripts/coordinator-command-center-build3-proof.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

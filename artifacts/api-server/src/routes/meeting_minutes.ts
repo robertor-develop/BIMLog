@@ -51,6 +51,12 @@ import { sendEmail } from "../lib/email";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { singleFileUpload } from "../middlewares/multipart";
 import { extractFileText } from "../lib/extract-file-text";
+import {
+  insertMeetingRfiLinks,
+  insertMeetingSubmittalLinks,
+  MeetingRfiLinkError,
+  MeetingSubmittalLinkError,
+} from "../lib/meeting-canonical-links";
 
 const FFMPEG_PATH = (() => {
   try {
@@ -406,24 +412,6 @@ async function requireMeeting(
 }
 
 class MeetingClashLinkError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-  ) {
-    super(code);
-  }
-}
-
-class MeetingRfiLinkError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-  ) {
-    super(code);
-  }
-}
-
-class MeetingSubmittalLinkError extends Error {
   constructor(
     public status: number,
     public code: string,
@@ -1209,154 +1197,6 @@ async function getMeetingScheduleBucketLinks(meetingId: number) {
       openTaskPath: `/projects/${link.projectId}/schedule?bucket=${link.bucketId}&task=${task.milestoneId}`,
     })),
   }));
-}
-
-async function insertMeetingSubmittalLinks(
-  executor: any,
-  projectId: number,
-  meetingId: number,
-  rawSubmittalIds: number[],
-  userId: number,
-) {
-  const submittalIds = [...new Set(rawSubmittalIds.filter(Number.isInteger))];
-  if (!submittalIds.length) return { requested: 0, added: 0 };
-
-  const [meeting] = await executor
-    .select({ id: meetingMinutesTable.id })
-    .from(meetingMinutesTable)
-    .where(
-      and(
-        eq(meetingMinutesTable.id, meetingId),
-        eq(meetingMinutesTable.projectId, projectId),
-        isNull(meetingMinutesTable.deletedAt),
-      ),
-    )
-    .limit(1);
-  if (!meeting) throw new MeetingSubmittalLinkError(404, "meeting_not_found");
-
-  const rows = await executor
-    .select({ submittal: submittalsTable, assignedToName: usersTable.fullName })
-    .from(submittalsTable)
-    .leftJoin(usersTable, eq(submittalsTable.assignedToId, usersTable.id))
-    .where(
-      and(
-        inArray(submittalsTable.id, submittalIds),
-        eq(submittalsTable.projectId, projectId),
-        isNull(submittalsTable.deletedAt),
-      ),
-    );
-  if (rows.length !== submittalIds.length)
-    throw new MeetingSubmittalLinkError(404, "submittal_not_accessible");
-
-  const inserted = await executor
-    .insert(meetingSubmittalLinksTable)
-    .values(
-      rows.map(({ submittal, assignedToName }: any) => {
-        const discipline = submittalDiscipline(submittal);
-        return {
-          projectId,
-          meetingId,
-          submittalId: submittal.id,
-          numberSnapshot: submittal.number,
-          titleSnapshot: submittal.title,
-          descriptionSnapshot: submittal.description || null,
-          floorSnapshot: cleanLabel(submittal.floor),
-          disciplineSnapshot: discipline,
-          disciplineBucketSnapshot: submittalDisciplineBucket(discipline),
-          statusSnapshot: submittal.status,
-          responsibleSnapshot: submittalResponsible(submittal, assignedToName),
-          deadlineSnapshot: submittal.dateRequired || submittal.dueDate || null,
-          createdById: userId,
-        };
-      }),
-    )
-    .onConflictDoNothing({
-      target: [
-        meetingSubmittalLinksTable.meetingId,
-        meetingSubmittalLinksTable.submittalId,
-      ],
-    })
-    .returning({ id: meetingSubmittalLinksTable.id });
-  return { requested: submittalIds.length, added: inserted.length };
-}
-
-async function insertMeetingRfiLinks(
-  executor: any,
-  projectId: number,
-  meetingId: number,
-  rawRfiIds: number[],
-  userId: number,
-) {
-  const rfiIds = [...new Set(rawRfiIds.filter(Number.isInteger))];
-  if (!rfiIds.length) return { requested: 0, added: 0 };
-
-  const [meeting] = await executor
-    .select({ id: meetingMinutesTable.id })
-    .from(meetingMinutesTable)
-    .where(
-      and(
-        eq(meetingMinutesTable.id, meetingId),
-        eq(meetingMinutesTable.projectId, projectId),
-        isNull(meetingMinutesTable.deletedAt),
-      ),
-    )
-    .limit(1);
-  if (!meeting) throw new MeetingRfiLinkError(404, "meeting_not_found");
-
-  const rows = await executor
-    .select({
-      id: rfisTable.id,
-      number: rfisTable.number,
-      subject: rfisTable.subject,
-      description: rfisTable.description,
-      question: rfisTable.question,
-      status: rfisTable.status,
-      ballInCourt: rfisTable.ballInCourt,
-      submittedToPerson: rfisTable.submittedToPerson,
-      submittedToCompany: rfisTable.submittedToCompany,
-      assignedToName: usersTable.fullName,
-    })
-    .from(rfisTable)
-    .leftJoin(usersTable, eq(rfisTable.assignedToId, usersTable.id))
-    .where(
-      and(
-        inArray(rfisTable.id, rfiIds),
-        eq(rfisTable.projectId, projectId),
-        isNull(rfisTable.deletedAt),
-      ),
-    );
-
-  if (rows.length !== rfiIds.length) {
-    // Deliberately do not reveal whether an inaccessible identity exists in a
-    // different project or was deleted.
-    throw new MeetingRfiLinkError(404, "rfi_not_accessible");
-  }
-
-  const inserted = await executor
-    .insert(meetingRfiLinksTable)
-    .values(
-      rows.map((r: any) => ({
-        projectId,
-        meetingId,
-        rfiId: r.id,
-        rfiNumberSnapshot: r.number,
-        titleSnapshot: r.subject || r.description || r.question || r.number,
-        descriptionSnapshot: r.description || r.question || null,
-        statusSnapshot: r.status,
-        responsibleSnapshot:
-          r.ballInCourt ||
-          r.assignedToName ||
-          r.submittedToPerson ||
-          r.submittedToCompany ||
-          null,
-        createdById: userId,
-      })),
-    )
-    .onConflictDoNothing({
-      target: [meetingRfiLinksTable.meetingId, meetingRfiLinksTable.rfiId],
-    })
-    .returning({ id: meetingRfiLinksTable.id });
-  return { requested: rfiIds.length, added: inserted.length };
 }
 
 async function insertMeetingLensViewpointLinks(

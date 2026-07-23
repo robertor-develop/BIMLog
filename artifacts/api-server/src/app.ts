@@ -37,6 +37,7 @@ import {
   ensureLivingBriefMirrorSchema,
 } from "./lib/living-brief-migration";
 import { startCoordinatorSavedViewMigration } from "./lib/coordinator-saved-view-migration";
+import { startCoordinatorBulkActionMigration } from "./lib/coordinator-bulk-action-migration";
 import { pool } from "@workspace/db";
 
 const ENV_MODE =
@@ -67,9 +68,10 @@ const app: Express = express();
 (async () => {
   try {
     await startCoordinatorSavedViewMigration();
+    await startCoordinatorBulkActionMigration();
     console.log("[migration] coordinator saved views ensured");
   } catch {
-    console.error("[migration] coordinator saved view migration failed");
+    console.error("[migration] coordinator data migration failed");
   }
 })();
 

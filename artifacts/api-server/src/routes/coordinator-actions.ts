@@ -12,6 +12,11 @@ import {
   listCoordinatorSavedViews,
   updateCoordinatorSavedView,
 } from "../lib/coordinator-saved-views";
+import {
+  CoordinatorBulkActionError,
+  executeCoordinatorMeetingLinks,
+  previewCoordinatorMeetingLinks,
+} from "../lib/coordinator-bulk-actions";
 
 const router: IRouter = Router();
 
@@ -41,6 +46,32 @@ function savedViewFailure(res: Response, error: unknown) {
 function assertSavedViewBody(req: Request) {
   if (Buffer.byteLength(JSON.stringify(req.body ?? {}), "utf8") > 8192)
     throw new CoordinatorSavedViewError(413, "SAVED_VIEW_PAYLOAD_TOO_LARGE", "The saved-view request is too large.", "La solicitud de la vista guardada es demasiado grande.");
+}
+
+function bulkFailure(res: Response, error: unknown) {
+  if (error instanceof CoordinatorBulkActionError) {
+    res.status(error.status).json({
+      error: error.code,
+      message: error.message,
+      messageEs: error.messageEs,
+    });
+    return;
+  }
+  res.status(500).json({
+    error: "COORDINATOR_BULK_OPERATION_FAILED",
+    message: "The controlled bulk operation could not be completed.",
+    messageEs: "No se pudo completar la operación masiva controlada.",
+  });
+}
+
+function assertBulkBody(req: Request) {
+  if (Buffer.byteLength(JSON.stringify(req.body ?? {}), "utf8") > 32768)
+    throw new CoordinatorBulkActionError(
+      413,
+      "COORDINATOR_BULK_PAYLOAD_TOO_LARGE",
+      "The bulk-action request is too large.",
+      "La solicitud de acción masiva es demasiado grande.",
+    );
 }
 
 router.get(
@@ -74,6 +105,45 @@ router.get(
           error: "COORDINATOR_REGISTER_FAILED",
           message: "The action register could not be loaded.",
         });
+    }
+  },
+);
+
+router.post(
+  "/projects/:projectId/coordinator-actions/meeting-links/preview",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      assertBulkBody(req);
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json(
+        await previewCoordinatorMeetingLinks({
+          userId: req.user!.userId,
+          projectId: Number(req.params.projectId),
+          body: req.body,
+        }),
+      );
+    } catch (error) {
+      bulkFailure(res, error);
+    }
+  },
+);
+
+router.post(
+  "/projects/:projectId/coordinator-actions/meeting-links/execute",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      assertBulkBody(req);
+      res.setHeader("Cache-Control", "private, no-store");
+      const result = await executeCoordinatorMeetingLinks({
+        userId: req.user!.userId,
+        projectId: Number(req.params.projectId),
+        body: req.body,
+      });
+      res.status(result.idempotent ? 200 : 201).json(result);
+    } catch (error) {
+      bulkFailure(res, error);
     }
   },
 );

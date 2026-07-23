@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { CoordinatorBulkActions } from "./CoordinatorBulkActions";
 
 type SourceModule = "lens" | "rfi" | "submittal" | "meeting" | "schedule";
 type DeadlineState = "overdue" | "due_this_week" | "upcoming" | "no_due_date";
@@ -69,7 +70,7 @@ type LensIdentity = {
   issueGroupId?: string | null;
 };
 
-type ActionItem = {
+export type ActionItem = {
   key: string;
   sourceModule: SourceModule;
   sourceId: number;
@@ -215,6 +216,8 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
   const [savedViewError, setSavedViewError] = useState("");
   const [activeSavedViewId, setActiveSavedViewId] = useState("");
   const [savedViewBusy, setSavedViewBusy] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<Record<string, ActionItem>>({});
+  const [selectionError, setSelectionError] = useState("");
   const urlInitialized = useRef(false);
   const defaultApplied = useRef(false);
 
@@ -472,6 +475,32 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
         : SOURCE_ORDER.filter((item) => [...current, module].includes(item)),
     );
   };
+
+  const toggleSelection = (item: ActionItem) => {
+    setSelectionError("");
+    setSelectedItems((current) => {
+      if (current[item.key]) {
+        const next = { ...current };
+        delete next[item.key];
+        return next;
+      }
+      if (Object.keys(current).length >= 50) {
+        setSelectionError(
+          tr(
+            "Select no more than 50 actions per controlled operation.",
+            "Seleccione como máximo 50 acciones por operación controlada.",
+          ),
+        );
+        return current;
+      }
+      return { ...current, [item.key]: item };
+    });
+  };
+
+  useEffect(() => {
+    setSelectedItems({});
+    setSelectionError("");
+  }, [projectId]);
 
   const formatDate = (value: string | null) => {
     if (!value) return tr("No deadline", "Sin fecha límite");
@@ -832,6 +861,21 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
         </div>
       </div>
 
+      {selectionError && (
+        <div className="ccc-alert ccc-alert-error" role="alert">
+          <AlertTriangle size={18} />
+          <div><strong>{tr("Selection limit", "Límite de selección")}</strong><span>{selectionError}</span></div>
+        </div>
+      )}
+
+      <CoordinatorBulkActions
+        projectId={projectId}
+        selected={Object.values(selectedItems)}
+        onClear={() => setSelectedItems({})}
+        onRefresh={() => setRetryKey((value) => value + 1)}
+        lang={lang}
+      />
+
       {savedViewError && (
         <div className="ccc-alert ccc-alert-error" role="alert">
           <AlertTriangle size={18} /><div><strong>{tr("Personal views unavailable", "Vistas personales no disponibles")}</strong><span>{savedViewError}</span></div>
@@ -951,6 +995,31 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
             <table className="ccc-table">
               <thead>
                 <tr>
+                  <th className="ccc-select-cell">
+                    <input
+                      type="checkbox"
+                      aria-label={tr("Select all actions on this page", "Seleccionar todas las acciones de esta página")}
+                      checked={data.items.length > 0 && data.items.every((item) => !!selectedItems[item.key])}
+                      onChange={(event) => {
+                        if (!event.target.checked) {
+                          setSelectedItems((current) => {
+                            const next = { ...current };
+                            data.items.forEach((item) => delete next[item.key]);
+                            return next;
+                          });
+                          return;
+                        }
+                        setSelectedItems((current) => {
+                          const next = { ...current };
+                          for (const item of data.items) {
+                            if (Object.keys(next).length >= 50) break;
+                            next[item.key] = item;
+                          }
+                          return next;
+                        });
+                      }}
+                    />
+                  </th>
                   <th>{tr("Source", "Fuente")}</th>
                   <th>{tr("Action", "Acción")}</th>
                   <th>{tr("Status", "Estado")}</th>
@@ -974,6 +1043,8 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
                     tr={tr}
                     formatDate={formatDate}
                     deadlineLabel={deadlineLabel}
+                    selected={!!selectedItems[item.key]}
+                    onToggle={() => toggleSelection(item)}
                   />
                 ))}
               </tbody>
@@ -988,6 +1059,8 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
                 tr={tr}
                 formatDate={formatDate}
                 deadlineLabel={deadlineLabel}
+                selected={!!selectedItems[item.key]}
+                onToggle={() => toggleSelection(item)}
               />
             ))}
           </div>
@@ -1026,6 +1099,8 @@ type SharedItemProps = {
   tr: (en: string, es: string) => string;
   formatDate: (value: string | null) => string;
   deadlineLabel: (value: DeadlineState) => string;
+  selected: boolean;
+  onToggle: () => void;
 };
 
 function ItemIdentity({ item, tr }: Pick<SharedItemProps, "item" | "tr">) {
@@ -1076,9 +1151,19 @@ function ActionRow({
   tr,
   formatDate,
   deadlineLabel,
+  selected,
+  onToggle,
 }: SharedItemProps) {
   return (
     <tr>
+      <td className="ccc-select-cell">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggle}
+          aria-label={tr(`Select ${item.displayIdentifier}`, `Seleccionar ${item.displayIdentifier}`)}
+        />
+      </td>
       <td>
         <span className={`ccc-source ccc-source-${item.sourceModule}`}>
           {sourceLabel(item.sourceModule, lang)}
@@ -1127,13 +1212,18 @@ function ActionCard({
   tr,
   formatDate,
   deadlineLabel,
+  selected,
+  onToggle,
 }: SharedItemProps) {
   return (
     <article className="ccc-card">
       <div className="ccc-card-top">
-        <span className={`ccc-source ccc-source-${item.sourceModule}`}>
-          {sourceLabel(item.sourceModule, lang)}
-        </span>
+        <label className="ccc-card-select">
+          <input type="checkbox" checked={selected} onChange={onToggle} />
+          <span className={`ccc-source ccc-source-${item.sourceModule}`}>
+            {sourceLabel(item.sourceModule, lang)}
+          </span>
+        </label>
         <span className={statusClass(item.presentationStatus)}>
           {statusLabel(item.presentationStatus, lang)}
         </span>
