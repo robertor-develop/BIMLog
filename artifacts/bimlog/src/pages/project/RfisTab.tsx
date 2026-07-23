@@ -612,6 +612,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
+  const [meetingDraftReturn, setMeetingDraftReturn] = useState<string | null>(null);
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
@@ -627,13 +628,16 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const floor = sp.get("floor");
     const ref = sp.get("ref");
     const rfiParam = sp.get("rfi");
+    const returnTab = sp.get("returnTab");
+    const meetingDraft = sp.get("meetingDraft");
 
     // Deep-link straight to an existing RFI's detail panel (the plugin opens the
     // browser after creating an RFI from a viewpoint). Fetch by id rather than
     // relying on the list, since a brand-new draft may not be loaded/filtered in yet.
     if (rfiParam) {
       const rfiId = Number(rfiParam);
-      window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
+      setMeetingDraftReturn(returnTab === "meetings" && meetingDraft ? meetingDraft : null);
+      if (!(returnTab === "meetings" && meetingDraft)) window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
       if (Number.isFinite(rfiId)) {
         (async () => {
           const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfiId}`, {
@@ -828,19 +832,33 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   // with a Back button — matching Change Orders / Lens Viewpoints. No overlay, no pop-up.
   if (selectedRfi) {
     return (
-      <RfiDetailPanel
-        projectId={projectId}
-        rfi={selectedRfi}
-        canWrite={canWrite}
-        lang={lang}
-        members={members || []}
-        user={user}
-        onClose={() => setSelectedRfi(null)}
-        onRevise={setSelectedRfi}
-        onExportPdf={handleExportPdf}
-        onExportCompletePdf={handleExportCompletePdf}
-        onUpdate={(updated) => setSelectedRfi(updated)}
-      />
+      <div>
+        {meetingDraftReturn && (
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid hsl(var(--border))", background: "#F8FAFC" }}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.assign(`/projects/${projectId}/meetings?meetingDraft=${encodeURIComponent(meetingDraftReturn)}`)}
+            >
+              {w("Back to Meeting Draft", "Volver al borrador de reunión", lang)}
+            </Button>
+          </div>
+        )}
+        <RfiDetailPanel
+          projectId={projectId}
+          rfi={selectedRfi}
+          canWrite={canWrite}
+          lang={lang}
+          members={members || []}
+          user={user}
+          onClose={() => setSelectedRfi(null)}
+          onRevise={setSelectedRfi}
+          onExportPdf={handleExportPdf}
+          onExportCompletePdf={handleExportCompletePdf}
+          onUpdate={(updated) => setSelectedRfi(updated)}
+        />
+      </div>
     );
   }
 

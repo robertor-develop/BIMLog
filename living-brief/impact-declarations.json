@@ -1491,6 +1491,119 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5fb8da907d0c542ec94e5ddbcf425e21d45a7a09d74447144d296f5f2dec39a8"
+    },
+    {
+      "taskId": "ruben-meetings-workflow-local-candidate",
+      "reviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "reviewedAt": "2026-07-22T22:58:15.002Z",
+      "status": "local_candidate",
+      "captureTiming": "normal_candidate_boundary",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "isolated_local_implementation",
+          "credential_blind_local_test",
+          "browser_evidence",
+          "local_validation",
+          "clean_local_review_commit"
+        ],
+        "operatorOnly": [
+          "production_deployment",
+          "customer_data_access",
+          "replit_publish",
+          "field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Ruben Meeting workflow required persistent companies, reusable attendees, canonical RFI controls, exact RFI return navigation, and durable unsaved draft restoration."
+        }
+      ],
+      "workstreams": [
+        "meeting-minutes-core-workflow",
+        "project-directory",
+        "rfi-canonical-controls",
+        "meeting-drafts"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows existing canonical-record, draft-preservation, authorization, and evidence doctrine without changing product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows current isolated-worktree, credential-blind local-test, no-production, no-publish, terminal-alert, and review-candidate governance."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Recorded Ruben workflow proof expectations for reusable companies/contacts, canonical RFI controls, durable drafts, bilingual responsive behavior, and no data loss."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves current Meeting coordination workflow without changing long-term BIMLog roadmap direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The official deterministic generator was run and reported PLATFORM.md unchanged; no platform structural document change is required for this local candidate."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, sync behavior, or field acceptance state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Meeting PDF/Print actions are preserved; no shared report design rule changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Ruben Meetings workflow as a local review candidate only, with no push, publish, deployment, or customer verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded remaining review/push/publish boundaries and the exact local candidate scope."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production incident or permanent audit doctrine change is introduced by this local candidate."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/routes/meeting_minutes.ts",
+        "artifacts/api-server/src/routes/members.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "lib/db/src/schema/meeting-minutes.ts",
+        "lib/db/src/schema/project-directory.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c6bcf763a72cc8611635c5ba05c2a8d7a1e4f80beed94b1326cc659bcdfd0fb8"
     }
   ]
 }

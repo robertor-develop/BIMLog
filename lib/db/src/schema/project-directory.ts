@@ -1,6 +1,6 @@
 import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
-import { usersTable } from "./users";
+import { companiesTable, usersTable } from "./users";
 
 export const projectDirectoryTable = pgTable("project_directory", {
   id: serial("id").primaryKey(),
@@ -8,6 +8,7 @@ export const projectDirectoryTable = pgTable("project_directory", {
   fullName: text("full_name").notNull(),
   email: text("email").notNull(),
   companyName: text("company_name"),
+  companyId: integer("company_id").references(() => companiesTable.id),
   role: text("role").notNull(),
   bimlogStatus: text("bimlog_status").default("none"),
   notes: text("notes"),

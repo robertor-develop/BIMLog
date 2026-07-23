@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import crypto from "crypto";
 import { db } from "@workspace/db";
 import {
@@ -25,6 +25,9 @@ import {
   scheduleItemPlacementsTable,
   meetingScheduleBucketLinksTable,
   meetingScheduleTaskLinksTable,
+  companiesTable,
+  projectDirectoryTable,
+  meetingDraftsTable,
 } from "@workspace/db/schema";
 import {
   eq,
@@ -59,6 +62,76 @@ const FFMPEG_PATH = (() => {
 })();
 
 const router: Router = Router();
+
+const draftKeyFor = (meetingId?: number | null) =>
+  meetingId ? `edit:${meetingId}` : "new";
+
+const draftExpiresAt = () => {
+  const value = new Date();
+  value.setDate(value.getDate() + 14);
+  return value;
+};
+
+const validateAttendeeCompanyAccess = async (
+  tx: any,
+  projectId: number,
+  companyId: number | null | undefined,
+) => {
+  if (!companyId) return;
+  const [company] = await tx
+    .select({ id: companiesTable.id })
+    .from(companiesTable)
+    .where(eq(companiesTable.id, companyId))
+    .limit(1);
+  if (!company) throw new MeetingClashLinkError(404, "attendee_company_not_found");
+  const [projectDirectory] = await tx
+    .select({ id: projectDirectoryTable.id })
+    .from(projectDirectoryTable)
+    .where(
+      and(
+        eq(projectDirectoryTable.projectId, projectId),
+        eq(projectDirectoryTable.companyId, companyId),
+      ),
+    )
+    .limit(1);
+  if (projectDirectory) return;
+  const [memberCompany] = await tx
+    .select({ id: usersTable.id })
+    .from(usersTable)
+    .innerJoin(projectMembersTable, eq(projectMembersTable.userId, usersTable.id))
+    .where(
+      and(
+        eq(projectMembersTable.projectId, projectId),
+        eq(usersTable.companyId, companyId),
+      ),
+    )
+    .limit(1);
+  if (!memberCompany) throw new MeetingClashLinkError(403, "attendee_company_not_in_project");
+};
+
+
+const validateAttendeeDirectoryEntryAccess = async (
+  tx: any,
+  projectId: number,
+  directoryEntryId: number | null | undefined,
+  companyId: number | null | undefined,
+) => {
+  if (!directoryEntryId) return;
+  const [entry] = await tx
+    .select({ id: projectDirectoryTable.id, companyId: projectDirectoryTable.companyId })
+    .from(projectDirectoryTable)
+    .where(
+      and(
+        eq(projectDirectoryTable.id, directoryEntryId),
+        eq(projectDirectoryTable.projectId, projectId),
+      ),
+    )
+    .limit(1);
+  if (!entry) throw new MeetingClashLinkError(404, "attendee_directory_entry_not_found");
+  if (companyId && entry.companyId && entry.companyId !== companyId) {
+    throw new MeetingClashLinkError(400, "attendee_directory_entry_company_mismatch");
+  }
+};
 
 const parseLegacyRfiRows = (notes: string | null) => {
   if (!notes) return [];
@@ -209,11 +282,33 @@ const serializeMeetingRfiLink = (
 
 async function getMeetingRfiLinks(meetingId: number) {
   const links = await db
-    .select()
+    .select({
+      link: meetingRfiLinksTable,
+      currentStatus: rfisTable.status,
+      currentResponsibleCompany: rfisTable.submittedToCompany,
+      currentResponsiblePerson: rfisTable.submittedToPerson,
+      currentBallInCourt: rfisTable.ballInCourt,
+      assignedToName: usersTable.fullName,
+      assignedToId: rfisTable.assignedToId,
+      updatedAt: rfisTable.updatedAt,
+    })
     .from(meetingRfiLinksTable)
+    .leftJoin(rfisTable, eq(rfisTable.id, meetingRfiLinksTable.rfiId))
+    .leftJoin(usersTable, eq(usersTable.id, rfisTable.assignedToId))
     .where(eq(meetingRfiLinksTable.meetingId, meetingId))
     .orderBy(asc(meetingRfiLinksTable.id));
-  return links.map(serializeMeetingRfiLink);
+  return links.map((row) => ({
+    ...serializeMeetingRfiLink(row.link),
+    currentStatus: row.currentStatus || row.link.statusSnapshot,
+    currentResponsible:
+      row.assignedToName ||
+      row.currentBallInCourt ||
+      row.currentResponsibleCompany ||
+      row.currentResponsiblePerson ||
+      row.link.responsibleSnapshot,
+    assignedToId: row.assignedToId,
+    currentUpdatedAt: row.updatedAt?.toISOString?.() ?? null,
+  }));
 }
 
 const ELIGIBLE_CLASH_STATUSES = ["open", "follow_up"] as const;
@@ -1415,6 +1510,98 @@ router.get(
   },
 );
 
+router.get(
+  "/projects/:projectId/meetings/draft",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    try {
+      const [draft] = await db.select().from(meetingDraftsTable).where(and(
+        eq(meetingDraftsTable.projectId, projectId),
+        eq(meetingDraftsTable.userId, req.user!.userId),
+        eq(meetingDraftsTable.draftKey, draftKeyFor(meetingId)),
+        sql`${meetingDraftsTable.expiresAt} > now()`,
+      )).limit(1);
+      res.json(draft ? {
+        ...draft,
+        updatedAt: draft.updatedAt.toISOString(),
+        expiresAt: draft.expiresAt.toISOString(),
+        canonicalUpdatedAt: draft.canonicalUpdatedAt?.toISOString() ?? null,
+      } : null);
+    } catch {
+      res.status(500).json({ error: "meeting_draft_load_failed" });
+    }
+  },
+);
+
+router.put(
+  "/projects/:projectId/meetings/draft",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = req.body?.meeting_id ? Number(req.body.meeting_id) : null;
+    const payload = req.body?.payload;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      res.status(400).json({ error: "draft_payload_required" });
+      return;
+    }
+    try {
+      let canonicalUpdatedAt: Date | null = null;
+      if (meetingId) {
+        const [meeting] = await db.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.id, meetingId),
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).limit(1);
+        if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+        canonicalUpdatedAt = meeting.updatedAt;
+      }
+      const now = new Date();
+      const expiresAt = draftExpiresAt();
+      const [draft] = await db.insert(meetingDraftsTable).values({
+        projectId,
+        userId: req.user!.userId,
+        meetingId,
+        draftKey: draftKeyFor(meetingId),
+        payload,
+        canonicalUpdatedAt,
+        updatedAt: now,
+        expiresAt,
+      }).onConflictDoUpdate({
+        target: [meetingDraftsTable.projectId, meetingDraftsTable.userId, meetingDraftsTable.draftKey],
+        set: { payload, canonicalUpdatedAt, updatedAt: now, expiresAt },
+      }).returning();
+      res.json({
+        ...draft,
+        updatedAt: draft.updatedAt.toISOString(),
+        expiresAt: draft.expiresAt.toISOString(),
+        canonicalUpdatedAt: draft.canonicalUpdatedAt?.toISOString() ?? null,
+      });
+    } catch {
+      res.status(500).json({ error: "meeting_draft_save_failed" });
+    }
+  },
+);
+
+router.delete(
+  "/projects/:projectId/meetings/draft",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    await db.delete(meetingDraftsTable).where(and(
+      eq(meetingDraftsTable.projectId, projectId),
+      eq(meetingDraftsTable.userId, req.user!.userId),
+      eq(meetingDraftsTable.draftKey, draftKeyFor(meetingId)),
+    ));
+    res.json({ ok: true });
+  },
+);
+
 // ── POST /projects/:projectId/meetings ────────────────────────────────────────
 router.post(
   "/projects/:projectId/meetings",
@@ -1429,6 +1616,8 @@ router.post(
       notes?: string;
       attendees?: {
         user_id?: number;
+        company_id?: number;
+        directory_entry_id?: number;
         external_email?: string;
         full_name: string;
         company?: string;
@@ -1481,10 +1670,16 @@ router.post(
           .returning();
 
         if (body.attendees?.length) {
+          for (const attendee of body.attendees) {
+            await validateAttendeeCompanyAccess(tx, projectId, attendee.company_id);
+            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directory_entry_id, attendee.company_id);
+          }
           await tx.insert(meetingAttendeesTable).values(
             body.attendees.map((a) => ({
               meetingId: created.id,
               userId: a.user_id ?? null,
+              companyId: a.company_id ?? null,
+              directoryEntryId: a.directory_entry_id ?? null,
               externalEmail: a.external_email ?? null,
               fullName: a.full_name,
               company: a.company ?? null,
@@ -1525,6 +1720,11 @@ router.post(
           fileNameAfter: null,
           details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
         });
+        await tx.delete(meetingDraftsTable).where(and(
+          eq(meetingDraftsTable.projectId, projectId),
+          eq(meetingDraftsTable.userId, req.user!.userId),
+          eq(meetingDraftsTable.draftKey, draftKeyFor(null)),
+        ));
         return created;
       });
       res.status(201).json(meeting);
@@ -2639,6 +2839,8 @@ router.patch(
       expected_updated_at: string;
       attendees: {
         user_id?: number;
+        company_id?: number;
+        directory_entry_id?: number;
         external_email?: string;
         full_name: string;
         company?: string;
@@ -2700,6 +2902,10 @@ router.patch(
         if (Array.isArray(body.attendees)) {
           if (body.attendees.some((attendee) => !attendee.full_name?.trim()))
             throw new MeetingClashLinkError(400, "attendee_name_required");
+          for (const attendee of body.attendees) {
+            await validateAttendeeCompanyAccess(tx, projectId, attendee.company_id);
+            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directory_entry_id, attendee.company_id);
+          }
           await tx
             .delete(meetingAttendeesTable)
             .where(eq(meetingAttendeesTable.meetingId, meetingId));
@@ -2708,6 +2914,8 @@ router.patch(
               body.attendees.map((attendee) => ({
                 meetingId,
                 userId: attendee.user_id ?? null,
+                companyId: attendee.company_id ?? null,
+                directoryEntryId: attendee.directory_entry_id ?? null,
                 externalEmail: attendee.external_email ?? null,
                 fullName: attendee.full_name.trim(),
                 company: attendee.company?.trim() || null,
@@ -2734,6 +2942,11 @@ router.patch(
             lifecyclePolicy: "open_records_editable_no_finalized_status_column",
           }),
         });
+        await tx.delete(meetingDraftsTable).where(and(
+          eq(meetingDraftsTable.projectId, projectId),
+          eq(meetingDraftsTable.userId, req.user!.userId),
+          eq(meetingDraftsTable.draftKey, draftKeyFor(meetingId)),
+        ));
         return row;
       });
       res.json(updated);

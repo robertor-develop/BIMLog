@@ -32,6 +32,7 @@ router.get("/projects/:projectId/members", authMiddleware, requireProjectMember(
           userId: m.userId,
           userFullName: user[0]?.fullName || "",
           userEmail: user[0]?.email || "",
+          userCompanyId: user[0]?.companyId || null,
           userCompanyName: companyName,
           role: m.role,
           joinedAt: m.joinedAt.toISOString(),

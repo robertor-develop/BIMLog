@@ -1,4 +1,4 @@
-import {
+﻿import {
   pgTable,
   serial,
   text,
@@ -9,7 +9,8 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
-import { usersTable } from "./users";
+import { companiesTable, usersTable } from "./users";
+import { projectDirectoryTable } from "./project-directory";
 import { rfisTable } from "./rfis";
 import { submittalsTable } from "./submittals";
 import { clashesTable, clashReportsTable } from "./clash_reports";
@@ -42,11 +43,41 @@ export const meetingAttendeesTable = pgTable("meeting_attendees", {
     .references(() => meetingMinutesTable.id)
     .notNull(),
   userId: integer("user_id").references(() => usersTable.id),
+  companyId: integer("company_id").references(() => companiesTable.id),
+  directoryEntryId: integer("directory_entry_id").references(() => projectDirectoryTable.id),
   externalEmail: text("external_email"),
   fullName: text("full_name").notNull(),
   company: text("company"),
   role: text("role"),
 });
+
+export const meetingDraftsTable = pgTable(
+  "meeting_drafts",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    userId: integer("user_id")
+      .references(() => usersTable.id)
+      .notNull(),
+    meetingId: integer("meeting_id").references(() => meetingMinutesTable.id),
+    draftKey: text("draft_key").notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    canonicalUpdatedAt: timestamp("canonical_updated_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+  },
+  (t) => ({
+    meetingDraftScopeUnique: uniqueIndex("meeting_drafts_scope_uidx").on(
+      t.projectId,
+      t.userId,
+      t.draftKey,
+    ),
+    meetingDraftExpiryIdx: index("meeting_drafts_expiry_idx").on(t.expiresAt),
+  }),
+);
 
 // Canonical RFI identity plus immutable meeting-time display snapshots. Later
 // RFI edits therefore cannot rewrite saved or exported meeting history.

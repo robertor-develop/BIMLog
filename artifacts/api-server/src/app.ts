@@ -1,4 +1,4 @@
-import express, {
+﻿import express, {
   type Express,
   type Request,
   type Response,
@@ -914,6 +914,40 @@ void rfiMigrationReady.then((ready) => {
     );
     await pool.query(
       `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS responsible_company TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE project_directory ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS project_directory_company_idx ON project_directory (project_id, company_id)`,
+    );
+    await pool.query(
+      `ALTER TABLE meeting_attendees ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_attendees_company_idx ON meeting_attendees (meeting_id, company_id)`,
+    );
+    await pool.query(
+      `ALTER TABLE meeting_attendees ADD COLUMN IF NOT EXISTS directory_entry_id INTEGER REFERENCES project_directory(id)`,
+    );
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_attendees_directory_entry_idx ON meeting_attendees (meeting_id, directory_entry_id)`,
+    );
+    await pool.query(`CREATE TABLE IF NOT EXISTS meeting_drafts (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL REFERENCES projects(id),
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      meeting_id INTEGER REFERENCES meeting_minutes(id),
+      draft_key TEXT NOT NULL,
+      payload JSONB NOT NULL,
+      canonical_updated_at TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT now(),
+      updated_at TIMESTAMP NOT NULL DEFAULT now(),
+      expires_at TIMESTAMP NOT NULL,
+      UNIQUE(project_id, user_id, draft_key)
+    )`);
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS meeting_drafts_expiry_idx ON meeting_drafts (expires_at)`,
     );
     await pool.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`,

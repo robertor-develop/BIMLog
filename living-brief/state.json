@@ -1,19 +1,29 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
+  "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "af569c695d26c64b18e319baca2d24c4f2f472dde29669173db9367ad88deba2",
+  "bundleSha256": "8e6a7889fd4923786ac369bdb3b3dce32180b19c2b66cd0a1feff9616451175b",
   "impact": {
-    "baselineCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
+    "baselineCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
     "changedPaths": [
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "artifacts/api-server/src/routes/members.ts",
+      "artifacts/api-server/src/routes/project_directory.ts",
+      "artifacts/api-server/src/routes/rfis.ts",
+      "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+      "lib/db/src/schema/meeting-minutes.ts",
+      "lib/db/src/schema/project-directory.ts",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
+      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -24,11 +34,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "claude",
@@ -36,11 +46,11 @@
       "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "quality",
@@ -48,11 +58,11 @@
       "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "vision",
@@ -60,23 +70,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "e596c7603c356db21068ea933943a681ddfbf84edb8d772edce51e60af102db7",
-      "sourceChangedAt": "2026-07-22T18:57:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "sourceChangedAt": "2026-07-22T15:08:57-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "plugin",
@@ -84,11 +94,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +106,11 @@
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "standards_register",
@@ -108,35 +118,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "2b57189eaeb9c52f0aeca93386f4e11052ba87174ab0c48d26f868ca22a7169b",
-      "sourceChangedAt": "2026-07-22T18:57:00.000Z",
+      "sha256": "a27543dce14d8c673b261a236ee9c442f3b755c474c7f1875721d20ffbdd9c54",
+      "sourceChangedAt": "2026-07-22T22:59:45.788Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "adc2600696de3a757b76406bd44c1e3c68910f9296aece09a8693ec020994666",
-      "sourceChangedAt": "2026-07-22T18:57:00.000Z",
+      "sha256": "f6a779f896f27273acf5278f9ca64a2dbbbe0f98bd11b1c9495136001de0a547",
+      "sourceChangedAt": "2026-07-22T22:59:45.788Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     },
     {
       "key": "audit",
@@ -144,11 +154,11 @@
       "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "semanticReviewTask": "cost-financial-control-build-3-final-integration",
+      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T18:57:00.000Z"
+      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
     }
   ]
 }

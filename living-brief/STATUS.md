@@ -16,6 +16,11 @@ circular-material recovery. This is roadmap authority only. No asset-passport mo
 CMMS connector, marketplace, executable contract, payment/settlement, material passport, carbon accounting, or
 circular recovery behavior is implemented, deployed, or customer verified by this documentation build.
 
+Ruben urgent Meeting workflow correction is a local review candidate only. It adds inline canonical company registration,
+reusable project-directory attendees/contacts, canonical attendee directory identity, compact linked RFI status/responsible
+controls, exact View RFI/Ver RFI deep links, and server-draft restoration when returning from RFI navigation or refreshing
+`/meetings`. The candidate is not pushed, published, deployed, production verified, customer verified, or field accepted.
+
 Living Brief credential persistence and controlled recovery are accepted in source at
 `c3a7c809643022abb04b8fe58db043ccd5d828ff` after reconciliation onto Coordinator master
 `81007cafddd1d59880259af2255863986715ed56`. This is not published, deployed, production verified, or live mirror

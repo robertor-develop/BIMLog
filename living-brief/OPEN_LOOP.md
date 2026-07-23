@@ -4,6 +4,19 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-22
 
+### Ruben urgent Meeting workflow correction local candidate; review/push pending
+
+- Local Meetings candidate adds persistent canonical company registration from attendee rows, reusable project-directory
+  contact selection, attendee canonical directory identity, compact linked RFI controls, exact RFI deep-link navigation
+  with Meeting draft return context, and durable server-authoritative new Meeting draft restoration on direct return,
+  tab navigation, and refresh/restart.
+- The candidate preserves Meeting snapshots and existing RFI/Submittal/Schedule/Lens/legacy behavior; viewing an RFI
+  does not mutate the RFI, and RFI status/responsible edits use the canonical RFI route with current authorization and
+  stale-update protection.
+- Expanded local Chrome proof passed in the isolated `127.0.0.1:55432/bimlog_rfi_test` harness. Remaining gates are
+  source reconciliation, final repository validation, clean local review commit, and Roberto review. No push, publish,
+  deployment, production/customer data access, or Replit action is included by this candidate.
+
 ### Built-asset lifecycle operating network roadmap validation
 
 - Roberto approved recording the long-term BIMLog roadmap from construction coordination to verified construction

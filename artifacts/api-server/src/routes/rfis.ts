@@ -1431,11 +1431,23 @@ router.get("/projects/:projectId/rfis/:rfiId", authMiddleware, requireProjectMem
 router.patch("/projects/:projectId/rfis/:rfiId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
+    const expectedUpdatedAt =
+      typeof req.body?.expected_updated_at === "string"
+        ? req.body.expected_updated_at
+        : null;
     const body = UpdateRfiBody.parse(req.body);
 
     const existing = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
     if (existing.length === 0) {
       res.status(404).json({ error: "RFI not found" });
+      return;
+    }
+    if (
+      expectedUpdatedAt &&
+      new Date(expectedUpdatedAt).getTime() !==
+        new Date(existing[0].updatedAt).getTime()
+    ) {
+      res.status(409).json({ error: "rfi_stale_update" });
       return;
     }
 
@@ -3122,5 +3134,3 @@ router.delete("/projects/:projectId/rfis/:rfiId",
 );
 
 export default router;
-
-

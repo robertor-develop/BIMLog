@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef, Fragment } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 import { useListMembers } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,12 +49,35 @@ interface Meeting {
 
 interface Attendee {
   id?: number;
+  companyId?: number | null;
+  directoryEntryId?: number | null;
   trade: string;
   company: string;
   fullName: string;
   role: string;
   email: string;
   phone: string;
+}
+
+interface ProjectDirectoryEntry {
+  id: number;
+  fullName: string;
+  email: string;
+  companyId?: number | null;
+  companyName?: string | null;
+  role: string;
+  notes?: string | null;
+}
+
+interface CanonicalCompany {
+  id: number;
+  name: string;
+  website?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  industry?: string | null;
+  companyType?: string | null;
+  profileDescription?: string | null;
 }
 
 interface RFIRow {
@@ -71,6 +95,10 @@ interface LinkedRfi {
   description?: string | null;
   status: string;
   responsible?: string | null;
+  currentStatus?: string | null;
+  currentResponsible?: string | null;
+  assignedToId?: number | null;
+  currentUpdatedAt?: string | null;
 }
 
 interface RfiCandidate {
@@ -271,8 +299,13 @@ export function MeetingsTab({
   canWrite: boolean;
 }) {
   const { lang } = useI18n();
+  const { getOptions, getLabel } = useConfig();
   const { token } = useAuthStore();
   const t = (en: string, es: string) => (lang === "es" ? es : en);
+  const rfiStatusOptions = [
+    ...new Map(getOptions("rfi_status").map((option) => [option.value, option]))
+      .values(),
+  ];
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -281,19 +314,89 @@ export function MeetingsTab({
   const queryClient = useQueryClient();
   const { data: members } = useListMembers(projectId);
   const memberList = members ?? [];
-  const uniqueCompanies = [
-    ...new Set(
-      memberList.map((m) => m.userCompanyName).filter(Boolean) as string[],
-    ),
-  ];
-  const companyPeople = (company: string) =>
-    memberList.filter((m) => m.userCompanyName === company);
+  const [directoryEntries, setDirectoryEntries] = useState<
+    ProjectDirectoryEntry[]
+  >([]);
+  const normalizeCompany = (value: string) =>
+    value.trim().replace(/\s+/g, " ");
+  const companyKey = (value: string) => normalizeCompany(value).toLowerCase();
+  const noteValue = (notes: string | null | undefined, label: string) => {
+    const match = String(notes || "").match(new RegExp(`${label}:\\s*([^|]+)`, "i"));
+    return match?.[1]?.trim() || "";
+  };
+  const companyMap = new Map<string, string>();
+  const companyIdByName = new Map<string, number>();
+  for (const company of memberList
+    .map((m) => m.userCompanyName)
+    .filter(Boolean) as string[]) {
+    const normalized = normalizeCompany(company);
+    if (normalized) companyMap.set(companyKey(normalized), normalized);
+  }
+  for (const member of memberList) {
+    const normalized = normalizeCompany(member.userCompanyName || "");
+    const memberCompanyId = Number((member as { userCompanyId?: number | null }).userCompanyId);
+    if (normalized && Number.isInteger(memberCompanyId) && memberCompanyId > 0)
+      companyIdByName.set(companyKey(normalized), memberCompanyId);
+  }
+  for (const company of directoryEntries
+    .map((entry) => entry.companyName)
+    .filter(Boolean) as string[]) {
+    const normalized = normalizeCompany(company);
+    if (normalized && !companyMap.has(companyKey(normalized)))
+      companyMap.set(companyKey(normalized), normalized);
+  }
+  for (const entry of directoryEntries) {
+    const normalized = normalizeCompany(entry.companyName || "");
+    if (normalized && entry.companyId)
+      companyIdByName.set(companyKey(normalized), entry.companyId);
+  }
+  const uniqueCompanies = [...companyMap.values()].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const companyPeople = (company: string) => {
+    const key = companyKey(company);
+    const memberContacts = memberList.filter(
+      (m) => companyKey(m.userCompanyName || "") === key,
+    );
+    const directoryContacts = directoryEntries
+      .filter((entry) => companyKey(entry.companyName || "") === key)
+      .map((entry) => ({
+        id: `directory-${entry.id}`,
+        directoryEntryId: entry.id,
+        projectId,
+        userId: 0,
+        userFullName: entry.fullName,
+        userEmail: entry.email,
+        userCompanyName: entry.companyName || "",
+        role: entry.role,
+        phone: noteValue(entry.notes, "Phone"),
+        trade: noteValue(entry.notes, "Trade"),
+        joinedAt: "",
+      }));
+    return [...memberContacts, ...directoryContacts];
+  };
 
   const [addCompanyIndex, setAddCompanyIndex] = useState<number | null>(null);
+  const [addingCompanyIndex, setAddingCompanyIndex] = useState<number | null>(
+    null,
+  );
+  const [companyAddErrors, setCompanyAddErrors] = useState<
+    Record<number, string>
+  >({});
+  const [contactSaving, setContactSaving] = useState<Record<number, boolean>>(
+    {},
+  );
+  const [contactErrors, setContactErrors] = useState<Record<number, string>>(
+    {},
+  );
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanyEmail, setNewCompanyEmail] = useState("");
   const [newCompanyPhone, setNewCompanyPhone] = useState("");
   const [newCompanyAddress, setNewCompanyAddress] = useState("");
+  const [newCompanyWebsite, setNewCompanyWebsite] = useState("");
+  const [newCompanyIndustry, setNewCompanyIndustry] = useState("");
+  const [newCompanyType, setNewCompanyType] = useState("");
+  const [newCompanyNotes, setNewCompanyNotes] = useState("");
   const [newContactPerson, setNewContactPerson] = useState("");
   const [freeTextPersons, setFreeTextPersons] = useState<number[]>([]);
 
@@ -302,59 +405,183 @@ export function MeetingsTab({
     setNewCompanyEmail("");
     setNewCompanyPhone("");
     setNewCompanyAddress("");
+    setNewCompanyWebsite("");
+    setNewCompanyIndustry("");
+    setNewCompanyType("");
+    setNewCompanyNotes("");
     setNewContactPerson("");
     setAddCompanyIndex(null);
   };
 
+  const loadDirectoryEntries = async () => {
+    if (!token) return;
+    const response = await fetch(`${API}/projects/${projectId}/directory`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) setDirectoryEntries(await response.json());
+  };
+
   const handleAddCompany = async (index: number) => {
-    if (!newCompanyName.trim()) return;
-    const tok = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state
-      ?.token;
-    const companyName = newCompanyName.trim();
+    const companyName = normalizeCompany(newCompanyName);
+    if (!companyName) {
+      setCompanyAddErrors((prev) => ({
+        ...prev,
+        [index]: t("Company name is required.", "El nombre de la empresa es obligatorio."),
+      }));
+      return;
+    }
+    setCompanyAddErrors((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+    setAddingCompanyIndex(index);
     let res: Response;
     try {
-      res = await fetch(`/api/v1/projects/${projectId}/directory`, {
+      res = await fetch(`/api/v1/projects/${projectId}/directory/companies`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${tok}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          full_name: newContactPerson.trim() || companyName,
-          email: newCompanyEmail.trim() || "contact@bimlog.io",
           company_name: companyName,
-          role: "External Company",
-          notes: `Phone: ${newCompanyPhone} | Address: ${newCompanyAddress}`,
+          website: newCompanyWebsite,
+          address: newCompanyAddress,
+          phone: newCompanyPhone,
+          industry: newCompanyIndustry,
+          company_type: newCompanyType,
+          profile_description: newCompanyNotes,
+          primary_contact_name: newContactPerson,
+          primary_contact_email: newCompanyEmail,
+          primary_contact_phone: newCompanyPhone,
+          notes: newCompanyNotes,
         }),
       });
     } catch (err) {
-      setError(
-        t(
-          "Failed to add company. Check your connection and try again.",
-          "No se pudo agregar la empresa. Verifique su conexión e intente de nuevo.",
+      setCompanyAddErrors((prev) => ({
+        ...prev,
+        [index]: t(
+          "Company could not be saved. Check your connection and try again.",
+          "No se pudo guardar la empresa. Verifique su conexión e intente de nuevo.",
         ),
-      );
+      }));
+      setAddingCompanyIndex(null);
       return;
     }
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      setError(
-        t(
-          `Failed to add company (${res.status}). ${body}`,
-          `No se pudo agregar la empresa (${res.status}). ${body}`,
+      const body = await res.json().catch(() => ({}));
+      setCompanyAddErrors((prev) => ({
+        ...prev,
+        [index]: t(
+          body.error === "company_name_required"
+            ? "Company name is required."
+            : "Company could not be saved to the project directory.",
+          body.error === "company_name_required"
+            ? "El nombre de la empresa es obligatorio."
+            : "No se pudo guardar la empresa en el directorio del proyecto.",
         ),
-      );
+      }));
+      setAddingCompanyIndex(null);
       return;
     }
+    const createdCompany = (await res.json()) as CanonicalCompany & {
+      directoryEntry?: ProjectDirectoryEntry;
+      reused?: boolean;
+    };
+    const entry =
+      createdCompany.directoryEntry ||
+      ({
+        id: 0,
+        fullName: newContactPerson || createdCompany.name || companyName,
+        email: newCompanyEmail,
+        companyId: createdCompany.id,
+        companyName: createdCompany.name || companyName,
+        role: "External Company",
+      } satisfies ProjectDirectoryEntry);
     await queryClient.invalidateQueries({
       queryKey: [`/api/v1/projects/${projectId}/members`],
     });
+    setDirectoryEntries((prev) => {
+      const rest = prev.filter((item) => item.id !== entry.id);
+      return [...rest, entry];
+    });
+    await loadDirectoryEntries().catch(() => undefined);
     setAttendees((prev) => {
       const arr = [...prev];
-      arr[index] = { ...arr[index], company: companyName };
+      arr[index] = {
+        ...arr[index],
+        company: entry.companyName || companyName,
+        companyId: entry.companyId || createdCompany.id,
+        directoryEntryId: entry.id || null,
+      };
       return arr;
     });
+    setAddingCompanyIndex(null);
     resetAddCompanyForm();
+  };
+
+  const saveAttendeeContact = async (index: number) => {
+    const attendee = attendees[index];
+    if (!attendee?.fullName.trim() || !attendee.companyId) {
+      setContactErrors((prev) => ({
+        ...prev,
+        [index]: t(
+          "Select a company and enter a name before saving this contact.",
+          "Seleccione una empresa e ingrese un nombre antes de guardar este contacto.",
+        ),
+      }));
+      return;
+    }
+    setContactSaving((prev) => ({ ...prev, [index]: true }));
+    setContactErrors((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+    try {
+      const response = await fetch(
+        `${API}/projects/${projectId}/directory/contacts`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            full_name: attendee.fullName,
+            company_id: attendee.companyId,
+            company_name: attendee.company,
+            role: attendee.role,
+            trade: attendee.trade,
+            email: attendee.email,
+            phone: attendee.phone,
+          }),
+        },
+      );
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "contact_save_failed");
+      }
+      const entry = (await response.json()) as ProjectDirectoryEntry;
+      setDirectoryEntries((prev) => {
+        const rest = prev.filter((item) => item.id !== entry.id);
+        return [...rest, entry];
+      });
+      setAttendees((prev) => {
+        const next = [...prev];
+        next[index] = { ...next[index], directoryEntryId: entry.id };
+        return next;
+      });
+      setFreeTextPersons((prev) => prev.filter((item) => item !== index));
+    } catch (err) {
+      setContactErrors((prev) => ({
+        ...prev,
+        [index]:
+          err instanceof Error
+            ? err.message
+            : t("Could not save this contact.", "No se pudo guardar este contacto."),
+      }));
+    } finally {
+      setContactSaving((prev) => ({ ...prev, [index]: false }));
+    }
   };
 
   const [view, setView] = useState<"list" | "new" | "detail" | "actions">(
@@ -387,7 +614,15 @@ export function MeetingsTab({
   const [location, setLocation] = useState("");
   const [agendaItems, setAgendaItems] = useState<string[]>(["", "", "", ""]);
   const [attendees, setAttendees] = useState<Attendee[]>([
-    { trade: "", company: "", fullName: "", role: "", email: "", phone: "" },
+    {
+      trade: "",
+      company: "",
+      companyId: null,
+      fullName: "",
+      role: "",
+      email: "",
+      phone: "",
+    },
   ]);
   // Manual rows remain only for imported legacy text; canonical selections
   // persist through meeting_rfi_links.
@@ -409,6 +644,12 @@ export function MeetingsTab({
   const [selectorLoading, setSelectorLoading] = useState(false);
   const [selectorError, setSelectorError] = useState("");
   const [selectorSaving, setSelectorSaving] = useState(false);
+  const [rfiControlSaving, setRfiControlSaving] = useState<
+    Record<number, string>
+  >({});
+  const [rfiControlErrors, setRfiControlErrors] = useState<
+    Record<number, string>
+  >({});
   const [selectedSubmittals, setSelectedSubmittals] = useState<
     LinkedSubmittal[]
   >([]);
@@ -454,6 +695,14 @@ export function MeetingsTab({
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [validationSummary, setValidationSummary] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [draftStatus, setDraftStatus] = useState<
+    "idle" | "saving" | "saved" | "failed"
+  >("idle");
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [draftDirty, setDraftDirty] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const draftRestoreRef = useRef(false);
+  const autoDraftRestoreAttemptedRef = useRef(false);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const meetingDateInputRef = useRef<HTMLInputElement | null>(null);
   const bottomValidationRef = useRef<HTMLDivElement | null>(null);
@@ -574,6 +823,7 @@ export function MeetingsTab({
 
   useEffect(() => {
     loadMeetings();
+    void loadDirectoryEntries().catch(() => undefined);
   }, [projectId]);
 
   useEffect(() => {
@@ -623,6 +873,62 @@ export function MeetingsTab({
     }, 0);
     return () => window.clearTimeout(timer);
   }, [loading, meetings]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const meetingDraftParam = params.get("meetingDraft");
+    if (!meetingDraftParam || !token) return;
+    const restoreDraft = async () => {
+      if (meetingDraftParam === "new") {
+        resetForm();
+        setView("new");
+        setDraftLoaded(true);
+        await loadMeetingDraft(null);
+      } else if (meetingDraftParam.startsWith("edit:")) {
+        const meetingId = Number(meetingDraftParam.slice(5));
+        if (!Number.isInteger(meetingId) || meetingId <= 0) return;
+        const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+        const meeting = (await response.json()) as Meeting;
+        await openEditMeeting(meeting);
+      }
+      params.delete("meetingDraft");
+      const next = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${next ? `?${next}` : ""}`);
+      window.setTimeout(() => {
+        const saveButton = [...document.querySelectorAll("button")].find((button) =>
+          button.textContent?.includes(t("Save Meeting", "Guardar Reunión")),
+        ) as HTMLButtonElement | undefined;
+        saveButton?.focus();
+      }, 0);
+    };
+    void restoreDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, token]);
+
+  useEffect(() => {
+    if (!token || view !== "list" || autoDraftRestoreAttemptedRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("meetingDraft") || params.get("meeting") || params.get("action")) return;
+    autoDraftRestoreAttemptedRef.current = true;
+    const restoreSavedDraft = async () => {
+      const restored = await loadMeetingDraft(null);
+      if (restored) {
+        setView("new");
+        setDraftLoaded(true);
+        window.setTimeout(() => {
+          const saveButton = [...document.querySelectorAll("button")].find((button) =>
+            button.textContent?.includes(t("Save Meeting", "Guardar Reunión")),
+          ) as HTMLButtonElement | undefined;
+          saveButton?.focus();
+        }, 0);
+      }
+    };
+    void restoreSavedDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, token, view]);
 
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -707,7 +1013,16 @@ export function MeetingsTab({
     setLocation("");
     setAgendaItems(["", "", "", ""]);
     setAttendees([
-      { trade: "", company: "", fullName: "", role: "", email: "", phone: "" },
+      {
+        trade: "",
+        company: "",
+        companyId: null,
+        directoryEntryId: null,
+        fullName: "",
+        role: "",
+        email: "",
+        phone: "",
+      },
     ]);
     setRfis([]);
     setSelectedRfis([]);
@@ -754,11 +1069,203 @@ export function MeetingsTab({
     setValidationSummary([]);
     setFieldErrors({});
     setError("");
+    setDraftStatus("idle");
+    setDraftSavedAt(null);
+    setDraftDirty(false);
+    setDraftLoaded(false);
   };
 
-  const openNew = () => {
+  const currentDraftPayload = () => ({
+    title,
+    meetingDate,
+    meetingTime,
+    location,
+    agendaItems,
+    attendees,
+    rfis,
+    selectedRfis,
+    selectedSubmittals,
+    selectedLensViewpoints,
+    deliverables,
+    viewpoints,
+    aiSummaryText,
+    fieldErrors,
+    validationSummary,
+    updatedAt: new Date().toISOString(),
+  });
+
+  const applyDraftPayload = (payload: Record<string, unknown>) => {
+    draftRestoreRef.current = true;
+    setTitle(String(payload.title || ""));
+    setMeetingDate(String(payload.meetingDate || ""));
+    setMeetingTime(String(payload.meetingTime || "10:00"));
+    setLocation(String(payload.location || ""));
+    if (Array.isArray(payload.agendaItems))
+      setAgendaItems(payload.agendaItems as string[]);
+    if (Array.isArray(payload.attendees))
+      setAttendees(payload.attendees as Attendee[]);
+    if (Array.isArray(payload.rfis)) setRfis(payload.rfis as RFIRow[]);
+    if (Array.isArray(payload.selectedRfis))
+      setSelectedRfis(payload.selectedRfis as LinkedRfi[]);
+    if (Array.isArray(payload.selectedSubmittals))
+      setSelectedSubmittals(payload.selectedSubmittals as LinkedSubmittal[]);
+    if (Array.isArray(payload.selectedLensViewpoints))
+      setSelectedLensViewpoints(
+        payload.selectedLensViewpoints as LinkedLensViewpoint[],
+      );
+    if (Array.isArray(payload.deliverables))
+      setDeliverables(payload.deliverables as DeliverableRow[]);
+    if (Array.isArray(payload.viewpoints))
+      setViewpoints(payload.viewpoints as ViewpointRow[]);
+    setAiSummaryText(String(payload.aiSummaryText || ""));
+    if (payload.fieldErrors && typeof payload.fieldErrors === "object")
+      setFieldErrors(payload.fieldErrors as Record<string, string>);
+    if (Array.isArray(payload.validationSummary))
+      setValidationSummary(payload.validationSummary as string[]);
+    window.setTimeout(() => {
+      draftRestoreRef.current = false;
+    }, 0);
+  };
+
+  const draftQuery = (meetingId?: number | null) =>
+    meetingId ? `?meeting_id=${meetingId}` : "";
+
+  const loadMeetingDraft = async (meetingId?: number | null) => {
+    if (!token) return false;
+    const response = await fetch(
+      `${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!response.ok) return false;
+    const draft = await response.json();
+    if (!draft?.payload) return false;
+    applyDraftPayload(draft.payload);
+    setDraftStatus("saved");
+    setDraftSavedAt(draft.updatedAt || null);
+    setDraftDirty(false);
+    return true;
+  };
+
+  useEffect(() => {
+    if (view !== "new" || !draftLoaded || draftRestoreRef.current) return;
+    setDraftDirty(true);
+    const timer = window.setTimeout(async () => {
+      const meetingId = editingMeeting?.id ?? null;
+      setDraftStatus("saving");
+      try {
+        const response = await fetch(
+          `${API}/projects/${projectId}/meetings/draft`,
+          {
+            method: "PUT",
+            headers,
+            body: JSON.stringify({
+              meeting_id: meetingId,
+              payload: currentDraftPayload(),
+            }),
+          },
+        );
+        if (!response.ok) throw new Error("draft_save_failed");
+        const draft = await response.json();
+        setDraftStatus("saved");
+        setDraftSavedAt(draft.updatedAt || new Date().toISOString());
+        setDraftDirty(false);
+      } catch {
+        setDraftStatus("failed");
+        setDraftDirty(true);
+      }
+    }, 900);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    view,
+    draftLoaded,
+    title,
+    meetingDate,
+    meetingTime,
+    location,
+    agendaItems,
+    attendees,
+    rfis,
+    selectedRfis,
+    selectedSubmittals,
+    selectedLensViewpoints,
+    deliverables,
+    viewpoints,
+    aiSummaryText,
+  ]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (view !== "new" || !draftDirty || draftStatus !== "failed") return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [view, draftDirty, draftStatus]);
+
+  const persistMeetingDraftNow = async () => {
+    if (view !== "new" || !draftLoaded || !token) return true;
+    const meetingId = editingMeeting?.id ?? null;
+    setDraftStatus("saving");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/meetings/draft`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({
+          meeting_id: meetingId,
+          payload: currentDraftPayload(),
+        }),
+      });
+      if (!response.ok) throw new Error("draft_save_failed");
+      const draft = await response.json();
+      setDraftStatus("saved");
+      setDraftSavedAt(draft.updatedAt || new Date().toISOString());
+      setDraftDirty(false);
+      return true;
+    } catch {
+      setDraftStatus("failed");
+      setDraftDirty(true);
+      return false;
+    }
+  };
+
+  const confirmUnsafeNavigation = () =>
+    draftStatus !== "failed" ||
+    window.confirm(
+      t(
+        "The Meeting draft could not be safely saved. Leave anyway and risk losing the latest changes?",
+        "No se pudo guardar de forma segura el borrador de la Reunión. ¿Salir de todos modos y arriesgar perder los últimos cambios?",
+      ),
+    );
+
+  const discardMeetingDraft = async () => {
+    const meetingId = editingMeeting?.id ?? null;
+    if (
+      !window.confirm(
+        t(
+          "Discard this saved Meeting draft?",
+          "¿Descartar este borrador guardado de la Reunión?",
+        ),
+      )
+    )
+      return;
+    await fetch(
+      `${API}/projects/${projectId}/meetings/draft${draftQuery(meetingId)}`,
+      { method: "DELETE", headers },
+    );
+    setDraftStatus("idle");
+    setDraftSavedAt(null);
+    setDraftDirty(false);
+    if (editingMeeting) await openEditMeeting(editingMeeting);
+    else resetForm();
+  };
+
+  const openNew = async () => {
     resetForm();
     setView("new");
+    setDraftLoaded(true);
+    void loadMeetingDraft(null);
   };
 
   const openEditMeeting = async (meeting: Meeting) => {
@@ -778,6 +1285,8 @@ export function MeetingsTab({
     }
     const detail = (await response.json()) as Meeting & {
       attendees?: {
+        companyId?: number | null;
+        directoryEntryId?: number | null;
         fullName: string;
         company?: string | null;
         role?: string | null;
@@ -801,6 +1310,8 @@ export function MeetingsTab({
         ? detail.attendees.map((attendee) => ({
             trade: "",
             company: attendee.company || "",
+            companyId: attendee.companyId || null,
+            directoryEntryId: attendee.directoryEntryId || null,
             fullName: attendee.fullName,
             role: attendee.role || "",
             email: attendee.externalEmail || "",
@@ -810,6 +1321,8 @@ export function MeetingsTab({
             {
               trade: "",
               company: "",
+              companyId: null,
+              directoryEntryId: null,
               fullName: "",
               role: "",
               email: "",
@@ -862,6 +1375,8 @@ export function MeetingsTab({
     setValidationSummary([]);
     setFieldErrors({});
     setView("new");
+    setDraftLoaded(true);
+    void loadMeetingDraft(meeting.id);
   };
 
   const reportToken = () => encodeURIComponent(token || "");
@@ -1026,8 +1541,93 @@ export function MeetingsTab({
     await loadMeetings();
   };
 
-  const openOriginalRfi = (rfiId: number) =>
-    window.location.assign(`/projects/${projectId}/rfis?rfi=${rfiId}`);
+  const openOriginalRfi = async (rfiId: number) => {
+    if (!confirmUnsafeNavigation()) return;
+    if (!(await persistMeetingDraftNow())) {
+      if (!confirmUnsafeNavigation()) return;
+    }
+    const params = new URLSearchParams({ rfi: String(rfiId) });
+    if (view === "new") {
+      params.set("returnTab", "meetings");
+      params.set("meetingDraft", editingMeeting ? `edit:${editingMeeting.id}` : "new");
+    }
+    window.location.assign(`/projects/${projectId}/rfis?${params.toString()}`);
+  };
+
+  const updateCanonicalRfiFromMeeting = async (
+    rfi: LinkedRfi,
+    updates: { status?: string; assignedToId?: number | null },
+  ) => {
+    setRfiControlSaving((prev) => ({ ...prev, [rfi.rfiId]: "saving" }));
+    setRfiControlErrors((prev) => {
+      const next = { ...prev };
+      delete next[rfi.rfiId];
+      return next;
+    });
+    try {
+      const response = await fetch(
+        `${API}/projects/${projectId}/rfis/${rfi.rfiId}`,
+        {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({
+            ...updates,
+            expected_updated_at: rfi.currentUpdatedAt,
+          }),
+        },
+      );
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          body.error ||
+            t("Could not update the RFI.", "No se pudo actualizar el RFI."),
+        );
+      }
+      const updated = await response.json();
+      const assignedMember = memberList.find(
+        (member) => member.userId === updated.assignedToId,
+      );
+      const apply = (rows: LinkedRfi[]) =>
+        rows.map((row) =>
+          row.rfiId === rfi.rfiId
+            ? {
+                ...row,
+                currentStatus: updated.status || row.currentStatus,
+                currentResponsible:
+                  assignedMember?.userFullName ||
+                  updated.ballInCourt ||
+                  updated.submittedToCompany ||
+                  updated.submittedToPerson ||
+                  row.currentResponsible,
+                assignedToId: updated.assignedToId ?? null,
+                currentUpdatedAt: updated.updatedAt || row.currentUpdatedAt,
+              }
+            : row,
+        );
+      setSelectedRfis((prev) => apply(prev));
+      setMeetings((prev) =>
+        prev.map((meeting) =>
+          meeting.linkedRfis
+            ? { ...meeting, linkedRfis: apply(meeting.linkedRfis) }
+            : meeting,
+        ),
+      );
+      setRfiControlSaving((prev) => ({ ...prev, [rfi.rfiId]: "saved" }));
+    } catch (err) {
+      setRfiControlSaving((prev) => {
+        const next = { ...prev };
+        delete next[rfi.rfiId];
+        return next;
+      });
+      setRfiControlErrors((prev) => ({
+        ...prev,
+        [rfi.rfiId]:
+          err instanceof Error
+            ? err.message
+            : t("Could not update the RFI.", "No se pudo actualizar el RFI."),
+      }));
+    }
+  };
 
   const RfiSelectorModal = () =>
     selectorMeetingId !== undefined ? (
@@ -2396,6 +2996,8 @@ export function MeetingsTab({
           .filter((a) => a.fullName)
           .map((a) => ({
             full_name: a.fullName,
+            company_id: a.companyId || undefined,
+            directory_entry_id: a.directoryEntryId || undefined,
             company: a.company,
             role: a.role,
             external_email: a.email || undefined,
@@ -2827,29 +3429,66 @@ export function MeetingsTab({
                             <div style={{ fontSize: 13, fontWeight: 700 }}>
                               {rfi.rfiNumber} · {rfi.title}
                             </div>
-                            {rfi.description &&
-                              rfi.description !== rfi.title && (
-                                <div
-                                  style={{
-                                    fontSize: 12,
-                                    color: "#4B5563",
-                                    marginTop: 2,
-                                  }}
-                                >
-                                  {rfi.description}
-                                </div>
-                              )}
                             <div
                               style={{
-                                fontSize: 11,
-                                color: "#6B7280",
+                                display: "flex",
+                                gap: 8,
+                                flexWrap: "wrap",
                                 marginTop: 4,
                               }}
                             >
-                              {t("Status", "Estado")}: {rfi.status} ·{" "}
-                              {t("Responsible", "Responsable")}:{" "}
-                              {rfi.responsible || "?"}
+                              <select
+                                value={rfi.currentStatus || rfi.status}
+                                onChange={(event) =>
+                                  void updateCanonicalRfiFromMeeting(rfi, {
+                                    status: event.target.value,
+                                  })
+                                }
+                                disabled={
+                                  !canWrite ||
+                                  rfiControlSaving[rfi.rfiId] === "saving"
+                                }
+                                style={{ fontSize: 11, padding: "3px 6px" }}
+                              >
+                                {rfiStatusOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {getLabel("rfi_status", option.value)}
+                                  </option>
+                                ))}
+                              </select>
+                              <select
+                                value={rfi.assignedToId || ""}
+                                onChange={(event) =>
+                                  void updateCanonicalRfiFromMeeting(rfi, {
+                                    assignedToId: event.target.value
+                                      ? Number(event.target.value)
+                                      : undefined,
+                                  })
+                                }
+                                disabled={
+                                  !canWrite ||
+                                  rfiControlSaving[rfi.rfiId] === "saving"
+                                }
+                                style={{ fontSize: 11, padding: "3px 6px" }}
+                              >
+                                <option value="">
+                                  {rfi.currentResponsible ||
+                                    rfi.responsible ||
+                                    t("Responsible", "Responsable")}
+                                </option>
+                                {memberList.map((member) => (
+                                  <option key={member.userId} value={member.userId}>
+                                    {member.userFullName} -{" "}
+                                    {member.userCompanyName || member.userEmail}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
+                            {rfiControlErrors[rfi.rfiId] && (
+                              <div role="alert" style={{ fontSize: 11, color: "#B91C1C", marginTop: 4 }}>
+                                {rfiControlErrors[rfi.rfiId]}
+                              </div>
+                            )}
                           </div>
                           <button
                             className="btn btn-sm btn-outline"
@@ -2859,7 +3498,7 @@ export function MeetingsTab({
                               size={12}
                               style={{ marginRight: 4 }}
                             />
-                            {t("Open Original RFI", "Abrir RFI original")}
+                            {t("View RFI", "Ver RFI")}
                           </button>
                           {canWrite && (
                             <button
@@ -3811,8 +4450,19 @@ export function MeetingsTab({
               {t("Print Meeting", "Imprimir Reunión")}
             </button>
           )}
-          <button className="btn btn-outline" onClick={() => setView("list")}>
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              if (confirmUnsafeNavigation()) setView("list");
+            }}
+          >
             {t("Cancel", "Cancelar")}
+          </button>
+          <button
+            className="btn btn-outline"
+            onClick={() => void discardMeetingDraft()}
+          >
+            {t("Discard Draft", "Descartar borrador")}
           </button>
           <button
             className="btn btn-primary"
@@ -3826,6 +4476,30 @@ export function MeetingsTab({
                 : t("Save Meeting", "Guardar Reunión")}
           </button>
         </div>
+      </div>
+
+      <div
+        role={draftStatus === "failed" ? "alert" : "status"}
+        aria-live="polite"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: -12,
+          marginBottom: 12,
+          fontSize: 12,
+          color: draftStatus === "failed" ? "#B91C1C" : "#6B7280",
+        }}
+      >
+        {draftStatus === "saving"
+          ? t("Saving draft...", "Guardando borrador...")
+          : draftStatus === "saved"
+            ? `${t("Draft saved", "Borrador guardado")}${draftSavedAt ? ` ${new Date(draftSavedAt).toLocaleTimeString()}` : ""}`
+            : draftStatus === "failed"
+              ? t(
+                  "Save failed - changes not safely stored",
+                  "Error al guardar - los cambios no están almacenados de forma segura",
+                )
+              : ""}
       </div>
 
       {error && (
@@ -4233,10 +4907,14 @@ export function MeetingsTab({
                           <select
                             value={a.company}
                             onChange={(e) => {
+                              const company = e.target.value;
                               const arr = [...attendees];
                               arr[i] = {
                                 ...arr[i],
-                                company: e.target.value,
+                                company,
+                                companyId:
+                                  companyIdByName.get(companyKey(company)) ||
+                                  null,
                                 fullName: "",
                                 email: "",
                               };
@@ -4315,6 +4993,19 @@ export function MeetingsTab({
                                   ...arr[i],
                                   fullName: e.target.value,
                                   email: sel ? sel.userEmail : arr[i].email,
+                                  role: sel ? sel.role || arr[i].role : arr[i].role,
+                                  phone: sel
+                                    ? (sel as { phone?: string }).phone ||
+                                      arr[i].phone
+                                    : arr[i].phone,
+                                  trade: sel
+                                    ? (sel as { trade?: string }).trade ||
+                                      arr[i].trade
+                                    : arr[i].trade,
+                                  directoryEntryId: sel
+                                    ? (sel as { directoryEntryId?: number }).directoryEntryId ||
+                                      arr[i].directoryEntryId
+                                    : arr[i].directoryEntryId,
                                 };
                                 setAttendees(arr);
                               }}
@@ -4375,6 +5066,43 @@ export function MeetingsTab({
                                     "Agregar persona fuera de lista",
                                   )}
                             </button>
+                          )}
+                          {isFreeTextPerson && a.companyId && a.fullName && (
+                            <button
+                              type="button"
+                              onClick={() => void saveAttendeeContact(i)}
+                              disabled={contactSaving[i]}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                                marginTop: 4,
+                                padding: "2px 6px",
+                                fontSize: 10,
+                                borderRadius: 4,
+                                border: "1px solid #16A34A",
+                                background: "#F0FDF4",
+                                cursor: contactSaving[i] ? "not-allowed" : "pointer",
+                                color: "#166534",
+                              }}
+                            >
+                              <UserPlus size={11} />
+                              {contactSaving[i]
+                                ? t("Saving...", "Guardando...")
+                                : t("Save contact", "Guardar contacto")}
+                            </button>
+                          )}
+                          {contactErrors[i] && (
+                            <div
+                              role="alert"
+                              style={{
+                                marginTop: 4,
+                                fontSize: 11,
+                                color: "#B91C1C",
+                              }}
+                            >
+                              {contactErrors[i]}
+                            </div>
                           )}
                         </td>
                         <td style={CELL_STYLE}>
@@ -4483,7 +5211,7 @@ export function MeetingsTab({
                                   </div>
                                   <input
                                     value={newCompanyName}
-                                    onChange={(e) =>
+                                  onChange={(e) =>
                                       setNewCompanyName(e.target.value)
                                     }
                                     placeholder={t(
@@ -4609,6 +5337,109 @@ export function MeetingsTab({
                                     }}
                                   />
                                 </div>
+                                <div>
+                                  <div
+                                    style={{
+                                      fontSize: 10,
+                                      color: "#6B7280",
+                                      fontWeight: 700,
+                                      marginBottom: 3,
+                                    }}
+                                  >
+                                    {t("Website", "Sitio web")}
+                                  </div>
+                                  <input
+                                    value={newCompanyWebsite}
+                                    onChange={(e) =>
+                                      setNewCompanyWebsite(e.target.value)
+                                    }
+                                    placeholder="https://"
+                                    style={{
+                                      width: "100%",
+                                      fontSize: 12,
+                                      border: "1px solid #BFDBFE",
+                                      borderRadius: 6,
+                                      padding: "5px 8px",
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <div
+                                    style={{
+                                      fontSize: 10,
+                                      color: "#6B7280",
+                                      fontWeight: 700,
+                                      marginBottom: 3,
+                                    }}
+                                  >
+                                    {t("Trade / discipline", "Trade / disciplina")}
+                                  </div>
+                                  <input
+                                    value={newCompanyIndustry}
+                                    onChange={(e) =>
+                                      setNewCompanyIndustry(e.target.value)
+                                    }
+                                    placeholder={t("Electrical", "Eléctrico")}
+                                    style={{
+                                      width: "100%",
+                                      fontSize: 12,
+                                      border: "1px solid #BFDBFE",
+                                      borderRadius: 6,
+                                      padding: "5px 8px",
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <div
+                                    style={{
+                                      fontSize: 10,
+                                      color: "#6B7280",
+                                      fontWeight: 700,
+                                      marginBottom: 3,
+                                    }}
+                                  >
+                                    {t("Company type", "Tipo de empresa")}
+                                  </div>
+                                  <input
+                                    value={newCompanyType}
+                                    onChange={(e) =>
+                                      setNewCompanyType(e.target.value)
+                                    }
+                                    placeholder={t("Customer / subcontractor", "Cliente / subcontratista")}
+                                    style={{
+                                      width: "100%",
+                                      fontSize: 12,
+                                      border: "1px solid #BFDBFE",
+                                      borderRadius: 6,
+                                      padding: "5px 8px",
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <div
+                                    style={{
+                                      fontSize: 10,
+                                      color: "#6B7280",
+                                      fontWeight: 700,
+                                      marginBottom: 3,
+                                    }}
+                                  >
+                                    {t("Notes", "Notas")}
+                                  </div>
+                                  <input
+                                    value={newCompanyNotes}
+                                    onChange={(e) =>
+                                      setNewCompanyNotes(e.target.value)
+                                    }
+                                    style={{
+                                      width: "100%",
+                                      fontSize: 12,
+                                      border: "1px solid #BFDBFE",
+                                      borderRadius: 6,
+                                      padding: "5px 8px",
+                                    }}
+                                  />
+                                </div>
                               </div>
                               <div
                                 style={{
@@ -4620,6 +5451,7 @@ export function MeetingsTab({
                                 <button
                                   type="button"
                                   onClick={resetAddCompanyForm}
+                                  disabled={addingCompanyIndex === i}
                                   style={{
                                     padding: "5px 12px",
                                     fontSize: 11,
@@ -4634,20 +5466,42 @@ export function MeetingsTab({
                                 <button
                                   type="button"
                                   onClick={() => handleAddCompany(i)}
+                                  disabled={addingCompanyIndex === i}
                                   style={{
                                     padding: "5px 14px",
                                     fontSize: 11,
                                     borderRadius: 6,
-                                    background: "#2563EB",
+                                    background:
+                                      addingCompanyIndex === i
+                                        ? "#93C5FD"
+                                        : "#2563EB",
                                     color: "white",
                                     border: "none",
-                                    cursor: "pointer",
+                                    cursor:
+                                      addingCompanyIndex === i
+                                        ? "not-allowed"
+                                        : "pointer",
                                     fontWeight: 700,
                                   }}
                                 >
-                                  {t("Add Company", "Agregar Empresa")}
+                                  {addingCompanyIndex === i
+                                    ? t("Adding...", "Agregando...")
+                                    : t("Add Company", "Agregar Empresa")}
                                 </button>
                               </div>
+                              {companyAddErrors[i] && (
+                                <div
+                                  role="alert"
+                                  style={{
+                                    marginTop: 8,
+                                    fontSize: 11,
+                                    color: "#B91C1C",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {companyAddErrors[i]}
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -4666,6 +5520,8 @@ export function MeetingsTab({
                     {
                       trade: "",
                       company: "",
+                      companyId: null,
+                      directoryEntryId: null,
                       fullName: "",
                       role: "",
                       email: "",
@@ -4710,15 +5566,68 @@ export function MeetingsTab({
                   <div style={{ fontSize: 13, fontWeight: 700 }}>
                     {rfi.rfiNumber} · {rfi.title}
                   </div>
-                  {rfi.description && rfi.description !== rfi.title && (
-                    <div style={{ fontSize: 12, color: "#4B5563" }}>
-                      {rfi.description}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      flexWrap: "wrap",
+                      marginTop: 6,
+                    }}
+                  >
+                    <select
+                      value={rfi.currentStatus || rfi.status}
+                      onChange={(event) =>
+                        void updateCanonicalRfiFromMeeting(rfi, {
+                          status: event.target.value,
+                        })
+                      }
+                      disabled={!canWrite || rfiControlSaving[rfi.rfiId] === "saving"}
+                      style={{ fontSize: 11, padding: "3px 6px" }}
+                    >
+                      {rfiStatusOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {getLabel("rfi_status", option.value)}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={rfi.assignedToId || ""}
+                      onChange={(event) =>
+                        void updateCanonicalRfiFromMeeting(rfi, {
+                          assignedToId: event.target.value
+                            ? Number(event.target.value)
+                            : undefined,
+                        })
+                      }
+                      disabled={!canWrite || rfiControlSaving[rfi.rfiId] === "saving"}
+                      style={{ fontSize: 11, padding: "3px 6px" }}
+                    >
+                      <option value="">
+                        {rfi.currentResponsible ||
+                          rfi.responsible ||
+                          t("Responsible", "Responsable")}
+                      </option>
+                      {memberList.map((member) => (
+                        <option key={member.userId} value={member.userId}>
+                          {member.userFullName} -{" "}
+                          {member.userCompanyName || member.userEmail}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {rfiControlErrors[rfi.rfiId] && (
+                    <div role="alert" style={{ fontSize: 11, color: "#B91C1C", marginTop: 4 }}>
+                      {rfiControlErrors[rfi.rfiId]}
                     </div>
                   )}
-                  <div style={{ fontSize: 11, color: "#6B7280" }}>
-                    {rfi.status} · {rfi.responsible || "?"}
-                  </div>
                 </div>
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => openOriginalRfi(rfi.rfiId)}
+                >
+                  <ExternalLink size={12} style={{ marginRight: 4 }} />
+                  {t("View RFI", "Ver RFI")}
+                </button>
                 {!editingMeeting && (
                   <button
                     className="btn btn-sm btn-outline"
@@ -5317,8 +6226,19 @@ export function MeetingsTab({
           paddingTop: 8,
         }}
       >
-        <button className="btn btn-outline" onClick={() => setView("list")}>
+        <button
+          className="btn btn-outline"
+          onClick={() => {
+            if (confirmUnsafeNavigation()) setView("list");
+          }}
+        >
           {t("Cancel", "Cancelar")}
+        </button>
+        <button
+          className="btn btn-outline"
+          onClick={() => void discardMeetingDraft()}
+        >
+          {t("Discard Draft", "Descartar borrador")}
         </button>
         <button
           className="btn btn-primary"
@@ -5331,6 +6251,28 @@ export function MeetingsTab({
               ? t("Save Changes", "Guardar cambios")
               : t("Save Meeting", "Guardar Reunión")}
         </button>
+      </div>
+
+      <div
+        role={draftStatus === "failed" ? "alert" : "status"}
+        aria-live="polite"
+        style={{
+          textAlign: "right",
+          marginTop: 6,
+          fontSize: 12,
+          color: draftStatus === "failed" ? "#B91C1C" : "#6B7280",
+        }}
+      >
+        {draftStatus === "saving"
+          ? t("Saving draft...", "Guardando borrador...")
+          : draftStatus === "saved"
+            ? `${t("Draft saved", "Borrador guardado")}${draftSavedAt ? ` ${new Date(draftSavedAt).toLocaleTimeString()}` : ""}`
+            : draftStatus === "failed"
+              ? t(
+                  "Save failed - changes not safely stored",
+                  "Error al guardar - los cambios no están almacenados de forma segura",
+                )
+              : ""}
       </div>
 
       {showNoKeyModal && (

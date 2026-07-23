@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import {
-  projectDirectoryTable, usersTable, activityLogTable, projectInvitations,
+  companiesTable, projectDirectoryTable, usersTable, activityLogTable, projectInvitations,
 } from "@workspace/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
 import { singleFileUpload } from "../middlewares/multipart";
@@ -11,6 +11,18 @@ import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
+
+const normalizeCompanyName = (value: string) =>
+  value.trim().replace(/\s+/g, " ");
+
+const companyDirectoryEmail = (projectId: number, companyId: number, companyName: string) => {
+  const slug = companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48) || "company";
+  return `project-${projectId}-company-${companyId}-${slug}@project-directory.local`;
+};
 
 // ── GET /projects/:projectId/directory ────────────────────────────────────────
 router.get("/projects/:projectId/directory", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -55,6 +67,169 @@ router.post("/projects/:projectId/directory", authMiddleware, requirePermission(
     res.status(201).json(entry);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// Register a reusable company name in the project directory without creating a
+// meeting-only company list. Existing contacts for the same project/company are
+// reused so repeated clicks and concurrent requests converge on one company.
+router.post("/projects/:projectId/directory/companies", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const companyName = normalizeCompanyName(String(req.body?.company_name ?? ""));
+  const website = normalizeCompanyName(String(req.body?.website ?? ""));
+  const address = normalizeCompanyName(String(req.body?.address ?? ""));
+  const phone = normalizeCompanyName(String(req.body?.phone ?? ""));
+  const industry = normalizeCompanyName(String(req.body?.industry ?? ""));
+  const companyType = normalizeCompanyName(String(req.body?.company_type ?? ""));
+  const profileDescription = normalizeCompanyName(String(req.body?.profile_description ?? ""));
+  const contactName = normalizeCompanyName(String(req.body?.primary_contact_name ?? ""));
+  const contactEmail = String(req.body?.primary_contact_email ?? "").trim().toLowerCase();
+  const contactPhone = normalizeCompanyName(String(req.body?.primary_contact_phone ?? ""));
+  const notes = normalizeCompanyName(String(req.body?.notes ?? ""));
+  if (!companyName) {
+    res.status(400).json({ error: "company_name_required" });
+    return;
+  }
+  if (companyName.length > 160) {
+    res.status(400).json({ error: "company_name_too_long" });
+    return;
+  }
+  try {
+    const result = await db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`canonical-company:${companyName.toLowerCase()}`}, 0))`);
+      let [company] = await tx
+        .select()
+        .from(companiesTable)
+        .where(sql`lower(regexp_replace(trim(${companiesTable.name}), '\\s+', ' ', 'g')) = ${companyName.toLowerCase()}`)
+        .orderBy(companiesTable.id)
+        .limit(1);
+      let reused = true;
+      if (!company) {
+        reused = false;
+        [company] = await tx.insert(companiesTable).values({
+          name: companyName,
+          website: website || null,
+          address: address || null,
+          phone: phone || null,
+          industry: industry || null,
+          companyType: companyType || null,
+          profileDescription: profileDescription || null,
+        }).returning();
+      } else if (website || address || phone || industry || companyType || profileDescription) {
+        const updates: Record<string, unknown> = {};
+        if (website && !company.website) updates.website = website;
+        if (address && !company.address) updates.address = address;
+        if (phone && !company.phone) updates.phone = phone;
+        if (industry && !company.industry) updates.industry = industry;
+        if (companyType && !company.companyType) updates.companyType = companyType;
+        if (profileDescription && !company.profileDescription) updates.profileDescription = profileDescription;
+        if (Object.keys(updates).length) {
+          [company] = await tx.update(companiesTable).set(updates).where(eq(companiesTable.id, company.id)).returning();
+        }
+      }
+
+      const [existingEntry] = await tx
+        .select()
+        .from(projectDirectoryTable)
+        .where(and(
+          eq(projectDirectoryTable.projectId, projectId),
+          eq(projectDirectoryTable.companyId, company.id),
+        ))
+        .orderBy(projectDirectoryTable.id)
+        .limit(1);
+      if (existingEntry) return { company, directoryEntry: existingEntry, reused };
+
+      const [createdEntry] = await tx.insert(projectDirectoryTable).values({
+        projectId,
+        fullName: contactName || companyName,
+        email: contactEmail || companyDirectoryEmail(projectId, company.id, companyName),
+        companyName,
+        companyId: company.id,
+        role: "External Company",
+        notes: notes || [contactPhone ? `Phone: ${contactPhone}` : "", "Registered from Meeting attendee workflow."].filter(Boolean).join(" "),
+        addedById: req.user!.userId,
+        bimlogStatus: "none",
+      }).returning();
+
+      await tx.insert(activityLogTable).values({
+        projectId,
+        userId: req.user!.userId,
+        userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName,
+        actionType: "create",
+        entityType: "directory_company",
+        entityId: createdEntry.id,
+        fileNameBefore: null,
+        fileNameAfter: null,
+        details: `Registered project directory company: ${companyName}`,
+      });
+      return { company, directoryEntry: createdEntry, reused };
+    });
+    res.status(result.reused ? 200 : 201).json({
+      id: result.company.id,
+      name: result.company.name,
+      website: result.company.website,
+      address: result.company.address,
+      phone: result.company.phone,
+      industry: result.company.industry,
+      companyType: result.company.companyType,
+      profileDescription: result.company.profileDescription,
+      directoryEntry: result.directoryEntry,
+      reused: result.reused,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "directory_company_create_failed" });
+  }
+});
+
+router.post("/projects/:projectId/directory/contacts", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const fullName = normalizeCompanyName(String(req.body?.full_name ?? ""));
+  const companyId = Number(req.body?.company_id);
+  const companyName = normalizeCompanyName(String(req.body?.company_name ?? ""));
+  const role = normalizeCompanyName(String(req.body?.role ?? "Attendee"));
+  const trade = normalizeCompanyName(String(req.body?.trade ?? ""));
+  const email = String(req.body?.email ?? "").trim().toLowerCase();
+  const phone = normalizeCompanyName(String(req.body?.phone ?? ""));
+  const notes = normalizeCompanyName(String(req.body?.notes ?? ""));
+  if (!fullName) { res.status(400).json({ error: "full_name_required" }); return; }
+  if (!Number.isInteger(companyId) || companyId <= 0) { res.status(400).json({ error: "company_id_required" }); return; }
+  try {
+    const entry = await db.transaction(async (tx) => {
+      const [company] = await tx.select().from(companiesTable).where(eq(companiesTable.id, companyId)).limit(1);
+      if (!company) return null;
+      const normalizedCompanyName = companyName || company.name;
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`project-directory-contact:${projectId}:${companyId}:${email || fullName.toLowerCase()}`}, 0))`);
+      const [existing] = await tx.select().from(projectDirectoryTable).where(and(
+        eq(projectDirectoryTable.projectId, projectId),
+        eq(projectDirectoryTable.companyId, companyId),
+        email
+          ? sql`lower(${projectDirectoryTable.email}) = ${email}`
+          : sql`lower(regexp_replace(trim(${projectDirectoryTable.fullName}), '\\s+', ' ', 'g')) = ${fullName.toLowerCase()}`,
+      )).limit(1);
+      if (existing) return existing;
+      const [created] = await tx.insert(projectDirectoryTable).values({
+        projectId,
+        fullName,
+        email: email || companyDirectoryEmail(projectId, companyId, `${fullName}-${company.name}`),
+        companyName: normalizedCompanyName,
+        companyId,
+        role: role || "Attendee",
+        notes: [trade ? `Trade: ${trade}` : "", phone ? `Phone: ${phone}` : "", notes].filter(Boolean).join(" | ") || null,
+        addedById: req.user!.userId,
+        bimlogStatus: "none",
+      }).returning();
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "create", entityType: "directory_entry", entityId: created.id,
+        fileNameBefore: null, fileNameAfter: null, details: `Added meeting attendee contact: ${fullName}`,
+      });
+      return created;
+    });
+    if (!entry) { res.status(404).json({ error: "company_not_found" }); return; }
+    res.status(201).json(entry);
+  } catch {
+    res.status(500).json({ error: "directory_contact_create_failed" });
   }
 });
 
