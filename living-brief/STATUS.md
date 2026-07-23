@@ -58,6 +58,14 @@ removes 0.18.5, and applies the canonical date-only/explicit-instant/timezone-le
 post-Finance spreadsheet inventory. It is not published, deployed, production verified, customer verified, or
 extended to Batches C-I.
 
+Coordinator Command Center Build 3 is accepted in source at integration commit
+`18154f359ea45783eda54fe3a52111d9f45fb41a`, directly based on Security Batch B master
+`9cf0fe6cd83c781d1a3f46367d47e88f0474fe8f`. It adds controlled bulk actions from the Lens/Viewpoints-first
+Command Center using existing canonical Meeting and Schedule relationships: supported RFI/Submittal links to
+Meeting Minutes and supported Submittal Schedule Bucket create/sync. Lens/Viewpoints remain first-class navigation
+items with exact identity and no Build 3 mutation path. Clash aggregation/substitution, Build 4 notifications,
+AI behavior, publication, deployment, production/customer access, and field verification remain out of scope.
+
 Portability Phase 1A is accepted in source at integration commit
 `6f9c3f18d524723361f5f0ab45cf18f160566311`, directly based on authoritative master
 `988b5cef9312737f1d64447aa6b5b642b927e4ab`. It reapplies only the two corrected files from reviewed candidate
@@ -82,12 +90,15 @@ is reserved for genuine completion.
 - Portability Phase 1A: owner-approved temporary credential continuity exception, value-blind credential-category and
   recovery ownership inventory, future managed-secret cutover design, mandatory public-launch blocker, and a
   byte-preserving guard that prints no protected value or fingerprint.
-- Coordinator Command Center Builds 1-2: a Lens/Viewpoints-first read-only project action register for
+- Coordinator Command Center Builds 1-3: a Lens/Viewpoints-first project action register for
   actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks, plus bounded personal
-  saved views, operational filters, personal defaults, built-in work views, and shareable authorized navigation.
+  saved views, operational filters, personal defaults, built-in work views, shareable authorized navigation, and
+  controlled confirmed bulk actions for canonical RFI/Submittal Meeting links plus Submittal Schedule Bucket
+  create/sync.
   Canonical modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,
   deterministic pagination, visible partial-source failures, honest empty results, bilingual desktop/mobile behavior,
-  and zero canonical mutation/AI use are accepted. Clash aggregation and Build 3 remain deferred.
+  and zero AI use are accepted. Lens/Viewpoints are navigation-only for Build 3 mutation scope, and Clash aggregation
+  remains deferred.
 - RFI Builds 1-7: canonical lifecycle and attachments; non-destructive crop/replacement/show-hide;
   Standard PDF, editable DOCX, factual Audit PDF, native-fidelity Complete PDF, and four-sheet RFI
   Register Excel. Build 8 has not started.

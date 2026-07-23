@@ -4,6 +4,20 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Coordinator Command Center Build 3 accepted in source; deployment verification pending
+
+- Accepted Coordinator Build 3 source at `18154f359ea45783eda54fe3a52111d9f45fb41a` adds explicit-confirmation
+  bulk actions from the existing Command Center register without creating duplicate canonical records. RFI and
+  Submittal items can be added to accessible Meeting Minutes through accepted canonical link behavior; supported
+  Submittal actions can create/link/sync accepted M4 Schedule Buckets/tasks with deterministic per-item outcomes.
+- Lens/Viewpoints remain first-class Lens terminology and exact identity/navigation records. Build 3 does not mutate,
+  duplicate, relabel, merge, or substitute Lens/Viewpoints; Clash aggregation/substitution remains future scope.
+- Focused proof, typecheck, and browser evidence were preserved through English desktop and exact 390px Spanish mobile
+  flows, including preview, confirmation, execution, Schedule create/sync, overflow, console, and local request checks.
+- Remaining operational gates after source push are publication/deployment, production verification, customer/field
+  verification, Build 4 notifications/digests, Build 5 feedback tooling, and any future Clash work. No production or
+  customer data was accessed by this source integration.
+
 ### Ruben urgent Meeting workflow correction accepted and pushed in source
 
 - Accepted Meetings source at `bec190ac248fc5134f742b1bafbc673a594e52ec` adds persistent canonical company

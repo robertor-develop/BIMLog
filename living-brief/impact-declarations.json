@@ -1722,6 +1722,114 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5b8d391bcea23c3c0b140ca8effcacdff3b50e9d6777188d69cf5086e816506e"
+    },
+    {
+      "taskId": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
+      "reviewedAt": "2026-07-23T15:53:34.000Z",
+      "status": "accepted_source",
+      "captureTiming": "normal_acceptance_review",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_current_master_reconciliation",
+          "bounded_local_browser_evidence",
+          "focused_regression_reuse_and_rerun",
+          "living_brief_semantic_reconciliation",
+          "single_final_gate",
+          "normal_fast_forward_push"
+        ],
+        "operatorOnly": [
+          "production_deployment",
+          "customer_data_access",
+          "field_acceptance",
+          "build_4_notifications"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Coordinator Build 3 must preserve the Lens/Viewpoints-first register boundary while adding only controlled canonical Meeting and Schedule bulk actions for supported source records."
+        }
+      ],
+      "workstreams": [
+        "coordinator-command-center-build-3",
+        "meeting-minutes-m1-m4",
+        "schedule-buckets",
+        "lens-viewpoints-navigation",
+        "rfi",
+        "submittal"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing canonical-record and authoritative-source doctrine without creating a new source of truth."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows current isolated-worktree, evidence-preservation, no-production, no-publish, terminal-alert, and clean-integration governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, tenancy, idempotency, concurrency, bilingual responsive, privacy, no-AI, and regression gates cover the accepted bulk-action scope."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Controlled Meeting and Schedule actions advance the accepted coordinator workflow without changing the long-term product roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The official deterministic generator recorded the new Coordinator bulk-action service, route, UI component, and schema files."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, sync behavior, protected baseline, installation, or field-acceptance state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No shared PDF, Excel, DOCX, transmittal, or report-delivery contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Coordinator Build 3 source acceptance, baseline, supported actions, Lens/Clash boundaries, and no-deployment state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded remaining deployment, production/customer verification, Build 4, Build 5, and future Clash boundaries after Build 3 source acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration introduces no new production incident or permanent audit doctrine change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f913414287d1b98b5958cffa66bb3ed11dcbeab490ee0e8510c872759700358d"
     }
   ]
 }

@@ -139,6 +139,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-usage.ts
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
+- artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
+- artifacts/api-server/src/lib/coordinator-bulk-actions.ts
 - artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
 - artifacts/api-server/src/lib/email.ts
@@ -190,6 +192,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/living-brief-mirror.ts
 - artifacts/api-server/src/lib/living-brief-runtime.behavior.ts
 - artifacts/api-server/src/lib/living-brief-source.ts
+- artifacts/api-server/src/lib/meeting-canonical-links.ts
 - artifacts/api-server/src/lib/oauth.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
@@ -227,6 +230,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/contact-submissions.ts
 - lib/db/src/schema/conventions.ts
 - lib/db/src/schema/coordination_intake_events.ts
+- lib/db/src/schema/coordinator-bulk-operations.ts
 - lib/db/src/schema/coordinator-saved-views.ts
 - lib/db/src/schema/email-log.ts
 - lib/db/src/schema/feature-catalog.ts
@@ -299,6 +303,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/ClashReportsTab.tsx
 - artifacts/bimlog/src/pages/project/ConventionBuilder.tsx
 - artifacts/bimlog/src/pages/project/CoordinationHub.tsx
+- artifacts/bimlog/src/pages/project/CoordinatorBulkActions.tsx
 - artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx
 - artifacts/bimlog/src/pages/project/DirectoryTab.tsx
 - artifacts/bimlog/src/pages/project/FilesTab.tsx
