@@ -4,11 +4,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
-### Security Batch C Axios correction is a local review candidate
+### Security Batch C Axios correction accepted in source
 
-- The candidate is based directly on accepted `origin/master`
+- Integration commit `cf2edd9125d797109215ed0e03d0e08d27f13ff0` is based directly on accepted `origin/master`
   `ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a` and preserves all Coordinator, Meetings, Finance, Living Brief,
-  Security Batch A, and Security Batch B history.
+  Security Batch A, and Security Batch B history without importing stale candidate ancestry.
 - The sole dependency constraint is an exact Axios 1.18.1 override in canonical `pnpm-workspace.yaml`.
   `@sendgrid/mail@8.1.6` and `@sendgrid/client@8.1.6` remain unchanged; `form-data@4.0.5` remains on its already
   corrected line. The lockfile delta is limited to Axios and its required HTTP/proxy transport dependencies.
@@ -19,8 +19,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - The bounded loopback-only transport proof covers JSON serialization, credential confinement, fixed destination,
   proxy bypass, redirect rejection, timeout, request/response limits, controlled provider errors, and all inventoried
   `sendEmail` caller modules. No provider or production service was contacted.
-- Remaining source gates are the final complete workspace build, evidence/candidate commit, and independent review.
-  No push, publication, deployment, production/customer access, or Batches D-I work is included.
+- Source acceptance includes frozen installation, focused transport proof, exact lock review, Living Brief matrices,
+  typechecks, and one final complete workspace build. Only normal fast-forward source delivery is permitted;
+  publication, deployment, production/customer access, and Batches D-I remain separate.
 - The historical registry snapshot remains last-known only; this candidate makes no fresh registry-wide count claim.
 
 ### Coordinator Command Center Build 3 accepted in source; deployment verification pending

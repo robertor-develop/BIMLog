@@ -58,13 +58,14 @@ removes 0.18.5, and applies the canonical date-only/explicit-instant/timezone-le
 post-Finance spreadsheet inventory. It is not published, deployed, production verified, customer verified, or
 extended to Batches C-I.
 
-Security Batch C is a local review candidate based directly on accepted Coordinator Command Center Build 3 master
+Security Batch C is accepted in source at integration commit
+`cf2edd9125d797109215ed0e03d0e08d27f13ff0`, directly based on accepted Coordinator Command Center Build 3 master
 `ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a`. It deterministically resolves the production SendGrid client's
 transitive Axios transport to exact 1.18.1 through the canonical `pnpm-workspace.yaml` override authority while
 retaining `@sendgrid/mail@8.1.6`, `@sendgrid/client@8.1.6`, and `form-data@4.0.5`. The email wrapper adds a fixed
 10-second timeout, 512 KiB request bound, 64 KiB response bound, and zero redirects without changing provider
-destinations, credentials, recipients, templates, authorization, or delivery semantics. This candidate is not
-accepted, pushed, published, deployed, production verified, customer verified, or extended to Batches D-I.
+destinations, credentials, recipients, templates, authorization, or delivery semantics. This source acceptance is
+not published, deployed, production verified, customer verified, or extended to Batches D-I.
 
 Coordinator Command Center Build 3 is accepted in source at integration commit
 `18154f359ea45783eda54fe3a52111d9f45fb41a`, directly based on Security Batch B master
