@@ -9,7 +9,9 @@
   },
   "scripts": {
     "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "push-force": "node -e \"throw new Error('Direct force-push is disabled. Use sync-development with the guarded development target.')\"",
+    "sync-development": "node ./scripts/sync-development-schema.mjs",
+    "check:parity": "node ./scripts/check-schema-parity.mjs"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

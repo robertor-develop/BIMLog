@@ -32,7 +32,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pnpm --filter @workspace/db run push-force"
+args = "BIMLOG_SCHEMA_TARGET=development pnpm --filter @workspace/db run sync-development"
 
 [workflows.workflow.metadata]
 isValidation = true
