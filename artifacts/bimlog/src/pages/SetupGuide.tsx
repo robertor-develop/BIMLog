@@ -146,25 +146,25 @@ const sections = [
       {
         title: "Validate and Download",
         badge: "Free",
-        desc: "Upload your file through BIMLog. We validate it instantly and return the approved file with a full audit record. You then upload it yourself to Procore, OneDrive, Google Drive, or wherever your project lives. Works today. Zero setup required.",
+        desc: "Upload a supported file through BIMLog. BIMLog validates it and provides the resulting project record and available export actions. You decide where an exported copy goes.",
       },
       {
         title: "BIMLog Sync Agent",
         badge: "Professional",
-        desc: "A lightweight desktop app watches a folder on your computer or server. Drop any file into the folder and BIMLog validates and routes it to the right platform automatically. No manual upload, no API setup, just a folder you already know how to use.",
+        desc: "A desktop app watches a selected folder and submits supported files to BIMLog for validation. External delivery is not implied.",
       },
       {
-        title: "Managed Connection",
-        badge: "Team and up",
-        desc: "Our team logs in on your behalf using your API token or credentials and configures the connection for you. White-glove setup is included with founding partner onboarding. Contact info@ignitesmart.ai.",
+        title: "Integration Review Request",
+        badge: "Approval required",
+        desc: "Request a provider and customer review without sending passwords, API keys, or access tokens. Approved connectors are enabled through governed configuration.",
       },
       {
         title: "OAuth Connection",
         badge: "Business and up",
-        desc: "You log in with your own credentials through a secure window. We never see your password. BIMLog receives a secure token and delivers your files automatically to the right project. Available on Business plans and up.",
+        desc: "When an approved OAuth file source is configured, you authorize read-only file access through the provider. Availability is shown in the governed Integrations catalog.",
       },
     ],
-    note: "For Managed and OAuth connections, contact info@ignitesmart.ai.",
+    note: "Use the governed Integrations catalog to review accurate availability. Never send credentials in a request.",
   },
 ];
 

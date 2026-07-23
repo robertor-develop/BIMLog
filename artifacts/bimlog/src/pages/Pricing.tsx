@@ -63,10 +63,9 @@ const BUSINESS_FEATURES = [
   "Coordination Accountability Report",
   "Discipline Performance Report",
   "Compliance Badge — verifiable digital award on project completion",
-  "Direct platform integrations — Procore, Autodesk ACC, OneDrive, SharePoint",
-  "MS Project schedule import",
+  "Governed connectors subject to provider and customer approval",
+  "Open-format file exchange and approved file sources",
   "Delay Attribution reporting",
-  "PowerBI connector",
   "Dedicated onboarding support",
   "Phone and email support",
   "SLA guaranteed uptime",
@@ -78,8 +77,8 @@ const ENTERPRISE_FEATURES = [
   "White-label option — your logo and branding",
   "Custom report templates tailored to your requirements",
   "BIMLog Sync Agent — enterprise folder watching and automatic validation",
-  "OAuth connections — secure token-based direct integrations",
-  "Full API access with webhooks",
+  "Approved OAuth file sources when configured",
+  "Authenticated API access for supported workflows",
   "Custom data retention policy",
   "Dedicated account manager",
   "Custom SLA and uptime guarantees",
@@ -95,8 +94,8 @@ const FAQS = [
     a: "No. Subcontractors and coordinators can sign up and use BIMLog on any project independently. You do not need permission from anyone above you in the project hierarchy. Start building your project record today for free.",
   },
   {
-    q: "Does BIMLog replace Procore or Autodesk?",
-    a: "No. BIMLog works with the tools your team already uses. It connects to Procore, Autodesk, OneDrive, and others — adding the governance and accountability layer those platforms do not provide. You keep using the tools you know. BIMLog makes them accountable.",
+    q: "Does BIMLog replace my existing project systems?",
+    a: "BIMLog can work alongside approved customer systems through governed, reversible file exchange. Connector availability depends on provider approval, customer entitlement, and deployment configuration.",
   },
   {
     q: "What happens to my data after 3 months on the free tier?",
@@ -104,7 +103,7 @@ const FAQS = [
   },
   {
     q: "Is my data secure?",
-    a: "All data is encrypted in transit using TLS 1.3 and at rest using AES-256. Infrastructure is hosted on AWS with US-East and São Paulo regions. We do not store physical files — only metadata and audit records. Full details in our Privacy Policy.",
+    a: "BIMLog applies access controls and transport security. Uploaded and imported files may be retained in the configured project storage so BIMLog can provide its documented workflows. Deployment and retention details are stated in the applicable customer terms and Privacy Policy.",
   },
   {
     q: "Can I export my data?",

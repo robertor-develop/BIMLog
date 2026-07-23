@@ -45,13 +45,13 @@ const PRIORITY_BADGE: Record<string, string> = {
 };
 
 const DEFAULT_RFI_TYPES = ["Coordination", "General", "Drawing", "Spec", "Submittal", "Safety Data Sheet", "Change", "Other"];
-const FILE_SOURCE_PROVIDERS = [
-  { key: "google_drive", param: "google-drive", label: "Google Drive" },
-  { key: "dropbox", param: "dropbox", label: "Dropbox" },
-  { key: "bim360", param: "bim360", label: "BIM 360" },
-  { key: "procore", param: "procore", label: "Procore" },
-] as const;
-type FileSourceProvider = typeof FILE_SOURCE_PROVIDERS[number];
+type FileSourceProvider = { key: string; param: string; label: string };
+type FileSourceCatalogEntry = {
+  key: string;
+  label: { en: string; es: string };
+  availability: "available" | "setup_required" | "review_required";
+  oauthParam: string | null;
+};
 
 const INTERNAL_FILE_LOCATOR = /^\/api\/v1\/projects\/(\d+)\/files\/(\d+)\/download(?:\?name=[^#&]*)?$/;
 const UNSAFE_REFERENCE_SCHEME = /^(?:javascript|data|file|vbscript|blob):/i;
@@ -1589,14 +1589,19 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const [cloudPickerCreate, setCloudPickerCreate] = useState<FileSourceProvider | null>(null);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-    fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : [])
-      .then((d) => {
+    Promise.all([
+      fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/v1/me/provider-catalog`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : { providers: [] }),
+    ])
+      .then(([d, catalog]) => {
         const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
-        setConnectedFileSourcesCreate(FILE_SOURCE_PROVIDERS.filter(p => list.some(c => c.provider === p.key && c.status === "connected")));
+        const providers = Array.isArray(catalog.providers) ? catalog.providers as FileSourceCatalogEntry[] : [];
+        setConnectedFileSourcesCreate(providers
+          .filter(p => p.oauthParam && p.availability === "available" && list.some(c => c.provider === p.key && c.status === "connected"))
+          .map(p => ({ key: p.key, param: p.oauthParam!, label: lang === "es" ? p.label.es : p.label.en })));
       })
       .catch((error) => logClientError("RFI create file source connection load", error));
-  }, []);
+  }, [lang]);
 
 
   const lastRfiData = useRef<any>(null);
@@ -2193,16 +2198,21 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const [sending, setSending] = useState(false);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-    fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : [])
-      .then((d) => {
+    Promise.all([
+      fetch(`/api/v1/me/connections`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : []),
+      fetch(`/api/v1/me/provider-catalog`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : { providers: [] }),
+    ])
+      .then(([d, catalog]) => {
         const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
+        const providers = Array.isArray(catalog.providers) ? catalog.providers as FileSourceCatalogEntry[] : [];
         const sg = list.find(c => c.provider === "sendgrid");
         setSgConnected(!!sg && sg.status === "connected");
-        setConnectedFileSources(FILE_SOURCE_PROVIDERS.filter(p => list.some(c => c.provider === p.key && c.status === "connected")));
+        setConnectedFileSources(providers
+          .filter(p => p.oauthParam && p.availability === "available" && list.some(c => c.provider === p.key && c.status === "connected"))
+          .map(p => ({ key: p.key, param: p.oauthParam!, label: lang === "es" ? p.label.es : p.label.en })));
       })
       .catch(() => setSgConnected(false));
-  }, []);
+  }, [lang]);
 
   const handleSendReal = async () => {
     setSending(true);

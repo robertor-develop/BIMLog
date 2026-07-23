@@ -22,6 +22,7 @@ import {
 import { extractFileText } from "../lib/extract-file-text";
 import { getValidAccessToken, providerFromParam } from "../lib/oauth";
 import { downloadCloud } from "../lib/cloud-files";
+import { isProviderOperationAllowed } from "../lib/provider-governance";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { Document, Paragraph, TextRun, Table, TableRow, TableCell, Packer, WidthType, ShadingType } from "docx";
 import { PDFDocument as PdfLibDocument } from "pdf-lib";
@@ -2789,6 +2790,14 @@ router.post("/projects/:projectId/rfis/attachments/from-cloud",
     try {
       const projectId = parsePositiveId(req.params.projectId, "project ID");
       const targetRfiId = await validateRfiAttachmentTarget(projectId, rfiId);
+      if (!isProviderOperationAllowed(key, req.user!.companyId, "import")) {
+        res.status(403).json({
+          error: "This file source is not approved for this company.",
+          errorEs: "Esta fuente de archivos no está aprobada para esta empresa.",
+          code: "PROVIDER_NOT_APPROVED",
+        });
+        return;
+      }
       const { buffer, exportedPdf } = await downloadCloud(req.user!.userId, key, ref, mimeType);
       const importedName = exportedPdf && !/\.pdf$/i.test(fileName) ? `${fileName}.pdf` : fileName;
       res.json(await storeRfiAttachment({ projectId, rfiId: targetRfiId, userId: req.user!.userId, fileName: importedName, buffer, origin: key }));

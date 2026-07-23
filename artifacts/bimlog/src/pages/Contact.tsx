@@ -13,7 +13,7 @@ const INTEREST_OPTIONS = [
   "Business plan",
   "Enterprise / custom proposal",
   "Founding Partner program",
-  "Platform integrations — Procore, Autodesk, OneDrive",
+  "Governed integration review (do not include credentials)",
   "Demo request",
   "Press or media inquiry",
   "General question",
@@ -153,6 +153,9 @@ export function Contact() {
                     rows={5}
                     style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 14, resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
                   />
+                  <div style={{ marginTop: 6, fontSize: 11, lineHeight: 1.5, color: "#92400E" }}>
+                    Do not include passwords, API keys, or access tokens. / No incluyas contraseñas, claves API ni tokens de acceso.
+                  </div>
                 </div>
 
                 <Button type="submit" disabled={status === "sending"} style={{ fontWeight: 700, fontSize: 14, padding: "12px 24px" }}>

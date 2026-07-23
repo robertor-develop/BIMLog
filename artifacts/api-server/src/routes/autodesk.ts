@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { isLegacyAutodeskAllowed } from "../lib/provider-governance";
 
 declare module "express-session" {
   interface SessionData {
@@ -8,6 +9,18 @@ declare module "express-session" {
 }
 
 const router: Router = Router();
+
+router.use((_req, res, next) => {
+  if (!isLegacyAutodeskAllowed()) {
+    res.status(404).json({
+      error: "Connector unavailable",
+      errorEs: "Conector no disponible",
+      code: "PROVIDER_NOT_APPROVED",
+    });
+    return;
+  }
+  next();
+});
 
 // Must EXACTLY match a callback URL registered in the Autodesk APS app console.
 // AUTODESK_REDIRECT_URI overrides it if ever needed.

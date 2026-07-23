@@ -15,11 +15,11 @@ const CONTENT = {
       },
       {
         heading: "2. What Data We Collect",
-        body: "Account Data: Full name, email address, company name, job title, phone number, and password stored as a secure hash. We never store plain text passwords.\n\nProfile Data: Profile photo, digital signature, company logo stored as encoded images. Job title, phone number, notification preferences, and API token.\n\nProject Data: Project names, project codes, naming conventions, file metadata including file names, upload timestamps, uploader identity, convention compliance results, SHA-256 cryptographic hashes, and document relationship declarations. We do not store physical project files — only the metadata and audit records associated with them.\n\nRFI and Submittal Data: Full lifecycle data for every RFI and submittal — parties, dates, status history, ball-in-court records, response attempts, view events, and AI compliance check results.\n\nActivity Data: An immutable timestamped record of every action taken on the platform by every user — uploads, status changes, responses, and team changes.\n\nUsage Data: Browser type, IP address, pages visited, and session duration collected for platform security and performance monitoring.",
+        body: "Account Data: Full name, email address, company name, job title, phone number, and password stored as a secure hash. We never store plain text passwords.\n\nProfile Data: Profile photo, digital signature, company logo stored as encoded images. Job title, phone number, notification preferences, and API token.\n\nProject Data: Project names, project codes, naming conventions, uploaded or imported project files, file names, upload timestamps, uploader identity, convention compliance results, SHA-256 cryptographic hashes, and document relationship declarations. Files may remain in the storage configured for the BIMLog environment so the requested project workflows can operate.\n\nRFI and Submittal Data: Full lifecycle data for every RFI and submittal — parties, dates, status history, ball-in-court records, response attempts, view events, and AI compliance check results.\n\nActivity Data: A timestamped record of actions taken on the platform — uploads, status changes, responses, and team changes.\n\nUsage Data: Browser type, IP address, pages visited, and session duration may be collected for platform security and performance monitoring.",
       },
       {
-        heading: "3. What We Do NOT Store",
-        body: "BIMLog does not permanently store physical project files. All files uploaded through BIMLog are validated and routed to the client's designated storage environment such as Procore, OneDrive, or their designated CDE. BIMLog retains no copy of the physical file after routing is complete. BIMLog stores only the metadata, audit trail, and analytical outputs associated with each file event.",
+        heading: "3. Project File Storage",
+        body: "BIMLog may store uploaded and imported project files in the storage configured for the deployed environment. Retention and deletion depend on the applicable customer configuration, contract, and legal requirements. Connecting a read-only file source imports a selected copy into BIMLog; it does not imply automatic delivery to another platform.",
       },
       {
         heading: "4. How We Use Your Data",
@@ -27,11 +27,11 @@ const CONTENT = {
       },
       {
         heading: "5. How We Store and Protect Your Data",
-        body: "All data is hosted on Amazon Web Services with primary infrastructure in US-East and a secondary region in South America for Latin American data residency. All data is encrypted in transit using TLS 1.3 and encrypted at rest using AES-256. Access to production data is restricted to authorized IgniteSmart engineering personnel only.",
+        body: "BIMLog uses access controls and transport security appropriate to the configured environment. Hosting region, storage encryption, backup, and production-access commitments are deployment-specific and are stated in the applicable customer agreement or environment documentation.",
       },
       {
         heading: "6. Data Retention",
-        body: "We retain your account data for as long as your account is active. Project data and audit trails are retained for the life of the project plus seven years to support potential legal and contractual obligations of our clients. Completed projects move to read-only archive status and are never deleted. You may request export of your data at any time by contacting info@ignitesmart.ai.",
+        body: "We retain account, project, file, and audit data according to the configured customer policy and applicable contractual or legal requirements. You may request information about export, retention, or deletion by contacting info@ignitesmart.ai.",
       },
       {
         heading: "7. Your Rights",
@@ -39,7 +39,7 @@ const CONTENT = {
       },
       {
         heading: "8. Third Party Services",
-        body: "BIMLog uses the following third party services: Amazon Web Services for infrastructure and hosting, AI API providers for AI-powered features where only anonymized project content is processed, and Resend for transactional email delivery. Each third party is bound by a data processing agreement consistent with applicable privacy law.",
+        body: "BIMLog may use configured infrastructure, email, AI, notification, and customer-authorized connector providers to deliver requested features. The providers and data flows applicable to a deployment are disclosed through the relevant customer terms or environment documentation. Connector credentials are handled server-side and are not returned in the customer-facing connection catalog.",
       },
       {
         heading: "9. Cookies",
@@ -66,11 +66,11 @@ const CONTENT = {
       },
       {
         heading: "2. Qué Datos Recopilamos",
-        body: "Datos de Cuenta: Nombre completo, dirección de correo electrónico, nombre de empresa, cargo, número de teléfono y contraseña almacenada como hash seguro. Nunca almacenamos contraseñas en texto plano.\n\nDatos de Perfil: Foto de perfil, firma digital, logo de empresa almacenados como imágenes codificadas. Cargo, número de teléfono, preferencias de notificaciones y token de API.\n\nDatos de Proyecto: Nombres de proyectos, códigos de proyectos, convenciones de nombres, metadatos de archivos incluyendo nombres de archivos, marcas de tiempo de carga, identidad del cargador, resultados de cumplimiento de convenciones, hashes criptográficos SHA-256 y declaraciones de relación de documentos. No almacenamos archivos físicos de proyecto — solo los metadatos y registros de auditoría asociados.\n\nDatos de RFI y Entregables: Datos completos del ciclo de vida de cada RFI y entregable — partes, fechas, historial de estado, registros de responsabilidad, intentos de respuesta, eventos de visualización y resultados de verificación de cumplimiento de IA.\n\nDatos de Actividad: Un registro inmutable con marca de tiempo de cada acción realizada en la plataforma por cada usuario — cargas, cambios de estado, respuestas y cambios de equipo.\n\nDatos de Uso: Tipo de navegador, dirección IP, páginas visitadas y duración de sesión recopilados para seguridad y monitoreo del rendimiento de la plataforma.",
+        body: "Datos de Cuenta: Nombre completo, dirección de correo electrónico, nombre de empresa, cargo, número de teléfono y contraseña almacenada como hash seguro. Nunca almacenamos contraseñas en texto plano.\n\nDatos de Perfil: Foto de perfil, firma digital, logo de empresa almacenados como imágenes codificadas. Cargo, número de teléfono, preferencias de notificaciones y token de API.\n\nDatos de Proyecto: Nombres y códigos de proyectos, convenciones de nombres, archivos de proyecto cargados o importados, nombres de archivos, marcas de tiempo, identidad del cargador, resultados de cumplimiento, hashes criptográficos SHA-256 y relaciones documentales. Los archivos pueden permanecer en el almacenamiento configurado para el entorno BIMLog para que funcionen los flujos solicitados.\n\nDatos de RFI y Entregables: Datos del ciclo de vida de cada RFI y entregable, incluidas partes, fechas, historial de estado, responsabilidad, respuestas, visualizaciones y verificaciones de IA.\n\nDatos de Actividad: Registro con marca de tiempo de acciones realizadas en la plataforma.\n\nDatos de Uso: El tipo de navegador, dirección IP, páginas visitadas y duración de sesión pueden recopilarse para seguridad y rendimiento.",
       },
       {
-        heading: "3. Lo Que NO Almacenamos",
-        body: "BIMLog no almacena permanentemente archivos físicos de proyecto. Todos los archivos cargados a través de BIMLog son validados y enrutados al entorno de almacenamiento designado del cliente. BIMLog no retiene ninguna copia del archivo físico después de que el enrutamiento esté completo. BIMLog almacena solo los metadatos, la auditoría y los resultados analíticos asociados a cada evento de archivo.",
+        heading: "3. Almacenamiento de Archivos de Proyecto",
+        body: "BIMLog puede almacenar archivos de proyecto cargados e importados en el almacenamiento configurado para el entorno desplegado. La retención y eliminación dependen de la configuración del cliente, el contrato y los requisitos legales aplicables. Conectar una fuente de archivos de solo lectura importa una copia seleccionada a BIMLog; no implica entrega automática a otra plataforma.",
       },
       {
         heading: "4. Cómo Usamos Sus Datos",
@@ -78,11 +78,11 @@ const CONTENT = {
       },
       {
         heading: "5. Cómo Almacenamos y Protegemos Sus Datos",
-        body: "Todos los datos están alojados en Amazon Web Services con infraestructura principal en US-East y una región secundaria en América del Sur para residencia de datos latinoamericanos. Todos los datos están encriptados en tránsito usando TLS 1.3 y encriptados en reposo usando AES-256. El acceso a los datos de producción está restringido al personal de ingeniería autorizado de IgniteSmart.",
+        body: "BIMLog usa controles de acceso y seguridad de transporte apropiados para el entorno configurado. La región de alojamiento, el cifrado de almacenamiento, las copias de seguridad y los compromisos de acceso a producción son específicos del despliegue y se indican en el acuerdo del cliente o la documentación del entorno.",
       },
       {
         heading: "6. Retención de Datos",
-        body: "Retenemos sus datos de cuenta mientras su cuenta esté activa. Los datos de proyecto y registros de auditoría se retienen durante la vida del proyecto más siete años para apoyar posibles obligaciones legales y contractuales de nuestros clientes. Los proyectos completados pasan a estado de archivo de solo lectura y nunca se eliminan. Puede solicitar exportar sus datos en cualquier momento contactando info@ignitesmart.ai.",
+        body: "Retenemos datos de cuenta, proyecto, archivos y auditoría según la política configurada para el cliente y los requisitos contractuales o legales aplicables. Puede solicitar información sobre exportación, retención o eliminación contactando info@ignitesmart.ai.",
       },
       {
         heading: "7. Sus Derechos",
@@ -90,7 +90,7 @@ const CONTENT = {
       },
       {
         heading: "8. Servicios de Terceros",
-        body: "BIMLog utiliza los siguientes servicios de terceros: Amazon Web Services para infraestructura y alojamiento, proveedores de API de IA para funciones impulsadas por IA donde solo se procesa contenido de proyecto anonimizado, y Resend para entrega de correo electrónico transaccional. Cada tercero está sujeto a un acuerdo de procesamiento de datos consistente con la ley de privacidad aplicable.",
+        body: "BIMLog puede usar proveedores configurados de infraestructura, correo, IA, notificaciones y conectores autorizados por el cliente para entregar las funciones solicitadas. Los proveedores y flujos aplicables a cada despliegue se informan en los términos del cliente o la documentación del entorno. Las credenciales de conectores se manejan en el servidor y no se devuelven en el catálogo de conexiones.",
       },
       {
         heading: "9. Cookies",

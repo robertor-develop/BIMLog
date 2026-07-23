@@ -48,12 +48,6 @@ const SECTION_LABELS: Record<string, string> = {
   Tools:   "project.section.tools",
 };
 
-const PLATFORM_ITEMS = [
-  { name: "Procore",          logoBg: "#E0F2FE", logoColor: "#0369A1", logoText: "PC" },
-  { name: "Autodesk BIM 360", logoBg: "#FEF3C7", logoColor: "#92400E", logoText: "B360" },
-  { name: "OneDrive",         logoBg: "#EFF6FF", logoColor: "#0067B8", logoText: "OD" },
-];
-
 function SidebarModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
@@ -73,8 +67,6 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   const { user, token } = useAuthStore();
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
-  const [showManaged, setShowManaged] = useState(false);
-  const [showOAuth, setShowOAuth] = useState(false);
   const [isSuperAdminState, setIsSuperAdminState] = useState(false);
 
   useEffect(() => {
@@ -110,36 +102,6 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
               {tr("Contact Us", "Contáctanos")}
             </a>
           </div>
-        </SidebarModal>
-      )}
-
-      {showManaged && (
-        <SidebarModal onClose={() => setShowManaged(false)}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>{tr("Managed Connection", "Conexión Administrada")}</div>
-            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
-              {tr("Managed Connection is available on", "Conexión Administrada está disponible en")} <strong>{tr("Team plans and up", "planes Team y superiores")}</strong>. {tr("Our team logs in on your behalf and configures everything. Contact us to get started.", "Nuestro equipo inicia sesión en tu nombre y configura todo. Contáctanos para comenzar.")}
-            </div>
-          </div>
-          <a href="mailto:info@ignitesmart.ai?subject=BIMLog%20Managed%20Connection%20Request" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, background: "#1D4ED8", color: "white", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
-            <Mail style={{ width: 13, height: 13 }} />
-            {tr("Get Started", "Comenzar")}
-          </a>
-        </SidebarModal>
-      )}
-
-      {showOAuth && (
-        <SidebarModal onClose={() => setShowOAuth(false)}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>{tr("OAuth Connection", "Conexión OAuth")}</div>
-            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
-              {tr("OAuth Connection is available on", "Conexión OAuth está disponible en")} <strong>{tr("Business plans and up", "planes Business y superiores")}</strong>. {tr("Secure token-based direct integration. No API tokens to manage.", "Integración directa segura basada en tokens. Sin tokens API que gestionar.")}
-            </div>
-          </div>
-          <a href="mailto:info@ignitesmart.ai?subject=BIMLog%20OAuth%20Connection%20Request" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, background: "#1D4ED8", color: "white", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
-            <Mail style={{ width: 13, height: 13 }} />
-            {tr("Contact Us", "Contáctanos")}
-          </a>
         </SidebarModal>
       )}
 
@@ -203,29 +165,10 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             BIMLog Sync Agent
           </button>
 
-          <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => setShowManaged(true)}>
+          <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => navigate(`/projects/${projectId}/integrations`)}>
             <div className="nav-dot" />
-            {tr("Managed Connection", "Conexión Administrada")}
+            {tr("Approved integrations", "Integraciones aprobadas")}
           </button>
-
-          <button className="sidebar-nav-item" style={sidebarBtnStyle} onClick={() => setShowOAuth(true)}>
-            <div className="nav-dot" />
-            {tr("OAuth Connection", "Conexión OAuth")}
-          </button>
-
-          <div style={{ paddingLeft: 20, paddingTop: 10, paddingBottom: 4, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "rgba(255,255,255,0.3)" }}>
-            {tr("API Platform Integrations", "Integraciones de Plataforma API")}
-          </div>
-
-          {PLATFORM_ITEMS.map(p => (
-            <button key={p.name} className="sidebar-nav-item" style={{ ...sidebarBtnStyle, paddingLeft: 24 }} onClick={() => navigate(`/projects/${projectId}/integrations`)}>
-              <div className="nav-dot" />
-              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: 3, flexShrink: 0, background: p.logoBg, color: p.logoColor, fontSize: 7, fontWeight: 800, fontFamily: "var(--font-mono)" }}>
-                {p.logoText}
-              </span>
-              {p.name}
-            </button>
-          ))}
         </div>
 
         {(isAdmin || isSuperAdminState) && (

@@ -143,12 +143,12 @@ export function Landing() {
               color: "bg-violet-50 border-violet-100",
               title: tt("Create a project", "Crea un proyecto"),
               desc: tt(
-                "Click New Project on the dashboard. Give it a name and a short code like NYC-270. Connect your existing platforms from the Integrations tab.",
-                "Haz clic en Nuevo Proyecto en el panel. Asigna un nombre y un código corto como NYC-270. Conecta tus plataformas existentes desde la pestaña Integraciones.",
+                "Click New Project on the dashboard. Give it a name and a short code like NYC-270. Review approved file exchange options from the Integrations tab.",
+                "Haz clic en Nuevo Proyecto en el panel. Asigna un nombre y un código corto como NYC-270. Revisa las opciones aprobadas de intercambio de archivos en la pestaña Integraciones.",
               ),
               tips: [
                 tt("Short code e.g. NYC-270", "Código corto, ej. NYC-270"),
-                tt("Connect platforms from the Integrations tab", "Conecta plataformas desde la pestaña Integraciones"),
+                tt("Review approved integrations", "Revisa las integraciones aprobadas"),
               ],
             },
             {

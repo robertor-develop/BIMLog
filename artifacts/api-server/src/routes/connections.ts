@@ -1,12 +1,16 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { userConnectionsTable } from "@workspace/db/schema";
+import { userConnectionsTable, usersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { authMiddleware, signOAuthState, verifyOAuthState } from "../middlewares/auth";
 import { getAppUrl } from "../lib/email";
 import { browseCloud } from "../lib/cloud-files";
 import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
 import { getAiUsageSummary, sendAiUsageError } from "../lib/ai-usage";
+import {
+  customerProviderCatalog,
+  isProviderOperationAllowed,
+} from "../lib/provider-governance";
 
 const router: Router = Router();
 
@@ -28,10 +32,21 @@ router.get("/me/connections", authMiddleware, async (req, res) => {
   try {
     const rows = await db.select().from(userConnectionsTable)
       .where(eq(userConnectionsTable.userId, req.user!.userId));
-    res.json(rows.map(toSafe));
+    res.json(rows
+      .filter((row) => {
+        const key = providerFromParam(row.provider);
+        return !key || isProviderOperationAllowed(key, req.user!.companyId, "catalog");
+      })
+      .map(toSafe));
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
+});
+
+router.get("/me/provider-catalog", authMiddleware, (_req, res) => {
+  res.json({
+    providers: customerProviderCatalog(_req.user!.companyId, providerConfigured),
+  });
 });
 
 router.get("/me/ai-usage", authMiddleware, async (req, res) => {
@@ -112,6 +127,14 @@ router.get("/me/connections/:provider/authorize", authMiddleware, (req, res) => 
   const providerParam = String(req.params.provider);
   const key = providerFromParam(providerParam);
   if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
+  if (!isProviderOperationAllowed(key, req.user!.companyId, "authorize")) {
+    res.status(403).json({
+      error: "This connector is not approved for this company.",
+      errorEs: "Este conector no está aprobado para esta empresa.",
+      code: "PROVIDER_NOT_APPROVED",
+    });
+    return;
+  }
   if (!providerConfigured(key)) {
     res.status(503).json({ error: `${OAUTH_PROVIDERS[key].label} is not enabled on this BIMLog yet — the platform app is not configured.`, code: "PROVIDER_NOT_CONFIGURED" });
     return;
@@ -135,6 +158,11 @@ router.get("/connections/:provider/callback", async (req, res) => {
     let payload: { userId: number; provider: string; scope: string };
     try { payload = verifyOAuthState(state); } catch { return fail("Invalid or expired connect link"); }
     if (payload.scope !== "oauth_state" || payload.provider !== key) return fail("Invalid connect state");
+    const [user] = await db.select({ companyId: usersTable.companyId }).from(usersTable)
+      .where(eq(usersTable.id, payload.userId)).limit(1);
+    if (!user || !isProviderOperationAllowed(key, user.companyId, "callback")) {
+      return fail("This connector is not approved for this company");
+    }
     if (!providerConfigured(key)) return fail("Provider not configured");
 
     const tok = await exchangeCodeForTokens(key, code, redirectUriFor(providerParam));
@@ -173,6 +201,10 @@ router.get("/connections/:provider/callback", async (req, res) => {
 
 // ── GET /me/connections/google-drive/files — browse the user's Drive ──────────
 router.get("/me/connections/google-drive/files", authMiddleware, async (req, res) => {
+  if (!isProviderOperationAllowed("google_drive", req.user!.companyId, "browse")) {
+    res.status(403).json({ error: "Provider not approved", code: "PROVIDER_NOT_APPROVED" });
+    return;
+  }
   try {
     const token = await getValidAccessToken(req.user!.userId, "google_drive");
     const q = String(req.query.q || "").trim();
@@ -198,6 +230,14 @@ router.get("/me/connections/google-drive/files", authMiddleware, async (req, res
 router.get("/me/connections/:provider/browse", authMiddleware, async (req, res) => {
   const key = providerFromParam(String(req.params.provider));
   if (!key) { res.status(404).json({ error: "Unknown provider" }); return; }
+  if (!isProviderOperationAllowed(key, req.user!.companyId, "browse")) {
+    res.status(403).json({
+      error: "This file source is not approved for this company.",
+      errorEs: "Esta fuente de archivos no está aprobada para esta empresa.",
+      code: "PROVIDER_NOT_APPROVED",
+    });
+    return;
+  }
   try {
     const result = await browseCloud(
       req.user!.userId,
@@ -217,6 +257,11 @@ router.get("/me/connections/:provider/browse", authMiddleware, async (req, res) 
 // ── DELETE /me/connections/:provider — disconnect a service ───────────────────
 router.delete("/me/connections/:provider", authMiddleware, async (req, res) => {
   try {
+    const key = providerFromParam(String(req.params.provider));
+    if (key && !isProviderOperationAllowed(key, req.user!.companyId, "disconnect")) {
+      res.status(403).json({ error: "Provider not approved", code: "PROVIDER_NOT_APPROVED" });
+      return;
+    }
     await db.delete(userConnectionsTable)
       .where(and(eq(userConnectionsTable.userId, req.user!.userId), eq(userConnectionsTable.provider, String(req.params.provider))));
     res.json({ ok: true });

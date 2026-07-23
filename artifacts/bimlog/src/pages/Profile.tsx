@@ -142,6 +142,13 @@ interface TelegramConversationPanel {
   }>;
 }
 
+interface GovernedProvider {
+  key: string;
+  label: { en: string; es: string };
+  availability: "available" | "setup_required" | "review_required";
+  oauthParam: string | null;
+}
+
 const DEFAULT_PREFS = {
   emailRfiAssigned: true,
   emailSubmittalAssigned: true,
@@ -223,6 +230,7 @@ export function Profile() {
   const [generatingToken, setGeneratingToken] = useState(false);
 
   const [connections, setConnections] = useState<{ provider: string; status: string; accountLabel: string | null }[]>([]);
+  const [governedProviders, setGovernedProviders] = useState<GovernedProvider[]>([]);
   const [sgKeyInput, setSgKeyInput] = useState("");
   const [sgFromInput, setSgFromInput] = useState("");
   const [savingSg, setSavingSg] = useState(false);
@@ -507,9 +515,16 @@ export function Profile() {
 
   async function loadConnections() {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/me/connections`, { headers: authHeaders });
+      const [res, catalogResponse] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/me/connections`, { headers: authHeaders }),
+        fetch(`${API_BASE}/api/v1/me/provider-catalog`, { headers: authHeaders }),
+      ]);
       const data = await res.json();
+      const catalog = await catalogResponse.json() as { providers?: GovernedProvider[] };
       setConnections(Array.isArray(data) ? data : []);
+      setGovernedProviders(Array.isArray(catalog.providers)
+        ? catalog.providers.filter((provider) => provider.oauthParam)
+        : []);
     } catch (error) {
       logClientError("profile connections load", error);
     }
@@ -1610,32 +1625,39 @@ export function Profile() {
           })()}
         </SectionCard>
 
-        {/* Integrations — per-user cloud storage + PM connections */}
-        <SectionCard title="File Sources & Integrations" icon={FolderOpen}>
+        {/* The server-governed catalog is the only provider discovery source. */}
+        <SectionCard title={tt("Approved file sources", "Fuentes de archivos aprobadas")} icon={FolderOpen}>
           <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
-            Connect your own accounts so you can attach files from them to RFIs and documents. Each account is connected per user — connect once and it's yours.
+            {tt(
+              "Only connectors approved for your company appear here. Read-only access is used where supported.",
+              "Aquí solo aparecen los conectores aprobados para tu empresa. Se usa acceso de solo lectura cuando es compatible.",
+            )}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
-              { key: "google_drive", param: "google-drive", label: "Google Drive", badge: "GD", color: "#1A73E8", bg: "#E8F0FE" },
-              { key: "dropbox", param: "dropbox", label: "Dropbox", badge: "DB", color: "#0061FF", bg: "#E6EEFF" },
-              { key: "bim360", param: "bim360", label: "BIM 360 / Autodesk", badge: "AU", color: "#0696D7", bg: "#E3F4FB" },
-              { key: "procore", param: "procore", label: "Procore", badge: "PC", color: "#F47E42", bg: "#FDEEE4" },
-            ].map(p => {
+            {governedProviders.map(p => {
               const conn = connections.find(c => c.provider === p.key);
+              const label = tt(p.label.en, p.label.es);
               return (
                 <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 6, background: p.bg, color: p.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{p.badge}</div>
+                  <div style={{ width: 32, height: 32, borderRadius: 6, background: "#E8F0FE", color: "#1A73E8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 11, flexShrink: 0 }}>{label.slice(0, 2).toUpperCase()}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13 }}>{p.label}</div>
-                    <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{conn ? (conn.accountLabel ? `Connected — ${conn.accountLabel}` : "Connected") : "Not connected"}</div>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{label}</div>
+                    <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                      {conn
+                        ? (conn.accountLabel ? `${tt("Connected", "Conectado")} — ${conn.accountLabel}` : tt("Connected", "Conectado"))
+                        : p.availability === "available"
+                          ? tt("Not connected", "No conectado")
+                          : tt("Setup required", "Configuración requerida")}
+                    </div>
                   </div>
                   {conn ? (
                     <Button size="sm" variant="outline" onClick={() => disconnectProvider(p.key)} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6, flexShrink: 0 }}>
-                      <Trash2 style={{ width: 12, height: 12 }} />Disconnect
+                      <Trash2 style={{ width: 12, height: 12 }} />{tt("Disconnect", "Desconectar")}
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => connectProvider(p.param)} style={{ flexShrink: 0 }}>Connect</Button>
+                    <Button size="sm" disabled={p.availability !== "available"} onClick={() => p.oauthParam && connectProvider(p.oauthParam)} style={{ flexShrink: 0 }}>
+                      {p.availability === "available" ? tt("Connect", "Conectar") : tt("Setup required", "Configuración requerida")}
+                    </Button>
                   )}
                 </div>
               );
