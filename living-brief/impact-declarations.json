@@ -1830,6 +1830,128 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f913414287d1b98b5958cffa66bb3ed11dcbeab490ee0e8510c872759700358d"
+    },
+    {
+      "taskId": "security-batch-c-sendgrid-axios-local-candidate",
+      "reviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "reviewedAt": "2026-07-23T16:34:38.519Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_current_master_reconciliation",
+          "bounded_dependency_resolution",
+          "loopback_only_transport_validation",
+          "living_brief_semantic_reconciliation",
+          "local_review_candidate"
+        ],
+        "operatorOnly": [
+          "production_deployment",
+          "customer_data_access",
+          "provider_contact",
+          "security_batches_d_through_i",
+          "source_acceptance_and_push"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Security Batch C replaces the constrained production SendGrid Axios 1.13.6 resolution with exact 1.18.1 and adds finite outbound email transport bounds without changing provider, credential, authorization, or product semantics."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Every existing sendEmail caller retains its accepted recipient, preference, authorization, logging, template, and asynchronous or non-fatal behavior while transport validation remains loopback-only."
+        }
+      ],
+      "workstreams": [
+        "security-dependency-remediation",
+        "sendgrid-mail-transport",
+        "axios-1-18-1",
+        "bounded-outbound-http"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded transport correction follows existing source-of-truth and evidence doctrine without changing ecosystem identity or ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing clean-worktree, canonical-override, defensive-security, no-production, provider-credential continuity, and terminal-notification governance fully covers this local candidate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing dependency-security gates already require exact resolution, minimal lockfile delta, frozen install, bounded local fixtures, full build, and preserved authorization and product semantics."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dependency and transport hardening does not alter BIMLog product strategy, roadmap, workflows, or commercial behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic generator recorded the new focused SendGrid transport configuration module and validation script."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, synchronization, installation, or field-acceptance behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, DOCX, transmittal, Complete Package, or report presentation/delivery contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the Batch C local candidate baseline, exact dependency/transport scope, preserved product boundaries, and non-acceptance state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the exact candidate scope, bounded validation, remaining local gates, last-known audit-count boundary, and no-push/no-deployment state."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing dependency-security and defensive-execution audit already captures the governing control; this correction introduces no new systemic incident doctrine."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/email.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml"
+      ],
+      "reviewedChangeSha256": "27dd164e2f0dffdf31fbd390a1414ad583d1d9cdc76d6627675b319bfdc843b8"
     }
   ]
 }

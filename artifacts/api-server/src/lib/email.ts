@@ -1,9 +1,17 @@
 import sgMail from "@sendgrid/mail";
 import { db } from "@workspace/db";
 import { emailLogTable } from "@workspace/db/schema";
+import {
+  configureSendGridTransport,
+  type ConfigurableSendGridMailService,
+} from "./sendgrid-transport";
 
 const FROM = "notifications@ignitesmart.ai";
 const APP_URL = process.env.BIMLOG_URL || "https://bimlog.app";
+
+configureSendGridTransport(
+  sgMail as unknown as ConfigurableSendGridMailService,
+);
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);

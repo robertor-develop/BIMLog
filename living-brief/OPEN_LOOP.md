@@ -4,6 +4,25 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Security Batch C Axios correction is a local review candidate
+
+- The candidate is based directly on accepted `origin/master`
+  `ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a` and preserves all Coordinator, Meetings, Finance, Living Brief,
+  Security Batch A, and Security Batch B history.
+- The sole dependency constraint is an exact Axios 1.18.1 override in canonical `pnpm-workspace.yaml`.
+  `@sendgrid/mail@8.1.6` and `@sendgrid/client@8.1.6` remain unchanged; `form-data@4.0.5` remains on its already
+  corrected line. The lockfile delta is limited to Axios and its required HTTP/proxy transport dependencies.
+- The existing email wrapper now applies fixed finite transport defaults: 10-second timeout, 512 KiB request body,
+  64 KiB response body, and zero redirects. The official SendGrid destination, server-owned credential boundary,
+  JSON mail serialization, recipients, templates, authorization, preferences, logging, and asynchronous/non-fatal
+  caller behavior are unchanged.
+- The bounded loopback-only transport proof covers JSON serialization, credential confinement, fixed destination,
+  proxy bypass, redirect rejection, timeout, request/response limits, controlled provider errors, and all inventoried
+  `sendEmail` caller modules. No provider or production service was contacted.
+- Remaining source gates are the final complete workspace build, evidence/candidate commit, and independent review.
+  No push, publication, deployment, production/customer access, or Batches D-I work is included.
+- The historical registry snapshot remains last-known only; this candidate makes no fresh registry-wide count claim.
+
 ### Coordinator Command Center Build 3 accepted in source; deployment verification pending
 
 - Accepted Coordinator Build 3 source at `18154f359ea45783eda54fe3a52111d9f45fb41a` adds explicit-confirmation

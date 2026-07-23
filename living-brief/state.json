@@ -1,19 +1,24 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
+  "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "9d1e59b87faa70da80fe0ce4a6a8275fe21983ac395e7eb73c98f997c722a8e1",
+  "bundleSha256": "00189f8071fd8aad26e2f5424388e2a187d84bcadbe1b167ba44d7cdaea147e7",
   "impact": {
-    "baselineCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
+    "baselineCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
     "changedPaths": [
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/src/lib/email.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -24,11 +29,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "claude",
@@ -36,11 +41,11 @@
       "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "quality",
@@ -48,11 +53,11 @@
       "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "vision",
@@ -60,23 +65,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "0357cabf5f0aab5a092b768db59d3fcf1cc15f6ae0f80e40db9ecccce770ed9c",
-      "sourceChangedAt": "2026-07-23T15:53:34.000Z",
+      "sha256": "593a014d9e666088b5dccb25c16536c940cb81011f37014ec3b81bd60f027063",
+      "sourceChangedAt": "2026-07-23T16:34:38.519Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "plugin",
@@ -84,11 +89,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +101,11 @@
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "standards_register",
@@ -108,35 +113,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "3965992e52ec9b212c6622e1145945163ac5d330b8cd6911394c94732e4d5ff0",
-      "sourceChangedAt": "2026-07-23T15:53:34.000Z",
+      "sha256": "d1fa7d9b7a9fa582dbd83fee251e14d1ec9a69c1950d2e33f5635a14cb2e55ea",
+      "sourceChangedAt": "2026-07-23T16:34:38.519Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "aeba42bfb475dd2581fd3c5d2b7fe9f4abbfdfd5285c32ef1e4986a7c5104dda",
-      "sourceChangedAt": "2026-07-23T15:53:34.000Z",
+      "sha256": "cbab32f74303ed45dbcb94f4ae452343eb9ce4c2ed7c030b4a149e3982c3fb90",
+      "sourceChangedAt": "2026-07-23T16:34:38.519Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     },
     {
       "key": "audit",
@@ -144,11 +149,11 @@
       "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "semanticReviewTask": "coordinator-command-center-build-3-bulk-actions-integration",
+      "reconciledThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewedThroughCommit": "ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a",
+      "semanticReviewTask": "security-batch-c-sendgrid-axios-local-candidate",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T15:53:34.000Z"
+      "semanticReviewedAt": "2026-07-23T16:34:38.519Z"
     }
   ]
 }

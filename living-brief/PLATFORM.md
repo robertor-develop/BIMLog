@@ -203,6 +203,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-register-export.ts
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
+- artifacts/api-server/src/lib/sendgrid-transport.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/telegram-product-delivery.ts
 - artifacts/api-server/src/lib/telegram-product-notifications.ts
