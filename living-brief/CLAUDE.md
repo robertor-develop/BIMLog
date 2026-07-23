@@ -233,6 +233,24 @@ review. A blocked publish gets an immediate terminal summary naming stage, artif
 validation, Git/production effects, and next action. Do not retry an identical blocked publish without validated
 dependency-state change.
 
+### Database publication and source-authority preflight
+
+Replit documents that structural development-database changes may be applied to production at Publish. No supported
+repository configuration is proven to disable that managed migration authority for BIMLog. Publication therefore
+remains human-gated: never claim the root build can stop schema work that Replit may perform before the build.
+
+Before Helium synchronization or Publish, freshly read remote `refs/heads/master`, `origin/master`, clean local
+`master`, and `HEAD` must match exactly. The older remote default `main`, a cached deployment snapshot, detached stale
+source, dirty workspace, truncated log, or incomplete SQL preview blocks the operation. Inventory and preserve
+workspace-only files before any source repair; use only reviewed fast-forward operations and never overwrite or reset
+unreviewed work.
+
+Development sync is limited to an explicitly identified Replit Helium database that differs from the governed runtime
+production identity. A non-empty regenerated preview may contain only hash-inventoried additive statements required by
+the accepted master, with zero DROP, CASCADE, TRUNCATE, RLS disable, or unexplained removal. Every future schema
+publication requires a verified restore point, exact pre-publication affected-table counts, explicit owner approval,
+the complete deployment log, exact deployed-commit attestation, and matching post-publication counts.
+
 This monorepo's sole pnpm override authority is `pnpm-workspace.yaml`. Never add a competing root
 `package.json` `pnpm.overrides` block. A targeted security fix preserves the complete existing override/exclusion set
 and proves a tar-only semantic delta: zero lost controls and zero unrelated importer, version, integrity, optional,

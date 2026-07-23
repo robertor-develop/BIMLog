@@ -67,12 +67,14 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 
 ## Critical Database Facts — Read Before Every Session
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
-- DATABASE_URL = Replit built-in heliumdb. Used ONLY by drizzle-kit CLI for schema migrations. Never used at runtime. Data here is ephemeral and resets on rebuild.
+- DATABASE_URL = Replit Helium development database. It is used ONLY by guarded drizzle-kit development-schema synchronization and never at runtime. Its structural state can influence Replit's generated production migration at Publish.
 - The ENV startup banner historically showed DB_HOST: helium and DB_NAME: heliumdb — this was MISLEADING. It was reading PGHOST and PGDATABASE which point to heliumdb not the actual runtime connection. This has now been fixed.
 - NEVER diagnose data loss by querying heliumdb. Always query Neon via PROD_DATABASE_URL.
 - NEVER trust PGHOST or PGDATABASE for runtime database diagnostics.
 - lens_viewpoints data that appeared to disappear on rebuild was never on Neon — it was on heliumdb which resets. All writes now go to Neon and survive all rebuilds.
 - Any future database diagnostics must confirm PROD_DATABASE_URL is the connection target before drawing any conclusions.
+- Replit currently documents that development structural changes may be applied to production at Publish. No supported repository configuration is proven to disable that managed migration authority. Every Publish remains human-gated; a root build cannot stop a migration Replit may apply before the build.
+- Authoritative source is the explicitly fetched remote master ref, not the older remote default main. Before Helium sync or Publish, the clean Replit workspace, local master, origin/master, and freshly read remote master must match exactly and pass the commit-bound publication-source attestation.
 
 ## Monorepo shape
 - pnpm workspaces.
@@ -113,6 +115,10 @@ ${appRoutes()}
   isSuperAdminMiddleware re-checks users.is_super_admin.
 - Schema changes go in BOTH the drizzle schema file AND the idempotent startup migration block
   in artifacts/api-server/src/app.ts (ALTER TABLE / CREATE TABLE ... IF NOT EXISTS).
+- Direct schema force-push is disabled. The guarded development sync requires exact authoritative
+  master attestation, a Replit Helium target distinct from the runtime production identity, and
+  read-only table/index parity. Publish additionally requires the complete generated SQL, a
+  hash-bound additive inventory, a verified restore point, and affected-table count manifests.
 - Route ordering: literal sub-paths (e.g. .../lens-pull, .../plugin-pull) must be registered
   before parameterized catch-alls like .../:reportId (no NaN guard).
 - Soft-delete DELETE routes live inside their feature route files (see routes/index.ts comments).

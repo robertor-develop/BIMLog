@@ -21,6 +21,30 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   mutation, Replit work, publication, deployment, production/customer access, or customer data access. Publication,
   deployment, runtime verification, and any future customer/provider approval remain separate.
 
+### Urgent database publication safety gate accepted locally; Replit source repair and publication remain blocked
+
+- Clean integration commit `f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104` is based directly on authoritative
+  `origin/master` `8c9d1aaf735932b4f5ed2d271cfeef7925ddc635` and reapplies the nine-file candidate without
+  importing candidate ancestry.
+- Independent hardening closed comment-separated destructive-SQL bypasses, requires the production identity to be
+  present for comparison, restricts development mutation/parity to Replit Helium, binds the source contract to
+  freshly read remote master, and requires a complete hash-bound additive preview inventory.
+- Official Replit documentation says development structural deletions may be applied to production at Publish. No
+  supported `.replit` switch was found to disable that authority, and the two opaque artifact IDs cannot be safely
+  reclassified from repository evidence. Replit publication remains human-gated; the root build is not a pre-migration
+  kill switch.
+- The read-only Replit audit used stale deployed source `2c1ffc4b5c08618610cdb70b42fcb08556726f1c`,
+  saw 97 Drizzle table declarations, and proposed 33 `DROP TABLE ... CASCADE` statements. Accepted local source has
+  132 tables, 140 indexes, and all 92 startup-created tables reconciled. Do not duplicate the 33 declarations.
+- Before any future Publish, preserve reviewed Replit workspace-only files, fast-forward clean local `master` to
+  freshly fetched remote master, attest exact equality, run the separately approved guarded Helium sync, prove
+  read-only parity, and regenerate the preview. The preview may be empty or explicitly inventoried additive-only;
+  it must contain zero DROP, CASCADE, TRUNCATE, RLS disable, or unexplained removal.
+- Publication remains blocked pending a verified restore point, exact pre-publication record counts for every
+  affected production table, complete SQL and deployment logs, Roberto's explicit approval, deployed-commit
+  attestation, and exact post-publication counts. No database, Replit, production, or customer access occurred in
+  this integration review.
+
 ### Coordinator Command Center Build 4 accepted in source; deployment verification pending
 
 - Accepted Coordinator Build 4 source at `6f96a3f2385a08c3e364099178617d4ec16dfcf5` is based directly on Security

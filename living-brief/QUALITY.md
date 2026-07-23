@@ -372,7 +372,11 @@ Ready/acceptance boundary, where its semantic declaration is still mandatory bef
 ### Current cross-cutting acceptance controls
 
 - Database migrations are additive, idempotent, restart-safe, and transactionally tested. Replit publish
-  previews must contain zero destructive SQL; unexpected drop, rebuild, rename, or divergence blocks publish.
+  previews must be complete and commit-bound, with zero destructive SQL; unexpected drop, rebuild, rename,
+  RLS disable, constraint/index removal, source divergence, or truncated evidence blocks publish. Replit source
+  must equal freshly fetched authoritative `master` before guarded Helium sync. A non-empty preview contains only
+  explicitly inventoried additive statements tied to the accepted source contract. Future schema publication also
+  requires a verified restore point plus exact pre/post affected-table record-count manifests.
 - Durable credentials and other security authorities are never reseeded by build, startup, restart, publish,
   source-mirror synchronization, or migration. Initialization is create-if-absent only through a controlled
   authenticated bootstrap or one-time migration of existing durable state. Reset requires current Super

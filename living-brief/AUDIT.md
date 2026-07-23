@@ -643,3 +643,28 @@ Permanent control: lifecycle-roadmap work must move through capability gates, cu
 research, legal/safety/privacy review, and short evidence-backed releases. The roadmap does not authorize simultaneous
 implementation of IoT, marketplace, executable contracts, blockchain, payment/settlement, production integrations, or
 circular-recovery claims.
+
+## Database publication safety and stale-source audit - July 23, 2026
+
+Status: local source integration accepted for Living Brief review; not pushed, published, deployed, database-synced,
+or production/customer verified at the time of capture.
+
+The authoritative remote advertised older `main` as its default while accepted BIMLog history advanced on `master`.
+A read-only Replit audit reported effective deployed source `2c1ffc4b5c08618610cdb70b42fcb08556726f1c`, only 97
+Drizzle table declarations, and a generated preview containing 33 `DROP TABLE ... CASCADE` operations. The prior
+deployment applied no drops and the supplied audit reports live data remained intact. The exact Replit mechanism that
+retained the stale snapshot was not independently accessible; the observed state is consistent with failure to
+advance the workspace/deployment source to explicit remote master.
+
+Independent local proof at authoritative source found 132 Drizzle tables, 140 indexes, all schema files exported, and
+all 92 startup-created tables reconciled. The stale 33-table proposal is rejected because those declarations already
+exist on accepted master. Integration commit `f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104` adds destructive-source and
+preview gates, comment-bypass fixtures, remote-master/clean-workspace attestation, guarded Helium-only development
+sync, read-only source parity, direct-force-push refusal, and the publication runbook.
+
+Official Replit documentation states that development structural changes can be applied to production at Publish and
+documents no repository switch that disables this behavior. BIMLog's opaque artifact IDs do not establish a safe
+compute-only configuration. Therefore publication remains human-gated. Required remaining evidence is exact master
+equality in Replit, separately authorized guarded Helium sync, read-only parity, a complete empty or additive-only
+hash-bound preview, verified restore point, pre/post affected-table counts, complete deployment log, and exact deployed
+commit. No database, Replit, provider, production, customer, or credential access occurred during this local review.

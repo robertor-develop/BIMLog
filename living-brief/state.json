@@ -1,19 +1,24 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+  "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "7ee5de5d2dcdfe1403db53d670a1cf83d4daf5cdbeb16c3f2f8d869920fc6818",
+  "bundleSha256": "f95e9043dccbb8aa8861daa79297a78bff074670996bfb84330857a9fc819753",
   "impact": {
-    "baselineCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+    "baselineCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
+      "living-brief/AUDIT.md",
+      "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/REPORT_DESIGN_SYSTEM.md",
+      "living-brief/PLATFORM.md",
+      "living-brief/QUALITY.md",
+      "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "REPORT_DESIGN_SYSTEM.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -24,35 +29,35 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
-      "sourceChangedAt": "2026-07-22T14:39:40-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sha256": "9fe2b131c6682e97033cbf683b95556255a7a676fdb926b65f142c11bc63079f",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
-      "sourceChangedAt": "2026-07-22T14:39:40-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sha256": "73eea2d592182e6a44d8666bd1b173db00508d10cb76676d4473dbb3817ab402",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "vision",
@@ -60,23 +65,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "b99c36a6333517579f9494799501f4ea4d80dae5c79924da304263c9b1e71226",
-      "sourceChangedAt": "2026-07-23T13:49:42-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sha256": "3de77275e73b28a605024675121b8d91647f4fabb8971154c645f14079344049",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "plugin",
@@ -84,23 +89,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
       "sha256": "741f0338ba1fff3c6cdc4c9d92eabab4a215d2f6b7b33f57ec580798eee96789",
-      "sourceChangedAt": "2026-07-23T19:21:22.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sourceChangedAt": "2026-07-23T15:24:00-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "standards_register",
@@ -108,47 +113,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "e62e553d0add2ecc230a51b638d1734d6b535e546e571d005d21a44116592f1f",
-      "sourceChangedAt": "2026-07-23T13:49:42-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sha256": "95b1b049469098d5e3f96e48e2cac0232f4c99d3690a9b00b98041987b56daac",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "63f1f66176c1636365b020a9f3bc21a444e5e4c3b33127a9c5abdec1394ce722",
-      "sourceChangedAt": "2026-07-23T19:21:22.000Z",
+      "sha256": "a7e8edcae68f6a4c86d54e28ae173666e4e21ea9e8b7ae2dce067b2b17447178",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
-      "sourceChangedAt": "2026-07-22T14:39:40-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
-      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
+      "sha256": "fc0b3acc164ff907aa98d3b70e59b5ad1fc15271a7e0d55f9486b206ce9dec92",
+      "sourceChangedAt": "2026-07-23T19:10:35.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "semanticReviewTask": "database-publication-safety-gate-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-23T15:10:35-04:00"
     }
   ]
 }

@@ -9,6 +9,15 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+Database publication safety is accepted in local integration source at
+`f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104`. It adds a fail-closed destructive-SQL gate, exact remote-master source
+attestation, guarded Replit Helium-only development synchronization, source table/index parity, disabled direct
+force-push, and complete-preview/additive-inventory controls. The current source contract contains 132 Drizzle
+tables, 140 indexes, and all 92 startup-created tables. This does not prove that Replit-managed database migration
+authority can be disabled, and it does not authorize a database sync or Publish. Replit repair, guarded Helium sync,
+read-only parity, complete regenerated preview, verified restore point, affected-table counts, owner approval,
+publication, and post-publication verification remain separate gates.
+
 Roberto-approved built-asset lifecycle roadmap: approved strategy is being recorded for BIMLog's long-term expansion
 from construction coordination into verified construction records, asset passports, maintenance obligations,
 condition/IoT events, controlled work orchestration, contractor/supplier networks, executable contract rules, and

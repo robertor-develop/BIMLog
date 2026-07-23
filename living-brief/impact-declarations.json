@@ -2428,6 +2428,158 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c8474bbc609535a8a4a059b91f8d0b0f367d3819d6e7ea9a1b9cc6dbf16f82eb"
+    },
+    {
+      "taskId": "database-publication-safety-gate-integration",
+      "reviewedThroughCommit": "f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104",
+      "reviewedAt": "2026-07-23T15:10:35-04:00",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository_and_sanitized_git_state",
+          "review_candidate_in_clean_worktree",
+          "read_current_primary_vendor_documentation",
+          "run_local_value_blind_safety_fixtures",
+          "create_clean_integration_and_acceptance_commits",
+          "normal_push_and_remote_equality_verification"
+        ],
+        "operatorOnly": [
+          "replit_workspace_repair",
+          "helium_schema_sync",
+          "production_read_only_inventory",
+          "backup_restore_verification",
+          "publication_or_deployment",
+          "post_publication_production_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Replit used stale source while accepted work advanced on master, producing a 33-table destructive preview from an obsolete 97-table declaration set."
+        },
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A repository build gate alone cannot guarantee safety because Replit may apply managed database changes before the build runs."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Authoritative source already contains 132 Drizzle tables, 140 indexes, and all 92 startup-created tables, so the stale 33-table duplication proposal is rejected."
+        },
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Future schema publication requires exact remote-master source attestation, guarded Helium parity, complete additive-only preview evidence, recovery proof, and pre/post record counts."
+        }
+      ],
+      "workstreams": [
+        "platform-portability",
+        "database-publication-safety",
+        "replit-source-authority",
+        "backup-and-restore-readiness",
+        "living-brief-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The safety gate preserves existing BIMLog ownership, canonical-source doctrine, and evidence boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Added permanent source-authority, managed-migration, complete-preview, backup, and record-count publication controls."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Strengthened database release acceptance with commit-bound source, full additive preview, recovery, and pre/post count evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This safety correction changes release controls without changing product roadmap, customer commitments, or commercial direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Recorded the guarded Helium development role, governed runtime database boundary, Replit managed-migration limitation, and master attestation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, Sync Agent, Lens identity, package, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, report layout, data presentation, or report-generation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance claim, or standards adoption changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the accepted local source safety boundary and separated it from Replit repair, sync, publication, and production verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded the stale-source incident and exact remaining Replit, parity, preview, recovery, approval, and verification blockers."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Captured the dated stale-source destructive-preview evidence, authoritative schema counts, architecture limitation, and non-actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "421f005934c2518b9c916252b9440ae4125548e852f0a873738d78ae1fe0125c"
     }
   ]
 }
