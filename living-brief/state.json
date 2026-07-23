@@ -1,20 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+  "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "8e6a7889fd4923786ac369bdb3b3dce32180b19c2b66cd0a1feff9616451175b",
+  "bundleSha256": "f1545438468c5c190db89e7a76ef86ecc6005cc95a299004aa4315e66ad06c7b",
   "impact": {
-    "baselineCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
+    "baselineCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
     "changedPaths": [
-      "artifacts/api-server/src/app.ts",
-      "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "artifacts/api-server/src/routes/members.ts",
-      "artifacts/api-server/src/routes/project_directory.ts",
-      "artifacts/api-server/src/routes/rfis.ts",
-      "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "artifacts/bimlog/src/pages/project/RfisTab.tsx",
-      "lib/db/src/schema/meeting-minutes.ts",
-      "lib/db/src/schema/project-directory.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -22,8 +13,6 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
-      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -34,11 +23,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "claude",
@@ -46,11 +35,11 @@
       "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "quality",
@@ -58,11 +47,11 @@
       "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "vision",
@@ -70,11 +59,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "platform",
@@ -82,11 +71,11 @@
       "sha256": "e596c7603c356db21068ea933943a681ddfbf84edb8d772edce51e60af102db7",
       "sourceChangedAt": "2026-07-22T15:08:57-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "plugin",
@@ -94,11 +83,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "report_design_system",
@@ -106,11 +95,11 @@
       "sha256": "4078fc5cd82132e3a29eaaff978a5e217f6d6255b84a51cfe688fe72cdeba58b",
       "sourceChangedAt": "2026-07-21T20:08:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "standards_register",
@@ -118,35 +107,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "a27543dce14d8c673b261a236ee9c442f3b755c474c7f1875721d20ffbdd9c54",
-      "sourceChangedAt": "2026-07-22T22:59:45.788Z",
+      "sha256": "2986adbc420fb203295fbce7e74641d0f82ec69895e71731e48a29c92c160a77",
+      "sourceChangedAt": "2026-07-23T15:17:57.476Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "f6a779f896f27273acf5278f9ca64a2dbbbe0f98bd11b1c9495136001de0a547",
-      "sourceChangedAt": "2026-07-22T22:59:45.788Z",
+      "sha256": "154d40b7b900a4627c0c63509835d0552f04b0be7d794712230f689a74083b62",
+      "sourceChangedAt": "2026-07-23T15:17:57.476Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     },
     {
       "key": "audit",
@@ -154,11 +143,11 @@
       "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewedThroughCommit": "36004590c6672fa731c6e2b1196dcfcec6d381fe",
-      "semanticReviewTask": "ruben-meetings-workflow-local-candidate",
+      "reconciledThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "semanticReviewTask": "security-batch-b-sheetjs-0203-final-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-22T22:58:15.002Z"
+      "semanticReviewedAt": "2026-07-23T15:17:57.476Z"
     }
   ]
 }

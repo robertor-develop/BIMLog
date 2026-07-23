@@ -1,8 +1,8 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `50ce892b51ef1696e6e47740d5e9f4977b6ebf24`
-Reconciliation date: 2026-07-22
+Accepted source reconciled through: `d4aa7ed91b1a439f8144956554e4044b95cd6979`
+Reconciliation date: 2026-07-23
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
 synchronization, and field/customer verification are separate states. The current semantic-content
@@ -16,10 +16,11 @@ circular-material recovery. This is roadmap authority only. No asset-passport mo
 CMMS connector, marketplace, executable contract, payment/settlement, material passport, carbon accounting, or
 circular recovery behavior is implemented, deployed, or customer verified by this documentation build.
 
-Ruben urgent Meeting workflow correction is a local review candidate only. It adds inline canonical company registration,
-reusable project-directory attendees/contacts, canonical attendee directory identity, compact linked RFI status/responsible
-controls, exact View RFI/Ver RFI deep links, and server-draft restoration when returning from RFI navigation or refreshing
-`/meetings`. The candidate is not pushed, published, deployed, production verified, customer verified, or field accepted.
+Ruben urgent Meeting workflow correction is accepted and pushed in source at
+`bec190ac248fc5134f742b1bafbc673a594e52ec`. It adds inline canonical company registration, reusable
+project-directory attendees/contacts, canonical attendee directory identity, compact linked RFI status/responsible
+controls, exact View RFI/Ver RFI deep links, and server-draft restoration when returning from RFI navigation or
+refreshing `/meetings`. It is not published, deployed, production verified, customer verified, or field accepted.
 
 Living Brief credential persistence and controlled recovery are accepted in source at
 `c3a7c809643022abb04b8fe58db043ccd5d828ff` after reconciliation onto Coordinator master
@@ -46,7 +47,16 @@ Security Batch A is accepted in source at integration commit `97e32503a641c37ff5
 master `b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6`. The preserved candidate
 `01c60a1bc24649153afd70b5c061b4cb01d79789` remains provenance evidence only; its ancestry was not imported.
 The accepted correction is not published, deployed, production verified, customer verified, or extended to
-SheetJS/Batches B-I.
+SheetJS/Batches B-I. Security Batch B is separately integrated below.
+
+Security Batch B is accepted in source at integration commit
+`d4aa7ed91b1a439f8144956554e4044b95cd6979`, directly based on Meetings master
+`bec190ac248fc5134f742b1bafbc673a594e52ec`. Reviewed candidate
+`b6498cefd4d833c46868426e71db2f6520da3241` remains provenance evidence; only its content was reapplied.
+The correction resolves both direct SheetJS consumers to the provenance-verified official CE 0.20.3 artifact,
+removes 0.18.5, and applies the canonical date-only/explicit-instant/timezone-less/raw-cell policy across the
+post-Finance spreadsheet inventory. It is not published, deployed, production verified, customer verified, or
+extended to Batches C-I.
 
 Portability Phase 1A is accepted in source at integration commit
 `6f9c3f18d524723361f5f0ab45cf18f160566311`, directly based on authoritative master
@@ -93,6 +103,9 @@ is reserved for genuine completion.
   versioned cost structures, budgets, upstream and downstream contracts/commitments, SOV lines,
   amendments, separate approval and execution, controlled over-budget escalation, immutable
   snapshots/history, bounded import/export, searchable PDF/XLSX exports, and bilingual UI.
+- Security Batch B: exact official SheetJS CE 0.20.3 artifact, one accepted resolution across the two direct
+  consumers, raw UTF-8 BOM/non-BOM CSV handling, machine-timezone-independent date-only semantics, explicit-offset
+  instant handling, timezone-less date-time preservation/rejection, and bounded post-Finance compatibility evidence.
 - Shop Drawing Control filter correction: UI and PDF/Excel outputs share normalized filter semantics.
 - The source-authoritative 11-document Living Brief architecture is accepted: one catalog drives checks,
   deterministic PLATFORM generation, authenticated API, exact mirror, bilingual UI, copy, and export.
@@ -126,14 +139,14 @@ is reserved for genuine completion.
   seeding, removes the locked-screen reset form, and requires revalidated Super Administrator reset with audit.
   Production credential preservation still requires later controlled migration/publish verification; no
   production credential, secret, or database was accessed by this candidate.
-- The full dependency audit records 94 pre-existing findings (7 low, 47 moderate, 40 high) outside the
-  tar-only correction. They require a separately scoped dependency-security review and are not silently
-  folded into the publish unblock.
+- The historical full dependency audit recorded 94 findings (7 low, 47 moderate, 40 high) outside the tar-only
+  correction. Batch B removes the two known applicable SheetJS advisory records from the exact accepted resolution,
+  but no fresh registry-wide count is claimed; remaining findings require separately authorized bounded batches.
 - Security Batch A is accepted in source at `97e32503a641c37ff55c0e96806c1cf58af57ae1`. It uses exact Multer 2.2.0 and centralized
   bounded multipart parsing across 20 accepted upload endpoints with controlled bilingual failures and durable
   storage compensation. Frozen install, finite multipart and Living Brief matrices, typecheck, one complete build
   sequence, semantic lock audit, encoding, privacy, and diff gates passed. Normal push and exact remote equality
-  verification remain the release boundary. SheetJS/Batches B-I remain unstarted.
+  verification remain the release boundary. Batch B is separately accepted at `d4aa7ed91b1a439f8144956554e4044b95cd6979`.
 - The owner credential continuity exception is active only during ongoing platform development. Public/production
   launch requires separately approved managed-secret migration, durable backup/recovery, controlled rotation/revocation
   as appropriate, callback continuity, rollback proof, history remediation, and independent verification.
@@ -151,6 +164,7 @@ is reserved for genuine completion.
 
 ## Current candidates and next work
 
+- Security Batches C-I: not started and require separate authorization.
 - Living Brief Content Reconciliation Build 2: independently reconciled review candidate only.
 - Replit verified pull of `178462e`, actual 12-table preview, explicitly approved publish, runtime/mirror
   reconciliation, and deployed browser verification.

@@ -1604,6 +1604,124 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c6bcf763a72cc8611635c5ba05c2a8d7a1e4f80beed94b1326cc659bcdfd0fb8"
+    },
+    {
+      "taskId": "security-batch-b-sheetjs-0203-final-integration",
+      "reviewedThroughCommit": "d4aa7ed91b1a439f8144956554e4044b95cd6979",
+      "reviewedAt": "2026-07-23T15:17:57.476Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_current_master_reconciliation",
+          "bounded_dependency_and_spreadsheet_validation",
+          "living_brief_semantic_reconciliation",
+          "single_final_gate",
+          "normal_fast_forward_push"
+        ],
+        "operatorOnly": [
+          "production_deployment",
+          "customer_data_access",
+          "external_security_testing",
+          "security_batches_c_through_i"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Security Batch B replaces the two vulnerable direct SheetJS 0.18.5 paths with the provenance-verified official CE 0.20.3 artifact and a machine-timezone-independent spreadsheet temporal policy."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "report_design_system",
+            "status",
+            "open_loop"
+          ],
+          "summary": "CSV, XLS, XLSX, Finance, Submittal, Clash, RFI, shared extraction, and Complete Package behavior must preserve exact date-only, decimal, formula-control, report, and authorization semantics."
+        }
+      ],
+      "workstreams": [
+        "security-dependency-remediation",
+        "sheetjs-ce-0203",
+        "canonical-spreadsheet-temporal-policy",
+        "finance-builds-2-3",
+        "rfi-and-submittal-exports"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dependency correction follows existing canonical-record, evidence, and source-acceptance doctrine without changing ecosystem identity or ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing dependency authority, defensive-security, clean-worktree, exact-artifact, no-production, and terminal-notification governance fully covers this integration."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing supply-chain and defensive-security gates already require exact provenance, minimal lockfile delta, frozen install, compatibility proof, and preserved spreadsheet/report semantics."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves current spreadsheet-simple construction and finance workflows and does not alter BIMLog product strategy or roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic generator was run after integration and produced no semantic Platform map change; the shared policy and affected consumers fit existing platform structures."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, sync behavior, protected baseline, installation, or field-acceptance state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing RFI, Submittal, Clash, Finance, and Complete Package output contracts are preserved; no shared report layout, delivery, privacy, or fidelity rule changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes in this dependency correction."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Meetings as pushed source truth and Security Batch B as accepted source with exact commit, dependency, temporal-policy, and no-deployment boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded Batch B source scope, evidence, remaining push verification, no fresh registry-wide count, and the separately authorized boundary for Batches C-I."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing dependency-security and defensive-execution audit already captures the governing lesson; this bounded correction introduces no new systemic incident doctrine."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5b8d391bcea23c3c0b140ca8effcacdff3b50e9d6777188d69cf5086e816506e"
     }
   ]
 }

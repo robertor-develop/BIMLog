@@ -2,20 +2,21 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
-## Current terminal truth - 2026-07-22
+## Current terminal truth - 2026-07-23
 
-### Ruben urgent Meeting workflow correction local candidate; review/push pending
+### Ruben urgent Meeting workflow correction accepted and pushed in source
 
-- Local Meetings candidate adds persistent canonical company registration from attendee rows, reusable project-directory
+- Accepted Meetings source at `bec190ac248fc5134f742b1bafbc673a594e52ec` adds persistent canonical company
+  registration from attendee rows, reusable project-directory
   contact selection, attendee canonical directory identity, compact linked RFI controls, exact RFI deep-link navigation
   with Meeting draft return context, and durable server-authoritative new Meeting draft restoration on direct return,
   tab navigation, and refresh/restart.
 - The candidate preserves Meeting snapshots and existing RFI/Submittal/Schedule/Lens/legacy behavior; viewing an RFI
   does not mutate the RFI, and RFI status/responsible edits use the canonical RFI route with current authorization and
   stale-update protection.
-- Expanded local Chrome proof passed in the isolated `127.0.0.1:55432/bimlog_rfi_test` harness. Remaining gates are
-  source reconciliation, final repository validation, clean local review commit, and Roberto review. No push, publish,
-  deployment, production/customer data access, or Replit action is included by this candidate.
+- Expanded local Chrome proof passed in the isolated `127.0.0.1:55432/bimlog_rfi_test` harness. Source integration
+  and normal push are complete. Publication, deployment, production/customer verification, and field acceptance remain
+  separate; no production/customer data access or Replit action occurred.
 
 ### Built-asset lifecycle operating network roadmap validation
 
@@ -180,12 +181,31 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   typecheck; the complete workspace build with the documented PORT setting; semantic lock, diff, encoding, privacy,
   and exact-candidate-content checks. The initial build invocation stopped only because PORT was omitted; already
   passed checks were not rerun, and the unfinished workspace build phase then passed with `PORT=3000`.
-- Current registry audit remains 94 records: 0 critical, 41 high, 46 moderate, and 7 low. Multer contributes zero
-  remaining records. These counts do not claim SheetJS or Batches B-I were corrected; those batches remain unstarted
-  and require separate authorization.
+- The last accepted registry snapshot after Batch A contained 94 records: 0 critical, 41 high, 46 moderate, and 7 low.
+  Multer contributes zero remaining records. Batch B is separately accepted below; no fresh registry-wide count is
+  inferred for the remaining findings.
 - Remaining boundary: normal push of the integration and acceptance commits plus exact remote ancestry/equality
   verification. No publish, deployment, production/customer access, or external security testing occurred.
 - The one persistent UI safety notice remains one visible notice only and is excluded from Telegram.
+
+### Security Batch B SheetJS correction accepted in source
+
+- Integration commit `d4aa7ed91b1a439f8144956554e4044b95cd6979` reapplies the reviewed candidate
+  `b6498cefd4d833c46868426e71db2f6520da3241` directly to Meetings master
+  `bec190ac248fc5134f742b1bafbc673a594e52ec` without importing the candidate's older ancestry.
+- Both direct consumers resolve the exact provenance-verified official SheetJS CE 0.20.3 tarball; 0.18.5 and its
+  seven exclusively used transitive packages are absent. `pnpm-workspace.yaml`, every override, and every platform
+  exclusion remain unchanged.
+- The canonical spreadsheet policy preserves date-only calendar values independent of machine timezone, normalizes
+  only explicit-offset/Z timestamps as instants, preserves or rejects timezone-less date-times without implicit local
+  conversion, and keeps unknown cells raw. UTF-8 CSV with and without BOM, XLS/XLSX numeric dates, server/browser
+  parity, Finance Budget/Contract, RFI exports, Submittals, Clash Reports, shared extraction, and Complete Package
+  conversion have bounded compatibility coverage.
+- Exact candidate evidence is retained outside the repository with manifest SHA-256
+  `37c6575eed756152af8ad2d318c5670dd56efd58729725da01f7a6e2802fa205`. No fresh registry-wide count is claimed;
+  Batches C-I remain unstarted and require separate authorization.
+- Publication, deployment, production/customer access, external security testing, and Batches C-I are outside this
+  acceptance. Normal source push and exact remote verification are the final source gates for this cycle.
 ### Terminal-turn Telegram notification rule
 
 - Every explicitly assigned task work cycle that stops must send one sanitized structured Telegram terminal-turn
@@ -301,7 +321,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - Reused evidence: Build 3 focused behavior, PostgreSQL, authenticated API, import/concurrency, Build 1/2 regressions, typecheck/build checks, and browser acceptance. Browser acceptance passed English desktop and Spanish exact 390px product assertions; the only retained warning was pre-existing blocked `fonts.googleapis.com` CSS, classified as a platform font warning for Localization/UI.
 - Focused current-master shared regression passed 44/44 after stale external harness assertions were corrected without product changes. Reconciliation onto current master preserved Meeting Minutes, Living Brief roadmap/quality-framework content, Telegram Build 6, Security Batch A, Portability, Plans/Entitlements, RFI/Submittals, Navisworks, startup, routing, schema, and sidebar history.
 - Sanitized external evidence remains under the retained Finance Build 3 evidence package; shared-regression completion SHA-256: `369ab08d51160d19f83c4373dad3fa39fbe998f662ff2c48485ac011de66fe4a`.
-- No deployment or publication occurred. Finance Build 4 and Security Batch B were not started.
+- No deployment or publication occurred. Finance Build 4 remains unstarted. Security Batch B is separately accepted
+  above; Security Batches C-I remain unstarted.
 
 ## Mandatory New Task Startup Rule
 
