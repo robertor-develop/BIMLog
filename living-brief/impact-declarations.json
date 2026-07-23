@@ -2070,6 +2070,131 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f88dcd674cc193f2a0c1e4a43103ad0755541cd61a2fab69045b38ffcd640f19"
+    },
+    {
+      "taskId": "coordinator-command-center-build-4-final-integration",
+      "reviewedThroughCommit": "6f96a3f2385a08c3e364099178617d4ec16dfcf5",
+      "reviewedAt": "2026-07-23T13:42:21-04:00",
+      "status": "accepted_source",
+      "captureTiming": "normal_integration_review",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_current_master_ancestry_verification",
+          "content_only_candidate_replay_without_old_ancestry",
+          "living_brief_overlap_reconciliation",
+          "focused_boundary_proof",
+          "workspace_typecheck",
+          "single_final_gate",
+          "normal_fast_forward_push",
+          "remote_equality_verification"
+        ],
+        "operatorOnly": [
+          "publication",
+          "deployment",
+          "production_access",
+          "customer_data_access",
+          "field_acceptance",
+          "coordinator_build_5"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "product_boundary_and_metric_authority_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Coordinator Command Center remains the operational Act surface with only four contextual counters, while Project Insights & Reports becomes the Understand/Report surface backed by a shared server-side metric-definition authority."
+        },
+        {
+          "category": "canonical_module_authority_preservation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The accepted Build 4 correction removes redundant Analytics dashboard content, preserves Activity Log, Files, Schedule, Lens/Viewpoint, and Build 3 bulk-action ownership, and adds no Clash, AI, notification, deployment, or production behavior."
+        }
+      ],
+      "workstreams": [
+        "coordinator-command-center-build-4",
+        "project-insights-and-reports",
+        "coordinator-builds-1-through-3",
+        "activity-log",
+        "files",
+        "reports",
+        "shared-metric-definitions"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted correction follows existing canonical-module ownership doctrine and does not alter ecosystem identity or source authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing clean-integration, no-old-ancestry, no-production, no-AI, no-Clash-substitution, and terminal-notification governance covers this acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Independent review confirmed Build 4 boundary semantics, duplicate-surface removal, shared metric definitions, exact deep-link authorization behavior, focused proof, typecheck, and final gate scope."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction clarifies Act versus Understand/Report surfaces without changing BIMLog product strategy, roadmap, billing, deployment, or customer commitments."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Official deterministic platform generation records the new Project Insights metric authority and related API/UI structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, synchronization, installation, Lens identity, or field-acceptance behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Project Insights links to governed reporting surfaces but adds no duplicate PDF, spreadsheet, DOCX, transmittal, or report-delivery contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Promoted Coordinator Build 4 from reviewed local candidate to accepted source with exact integration commit, parent, product-boundary scope, and no-deployment boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded accepted source ancestry, Act versus Understand/Report boundary, preserved module ownership, and continued deferral of deployment, field acceptance, and Build 5."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The boundary correction introduces no new audit doctrine, private audit exposure, credential handling, or security incident finding."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "aee58f3e6909fa424860c30e77281d1ad695c6a285cdb46758c93a1c9ecc4fd1"
     }
   ]
 }

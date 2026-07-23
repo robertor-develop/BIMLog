@@ -1,7 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
 Status: Active current-state record
-Accepted source reconciled through: `d4aa7ed91b1a439f8144956554e4044b95cd6979`
+Accepted source reconciled through: `6f96a3f2385a08c3e364099178617d4ec16dfcf5`
 Reconciliation date: 2026-07-23
 
 This file states accepted `origin/master` source truth. Accepted source, deployed source, database-mirror
@@ -58,6 +58,23 @@ removes 0.18.5, and applies the canonical date-only/explicit-instant/timezone-le
 post-Finance spreadsheet inventory. It is not published, deployed, production verified, customer verified, or
 extended to Batches C-I.
 
+Coordinator Command Center Build 4 is accepted in source at integration commit
+`6f96a3f2385a08c3e364099178617d4ec16dfcf5`, directly based on Security Batch C master
+`5d71fe6150c332b28f3e2274afeebdcf0a7fc146`. Reviewed candidate
+`a918c60c1e75a6c89a86ff16ec1e7ea31889e59b` remains provenance evidence; only the reviewed Build 4
+product-boundary content was reapplied, without importing candidate ancestry. Build 4 separates the Act -> Understand/
+Report surfaces: Coordinator Command Center remains the operational execution surface for current actionable records,
+My Items, overdue/due soon/blocked work, responsibility/ball-in-court, saved operational views, selection, governed
+actions, and only four contextual counters: actionable, overdue, due soon, and blocked. Analytics is renamed
+Project Insights & Reports / Perspectivas e Informes and becomes the analytical/reporting surface for compliance,
+bottlenecks, company performance, RFI aging/status performance, honest unavailable states, and governed report links.
+Recent Activity, Recent Files, operational task lists, and the Schedule placeholder are removed from Insights because
+Activity Log, Files, Command Center, and Schedule own those surfaces. Shared server-side metric definitions now govern
+counts, status buckets, date boundaries, and permissions so Insights deep-links to exact filtered Command Center
+records without granting authority. Lens/Viewpoint identity, Coordinator Build 3 bulk actions, Clash deferral,
+AI/notification boundaries, publication, deployment, production/customer access, field verification, and Build 5
+remain unchanged and out of scope.
+
 Security Batch C is accepted in source at integration commit
 `cf2edd9125d797109215ed0e03d0e08d27f13ff0`, directly based on accepted Coordinator Command Center Build 3 master
 `ed8b94bd4f7e73f3ad5bbb1d236f4b474f4fae1a`. It deterministically resolves the production SendGrid client's
@@ -99,11 +116,13 @@ is reserved for genuine completion.
 - Portability Phase 1A: owner-approved temporary credential continuity exception, value-blind credential-category and
   recovery ownership inventory, future managed-secret cutover design, mandatory public-launch blocker, and a
   byte-preserving guard that prints no protected value or fingerprint.
-- Coordinator Command Center Builds 1-3: a Lens/Viewpoints-first project action register for
+- Coordinator Command Center Builds 1-4: a Lens/Viewpoints-first project action register for
   actionable current Lens Viewpoints, RFIs, Submittals, Meeting actions, and Schedule tasks, plus bounded personal
   saved views, operational filters, personal defaults, built-in work views, shareable authorized navigation, and
   controlled confirmed bulk actions for canonical RFI/Submittal Meeting links plus Submittal Schedule Bucket
-  create/sync.
+  create/sync. Build 4 keeps the Command Center focused on operational execution and moves analysis/reporting into
+  Project Insights & Reports with shared server-side metric definitions and exact filtered deep links back to the
+  Command Center.
   Canonical modules remain authoritative; exact identity/deep links, current authorization and entitlement checks,
   deterministic pagination, visible partial-source failures, honest empty results, bilingual desktop/mobile behavior,
   and zero AI use are accepted. Lens/Viewpoints are navigation-only for Build 3 mutation scope, and Clash aggregation

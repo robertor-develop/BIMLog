@@ -4,6 +4,26 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Coordinator Command Center Build 4 accepted in source; deployment verification pending
+
+- Accepted Coordinator Build 4 source at `6f96a3f2385a08c3e364099178617d4ec16dfcf5` is based directly on Security
+  Batch C master `5d71fe6150c332b28f3e2274afeebdcf0a7fc146` and preserves the Batch C commits
+  `cf2edd9125d797109215ed0e03d0e08d27f13ff0` and `5d71fe6150c332b28f3e2274afeebdcf0a7fc146` plus all prior
+  Coordinator, Meetings, Finance, Security, Telegram, and Living Brief history without importing stale candidate
+  ancestry.
+- The accepted boundary correction keeps Coordinator Command Center as the Act surface: current actionable records,
+  My Items, overdue/due soon/blocked work, responsibility/ball-in-court, saved operational views, selection, governed
+  actions, and only four contextual counters: actionable, overdue, due soon, and blocked.
+- Analytics is renamed Project Insights & Reports / Perspectivas e Informes and becomes the Understand/Report surface
+  for compliance, bottlenecks, company performance, RFI aging/status performance, honest unavailable states, and
+  governed report links. Recent Activity, Recent Files, operational task lists, and the Schedule placeholder are removed
+  because their canonical owners are Activity Log, Files, Command Center, and Schedule.
+- Shared server-side metric definitions govern counts, status buckets, date boundaries, and permissions; actionable
+  insights deep-link to exact filtered Command Center records, and links grant no authority.
+- Lens/Viewpoint identity, Coordinator Build 3 bulk actions, Clash deferral, AI/notification boundaries, and canonical
+  module authority remain unchanged. Publication, deployment, production/customer verification, field acceptance, and
+  Build 5 remain separate and unstarted.
+
 ### Security Batch C Axios correction accepted in source
 
 - Integration commit `cf2edd9125d797109215ed0e03d0e08d27f13ff0` is based directly on accepted `origin/master`
