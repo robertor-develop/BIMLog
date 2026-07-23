@@ -135,3 +135,8 @@ Phase 2 did not change database schema, filters, report record selection, or mod
 Report design owns the factual artifact, canonical title, native fidelity, filename, manifest, and privacy.
 Telegram Delivery Concierge and notification preferences own user-confirmed channel preparation and delivery;
 they may not rewrite the report, bypass authorization, or present an unavailable adapter as connected.
+
+Connector Governance Phase 1 does not change report bytes, report models, report authorization, filenames, native
+fidelity, or delivery semantics. Its impact on report-adjacent workflows is limited to provider discovery and file
+source availability: RFI attachment import controls may show only server-approved, actually available file-source
+connectors, and a hidden/private connector must not be presented as a valid report delivery or attachment path.

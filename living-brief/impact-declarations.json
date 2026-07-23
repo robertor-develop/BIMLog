@@ -2313,6 +2313,121 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "10d328b6a80b7b55d4d2db1195431feb33a07ba5926c715e7046906a3c63f99c"
+    },
+    {
+      "taskId": "connector-governance-phase-1-source-acceptance",
+      "reviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "reviewedAt": "2026-07-23T14:45:00-04:00",
+      "status": "accepted_source_pending_deployment_verification",
+      "captureTiming": "normal_integration_review",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "clean_worktree_review",
+          "provider_governance_diff_review",
+          "direct_provider_governance_proof_scripts",
+          "living_brief_acceptance_reconciliation",
+          "normal_push",
+          "remote_equality_verification"
+        ],
+        "operatorOnly": [
+          "publication",
+          "deployment",
+          "production_access",
+          "customer_data_access",
+          "credential_testing",
+          "provider_configuration_changes"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "authorization_and_provider_boundary",
+          "disposition": "captured_at_acceptance",
+          "authorities": [
+            "open_loop",
+            "report_design_system"
+          ],
+          "summary": "Connector Governance Phase 1 makes the server-side provider catalog the customer-facing authority, hides governed/private providers by default, and denies unapproved provider operations."
+        },
+        {
+          "category": "privacy_and_disclosure_truthfulness",
+          "disposition": "captured_at_acceptance",
+          "authorities": [
+            "open_loop"
+          ],
+          "summary": "English and Spanish customer-facing copy no longer claims unavailable private integrations, managed credential submission, or inaccurate project-file storage behavior as current product truth."
+        }
+      ],
+      "workstreams": [
+        "connector-governance",
+        "provider-catalog",
+        "file-source-rfi-attachments",
+        "privacy-disclosure",
+        "source-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows existing canonical-source and governed-authority doctrine without changing ecosystem identity or lifecycle roadmap."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing clean-integration, capability-preflight, no-production, no-credential-access, and terminal-notification rules cover this acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The provider-risk default-deny boundary, bilingual disclosure truthfulness, and no credential/provider mutation constraints are enforced by the reviewed implementation and proof scripts."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction narrows current connector claims without changing BIMLog strategic roadmap, monetization, or customer commitments."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform structural inventory, schema, startup, migration, package, route family, or generated platform map change is required for this acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, Lens identity, installation, synchronization, package, or field-acceptance behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Recorded that connector governance does not change report artifacts, but report-adjacent file-source controls must only expose approved, actually available connectors."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, citation, or adoption claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No broad product status, deployment, field acceptance, migration, credential, or production state changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded accepted Connector Governance Phase 1 source, default-deny provider catalog truth, bilingual disclosure cleanup, and continued deployment/production deferral."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new systemic audit incident, credential exposure, production access, or security finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c8474bbc609535a8a4a059b91f8d0b0f367d3819d6e7ea9a1b9cc6dbf16f82eb"
     }
   ]
 }

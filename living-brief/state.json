@@ -1,17 +1,19 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
+  "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
   "catalogSha256": "04e2f2fc4d793b56bb2d7c472e94c68c90a0bd0416316589b44d5c59f2381dda",
-  "bundleSha256": "63ac3f307d2d9e99da57855c51891b22d2af22d2a0603cd3f7609d584c2901b6",
+  "bundleSha256": "7ee5de5d2dcdfe1403db53d670a1cf83d4daf5cdbeb16c3f2f8d869920fc6818",
   "impact": {
-    "baselineCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
+    "baselineCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/REPORT_DESIGN_SYSTEM.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -22,11 +24,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "claude",
@@ -34,11 +36,11 @@
       "sha256": "eefe6596f7e1a3a778c9cf1425f9fd7065fb46490de6c92dc1981f3fc0689a48",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "quality",
@@ -46,11 +48,11 @@
       "sha256": "7bbb2f787a854547abdf687d8b0bcd79dc260e96d6a7a50972c6269db00f4db9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "vision",
@@ -58,11 +60,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "platform",
@@ -70,11 +72,11 @@
       "sha256": "b99c36a6333517579f9494799501f4ea4d80dae5c79924da304263c9b1e71226",
       "sourceChangedAt": "2026-07-23T13:49:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "plugin",
@@ -82,23 +84,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
-      "sha256": "b96478dff71a4645f7c00256128d44121704622cd1b7354a12f6e357d90a4037",
-      "sourceChangedAt": "2026-07-23T14:05:33-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "sha256": "741f0338ba1fff3c6cdc4c9d92eabab4a215d2f6b7b33f57ec580798eee96789",
+      "sourceChangedAt": "2026-07-23T19:21:22.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "standards_register",
@@ -106,11 +108,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "status",
@@ -118,23 +120,23 @@
       "sha256": "e62e553d0add2ecc230a51b638d1734d6b535e546e571d005d21a44116592f1f",
       "sourceChangedAt": "2026-07-23T13:49:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "4b2a8504604cae4f8460a5b817053df91e7ceb0a5b9d5e1c626d32f37236daf2",
-      "sourceChangedAt": "2026-07-23T18:07:00.000Z",
+      "sha256": "63f1f66176c1636365b020a9f3bc21a444e5e4c3b33127a9c5abdec1394ce722",
+      "sourceChangedAt": "2026-07-23T19:21:22.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     },
     {
       "key": "audit",
@@ -142,11 +144,11 @@
       "sha256": "32f7469cb17238cb86304cd3419b7688b5c999bf19355ccdbb86e2b97f73db2d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewedThroughCommit": "5ab2cb61db18f57f9fa3c530a23cba9ffc7f37c9",
-      "semanticReviewTask": "rfi-list-log-governed-pdf-source-acceptance",
+      "reconciledThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewedThroughCommit": "dd41c79607a6f51e19eb2d63febb92b1d74edb27",
+      "semanticReviewTask": "connector-governance-phase-1-source-acceptance",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-23T14:07:00-04:00"
+      "semanticReviewedAt": "2026-07-23T14:45:00-04:00"
     }
   ]
 }

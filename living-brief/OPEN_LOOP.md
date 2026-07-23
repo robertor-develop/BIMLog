@@ -4,6 +4,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Connector Governance Phase 1 accepted in source; deployment verification pending
+
+- Accepted Connector Governance Phase 1 source at `dd41c79607a6f51e19eb2d63febb92b1d74edb27` is based directly on
+  current accepted master `f13d538074878822e56a7d780113d3517dffacdf` and preserves all RFI report, Coordinator,
+  Security, Living Brief, Meeting, Finance, Telegram, and Navisworks history without importing stale candidate
+  ancestry.
+- The accepted boundary makes the server-side provider catalog the customer-facing connector authority. Default public
+  capabilities are limited to IFC/openBIM, document exchange, BIMLog Lens/Navisworks, Google Drive, and Dropbox;
+  governed/private providers remain hidden and denied unless a company-specific approval token permits the exact
+  operation.
+- English and Spanish customer-facing copy no longer presents unavailable private connectors, managed password/API-key
+  submission, or inaccurate project-file storage/privacy claims as current behavior. The UI directs users to approved
+  capabilities and warns not to send passwords, API keys, or access tokens in integration requests.
+- The correction does not add schema, migrations, package/lockfile changes, credential testing, provider setting
+  mutation, Replit work, publication, deployment, production/customer access, or customer data access. Publication,
+  deployment, runtime verification, and any future customer/provider approval remain separate.
+
 ### Coordinator Command Center Build 4 accepted in source; deployment verification pending
 
 - Accepted Coordinator Build 4 source at `6f96a3f2385a08c3e364099178617d4ec16dfcf5` is based directly on Security
