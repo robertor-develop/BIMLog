@@ -130,9 +130,10 @@ ${appRoutes()}
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin
   reconciliation requires observed mirror hashes. Only super admins change the password, grant
   access, or reconcile a mismatched mirror.
-- RFI report template settings: standard PDF, DOCX, and Complete PDF embedded canonical pages use
-  the same project-scoped report settings snapshot. Settings live in rfi_report_settings and never
-  mutate canonical RFI data or Lens/Viewpoint source identity.
+- RFI report template settings: accepted source integration uses one project-scoped report settings
+  snapshot for Standard PDF, DOCX, and Complete PDF embedded canonical pages. Settings live in
+  rfi_report_settings, are added through additive startup/schema wiring, and never mutate canonical RFI
+  data or Lens/Viewpoint source identity.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
 `;

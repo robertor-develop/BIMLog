@@ -141,7 +141,7 @@ fidelity, or delivery semantics. Its impact on report-adjacent workflows is limi
 source availability: RFI attachment import controls may show only server-approved, actually available file-source
 connectors, and a hidden/private connector must not be presented as a valid report delivery or attachment path.
 
-## RFI report template settings candidate
+## RFI report template settings accepted source
 
 - Local candidate adds one canonical project settings model for Standard RFI PDF and editable RFI DOCX section
   and field visibility. Existing projects without saved settings retain the full legacy report shape until a

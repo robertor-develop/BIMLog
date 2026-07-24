@@ -1299,22 +1299,28 @@ Future behavior:
 - BIMLog warns that this may use AI credits.
 - The extracted fields must show confidence and require user review.
 
-### RFI Report Template Settings - Local Review Candidate
+### RFI Report Template Settings - Accepted Source Integration
 
-- Candidate adds governed per-project RFI report settings for Standard PDF and DOCX, including default and
+- Accepted source adds governed per-project RFI report settings for Standard PDF and DOCX, including default and
   Ruben lean presets, hide-empty behavior, stable section/field IDs, preview, stale-version protection, and
   export activity settings snapshots.
-- Candidate root-cause fix: viewpoint-created RFIs stored the screenshot file but did not persist the file ID
+- Root-cause fix: viewpoint-created RFIs stored the screenshot file but did not persist the file ID
   into `image_presentation_json`; exports could not select the linked source screenshot.
-- Candidate adds source viewpoint screenshot and additional report screenshot controls to the canonical
-  report settings model. Remaining review must verify browser UX, PDF/DOCX parity, image ordering/captions,
-  Spanish 390px behavior, and independent acceptance evidence before integration.
-- Correction candidate supersedes `11c1a322`: Complete RFI PDF now passes the same project report-settings
+- Source adds source viewpoint screenshot and additional report screenshot controls to the canonical
+  report settings model. Independent evidence accepted browser UX, PDF/DOCX parity, image ordering/captions,
+  Spanish 390px behavior, and Complete PDF package parity before clean integration.
+- Correction supersedes `11c1a322`: Complete RFI PDF now passes the same project report-settings
   snapshot into the embedded canonical RFI page as Standard PDF and DOCX. A deterministic regression covers
   shared settings version/hash, Ruben lean section visibility, and source/additional screenshot fields.
-- Final local correction gates Project RFI Report Settings visibility to project-admin authority or super-admin
+- Final correction gates Project RFI Report Settings visibility to project-admin authority or super-admin
   authority, matching the admin/write API contract instead of showing the control to every broad write role.
-- Boundary: not pushed, not published, not deployed, no production/customer data access, no plugin changes.
+- Accepted evidence hashes: browser `50d8890d3f1d9bd685511a799bde245da489dde5c0a3dc1470c33e627cba104b`,
+  DOCX V2 `f99fd27c5526232e47125aee2b09549950a3fe44c0b9145cc08a192b0482c1b0`, Complete PDF
+  `f431c9a729964c4028a0effebd5d696720ad0a6b0f6586af721937e243e2401e`, Complete PDF verification
+  `b79d8fa7f2169a173bb7ce3d9b37a07eedd0fc9f4b07e16c5aa2dc0db78c60cf`, and consolidated final evidence
+  `0419a5189f75281aaadda806db25d940bfeef76d56bef19b24a71210ac095eb2`.
+- Boundary: clean source integration only; not published, not deployed, no production/customer data access,
+  no plugin changes, and Finance is not a release blocker for this RFI integration.
 
 ## Closed / Shipped
 

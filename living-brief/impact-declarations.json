@@ -2893,6 +2893,102 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1d5f2c9d7b9ed7a87f5a6052bedee6b90ad584a8c3f722e8e2af48fe2e73bc0f"
+    },
+    {
+      "taskId": "rfi-report-template-settings-clean-integration",
+      "reviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "reviewedAt": "2026-07-24T15:30:00Z",
+      "status": "accepted_source",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Clean source integration of independently accepted Ruben RFI report template settings onto authoritative master after Replit publication-safety correction. No publish, deployment, production/customer access, plugin change, or Finance dependency included.",
+      "workstreams": [
+        "rfi-report-settings",
+        "rfi-standard-exports",
+        "rfi-report-screenshots",
+        "complete-rfi-pdf-package"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration preserves project-governed BIMLog RFI reporting and existing ecosystem ownership boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Clean worktree integration, evidence preservation, no-production, no-publish, and terminal-summary rules were followed."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Accepted evidence proves governed per-project RFI report settings, admin authority, stale protection, parity, screenshots, bilingual UI, and final gate completion."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This source integration enables configurable professional RFI reporting without changing roadmap or commercial commitments."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds an additive RFI report settings table, startup migration, schema export, and no destructive publication or production action."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, installation, synchronization, or field workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "RFI Standard PDF, DOCX, and embedded Complete PDF canonical pages share one settings snapshot/version/hash, with governed source and additional screenshot presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted source integration and keeps publication, deployment, production/customer verification, Replit action, and Finance separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records accepted evidence hashes, clean integration boundary, and remaining non-source operational gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new production audit event, customer-data observation, deployment, or field verification occurred during source integration."
+        }
+      ],
+      "acceptedEvidence": {
+        "browserSha256": "50d8890d3f1d9bd685511a799bde245da489dde5c0a3dc1470c33e627cba104b",
+        "docxV2Sha256": "f99fd27c5526232e47125aee2b09549950a3fe44c0b9145cc08a192b0482c1b0",
+        "completePdfSha256": "f431c9a729964c4028a0effebd5d696720ad0a6b0f6586af721937e243e2401e",
+        "completePdfVerificationSha256": "b79d8fa7f2169a173bb7ce3d9b37a07eedd0fc9f4b07e16c5aa2dc0db78c60cf",
+        "consolidatedManifestSha256": "0419a5189f75281aaadda806db25d940bfeef76d56bef19b24a71210ac095eb2"
+      },
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/rfi-standard-exports.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/rfi-report-settings.ts",
+        "lib/db/src/schema/rfis.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b93e4b64cbc603269fb8befb620b2fe397de7d9cb44243a2d950796be67d62ee"
     }
   ]
 }

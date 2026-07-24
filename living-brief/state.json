@@ -1,27 +1,32 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
+  "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "23738ec1ba45e84780513390bbd216f3b6b32c89dadcc526dee60eb208e65760",
+  "bundleSha256": "0e52cdb1b0f689f98cf4ab90bca87fd814a86247eae1d62f07dcdb796119f18b",
   "impact": {
-    "baselineCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
+    "baselineCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
     "changedPaths": [
+      "artifacts/api-server/package.json",
       "artifacts/api-server/scripts/generate-platform-md.ts",
-      "living-brief/AUDIT.md",
-      "living-brief/CLAUDE.md",
+      "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/lib/rfi-standard-exports.ts",
+      "artifacts/api-server/src/routes/rfis.ts",
+      "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+      "lib/db/src/schema/index.ts",
+      "lib/db/src/schema/rfi-report-settings.ts",
+      "lib/db/src/schema/rfis.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/PLATFORM.md",
-      "living-brief/QUALITY.md",
+      "living-brief/REPORT_DESIGN_SYSTEM.md",
       "living-brief/STATUS.md",
-      "living-brief/catalog.json",
-      "living-brief/impact-declarations.json",
-      "scripts/check-living-brief.mjs",
-      "scripts/test-living-brief-gate.mjs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
       "PLATFORM.md",
+      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -32,35 +37,35 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
       "sha256": "f50708783683946ce3de1243c8b2584c0e9432f4bc7b4c175dd72b703b249f8e",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "sourceChangedAt": "2026-07-24T11:29:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
       "sha256": "749765ac3a6523038c50b432c5d09555fba16a99b2f971c530a5c6c1bed6cb3e",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "sourceChangedAt": "2026-07-24T11:29:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "vision",
@@ -68,23 +73,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "fc7774d712823aebaae6f681b5b261a1749d07439866baf5e4fd6f010cca425b",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
+      "sha256": "ce92372b1f74f89ea4ba3b5d13676f3cd52881cdc94e1085ccbaed87b7dcaaa9",
+      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "plugin",
@@ -92,23 +97,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
-      "sha256": "741f0338ba1fff3c6cdc4c9d92eabab4a215d2f6b7b33f57ec580798eee96789",
-      "sourceChangedAt": "2026-07-23T15:24:00-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "sha256": "d60a3b22043a62afe9fd62866db06100f00dd2cb6d85a05fc506bbb6ac8773f6",
+      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "standards_register",
@@ -116,47 +121,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "c0386962466cbe2e630801705e92f7304563c6f2ca4801aaa580eca09b7e138d",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
+      "sha256": "72c57df37f1ca57c025e8d01b1aa201bdd6a4bf141cdb9960a174b66e2b3fc83",
+      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a1d7cafe7a1ffb1d2527f37f4d00748ce62b2c25af853d9f4d3258404da972e9",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
+      "sha256": "fe999b369f730570e028cb0447c9628a10d7e682d3761699ce3c61f7e767d5e6",
+      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "431d606d198d26f918ba792b5af5830569e4e23bf60e2ffbdbd88e777c453502",
-      "sourceChangedAt": "2026-07-24T15:09:22.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
-      "semanticReviewTask": "replit-publication-credential-removal-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T11:09:22-04:00"
+      "sourceChangedAt": "2026-07-24T11:29:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-24T15:30:00Z"
     }
   ]
 }
