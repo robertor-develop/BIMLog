@@ -713,3 +713,30 @@ Focused source fixtures reproduce the 63-byte collision and fake-success conditi
 18 cluster with synthetic rows proved additive reconciliation, exact definitions, second-run idempotency, unchanged
 row counts, duplicate-data refusal, and transaction rollback. The temporary cluster was stopped and removed.
 No production, Replit, provider, credential, customer data, deployment, or publication access occurred.
+
+---
+
+## Complete Replit publication-preview alignment audit - July 24, 2026
+
+Status: local source correction and disposable proof complete; not pushed, rerun in Replit, published, deployed, or
+production/customer verified at capture time.
+
+The complete Replit Publish preview generated from accepted master
+`c40d1c46261e4d086c7e87a332a9e23660903c6b` was rejected because it contained 87 `DROP CONSTRAINT` and 18
+`DROP INDEX` statements followed by semantically equivalent re-additions under generated names. It contained no
+`DROP TABLE`, `CASCADE`, or `DISABLE RLS`, but every drop remained a release blocker. Official Replit documentation
+did not establish a supported fail-safe Publish-without-database-changes path.
+
+Local source commit `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` explicitly binds all 105 affected foreign
+key, unique, check, and index authorities to the existing database names while preserving their definitions,
+ownership, and records. The exact complete preview is retained as a hash-bound regression fixture. The destructive
+SQL gate rejects it and the fixture verifies that every dropped authority is explicitly represented in declarative
+source.
+
+Focused proof passed: database safety fixtures, 133-table/147-index/93-startup-table source reconciliation,
+constraint-definition parity, tracked-configuration/current-diff secret scans with zero findings, mojibake scan,
+all TypeScript projects, API build, BIMLog production build verification, and mockup build. A disposable local
+PostgreSQL database proved first and repeat declarative application with zero destructive statements. No production,
+Replit, provider, credential, customer data, deployment, or publication access occurred. The final decision still
+requires exact Replit master attestation, guarded development-only synchronization, complete regenerated preview
+inspection, and Roberto's explicit Publish approval.

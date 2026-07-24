@@ -9,6 +9,15 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+Complete Replit publication-preview name alignment is accepted locally in source at
+`a761ff82b65226ac9c7fd782b6f69a60a3e1da1b`. It binds the 105 constraint/index authorities from the rejected
+complete preview to their existing production-safe names, preserves their definitions and records, and adds the
+complete preview as a permanent destructive-SQL regression fixture. Disposable PostgreSQL proved first-run and
+repeat declarative application with zero destructive statements. This source state is not yet pushed, rerun in
+Replit, previewed, published, deployed, or production/customer verified. Publish remains blocked until Replit uses
+the final accepted master, guarded development synchronization passes, and the complete regenerated preview is
+empty or contains only explicitly inventoried additive SQL with zero destructive statements.
+
 Database publication safety is accepted in local integration source at
 `f5d2ef4bd76115bb9f595ad803adcbdf2e9a2104`. It adds a fail-closed destructive-SQL gate, exact remote-master source
 attestation, guarded Replit Helium-only development synchronization, source table/index parity, disabled direct
@@ -219,13 +228,12 @@ is reserved for genuine completion.
 
 ## Current candidates and next work
 
-- Database publication-safety constraint hotfix: local source commit `907a58846ff322138647dd478eb80ead204e5aa3`
-  replaces a PostgreSQL-truncated declarative foreign-key/unique-name collision with distinct explicit names,
-  adds additive/idempotent startup reconciliation with duplicate-data refusal, makes development sync fail on
-  emitted database-tool errors even after a zero exit, and verifies the required constraint definitions in
-  parity. Focused fixtures, 39/39 financial behavior checks, typecheck, affected API build, and disposable
-  PostgreSQL additive/idempotent/rollback proof passed. It is not yet pushed, rerun in Replit, previewed,
-  published, deployed, or production/customer verified.
+- Replit publication-preview alignment: local source commit
+  `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` preserves the accepted constraint-collision correction and aligns all
+  105 rejected preview constraint/index names to the existing database authorities. Focused fixtures, source
+  safety, complete-preview regression, typechecks, builds, and disposable PostgreSQL first/repeat application
+  passed. Normal push, Replit guarded development sync, complete regenerated preview, and Roberto's explicit
+  Publish decision remain pending.
 - Security Batches C-I: not started and require separate authorization.
 - Living Brief Content Reconciliation Build 2: independently reconciled review candidate only.
 - Replit verified pull of `178462e`, actual 12-table preview, explicitly approved publish, runtime/mirror

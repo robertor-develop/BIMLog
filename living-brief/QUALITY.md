@@ -381,7 +381,10 @@ Ready/acceptance boundary, where its semantic declaration is still mandatory bef
   RLS disable, constraint/index removal, source divergence, or truncated evidence blocks publish. Replit source
   must equal freshly fetched authoritative `master` before guarded Helium sync. A non-empty preview contains only
   explicitly inventoried additive statements tied to the accepted source contract. Future schema publication also
-  requires a verified restore point plus exact pre/post affected-table record-count manifests.
+  requires a verified restore point plus exact pre/post affected-table record-count manifests. Declarative
+  constraint and index names must be explicit, stable, length-safe, and aligned with existing database authorities;
+  the complete rejected preview must be retained as a regression fixture when generated-name churn would otherwise
+  produce destructive drop-and-recreate SQL.
 - Durable credentials and other security authorities are never reseeded by build, startup, restart, publish,
   source-mirror synchronization, or migration. Initialization is create-if-absent only through a controlled
   authenticated bootstrap or one-time migration of existing durable state. Reset requires current Super

@@ -4,6 +4,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Replit complete-preview name alignment accepted locally; final preview remains pending
+
+- Local source commit `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` aligns all 105 constraint/index authorities
+  from the rejected complete Publish preview to the existing stable database names and definitions. It does not
+  drop, rename, rebuild, or rewrite records.
+- The exact rejected preview is a hash-bound regression fixture: 87 `DROP CONSTRAINT` and 18 `DROP INDEX`
+  statements must fail closed, and every affected authority must remain explicitly declared in source.
+- Disposable PostgreSQL first-run and repeat declarative application completed with zero `DROP CONSTRAINT`,
+  `DROP INDEX`, `DROP TABLE`, `CASCADE`, `TRUNCATE`, or `DISABLE RLS` statements. Source safety reports 133 tables,
+  147 indexes, and 93 startup tables reconciled.
+- Remaining gates are normal source push, exact Replit master attestation, guarded development-only sync and
+  constraint-aware parity, and complete regenerated preview inspection. Publish is permitted only after that
+  preview is empty or explicitly inventoried additive-only and Roberto separately approves Publish.
+- Known credential/JWT replacement risk remains owner-deferred until after Ruben's urgent delivery and is not
+  resolved by this schema correction. No Replit, database, provider, credential, production, customer, publish, or
+  deployment action occurred in this source cycle.
+
 ### Connector Governance Phase 1 accepted in source; deployment verification pending
 
 - Accepted Connector Governance Phase 1 source at `dd41c79607a6f51e19eb2d63febb92b1d74edb27` is based directly on

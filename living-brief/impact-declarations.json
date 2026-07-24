@@ -3067,6 +3067,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "966b16a5c0b09d0bdf1959651f95ce0492a038d4e115f3b7d2319b42fe0480a4"
+    },
+    {
+      "taskId": "replit-complete-preview-name-alignment-hotfix",
+      "reviewedThroughCommit": "a761ff82b65226ac9c7fd782b6f69a60a3e1da1b",
+      "reviewedAt": "2026-07-24T18:43:12.043Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Publication-safety correction that binds all constraint and index authorities from the rejected complete Replit preview to existing stable names and retains the full preview as a destructive-SQL regression fixture.",
+      "workstreams": [
+        "database-publication-safety",
+        "replit-publish-preview",
+        "declarative-schema-authority"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing BIMLog module ownership, data meaning, and product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work remains bounded to isolated source correction, disposable proof, normal integration, and no production or Replit mutation."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires explicit stable declarative database object names and retention of complete rejected previews as destructive-SQL regression evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, customer promise, commercial capability, or user workflow changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted PostgreSQL, Drizzle, startup migration, and guarded Replit development-sync architecture remains unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, synchronization, or field workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract, PDF, DOCX, XLSX, screenshot, or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, certification, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local correction, validated boundary, and remaining Replit preview and Publish gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks normal push, exact Replit source alignment, guarded development sync, complete preview inspection, and explicit Publish approval."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the sanitized rejected-preview classification, source correction, disposable PostgreSQL proof, and explicit non-actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "27cca6a3637dbdfe6f6b6ff51f06083158a9454ca357264290536016faf2c63f"
     }
   ]
 }
