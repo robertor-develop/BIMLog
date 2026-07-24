@@ -1,12 +1,14 @@
 import {
   check,
   date,
+  foreignKey,
   integer,
   jsonb,
   numeric,
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -191,12 +193,20 @@ export const financialContractImportSessionsTable = pgTable(
     acceptedCount: integer("accepted_count").notNull(),
     rejectedCount: integer("rejected_count").notNull(),
     preview: jsonb("preview").notNull(),
-    confirmedContractVersionId: text("confirmed_contract_version_id").references(() => financialContractVersionsTable.id).unique(),
+    confirmedContractVersionId: text("confirmed_contract_version_id"),
     idempotencyKey: text("idempotency_key").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   },
-  (t) => [uniqueIndex("financial_contract_import_project_key_uidx").on(t.projectId, t.idempotencyKey)],
+  (t) => [
+    foreignKey({
+      columns: [t.confirmedContractVersionId],
+      foreignColumns: [financialContractVersionsTable.id],
+      name: "fc_import_confirmed_version_fk",
+    }),
+    unique("fc_import_confirmed_version_uk").on(t.confirmedContractVersionId),
+    uniqueIndex("financial_contract_import_project_key_uidx").on(t.projectId, t.idempotencyKey),
+  ],
 );
 
 export const financialContractRecordGrantsTable = pgTable(
