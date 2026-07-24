@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const EXPECTED_PROTECTED_FILE_SHA256 =
-  "345f301804b5ab027ba7d97d492ffb78408436ef1451b9fd9e6f1fb7e16933ce";
+  "4ec1e2ee4c56a58fffe58f234569811eee783df30ed7361fcb6c19a4a67fb116";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "..");
