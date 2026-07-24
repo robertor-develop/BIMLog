@@ -2793,6 +2793,7 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
         "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
         "artifacts/api-server/src/app.ts",
         "artifacts/api-server/src/lib/rfi-standard-exports.ts",
         "artifacts/api-server/src/routes/rfis.ts",
@@ -2806,7 +2807,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "fe9366f689614e215e3b09d9d660edf04d41725dea20ac3323700ce14d4b8cbf"
+      "reviewedChangeSha256": "9389b63ce3e5302615c30695f16f0293638a1664d015c40e9e041fb3d0cf2e7f"
     }
   ]
 }
