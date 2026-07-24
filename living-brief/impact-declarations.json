@@ -2989,6 +2989,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b93e4b64cbc603269fb8befb620b2fe397de7d9cb44243a2d950796be67d62ee"
+    },
+    {
+      "taskId": "database-publication-constraint-collision-hotfix",
+      "reviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "reviewedAt": "2026-07-24T16:42:48.566Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Publication-safety hotfix for a PostgreSQL identifier-truncation collision between confirmed-contract-version foreign-key and uniqueness authorities, including additive startup reconciliation, fail-closed development sync output handling, and constraint-definition parity.",
+      "workstreams": [
+        "database-publication-safety",
+        "replit-development-sync",
+        "financial-contract-schema"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing BIMLog module and ownership boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work remains bounded to a clean hotfix, local/disposable proof, no production access, and normal source integration."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds a permanent rule that publication parity verifies constraint definitions and emitted database-tool errors cannot be masked by zero exit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, customer promise, or commercial capability changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing PostgreSQL, Drizzle, startup migration, and guarded Replit development-sync architecture remains; only its constraint safety is corrected."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, synchronization, or field workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report data contract, PDF, DOCX, XLSX, screenshot, or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, certification, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local hotfix, validation boundary, and remaining Replit/publish gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks normal push, Replit rerun, constraint-aware parity, complete preview, and explicit Publish approval as unfinished."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the sanitized incident classification, source correction, disposable PostgreSQL proof, and explicit non-actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "966b16a5c0b09d0bdf1959651f95ce0492a038d4e115f3b7d2319b42fe0480a4"
     }
   ]
 }

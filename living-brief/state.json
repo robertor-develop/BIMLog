@@ -1,32 +1,20 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+  "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "0e52cdb1b0f689f98cf4ab90bca87fd814a86247eae1d62f07dcdb796119f18b",
+  "bundleSha256": "462b8b0ff728255c9cf518c3c0503815f8bc0c44073da6a4feaa529b84b2bce0",
   "impact": {
-    "baselineCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
+    "baselineCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
     "changedPaths": [
-      "artifacts/api-server/package.json",
-      "artifacts/api-server/scripts/generate-platform-md.ts",
-      "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
-      "artifacts/api-server/src/app.ts",
-      "artifacts/api-server/src/lib/rfi-standard-exports.ts",
-      "artifacts/api-server/src/routes/rfis.ts",
-      "artifacts/bimlog/src/pages/project/RfisTab.tsx",
-      "lib/db/src/schema/index.ts",
-      "lib/db/src/schema/rfi-report-settings.ts",
-      "lib/db/src/schema/rfis.ts",
+      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
-      "living-brief/REPORT_DESIGN_SYSTEM.md",
+      "living-brief/QUALITY.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
-      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -37,11 +25,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "claude",
@@ -49,23 +37,23 @@
       "sha256": "f50708783683946ce3de1243c8b2584c0e9432f4bc7b4c175dd72b703b249f8e",
       "sourceChangedAt": "2026-07-24T11:29:16-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "749765ac3a6523038c50b432c5d09555fba16a99b2f971c530a5c6c1bed6cb3e",
-      "sourceChangedAt": "2026-07-24T11:29:16-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "sha256": "312d41142a8dc5421330e809244fe0cc45b9ddf171fe334b710489ed913e82fb",
+      "sourceChangedAt": "2026-07-24T16:42:48.566Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "vision",
@@ -73,23 +61,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "ce92372b1f74f89ea4ba3b5d13676f3cd52881cdc94e1085ccbaed87b7dcaaa9",
-      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "sourceChangedAt": "2026-07-24T11:52:31-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "plugin",
@@ -97,23 +85,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
       "sha256": "d60a3b22043a62afe9fd62866db06100f00dd2cb6d85a05fc506bbb6ac8773f6",
-      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "sourceChangedAt": "2026-07-24T11:52:31-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "standards_register",
@@ -121,47 +109,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "72c57df37f1ca57c025e8d01b1aa201bdd6a4bf141cdb9960a174b66e2b3fc83",
-      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
+      "sha256": "c97e3554651a5c59cef94be7e8697879be57435b152419615e4ffad1a9d64824",
+      "sourceChangedAt": "2026-07-24T16:42:48.566Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "fe999b369f730570e028cb0447c9628a10d7e682d3761699ce3c61f7e767d5e6",
-      "sourceChangedAt": "2026-07-24T15:30:00.000Z",
+      "sha256": "8097c4b72861e56a861d14b0976a9f41858043a33749d2469008f39286f72108",
+      "sourceChangedAt": "2026-07-24T16:42:48.566Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "431d606d198d26f918ba792b5af5830569e4e23bf60e2ffbdbd88e777c453502",
-      "sourceChangedAt": "2026-07-24T11:29:16-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewedThroughCommit": "41e29e6a3f538d939aec326a25b56641f3272478",
-      "semanticReviewTask": "rfi-report-template-settings-clean-integration",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-24T15:30:00Z"
+      "sha256": "b932fcfc471d64bec6171c93e07e50b7979c5dac01976763512afec6cdc0790b",
+      "sourceChangedAt": "2026-07-24T16:42:48.566Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewedThroughCommit": "907a58846ff322138647dd478eb80ead204e5aa3",
+      "semanticReviewTask": "database-publication-constraint-collision-hotfix",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-07-24T16:42:48.566Z"
     }
   ]
 }

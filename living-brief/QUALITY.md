@@ -503,6 +503,7 @@ Rules:
 - Before changing reports, verify the live table filter, PDF output, Excel output, and history scope use the same records.
 - Before changing AI behavior, verify credit/cost visibility and whether the action is cheap text assist or expensive file/file-reading assist.
 - Before changing plugin behavior, verify both Navisworks 2021 and 2025 source copies or explicitly state which one was changed.
+- Database publication parity must verify required constraint definitions, not only table and index names; a database tool that emits an error must fail the governed wrapper even if its process exits zero.
 - If a user complaint exposes a wider pattern, update QUALITY.md or STATUS.md so the same mistake is not repeated.
 
 Customer feedback closeout checklist:

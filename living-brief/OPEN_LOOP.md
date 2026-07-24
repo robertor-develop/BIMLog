@@ -1322,6 +1322,24 @@ Future behavior:
 - Boundary: clean source integration only; not published, not deployed, no production/customer data access,
   no plugin changes, and Finance is not a release blocker for this RFI integration.
 
+### Replit Constraint Collision Publication-Safety Hotfix - Local Source Candidate
+
+- Exact release baseline: `9cbda7d27c7b9a4695cf47ca7d3afd760b1cf73d`; Finance remains excluded.
+- The observed development sync attempted a duplicate PostgreSQL constraint name after 63-byte identifier
+  truncation, emitted an error, returned zero, and passed the prior table/index-name-only parity check.
+- Local source commit `907a58846ff322138647dd478eb80ead204e5aa3` gives the confirmed-contract-version
+  foreign key and uniqueness authority distinct explicit names, preserves existing rows and the historical
+  constraint, and adds the new constraints transactionally and idempotently.
+- Duplicate confirmed-version references cause a fail-closed startup error; the migration does not delete,
+  rewrite, or silently deduplicate records.
+- Development sync now rejects database-tool error output even after a zero exit. Parity verifies the exact
+  required foreign-key and unique definitions in addition to required table and index names.
+- Local proof passed with synthetic PostgreSQL rows for additive reconciliation, a second idempotent run,
+  exact definitions, duplicate-data refusal, full transaction rollback, and unchanged row counts.
+- Remaining gate: normal source push, exact Replit master alignment, authorized guarded development sync,
+  complete constraint-aware parity, and a complete empty or explicitly additive-only preview. Any emitted
+  error, destructive statement, missing/truncated log, or unexplained change blocks Publish.
+
 ## Closed / Shipped
 
 ### RFI List and Log Governed PDFs

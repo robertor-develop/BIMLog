@@ -689,3 +689,27 @@ safety, destructive fixtures, privacy/diff checks, and no secret output. Removal
 credential was replaced or revoked. Replit Secret updates, controlled database overlap and revocation, JWT
 session-impact handling, Replit branch preservation/alignment, guarded Helium synchronization, complete preview,
 backup/restore evidence, publication, and production verification remain required operator gates.
+
+---
+
+## Development constraint collision hotfix audit - July 24, 2026
+
+Status: local source hotfix and disposable proof complete; not pushed, rerun in Replit, published, deployed, or
+production/customer verified at capture time.
+
+Read-only development evidence established that PostgreSQL identifier truncation caused the generated foreign-key
+and uniqueness authorities for `confirmed_contract_version_id` to collide. The foreign key existed, the uniqueness
+authority did not, the database tool emitted PostgreSQL error `42710` but returned zero, and the prior parity gate
+passed because it checked only required table and index names.
+
+Source commit `907a58846ff322138647dd478eb80ead204e5aa3` uses short, explicit, distinct foreign-key and
+unique names in declarative and startup schema authority. Existing databases are reconciled additively and
+transactionally: the historical constraint and records remain, the explicit constraints are verified or added
+idempotently, and duplicate confirmed-version references refuse the migration without rewriting data. The guarded
+development-sync wrapper now treats emitted database-tool errors as failure even after a zero process exit, and
+parity verifies the required constraint names, types, owning table, and definitions.
+
+Focused source fixtures reproduce the 63-byte collision and fake-success condition. A disposable local PostgreSQL
+18 cluster with synthetic rows proved additive reconciliation, exact definitions, second-run idempotency, unchanged
+row counts, duplicate-data refusal, and transaction rollback. The temporary cluster was stopped and removed.
+No production, Replit, provider, credential, customer data, deployment, or publication access occurred.

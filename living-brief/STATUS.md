@@ -219,6 +219,13 @@ is reserved for genuine completion.
 
 ## Current candidates and next work
 
+- Database publication-safety constraint hotfix: local source commit `907a58846ff322138647dd478eb80ead204e5aa3`
+  replaces a PostgreSQL-truncated declarative foreign-key/unique-name collision with distinct explicit names,
+  adds additive/idempotent startup reconciliation with duplicate-data refusal, makes development sync fail on
+  emitted database-tool errors even after a zero exit, and verifies the required constraint definitions in
+  parity. Focused fixtures, 39/39 financial behavior checks, typecheck, affected API build, and disposable
+  PostgreSQL additive/idempotent/rollback proof passed. It is not yet pushed, rerun in Replit, previewed,
+  published, deployed, or production/customer verified.
 - Security Batches C-I: not started and require separate authorization.
 - Living Brief Content Reconciliation Build 2: independently reconciled review candidate only.
 - Replit verified pull of `178462e`, actual 12-table preview, explicitly approved publish, runtime/mirror
