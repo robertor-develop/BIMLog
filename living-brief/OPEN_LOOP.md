@@ -1309,6 +1309,9 @@ Future behavior:
 - Candidate adds source viewpoint screenshot and additional report screenshot controls to the canonical
   report settings model. Remaining review must verify browser UX, PDF/DOCX parity, image ordering/captions,
   Spanish 390px behavior, and independent acceptance evidence before integration.
+- Correction candidate supersedes `11c1a322`: Complete RFI PDF now passes the same project report-settings
+  snapshot into the embedded canonical RFI page as Standard PDF and DOCX. A deterministic regression covers
+  shared settings version/hash, Ruben lean section visibility, and source/additional screenshot fields.
 - Boundary: not pushed, not published, not deployed, no production/customer data access, no plugin changes.
 
 ## Closed / Shipped

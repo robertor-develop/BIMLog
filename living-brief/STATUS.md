@@ -230,7 +230,8 @@ is reserved for genuine completion.
 - RFI Report Template Settings: local review candidate only. It adds project-scoped RFI PDF/DOCX report
   template settings, a Ruben lean preset, canonical source/additional screenshot report controls, additive
   settings storage, and RFI-only UI/API wiring. It is not integrated, pushed, published, deployed, or
-  independently accepted.
+  independently accepted. The superseding correction makes Complete RFI PDF honor the same project
+  settings snapshot as Standard PDF and DOCX.
 - RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 4: not started.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.

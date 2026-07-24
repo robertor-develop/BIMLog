@@ -2282,6 +2282,7 @@ async function renderRfiPdfBuffer(
   responses: (typeof rfiResponsesTable.$inferSelect)[],
   project: typeof projectsTable.$inferSelect | undefined,
   includePresentationImage = true,
+  reportSettings?: RfiReportSettingsSnapshot,
 ): Promise<{ buffer: Buffer; model: CanonicalRfiExportModel }> {
   const attachmentLabels = await loadAttachmentLabels(rfi.projectId, [
     rfi.attachmentsJson as string[] | null,
@@ -2297,7 +2298,7 @@ async function renderRfiPdfBuffer(
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
-    renderCanonicalRfiPdf(doc, exportData.model, exportData.image, undefined, exportData.additionalImages);
+    renderCanonicalRfiPdf(doc, exportData.model, exportData.image, reportSettings, exportData.additionalImages);
     doc.end();
   });
   return { buffer, model: exportData.model };
@@ -2376,7 +2377,8 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
       packageInputs.push({ order: packageInputs.length, label: imageFile?.fileName || "RFI presentation image", fileName: imageFile?.fileName || "RFI-presentation-image.png", sourceType: imagePresentation?.replacementFileId ? "RFI replacement presentation image" : "RFI source presentation image", include: imagePresentation?.includeInCompletePdf !== false, buffer, role: "presentation-image", crop: imagePresentation?.crop || null, exclusionReason: imagePresentation?.includeInCompletePdf === false ? "Excluded by the persisted Complete PDF image setting." : undefined });
     }
 
-    const canonical = await renderRfiPdfBuffer(rfi, responses, project, false);
+    const reportSettings = await loadRfiReportSettingsSnapshot(rfi.projectId);
+    const canonical = await renderRfiPdfBuffer(rfi, responses, project, false, reportSettings);
     const result = await buildCompleteRfiPackage({
       rfiNumber: rfi.number,
       projectName: project?.name || `Project ${projectId}`,

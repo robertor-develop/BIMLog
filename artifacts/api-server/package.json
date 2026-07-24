@@ -18,7 +18,8 @@
     "test:coordinator-build4-boundary": "tsx ./scripts/coordinator-command-center-build4-boundary-proof.ts",
     "test:coordinator-build4-browser": "tsx ./scripts/coordinator-command-center-build4-browser-evidence.ts",
     "test:provider-governance": "tsx ./scripts/test-provider-governance.ts",
-    "test:provider-governance-browser": "tsx ./scripts/provider-governance-browser-evidence.ts"
+    "test:provider-governance-browser": "tsx ./scripts/provider-governance-browser-evidence.ts",
+    "test:rfi-report-settings": "tsx ./scripts/rfi-report-settings-proof.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

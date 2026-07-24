@@ -152,3 +152,5 @@ connectors, and a hidden/private connector must not be presented as a valid repo
   By, Reference Information/Attachments, source viewpoint screenshot, and additional screenshots when configured.
 - Saved exports record the settings version/hash in activity so later evidence can reproduce which template
   governed the generated PDF/DOCX.
+- Superseding correction confirms Complete RFI PDF uses the same project report-settings snapshot for its
+  embedded canonical RFI pages as Standard PDF and DOCX; there is no hidden legacy-full exception.

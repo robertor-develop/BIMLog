@@ -2791,11 +2791,14 @@
       ],
       "reviewedAt": "2026-07-23T23:20:04Z",
       "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/api-server/src/app.ts",
         "artifacts/api-server/src/lib/rfi-standard-exports.ts",
         "artifacts/api-server/src/routes/rfis.ts",
         "artifacts/bimlog/src/pages/project/RfisTab.tsx",
         "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/rfi-report-settings.ts",
         "lib/db/src/schema/rfis.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLATFORM.md",
@@ -2803,7 +2806,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c2f86da3f740ed36d2382d8bb27202bfc1f4efe4a376ace51b7f9e3babba9867"
+      "reviewedChangeSha256": "fe9366f689614e215e3b09d9d660edf04d41725dea20ac3323700ce14d4b8cbf"
     }
   ]
 }
