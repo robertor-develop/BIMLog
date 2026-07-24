@@ -40,7 +40,7 @@ export const coordinatorSavedViewsTable = pgTable(
     ownerProjectIndex: index("coordinator_saved_views_owner_project_idx").on(
       table.userId,
       table.projectId,
-      table.updatedAt.desc(),
+      table.updatedAt,
     ),
     stableIdentity: uniqueIndex("coordinator_saved_views_identity_uidx").on(
       table.id,
@@ -110,7 +110,7 @@ export const coordinatorSavedViewOperationsTable = pgTable(
     ).on(table.userId, table.projectId, table.idempotencyKey),
     viewHistoryIndex: index("coordinator_saved_view_operations_view_idx").on(
       table.savedViewId,
-      table.createdAt.desc(),
+      table.createdAt,
     ),
     projectForeignKey: foreignKey({
       columns: [table.projectId],

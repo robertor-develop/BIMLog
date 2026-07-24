@@ -1,0 +1,10 @@
+DROP INDEX "coordinator_saved_views_owner_project_idx";
+DROP INDEX "living_brief_gate_audit_created_idx";
+DROP INDEX "coordinator_saved_view_operations_view_idx";
+DROP INDEX "financial_contract_grant_lookup_idx";
+DROP INDEX "coordinator_bulk_meeting_operations_project_meeting_idx";
+CREATE INDEX "coordinator_saved_views_owner_project_idx" ON "coordinator_saved_views" USING btree ("user_id","project_id","updated_at" DESC NULLS LAST);
+CREATE INDEX "living_brief_gate_audit_created_idx" ON "living_brief_gate_audit" USING btree ("created_at" DESC NULLS LAST);
+CREATE INDEX "coordinator_saved_view_operations_view_idx" ON "coordinator_saved_view_operations" USING btree ("saved_view_id","created_at" DESC NULLS LAST);
+CREATE INDEX "financial_contract_grant_lookup_idx" ON "financial_contract_record_grants" USING btree ("contract_id","user_id","permission","version" DESC NULLS LAST);
+CREATE INDEX "coordinator_bulk_meeting_operations_project_meeting_idx" ON "coordinator_bulk_meeting_operations" USING btree ("project_id","meeting_id","created_at" DESC NULLS LAST);

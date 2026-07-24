@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS financial_contract_record_grants(id text PRIMARY KEY,
 CREATE TABLE IF NOT EXISTS financial_contract_history(id text PRIMARY KEY,company_id integer NOT NULL REFERENCES companies(id),project_id integer NOT NULL REFERENCES projects(id),contract_id text NOT NULL REFERENCES financial_contracts(id),contract_version_id text REFERENCES financial_contract_versions(id),amendment_id text REFERENCES financial_contract_amendments(id),amendment_version_id text REFERENCES financial_contract_amendment_versions(id),actor_user_id integer NOT NULL REFERENCES users(id),event_type text NOT NULL,before_state text,after_state text,reason_code text NOT NULL,evidence jsonb NOT NULL DEFAULT '{}'::jsonb,occurred_at timestamptz NOT NULL DEFAULT now());
 CREATE INDEX IF NOT EXISTS financial_contract_project_idx ON financial_contracts(project_id,perspective,created_at);
 CREATE INDEX IF NOT EXISTS financial_contract_history_scope_idx ON financial_contract_history(company_id,project_id,contract_id,occurred_at);
-CREATE INDEX IF NOT EXISTS financial_contract_grant_lookup_idx ON financial_contract_record_grants(contract_id,user_id,permission,version DESC);
+CREATE INDEX IF NOT EXISTS financial_contract_grant_lookup_idx ON financial_contract_record_grants(contract_id,user_id,permission,version DESC NULLS FIRST);
 `);
     await client.query(`
 DO $$ BEGIN

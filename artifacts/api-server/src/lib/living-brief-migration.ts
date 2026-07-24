@@ -40,7 +40,9 @@ export async function ensureLivingBriefGateSchema(): Promise<void> {
     created_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT living_brief_gate_audit_action CHECK (action IN ('legacy_migrated','bootstrap','reset'))
   )`);
-  await pool.query(`CREATE INDEX IF NOT EXISTS living_brief_gate_audit_created_idx ON living_brief_gate_audit (created_at DESC)`);
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS living_brief_gate_audit_created_idx ON living_brief_gate_audit (created_at DESC NULLS FIRST)`,
+  );
   await pool.query(`WITH migrated AS (
       INSERT INTO living_brief_gate_credentials (credential_key, password_hash, version, created_at, updated_at, session_invalidated_at)
       SELECT 'primary', value, 1, now(), now(), now()

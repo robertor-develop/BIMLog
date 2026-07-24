@@ -46,7 +46,9 @@ export const livingBriefGateAuditTable = pgTable(
       .notNull(),
   },
   (table) => [
-    index("living_brief_gate_audit_created_idx").on(table.createdAt.desc()),
+    index("living_brief_gate_audit_created_idx").on(
+      table.createdAt.desc().nullsFirst(),
+    ),
   ],
 );
 

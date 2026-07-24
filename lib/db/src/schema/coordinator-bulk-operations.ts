@@ -36,7 +36,7 @@ export const coordinatorBulkMeetingOperationsTable = pgTable(
     ).on(table.userId, table.projectId, table.idempotencyKey),
     projectMeetingIndex: index(
       "coordinator_bulk_meeting_operations_project_meeting_idx",
-    ).on(table.projectId, table.meetingId, table.createdAt.desc()),
+    ).on(table.projectId, table.meetingId, table.createdAt),
     projectForeignKey: foreignKey({
       columns: [table.projectId],
       foreignColumns: [projectsTable.id],

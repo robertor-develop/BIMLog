@@ -501,7 +501,7 @@ export const financialContractRecordGrantsTable = pgTable(
       t.contractId,
       t.userId,
       t.permission,
-      t.version.desc(),
+      t.version.desc().nullsFirst(),
     ),
     check(
       "financial_contract_record_permission_chk",

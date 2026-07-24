@@ -22,7 +22,7 @@ export async function ensureCoordinatorSavedViewSchema(): Promise<void> {
     CREATE UNIQUE INDEX IF NOT EXISTS coordinator_saved_views_identity_uidx
       ON coordinator_saved_views(id,project_id,user_id);
     CREATE INDEX IF NOT EXISTS coordinator_saved_views_owner_project_idx
-      ON coordinator_saved_views(user_id,project_id,updated_at DESC);
+      ON coordinator_saved_views(user_id,project_id,updated_at);
     CREATE UNIQUE INDEX IF NOT EXISTS coordinator_saved_views_active_name_uidx
       ON coordinator_saved_views(user_id,project_id,normalized_name) WHERE deleted_at IS NULL;
     CREATE UNIQUE INDEX IF NOT EXISTS coordinator_saved_views_active_config_uidx
@@ -49,7 +49,7 @@ export async function ensureCoordinatorSavedViewSchema(): Promise<void> {
     CREATE UNIQUE INDEX IF NOT EXISTS coordinator_saved_view_operations_idempotency_uidx
       ON coordinator_saved_view_operations(user_id,project_id,idempotency_key);
     CREATE INDEX IF NOT EXISTS coordinator_saved_view_operations_view_idx
-      ON coordinator_saved_view_operations(saved_view_id,created_at DESC);
+      ON coordinator_saved_view_operations(saved_view_id,created_at);
   `);
 }
 

@@ -85,6 +85,31 @@ assert.ok(
 assert.ok(
   rejectedPreviewViolations.some((item) => item.includes("DROP INDEX")),
 );
+const fiveIndexChurnPreview = fs.readFileSync(
+  path.resolve(
+    "scripts/fixtures/replit-publish-preview-five-index-churn-e3c28a4.sql",
+  ),
+  "utf8",
+);
+assert.equal(
+  crypto.createHash("sha256").update(fiveIndexChurnPreview).digest("hex"),
+  "bbf88bc249552189ad59f3af23c9d2f6d00895c76a5f0f345134f3fd5c0d0519",
+  "the exact five-index churn preview fixture must remain byte-identical",
+);
+assert.equal(
+  (fiveIndexChurnPreview.match(/\bDROP\s+INDEX\b/gi) ?? []).length,
+  5,
+);
+assert.equal(
+  (fiveIndexChurnPreview.match(/\bCREATE\s+INDEX\b/gi) ?? []).length,
+  5,
+);
+assert.ok(
+  analyzeSql(fiveIndexChurnPreview, "five-index rejected Replit preview").some(
+    (item) => item.includes("DROP INDEX"),
+  ),
+  "the exact five-index churn preview must fail closed",
+);
 const declarativeSchema = fs
   .readdirSync(path.resolve("lib/db/src/schema"))
   .filter((name) => name.endsWith(".ts"))
@@ -96,6 +121,95 @@ for (const name of previewDropNames) {
   assert.ok(
     declarativeSchema.includes(name),
     `declarative schema must preserve published object authority for ${name}`,
+  );
+}
+
+const productionAscendingIndexes = [
+  {
+    name: "coordinator_saved_views_owner_project_idx",
+    schema: "lib/db/src/schema/coordinator-saved-views.ts",
+    runtime: "artifacts/api-server/src/lib/coordinator-saved-view-migration.ts",
+    lastColumn: "table.updatedAt",
+  },
+  {
+    name: "coordinator_saved_view_operations_view_idx",
+    schema: "lib/db/src/schema/coordinator-saved-views.ts",
+    runtime: "artifacts/api-server/src/lib/coordinator-saved-view-migration.ts",
+    lastColumn: "table.createdAt",
+  },
+  {
+    name: "coordinator_bulk_meeting_operations_project_meeting_idx",
+    schema: "lib/db/src/schema/coordinator-bulk-operations.ts",
+    runtime:
+      "artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts",
+    lastColumn: "table.createdAt",
+  },
+];
+for (const authority of productionAscendingIndexes) {
+  const schemaSource = fs.readFileSync(path.resolve(authority.schema), "utf8");
+  const runtimeSource = fs.readFileSync(
+    path.resolve(authority.runtime),
+    "utf8",
+  );
+  const escapedName = authority.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedLastColumn = authority.lastColumn.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&",
+  );
+  const declaration = schemaSource.match(
+    new RegExp(
+      `index\\(\\s*"${escapedName}"\\s*,?\\s*\\)[\\s\\S]{0,120}?\\.on\\([\\s\\S]{0,200}?${escapedLastColumn}\\s*,?\\s*\\)`,
+    ),
+  )?.[0];
+  assert.ok(declaration, `${authority.name} declaration must be readable`);
+  assert.doesNotMatch(
+    declaration,
+    /\.desc\(\)|\.asc\(\)|\.nulls(?:First|Last)\(\)/,
+    `${authority.name} must preserve production plain ASC semantics`,
+  );
+  assert.match(
+    runtimeSource,
+    new RegExp(`${escapedName}[^;]*(?:;|$)`, "i"),
+    `${authority.name} runtime authority must remain explicit`,
+  );
+  assert.doesNotMatch(
+    runtimeSource.match(new RegExp(`${escapedName}[^;]*(?:;|$)`, "i"))?.[0] ??
+      "",
+    /\b(?:ASC|DESC|NULLS\s+(?:FIRST|LAST))\b/i,
+    `${authority.name} runtime authority must preserve production plain ASC semantics`,
+  );
+}
+
+const productionDescendingNullsFirstIndexes = [
+  {
+    name: "living_brief_gate_audit_created_idx",
+    schema: "lib/db/src/schema/living-brief-gate.ts",
+    runtime: "artifacts/api-server/src/lib/living-brief-migration.ts",
+  },
+  {
+    name: "financial_contract_grant_lookup_idx",
+    schema: "lib/db/src/schema/financial-contracts.ts",
+    runtime: "artifacts/api-server/src/lib/financial-contract-migration.ts",
+  },
+];
+for (const authority of productionDescendingNullsFirstIndexes) {
+  const schemaSource = fs.readFileSync(path.resolve(authority.schema), "utf8");
+  const runtimeSource = fs.readFileSync(
+    path.resolve(authority.runtime),
+    "utf8",
+  );
+  const escapedName = authority.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  assert.match(
+    schemaSource,
+    new RegExp(
+      `index\\(\\s*"${escapedName}"\\s*,?\\s*\\)[\\s\\S]{0,240}?\\.desc\\(\\)\\.nullsFirst\\(\\)`,
+    ),
+    `${authority.name} must preserve production DESC NULLS FIRST semantics`,
+  );
+  assert.match(
+    runtimeSource,
+    new RegExp(`${escapedName}[^;]*DESC\\s+NULLS\\s+FIRST`, "i"),
+    `${authority.name} runtime authority must explicitly use DESC NULLS FIRST`,
   );
 }
 
