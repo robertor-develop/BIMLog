@@ -341,6 +341,11 @@ hardening, no task may rotate, revoke, delete, replace, relocate, regenerate, in
 or test those credentials, nor change provider, callback, or authentication behavior. No build or correction may require
 Roberto to re-enter credentials. Future credential mutation requires fresh explicit Roberto approval.
 
+This exception never authorizes a secret value to remain in tracked source after exposure is proven. Remove known
+tracked secret assignments value-blind, keep values in managed environment/secret storage, reject reintroduction in
+tracked configuration or candidate diffs, and require separately approved replacement, health verification, session
+impact handling, revocation, history remediation, and publication review. Never print or test the exposed value.
+
 The accepted Phase 1A continuity record lives at
 `docs/portability/PHASE_1A_CREDENTIAL_CONTINUITY_EXCEPTION.md`. Before and after later portability work, run
 `node scripts/check-credential-continuity.mjs`. The guard compares the complete protected Replit configuration with

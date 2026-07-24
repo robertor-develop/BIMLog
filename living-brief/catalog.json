@@ -53,6 +53,7 @@
     "noPrintCopyQuoteTransmitOrTestSecretValues": true,
     "noProviderCallbackOrAuthenticationBehaviorChange": true,
     "noForcedCredentialReentryDuringDevelopment": true,
+    "knownExposedTrackedSecretsRequireValueBlindRemovalAndApprovedReplacement": true,
     "launchHardeningIsMandatoryBlocker": true,
     "requiresManagedSecretMigrationBackupRecoveryRotationRollbackHistoryAndVerification": true,
     "evidenceAndSummariesRemainValueBlind": true,

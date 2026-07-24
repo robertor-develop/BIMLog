@@ -2580,6 +2580,148 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "421f005934c2518b9c916252b9440ae4125548e852f0a873738d78ae1fe0125c"
+    },
+    {
+      "taskId": "replit-publication-credential-removal-integration",
+      "reviewedThroughCommit": "b17d5c730d00947e1c812e1e3a93d58995a7f3dd",
+      "reviewedAt": "2026-07-24T11:09:22-04:00",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_sanitized_repository_and_git_state",
+          "integrate_exact_reviewed_candidate_in_clean_worktree",
+          "run_value_blind_local_security_and_governance_checks",
+          "create_separate_living_brief_acceptance",
+          "normal_push_and_remote_equality_verification"
+        ],
+        "operatorOnly": [
+          "replit_secret_presence_and_replacement",
+          "database_or_jwt_credential_rotation_and_revocation",
+          "replit_workspace_preservation_and_alignment",
+          "helium_development_schema_sync",
+          "publication_deployment_or_production_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Tracked Replit configuration contained two secret-like assignments that required value-blind source removal and separately approved operator replacement."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Replit remains on a divergent local history and publication stays blocked until preservation, clean master alignment, guarded synchronization, and complete preview proof."
+        },
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Future builds and publication candidates must fail closed on literal credential material in explicit tracked configuration while excluding ordinary application source."
+        }
+      ],
+      "workstreams": [
+        "platform-portability",
+        "replit-publication-safety",
+        "credential-continuity",
+        "database-publication-safety",
+        "living-brief-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves BIMLog ownership, canonical-source discipline, and product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Clarified that the continuity exception never permits a proven exposed secret to remain tracked and requires value-blind removal plus approved replacement."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Added fail-closed acceptance for literal credentials in explicit tracked configuration with finite scope and operator replacement boundaries."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This security correction does not change product strategy, roadmap, customer commitments, or commercial claims."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Recorded environment and Replit Secret injection as runtime value authority and prohibited tracked database or secret assignments."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, Sync Agent behavior, package, endpoint, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, spreadsheet, layout, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance interpretation, or citation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded accepted integration source separately from secret replacement, Replit alignment, synchronization, publication, and production verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recorded remaining credential replacement, divergent-history preservation, master alignment, guarded sync, preview, and publication gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Captured sanitized exposure counts, exact source correction, focused proof, limitations, and explicit non-actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-living-brief-gate.mjs"
+      ],
+      "reviewedChangeSha256": "0d8050b37a482cb370c47f29d0a3191a9ab409ddb0ccbda208564f2e4c26eadd"
     }
   ]
 }

@@ -386,6 +386,7 @@ function validateCatalogAndFreshness() {
     "noPrintCopyQuoteTransmitOrTestSecretValues",
     "noProviderCallbackOrAuthenticationBehaviorChange",
     "noForcedCredentialReentryDuringDevelopment",
+    "knownExposedTrackedSecretsRequireValueBlindRemovalAndApprovedReplacement",
     "launchHardeningIsMandatoryBlocker",
     "requiresManagedSecretMigrationBackupRecoveryRotationRollbackHistoryAndVerification",
     "evidenceAndSummariesRemainValueBlind",

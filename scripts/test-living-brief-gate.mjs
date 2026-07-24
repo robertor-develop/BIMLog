@@ -162,6 +162,13 @@ expectFailure("owner credential continuity exception cannot be omitted", (target
   fs.writeFileSync(file, JSON.stringify(catalog));
 }, /owner credential continuity exception/);
 
+expectFailure("known exposed tracked secrets cannot remain under the continuity exception", (target) => {
+  const file = path.join(target, "living-brief/catalog.json");
+  const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+  delete catalog.ownerCredentialContinuityException.knownExposedTrackedSecretsRequireValueBlindRemovalAndApprovedReplacement;
+  fs.writeFileSync(file, JSON.stringify(catalog));
+}, /owner credential continuity exception/);
+
 expectFailure("credential no-reseed policy cannot be omitted", (target) => {
   const file = path.join(target, "living-brief/catalog.json");
   const catalog = JSON.parse(fs.readFileSync(file, "utf8"));

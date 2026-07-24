@@ -668,3 +668,24 @@ compute-only configuration. Therefore publication remains human-gated. Required 
 equality in Replit, separately authorized guarded Helium sync, read-only parity, a complete empty or additive-only
 hash-bound preview, verified restore point, pre/post affected-table counts, complete deployment log, and exact deployed
 commit. No database, Replit, provider, production, customer, or credential access occurred during this local review.
+
+---
+
+## Tracked Replit credential exposure correction audit - July 24, 2026
+
+Status: independently reviewed four-path source candidate accepted into local integration; Living Brief acceptance,
+normal push, Replit operator work, credential replacement, database synchronization, and publication were separate
+at capture time.
+
+A value-blind audit found two secret-like assignments in tracked `.replit`. No value is recorded in this audit.
+Candidate `b17d5c730d00947e1c812e1e3a93d58995a7f3dd` removes those assignments, preserves the guarded development sync,
+updates the whole-file continuity fingerprint, and adds a fail-closed repository/build gate. The gate covers explicit
+Replit, environment, recognized tool/runtime, workflow, package-manager, and deployment configuration conventions;
+finite fixtures exclude representative ordinary route, UI, schema, settings, and source modules.
+
+Focused proof passed with zero findings across 16 recognized tracked configuration files, zero candidate-diff
+findings after commit, credential-continuity verification, 132-table/140-index/92-startup-table database source
+safety, destructive fixtures, privacy/diff checks, and no secret output. Removal from source does not prove the
+credential was replaced or revoked. Replit Secret updates, controlled database overlap and revocation, JWT
+session-impact handling, Replit branch preservation/alignment, guarded Helium synchronization, complete preview,
+backup/restore evidence, publication, and production verification remain required operator gates.

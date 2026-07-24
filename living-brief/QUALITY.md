@@ -305,6 +305,11 @@ regenerates, invalidates, prints, copies, quotes, transmits, tests, or changes t
 behavior for those credentials without fresh explicit Roberto approval. A build may not require Roberto to re-enter
 them. Evidence remains value-blind.
 
+The exception does not protect a known exposed literal in tracked configuration. Quality fails any candidate that
+retains or introduces credential-bearing database URLs or literal secret-like assignments in explicitly recognized
+tracked configuration. Removal stays value-blind, runtime values come from governed environment/secret injection, and
+replacement/revocation remains a separately approved operator action with health and session-impact proof.
+
 Before public/production launch, the exception is a mandatory blocker. Launch hardening requires a separately approved
 managed-secret migration, durable backup/recovery, controlled rotation/revocation as appropriate, callback continuity,
 rollback proof, history remediation, and independent verification. This continuity rule is separate from and does not

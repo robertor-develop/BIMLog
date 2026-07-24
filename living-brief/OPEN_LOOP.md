@@ -209,6 +209,22 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   backup/recovery, appropriate rotation/revocation, callback continuity, rollback, history remediation, and independent
   verification.
 
+### Tracked Replit credential removal accepted in integration source; operator replacement pending
+
+- Accepted candidate `b17d5c730d00947e1c812e1e3a93d58995a7f3dd` removes two secret-like assignments from tracked
+  `.replit` value-blind, preserves the guarded Helium development sync, and relies on Replit Secrets/environment
+  injection for runtime values.
+- The new publication gate scans only explicit environment, Replit, tool/runtime, workflow, package-manager, and
+  deployment configuration conventions. Finite fixtures prove representative route, UI, schema, and ordinary source
+  modules remain outside that scope while covered files fail closed on literal database URLs or secret-like values.
+- The original continuity exception remains active for working credentials not proven exposed. It does not permit a
+  known exposed literal to remain in source. Database and JWT replacement, health/session verification, revocation,
+  and history remediation require approved operator work and were not performed by source integration.
+- Replit remains divergent at preserved local head `096a961818320e9a209b97964900839609582b79`. Preserve its seven
+  local commits on a separate branch, create clean `master` from the future authoritative remote only after all source
+  integrations finish, then require guarded development sync and a complete non-destructive preview. Publish remains
+  blocked.
+
 ### Living Brief Credential Persistence and Terminal-Turn Governance Accepted
 
 - Integration commit `c3a7c809643022abb04b8fe58db043ccd5d828ff` cleanly reconciles the accepted Living Brief

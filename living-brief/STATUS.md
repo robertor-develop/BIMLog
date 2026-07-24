@@ -18,6 +18,13 @@ authority can be disabled, and it does not authorize a database sync or Publish.
 read-only parity, complete regenerated preview, verified restore point, affected-table counts, owner approval,
 publication, and post-publication verification remain separate gates.
 
+Tracked publication credentials are removed in accepted integration source at
+`b17d5c730d00947e1c812e1e3a93d58995a7f3dd`. The four-path correction removes two secret-like assignments from
+tracked `.replit`, preserves guarded development synchronization, retains the value-blind whole-file continuity
+fingerprint, and adds a fail-closed tracked-configuration/current-diff gate with finite scope fixtures. It does not
+rotate or validate credentials, update Replit Secrets, align the divergent Replit workspace, connect to a database,
+publish, deploy, or prove runtime recovery. Those operator and deployment gates remain pending.
+
 Roberto-approved built-asset lifecycle roadmap: approved strategy is being recorded for BIMLog's long-term expansion
 from construction coordination into verified construction records, asset passports, maintenance obligations,
 condition/IoT events, controlled work orchestration, contractor/supplier networks, executable contract rules, and

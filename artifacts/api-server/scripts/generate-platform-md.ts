@@ -68,6 +68,7 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 ## Critical Database Facts — Read Before Every Session
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
 - DATABASE_URL = Replit Helium development database. It is used ONLY by guarded drizzle-kit development-schema synchronization and never at runtime. Its structural state can influence Replit's generated production migration at Publish.
+- Database URL and secret values must not be assigned in tracked .replit or recognized configuration files. Replit Secrets/environment injection supplies runtime values; the repository gate permits variable-name references but rejects literal credential material.
 - The ENV startup banner historically showed DB_HOST: helium and DB_NAME: heliumdb — this was MISLEADING. It was reading PGHOST and PGDATABASE which point to heliumdb not the actual runtime connection. This has now been fixed.
 - NEVER diagnose data loss by querying heliumdb. Always query Neon via PROD_DATABASE_URL.
 - NEVER trust PGHOST or PGDATABASE for runtime database diagnostics.
