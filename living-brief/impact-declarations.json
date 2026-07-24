@@ -2807,7 +2807,92 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "9389b63ce3e5302615c30695f16f0293638a1664d015c40e9e041fb3d0cf2e7f"
+      "reviewedChangeSha256": "72313aa5adb0e53bb93e3aa134d21e226efb15676f4224d34731abe4ffcc5543"
+    },
+    {
+      "taskId": "rfi-report-template-settings-admin-gate-correction",
+      "reviewedThroughCommit": "3758a3cc5d75db5ee308f76ea75fc4908e64fede",
+      "summary": "Narrow local correction for RFI report settings UI authority after deferred acceptance: report settings remain project-scoped and are visible only to project-admin or super-admin authority. No push, publish, deployment, plugin, production, or customer data access occurred.",
+      "workstreams": [
+        "rfi-report-settings",
+        "rfi-report-settings-authority"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves project-governed RFI reporting and does not alter ecosystem ownership or doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to agent hierarchy, connector governance, or development workflow instructions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction enforces the existing quality requirement that project report settings be controlled by proper authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product strategy change; this tightens authority on an existing local candidate."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, migration, route contract, platform inventory, package, or generated PLATFORM content changed for this UI authority gate."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin code, Navisworks behavior, installation, Sync, Pull, Reconcile, or field plugin workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, PDF/DOCX rendering model, section inventory, visual template, or export design token changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, compliance claim, or standards mapping changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records that the local RFI report settings candidate now gates settings UI to project-admin or super-admin authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the final admin-only visibility correction and no-push/no-publish/no-production boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new dated production audit, customer-data observation, deployment, or field verification occurred."
+        }
+      ],
+      "reviewedAt": "2026-07-24T03:02:20Z",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/rfi-standard-exports.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/rfi-report-settings.ts",
+        "lib/db/src/schema/rfis.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1d5f2c9d7b9ed7a87f5a6052bedee6b90ad584a8c3f722e8e2af48fe2e73bc0f"
     }
   ]
 }

@@ -745,6 +745,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [exportingRegister, setExportingRegister] = useState(false);
   const [exportingViewPdf, setExportingViewPdf] = useState(false);
   const rfisQueryClient = useQueryClient();
+  const currentMember = members?.find(m => m.userId === user?.id || (m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase()));
+  const canManageReportSettings = currentMember?.role === "project_admin" || Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
 
   // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
   useEffect(() => {
@@ -1086,7 +1088,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               {exportingRegister ? w("Exporting Register...", "Exportando Registro...", lang) : w("RFI Register Excel", "Registro RFI Excel", lang)}
             </Button>
           )}
-          {canWrite && (
+          {canManageReportSettings && (
             <Button variant="outline" size="sm" onClick={() => setShowReportSettings(value => !value)} style={{ gap: 5, fontSize: 11 }}>
               <FileText style={{ width: 12, height: 12 }} />
               {w("RFI Report Settings", "Ajustes Reporte RFI", lang)}
@@ -1113,7 +1115,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       </div>
 
-      {showReportSettings && canWrite && (
+      {showReportSettings && canManageReportSettings && (
         <RfiReportSettingsPanel projectId={projectId} lang={lang} onClose={() => setShowReportSettings(false)} />
       )}
 

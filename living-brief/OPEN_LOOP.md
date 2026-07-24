@@ -1312,6 +1312,8 @@ Future behavior:
 - Correction candidate supersedes `11c1a322`: Complete RFI PDF now passes the same project report-settings
   snapshot into the embedded canonical RFI page as Standard PDF and DOCX. A deterministic regression covers
   shared settings version/hash, Ruben lean section visibility, and source/additional screenshot fields.
+- Final local correction gates Project RFI Report Settings visibility to project-admin authority or super-admin
+  authority, matching the admin/write API contract instead of showing the control to every broad write role.
 - Boundary: not pushed, not published, not deployed, no production/customer data access, no plugin changes.
 
 ## Closed / Shipped

@@ -21,6 +21,8 @@ function check(name: string, passed: boolean, details?: unknown): Check {
 const repoRoot = path.resolve(process.cwd(), "../..");
 const routePath = path.join(process.cwd(), "src/routes/rfis.ts");
 const routeSource = fs.readFileSync(routePath, "utf8");
+const rfiTabPath = path.join(repoRoot, "artifacts/bimlog/src/pages/project/RfisTab.tsx");
+const rfiTabSource = fs.readFileSync(rfiTabPath, "utf8");
 
 const leanSettings = buildLeanRfiReportSettings();
 const snapshot = makeRfiReportSettingsSnapshot(leanSettings, 7, "project");
@@ -48,12 +50,16 @@ const checks: Check[] = [
   check("Complete PDF route loads project report settings snapshot", /const reportSettings = await loadRfiReportSettingsSnapshot\(rfi\.projectId\);/.test(routeSource)),
   check("Complete PDF passes settings snapshot into embedded canonical renderer helper", /renderRfiPdfBuffer\(rfi, responses, project, false, reportSettings\)/.test(routeSource)),
   check("embedded canonical helper passes snapshot into renderCanonicalRfiPdf", /renderCanonicalRfiPdf\(doc, exportData\.model, exportData\.image, reportSettings, exportData\.additionalImages\)/.test(routeSource)),
+  check("RFI report settings UI computes project-admin authority", /const canManageReportSettings = currentMember\?\.role === "project_admin" \|\| Boolean\(\(user as \{ isSuperAdmin\?: boolean \} \| null\)\?\.isSuperAdmin\);/.test(rfiTabSource)),
+  check("RFI report settings button is not gated by broad write permission", /canManageReportSettings && \(\s*<Button variant="outline" size="sm" onClick=\{\(\) => setShowReportSettings/.test(rfiTabSource) && !/canWrite && \(\s*<Button variant="outline" size="sm" onClick=\{\(\) => setShowReportSettings/.test(rfiTabSource)),
+  check("RFI report settings panel is not gated by broad write permission", /showReportSettings && canManageReportSettings &&/.test(rfiTabSource) && !/showReportSettings && canWrite &&/.test(rfiTabSource)),
 ];
 
 const proof = {
   generatedAt: new Date().toISOString(),
   repoRoot,
   routePath,
+  rfiTabPath,
   settingsVersion: snapshot.version,
   snapshotHash: snapshot.snapshotHash,
   visibleSections,
