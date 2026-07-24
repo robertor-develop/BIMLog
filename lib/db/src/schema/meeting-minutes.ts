@@ -7,6 +7,8 @@
   uniqueIndex,
   index,
   jsonb,
+  foreignKey,
+  unique,
 } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { companiesTable, usersTable } from "./users";
@@ -37,31 +39,47 @@ export const meetingMinutesTable = pgTable("meeting_minutes", {
   deleteReason: text("delete_reason"),
 });
 
-export const meetingAttendeesTable = pgTable("meeting_attendees", {
-  id: serial("id").primaryKey(),
-  meetingId: integer("meeting_id")
-    .references(() => meetingMinutesTable.id)
-    .notNull(),
-  userId: integer("user_id").references(() => usersTable.id),
-  companyId: integer("company_id").references(() => companiesTable.id),
-  directoryEntryId: integer("directory_entry_id").references(() => projectDirectoryTable.id),
-  externalEmail: text("external_email"),
-  fullName: text("full_name").notNull(),
-  company: text("company"),
-  role: text("role"),
-});
+export const meetingAttendeesTable = pgTable(
+  "meeting_attendees",
+  {
+    id: serial("id").primaryKey(),
+    meetingId: integer("meeting_id")
+      .references(() => meetingMinutesTable.id)
+      .notNull(),
+    userId: integer("user_id").references(() => usersTable.id),
+    companyId: integer("company_id"),
+    directoryEntryId: integer("directory_entry_id"),
+    externalEmail: text("external_email"),
+    fullName: text("full_name").notNull(),
+    company: text("company"),
+    role: text("role"),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.companyId],
+      foreignColumns: [companiesTable.id],
+      name: "meeting_attendees_company_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.directoryEntryId],
+      foreignColumns: [projectDirectoryTable.id],
+      name: "meeting_attendees_directory_entry_id_fkey",
+    }),
+    index("meeting_attendees_company_idx").on(t.meetingId, t.companyId),
+    index("meeting_attendees_directory_entry_idx").on(
+      t.meetingId,
+      t.directoryEntryId,
+    ),
+  ],
+);
 
 export const meetingDraftsTable = pgTable(
   "meeting_drafts",
   {
     id: serial("id").primaryKey(),
-    projectId: integer("project_id")
-      .references(() => projectsTable.id)
-      .notNull(),
-    userId: integer("user_id")
-      .references(() => usersTable.id)
-      .notNull(),
-    meetingId: integer("meeting_id").references(() => meetingMinutesTable.id),
+    projectId: integer("project_id").notNull(),
+    userId: integer("user_id").notNull(),
+    meetingId: integer("meeting_id"),
     draftKey: text("draft_key").notNull(),
     payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
     canonicalUpdatedAt: timestamp("canonical_updated_at"),
@@ -70,12 +88,25 @@ export const meetingDraftsTable = pgTable(
     expiresAt: timestamp("expires_at").notNull(),
   },
   (t) => ({
-    meetingDraftScopeUnique: uniqueIndex("meeting_drafts_scope_uidx").on(
-      t.projectId,
-      t.userId,
-      t.draftKey,
-    ),
+    meetingDraftScopeUnique: unique(
+      "meeting_drafts_project_id_user_id_draft_key_key",
+    ).on(t.projectId, t.userId, t.draftKey),
     meetingDraftExpiryIdx: index("meeting_drafts_expiry_idx").on(t.expiresAt),
+    projectForeignKey: foreignKey({
+      columns: [t.projectId],
+      foreignColumns: [projectsTable.id],
+      name: "meeting_drafts_project_id_fkey",
+    }),
+    userForeignKey: foreignKey({
+      columns: [t.userId],
+      foreignColumns: [usersTable.id],
+      name: "meeting_drafts_user_id_fkey",
+    }),
+    meetingForeignKey: foreignKey({
+      columns: [t.meetingId],
+      foreignColumns: [meetingMinutesTable.id],
+      name: "meeting_drafts_meeting_id_fkey",
+    }),
   }),
 );
 
@@ -242,15 +273,9 @@ export const meetingLensViewpointLinksTable = pgTable(
   "meeting_lens_viewpoint_links",
   {
     id: serial("id").primaryKey(),
-    projectId: integer("project_id")
-      .references(() => projectsTable.id)
-      .notNull(),
-    meetingId: integer("meeting_id")
-      .references(() => meetingMinutesTable.id)
-      .notNull(),
-    lensViewpointId: integer("lens_viewpoint_id")
-      .references(() => lensViewpointsTable.id)
-      .notNull(),
+    projectId: integer("project_id").notNull(),
+    meetingId: integer("meeting_id").notNull(),
+    lensViewpointId: integer("lens_viewpoint_id").notNull(),
     viewpointIdSnapshot: text("viewpoint_id_snapshot").notNull(),
     displayIdSnapshot: text("display_id_snapshot"),
     navisworksGuidSnapshot: text("navisworks_guid_snapshot"),
@@ -268,9 +293,7 @@ export const meetingLensViewpointLinksTable = pgTable(
     capturedAtSnapshot: timestamp("captured_at_snapshot", {
       withTimezone: true,
     }),
-    createdById: integer("created_by_id")
-      .references(() => usersTable.id)
-      .notNull(),
+    createdById: integer("created_by_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => ({
@@ -280,6 +303,26 @@ export const meetingLensViewpointLinksTable = pgTable(
     projectMeetingIdx: index(
       "meeting_lens_viewpoint_links_project_meeting_idx",
     ).on(t.projectId, t.meetingId),
+    projectForeignKey: foreignKey({
+      columns: [t.projectId],
+      foreignColumns: [projectsTable.id],
+      name: "meeting_lens_viewpoint_links_project_id_fkey",
+    }),
+    meetingForeignKey: foreignKey({
+      columns: [t.meetingId],
+      foreignColumns: [meetingMinutesTable.id],
+      name: "meeting_lens_viewpoint_links_meeting_id_fkey",
+    }),
+    lensForeignKey: foreignKey({
+      columns: [t.lensViewpointId],
+      foreignColumns: [lensViewpointsTable.id],
+      name: "meeting_lens_viewpoint_links_lens_viewpoint_id_fkey",
+    }),
+    createdByForeignKey: foreignKey({
+      columns: [t.createdById],
+      foreignColumns: [usersTable.id],
+      name: "meeting_lens_viewpoint_links_created_by_id_fkey",
+    }),
   }),
 );
 
@@ -386,6 +429,10 @@ export const meetingScheduleTaskLinksTable = pgTable(
     meetingMilestoneUnique: uniqueIndex(
       "meeting_schedule_task_links_meeting_milestone_uidx",
     ).on(t.projectId, t.meetingId, t.milestoneId),
+    bucketIndex: index("meeting_schedule_task_links_bucket_idx").on(
+      t.projectId,
+      t.bucketId,
+    ),
   }),
 );
 

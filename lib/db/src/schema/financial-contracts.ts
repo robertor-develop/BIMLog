@@ -2,6 +2,7 @@ import {
   check,
   date,
   foreignKey,
+  index,
   integer,
   jsonb,
   numeric,
@@ -27,20 +28,53 @@ export const financialContractsTable = pgTable(
   "financial_contracts",
   {
     id: text("id").primaryKey(),
-    bimlogId: text("bimlog_id").notNull().unique(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+    bimlogId: text("bimlog_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id").notNull(),
     perspective: text("perspective").notNull(),
     contractType: text("contract_type").notNull(),
     legalNumber: text("legal_number").notNull(),
     counterpartyName: text("counterparty_name").notNull(),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdById: integer("created_by_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
-    uniqueIndex("financial_contract_project_number_uidx").on(t.projectId, t.perspective, t.legalNumber),
-    check("financial_contract_perspective_chk", sql`${t.perspective} IN ('upstream','downstream')`),
-    check("financial_contract_type_chk", sql`${t.contractType} IN ('owner_prime','subcontract','purchase_order','consultant_agreement','other_commitment')`),
+    unique("financial_contracts_bimlog_id_key").on(t.bimlogId),
+    unique("financial_contracts_project_id_perspective_legal_number_key").on(
+      t.projectId,
+      t.perspective,
+      t.legalNumber,
+    ),
+    foreignKey({
+      columns: [t.companyId],
+      foreignColumns: [companiesTable.id],
+      name: "financial_contracts_company_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.projectId],
+      foreignColumns: [projectsTable.id],
+      name: "financial_contracts_project_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.createdById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contracts_created_by_id_fkey",
+    }),
+    index("financial_contract_project_idx").on(
+      t.projectId,
+      t.perspective,
+      t.createdAt,
+    ),
+    check(
+      "financial_contract_perspective_chk",
+      sql`${t.perspective} IN ('upstream','downstream')`,
+    ),
+    check(
+      "financial_contract_type_chk",
+      sql`${t.contractType} IN ('owner_prime','subcontract','purchase_order','consultant_agreement','other_commitment')`,
+    ),
   ],
 );
 
@@ -48,24 +82,30 @@ export const financialContractVersionsTable = pgTable(
   "financial_contract_versions",
   {
     id: text("id").primaryKey(),
-    contractId: text("contract_id").references(() => financialContractsTable.id).notNull(),
+    contractId: text("contract_id").notNull(),
     version: integer("version").notNull(),
     status: text("status").notNull(),
     title: text("title").notNull(),
     currency: text("currency").notNull(),
-    originalValue: numeric("original_value", { precision: 30, scale: 6 }).notNull(),
+    originalValue: numeric("original_value", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
     effectiveDate: date("effective_date"),
     completionDate: date("completion_date"),
     paymentTerms: text("payment_terms"),
-    commercialMetadata: jsonb("commercial_metadata").$type<Record<string, unknown>>().notNull().default({}),
-    budgetSnapshotId: text("budget_snapshot_id").references(() => approvedBudgetSnapshotsTable.id).notNull(),
-    structureVersionId: text("structure_version_id").references(() => projectCostStructureVersionsTable.id).notNull(),
-    signedFileId: integer("signed_file_id").references(() => filesTable.id),
-    preparedById: integer("prepared_by_id").references(() => usersTable.id).notNull(),
-    submittedById: integer("submitted_by_id").references(() => usersTable.id),
-    reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
-    approvedById: integer("approved_by_id").references(() => usersTable.id),
-    executedById: integer("executed_by_id").references(() => usersTable.id),
+    commercialMetadata: jsonb("commercial_metadata")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
+    budgetSnapshotId: text("budget_snapshot_id").notNull(),
+    structureVersionId: text("structure_version_id").notNull(),
+    signedFileId: integer("signed_file_id"),
+    preparedById: integer("prepared_by_id").notNull(),
+    submittedById: integer("submitted_by_id"),
+    reviewedById: integer("reviewed_by_id"),
+    approvedById: integer("approved_by_id"),
+    executedById: integer("executed_by_id"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
@@ -78,14 +118,75 @@ export const financialContractVersionsTable = pgTable(
     contentFingerprint: text("content_fingerprint").notNull(),
     revision: integer("revision").default(1).notNull(),
     supersedesId: text("supersedes_id"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
-    uniqueIndex("financial_contract_version_uidx").on(t.contractId, t.version),
-    check("financial_contract_version_status_chk", sql`${t.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','executed','superseded','terminated','voided','closed')`),
-    check("financial_contract_version_currency_chk", sql`${t.currency} ~ '^[A-Z]{3}$'`),
-    check("financial_contract_original_value_chk", sql`${t.originalValue} >= 0`),
+    unique("financial_contract_versions_contract_id_version_key").on(
+      t.contractId,
+      t.version,
+    ),
+    foreignKey({
+      columns: [t.contractId],
+      foreignColumns: [financialContractsTable.id],
+      name: "financial_contract_versions_contract_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.budgetSnapshotId],
+      foreignColumns: [approvedBudgetSnapshotsTable.id],
+      name: "financial_contract_versions_budget_snapshot_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.structureVersionId],
+      foreignColumns: [projectCostStructureVersionsTable.id],
+      name: "financial_contract_versions_structure_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.signedFileId],
+      foreignColumns: [filesTable.id],
+      name: "financial_contract_versions_signed_file_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.preparedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_versions_prepared_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.submittedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_versions_submitted_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.reviewedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_versions_reviewed_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.approvedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_versions_approved_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.executedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_versions_executed_by_id_fkey",
+    }),
+    check(
+      "financial_contract_version_status_chk",
+      sql`${t.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','executed','superseded','terminated','voided','closed')`,
+    ),
+    check(
+      "financial_contract_version_currency_chk",
+      sql`${t.currency} ~ '^[A-Z]{3}$'`,
+    ),
+    check(
+      "financial_contract_original_value_chk",
+      sql`${t.originalValue} >= 0`,
+    ),
   ],
 );
 
@@ -93,17 +194,39 @@ export const financialContractSovLinesTable = pgTable(
   "financial_contract_sov_lines",
   {
     id: text("id").primaryKey(),
-    contractVersionId: text("contract_version_id").references(() => financialContractVersionsTable.id).notNull(),
+    contractVersionId: text("contract_version_id").notNull(),
     stableLineId: text("stable_line_id").notNull(),
-    budgetSnapshotLineId: text("budget_snapshot_line_id").references(() => approvedBudgetSnapshotLinesTable.id).notNull(),
-    projectCostNodeId: text("project_cost_node_id").references(() => projectCostNodesTable.id).notNull(),
-    scheduleItemPlacementId: integer("schedule_item_placement_id").references(() => scheduleItemPlacementsTable.id),
+    budgetSnapshotLineId: text("budget_snapshot_line_id").notNull(),
+    projectCostNodeId: text("project_cost_node_id").notNull(),
+    scheduleItemPlacementId: integer("schedule_item_placement_id"),
     description: text("description").notNull(),
     amount: numeric("amount", { precision: 30, scale: 6 }).notNull(),
     sortOrder: integer("sort_order").notNull(),
   },
   (t) => [
-    uniqueIndex("financial_contract_sov_line_uidx").on(t.contractVersionId, t.stableLineId),
+    unique(
+      "financial_contract_sov_lines_contract_version_id_stable_lin_key",
+    ).on(t.contractVersionId, t.stableLineId),
+    foreignKey({
+      columns: [t.contractVersionId],
+      foreignColumns: [financialContractVersionsTable.id],
+      name: "financial_contract_sov_lines_contract_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.budgetSnapshotLineId],
+      foreignColumns: [approvedBudgetSnapshotLinesTable.id],
+      name: "financial_contract_sov_lines_budget_snapshot_line_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.projectCostNodeId],
+      foreignColumns: [projectCostNodesTable.id],
+      name: "financial_contract_sov_lines_project_cost_node_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.scheduleItemPlacementId],
+      foreignColumns: [scheduleItemPlacementsTable.id],
+      name: "financial_contract_sov_lines_schedule_item_placement_id_fkey",
+    }),
     check("financial_contract_sov_amount_chk", sql`${t.amount} >= 0`),
   ],
 );
@@ -112,34 +235,52 @@ export const financialContractAmendmentsTable = pgTable(
   "financial_contract_amendments",
   {
     id: text("id").primaryKey(),
-    contractId: text("contract_id").references(() => financialContractsTable.id).notNull(),
-    bimlogId: text("bimlog_id").notNull().unique(),
+    contractId: text("contract_id").notNull(),
+    bimlogId: text("bimlog_id").notNull(),
     legalNumber: text("legal_number").notNull(),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdById: integer("created_by_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
-  (t) => [uniqueIndex("financial_amendment_contract_number_uidx").on(t.contractId, t.legalNumber)],
+  (t) => [
+    unique("financial_contract_amendments_contract_id_legal_number_key").on(
+      t.contractId,
+      t.legalNumber,
+    ),
+    unique("financial_contract_amendments_bimlog_id_key").on(t.bimlogId),
+    foreignKey({
+      columns: [t.contractId],
+      foreignColumns: [financialContractsTable.id],
+      name: "financial_contract_amendments_contract_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.createdById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendments_created_by_id_fkey",
+    }),
+  ],
 );
 
 export const financialContractAmendmentVersionsTable = pgTable(
   "financial_contract_amendment_versions",
   {
     id: text("id").primaryKey(),
-    amendmentId: text("amendment_id").references(() => financialContractAmendmentsTable.id).notNull(),
-    contractVersionId: text("contract_version_id").references(() => financialContractVersionsTable.id).notNull(),
+    amendmentId: text("amendment_id").notNull(),
+    contractVersionId: text("contract_version_id").notNull(),
     version: integer("version").notNull(),
     status: text("status").notNull(),
     title: text("title").notNull(),
     currency: text("currency").notNull(),
     amountDelta: numeric("amount_delta", { precision: 30, scale: 6 }).notNull(),
-    budgetSnapshotId: text("budget_snapshot_id").references(() => approvedBudgetSnapshotsTable.id).notNull(),
-    structureVersionId: text("structure_version_id").references(() => projectCostStructureVersionsTable.id).notNull(),
-    signedFileId: integer("signed_file_id").references(() => filesTable.id),
-    preparedById: integer("prepared_by_id").references(() => usersTable.id).notNull(),
-    submittedById: integer("submitted_by_id").references(() => usersTable.id),
-    reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
-    approvedById: integer("approved_by_id").references(() => usersTable.id),
-    executedById: integer("executed_by_id").references(() => usersTable.id),
+    budgetSnapshotId: text("budget_snapshot_id").notNull(),
+    structureVersionId: text("structure_version_id").notNull(),
+    signedFileId: integer("signed_file_id"),
+    preparedById: integer("prepared_by_id").notNull(),
+    submittedById: integer("submitted_by_id"),
+    reviewedById: integer("reviewed_by_id"),
+    approvedById: integer("approved_by_id"),
+    executedById: integer("executed_by_id"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
@@ -152,13 +293,76 @@ export const financialContractAmendmentVersionsTable = pgTable(
     contentFingerprint: text("content_fingerprint").notNull(),
     revision: integer("revision").default(1).notNull(),
     supersedesId: text("supersedes_id"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
-    uniqueIndex("financial_amendment_version_uidx").on(t.amendmentId, t.version),
-    check("financial_amendment_status_chk", sql`${t.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','executed','superseded','voided')`),
-    check("financial_amendment_currency_chk", sql`${t.currency} ~ '^[A-Z]{3}$'`),
+    unique("financial_contract_amendment_versions_amendment_id_version_key").on(
+      t.amendmentId,
+      t.version,
+    ),
+    foreignKey({
+      columns: [t.amendmentId],
+      foreignColumns: [financialContractAmendmentsTable.id],
+      name: "financial_contract_amendment_versions_amendment_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.contractVersionId],
+      foreignColumns: [financialContractVersionsTable.id],
+      name: "financial_contract_amendment_versions_contract_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.budgetSnapshotId],
+      foreignColumns: [approvedBudgetSnapshotsTable.id],
+      name: "financial_contract_amendment_versions_budget_snapshot_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.structureVersionId],
+      foreignColumns: [projectCostStructureVersionsTable.id],
+      name: "financial_contract_amendment_versions_structure_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.signedFileId],
+      foreignColumns: [filesTable.id],
+      name: "financial_contract_amendment_versions_signed_file_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.preparedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendment_versions_prepared_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.submittedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendment_versions_submitted_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.reviewedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendment_versions_reviewed_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.approvedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendment_versions_approved_by_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.executedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_amendment_versions_executed_by_id_fkey",
+    }),
+    check(
+      "financial_amendment_status_chk",
+      sql`${t.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','executed','superseded','voided')`,
+    ),
+    check(
+      "financial_amendment_currency_chk",
+      sql`${t.currency} ~ '^[A-Z]{3}$'`,
+    ),
   ],
 );
 
@@ -166,26 +370,50 @@ export const financialContractAmendmentLinesTable = pgTable(
   "financial_contract_amendment_lines",
   {
     id: text("id").primaryKey(),
-    amendmentVersionId: text("amendment_version_id").references(() => financialContractAmendmentVersionsTable.id).notNull(),
+    amendmentVersionId: text("amendment_version_id").notNull(),
     stableLineId: text("stable_line_id").notNull(),
-    budgetSnapshotLineId: text("budget_snapshot_line_id").references(() => approvedBudgetSnapshotLinesTable.id).notNull(),
-    projectCostNodeId: text("project_cost_node_id").references(() => projectCostNodesTable.id).notNull(),
-    scheduleItemPlacementId: integer("schedule_item_placement_id").references(() => scheduleItemPlacementsTable.id),
+    budgetSnapshotLineId: text("budget_snapshot_line_id").notNull(),
+    projectCostNodeId: text("project_cost_node_id").notNull(),
+    scheduleItemPlacementId: integer("schedule_item_placement_id"),
     description: text("description").notNull(),
     amountDelta: numeric("amount_delta", { precision: 30, scale: 6 }).notNull(),
     sortOrder: integer("sort_order").notNull(),
   },
-  (t) => [uniqueIndex("financial_amendment_line_uidx").on(t.amendmentVersionId, t.stableLineId)],
+  (t) => [
+    unique(
+      "financial_contract_amendment__amendment_version_id_stable_l_key",
+    ).on(t.amendmentVersionId, t.stableLineId),
+    foreignKey({
+      columns: [t.amendmentVersionId],
+      foreignColumns: [financialContractAmendmentVersionsTable.id],
+      name: "financial_contract_amendment_lines_amendment_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.budgetSnapshotLineId],
+      foreignColumns: [approvedBudgetSnapshotLinesTable.id],
+      name: "financial_contract_amendment_lines_budget_snapshot_line_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.projectCostNodeId],
+      foreignColumns: [projectCostNodesTable.id],
+      name: "financial_contract_amendment_lines_project_cost_node_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.scheduleItemPlacementId],
+      foreignColumns: [scheduleItemPlacementsTable.id],
+      name: "financial_contract_amendment_li_schedule_item_placement_id_fkey",
+    }),
+  ],
 );
 
 export const financialContractImportSessionsTable = pgTable(
   "financial_contract_import_sessions",
   {
     id: text("id").primaryKey(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
-    sourceFileId: integer("source_file_id").references(() => filesTable.id).notNull(),
+    projectId: integer("project_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    actorUserId: integer("actor_user_id").notNull(),
+    sourceFileId: integer("source_file_id").notNull(),
     fileHash: text("file_hash").notNull(),
     parsedFingerprint: text("parsed_fingerprint").notNull(),
     currency: text("currency").notNull(),
@@ -195,17 +423,43 @@ export const financialContractImportSessionsTable = pgTable(
     preview: jsonb("preview").notNull(),
     confirmedContractVersionId: text("confirmed_contract_version_id"),
     idempotencyKey: text("idempotency_key").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   },
   (t) => [
     foreignKey({
       columns: [t.confirmedContractVersionId],
       foreignColumns: [financialContractVersionsTable.id],
-      name: "fc_import_confirmed_version_fk",
+      name: "financial_contract_import_ses_confirmed_contract_version_i_fkey",
     }),
-    unique("fc_import_confirmed_version_uk").on(t.confirmedContractVersionId),
-    uniqueIndex("financial_contract_import_project_key_uidx").on(t.projectId, t.idempotencyKey),
+    unique(
+      "financial_contract_import_ses_confirmed_contract_version_id_key",
+    ).on(t.confirmedContractVersionId),
+    unique(
+      "financial_contract_import_sessio_project_id_idempotency_key_key",
+    ).on(t.projectId, t.idempotencyKey),
+    foreignKey({
+      columns: [t.projectId],
+      foreignColumns: [projectsTable.id],
+      name: "financial_contract_import_sessions_project_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.companyId],
+      foreignColumns: [companiesTable.id],
+      name: "financial_contract_import_sessions_company_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.actorUserId],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_import_sessions_actor_user_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.sourceFileId],
+      foreignColumns: [filesTable.id],
+      name: "financial_contract_import_sessions_source_file_id_fkey",
+    }),
   ],
 );
 
@@ -213,19 +467,50 @@ export const financialContractRecordGrantsTable = pgTable(
   "financial_contract_record_grants",
   {
     id: text("id").primaryKey(),
-    contractId: text("contract_id").references(() => financialContractsTable.id).notNull(),
-    userId: integer("user_id").references(() => usersTable.id).notNull(),
+    contractId: text("contract_id").notNull(),
+    userId: integer("user_id").notNull(),
     permission: text("permission").notNull(),
     version: integer("version").notNull(),
     state: text("state").notNull(),
     reason: text("reason").notNull(),
-    grantedById: integer("granted_by_id").references(() => usersTable.id).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    grantedById: integer("granted_by_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (t) => [
-    uniqueIndex("financial_contract_record_grant_version_uidx").on(t.contractId, t.userId, t.permission, t.version),
-    check("financial_contract_record_permission_chk", sql`${t.permission} IN ('view','prepare','review','approve','execute','manage')`),
-    check("financial_contract_record_grant_state_chk", sql`${t.state} IN ('active','revoked')`),
+    unique(
+      "financial_contract_record_gra_contract_id_user_id_permissio_key",
+    ).on(t.contractId, t.userId, t.permission, t.version),
+    foreignKey({
+      columns: [t.contractId],
+      foreignColumns: [financialContractsTable.id],
+      name: "financial_contract_record_grants_contract_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.userId],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_record_grants_user_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.grantedById],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_record_grants_granted_by_id_fkey",
+    }),
+    index("financial_contract_grant_lookup_idx").on(
+      t.contractId,
+      t.userId,
+      t.permission,
+      t.version.desc(),
+    ),
+    check(
+      "financial_contract_record_permission_chk",
+      sql`${t.permission} IN ('view','prepare','review','approve','execute','manage')`,
+    ),
+    check(
+      "financial_contract_record_grant_state_chk",
+      sql`${t.state} IN ('active','revoked')`,
+    ),
   ],
 );
 
@@ -233,18 +518,66 @@ export const financialContractHistoryTable = pgTable(
   "financial_contract_history",
   {
     id: text("id").primaryKey(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    contractId: text("contract_id").references(() => financialContractsTable.id).notNull(),
-    contractVersionId: text("contract_version_id").references(() => financialContractVersionsTable.id),
-    amendmentId: text("amendment_id").references(() => financialContractAmendmentsTable.id),
-    amendmentVersionId: text("amendment_version_id").references(() => financialContractAmendmentVersionsTable.id),
-    actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id").notNull(),
+    contractId: text("contract_id").notNull(),
+    contractVersionId: text("contract_version_id"),
+    amendmentId: text("amendment_id"),
+    amendmentVersionId: text("amendment_version_id"),
+    actorUserId: integer("actor_user_id").notNull(),
     eventType: text("event_type").notNull(),
     beforeState: text("before_state"),
     afterState: text("after_state"),
     reasonCode: text("reason_code").notNull(),
-    evidence: jsonb("evidence").$type<Record<string, unknown>>().notNull().default({}),
-    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+    evidence: jsonb("evidence")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
+  (t) => [
+    foreignKey({
+      columns: [t.companyId],
+      foreignColumns: [companiesTable.id],
+      name: "financial_contract_history_company_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.projectId],
+      foreignColumns: [projectsTable.id],
+      name: "financial_contract_history_project_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.contractId],
+      foreignColumns: [financialContractsTable.id],
+      name: "financial_contract_history_contract_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.contractVersionId],
+      foreignColumns: [financialContractVersionsTable.id],
+      name: "financial_contract_history_contract_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.amendmentId],
+      foreignColumns: [financialContractAmendmentsTable.id],
+      name: "financial_contract_history_amendment_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.amendmentVersionId],
+      foreignColumns: [financialContractAmendmentVersionsTable.id],
+      name: "financial_contract_history_amendment_version_id_fkey",
+    }),
+    foreignKey({
+      columns: [t.actorUserId],
+      foreignColumns: [usersTable.id],
+      name: "financial_contract_history_actor_user_id_fkey",
+    }),
+    index("financial_contract_history_scope_idx").on(
+      t.companyId,
+      t.projectId,
+      t.contractId,
+      t.occurredAt,
+    ),
+  ],
 );

@@ -3,6 +3,7 @@ import {
   check,
   date,
   integer,
+  index,
   jsonb,
   numeric,
   pgTable,
@@ -20,23 +21,35 @@ export const companyCostLibraryVersionsTable = pgTable(
   {
     id: text("id").primaryKey(),
     libraryId: text("library_id").notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
+    companyId: integer("company_id")
+      .references(() => companiesTable.id)
+      .notNull(),
     version: integer("version").notNull(),
     effectiveDate: date("effective_date").notNull(),
     status: text("status").notNull(),
     reason: text("reason").notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     supersedesId: text("supersedes_id"),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdById: integer("created_by_id")
+      .references(() => usersTable.id)
+      .notNull(),
     reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
     approvedById: integer("approved_by_id").references(() => usersTable.id),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("company_cost_library_version_uidx").on(table.libraryId, table.version),
-    check("company_cost_library_status_chk", sql`${table.status} IN ('draft','submitted','under_review','approved','rejected','deprecated')`),
+    uniqueIndex("company_cost_library_version_uidx").on(
+      table.libraryId,
+      table.version,
+    ),
+    check(
+      "company_cost_library_status_chk",
+      sql`${table.status} IN ('draft','submitted','under_review','approved','rejected','deprecated')`,
+    ),
   ],
 );
 
@@ -44,7 +57,9 @@ export const companyCostNodesTable = pgTable(
   "company_cost_nodes",
   {
     id: text("id").primaryKey(),
-    libraryVersionId: text("library_version_id").references(() => companyCostLibraryVersionsTable.id).notNull(),
+    libraryVersionId: text("library_version_id")
+      .references(() => companyCostLibraryVersionsTable.id)
+      .notNull(),
     stableNodeId: text("stable_node_id").notNull(),
     parentStableNodeId: text("parent_stable_node_id"),
     hierarchicalPath: text("hierarchical_path").notNull(),
@@ -61,7 +76,20 @@ export const companyCostNodesTable = pgTable(
     effectiveTo: date("effective_to"),
     deprecationReason: text("deprecation_reason"),
   },
-  (table) => [uniqueIndex("company_cost_node_stable_uidx").on(table.libraryVersionId, table.stableNodeId)],
+  (table) => [
+    uniqueIndex("company_cost_node_stable_uidx").on(
+      table.libraryVersionId,
+      table.stableNodeId,
+    ),
+    uniqueIndex("company_cost_active_code_uidx")
+      .on(table.libraryVersionId, table.companyCode)
+      .where(sql`${table.active}`),
+    uniqueIndex("company_cost_sibling_order_uidx").on(
+      table.libraryVersionId,
+      sql`COALESCE(${table.parentStableNodeId}, '')`,
+      table.sortOrder,
+    ),
+  ],
 );
 
 export const projectCostStructureVersionsTable = pgTable(
@@ -69,24 +97,40 @@ export const projectCostStructureVersionsTable = pgTable(
   {
     id: text("id").primaryKey(),
     structureId: text("structure_id").notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    libraryVersionId: text("library_version_id").references(() => companyCostLibraryVersionsTable.id).notNull(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    companyId: integer("company_id")
+      .references(() => companiesTable.id)
+      .notNull(),
+    libraryVersionId: text("library_version_id")
+      .references(() => companyCostLibraryVersionsTable.id)
+      .notNull(),
     version: integer("version").notNull(),
     status: text("status").notNull(),
     reason: text("reason").notNull(),
     validationFingerprint: text("validation_fingerprint").notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     supersedesId: text("supersedes_id"),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdById: integer("created_by_id")
+      .references(() => usersTable.id)
+      .notNull(),
     reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
     approvedById: integer("approved_by_id").references(() => usersTable.id),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("project_cost_structure_version_uidx").on(table.structureId, table.version),
-    check("project_cost_structure_status_chk", sql`${table.status} IN ('draft','submitted','under_review','approved','rejected','deprecated')`),
+    uniqueIndex("project_cost_structure_version_uidx").on(
+      table.structureId,
+      table.version,
+    ),
+    check(
+      "project_cost_structure_status_chk",
+      sql`${table.status} IN ('draft','submitted','under_review','approved','rejected','deprecated')`,
+    ),
   ],
 );
 
@@ -94,10 +138,14 @@ export const projectCostNodesTable = pgTable(
   "project_cost_nodes",
   {
     id: text("id").primaryKey(),
-    structureVersionId: text("structure_version_id").references(() => projectCostStructureVersionsTable.id).notNull(),
+    structureVersionId: text("structure_version_id")
+      .references(() => projectCostStructureVersionsTable.id)
+      .notNull(),
     stableProjectNodeId: text("stable_project_node_id").notNull(),
     companyStableNodeId: text("company_stable_node_id").notNull(),
-    companyLibraryVersionId: text("company_library_version_id").references(() => companyCostLibraryVersionsTable.id).notNull(),
+    companyLibraryVersionId: text("company_library_version_id")
+      .references(() => companyCostLibraryVersionsTable.id)
+      .notNull(),
     parentProjectNodeId: text("parent_project_node_id"),
     projectCode: text("project_code").notNull(),
     projectName: text("project_name").notNull(),
@@ -111,7 +159,15 @@ export const projectCostNodesTable = pgTable(
     effectiveTo: date("effective_to"),
     mappingProvenance: text("mapping_provenance").notNull(),
   },
-  (table) => [uniqueIndex("project_cost_node_stable_uidx").on(table.structureVersionId, table.stableProjectNodeId)],
+  (table) => [
+    uniqueIndex("project_cost_node_stable_uidx").on(
+      table.structureVersionId,
+      table.stableProjectNodeId,
+    ),
+    uniqueIndex("project_cost_active_code_uidx")
+      .on(table.structureVersionId, table.projectCode)
+      .where(sql`${table.active}`),
+  ],
 );
 
 export const projectBudgetVersionsTable = pgTable(
@@ -119,14 +175,22 @@ export const projectBudgetVersionsTable = pgTable(
   {
     id: text("id").primaryKey(),
     budgetId: text("budget_id").notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    structureVersionId: text("structure_version_id").references(() => projectCostStructureVersionsTable.id).notNull(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    companyId: integer("company_id")
+      .references(() => companiesTable.id)
+      .notNull(),
+    structureVersionId: text("structure_version_id")
+      .references(() => projectCostStructureVersionsTable.id)
+      .notNull(),
     version: integer("version").notNull(),
     currency: text("currency").notNull(),
     status: text("status").notNull(),
     purpose: text("purpose").notNull(),
-    preparedById: integer("prepared_by_id").references(() => usersTable.id).notNull(),
+    preparedById: integer("prepared_by_id")
+      .references(() => usersTable.id)
+      .notNull(),
     submittedById: integer("submitted_by_id").references(() => usersTable.id),
     reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
     approvedById: integer("approved_by_id").references(() => usersTable.id),
@@ -136,17 +200,35 @@ export const projectBudgetVersionsTable = pgTable(
     outcomeReason: text("outcome_reason"),
     previousApprovedId: text("previous_approved_id"),
     contentFingerprint: text("content_fingerprint").notNull(),
-    calculatedTotal: numeric("calculated_total", { precision: 30, scale: 6 }).notNull(),
+    calculatedTotal: numeric("calculated_total", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
     approvedSnapshotId: text("approved_snapshot_id"),
     sourceFileId: integer("source_file_id").references(() => filesTable.id),
     revision: integer("revision").default(1).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    uniqueIndex("project_budget_version_uidx").on(table.budgetId, table.version),
+    uniqueIndex("project_budget_version_uidx").on(
+      table.budgetId,
+      table.version,
+    ),
+    uniqueIndex("project_original_budget_uidx")
+      .on(table.projectId)
+      .where(
+        sql`${table.status} = 'approved' AND ${table.previousApprovedId} IS NULL`,
+      ),
     check("project_budget_currency_chk", sql`${table.currency} ~ '^[A-Z]{3}$'`),
-    check("project_budget_status_chk", sql`${table.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','superseded','voided')`),
+    check(
+      "project_budget_status_chk",
+      sql`${table.status} IN ('draft','submitted','under_review','approved','returned','rejected','withdrawn','superseded','voided')`,
+    ),
   ],
 );
 
@@ -154,9 +236,13 @@ export const projectBudgetLinesTable = pgTable(
   "project_budget_lines",
   {
     id: text("id").primaryKey(),
-    budgetVersionId: text("budget_version_id").references(() => projectBudgetVersionsTable.id).notNull(),
+    budgetVersionId: text("budget_version_id")
+      .references(() => projectBudgetVersionsTable.id)
+      .notNull(),
     stableLineId: text("stable_line_id").notNull(),
-    projectCostNodeId: text("project_cost_node_id").references(() => projectCostNodesTable.id).notNull(),
+    projectCostNodeId: text("project_cost_node_id")
+      .references(() => projectCostNodesTable.id)
+      .notNull(),
     description: text("description").notNull(),
     amount: numeric("amount", { precision: 30, scale: 6 }).notNull(),
     quantity: numeric("quantity", { precision: 30, scale: 6 }),
@@ -166,32 +252,62 @@ export const projectBudgetLinesTable = pgTable(
     provenance: text("provenance"),
     sortOrder: integer("sort_order").notNull(),
   },
-  (table) => [uniqueIndex("project_budget_line_stable_uidx").on(table.budgetVersionId, table.stableLineId)],
+  (table) => [
+    uniqueIndex("project_budget_line_stable_uidx").on(
+      table.budgetVersionId,
+      table.stableLineId,
+    ),
+  ],
 );
 
 export const approvedBudgetSnapshotsTable = pgTable(
   "approved_budget_snapshots",
   {
     id: text("id").primaryKey(),
-    budgetVersionId: text("budget_version_id").references(() => projectBudgetVersionsTable.id).notNull().unique(),
+    budgetVersionId: text("budget_version_id")
+      .references(() => projectBudgetVersionsTable.id)
+      .notNull()
+      .unique(),
     budgetId: text("budget_id").notNull(),
     budgetVersion: integer("budget_version").notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    structureVersionId: text("structure_version_id").references(() => projectCostStructureVersionsTable.id).notNull(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    companyId: integer("company_id")
+      .references(() => companiesTable.id)
+      .notNull(),
+    structureVersionId: text("structure_version_id")
+      .references(() => projectCostStructureVersionsTable.id)
+      .notNull(),
     currency: text("currency").notNull(),
     total: numeric("total", { precision: 30, scale: 6 }).notNull(),
-    originalTotal: numeric("original_total", { precision: 30, scale: 6 }).notNull(),
-    currentTotal: numeric("current_total", { precision: 30, scale: 6 }).notNull(),
-    differenceFromOriginal: numeric("difference_from_original", { precision: 30, scale: 6 }).notNull(),
-    approvedById: integer("approved_by_id").references(() => usersTable.id).notNull(),
+    originalTotal: numeric("original_total", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
+    currentTotal: numeric("current_total", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
+    differenceFromOriginal: numeric("difference_from_original", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
+    approvedById: integer("approved_by_id")
+      .references(() => usersTable.id)
+      .notNull(),
     approvedAt: timestamp("approved_at", { withTimezone: true }).notNull(),
     approvalPolicyId: text("approval_policy_id").notNull(),
-    approvalLimit: numeric("approval_limit", { precision: 30, scale: 6 }).notNull(),
+    approvalLimit: numeric("approval_limit", {
+      precision: 30,
+      scale: 6,
+    }).notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     snapshotFingerprint: text("snapshot_fingerprint").notNull().unique(),
     previousSnapshotId: text("previous_snapshot_id"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
 );
 
@@ -199,9 +315,13 @@ export const approvedBudgetSnapshotLinesTable = pgTable(
   "approved_budget_snapshot_lines",
   {
     id: text("id").primaryKey(),
-    snapshotId: text("snapshot_id").references(() => approvedBudgetSnapshotsTable.id).notNull(),
+    snapshotId: text("snapshot_id")
+      .references(() => approvedBudgetSnapshotsTable.id)
+      .notNull(),
     stableLineId: text("stable_line_id").notNull(),
-    projectCostNodeId: text("project_cost_node_id").references(() => projectCostNodesTable.id).notNull(),
+    projectCostNodeId: text("project_cost_node_id")
+      .references(() => projectCostNodesTable.id)
+      .notNull(),
     projectCode: text("project_code").notNull(),
     projectName: text("project_name").notNull(),
     hierarchicalPath: text("hierarchical_path").notNull(),
@@ -213,17 +333,30 @@ export const approvedBudgetSnapshotLinesTable = pgTable(
     notes: text("notes"),
     sortOrder: integer("sort_order").notNull(),
   },
-  (table) => [uniqueIndex("approved_snapshot_line_stable_uidx").on(table.snapshotId, table.stableLineId)],
+  (table) => [
+    uniqueIndex("approved_snapshot_line_stable_uidx").on(
+      table.snapshotId,
+      table.stableLineId,
+    ),
+  ],
 );
 
 export const budgetImportSessionsTable = pgTable(
   "budget_import_sessions",
   {
     id: text("id").primaryKey(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
-    sourceFileId: integer("source_file_id").references(() => filesTable.id).notNull(),
+    projectId: integer("project_id")
+      .references(() => projectsTable.id)
+      .notNull(),
+    companyId: integer("company_id")
+      .references(() => companiesTable.id)
+      .notNull(),
+    actorUserId: integer("actor_user_id")
+      .references(() => usersTable.id)
+      .notNull(),
+    sourceFileId: integer("source_file_id")
+      .references(() => filesTable.id)
+      .notNull(),
     fileHash: text("file_hash").notNull(),
     parsedFingerprint: text("parsed_fingerprint").notNull(),
     currency: text("currency").notNull(),
@@ -231,10 +364,19 @@ export const budgetImportSessionsTable = pgTable(
     acceptedCount: integer("accepted_count").notNull(),
     rejectedCount: integer("rejected_count").notNull(),
     preview: jsonb("preview").notNull(),
-    confirmedBudgetVersionId: text("confirmed_budget_version_id").references(() => projectBudgetVersionsTable.id).unique(),
+    confirmedBudgetVersionId: text("confirmed_budget_version_id")
+      .references(() => projectBudgetVersionsTable.id)
+      .unique(),
     idempotencyKey: text("idempotency_key").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   },
-  (table) => [uniqueIndex("budget_import_project_key_uidx").on(table.projectId, table.idempotencyKey)],
+  (table) => [
+    uniqueIndex("budget_import_project_key_uidx").on(
+      table.projectId,
+      table.idempotencyKey,
+    ),
+  ],
 );

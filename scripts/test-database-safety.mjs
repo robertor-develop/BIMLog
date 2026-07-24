@@ -1,8 +1,13 @@
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { analyzeSql, collectSchemaContract, runStaticGate } from "./check-database-safety.mjs";
+import {
+  analyzeSql,
+  collectSchemaContract,
+  runStaticGate,
+} from "./check-database-safety.mjs";
 import { databaseToolResultFailed } from "../lib/db/scripts/sync-development-schema.mjs";
 import {
   evaluateParity,
@@ -28,16 +33,71 @@ const unsafePreview = `
 const previewViolations = analyzeSql(unsafePreview, "fixture");
 assert.ok(previewViolations.some((item) => item.includes("DROP TABLE")));
 assert.ok(previewViolations.some((item) => item.includes("CASCADE")));
-assert.ok(previewViolations.some((item) => item.includes("DISABLE ROW LEVEL SECURITY")));
+assert.ok(
+  previewViolations.some((item) => item.includes("DISABLE ROW LEVEL SECURITY")),
+);
 assert.ok(previewViolations.some((item) => item.includes("DROP INDEX")));
 assert.ok(previewViolations.some((item) => item.includes("DROP VIEW")));
-assert.ok(previewViolations.some((item) => item.includes("SET ROW_SECURITY OFF")));
+assert.ok(
+  previewViolations.some((item) => item.includes("SET ROW_SECURITY OFF")),
+);
 assert.ok(
   analyzeSql('client.query("DROP/**/TABLE unsafe_table")', "source fixture", {
     sourceContainer: true,
   }).some((item) => item.includes("DROP TABLE")),
   "comment-separated destructive SQL inside a source string must fail closed",
 );
+
+const rejectedPublishPreview = fs.readFileSync(
+  path.resolve("scripts/fixtures/replit-publish-preview-c40d1c4.sql"),
+  "utf8",
+);
+assert.equal(
+  crypto.createHash("sha256").update(rejectedPublishPreview).digest("hex"),
+  "6f4fa8cc7c88c751ad2d78705e785ab9111dccaa8a3c103969bb83d7f5de73fa",
+  "the complete rejected Replit preview fixture must remain byte-identical",
+);
+const previewDropNames = [
+  ...rejectedPublishPreview.matchAll(
+    /\bDROP\s+(?:CONSTRAINT|INDEX)\s+"([^"]+)"/gi,
+  ),
+].map((match) => match[1]);
+assert.equal(
+  previewDropNames.length,
+  105,
+  "fixture must retain all 105 destructive operations",
+);
+assert.equal(
+  (rejectedPublishPreview.match(/\bDROP\s+CONSTRAINT\b/gi) ?? []).length,
+  87,
+);
+assert.equal(
+  (rejectedPublishPreview.match(/\bDROP\s+INDEX\b/gi) ?? []).length,
+  18,
+);
+const rejectedPreviewViolations = analyzeSql(
+  rejectedPublishPreview,
+  "complete rejected Replit preview",
+);
+assert.ok(
+  rejectedPreviewViolations.some((item) => item.includes("DROP CONSTRAINT")),
+);
+assert.ok(
+  rejectedPreviewViolations.some((item) => item.includes("DROP INDEX")),
+);
+const declarativeSchema = fs
+  .readdirSync(path.resolve("lib/db/src/schema"))
+  .filter((name) => name.endsWith(".ts"))
+  .map((name) =>
+    fs.readFileSync(path.resolve("lib/db/src/schema", name), "utf8"),
+  )
+  .join("\n");
+for (const name of previewDropNames) {
+  assert.ok(
+    declarativeSchema.includes(name),
+    `declarative schema must preserve published object authority for ${name}`,
+  );
+}
 
 const syncScript = path.resolve("lib/db/scripts/sync-development-schema.mjs");
 function targetFixture(environment) {
@@ -90,7 +150,11 @@ assert.equal(
   "database-tool error output must fail even when the child returns zero",
 );
 assert.equal(
-  databaseToolResultFailed({ status: 0, stdout: "changes applied", stderr: "" }),
+  databaseToolResultFailed({
+    status: 0,
+    stdout: "changes applied",
+    stderr: "",
+  }),
   false,
   "clean zero-exit database-tool output must remain eligible for parity",
 );
@@ -110,9 +174,14 @@ assert.equal(
   "fixture must reproduce PostgreSQL's 63-byte identifier collision",
 );
 const explicitConstraintNames = requiredConstraints.map((item) => item.name);
-assert.equal(new Set(explicitConstraintNames).size, explicitConstraintNames.length);
+assert.equal(
+  new Set(explicitConstraintNames).size,
+  explicitConstraintNames.length,
+);
 assert.ok(
-  explicitConstraintNames.every((name) => Buffer.byteLength(name, "utf8") <= 63),
+  explicitConstraintNames.every(
+    (name) => Buffer.byteLength(name, "utf8") <= 63,
+  ),
   "explicit constraint names must be PostgreSQL length-safe",
 );
 
@@ -127,11 +196,18 @@ const passingConstraints = new Map(
   ]),
 );
 assert.deepEqual(
-  evaluateParity({ tables: [], indexes: [] }, new Set(), new Set(), passingConstraints),
+  evaluateParity(
+    { tables: [], indexes: [] },
+    new Set(),
+    new Set(),
+    passingConstraints,
+  ),
   { missingTables: [], missingIndexes: [], constraintProblems: [] },
 );
 const missingUniqueConstraint = new Map(passingConstraints);
-missingUniqueConstraint.delete("fc_import_confirmed_version_uk");
+missingUniqueConstraint.delete(
+  "financial_contract_import_ses_confirmed_contract_version_id_key",
+);
 assert.ok(
   evaluateParity(
     { tables: [], indexes: [] },
@@ -139,19 +215,29 @@ assert.ok(
     new Set(),
     missingUniqueConstraint,
   ).constraintProblems.some((problem) =>
-    problem.includes("missing constraint fc_import_confirmed_version_uk"),
+    problem.includes(
+      "missing constraint financial_contract_import_ses_confirmed_contract_version_id_key",
+    ),
   ),
   "parity must reject the observed foreign-key-only collision state",
 );
 const wrongForeignKey = new Map(passingConstraints);
-wrongForeignKey.set("fc_import_confirmed_version_fk", {
-  tableName: "financial_contract_import_sessions",
-  type: "f",
-  definition: "FOREIGN KEY (confirmed_contract_version_id) REFERENCES wrong_table(id)",
-});
+wrongForeignKey.set(
+  "financial_contract_import_ses_confirmed_contract_version_i_fkey",
+  {
+    tableName: "financial_contract_import_sessions",
+    type: "f",
+    definition:
+      "FOREIGN KEY (confirmed_contract_version_id) REFERENCES wrong_table(id)",
+  },
+);
 assert.ok(
-  evaluateParity({ tables: [], indexes: [] }, new Set(), new Set(), wrongForeignKey)
-    .constraintProblems.length > 0,
+  evaluateParity(
+    { tables: [], indexes: [] },
+    new Set(),
+    new Set(),
+    wrongForeignKey,
+  ).constraintProblems.length > 0,
   "parity must reject a same-name constraint with the wrong definition",
 );
 
@@ -164,8 +250,14 @@ const runtimeFinancialMigration = fs.readFileSync(
   "utf8",
 );
 for (const name of explicitConstraintNames) {
-  assert.ok(declarativeFinancialSchema.includes(name), `declarative schema missing ${name}`);
-  assert.ok(runtimeFinancialMigration.includes(name), `runtime migration missing ${name}`);
+  assert.ok(
+    declarativeFinancialSchema.includes(name),
+    `declarative schema missing ${name}`,
+  );
+  assert.ok(
+    runtimeFinancialMigration.includes(name),
+    `runtime migration missing ${name}`,
+  );
 }
 assert.match(
   runtimeFinancialMigration,
@@ -186,7 +278,10 @@ for (const table of [
   "financial_contract_history",
   "meeting_lens_viewpoint_links",
 ]) {
-  assert.ok(contract.tables.includes(table), `missing protected schema table ${table}`);
+  assert.ok(
+    contract.tables.includes(table),
+    `missing protected schema table ${table}`,
+  );
 }
 assert.deepEqual(contract.missingExports, []);
 
