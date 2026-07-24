@@ -4,6 +4,28 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Five-index preview correction accepted in source; Replit validation remains blocked
+
+- Accepted product commit `cac75b02fc0a9399902bd1442cc61d1a70fb33e9` corrects the five remaining
+  Replit drop/recreate index mismatches without table, record, constraint, or production DDL changes.
+- Three coordinator indexes now preserve their existing plain ascending definitions. The Living Brief audit and
+  financial grant indexes explicitly preserve the startup-authority `DESC NULLS FIRST` semantics instead of
+  Drizzle's incompatible bare-`desc` null ordering.
+- The exact five-index preview is a hash-bound regression fixture and fails the destructive SQL gate. Focused
+  database safety, 133-table/147-index/93-startup-table reconciliation, typechecks, API build, secret/privacy,
+  mojibake, and diff checks passed.
+- Before Replit alignment, its two local platform checkpoints must be confirmed preserved outside release
+  `master`; then the workspace must cleanly align to the exact accepted remote master. The next Replit preview must
+  retain only the expected additive RFI settings table, three foreign keys, and unique project index, with zero
+  destructive or unexplained statements.
+- Mandatory next acceptance item: upgrade schema parity from name/count checks to semantic index comparison
+  covering ordered columns, direction, null placement, uniqueness, predicate, access method, expressions,
+  operator classes, included columns, and constraint definitions. Bind that semantic parity and the destructive
+  preview parser into pre-push/final gates for every schema or startup-migration change.
+- Preview rehearsal must occur before release day. Declarative schema is the single schema authority; new
+  runtime-only table/index definitions are prohibited unless mirrored in declarative source and covered by parity
+  and regression proof.
+
 ### Replit complete-preview name alignment accepted locally; final preview remains pending
 
 - Local source commit `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` aligns all 105 constraint/index authorities

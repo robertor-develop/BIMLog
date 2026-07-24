@@ -5,7 +5,7 @@
       "taskId": "living-brief-content-reconciliation-build-2-integration",
       "reviewedThroughCommit": "178462eef6edbde08e2d44efb0a944b812f98480",
       "reviewedAt": "2026-07-21T17:22:05.076Z",
-      "status": "local_candidate",
+      "status": "accepted_source",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -3145,6 +3145,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "27cca6a3637dbdfe6f6b6ff51f06083158a9454ca357264290536016faf2c63f"
+    },
+    {
+      "taskId": "replit-five-index-preview-alignment-hotfix",
+      "reviewedThroughCommit": "cac75b02fc0a9399902bd1442cc61d1a70fb33e9",
+      "reviewedAt": "2026-07-24T22:50:53.557Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Local-only publication-safety candidate aligning five declarative and runtime index definitions to existing database order and null-placement semantics, with exact preview regression and mandatory semantic-parity follow-up.",
+      "workstreams": [
+        "database-publication-safety",
+        "replit-publish-preview",
+        "schema-authority"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing module ownership, product behavior, and data meaning."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The task remains bounded to an isolated source correction with no Replit, production, or pending-candidate mutation."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds single schema authority, semantic index parity, final-gate enforcement, and pre-release preview rehearsal requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, customer capability, or user workflow changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PostgreSQL, Drizzle, startup migration, guarded development synchronization, and Replit architecture remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, installation, or field workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract, PDF, DOCX, XLSX, screenshot, or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, certification, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted source and preserves the separate frozen Replit operational release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining Replit alignment and preview gates plus the mandatory semantic-parity acceptance item."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the five-index mismatch, local proof, release blocker, and explicit non-actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d61490c6511bb2e2fd9013398adbad48e1246f6d2b47e3370e8671458b205ba0"
     }
   ]
 }

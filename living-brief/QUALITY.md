@@ -384,7 +384,12 @@ Ready/acceptance boundary, where its semantic declaration is still mandatory bef
   requires a verified restore point plus exact pre/post affected-table record-count manifests. Declarative
   constraint and index names must be explicit, stable, length-safe, and aligned with existing database authorities;
   the complete rejected preview must be retained as a regression fixture when generated-name churn would otherwise
-  produce destructive drop-and-recreate SQL.
+  produce destructive drop-and-recreate SQL. Declarative schema is the single schema authority; a runtime/startup
+  table, index, or constraint definition is permitted only when identically mirrored and tested. Semantic parity
+  must compare ordered columns, ASC/DESC, NULLS FIRST/LAST, uniqueness, predicate, method, expressions, operator
+  classes, included columns, and constraint definitions, and must run with the destructive-preview parser in the
+  pre-push/final gate for every schema or startup-migration change. Complete preview rehearsal occurs before release
+  day rather than for the first time at Publish.
 - Durable credentials and other security authorities are never reseeded by build, startup, restart, publish,
   source-mirror synchronization, or migration. Initialization is create-if-absent only through a controlled
   authenticated bootstrap or one-time migration of existing durable state. Reset requires current Super

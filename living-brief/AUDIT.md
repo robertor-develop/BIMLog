@@ -740,3 +740,28 @@ PostgreSQL database proved first and repeat declarative application with zero de
 Replit, provider, credential, customer data, deployment, or publication access occurred. The final decision still
 requires exact Replit master attestation, guarded development-only synchronization, complete regenerated preview
 inspection, and Roberto's explicit Publish approval.
+
+---
+
+## Five-index publication-preview correction audit - July 24, 2026
+
+Status: accepted source correction; not synchronized in Replit, previewed again, published, deployed, or
+production/customer verified at capture time.
+
+After accepted source `e3c28a4f3ecce832b0a3ef8f05550a1408fc2017` passed guarded development sync and
+constraint-aware parity, the complete Replit preview retained five `DROP INDEX` and equivalent re-create
+operations. Accepted preview evidence proved that three coordinator indexes already use plain ascending
+definitions, while current source incorrectly declared descending order. Startup authority for the Living Brief
+audit and financial grant indexes uses descending order, which PostgreSQL canonicalizes with nulls first; bare
+Drizzle `.desc()` generated nulls last and therefore remained semantically different.
+
+Local candidate `cac75b02fc0a9399902bd1442cc61d1a70fb33e9` mirrors the three plain ascending definitions
+and explicitly binds the two descending definitions to `NULLS FIRST` across declarative and runtime authority.
+The exact five-index drop/recreate preview is retained as a hash-bound fixture and fails closed. Focused database
+safety, source reconciliation, typechecks, affected API build, tracked-configuration/current-diff privacy checks,
+mojibake, and diff checks passed.
+
+This incident opens a mandatory follow-up acceptance item for semantic index parity, final-gate enforcement,
+single schema authority, and pre-release preview rehearsal. No manual production DDL, database write, Replit
+mutation, provider/credential action, publication, deployment, customer access, or pending-candidate integration
+occurred. Source delivery alone does not authorize Publish.

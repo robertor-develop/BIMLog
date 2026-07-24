@@ -9,6 +9,15 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+The five-index Replit preview correction is accepted in source at product commit
+`cac75b02fc0a9399902bd1442cc61d1a70fb33e9`. It aligns three coordinator indexes to their existing plain
+ascending production definitions and aligns the Living Brief audit and financial grant indexes to the
+`DESC NULLS FIRST` semantics established by their startup authority. The exact five-index drop/recreate preview
+is retained as a fail-closed fixture. Source acceptance does not prove Replit alignment or authorize publication.
+The divergent Replit checkpoint history must be preserved before clean alignment; guarded development sync,
+complete regenerated preview, explicit GO, Publish, deployment, and production/customer verification remain
+separate operational gates.
+
 Complete Replit publication-preview name alignment is accepted locally in source at
 `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b`. It binds the 105 constraint/index authorities from the rejected
 complete preview to their existing production-safe names, preserves their definitions and records, and adds the
