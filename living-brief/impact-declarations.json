@@ -3452,6 +3452,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "def26205b5e6b8e3d3410e9e5c860e1b00ecafba3e268dc9666cd840d5d6f950"
+    },
+    {
+      "taskId": "replit-deterministic-api-artifact-closure",
+      "reviewedThroughCommit": "76addb6eb7b791a7579ca5c2e7d95a6526b544a1",
+      "reviewedAt": "2026-07-25T12:09:13.7459803-04:00",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Repository-controlled production runtime closure with build-bound isolated capability and startup proof.",
+      "workstreams": [
+        "replit-promotion-readiness",
+        "production-packaging",
+        "platform-continuity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Provider boundaries and all customer-facing capability ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows the serialized release, F-drive, evidence, and Replit operating boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed quality authority is exercised by build-bound closure and capability proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, product capability, or user workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated module structure is unchanged; production packaging authority is recorded in status and open-loop authorities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, installation, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report output semantics and layouts are unchanged; existing PDF and document capabilities are exercised only as packaging proof."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the deterministic artifact closure and preserves separate Replit Linux build and deployment truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records dirty-workspace preservation, clean realignment, frozen install, Republish, promotion, and deployed verification as unfinished."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sanitized packaging evidence remains external; no historical audit claim changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e6eed14d821ad896bd153531a4c2307b612121a9c347d9379073acd6a70129f2"
     }
   ]
 }

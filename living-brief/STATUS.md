@@ -9,6 +9,17 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+The deterministic Replit API artifact closure is accepted locally in source at product commit
+`76addb6eb7b791a7579ca5c2e7d95a6526b544a1`. The production build now bundles compatible pure-JavaScript
+dependencies and creates a lockfile-backed, artifact-local runtime tree for native, asset-bearing, and remaining
+external packages. An esbuild metafile, complete link-containment check, workspace-link verification, and
+artifact-only capability/startup proof fail the build before publication if the runtime closure is incomplete.
+The isolated proof executes PDF generation/parsing, image processing, canvas rendering, email/archive/DOCX/auth
+imports, the historical non-5xx `/api` contract, and truthful `/api/v1/healthz` readiness without production
+credentials or database access. This source acceptance does not prove a Replit Linux build, promotion, deployed
+health, or customer workflow; preservation of Replit's dirty Agent edits, clean master realignment, and one
+explicitly authorized Republish remain separate operational gates.
+
 The bounded Replit startup-risk correction is accepted in source at product commit
 `3ae00ec0138fb2c443eae320b80b7b3383fe36fc`. During the finite application-import window, exact `/api`
 preserves its historical non-ready Express-style `404` behavior required by the Replit artifact promoter, while

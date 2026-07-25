@@ -4,6 +4,30 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Deterministic Replit API artifact closure accepted locally; Republish proof pending
+
+- Product commit `76addb6eb7b791a7579ca5c2e7d95a6526b544a1` makes the repository build the production
+  runtime dependency closure instead of relying on Replit's optimizer or installed workspace links.
+- Compatible pure-JavaScript packages are bundled. Native and asset-bearing packages, PostgreSQL, and every
+  remaining external are deployed from the frozen workspace lockfile into the artifact, with no dependency link
+  permitted to escape that artifact.
+- The production build emits an esbuild metafile and runs the isolated artifact proof itself. PDF generation and
+  parsing, Sharp, Canvas, SendGrid import, ZIP, DOCX, PDF-lib, bcrypt/auth, workspace links, exact `/api` non-5xx,
+  and real health readiness must pass before the build succeeds.
+- The local Windows proof passed with synthetic values and an unreachable loopback database. The frozen lockfile
+  includes the Linux x64 native variants; the next Replit build must independently execute the same bound proof
+  on its Linux build host before promotion.
+- Replit's uncommitted Agent edits are not part of this source. Before realignment they must be preserved without
+  merging them into release master; authoritative `master` must then be recreated cleanly from the accepted
+  remote commit.
+- The observed Vite failure resolving declared `@workspace/api-zod` is treated as damaged/incomplete Replit
+  install state, not a Submittals source defect. After realignment, Replit must restore the frozen workspace
+  installation and source attestation before Republish.
+- Remaining gates are normal push, exact Replit master equality, clean frozen install, one explicitly authorized
+  Republish, successful artifact-only Linux proof/build/promotion, deployed health, and customer-workflow
+  verification. No Replit, database, schema, migration, secret, production, customer-data, Publish, or deployment
+  mutation occurred in this source correction.
+
 ### Bounded Replit startup-risk correction accepted in source; Republish proof pending
 
 - Product commit `3ae00ec0138fb2c443eae320b80b7b3383fe36fc` preserves exact `/api` as a
