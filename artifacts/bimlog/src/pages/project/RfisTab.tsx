@@ -3470,6 +3470,7 @@ export function RfiCanonicalForm({
   };
   const headerActions = editable ? [] : matrix.filter(action => action.key !== "save-response");
   const responseActions = matrix.filter(action => action.key === "save-response");
+  const stickyActions = editable && responseContent == null ? matrix.filter(action => action.key !== "save-response") : matrix;
   const priorityOptions = options?.priorities?.length ? options.priorities : [
     { value: "low", label: w("Low", "Baja", lang) },
     { value: "medium", label: w("Medium", "Media", lang) },
@@ -3643,7 +3644,7 @@ export function RfiCanonicalForm({
               <strong>{w("Before saving", "Antes de guardar", lang)}:</strong> {saveBlockers[0]}
               {saveBlockers.length > 1 && <span> {w(`+${saveBlockers.length - 1} more item(s).`, `+${saveBlockers.length - 1} elemento(s) mas.`, lang)}</span>}
             </div>}
-            <RfiActionBar actions={matrix} handlers={actions} loading={!!loading?.saving || !!loading?.response} />
+            <RfiActionBar actions={stickyActions} handlers={actions} loading={!!loading?.saving || !!loading?.response} />
           </div>}
         </div>
       </div>
