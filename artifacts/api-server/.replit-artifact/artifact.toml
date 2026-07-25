@@ -17,4 +17,4 @@ build = "pnpm --filter @workspace/api-server run build"
 run = "node artifacts/api-server/dist/index.cjs"
 
 [services.production.health.startup]
-path = "/api/healthz"
+path = "/api/v1/healthz"

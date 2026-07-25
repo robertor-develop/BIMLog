@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
+    "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts",

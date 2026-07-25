@@ -1,4 +1,4 @@
-import app from "./app";
+import { createApplicationBootstrap } from "./startup-bootstrap";
 
 const rawPort = process.env["PORT"];
 
@@ -14,6 +14,9 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+const bootstrap = createApplicationBootstrap(() => import("./app"));
+
+bootstrap.server.listen(port, () => {
+  console.log(`Startup listener bound on port ${port}`);
+  void bootstrap.initialize();
 });
