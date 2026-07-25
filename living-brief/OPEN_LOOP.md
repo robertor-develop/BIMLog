@@ -4,6 +4,21 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Replit early-port startup hotfix accepted in source; Republish verification pending
+
+- Product commit `048bb095bd2d4cd553eb6eedd27e0b63969d768a` binds the production listener before
+  the full application import and keeps startup or import-failure requests at truthful `503`.
+- Successful initialization switches requests to the existing Express application; its canonical
+  `/api/v1/healthz` response becomes the only `200` readiness result.
+- The tracked Replit startup probe now uses `/api/v1/healthz` instead of the unmounted `/api/healthz`.
+- Deterministic proof requires the port to bind well inside 60 seconds under a deliberately delayed import,
+  remain non-ready until load completes, then become ready; a failed import must remain non-ready and log the
+  failure.
+- Remaining gates are exact Replit alignment to the accepted remote master, one explicitly authorized Republish,
+  provider build/promote completion, and read-only deployed health/customer-workflow verification. No database,
+  schema, migration, secret, product workflow, production, customer-data, Replit Agent, Publish, or deployment
+  mutation occurred in this source correction.
+
 ### Final-six preview correction accepted in source; regenerated Replit preview remains pending
 
 - Accepted product commit `86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e` corrects the six remaining Replit

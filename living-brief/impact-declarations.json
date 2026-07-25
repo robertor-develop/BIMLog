@@ -3300,6 +3300,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1ba755b30ed205773182fbfd8ca7bf2a2e0ca301b0ac0ead15626d149ac2f4ff"
+    },
+    {
+      "taskId": "replit-early-port-startup-hotfix",
+      "reviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "reviewedAt": "2026-07-25T10:06:28.5271885-04:00",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Bounded production bootstrap correction that binds the configured port before application import, preserves truthful readiness, and corrects the repository-authoritative Replit startup probe.",
+      "workstreams": [
+        "replit-promotion-readiness",
+        "production-startup",
+        "platform-continuity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves product ownership, provider boundaries, and all customer-facing capability semantics."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows the bounded source-only workflow and preserves all established environment and authorization boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed quality authority remains intact and is exercised by deterministic startup and failure regression proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, customer capability, or user workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated structural platform authority remains current; operational bootstrap and readiness truth are recorded in status and open-loop authorities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, export, screenshot, PDF, DOCX, or spreadsheet behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the accepted early-port source correction and preserves separate deployment verification boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact Replit alignment, Republish, promotion, and deployed verification as unfinished operational gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sanitized build and local proof remain external evidence; no historical audit narrative requires modification."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "84e96da8add3872620c7eb9ce84c7bc5a72c00287a8ed1f161c601e88556268f"
     }
   ]
 }

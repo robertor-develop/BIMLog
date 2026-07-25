@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
+  "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "918784a275ef508014d01935f18b0b8fc7b47afb229719bfc93bed0470dec995",
+  "bundleSha256": "bc4af3b2aaf8005effed3eaac451e296c6a1fa5e4c45a852a7dffb6e67302c18",
   "impact": {
-    "baselineCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
+    "baselineCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
     "changedPaths": [
-      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -24,11 +23,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "claude",
@@ -36,11 +35,11 @@
       "sha256": "f50708783683946ce3de1243c8b2584c0e9432f4bc7b4c175dd72b703b249f8e",
       "sourceChangedAt": "2026-07-24T11:29:16-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "quality",
@@ -48,11 +47,11 @@
       "sha256": "cc0159ae3d074ae0b199f4a8dc3045a23485b3d7e42820045d4d2f1e7e20808d",
       "sourceChangedAt": "2026-07-25T08:35:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "vision",
@@ -60,11 +59,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "platform",
@@ -72,11 +71,11 @@
       "sha256": "ce92372b1f74f89ea4ba3b5d13676f3cd52881cdc94e1085ccbaed87b7dcaaa9",
       "sourceChangedAt": "2026-07-24T11:52:31-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "plugin",
@@ -84,11 +83,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "report_design_system",
@@ -96,11 +95,11 @@
       "sha256": "d60a3b22043a62afe9fd62866db06100f00dd2cb6d85a05fc506bbb6ac8773f6",
       "sourceChangedAt": "2026-07-24T11:52:31-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "standards_register",
@@ -108,47 +107,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "0bd925d099af6f94bca2b122816a4294d6bbb8f9de4fca902112dace7d38e9c6",
-      "sourceChangedAt": "2026-07-25T13:05:56.787Z",
+      "sha256": "97b5b7762c53f3ce4cb3ff7162d6d092a31e8c255030e30f7cebb35c966ebb6d",
+      "sourceChangedAt": "2026-07-25T14:06:28.527Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "5c6aaae79d812871098fd8ffed04906d749cd2c7db65c5941965f960e6999231",
-      "sourceChangedAt": "2026-07-25T13:05:56.787Z",
+      "sha256": "d8212c595c73aa21809dd715b9d052a7a8bfb2beaef9339cee52361594b415df",
+      "sourceChangedAt": "2026-07-25T14:06:28.527Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "81e6a10e3157c34ada153b2c82ecce95df18fb64cd4ff586e655217156c4549e",
-      "sourceChangedAt": "2026-07-25T13:05:56.787Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
-      "semanticReviewTask": "replit-final-six-preview-authority-hotfix",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-25T13:05:56.787Z"
+      "sourceChangedAt": "2026-07-25T09:08:17-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewedThroughCommit": "048bb095bd2d4cd553eb6eedd27e0b63969d768a",
+      "semanticReviewTask": "replit-early-port-startup-hotfix",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-07-25T10:06:28.5271885-04:00"
     }
   ]
 }

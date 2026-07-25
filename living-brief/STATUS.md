@@ -9,6 +9,15 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+The Replit early-port startup hotfix is accepted in source at product commit
+`048bb095bd2d4cd553eb6eedd27e0b63969d768a`. The production entrypoint now binds the configured port before
+asynchronously importing the application, returns `503` while initialization is starting or failed, and delegates
+to the existing Express handler only after a successful import. The repository-authoritative Replit startup probe
+now targets the mounted `/api/v1/healthz` route. Deterministic cold-start proof covers delayed import, ready
+transition, and failed import with preserved error logging. This source acceptance does not prove a successful
+Replit build, promotion, deployment, or customer workflow; exact remote alignment and Roberto's separately
+authorized Republish remain operational gates.
+
 The final-six Replit preview correction is accepted in source at product commit
 `86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e`. Read-only development/production catalog comparison proved that
 three coordinator indexes in production use `DESC NULLS FIRST`, while development was plain ascending. Declarative
