@@ -765,3 +765,25 @@ This incident opens a mandatory follow-up acceptance item for semantic index par
 single schema authority, and pre-release preview rehearsal. No manual production DDL, database write, Replit
 mutation, provider/credential action, publication, deployment, customer access, or pending-candidate integration
 occurred. Source delivery alone does not authorize Publish.
+
+---
+
+## Final-six publication-preview correction audit - July 25, 2026
+
+Status: accepted source correction; not synchronized in Replit, previewed again, published, deployed, or
+production/customer verified at capture time.
+
+This entry corrects the prior visual-preview inference that the three remaining coordinator indexes were plain
+ascending in production. A bounded read-only comparison of development and production system catalogs proved that
+production uses ordering option `3` (`DESC NULLS FIRST`) for the timestamp column of all three indexes, while
+development used ordering option `0` and plain ascending definitions. Method, uniqueness, key counts, attribute
+numbers, operator classes, expressions, and predicates matched.
+
+Product commit `86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e` explicitly preserves those production index
+semantics across declarative and startup authority. It also replaces declarative auto-generated RFI report-settings
+foreign-key names with the three existing PostgreSQL `_fkey` names already created by startup authority. The exact
+three-constraint/three-index drop-recreate preview is retained as a hash-bound regression fixture and fails closed.
+
+Focused database safety, source reconciliation, lock-matched typechecks, affected API build, privacy/secret,
+mojibake, Living Brief, and diff gates passed. No manual production DDL, database write, Replit mutation,
+provider/credential action, publication, deployment, customer access, or unrelated-candidate integration occurred.

@@ -4,20 +4,21 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
-### Five-index preview correction accepted in source; Replit validation remains blocked
+### Final-six preview correction accepted in source; regenerated Replit preview remains pending
 
-- Accepted product commit `cac75b02fc0a9399902bd1442cc61d1a70fb33e9` corrects the five remaining
-  Replit drop/recreate index mismatches without table, record, constraint, or production DDL changes.
-- Three coordinator indexes now preserve their existing plain ascending definitions. The Living Brief audit and
-  financial grant indexes explicitly preserve the startup-authority `DESC NULLS FIRST` semantics instead of
-  Drizzle's incompatible bare-`desc` null ordering.
-- The exact five-index preview is a hash-bound regression fixture and fails the destructive SQL gate. Focused
+- Accepted product commit `86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e` corrects the six remaining Replit
+  drop/recreate authorities without table, record, production DDL, or RFI behavior changes.
+- Read-only catalog evidence supersedes the earlier visual-preview inference: all three coordinator indexes use
+  `DESC NULLS FIRST` in production while development was plain ascending. Declarative and startup authority now
+  encode those semantics explicitly.
+- The three RFI report-settings foreign keys now preserve the existing production `_fkey` names across declarative
+  and startup authority rather than proposing Drizzle-generated replacement names.
+- The exact final-six preview is a hash-bound regression fixture and fails the destructive SQL gate. Focused
   database safety, 133-table/147-index/93-startup-table reconciliation, typechecks, API build, secret/privacy,
   mojibake, and diff checks passed.
-- Before Replit alignment, its two local platform checkpoints must be confirmed preserved outside release
-  `master`; then the workspace must cleanly align to the exact accepted remote master. The next Replit preview must
-  retain only the expected additive RFI settings table, three foreign keys, and unique project index, with zero
-  destructive or unexplained statements.
+- Replit must cleanly align to the exact accepted remote master, run guarded development-only synchronization and
+  parity, and regenerate the complete preview. The preview must be empty or explicitly inventoried additive-only,
+  with zero destructive or unexplained statements.
 - Mandatory next acceptance item: upgrade schema parity from name/count checks to semantic index comparison
   covering ordered columns, direction, null placement, uniqueness, predicate, access method, expressions,
   operator classes, included columns, and constraint definitions. Bind that semantic parity and the destructive

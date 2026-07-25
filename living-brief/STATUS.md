@@ -9,14 +9,14 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
-The five-index Replit preview correction is accepted in source at product commit
-`cac75b02fc0a9399902bd1442cc61d1a70fb33e9`. It aligns three coordinator indexes to their existing plain
-ascending production definitions and aligns the Living Brief audit and financial grant indexes to the
-`DESC NULLS FIRST` semantics established by their startup authority. The exact five-index drop/recreate preview
-is retained as a fail-closed fixture. Source acceptance does not prove Replit alignment or authorize publication.
-The divergent Replit checkpoint history must be preserved before clean alignment; guarded development sync,
-complete regenerated preview, explicit GO, Publish, deployment, and production/customer verification remain
-separate operational gates.
+The final-six Replit preview correction is accepted in source at product commit
+`86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e`. Read-only development/production catalog comparison proved that
+three coordinator indexes in production use `DESC NULLS FIRST`, while development was plain ascending. Declarative
+and startup authority now preserve the production semantics explicitly. The three RFI report-settings foreign keys
+now use the existing PostgreSQL `_fkey` names instead of Drizzle-generated replacement names. The exact six-authority
+drop/recreate preview is retained as a fail-closed fixture. Source acceptance does not prove Replit alignment or
+authorize publication; exact source attestation, guarded development sync, complete regenerated preview, explicit
+GO, Publish, deployment, and production/customer verification remain separate operational gates.
 
 Complete Replit publication-preview name alignment is accepted locally in source at
 `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b`. It binds the 105 constraint/index authorities from the rejected

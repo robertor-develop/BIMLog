@@ -3223,6 +3223,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d61490c6511bb2e2fd9013398adbad48e1246f6d2b47e3370e8671458b205ba0"
+    },
+    {
+      "taskId": "replit-final-six-preview-authority-hotfix",
+      "reviewedThroughCommit": "86a30f23a1d4999b630fe71a6a8ff4e90cd04e7e",
+      "reviewedAt": "2026-07-25T13:05:56.787Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Final publication-safety correction aligning three coordinator index definitions to catalog-proven production ordering semantics and three RFI report-settings foreign keys to existing PostgreSQL names.",
+      "workstreams": [
+        "database-publication-safety",
+        "replit-publish-preview",
+        "schema-authority"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing module ownership, product behavior, and data meaning."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work remains bounded to source authority, regression proof, normal push, and no Replit or production mutation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing semantic-parity, single-authority, destructive-preview, and pre-release rehearsal controls remain authoritative."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, customer capability, or user workflow changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PostgreSQL, Drizzle, startup migration, guarded development synchronization, and Replit architecture remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, installation, or field workflow changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, PDF, DOCX, XLSX, screenshot, or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, certification, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the final-six accepted source correction and remaining operational Publish gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact Replit alignment, guarded sync, regenerated preview, and explicit GO as unfinished."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Corrects the prior index-order inference using catalog evidence and records the six-authority source fix."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1ba755b30ed205773182fbfd8ca7bf2a2e0ca301b0ac0ead15626d149ac2f4ff"
     }
   ]
 }
