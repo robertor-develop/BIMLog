@@ -615,6 +615,90 @@ type RfiReportSettingsPayload = {
 };
 type RfiReportSettingsDocument = { schemaVersion: 1; preset: "default" | "lean"; emptyFieldMode: "not_recorded" | "hide_empty"; sections: RfiReportSettingsSection[] };
 type RfiReportSettingsSection = { id: string; visible: boolean; order: number; fields: Array<{ id: string; visible: boolean; order: number }> };
+type RfiReportExportKind = "pdf" | "docx" | "complete-pdf";
+type RfiReportRequest = { rfi: Rfi; kind: RfiReportExportKind };
+
+function cloneRfiReportSettings(settings: RfiReportSettingsDocument): RfiReportSettingsDocument {
+  return {
+    ...settings,
+    sections: settings.sections.map(section => ({
+      ...section,
+      fields: section.fields.map(field => ({ ...field })),
+    })),
+  };
+}
+
+function rfiReportKindLabel(kind: RfiReportExportKind, lang: string) {
+  if (kind === "docx") return w("RFI DOCX", "RFI DOCX", lang);
+  if (kind === "complete-pdf") return w("Complete RFI PDF", "PDF Completo RFI", lang);
+  return w("RFI PDF", "RFI PDF", lang);
+}
+
+function rfiReportExportPath(projectId: number, rfiId: number, kind: RfiReportExportKind) {
+  if (kind === "docx") return `/api/v1/projects/${projectId}/rfis/${rfiId}/export-word`;
+  if (kind === "complete-pdf") return `/api/v1/projects/${projectId}/rfis/${rfiId}/export-complete`;
+  return `/api/v1/projects/${projectId}/rfis/${rfiId}/export`;
+}
+
+function RfiReportSettingsControls({ payload, settings, lang, onChange }: {
+  payload: RfiReportSettingsPayload;
+  settings: RfiReportSettingsDocument;
+  lang: string;
+  onChange: (settings: RfiReportSettingsDocument) => void;
+}) {
+  const sectionMap = useMemo(() => new Map(settings.sections.map(section => [section.id, section])), [settings]);
+  const setSectionVisible = (sectionId: string, visible: boolean) => onChange({ ...settings, sections: settings.sections.map(section => section.id === sectionId ? { ...section, visible } : section) });
+  const setFieldVisible = (sectionId: string, fieldId: string, visible: boolean) => onChange({ ...settings, sections: settings.sections.map(section => section.id === sectionId ? { ...section, fields: section.fields.map(field => field.id === fieldId ? { ...field, visible } : field) } : section) });
+  const visiblePreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible !== false);
+  const hiddenPreview = payload.inventory.filter(section => sectionMap.get(section.id)?.visible === false);
+  return (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "end", flexWrap: "wrap" }}>
+          <Button type="button" variant="outline" size="sm" onClick={() => onChange(cloneRfiReportSettings(payload.defaultSettings))}>{w("Full Template", "Plantilla Completa", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => onChange(cloneRfiReportSettings(payload.leanPreset))}>{w("Focused Template", "Plantilla Enfocada", lang)}</Button>
+        </div>
+        <label style={{ display: "grid", gap: 4, fontSize: 12, fontWeight: 700 }}>
+          {w("Empty fields", "Campos vacios", lang)}
+          <select value={settings.emptyFieldMode} onChange={event => onChange({ ...settings, emptyFieldMode: event.target.value === "hide_empty" ? "hide_empty" : "not_recorded" })} style={{ height: 34, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "0 8px", background: "hsl(var(--background))" }}>
+            <option value="not_recorded">{w("Show Not recorded", "Mostrar No registrado", lang)}</option>
+            <option value="hide_empty">{w("Hide empty fields", "Ocultar campos vacios", lang)}</option>
+          </select>
+        </label>
+      </div>
+      <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, background: "hsl(var(--muted) / 0.25)" }}>
+        <strong>{w("Preview", "Vista previa", lang)}</strong>
+        <div>{w("Included", "Incluido", lang)}: {visiblePreview.map(section => w(section.label, section.labelEs, lang)).join(", ")}</div>
+        <div>{w("Omitted", "Omitido", lang)}: {hiddenPreview.length ? hiddenPreview.map(section => w(section.label, section.labelEs, lang)).join(", ") : w("None", "Ninguno", lang)}</div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 10, marginTop: 12 }}>
+        {payload.inventory.map(section => {
+          const configured = sectionMap.get(section.id);
+          const fieldMap = new Map((configured?.fields || []).map(field => [field.id, field]));
+          return (
+            <div key={section.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+              <label style={{ display: "flex", gap: 8, alignItems: "center", fontWeight: 700, fontSize: 12 }}>
+                <input type="checkbox" checked={configured?.visible !== false} disabled={section.mandatory} onChange={event => setSectionVisible(section.id, event.target.checked)} />
+                {w(section.label, section.labelEs, lang)}
+              </label>
+              <div style={{ display: "grid", gap: 5, marginTop: 8 }}>
+                {section.fields.map(field => {
+                  const configuredField = fieldMap.get(field.id);
+                  return (
+                    <label key={field.id} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
+                      <input type="checkbox" checked={configuredField?.visible !== false} disabled={field.mandatory} onChange={event => setFieldVisible(section.id, field.id, event.target.checked)} />
+                      {w(field.label, field.labelEs, lang)}{field.mandatory ? ` ${w("(required)", "(requerido)", lang)}` : ""}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
 
 function RfiReportScreenshotsEditor({ items = [], files, editable, lang, onChange }: { items?: NonNullable<RfiImagePresentation>["reportScreenshots"]; files: ProjectFile[]; editable: boolean; lang: string; onChange: (items: NonNullable<RfiImagePresentation>["reportScreenshots"]) => void }) {
   if (!items?.length) return null;
@@ -701,8 +785,8 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
       <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between", flexWrap: "wrap" }}>
         <div><strong>{w("Project RFI Report Settings", "Ajustes de Reporte RFI del Proyecto", lang)}</strong><div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{payload.current.legacyDefaultActive ? w("Full BIMLog report remains active until a project setting is saved.", "El reporte BIMLog completo sigue activo hasta guardar un ajuste del proyecto.", lang) : `${w("Settings version", "Version de ajustes", lang)} ${payload.current.version}`}</div></div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.defaultSettings)}>{w("Default", "Predeterminado", lang)}</Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.leanPreset)}>{w("Ruben Lean Preset", "Plantilla Lean Ruben", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.defaultSettings)}>{w("Full Template", "Plantilla Completa", lang)}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => setSettings(payload.leanPreset)}>{w("Focused Template", "Plantilla Enfocada", lang)}</Button>
           <Button type="button" variant="outline" size="sm" onClick={() => void reset()} disabled={saving}>{w("Reset to Default", "Restablecer", lang)}</Button>
           <Button type="button" size="sm" onClick={() => void save()} disabled={saving}>{saving ? w("Saving...", "Guardando...", lang) : w("Save Settings", "Guardar Ajustes", lang)}</Button>
           <Button type="button" variant="outline" size="sm" onClick={onClose}><X style={{ width: 13, height: 13 }} />{w("Close", "Cerrar", lang)}</Button>
@@ -723,6 +807,128 @@ function RfiReportSettingsPanel({ projectId, lang, onClose }: { projectId: numbe
   );
 }
 
+function GenerateRfiReportModal({ projectId, request, lang, canSaveDefaults, onClose }: {
+  projectId: number;
+  request: RfiReportRequest;
+  lang: string;
+  canSaveDefaults: boolean;
+  onClose: () => void;
+}) {
+  const { toast } = useToast();
+  const [payload, setPayload] = useState<RfiReportSettingsPayload | null>(null);
+  const [settings, setSettings] = useState<RfiReportSettingsDocument | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingDefaults, setSavingDefaults] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const token = () => JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetch(`/api/v1/projects/${projectId}/rfis/report-settings`, { headers: { Authorization: `Bearer ${token()}` } })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error((data as { error?: string }).error || w("RFI report settings could not be loaded.", "No se pudieron cargar los ajustes de reporte RFI.", lang));
+        if (!active) return;
+        const loaded = data as RfiReportSettingsPayload;
+        setPayload(loaded);
+        setSettings(cloneRfiReportSettings(loaded.current.settings));
+      })
+      .catch(error => {
+        toast({ title: error instanceof Error ? error.message : w("Report settings unavailable", "Ajustes de reporte no disponibles", lang), variant: "destructive" });
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [projectId, request.rfi.id, lang, toast]);
+
+  const saveDefaults = async () => {
+    if (!payload || !settings) return;
+    setSavingDefaults(true);
+    try {
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/report-settings`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ settings, expectedVersion: payload.current.version ?? 0 }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error((data as { error?: string }).error || w("Project defaults were not saved.", "No se guardaron los valores predeterminados del proyecto.", lang));
+      const updated = data as RfiReportSettingsPayload;
+      setPayload(updated);
+      setSettings(cloneRfiReportSettings(updated.current.settings));
+      toast({ title: w("Project RFI report defaults saved", "Valores predeterminados RFI guardados", lang) });
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("Project defaults were not saved.", "No se guardaron los valores predeterminados del proyecto.", lang), variant: "destructive" });
+    } finally {
+      setSavingDefaults(false);
+    }
+  };
+
+  const generate = async () => {
+    if (!settings) return;
+    setGenerating(true);
+    try {
+      const params = new URLSearchParams({ reportSettings: JSON.stringify(settings) });
+      const response = await fetch(`${rfiReportExportPath(projectId, request.rfi.id, request.kind)}?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({})) as { error?: string; details?: string[] };
+        throw new Error([data.error || w("RFI report could not be generated.", "No se pudo generar el reporte RFI.", lang), ...(data.details || [])].join(" "));
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const fallback = request.kind === "docx" ? `${request.rfi.number}-Request-for-Information.docx` : request.kind === "complete-pdf" ? `${request.rfi.number}-Complete-RFI-Package.pdf` : `${request.rfi.number}-Request-for-Information.pdf`;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filenameFromDisposition(response.headers.get("Content-Disposition") || "", fallback);
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: w(`${rfiReportKindLabel(request.kind, lang)} generated`, `${rfiReportKindLabel(request.kind, lang)} generado`, lang) });
+      onClose();
+    } catch (error) {
+      toast({ title: error instanceof Error ? error.message : w("RFI report generation failed", "Falló la generación del reporte RFI", lang), variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label={w("Generate RFI Report", "Generar Reporte RFI", lang)} onClick={() => !generating && !savingDefaults && onClose()} style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16, overflowY: "auto" }}>
+      <div onClick={event => event.stopPropagation()} style={{ background: "hsl(var(--background))", color: "hsl(var(--foreground))", borderRadius: 12, width: "100%", maxWidth: 860, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 20, margin: "24px 0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{w("Generate RFI Report", "Generar Reporte RFI", lang)}</h3>
+            <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 4 }}>
+              {request.rfi.number} - {request.rfi.subject} · {rfiReportKindLabel(request.kind, lang)}
+            </div>
+          </div>
+          <Button type="button" variant="outline" size="icon" onClick={onClose} disabled={generating || savingDefaults} aria-label={w("Close", "Cerrar", lang)}><X style={{ width: 16, height: 16 }} /></Button>
+        </div>
+        {loading || !payload || !settings ? (
+          <div style={{ padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 8 }}>{w("Loading saved project defaults...", "Cargando valores predeterminados del proyecto...", lang)}</div>
+        ) : (
+          <>
+            <div style={{ marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+              {payload.current.legacyDefaultActive
+                ? w("No project defaults are saved yet. These choices apply only to this export unless an authorized user saves project defaults.", "Aun no hay valores predeterminados guardados para el proyecto. Estas opciones aplican solo a esta exportacion salvo que un usuario autorizado guarde los valores del proyecto.", lang)
+                : `${w("Loaded project defaults", "Valores predeterminados cargados", lang)}: ${w("version", "version", lang)} ${payload.current.version}`}
+            </div>
+            <RfiReportSettingsControls payload={payload} settings={settings} lang={lang} onChange={setSettings} />
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap", marginTop: 18 }}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={generating || savingDefaults}>{w("Cancel", "Cancelar", lang)}</Button>
+              {canSaveDefaults && <Button type="button" variant="outline" onClick={() => void saveDefaults()} disabled={generating || savingDefaults}>{savingDefaults ? w("Saving...", "Guardando...", lang) : w("Save Project Defaults", "Guardar Valores del Proyecto", lang)}</Button>}
+              <Button type="button" onClick={() => void generate()} disabled={generating || savingDefaults}>
+                <Download style={{ width: 14, height: 14 }} />
+                {generating ? w("Generating...", "Generando...", lang) : w("Generate Report", "Generar Reporte", lang)}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function RfisTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
   const { lang } = useI18n();
   const { getLabel, getOptions } = useConfig();
@@ -736,6 +942,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreate, setShowCreate] = useState(false);
   const [showReportSettings, setShowReportSettings] = useState(false);
+  const [reportRequest, setReportRequest] = useState<RfiReportRequest | null>(null);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [meetingDraftReturn, setMeetingDraftReturn] = useState<string | null>(null);
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
@@ -936,54 +1143,9 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     }).length ?? 0
   , [rfis]);
 
-  const handleExportPdf = async (rfi: Rfi) => {
-    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-    const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!resp.ok) { toast({ title: "Export failed", variant: "destructive" }); return; }
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-Request-for-Information.pdf`; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExportCompletePdf = async (rfi: Rfi) => {
-    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-    const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-complete`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!resp.ok) {
-      const data = await resp.json().catch(() => ({})) as { error?: string; details?: string[] };
-      toast({
-        title: data.error || "Complete RFI PDF failed",
-        description: data.details?.join("; "),
-        variant: "destructive",
-      });
-      return;
-    }
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}-Complete-RFI-Package.pdf`; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExportWordRfi = async (rfi: Rfi) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-word`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!resp.ok) throw new Error("Export failed");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.docx`; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: `${rfi.number} exported as Word (.docx)` });
-    } catch {
-      toast({ title: w("Word export failed", "Error al exportar Word", lang), variant: "destructive" });
-    }
-  };
+  const handleExportPdf = (rfi: Rfi) => setReportRequest({ rfi, kind: "pdf" });
+  const handleExportCompletePdf = (rfi: Rfi) => setReportRequest({ rfi, kind: "complete-pdf" });
+  const handleExportWordRfi = (rfi: Rfi) => setReportRequest({ rfi, kind: "docx" });
 
   // Config can contain duplicate rfi_status entries; dedupe by value so the stats
   // strip, filter tabs, and status <select> each show a status only once.
@@ -1017,8 +1179,18 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           onRevise={setSelectedRfi}
           onExportPdf={handleExportPdf}
           onExportCompletePdf={handleExportCompletePdf}
+          onExportWordRfi={handleExportWordRfi}
           onUpdate={(updated) => setSelectedRfi(updated)}
         />
+        {reportRequest && (
+          <GenerateRfiReportModal
+            projectId={projectId}
+            request={reportRequest}
+            lang={lang}
+            canSaveDefaults={canManageReportSettings}
+            onClose={() => setReportRequest(null)}
+          />
+        )}
       </div>
     );
   }
@@ -1040,6 +1212,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 
   return (
     <div style={{ position: "relative" }}>
+      {reportRequest && (
+        <GenerateRfiReportModal
+          projectId={projectId}
+          request={reportRequest}
+          lang={lang}
+          canSaveDefaults={canManageReportSettings}
+          onClose={() => setReportRequest(null)}
+        />
+      )}
       {/* Header */}
       <div className="section-header" style={{ marginBottom: 12 }}>
         <div>
@@ -2016,7 +2197,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
 }
 
 // ─── RFI Detail Panel ─────────────────────────────────────────────────────────
-function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose, onRevise, onExportPdf, onExportCompletePdf, onUpdate }: {
+function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose, onRevise, onExportPdf, onExportCompletePdf, onExportWordRfi, onUpdate }: {
   projectId: number;
   rfi: Rfi;
   canWrite: boolean;
@@ -2027,6 +2208,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   onRevise: (rfi: Rfi) => void;
   onExportPdf: (rfi: Rfi) => void;
   onExportCompletePdf: (rfi: Rfi) => void;
+  onExportWordRfi: (rfi: Rfi) => void;
   onUpdate: (rfi: Rfi) => void;
 }) {
   const persistedEmail = rfi as Rfi & { emailDescription?: string | null; emailDraft?: string | null };
@@ -2528,24 +2710,6 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
       setRaisingCo(false);
     }
   };
-
-  const handleExportWord = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const resp = await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-word`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!resp.ok) throw new Error("Export failed");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `${rfi.number}.docx`; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: w("Word document exported", "Documento Word exportado", lang) });
-    } catch {
-      toast({ title: w("Word export failed", "Error al exportar Word", lang), variant: "destructive" });
-    }
-  };
-
 
   const handleDownloadAuditCert = async () => {
     try {
@@ -3090,7 +3254,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           back: onClose,
           "export-pdf": () => onExportPdf(rfi),
           "export-complete-pdf": () => onExportCompletePdf(rfi),
-          "export-docx": handleExportWord,
+          "export-docx": () => onExportWordRfi(rfi),
           "export-audit-pdf": handleDownloadAuditCert,
           "viewed-by": () => setShowViewedBy(!showViewedBy),
           edit: startInfoEdit,

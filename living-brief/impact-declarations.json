@@ -3528,6 +3528,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e6eed14d821ad896bd153531a4c2307b612121a9c347d9379073acd6a70129f2"
+    },
+    {
+      "taskId": "rfi-report-generation-modal-local-candidate",
+      "reviewedThroughCommit": "7c12615fe521e9797a381e2e8b145bcf35b188e5",
+      "reviewedAt": "2026-07-25T16:42:13.7873768-04:00",
+      "status": "local_candidate",
+      "captureTiming": "rfi_product_candidate",
+      "summary": "Platform-wide Generate RFI Report modal with one-time choices and canonical PDF/DOCX/Complete PDF settings parity.",
+      "workstreams": [
+        "rfi-customer-delivery",
+        "report-generation",
+        "release-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, company relationship, or market-positioning authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows the F-drive worktree, serialized release, no-production, no-publish, and sole-writer boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The RFI workflow remains governed by the existing quality law; this candidate improves explicit report choices and validation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, or product-category expansion."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated platform structure, hosting architecture, schema publication, or deployment behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, install, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate reuses the existing canonical RFI report-settings model and export renderers rather than creating a separate report design system."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or citation interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local RFI report-generation modal candidate and its non-integrated/non-deployed state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining review, build, commit, and acceptance gates for the RFI report-generation candidate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate semantics or retained evidence claims are changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/rfi-report-settings-proof.ts",
+        "artifacts/api-server/scripts/test-provider-governance.ts",
+        "artifacts/api-server/src/routes/autodesk.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4dfdcac8f97aaa5225d9fff32f15938bba7b014de46313630b1fb531e89e3670"
     }
   ]
 }

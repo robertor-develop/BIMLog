@@ -10,7 +10,7 @@ declare module "express-session" {
 
 const router: Router = Router();
 
-router.use((_req, res, next) => {
+router.use("/autodesk", (_req, res, next) => {
   if (!isLegacyAutodeskAllowed()) {
     res.status(404).json({
       error: "Connector unavailable",

@@ -4,6 +4,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### RFI report-generation modal local candidate; review and acceptance pending
+
+- Local candidate on `origin/master` `7c12615fe521e9797a381e2e8b145bcf35b188e5` adds the platform-wide Generate RFI
+  Report modal for single-RFI PDF, DOCX, and Complete PDF actions.
+- The modal loads active project defaults, supports one-time per-export overrides without mutating defaults, keeps
+  neutral Full Template and Focused Template presets, and exposes explicit Save Project Defaults only to authorized
+  project authorities.
+- Standard PDF, DOCX, and Complete PDF use the same canonical report-settings model. Complete PDF also applies the
+  modal choices to appended attachment/source-image package pages so hidden choices are not silently included.
+- RFI Type remains mandatory in the identity/status section. Sections 3, 5, 6, and 7, source viewpoint screenshot,
+  ordered additional screenshots, attachments, and empty-field behavior are configurable through the same model.
+- Focused proofs currently pass for report-settings parity and provider-governance/router-shadow behavior; mojibake
+  and typecheck pass. Remaining local gates are Living Brief state regeneration, production build, final source
+  review, local candidate commit, and independent review.
+- This is not integration, push, publication, deployment, production/customer access, customer verification, or live
+  acceptance. Security `adm-zip`, Plans entitlements, Finance, plugins, and Telegram product code remain out of scope.
+
 ### Deterministic Replit API artifact closure accepted locally; Republish proof pending
 
 - Product commit `76addb6eb7b791a7579ca5c2e7d95a6526b544a1` makes the repository build the production

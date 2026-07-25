@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   customerProviderCatalog,
   isLegacyAutodeskAllowed,
@@ -34,6 +35,18 @@ const unconfiguredCatalog = customerProviderCatalog(17, () => false, "");
 assert.equal(
   unconfiguredCatalog.find((provider) => provider.key === "google_drive")?.availability,
   "setup_required",
+);
+
+const autodeskRouteSource = readFileSync(new URL("../src/routes/autodesk.ts", import.meta.url), "utf8");
+assert.match(
+  autodeskRouteSource,
+  /router\.use\(\s*["']\/autodesk["']/,
+  "legacy Autodesk governance must be scoped to /autodesk and must not shadow later API routers",
+);
+assert.doesNotMatch(
+  autodeskRouteSource,
+  /router\.use\(\s*\(\s*_req/,
+  "legacy Autodesk governance must never be installed as a router-wide catch-all",
 );
 
 console.log("provider governance authorization and disclosure checks passed");

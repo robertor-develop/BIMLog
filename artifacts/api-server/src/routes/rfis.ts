@@ -31,6 +31,7 @@ import {
   buildCanonicalRfiExportModel,
   buildDefaultRfiReportSettings,
   buildLeanRfiReportSettings,
+  buildLegacyRfiReportSettings,
   buildRfiAuditModel,
   makeRfiReportSettingsSnapshot,
   normalizeRfiReportSettings,
@@ -50,6 +51,10 @@ import {
 import { buildRfiRegisterWorkbook } from "../lib/rfi-register-export";
 import { recordRfiNotificationSourceEvent } from "../lib/telegram-rfi-notifications";
 const router: IRouter = Router();
+
+class RfiReportSettingsOverrideError extends Error {
+  readonly status = 422;
+}
 
 type RfiPackageItem = {
   key: string;
@@ -649,8 +654,41 @@ async function loadRfiReportSettingsSnapshot(projectId: number): Promise<RfiRepo
   return row ? makeRfiReportSettingsSnapshot(row.settings as RfiReportSettingsDocument, row.version, "project") : makeRfiReportSettingsSnapshot(null, 0, "legacy_default");
 }
 
+async function loadRfiReportSettingsSnapshotForExport(projectId: number, rawOverride: unknown): Promise<RfiReportSettingsSnapshot> {
+  const row = await loadRfiReportSettingsRow(projectId);
+  if (rawOverride == null || rawOverride === "") {
+    return row ? makeRfiReportSettingsSnapshot(row.settings as RfiReportSettingsDocument, row.version, "project") : makeRfiReportSettingsSnapshot(null, 0, "legacy_default");
+  }
+  const encoded = Array.isArray(rawOverride) ? rawOverride[0] : rawOverride;
+  if (typeof encoded !== "string") throw new RfiReportSettingsOverrideError("Report choices are invalid.");
+  if (encoded.length > 32_000) throw new RfiReportSettingsOverrideError("Report choices are too large.");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(encoded);
+  } catch {
+    throw new RfiReportSettingsOverrideError("Report choices could not be read.");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new RfiReportSettingsOverrideError("Report choices must be a settings object.");
+  const candidate = parsed as { schemaVersion?: unknown; sections?: unknown };
+  if (candidate.schemaVersion !== 1 || !Array.isArray(candidate.sections)) throw new RfiReportSettingsOverrideError("Report choices are missing required settings structure.");
+  let settings: RfiReportSettingsDocument;
+  try {
+    settings = normalizeRfiReportSettings(parsed);
+  } catch (error) {
+    throw new RfiReportSettingsOverrideError(error instanceof Error ? error.message : "Report choices are invalid.");
+  }
+  return makeRfiReportSettingsSnapshot(settings, row?.version ?? 0, row ? "project" : "legacy_default");
+}
+
+function rfiReportFieldVisible(snapshot: RfiReportSettingsSnapshot, sectionId: string, fieldId: string): boolean {
+  const section = snapshot.settings.sections.find(candidate => candidate.id === sectionId);
+  if (!section || section.visible === false) return false;
+  const field = section.fields.find(candidate => candidate.id === fieldId);
+  return field?.visible !== false;
+}
+
 function publicRfiReportSettingsPayload(row: typeof rfiReportSettingsTable.$inferSelect | null) {
-  const currentSettings = row ? normalizeRfiReportSettings(row.settings) : buildDefaultRfiReportSettings();
+  const currentSettings = row ? normalizeRfiReportSettings(row.settings) : buildLegacyRfiReportSettings();
   const snapshot = row ? makeRfiReportSettingsSnapshot(currentSettings, row.version, "project") : makeRfiReportSettingsSnapshot(null, 0, "legacy_default");
   return {
     inventory: RFI_REPORT_SECTION_INVENTORY,
@@ -2226,7 +2264,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
 
-    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
 
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
@@ -2240,9 +2278,9 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       ...responses.map(response => response.responseAttachmentsJson as string[] | null),
     ]);
     const generatedAt = new Date();
-    const activeImage = await loadActiveRfiExportImage(rfi);
-    const additionalImages = await loadAdditionalRfiExportImages(rfi);
-    const reportSettings = await loadRfiReportSettingsSnapshot(projectId);
+    const reportSettings = await loadRfiReportSettingsSnapshotForExport(projectId, req.query.reportSettings);
+    const activeImage = rfiReportFieldVisible(reportSettings, "references", "source_viewpoint_image") ? await loadActiveRfiExportImage(rfi) : null;
+    const additionalImages = rfiReportFieldVisible(reportSettings, "references", "additional_screenshots") ? await loadAdditionalRfiExportImages(rfi) : [];
     const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
     const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     const chunks: Buffer[] = [];
@@ -2271,6 +2309,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export", authMiddleware, requirePro
       console.error("[rfis] Failed to log PDF export activity:", activityError instanceof Error ? activityError.message : activityError);
     });
   } catch (error) {
+    if (error instanceof RfiReportSettingsOverrideError) {
+      res.status(error.status).json({ error: error.message, category: "report_settings" });
+      return;
+    }
     console.error("[rfis] RFI PDF generation failed:", error instanceof Error ? error.message : error);
     res.status(500).json({ error: "RFI PDF could not be generated." });
   }
@@ -2283,13 +2325,14 @@ async function renderRfiPdfBuffer(
   project: typeof projectsTable.$inferSelect | undefined,
   includePresentationImage = true,
   reportSettings?: RfiReportSettingsSnapshot,
+  includeAdditionalScreenshots = includePresentationImage,
 ): Promise<{ buffer: Buffer; model: CanonicalRfiExportModel }> {
   const attachmentLabels = await loadAttachmentLabels(rfi.projectId, [
     rfi.attachmentsJson as string[] | null,
     ...responses.map(response => response.responseAttachmentsJson as string[] | null),
   ]);
   const activeImage = includePresentationImage ? await loadActiveRfiExportImage(rfi) : null;
-  const additionalImages = includePresentationImage ? await loadAdditionalRfiExportImages(rfi) : [];
+  const additionalImages = includeAdditionalScreenshots ? await loadAdditionalRfiExportImages(rfi) : [];
   const generatedAt = new Date();
   const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
   const buffer = await new Promise<Buffer>((resolve, reject) => {
@@ -2316,7 +2359,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
   res.once("close", () => { if (!res.writableEnded) cancelExport(); });
   try {
     const { projectId, rfiId } = UpdateRfiParams.parse({ projectId: req.params.projectId, rfiId: req.params.rfiId });
-    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+    const [rfi] = await db.select().from(rfisTable).where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
     rfiNumber = rfi.number;
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
@@ -2324,9 +2367,13 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
       .where(and(eq(rfiResponsesTable.rfiId, rfiId), eq(rfiResponsesTable.projectId, projectId)))
       .orderBy(rfiResponsesTable.responseNumber);
 
+    const reportSettings = await loadRfiReportSettingsSnapshotForExport(rfi.projectId, req.query.reportSettings);
     const imagePresentation = normalizeImagePresentation(rfi.imagePresentationJson);
+    const includeAttachmentPages = rfiReportFieldVisible(reportSettings, "references", "attachments");
+    const includeSourceImagePage = rfiReportFieldVisible(reportSettings, "references", "source_viewpoint_image");
     const packageItems = normalizePackageConfig(rfi.attachmentPackageJson);
     const activeImageId = imagePresentation?.replacementFileId ?? imagePresentation?.sourceFileId ?? null;
+    const reportScreenshotIds = new Set((imagePresentation?.reportScreenshots || []).map(item => item.fileId));
     const fileIds = [...new Set([...packageItems.map(item => item.fileId).filter((id): id is number => typeof id === "number"), ...(activeImageId ? [activeImageId] : [])])];
     const fileRows = fileIds.length ? await db.select().from(filesTable)
       .where(and(eq(filesTable.projectId, projectId), inArray(filesTable.id, fileIds))) : [];
@@ -2338,18 +2385,18 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
     for (const item of packageItems.sort((left, right) => left.order - right.order)) {
       if (item.fileId) {
         const file = filesById.get(item.fileId);
-        if (!file && item.include) throw new CompletePackageError(`${item.label} is no longer available in this project.`, "missing_file", item.label);
+        const isPresentationFile = item.fileId === imagePresentation?.sourceFileId || item.fileId === imagePresentation?.replacementFileId || reportScreenshotIds.has(item.fileId);
+        if (!file && item.include && !isPresentationFile && includeAttachmentPages) throw new CompletePackageError(`${item.label} is no longer available in this project.`, "missing_file", item.label);
         if (!file) continue;
         if (seenFiles.has(item.fileId)) continue;
         seenFiles.add(item.fileId);
-        const isPresentationFile = item.fileId === imagePresentation?.sourceFileId || item.fileId === imagePresentation?.replacementFileId;
         let buffer: Buffer | undefined;
-        if (file && item.include && !isPresentationFile) {
+        if (file && item.include && !isPresentationFile && includeAttachmentPages) {
           if (!file.storagePath) throw new CompletePackageError(`${file.fileName} has no stored file content.`, "missing_file", file.fileName);
           try { buffer = await storage.download(file.storagePath); }
           catch { throw new CompletePackageError(`${file.fileName} could not be read from BIMLog storage.`, "missing_file", file.fileName); }
         }
-        packageInputs.push({ order: packageInputs.length, label: file?.fileName || item.label, fileName: file?.fileName || item.label, sourceType: file?.source || item.source || "BIMLog file", include: item.include && !isPresentationFile, buffer, role: "attachment", exclusionReason: isPresentationFile ? "Controlled independently by the persisted Complete PDF image setting." : undefined });
+        packageInputs.push({ order: packageInputs.length, label: file?.fileName || item.label, fileName: file?.fileName || item.label, sourceType: file?.source || item.source || "BIMLog file", include: item.include && !isPresentationFile && includeAttachmentPages, buffer, role: "attachment", exclusionReason: isPresentationFile ? "Controlled independently by the persisted Complete PDF image setting." : includeAttachmentPages ? undefined : "Excluded by this report generation choice." });
       } else {
         const referenceKey = String(item.attachment || item.label).trim().toLowerCase();
         if (!referenceKey || seenReferences.has(referenceKey)) continue;
@@ -2367,18 +2414,17 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
 
     if (activeImageId) {
       const imageFile = filesById.get(activeImageId);
-      if (!imageFile && imagePresentation?.includeInCompletePdf !== false) throw new CompletePackageError("The selected RFI presentation image is no longer available.", "missing_file", "RFI presentation image");
+      if (!imageFile && imagePresentation?.includeInCompletePdf !== false && includeSourceImagePage) throw new CompletePackageError("The selected RFI presentation image is no longer available.", "missing_file", "RFI presentation image");
       let buffer: Buffer | undefined;
-      if (imageFile && imagePresentation?.includeInCompletePdf !== false) {
+      if (imageFile && imagePresentation?.includeInCompletePdf !== false && includeSourceImagePage) {
         if (!imageFile.storagePath) throw new CompletePackageError(`${imageFile.fileName} has no stored image content.`, "missing_file", imageFile.fileName);
         try { buffer = await storage.download(imageFile.storagePath); }
         catch { throw new CompletePackageError(`${imageFile.fileName} could not be read from BIMLog storage.`, "missing_file", imageFile.fileName); }
       }
-      packageInputs.push({ order: packageInputs.length, label: imageFile?.fileName || "RFI presentation image", fileName: imageFile?.fileName || "RFI-presentation-image.png", sourceType: imagePresentation?.replacementFileId ? "RFI replacement presentation image" : "RFI source presentation image", include: imagePresentation?.includeInCompletePdf !== false, buffer, role: "presentation-image", crop: imagePresentation?.crop || null, exclusionReason: imagePresentation?.includeInCompletePdf === false ? "Excluded by the persisted Complete PDF image setting." : undefined });
+      packageInputs.push({ order: packageInputs.length, label: imageFile?.fileName || "RFI presentation image", fileName: imageFile?.fileName || "RFI-presentation-image.png", sourceType: imagePresentation?.replacementFileId ? "RFI replacement presentation image" : "RFI source presentation image", include: imagePresentation?.includeInCompletePdf !== false && includeSourceImagePage, buffer, role: "presentation-image", crop: imagePresentation?.crop || null, exclusionReason: imagePresentation?.includeInCompletePdf === false ? "Excluded by the persisted Complete PDF image setting." : includeSourceImagePage ? undefined : "Excluded by this report generation choice." });
     }
 
-    const reportSettings = await loadRfiReportSettingsSnapshot(rfi.projectId);
-    const canonical = await renderRfiPdfBuffer(rfi, responses, project, false, reportSettings);
+    const canonical = await renderRfiPdfBuffer(rfi, responses, project, false, reportSettings, rfiReportFieldVisible(reportSettings, "references", "additional_screenshots"));
     const result = await buildCompleteRfiPackage({
       rfiNumber: rfi.number,
       projectName: project?.name || `Project ${projectId}`,
@@ -2416,6 +2462,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
       }).catch(activityError => console.error("[rfis] Failed to log Complete RFI PDF failure:", activityError instanceof Error ? activityError.message : activityError));
     }
     if (failure?.category === "cancelled" || res.destroyed) return;
+    if (error instanceof RfiReportSettingsOverrideError) {
+      res.status(error.status).json({ error: error.message, category: "report_settings" });
+      return;
+    }
     if (failure) {
       res.status(failure.status).json({ error: "Complete RFI PDF could not be generated.", details: [failure.message], category: failure.category });
       return;
@@ -3224,7 +3274,7 @@ router.post("/projects/:projectId/rfis/:rfiId/responses", authMiddleware, requir
     }
 
     const [rfi] = await db.select().from(rfisTable)
-      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId))).limit(1);
+      .where(and(eq(rfisTable.id, rfiId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).limit(1);
     if (!rfi) { res.status(404).json({ error: "RFI not found" }); return; }
 
     const [responder] = await db.select({ email: usersTable.email, fullName: usersTable.fullName })
@@ -3399,9 +3449,9 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       ...responses.map(response => response.responseAttachmentsJson as string[] | null),
     ]);
     const generatedAt = new Date();
-    const activeImage = await loadActiveRfiExportImage(rfi);
-    const additionalImages = await loadAdditionalRfiExportImages(rfi);
-    const reportSettings = await loadRfiReportSettingsSnapshot(projectId);
+    const reportSettings = await loadRfiReportSettingsSnapshotForExport(projectId, req.query.reportSettings);
+    const activeImage = rfiReportFieldVisible(reportSettings, "references", "source_viewpoint_image") ? await loadActiveRfiExportImage(rfi) : null;
+    const additionalImages = rfiReportFieldVisible(reportSettings, "references", "additional_screenshots") ? await loadAdditionalRfiExportImages(rfi) : [];
     const exportData = await buildSavedRfiExportModel({ rfi, responses, project, attachmentLabels, activeImage, additionalImages, generatedAt });
     const doc = buildCanonicalRfiDocx(exportData.model, exportData.image, reportSettings, exportData.additionalImages);
     const buffer = await Packer.toBuffer(doc);
@@ -3413,6 +3463,10 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
       actionType: "export", entityType: "rfi", entityId: rfiId, details: JSON.stringify({ event: "rfi.docx_exported", number: rfi.number, reportSettings }),
     }).catch(error => console.error("[rfis] Failed to log DOCX export activity:", error instanceof Error ? error.message : error));
   } catch (error) {
+    if (error instanceof RfiReportSettingsOverrideError) {
+      res.status(error.status).json({ error: error.message, category: "report_settings" });
+      return;
+    }
     console.error("[rfis] RFI DOCX generation failed:", error instanceof Error ? error.message : error);
     res.status(500).json({ error: "RFI DOCX could not be generated." });
   }

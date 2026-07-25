@@ -44,15 +44,18 @@ const checks: Check[] = [
   check("standard PDF/DOCX/Complete embedded share snapshot hash", standardPdf.snapshotHash === docx.snapshotHash && docx.snapshotHash === completeEmbedded.snapshotHash, {
     hash: snapshot.snapshotHash,
   }),
-  check("Ruben lean preset visible sections are deterministic", JSON.stringify(visibleSections) === JSON.stringify(["header", "submitted_by", "references"]), { visibleSections }),
-  check("source viewpoint screenshot field is configurable and visible in lean preset", referenceFields.includes("source_viewpoint_image") && inventoryFields.includes("source_viewpoint_image"), { referenceFields }),
-  check("additional screenshots field is configurable and visible in lean preset", referenceFields.includes("additional_screenshots") && inventoryFields.includes("additional_screenshots"), { referenceFields }),
-  check("Complete PDF route loads project report settings snapshot", /const reportSettings = await loadRfiReportSettingsSnapshot\(rfi\.projectId\);/.test(routeSource)),
-  check("Complete PDF passes settings snapshot into embedded canonical renderer helper", /renderRfiPdfBuffer\(rfi, responses, project, false, reportSettings\)/.test(routeSource)),
+  check("focused preset visible sections are deterministic", JSON.stringify(visibleSections) === JSON.stringify(["header", "submitted_by", "references"]), { visibleSections }),
+  check("source viewpoint screenshot field is configurable and visible in focused preset", referenceFields.includes("source_viewpoint_image") && inventoryFields.includes("source_viewpoint_image"), { referenceFields }),
+  check("additional screenshots field is configurable and visible in focused preset", referenceFields.includes("additional_screenshots") && inventoryFields.includes("additional_screenshots"), { referenceFields }),
+  check("Complete PDF route loads override-aware report settings snapshot", /const reportSettings = await loadRfiReportSettingsSnapshotForExport\(rfi\.projectId, req\.query\.reportSettings\);/.test(routeSource)),
+  check("Complete PDF passes settings snapshot into embedded canonical renderer helper", /renderRfiPdfBuffer\(rfi, responses, project, false, reportSettings, rfiReportFieldVisible\(reportSettings, "references", "additional_screenshots"\)\)/.test(routeSource)),
   check("embedded canonical helper passes snapshot into renderCanonicalRfiPdf", /renderCanonicalRfiPdf\(doc, exportData\.model, exportData\.image, reportSettings, exportData\.additionalImages\)/.test(routeSource)),
   check("RFI report settings UI computes project-admin authority", /const canManageReportSettings = currentMember\?\.role === "project_admin" \|\| Boolean\(\(user as \{ isSuperAdmin\?: boolean \} \| null\)\?\.isSuperAdmin\);/.test(rfiTabSource)),
   check("RFI report settings button is not gated by broad write permission", /canManageReportSettings && \(\s*<Button variant="outline" size="sm" onClick=\{\(\) => setShowReportSettings/.test(rfiTabSource) && !/canWrite && \(\s*<Button variant="outline" size="sm" onClick=\{\(\) => setShowReportSettings/.test(rfiTabSource)),
   check("RFI report settings panel is not gated by broad write permission", /showReportSettings && canManageReportSettings &&/.test(rfiTabSource) && !/showReportSettings && canWrite &&/.test(rfiTabSource)),
+  check("RFI exports use Generate RFI Report modal state instead of direct downloads", /const handleExportPdf = \(rfi: Rfi\) => setReportRequest\(\{ rfi, kind: "pdf" \}\);/.test(rfiTabSource) && /const handleExportCompletePdf = \(rfi: Rfi\) => setReportRequest\(\{ rfi, kind: "complete-pdf" \}\);/.test(rfiTabSource) && /const handleExportWordRfi = \(rfi: Rfi\) => setReportRequest\(\{ rfi, kind: "docx" \}\);/.test(rfiTabSource)),
+  check("Generate RFI Report modal sends one-time report choices without mutating defaults", /new URLSearchParams\(\{ reportSettings: JSON\.stringify\(settings\) \}\)/.test(rfiTabSource) && /Save Project Defaults/.test(rfiTabSource)),
+  check("RFI report preset labels are neutral in the UI", /Focused Template/.test(rfiTabSource) && /Full Template/.test(rfiTabSource) && !/Ruben Lean Preset/.test(rfiTabSource)),
 ];
 
 const proof = {
