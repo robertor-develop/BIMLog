@@ -20,7 +20,7 @@ import {
   Search, Calendar, Trash2,
   Send, Copy, FolderOpen,
   Upload, Camera, Clipboard, UserPlus, Mail, ExternalLink,
-  ChevronUp, ChevronDown, CheckCircle2, CircleAlert,
+  ChevronUp, ChevronDown, CheckCircle2, CircleAlert, Image,
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { RfiImageCropEditor, type NormalizedCrop } from "@/components/rfi/RfiImageCropEditor";
@@ -618,6 +618,12 @@ type RfiReportSettingsSection = { id: string; visible: boolean; order: number; f
 type RfiReportExportKind = "pdf" | "docx" | "complete-pdf";
 type RfiReportRequest = { rfi: Rfi; kind: RfiReportExportKind };
 
+function rfiReportSettingFieldVisible(settings: RfiReportSettingsDocument | null | undefined, sectionId: string, fieldId: string) {
+  const section = settings?.sections.find(item => item.id === sectionId);
+  if (!section || section.visible === false) return false;
+  return section.fields.find(field => field.id === fieldId)?.visible !== false;
+}
+
 function cloneRfiReportSettings(settings: RfiReportSettingsDocument): RfiReportSettingsDocument {
   return {
     ...settings,
@@ -700,8 +706,64 @@ function RfiReportSettingsControls({ payload, settings, lang, onChange }: {
   );
 }
 
-function RfiReportScreenshotsEditor({ items = [], files, editable, lang, onChange }: { items?: NonNullable<RfiImagePresentation>["reportScreenshots"]; files: ProjectFile[]; editable: boolean; lang: string; onChange: (items: NonNullable<RfiImagePresentation>["reportScreenshots"]) => void }) {
-  if (!items?.length) return null;
+function RfiReportVisualEvidencePreview({ rfi, settings, lang }: { rfi: Rfi; settings: RfiReportSettingsDocument; lang: string }) {
+  const presentation = ((rfi as Rfi & { imagePresentationJson?: RfiImagePresentation }).imagePresentationJson || null);
+  const sourceEnabled = rfiReportSettingFieldVisible(settings, "references", "source_viewpoint_image");
+  const additionalEnabled = rfiReportSettingFieldVisible(settings, "references", "additional_screenshots");
+  const sourceId = presentation?.replacementFileId ?? presentation?.sourceFileId ?? null;
+  const screenshots = [...(presentation?.reportScreenshots || [])].sort((left, right) => left.order - right.order);
+  return (
+    <div style={{ marginTop: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, background: "hsl(var(--muted) / 0.18)" }}>
+      <strong>{w("Visual evidence in this export", "Evidencia visual en esta exportacion", lang)}</strong>
+      <div style={{ display: "grid", gap: 5, marginTop: 6 }}>
+        <div>
+          {w("Source Viewpoint Screenshot", "Captura de Viewpoint Fuente", lang)}: {" "}
+          <span style={{ fontWeight: 700, color: sourceEnabled && sourceId ? "#166534" : "hsl(var(--muted-foreground))" }}>
+            {sourceEnabled ? (sourceId ? w("Included when the stored image is available", "Incluida si la imagen guardada esta disponible", lang) : w("No stored source image on this RFI", "Este RFI no tiene imagen fuente guardada", lang)) : w("Excluded by these report choices", "Excluida por estas opciones de reporte", lang)}
+          </span>
+        </div>
+        <div>
+          {w("Additional Screenshots", "Capturas Adicionales", lang)}: {" "}
+          <span style={{ fontWeight: 700, color: additionalEnabled && screenshots.some(item => item.include !== false) ? "#166534" : "hsl(var(--muted-foreground))" }}>
+            {additionalEnabled
+              ? screenshots.filter(item => item.include !== false).length
+                ? w(`${screenshots.filter(item => item.include !== false).length} selected`, `${screenshots.filter(item => item.include !== false).length} seleccionada(s)`, lang)
+                : w("None selected on this RFI", "Ninguna seleccionada en este RFI", lang)
+              : w("Excluded by these report choices", "Excluidas por estas opciones de reporte", lang)}
+          </span>
+        </div>
+        {additionalEnabled && screenshots.filter(item => item.include !== false).map((item, index) => (
+          <div key={`${item.fileId}-${index}`} style={{ color: "hsl(var(--muted-foreground))" }}>{index + 1}. {item.caption || w(`Screenshot ${index + 1}`, `Captura ${index + 1}`, lang)}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RfiScreenshotThumbnail({ projectId, fileId, label }: { projectId: number; fileId: number; label: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    fetch(canonicalFileLocator(projectId, fileId), { headers: token ? { Authorization: `Bearer ${token}` } : undefined })
+      .then(async response => {
+        if (!response.ok) throw new Error("thumbnail_failed");
+        objectUrl = URL.createObjectURL(await response.blob());
+        if (active) setUrl(objectUrl);
+        else URL.revokeObjectURL(objectUrl);
+      })
+      .catch(() => { if (active) setUrl(null); });
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [projectId, fileId]);
+  return (
+    <div style={{ width: 84, height: 64, border: "1px solid hsl(var(--border))", borderRadius: 6, overflow: "hidden", background: "hsl(var(--muted) / 0.35)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+      {url ? <img src={url} alt={label} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <Image style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} />}
+    </div>
+  );
+}
+
+function RfiReportScreenshotsEditor({ projectId, items = [], files, editable, lang, onChange }: { projectId: number; items?: NonNullable<RfiImagePresentation>["reportScreenshots"]; files: ProjectFile[]; editable: boolean; lang: string; onChange: (items: NonNullable<RfiImagePresentation>["reportScreenshots"]) => void }) {
   const ordered = [...items].sort((a, b) => a.order - b.order);
   const rename = (fileId: number, patch: Partial<NonNullable<typeof items>[number]>) => onChange(ordered.map((item, index) => item.fileId === fileId ? { ...item, ...patch, order: index } : { ...item, order: index }));
   const move = (fileId: number, direction: -1 | 1) => {
@@ -715,15 +777,26 @@ function RfiReportScreenshotsEditor({ items = [], files, editable, lang, onChang
   return (
     <div style={{ marginTop: 10, padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
       <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Additional report screenshots", "Capturas adicionales del reporte", lang)}</div>
+      {!ordered.length && (
+        <div style={{ padding: "12px 10px", border: "1px dashed hsl(var(--border))", borderRadius: 6, color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
+          {w("No additional screenshots yet. Use Add image, Paste, or Capture to attach screenshots for RFI PDF, RFI DOCX, and Complete RFI PDF output.", "Aun no hay capturas adicionales. Use Agregar imagen, Pegar o Capturar para adjuntar capturas al PDF RFI, DOCX RFI y PDF Completo RFI.", lang)}
+        </div>
+      )}
       <div style={{ display: "grid", gap: 8 }}>
         {ordered.map((item, index) => {
           const file = files.find(candidate => candidate.id === item.fileId);
           const label = file?.fileName || item.caption || `Screenshot ${index + 1}`;
           return (
-            <div key={item.fileId} style={{ display: "grid", gridTemplateColumns: "auto minmax(0,1fr) auto", gap: 8, alignItems: "center", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined, paddingTop: index ? 8 : 0 }}>
+            <div key={item.fileId} style={{ display: "grid", gridTemplateColumns: "auto auto minmax(0,1fr) auto", gap: 8, alignItems: "center", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined, paddingTop: index ? 8 : 0 }}>
               <input type="checkbox" checked={item.include !== false} disabled={!editable} onChange={event => rename(item.fileId, { include: event.target.checked })} />
+              <RfiScreenshotThumbnail projectId={projectId} fileId={item.fileId} label={label} />
               <div style={{ display: "grid", gap: 5 }}>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{label}</div>
+                <div style={{ color: item.include === false ? "#B45309" : "#166534", fontSize: 11, fontWeight: 700 }}>
+                  {item.include === false
+                    ? w("Excluded from RFI PDF, RFI DOCX, and Complete RFI PDF", "Excluida del PDF RFI, DOCX RFI y PDF Completo RFI", lang)
+                    : w("Included in RFI PDF, RFI DOCX, and Complete RFI PDF", "Incluida en PDF RFI, DOCX RFI y PDF Completo RFI", lang)}
+                </div>
                 <Input value={item.caption || ""} disabled={!editable} onChange={event => rename(item.fileId, { caption: event.target.value })} placeholder={w("Caption", "Titulo", lang)} style={{ height: 30, fontSize: 12 }} />
                 <Input value={item.description || ""} disabled={!editable} onChange={event => rename(item.fileId, { description: event.target.value })} placeholder={w("Description", "Descripcion", lang)} style={{ height: 30, fontSize: 12 }} />
               </div>
@@ -914,6 +987,7 @@ function GenerateRfiReportModal({ projectId, request, lang, canSaveDefaults, onC
                 : `${w("Loaded project defaults", "Valores predeterminados cargados", lang)}: ${w("version", "version", lang)} ${payload.current.version}`}
             </div>
             <RfiReportSettingsControls payload={payload} settings={settings} lang={lang} onChange={setSettings} />
+            <RfiReportVisualEvidencePreview rfi={request.rfi} settings={settings} lang={lang} />
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", flexWrap: "wrap", marginTop: 18 }}>
               <Button type="button" variant="outline" onClick={onClose} disabled={generating || savingDefaults}>{w("Cancel", "Cancelar", lang)}</Button>
               {canSaveDefaults && <Button type="button" variant="outline" onClick={() => void saveDefaults()} disabled={generating || savingDefaults}>{savingDefaults ? w("Saving...", "Guardando...", lang) : w("Save Project Defaults", "Guardar Valores del Proyecto", lang)}</Button>}
@@ -2148,11 +2222,11 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         options={{ priorities: priorityOptions.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label })), rfiTypes: rfiTypeOptions }}
         cloudAttachmentActions={connectedFileSourcesCreate.map(provider => ({ key: provider.key, label: w(`From ${provider.label}`, `Desde ${provider.label}`, lang), icon: "cloud" as const, onClick: () => setCloudPickerCreate(provider) }))}
         imageAttachmentActions={[
-          { key: "upload-image", label: w("Upload Image", "Subir Imagen", lang), icon: "upload", onClick: () => imageFileRef.current?.click() },
+          { key: "upload-image", label: w("Add Image", "Agregar Imagen", lang), icon: "upload", onClick: () => imageFileRef.current?.click() },
           { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteCreateImage },
           { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureCreateImage },
         ]}
-        imagePresentationContent={imagePresentation ? <><RfiImagePresentationControls lang={lang} imageUrl={savedImagePreviewUrl} label={w(imagePresentation.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation.sourceKind === "paste" ? "Pasted image" : "Uploaded image", imagePresentation.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation.sourceKind === "paste" ? "Imagen pegada" : "Imagen subida", lang)} crop={imagePresentation.crop} showInRfi={imagePresentation.showInRfi !== false} includeInCompletePdf={imagePresentation.includeInCompletePdf !== false} editable onCrop={() => setEditingSavedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} /><RfiReportScreenshotsEditor items={imagePresentation.reportScreenshots} files={files || []} editable lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : prev)} /></> : null}
+        imagePresentationContent={<>{imagePresentation && <RfiImagePresentationControls lang={lang} imageUrl={savedImagePreviewUrl} label={w(imagePresentation.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation.sourceKind === "paste" ? "Pasted image" : "Uploaded image", imagePresentation.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation.sourceKind === "paste" ? "Imagen pegada" : "Imagen subida", lang)} crop={imagePresentation.crop} showInRfi={imagePresentation.showInRfi !== false} includeInCompletePdf={imagePresentation.includeInCompletePdf !== false} editable onCrop={() => setEditingSavedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} />}<RfiReportScreenshotsEditor projectId={projectId} items={imagePresentation?.reportScreenshots || []} files={files || []} editable lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : { sourceFileId: null, sourceKind: null, showInRfi: true, includeInCompletePdf: true, crop: null, reportScreenshots })} /></>}
         actions={{ submit: handleSubmit, cancel: () => { void cancelCreate(); } }}
         onChange={handleCanonicalCreateChange}
         onAddReference={addReference}
@@ -3244,12 +3318,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         options={{ priorities: priorityOptions, rfiTypes: rfiTypeOptions }}
         cloudAttachmentActions={infoEdit ? connectedFileSources.map(provider => ({ key: provider.key, label: w(`From ${provider.label}`, `Desde ${provider.label}`, lang), icon: "cloud" as const, onClick: () => setCloudPickerTarget({ target: "question", provider }) })) : []}
         imageAttachmentActions={infoEdit ? [
-          { key: "upload-image", label: w("Upload Image", "Subir Imagen", lang), icon: "upload", onClick: () => imageEvidenceInputRef.current?.click() },
+          { key: "upload-image", label: w("Add Image", "Agregar Imagen", lang), icon: "upload", onClick: () => imageEvidenceInputRef.current?.click() },
           { key: "replace-image", label: w("Replace Image", "Reemplazar Imagen", lang), icon: "replace", onClick: () => imageReplacementInputRef.current?.click() },
           { key: "paste-image", label: w("Paste Image", "Pegar Imagen", lang), icon: "paste", onClick: pasteImageEvidence },
           { key: "capture-screen", label: w("Capture Screen", "Capturar Pantalla", lang), icon: "capture", onClick: captureScreenImage },
         ] : []}
-        imagePresentationContent={(imagePresentation || viewpointFile) ? <><RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} /><RfiReportScreenshotsEditor items={imagePresentation?.reportScreenshots} files={files || []} editable={infoEdit} lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : { sourceFileId: viewpointFile?.id ?? null, sourceKind: viewpointFile ? "viewpoint" : null, showInRfi: true, includeInCompletePdf: true, crop: null, reportScreenshots })} /></> : null}
+        imagePresentationContent={<>{(imagePresentation || viewpointFile) && <RfiImagePresentationControls lang={lang} imageUrl={activeImageUrl} label={w(imagePresentation?.replacementFileId ? "Replacement image" : imagePresentation?.sourceKind === "screen-snip" ? "Screen snip" : imagePresentation?.sourceKind === "paste" ? "Pasted image" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Uploaded image" : "Original viewpoint image", imagePresentation?.replacementFileId ? "Imagen de reemplazo" : imagePresentation?.sourceKind === "screen-snip" ? "Recorte de pantalla" : imagePresentation?.sourceKind === "paste" ? "Imagen pegada" : imagePresentation?.sourceKind === "upload" || !viewpointFile ? "Imagen subida" : "Imagen original del punto de vista", lang)} crop={imagePresentation?.crop || null} showInRfi={imagePresentation?.showInRfi !== false} includeInCompletePdf={imagePresentation?.includeInCompletePdf !== false} editable={infoEdit} canRestore={!!imagePresentation?.replacementFileId && !!(imagePresentation?.sourceFileId || viewpointFile?.id)} onCrop={() => setEditingPersistedImage(true)} onFullImage={() => setImagePresentation(prev => prev ? { ...prev, crop: null } : prev)} onShowChange={showInRfi => setImagePresentation(prev => prev ? { ...prev, showInRfi } : prev)} onPdfChange={includeInCompletePdf => setImagePresentation(prev => prev ? { ...prev, includeInCompletePdf } : prev)} onRestore={() => setImagePresentation(prev => prev ? { ...prev, replacementFileId: null, replacementKind: null, crop: null, sourceFileId: prev.sourceFileId ?? viewpointFile?.id, sourceKind: prev.sourceKind ?? "viewpoint" } : prev)} />}<RfiReportScreenshotsEditor projectId={projectId} items={imagePresentation?.reportScreenshots || []} files={files || []} editable={infoEdit} lang={lang} onChange={reportScreenshots => setImagePresentation(prev => prev ? { ...prev, reportScreenshots } : { sourceFileId: viewpointFile?.id ?? null, sourceKind: viewpointFile ? "viewpoint" : null, showInRfi: true, includeInCompletePdf: true, crop: null, reportScreenshots })} /></>}
         actions={{
           back: onClose,
           "export-pdf": () => onExportPdf(rfi),
@@ -3378,7 +3452,7 @@ function CanonicalSection({ title, children }: { title: string; children: React.
 }
 
 export function RfiCanonicalForm({
-  lang, mode, recordState, values, permissions, references, attachments, attachmentFiles = [], uploadResults = [], imagePresentation, packageItems, responses,
+  lang, mode, recordState, values, permissions, validation, references, attachments, attachmentFiles = [], uploadResults = [], imagePresentation, packageItems, responses,
   loading, options, cloudAttachmentActions = [], imageAttachmentActions = [], pendingImagePreview, onAttachPendingImage, onCancelPendingImage, imagePresentationContent,
   actions, onChange, onAddReference, onRemoveReference, onOpenReference = () => undefined, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
   onCopyEmail, emailCopied, statusContent, submittedByDirectoryContent, submittedToDirectoryContent, distributionContent, referenceContent, impactContent, responseContent,
@@ -3394,7 +3468,7 @@ export function RfiCanonicalForm({
     reopened: w("Reopened RFI", "RFI Reabierto", lang),
     revised: w("Revised RFI", "RFI Revisado", lang),
   };
-  const headerActions = matrix.filter(action => action.key !== "save-response");
+  const headerActions = editable ? [] : matrix.filter(action => action.key !== "save-response");
   const responseActions = matrix.filter(action => action.key === "save-response");
   const priorityOptions = options?.priorities?.length ? options.priorities : [
     { value: "low", label: w("Low", "Baja", lang) },
@@ -3417,12 +3491,18 @@ export function RfiCanonicalForm({
   const costNeedsReason = values.costImpact === "Cost Increase TBD" || values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const costNeedsAmount = values.costImpact === "Cost Increase Known" || values.costImpact === "Cost Decrease";
   const scheduleNeedsFields = values.scheduleImpact === "Increase in Calendar Days" || values.scheduleImpact === "Decrease in Calendar Days";
+  const hasSourceVisualEvidence = !!(imagePresentation?.sourceFileId || imagePresentation?.replacementFileId);
   const presentationFileIds = new Set([imagePresentation?.sourceFileId, imagePresentation?.replacementFileId, ...(imagePresentation?.reportScreenshots || []).map(item => item.fileId)].filter((id): id is number => typeof id === "number"));
   const packageDisplayItems = packageItems.filter(item => !item.fileId || !presentationFileIds.has(item.fileId));
   const fileForAttachment = (value: string) => {
     const fileId = fileIdFromAttachment(value);
     return fileId ? attachmentFiles.find(file => file.id === fileId) : undefined;
   };
+  const saveBlockers = [
+    ...(!values.subject.trim() ? [w("Subject/title is required before saving.", "Asunto/titulo es requerido antes de guardar.", lang)] : []),
+    ...(responseActions.length > 0 && !values.responseText?.trim() ? [w("Official response text is required before saving the response.", "Se requiere respuesta oficial antes de guardar la respuesta.", lang)] : []),
+    ...Object.values(validation || {}).filter((message): message is string => !!message),
+  ];
   return (
     <div className="rfi-canonical-form" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -3446,6 +3526,7 @@ export function RfiCanonicalForm({
               {values.projectName && <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName} editable={false} />}
               {(editable || values.projectAddress) && <CanonicalField label={w("Project Address", "Direccion del Proyecto", lang)} value={values.projectAddress || ""} editable={editable} onChange={v => onChange("projectAddress", v)} full />}
               <CanonicalField label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
+              {editable && !values.subject.trim() && <div style={{ gridColumn: "1 / -1", color: "#B91C1C", fontSize: 11, fontWeight: 700 }}>{w("Subject/title is required before Save can complete.", "Asunto/titulo es requerido antes de completar Guardar.", lang)}</div>}
               <CanonicalField label={w("Status", "Estado", lang)} value={values.status} editable={false} />
               <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} options={priorityOptions} />
               <CanonicalField label={w("Type", "Tipo", lang)} value={values.rfiType} editable={editable} onChange={v => onChange("rfiType", v)} options={typeOptions} />
@@ -3485,7 +3566,7 @@ export function RfiCanonicalForm({
               <CanonicalField label={w("Note number", "Numero de Nota", lang)} value={values.noteNumber} editable={editable} onChange={v => onChange("noteNumber", v)} />
               <CanonicalField label={w("Location", "Ubicacion", lang)} value={values.locationDescription} editable={editable} onChange={v => onChange("locationDescription", v)} full />
             </FormGrid>
-            {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button>{imageAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}>{action.icon === "capture" ? <Camera style={{ width: 12, height: 12 }} /> : action.icon === "paste" ? <Clipboard style={{ width: 12, height: 12 }} /> : action.icon === "replace" ? <RefreshCw style={{ width: 12, height: 12 }} /> : <Upload style={{ width: 12, height: 12 }} />}{action.label}</Button>)}{cloudAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}><FolderOpen style={{ width: 12, height: 12 }} />{action.label}</Button>)}</div>}
+            {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}><Input value={values.referenceInput || ""} onChange={e => onChange("referenceInput", e.target.value)} placeholder={w("Reference/file name/URL", "Referencia/nombre/URL", lang)} style={{ flex: "1 1 260px", fontSize: 12 }} /><Button type="button" size="sm" variant="outline" onClick={onAddReference}>{w("Add Reference", "Agregar Referencia", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={onUploadFile}>{loading?.uploading ? w("Uploading...", "Subiendo...", lang) : w("Upload File", "Subir Archivo", lang)}</Button>{cloudAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}><FolderOpen style={{ width: 12, height: 12 }} />{action.label}</Button>)}</div>}
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 12, fontWeight: 700 }}>{w("Manual References", "Referencias Manuales", lang)}</div>
               <div style={{ display: "grid", gap: 5, marginTop: 5 }}>
@@ -3501,12 +3582,32 @@ export function RfiCanonicalForm({
               </div>
               {uploadResults.length > 0 && <div style={{ display: "grid", gap: 4, marginTop: 8 }}>{uploadResults.map((result, index) => <div key={`${result.name}-${index}`} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11, color: result.state === "error" ? "#B91C1C" : result.state === "success" ? "#166534" : "hsl(var(--muted-foreground))" }}>{result.state === "success" ? <CheckCircle2 style={{ width: 13, height: 13 }} /> : result.state === "error" ? <CircleAlert style={{ width: 13, height: 13 }} /> : <Loader2 className="animate-spin" style={{ width: 13, height: 13 }} />}<span>{result.name}{result.message ? ` - ${result.message}` : ""}</span></div>)}</div>}
             </div>
-            {imagePresentationContent}
             {(imagePresentation || packageDisplayItems.length > 0) && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>{w("Complete RFI PDF package", "Paquete PDF Completo RFI", lang)}</div>
               {packageDisplayItems.map((item, index) => <div key={item.key} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: 8, padding: "5px 0", borderTop: index ? "1px solid hsl(var(--border) / 0.5)" : undefined }}><input type="checkbox" checked={item.include} disabled={!editable || !onTogglePackageItem} onChange={e => onTogglePackageItem?.(item.key, e.target.checked)} /><span><strong style={{ display: "block" }}>{item.label}</strong><span style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{completePackageMethodLabel(item.label, lang)}</span></span>{editable && onMovePackageItem && <span style={{ display: "flex", gap: 4 }}><Button type="button" size="icon" variant="outline" disabled={index === 0} onClick={() => onMovePackageItem(item.key, -1)} title={w("Move up", "Mover arriba", lang)}><ChevronUp style={{ width: 14, height: 14 }} /></Button><Button type="button" size="icon" variant="outline" disabled={index === packageDisplayItems.length - 1} onClick={() => onMovePackageItem(item.key, 1)} title={w("Move down", "Mover abajo", lang)}><ChevronDown style={{ width: 14, height: 14 }} /></Button></span>}</div>)}
             </div>}
             {referenceContent}
+          </CanonicalSection>
+          <CanonicalSection title={w("Visual Evidence for Reports", "Evidencia Visual para Reportes", lang)}>
+            <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.18)", fontSize: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 800 }}>
+                <Image style={{ width: 16, height: 16 }} />
+                {w("Source viewpoint and additional screenshots", "Viewpoint fuente y capturas adicionales", lang)}
+              </div>
+              <p style={{ margin: "6px 0 0", color: "hsl(var(--muted-foreground))" }}>
+                {w("These images can be included in RFI PDF, RFI DOCX, and Complete RFI PDF when selected in the report composer.", "Estas imagenes pueden incluirse en PDF RFI, DOCX RFI y PDF Completo RFI cuando se seleccionan en el compositor de reportes.", lang)}
+              </p>
+              {editable && <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>{imageAttachmentActions.map(action => <Button key={action.key} type="button" size="sm" variant="outline" onClick={action.onClick} style={{ gap: 4 }}>{action.icon === "capture" ? <Camera style={{ width: 12, height: 12 }} /> : action.icon === "paste" ? <Clipboard style={{ width: 12, height: 12 }} /> : action.icon === "replace" ? <RefreshCw style={{ width: 12, height: 12 }} /> : <Upload style={{ width: 12, height: 12 }} />}{action.label}</Button>)}</div>}
+            </div>
+            {!hasSourceVisualEvidence && <div style={{ marginTop: 10, padding: "10px 12px", border: "1px dashed hsl(var(--border))", borderRadius: 8, fontSize: 12 }}>
+              <div style={{ fontWeight: 800 }}>{w("Source Viewpoint Screenshot", "Captura del Viewpoint Fuente", lang)}</div>
+              <div style={{ color: "hsl(var(--muted-foreground))", marginTop: 4 }}>{w("No source viewpoint screenshot is attached yet. If this RFI is created from a viewpoint, the source image appears here; otherwise use Add Image, Paste, or Capture for additional report screenshots.", "Aun no hay captura del viewpoint fuente adjunta. Si este RFI se crea desde un viewpoint, la imagen fuente aparece aqui; de lo contrario use Agregar imagen, Pegar o Capturar para capturas adicionales del reporte.", lang)}</div>
+            </div>}
+            {imagePresentationContent || (
+              <div style={{ marginTop: 10, padding: "12px 10px", border: "1px dashed hsl(var(--border))", borderRadius: 8, color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
+                {w("No source viewpoint image or additional screenshots are attached yet.", "Aun no hay imagen de viewpoint fuente ni capturas adicionales adjuntas.", lang)}
+              </div>
+            )}
           </CanonicalSection>
           <CanonicalSection title={w("5. Description of Question", "5. Descripcion de la Pregunta", lang)}>
             <CanonicalField label={w("Question", "Pregunta", lang)} value={values.question} editable={editable} onChange={v => onChange("question", v)} full multiline />
@@ -3537,6 +3638,13 @@ export function RfiCanonicalForm({
             {responses.length > 0 && <div style={{ marginTop: 10, display: "grid", gap: 8 }}>{responses.map((response, index) => <div key={response.id ?? index} style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}><strong>{w("Response", "Respuesta", lang)} {index + 1}</strong>{response.by && <span> - {response.by}</span>}<p style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{response.text}</p>{response.attachments?.map((attachment, attachmentIndex) => <div key={`${attachment}-${attachmentIndex}`} style={{ display: "flex", gap: 5, alignItems: "center", color: "#1D4ED8", marginTop: 3 }}><FileText style={{ width: 11, height: 11 }} />{isOpenableAttachment(attachment) ? <button type="button" onClick={() => onOpenReference(attachment)} style={{ padding: 0, border: 0, background: "transparent", color: "#1D4ED8", cursor: "pointer", fontSize: 12 }}>{attachmentLabelFromFiles(attachment, attachmentFiles)}</button> : attachment}</div>)}</div>)}</div>}
             {responseContent ?? (permissions.canRespond && <div style={{ marginTop: 10 }}><CanonicalField label={w("Official Response", "Respuesta Oficial", lang)} value={values.responseText || ""} editable={editable} onChange={v => onChange("responseText", v)} full multiline />{responseActions.length > 0 && <RfiActionBar actions={responseActions} handlers={actions} loading={!!loading?.response} />}</div>)}
           </CanonicalSection>
+          {editable && <div style={{ position: "sticky", bottom: 0, zIndex: 20, marginTop: 18, padding: "10px 0 0", background: "hsl(var(--background))", borderTop: "1px solid hsl(var(--border))" }}>
+            {saveBlockers.length > 0 && <div role="alert" style={{ marginBottom: 8, padding: "8px 10px", border: "1px solid #FCA5A5", borderRadius: 8, background: "#FEF2F2", color: "#991B1B", fontSize: 12 }}>
+              <strong>{w("Before saving", "Antes de guardar", lang)}:</strong> {saveBlockers[0]}
+              {saveBlockers.length > 1 && <span> {w(`+${saveBlockers.length - 1} more item(s).`, `+${saveBlockers.length - 1} elemento(s) mas.`, lang)}</span>}
+            </div>}
+            <RfiActionBar actions={matrix} handlers={actions} loading={!!loading?.saving || !!loading?.response} />
+          </div>}
         </div>
       </div>
     </div>
