@@ -4,6 +4,24 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Bounded Replit startup-risk correction accepted in source; Republish proof pending
+
+- Product commit `3ae00ec0138fb2c443eae320b80b7b3383fe36fc` preserves exact `/api` as a
+  historical non-ready `404` only during the bounded import window. It does not claim application readiness.
+- `/api/v1/healthz` and all other paths remain `503` until the real Express application is loaded; import failure
+  or the 45-second timeout changes `/api` to `503` as well.
+- Sanitized timing markers identify bootstrap bind, application-import begin, application-import completion or
+  failure, and the ready transition without exposing environment values or customer data.
+- The synchronous top-level `which ffmpeg` subprocess is removed from module initialization. FFmpeg capability
+  discovery is lazy, bounded, cached, and invoked only when meeting-audio transcription needs it.
+- Actual bundled `index.cjs` proof reached ready in under five seconds with an unreachable loopback database;
+  deterministic tests cover delayed import, historical `/api` behavior, readiness truth, failure/timeout, and
+  delayed FFmpeg discovery. This removes the only verified pre-log blocking subprocess but does not label it the
+  proven Replit root cause.
+- Remaining gates are exact Replit alignment, one explicitly authorized Republish, provider Promote completion,
+  and deployed health/customer-workflow verification. No database, schema, migration, secret, Replit Agent,
+  production, customer-data, Publish, or deployment mutation occurred in this source correction.
+
 ### Replit early-port startup hotfix accepted in source; Republish verification pending
 
 - Product commit `048bb095bd2d4cd553eb6eedd27e0b63969d768a` binds the production listener before

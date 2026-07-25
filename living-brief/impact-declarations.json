@@ -3376,6 +3376,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "84e96da8add3872620c7eb9ce84c7bc5a72c00287a8ed1f161c601e88556268f"
+    },
+    {
+      "taskId": "replit-bounded-startup-risk-removal",
+      "reviewedThroughCommit": "3ae00ec0138fb2c443eae320b80b7b3383fe36fc",
+      "reviewedAt": "2026-07-25T10:45:17.8774216-04:00",
+      "status": "accepted_source",
+      "captureTiming": "immediate_safety_correction",
+      "summary": "Bounded startup hardening preserving Replit's historical non-ready artifact-prefix behavior, removing the only verified pre-log subprocess, and adding decisive phase telemetry.",
+      "workstreams": [
+        "replit-promotion-readiness",
+        "production-startup",
+        "platform-continuity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves product ownership, provider boundaries, and every customer-facing capability contract."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded source-only correction follows the established authorization, evidence, and Replit operator boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed quality authority is exercised by deterministic delayed, failed, timed-out, and actual-bundle startup proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, customer capability, or user workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform structure records the lazy FFmpeg capability module while startup behavior is reconciled in operational authorities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, export, screenshot, PDF, DOCX, or spreadsheet behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted bounded startup hardening and accurately avoids claiming a proven Replit stall root cause."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact Replit alignment, Republish, promotion, deployed health, and customer verification as unfinished."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sanitized provider logs and local startup proof remain external evidence; historical audit narrative is unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "def26205b5e6b8e3d3410e9e5c860e1b00ecafba3e268dc9666cd840d5d6f950"
     }
   ]
 }

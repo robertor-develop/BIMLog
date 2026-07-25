@@ -9,6 +9,16 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+The bounded Replit startup-risk correction is accepted in source at product commit
+`3ae00ec0138fb2c443eae320b80b7b3383fe36fc`. During the finite application-import window, exact `/api`
+preserves its historical non-ready Express-style `404` behavior required by the Replit artifact promoter, while
+`/api/v1/healthz` and every other path remain `503` until the real application is ready. Import completion,
+failure, and the ready transition now have bounded, sanitized phase timing, and a 45-second timeout fails closed.
+The only verified pre-log subprocess, top-level `which ffmpeg`, is removed from module initialization; capability
+discovery is lazy, bounded, cached, and invoked only by meeting-audio transcription. This eliminates an objective
+startup risk but is not claimed as the proven cause of the Replit-only stall. Republish, promotion, deployed
+health, and customer verification remain separate operational gates.
+
 The Replit early-port startup hotfix is accepted in source at product commit
 `048bb095bd2d4cd553eb6eedd27e0b63969d768a`. The production entrypoint now binds the configured port before
 asynchronously importing the application, returns `503` while initialization is starting or failed, and delegates
