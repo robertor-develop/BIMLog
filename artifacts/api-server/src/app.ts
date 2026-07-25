@@ -480,13 +480,16 @@ const rfiMigrationReady = (async () => {
     );
     await pool.query(`CREATE TABLE IF NOT EXISTS rfi_report_settings (
       id SERIAL PRIMARY KEY,
-      project_id INTEGER NOT NULL REFERENCES projects(id),
+      project_id INTEGER NOT NULL,
       version INTEGER NOT NULL DEFAULT 1,
       settings JSONB NOT NULL,
-      created_by_id INTEGER NOT NULL REFERENCES users(id),
-      updated_by_id INTEGER NOT NULL REFERENCES users(id),
+      created_by_id INTEGER NOT NULL,
+      updated_by_id INTEGER NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT now(),
-      updated_at TIMESTAMP NOT NULL DEFAULT now()
+      updated_at TIMESTAMP NOT NULL DEFAULT now(),
+      CONSTRAINT rfi_report_settings_project_id_fkey FOREIGN KEY (project_id) REFERENCES projects(id),
+      CONSTRAINT rfi_report_settings_created_by_id_fkey FOREIGN KEY (created_by_id) REFERENCES users(id),
+      CONSTRAINT rfi_report_settings_updated_by_id_fkey FOREIGN KEY (updated_by_id) REFERENCES users(id)
     )`);
     await pool.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS rfi_report_settings_project_uidx ON rfi_report_settings (project_id)`,

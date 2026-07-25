@@ -19,7 +19,7 @@ export async function ensureCoordinatorBulkActionSchema(): Promise<void> {
     CREATE UNIQUE INDEX IF NOT EXISTS coordinator_bulk_meeting_operations_idempotency_uidx
       ON coordinator_bulk_meeting_operations(user_id,project_id,idempotency_key);
     CREATE INDEX IF NOT EXISTS coordinator_bulk_meeting_operations_project_meeting_idx
-      ON coordinator_bulk_meeting_operations(project_id,meeting_id,created_at);
+      ON coordinator_bulk_meeting_operations(project_id,meeting_id,created_at DESC NULLS FIRST);
   `);
 }
 

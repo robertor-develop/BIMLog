@@ -1,0 +1,12 @@
+ALTER TABLE "rfi_report_settings" DROP CONSTRAINT "rfi_report_settings_created_by_id_fkey";
+ALTER TABLE "rfi_report_settings" DROP CONSTRAINT "rfi_report_settings_project_id_fkey";
+ALTER TABLE "rfi_report_settings" DROP CONSTRAINT "rfi_report_settings_updated_by_id_fkey";
+DROP INDEX "coordinator_saved_views_owner_project_idx";
+DROP INDEX "coordinator_saved_view_operations_view_idx";
+DROP INDEX "coordinator_bulk_meeting_operations_project_meeting_idx";
+ALTER TABLE "rfi_report_settings" ADD CONSTRAINT "rfi_report_settings_created_by_id_users_id_fk" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "rfi_report_settings" ADD CONSTRAINT "rfi_report_settings_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "rfi_report_settings" ADD CONSTRAINT "rfi_report_settings_updated_by_id_users_id_fk" FOREIGN KEY ("updated_by_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+CREATE INDEX "coordinator_saved_views_owner_project_idx" ON "coordinator_saved_views" USING btree ("user_id","project_id","updated_at");
+CREATE INDEX "coordinator_saved_view_operations_view_idx" ON "coordinator_saved_view_operations" USING btree ("saved_view_id","created_at");
+CREATE INDEX "coordinator_bulk_meeting_operations_project_meeting_idx" ON "coordinator_bulk_meeting_operations" USING btree ("project_id","meeting_id","created_at");

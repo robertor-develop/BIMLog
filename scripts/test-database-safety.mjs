@@ -92,9 +92,12 @@ const fiveIndexChurnPreview = fs.readFileSync(
   "utf8",
 );
 assert.equal(
-  crypto.createHash("sha256").update(fiveIndexChurnPreview).digest("hex"),
+  crypto
+    .createHash("sha256")
+    .update(fiveIndexChurnPreview.replace(/\r\n/g, "\n"))
+    .digest("hex"),
   "bbf88bc249552189ad59f3af23c9d2f6d00895c76a5f0f345134f3fd5c0d0519",
-  "the exact five-index churn preview fixture must remain byte-identical",
+  "the exact five-index churn preview fixture must remain text-identical",
 );
 assert.equal(
   (fiveIndexChurnPreview.match(/\bDROP\s+INDEX\b/gi) ?? []).length,
@@ -110,6 +113,32 @@ assert.ok(
   ),
   "the exact five-index churn preview must fail closed",
 );
+const finalSixChurnPreview = fs.readFileSync(
+  path.resolve("scripts/fixtures/replit-publish-preview-final-six-ef1c423.sql"),
+  "utf8",
+);
+assert.equal(
+  crypto
+    .createHash("sha256")
+    .update(finalSixChurnPreview.replace(/\r\n/g, "\n"))
+    .digest("hex"),
+  "4fd84b43918e9cbd677591fece630683ddebc8aff9c9472cc49e5d60260dcab0",
+  "the exact final-six churn preview fixture must remain text-identical",
+);
+assert.equal(
+  (finalSixChurnPreview.match(/\bDROP\s+CONSTRAINT\b/gi) ?? []).length,
+  3,
+);
+assert.equal(
+  (finalSixChurnPreview.match(/\bDROP\s+INDEX\b/gi) ?? []).length,
+  3,
+);
+const finalSixViolations = analyzeSql(
+  finalSixChurnPreview,
+  "final-six rejected Replit preview",
+);
+assert.ok(finalSixViolations.some((item) => item.includes("DROP CONSTRAINT")));
+assert.ok(finalSixViolations.some((item) => item.includes("DROP INDEX")));
 const declarativeSchema = fs
   .readdirSync(path.resolve("lib/db/src/schema"))
   .filter((name) => name.endsWith(".ts"))
@@ -124,63 +153,23 @@ for (const name of previewDropNames) {
   );
 }
 
-const productionAscendingIndexes = [
+const productionDescendingNullsFirstIndexes = [
   {
     name: "coordinator_saved_views_owner_project_idx",
     schema: "lib/db/src/schema/coordinator-saved-views.ts",
     runtime: "artifacts/api-server/src/lib/coordinator-saved-view-migration.ts",
-    lastColumn: "table.updatedAt",
   },
   {
     name: "coordinator_saved_view_operations_view_idx",
     schema: "lib/db/src/schema/coordinator-saved-views.ts",
     runtime: "artifacts/api-server/src/lib/coordinator-saved-view-migration.ts",
-    lastColumn: "table.createdAt",
   },
   {
     name: "coordinator_bulk_meeting_operations_project_meeting_idx",
     schema: "lib/db/src/schema/coordinator-bulk-operations.ts",
     runtime:
       "artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts",
-    lastColumn: "table.createdAt",
   },
-];
-for (const authority of productionAscendingIndexes) {
-  const schemaSource = fs.readFileSync(path.resolve(authority.schema), "utf8");
-  const runtimeSource = fs.readFileSync(
-    path.resolve(authority.runtime),
-    "utf8",
-  );
-  const escapedName = authority.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const escapedLastColumn = authority.lastColumn.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&",
-  );
-  const declaration = schemaSource.match(
-    new RegExp(
-      `index\\(\\s*"${escapedName}"\\s*,?\\s*\\)[\\s\\S]{0,120}?\\.on\\([\\s\\S]{0,200}?${escapedLastColumn}\\s*,?\\s*\\)`,
-    ),
-  )?.[0];
-  assert.ok(declaration, `${authority.name} declaration must be readable`);
-  assert.doesNotMatch(
-    declaration,
-    /\.desc\(\)|\.asc\(\)|\.nulls(?:First|Last)\(\)/,
-    `${authority.name} must preserve production plain ASC semantics`,
-  );
-  assert.match(
-    runtimeSource,
-    new RegExp(`${escapedName}[^;]*(?:;|$)`, "i"),
-    `${authority.name} runtime authority must remain explicit`,
-  );
-  assert.doesNotMatch(
-    runtimeSource.match(new RegExp(`${escapedName}[^;]*(?:;|$)`, "i"))?.[0] ??
-      "",
-    /\b(?:ASC|DESC|NULLS\s+(?:FIRST|LAST))\b/i,
-    `${authority.name} runtime authority must preserve production plain ASC semantics`,
-  );
-}
-
-const productionDescendingNullsFirstIndexes = [
   {
     name: "living_brief_gate_audit_created_idx",
     schema: "lib/db/src/schema/living-brief-gate.ts",
@@ -210,6 +199,40 @@ for (const authority of productionDescendingNullsFirstIndexes) {
     runtimeSource,
     new RegExp(`${escapedName}[^;]*DESC\\s+NULLS\\s+FIRST`, "i"),
     `${authority.name} runtime authority must explicitly use DESC NULLS FIRST`,
+  );
+}
+
+const declarativeRfiSettingsSchema = fs.readFileSync(
+  path.resolve("lib/db/src/schema/rfi-report-settings.ts"),
+  "utf8",
+);
+const runtimeRfiSettingsSchema = fs.readFileSync(
+  path.resolve("artifacts/api-server/src/app.ts"),
+  "utf8",
+);
+const productionRfiForeignKeys = [
+  "rfi_report_settings_project_id_fkey",
+  "rfi_report_settings_created_by_id_fkey",
+  "rfi_report_settings_updated_by_id_fkey",
+];
+for (const name of productionRfiForeignKeys) {
+  assert.ok(
+    declarativeRfiSettingsSchema.includes(name),
+    `declarative RFI settings schema missing ${name}`,
+  );
+  assert.ok(
+    runtimeRfiSettingsSchema.includes(name),
+    `runtime RFI settings schema missing ${name}`,
+  );
+}
+for (const generatedName of [
+  "rfi_report_settings_project_id_projects_id_fk",
+  "rfi_report_settings_created_by_id_users_id_fk",
+  "rfi_report_settings_updated_by_id_users_id_fk",
+]) {
+  assert.ok(
+    !declarativeRfiSettingsSchema.includes(generatedName),
+    `declarative RFI settings schema must not reintroduce ${generatedName}`,
   );
 }
 
