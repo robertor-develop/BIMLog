@@ -17,6 +17,6 @@ if (Number.isNaN(port) || port <= 0) {
 const bootstrap = createApplicationBootstrap(() => import("./app"));
 
 bootstrap.server.listen(port, () => {
-  console.log(`Startup listener bound on port ${port}`);
+  console.log(`[startup] phase=bootstrap_bound port=${port} elapsed_ms=0`);
   void bootstrap.initialize();
 });

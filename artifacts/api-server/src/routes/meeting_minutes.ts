@@ -57,15 +57,7 @@ import {
   MeetingRfiLinkError,
   MeetingSubmittalLinkError,
 } from "../lib/meeting-canonical-links";
-
-const FFMPEG_PATH = (() => {
-  try {
-    const { execSync } = require("child_process");
-    return execSync("which ffmpeg").toString().trim() || "ffmpeg";
-  } catch {
-    return "ffmpeg";
-  }
-})();
+import { resolveFfmpegPath } from "../lib/ffmpeg-capability";
 
 const router: Router = Router();
 
@@ -3100,6 +3092,7 @@ router.post(
       }
 
       let fullTranscript = "";
+      const ffmpegPath = await resolveFfmpegPath();
 
       if (fileBuffer.length <= CHUNK_SIZE) {
         const { execSync } = await import("child_process");
@@ -3118,7 +3111,7 @@ router.post(
         fs.writeFileSync(inputPath, fileBuffer);
         try {
           execSync(
-            `${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y`,
+            `${ffmpegPath} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${outputPath}" -y`,
             { stdio: "pipe" },
           );
           const compressed = fs.readFileSync(outputPath);
@@ -3163,7 +3156,7 @@ router.post(
 
         try {
           execSync(
-            `${FFMPEG_PATH} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y`,
+            `${ffmpegPath} -i "${inputPath}" -ar 16000 -ac 1 -b:a 64k "${compressedPath}" -y`,
             { stdio: "pipe" },
           );
           const compressedBuffer = fs.readFileSync(compressedPath);
