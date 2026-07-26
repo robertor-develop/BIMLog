@@ -457,9 +457,32 @@ iframe[aria-label*="Replit" i],
 @media (max-width: 720px) {
   .phasea-mobile-nav-trigger {
     display: inline-flex;
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    z-index: 1100;
+    margin: 0;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
   }
   .app-shell > .phasea-project-sidebar.sidebar {
     display: none;
+  }
+  .app-shell > .main-area {
+    width: 100%;
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .project-context-bar {
+    min-width: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .page-content {
+    width: 100%;
+    min-width: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow-x: hidden;
   }
   .phasea-page-hero,
   .phasea-card-header {
