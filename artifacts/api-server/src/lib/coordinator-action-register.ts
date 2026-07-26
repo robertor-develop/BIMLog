@@ -134,6 +134,7 @@ export type AccessContext = {
 export function evaluateProjectReadAccess(input: {
   currentCompanyId: number;
   boundCompanyId: number | null;
+  projectCreatorCompanyId?: number | null;
   role: string | null;
   status: string | null;
   permission: string | null;
@@ -141,12 +142,23 @@ export function evaluateProjectReadAccess(input: {
   superAdminAccess?: string;
   superAdminReason?: string;
 }): AccessContext["accessMode"] | null {
-  const mapping = mapCurrentProjectRole(input.role, input.permission);
+  const fallbackPermission =
+    input.role === "project_admin" || input.role === "admin"
+      ? "admin"
+      : input.role === "viewer"
+        ? "read"
+        : input.permission;
+  const mapping = mapCurrentProjectRole(input.role, fallbackPermission);
   const currentTenant =
     Number.isSafeInteger(input.boundCompanyId) &&
     input.boundCompanyId === input.currentCompanyId;
+  const legacyTenant =
+    input.boundCompanyId == null &&
+    typeof input.projectCreatorCompanyId === "number" &&
+    Number.isSafeInteger(input.projectCreatorCompanyId) &&
+    input.projectCreatorCompanyId === input.currentCompanyId;
   if (
-    currentTenant &&
+    (currentTenant || legacyTenant) &&
     input.status === "active" &&
     mapping.knownRole &&
     hasScopedAuthority(mapping, ["project:read"])
@@ -396,8 +408,9 @@ export async function authorizeCoordinatorProject(input: {
   superAdminReason?: string;
 }): Promise<AccessContext> {
   const result = await pool.query(
-    `SELECT u.company_id,u.is_super_admin,pm.role,pm.status,co.meta,b.company_id AS bound_company_id
+    `SELECT u.company_id,u.is_super_admin,pm.role,pm.status,co.meta,b.company_id AS bound_company_id,creator.company_id AS project_creator_company_id
     FROM users u CROSS JOIN projects p
+    JOIN users creator ON creator.id=p.created_by_id
     LEFT JOIN LATERAL (SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1) b ON true
     LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=u.id
     LEFT JOIN config_options co ON co.category='member_role' AND co.value=pm.role
@@ -425,6 +438,10 @@ export async function authorizeCoordinatorProject(input: {
     currentCompanyId: Number(row.company_id),
     boundCompanyId:
       row.bound_company_id == null ? null : Number(row.bound_company_id),
+    projectCreatorCompanyId:
+      row.project_creator_company_id == null
+        ? null
+        : Number(row.project_creator_company_id),
     role: row.role == null ? null : String(row.role),
     status: row.status == null ? null : String(row.status),
     permission,

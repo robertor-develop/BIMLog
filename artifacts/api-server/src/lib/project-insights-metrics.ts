@@ -55,8 +55,11 @@ export async function loadProjectInsightsSummary(input: {
         [input.projectId],
       ),
       pool.query(
-        `SELECT COALESCE(NULLIF(uploaded_by_company,''),'Unknown') AS company,count(*)::int AS rejected
-         FROM files WHERE project_id=$1 AND lower(COALESCE(status,''))='rejected'
+        `SELECT COALESCE(NULLIF(c.name,''),'Unknown') AS company,count(*)::int AS rejected
+         FROM files f
+         LEFT JOIN users u ON u.id=f.uploaded_by_id
+         LEFT JOIN companies c ON c.id=u.company_id
+         WHERE f.project_id=$1 AND lower(COALESCE(f.status,''))='rejected'
          GROUP BY company ORDER BY rejected DESC,company ASC LIMIT 5`,
         [input.projectId],
       ),
@@ -120,10 +123,10 @@ export async function loadProjectInsightsSummary(input: {
     operationalContext: {
       ...register.counts.context,
       links: {
-        actionable: `${commandCenterBase}?ccBuiltIn=all_actionable`,
-        overdue: `${commandCenterBase}?ccBuiltIn=overdue`,
+        actionable: `${commandCenterBase}?ccView=all_actionable`,
+        overdue: `${commandCenterBase}?ccView=overdue`,
         dueSoon: `${commandCenterBase}?ccDeadline=due_this_week`,
-        blocked: `${commandCenterBase}?ccPresentation=action_required`,
+        blocked: `${commandCenterBase}?ccPresentationStatus=action_required`,
       },
     },
     compliance: {
@@ -155,7 +158,7 @@ export async function loadProjectInsightsSummary(input: {
           : safeCount(rfiAgingRow.average_open_age_days),
       links: {
         open: `${commandCenterBase}?ccModules=rfi`,
-        aging: `${commandCenterBase}?ccModules=rfi&ccBuiltIn=overdue`,
+        aging: `${commandCenterBase}?ccModules=rfi&ccView=overdue`,
         report: `${reportsBase}?report=rfi-aging`,
       },
     },

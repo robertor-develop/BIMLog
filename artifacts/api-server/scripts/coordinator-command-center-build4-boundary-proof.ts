@@ -92,9 +92,9 @@ check(
 check(
   "actionable_insights.deep_link_command_center",
   insights.includes("/command-center") &&
-    insights.includes("ccBuiltIn=overdue") &&
+    insights.includes("ccView=overdue") &&
     insights.includes("ccDeadline=due_this_week") &&
-    insights.includes("ccPresentation=action_required") &&
+    insights.includes("ccPresentationStatus=action_required") &&
     analytics.includes("setLocation(data.operationalContext.links.overdue)") &&
     insights.includes("linksGrantAuthority: false"),
   "actionable insight links target exact filtered Command Center views and grant no authority",
