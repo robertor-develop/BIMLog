@@ -1386,6 +1386,18 @@ export function MeetingsTab({
     window.open(meetingPdfUrl(meeting.id), "_blank", "noopener,noreferrer");
   const printMeeting = (meeting: Meeting) =>
     window.open(meetingPdfUrl(meeting.id), "_blank", "noopener,noreferrer");
+  const meetingReportScopeLabel = (meeting: Meeting) =>
+    `${meeting.title || t("Selected meeting", "Reunión seleccionada")} · ${new Date(
+      meeting.meetingDate,
+    ).toLocaleDateString()}`;
+  const meetingReportHelp = t(
+    "Creates the official meeting minutes PDF for the selected meeting, including the current saved attendees, notes, action items, and linked records supported by the report.",
+    "Crea el PDF oficial de actas para la reunión seleccionada, incluyendo los asistentes, notas, acciones y registros vinculados guardados que admite el reporte.",
+  );
+  const meetingPrintHelp = t(
+    "Opens the same PDF report in a new tab so it can be printed from the browser.",
+    "Abre el mismo reporte PDF en una nueva pestaña para imprimirlo desde el navegador.",
+  );
   const openOriginalLensViewpoint = (lensViewpointId: number) =>
     window.location.assign(
       `/projects/${projectId}/clash-reports?tab=lens&viewpoint=${lensViewpointId}`,
@@ -3333,7 +3345,14 @@ export function MeetingsTab({
                       </span>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                    }}
+                  >
                     {canWrite && (
                       <button
                         className="btn btn-sm btn-outline"
@@ -3342,19 +3361,71 @@ export function MeetingsTab({
                         {t("Edit Meeting", "Editar Reunión")}
                       </button>
                     )}
-                    <button
-                      className="btn btn-sm btn-outline"
-                      onClick={() => downloadMeetingPdf(m)}
+                    <div
+                      aria-label={t(
+                        "Meeting report actions",
+                        "Acciones de reporte de reunión",
+                      )}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                        maxWidth: 330,
+                        padding: 8,
+                        border: "1px solid #DBEAFE",
+                        borderRadius: 10,
+                        background: "#F8FAFC",
+                      }}
                     >
-                      <Download size={12} style={{ marginRight: 4 }} />
-                      {t("Download PDF", "Descargar PDF")}
-                    </button>
-                    <button
-                      className="btn btn-sm btn-outline"
-                      onClick={() => printMeeting(m)}
-                    >
-                      {t("Print Meeting", "Imprimir Reunión")}
-                    </button>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                          color: "#1D4ED8",
+                        }}
+                      >
+                        {t(
+                          "Generate Meeting Minutes Report",
+                          "Generar reporte de actas",
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#475569" }}>
+                        {meetingReportScopeLabel(m)}
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <button
+                          className="btn btn-sm btn-outline"
+                          onClick={() => downloadMeetingPdf(m)}
+                          title={meetingReportHelp}
+                          aria-label={t(
+                            "Generate meeting minutes PDF report",
+                            "Generar reporte PDF de actas",
+                          )}
+                        >
+                          <Download size={12} style={{ marginRight: 4 }} />
+                          {t("Generate PDF Report", "Generar reporte PDF")}
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline"
+                          onClick={() => printMeeting(m)}
+                          title={meetingPrintHelp}
+                          aria-label={t(
+                            "Open meeting minutes PDF report to print",
+                            "Abrir reporte PDF de actas para imprimir",
+                          )}
+                        >
+                          {t("Open PDF to Print", "Abrir PDF para imprimir")}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#64748B" }}>
+                        {t(
+                          "PDF is the formal minutes artifact. Registers and linked records remain available in their source modules.",
+                          "El PDF es el documento formal de actas. Los registros y vínculos permanecen disponibles en sus módulos de origen.",
+                        )}
+                      </div>
+                    </div>
                     {canWrite && (
                       <button
                         className="btn btn-sm btn-outline"
@@ -4432,23 +4503,67 @@ export function MeetingsTab({
             {title || t("Meeting Minutes", "Actas de Reunión")}
           </h2>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {editingMeeting && (
-            <button
-              className="btn btn-outline"
-              onClick={() => downloadMeetingPdf(editingMeeting)}
+            <div
+              aria-label={t(
+                "Meeting report actions",
+                "Acciones de reporte de reunión",
+              )}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+                padding: "8px 10px",
+                border: "1px solid #DBEAFE",
+                borderRadius: 10,
+                background: "#F8FAFC",
+              }}
             >
-              <Download size={12} style={{ marginRight: 4 }} />
-              {t("Download PDF", "Descargar PDF")}
-            </button>
-          )}
-          {editingMeeting && (
-            <button
-              className="btn btn-outline"
-              onClick={() => printMeeting(editingMeeting)}
-            >
-              {t("Print Meeting", "Imprimir Reunión")}
-            </button>
+              <div style={{ minWidth: 180 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    color: "#1D4ED8",
+                  }}
+                >
+                  {t(
+                    "Generate Meeting Minutes Report",
+                    "Generar reporte de actas",
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: "#475569" }}>
+                  {meetingReportScopeLabel(editingMeeting)}
+                </div>
+              </div>
+              <button
+                className="btn btn-outline"
+                onClick={() => downloadMeetingPdf(editingMeeting)}
+                title={meetingReportHelp}
+                aria-label={t(
+                  "Generate meeting minutes PDF report",
+                  "Generar reporte PDF de actas",
+                )}
+              >
+                <Download size={12} style={{ marginRight: 4 }} />
+                {t("Generate PDF Report", "Generar reporte PDF")}
+              </button>
+              <button
+                className="btn btn-outline"
+                onClick={() => printMeeting(editingMeeting)}
+                title={meetingPrintHelp}
+                aria-label={t(
+                  "Open meeting minutes PDF report to print",
+                  "Abrir reporte PDF de actas para imprimir",
+                )}
+              >
+                {t("Open PDF to Print", "Abrir PDF para imprimir")}
+              </button>
+            </div>
           )}
           <button
             className="btn btn-outline"
