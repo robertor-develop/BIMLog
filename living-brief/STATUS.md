@@ -8,6 +8,7 @@ This file states accepted `origin/master` source truth. Accepted source, deploye
 synchronization, and field/customer verification are separate states. The current semantic-content
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
+UI/auth and report-export UX release bundle is accepted in local serialized integration source at $head. It combines the Living Brief authentication gate durability correction, Headquarters global navigation and shell clarity, Meetings report-generation UX, Headquarters Admin/Total Control polish, and Finance Budget/Contract export UX labels. The integrated source preserves the frozen baseline c3d135c24c1432b63d74898a1de83e67ba54c394, excludes superseded Headquarters Slice 2 commit d7bcf76be2d14eae49ef0c7a10d17d55a198f59e, and remains not published, deployed, production verified, customer verified, or live accepted. Replit/provider publication remains a separate fail-closed step tied to the exact final pushed commit and preview.
 
 UI/UX Foundation Phase A is accepted in the current serialized source candidate based on authoritative master
 `6fc0f8ef48c23c07f89a3ad6b3928f6c552bcdfe`. The shared project shell now adds grouped project navigation,

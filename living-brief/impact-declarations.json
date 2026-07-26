@@ -3852,6 +3852,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8386d3906951e268d027c7bb8649449f7ffa5bdde994fefa847e469a11a4385a"
+    },
+    {
+      "taskId": "uiux-auth-serialized-release-owner-integration",
+      "reviewedThroughCommit": "88db2b7cadf924dc956a3468e5ba7cd8ae0c0ec6",
+      "reviewedAt": "2026-07-26T18:54:30-04:00",
+      "status": "accepted_source_integration_candidate",
+      "captureTiming": "serialized_release_integration",
+      "summary": "Combined UI/auth and report-export UX release source integration from accepted candidates.",
+      "workstreams": [
+        "living-brief-auth",
+        "headquarters-ui",
+        "meetings-report-ux",
+        "finance-export-ux",
+        "serialized-release"
+      ],
+      "authorities": [
+        {
+          "reason": "No ecosystem ownership, company relationship, market positioning, or product doctrine changes.",
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "The release follows F-drive isolated worktree, serialized integration, no-production, no-Replit, no-publish, and no-deploy boundaries.",
+          "key": "claude",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "Existing authentication, bilingual responsive UI, readable export-action, privacy, and evidence gates govern this release without new quality doctrine.",
+          "key": "quality",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No roadmap, commercial promise, module ownership model, or customer-facing product category expansion is introduced.",
+          "key": "vision",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "Source changes stay within existing frontend surfaces and Living Brief gate libraries; generated structural documentation remains deterministic if the build updates it.",
+          "key": "platform",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No Navisworks plugin source, installation, synchronization, or field workflow changes.",
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "Meetings and Finance export button clarity align with existing report-action UX; no PDF, DOCX, XLSX renderer or report-design doctrine changes.",
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No external standard, certification, citation, or compliance interpretation changes.",
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "Records the combined UI/auth and report-export UX source integration state and non-deployed boundary.",
+          "key": "status",
+          "result": "updated"
+        },
+        {
+          "reason": "Records remaining focused gates, normal push, remote verification, and separate Replit publication/customer acceptance boundaries.",
+          "key": "open_loop",
+          "result": "updated"
+        },
+        {
+          "reason": "No historical audit certificate semantics or retained dated audit evidence changes.",
+          "key": "audit",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b986acc2f2dc2e53cfc5f6031e7f790ec66b67d30a7ab10c9103abda29f4825e"
     }
   ]
 }
