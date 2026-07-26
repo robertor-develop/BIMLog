@@ -9,6 +9,13 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+UI/UX Foundation Phase A is accepted in the current serialized source candidate based on authoritative master
+`6fc0f8ef48c23c07f89a3ad6b3928f6c552bcdfe`. The shared project shell now adds grouped project navigation,
+desktop expanded/collapsed behavior, Spanish exact-390px drawer behavior, foundational responsive spacing tokens,
+and a representative Reports Hub hierarchy without changing RFI export behavior, schema, dependencies, security,
+Telegram product code, plugins, Replit, or production/customer data. This source state is not published, deployed,
+production verified, customer verified, or live accepted.
+
 Project Insights API release correction and Activity presentation are accepted in the current combined source
 candidate based on authoritative master `715fd6ad8ff0a9e80f69b6e969cfde3ff3c511b0`. The Project Insights backend
 now preserves tenant isolation while allowing a legitimate legacy same-company project-admin read when older binding

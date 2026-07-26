@@ -4,6 +4,18 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### UI/UX Foundation Phase A source candidate
+
+- Serialized source candidate is based on authoritative master `6fc0f8ef48c23c07f89a3ad6b3928f6c552bcdfe` and
+  changes only the shared Project Sidebar, foundational CSS, and representative non-RFI Reports Hub surface.
+- The accepted Phase A behavior adds grouped project navigation, desktop expanded/collapsed shell behavior, Spanish
+  exact-390px mobile drawer behavior, foundational responsive spacing tokens, and a clearer Reports Hub hierarchy.
+- RFI export/report behavior, Project Insights backend behavior, Activity presentation behavior, schema/database,
+  dependencies/lockfile, Security work, Telegram product code, plugins, Replit, production/customer data, publish, and
+  deploy remain outside this lane.
+- Remaining gates are focused browser evidence reuse/rerun as invalidated, serialized source validation, normal push,
+  remote equality verification, and later deployment/customer acceptance only if separately authorized.
+
 ### Project Insights API correction and Activity presentation combined source candidate
 
 - Combined source candidate is based on authoritative master `715fd6ad8ff0a9e80f69b6e969cfde3ff3c511b0` and combines

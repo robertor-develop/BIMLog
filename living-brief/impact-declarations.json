@@ -3773,6 +3773,85 @@
       ],
       "reviewedChangeSha256": "10340f10b89f130cf1982c453c090f01606ca2c6213971f48d0a220bfef63d80",
       "reviewedAt": "2026-07-26T11:44:50.7385064-04:00"
+    },
+    {
+      "taskId": "ui-ux-foundation-phase-a-integration",
+      "reviewedThroughCommit": "6fc0f8ef48c23c07f89a3ad6b3928f6c552bcdfe",
+      "reviewedAt": "2026-07-26T12:47:41.6690409-04:00",
+      "status": "accepted_source_integration_candidate",
+      "captureTiming": "serialized_ui_foundation_integration",
+      "summary": "UI/UX Foundation Phase A source candidate for grouped project navigation, foundational spacing, and representative Reports Hub hierarchy.",
+      "workstreams": [
+        "ui-ux-foundation",
+        "report-design-system",
+        "serialized-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, company relationship, market positioning, or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows F-drive worktree, serialized integration, no-production, no-Replit, no-publish, no-deploy, and clean source boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual, responsive, accessible, non-overlapping UI quality gates govern the accepted foundation without new quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, module ownership, or customer-facing product category changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source changes are scoped to frontend shell/navigation and one representative non-RFI page within existing platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, installation, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate applies existing Phase A interaction foundation to the Reports Hub but does not change governed PDF, DOCX, spreadsheet, or report export semantics."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the UI/UX Foundation Phase A source candidate and its non-deployed boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining focused browser, validation, normal push, remote verification, and later deployment/customer acceptance boundaries."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate semantics or retained dated audit evidence changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+        "artifacts/bimlog/src/index.css",
+        "artifacts/bimlog/src/pages/project/ReportsTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8386d3906951e268d027c7bb8649449f7ffa5bdde994fefa847e469a11a4385a"
     }
   ]
 }
