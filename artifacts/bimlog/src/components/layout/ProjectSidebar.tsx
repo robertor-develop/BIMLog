@@ -3,8 +3,6 @@ import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
-import { logClientError } from "@/lib/client-log";
-import { getMe } from "@workspace/api-client-react";
 import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
@@ -78,19 +76,11 @@ function SidebarModal({ onClose, children }: { onClose: () => void; children: Re
 export function ProjectSidebar({ projectId, projectCode, projectName, projectDesc, activeTab, isAdmin, memberRole }: SidebarProps) {
   const { t, lang } = useI18n();
   const tr = (en: string, es: string) => lang === "es" ? es : en;
-  const { user, token } = useAuthStore();
+  const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
-  const [isSuperAdminState, setIsSuperAdminState] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-    getMe()
-      .then((data: { isSuperAdmin?: boolean }) => { if (data.isSuperAdmin) setIsSuperAdminState(true); })
-      .catch((error: unknown) => logClientError("project sidebar user profile load", error));
-  }, [token]);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -158,10 +148,6 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEn: "People, project administration, and naming tools.",
       descriptionEs: "Personas, administracion del proyecto y herramientas de nombres.",
       items: byId(["directory", "team", "generator", "convention"]),
-      actions: [
-        { id: "admin-panel", labelEn: "Admin Panel", labelEs: "Panel de Administracion", onClick: () => navigate("/admin"), adminOnly: true },
-        { id: "total-control", labelEn: "Total Control", labelEs: "Control Total", onClick: () => navigate("/total-control"), superOnly: true },
-      ],
     },
     {
       id: "integrations",
@@ -175,7 +161,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
         { id: "sync-agent", labelEn: "BIMLog Sync Agent", labelEs: "BIMLog Sync Agent", onClick: () => setShowSyncAgent(true) },
       ],
     },
-  ].filter(group => group.items.length || group.actions?.some(action => (!action.adminOnly || isAdmin) && (!action.superOnly || isSuperAdminState)));
+  ].filter(group => group.items.length || group.actions?.length);
 
   const activeGroup = navGroups.find(group => group.items.some(item => item.id === activeTab))?.id ?? navGroups[0]?.id ?? "command";
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => ({ [activeGroup]: true }));
@@ -227,7 +213,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
               </Link>
             );
           })}
-          {group.actions?.filter(action => (!action.adminOnly || isAdmin) && (!action.superOnly || isSuperAdminState)).map(action => (
+          {group.actions?.map(action => (
             <button
               key={action.id}
               type="button"

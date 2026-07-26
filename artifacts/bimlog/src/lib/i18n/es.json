@@ -1,7 +1,7 @@
 {
   "app.name": "BIMLog",
   "app.tagline": "por IgniteSmart",
-  "nav.dashboard": "Panel",
+  "nav.dashboard": "Sede BIMLog",
   "nav.projects": "Proyectos",
   "nav.logout": "Cerrar Sesión",
   "nav.toggleLang": "Cambiar Idioma",

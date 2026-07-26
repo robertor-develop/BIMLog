@@ -157,7 +157,7 @@ function AiBriefingCard({ token }: { token?: string }) {
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export function Dashboard() {
-  const { t } = useI18n();
+  const { t, tt } = useI18n();
   const [, setLocation] = useLocation();
   const { data: projects, isLoading, isError, error, refetch } = useListProjects();
   const logout = useAuthStore(s => s.logout);
@@ -339,23 +339,44 @@ export function Dashboard() {
   const loadingText = <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Loading…</div>;
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div className="headquarters-dashboard-page" style={{ display: "flex", height: "100vh", overflow: "hidden", minWidth: 0 }}>
+      <style>{`
+        @media (max-width: 720px) {
+          .headquarters-dashboard-page {
+            display: block !important;
+            overflow-x: hidden !important;
+          }
+          .headquarters-dashboard-page > div:last-child {
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .headquarters-dashboard-page .headquarters-content {
+            max-width: 100% !important;
+            padding: 74px 12px 20px !important;
+            box-sizing: border-box;
+            overflow-x: hidden;
+          }
+        }
+      `}</style>
       {onboardingVisible && (
         <OnboardingFlow onDone={() => { setOnboardingVisible(false); doneOnboarding(); }} />
       )}
       <MasterSidebar />
 
       {/* Main scrollable area */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px" }}>
+      <div style={{ flex: 1, minWidth: 0, overflowY: "auto", overflowX: "hidden" }}>
+        <div className="headquarters-content" style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px" }}>
 
           {/* SECTION 1 — Page heading */}
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4 }}>
-              Command Center
+              {tt("BIMLog Headquarters", "Sede BIMLog")}
             </h1>
             <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-              {projects?.length ?? 0} project{(projects?.length ?? 0) !== 1 ? "s" : ""} · {totalFiles} files processed
+              {tt(
+                `${projects?.length ?? 0} project${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} files processed · Cross-project overview and administration entry point`,
+                `${projects?.length ?? 0} proyecto${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} archivos procesados · Vista general entre proyectos y entrada de administración`,
+              )}
             </p>
           </div>
 
@@ -364,7 +385,7 @@ export function Dashboard() {
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
               {/* FIX 3: each card navigates to the correct section */}
               <StatCard
                 label="Active Projects"

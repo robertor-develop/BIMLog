@@ -1,7 +1,7 @@
 {
   "app.name": "BIMLog",
   "app.tagline": "by IgniteSmart",
-  "nav.dashboard": "Dashboard",
+  "nav.dashboard": "BIMLog Headquarters",
   "nav.projects": "Projects",
   "nav.logout": "Sign Out",
   "nav.toggleLang": "Toggle Language",
