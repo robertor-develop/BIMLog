@@ -1,5 +1,20 @@
 import { pool } from "@workspace/db";
 
+type QueryClient = {
+  query<T = unknown>(text: string, values?: unknown[]): Promise<{ rows: T[]; rowCount: number | null }>;
+};
+
+export const LIVING_BRIEF_GATE_SCHEMA_LOCK = "living_brief_gate_schema_migration";
+
+export async function ensurePlatformSettingsSchema(client: QueryClient = pool): Promise<void> {
+  await client.query(`CREATE TABLE IF NOT EXISTS platform_settings (
+    id serial PRIMARY KEY,
+    key text NOT NULL UNIQUE,
+    value text NOT NULL,
+    updated_at timestamp NOT NULL DEFAULT now()
+  )`);
+}
+
 export async function ensureLivingBriefMirrorSchema(): Promise<void> {
   await pool.query(`CREATE TABLE IF NOT EXISTS living_brief_documents (
     document_key text PRIMARY KEY,
@@ -17,8 +32,9 @@ export async function ensureLivingBriefMirrorSchema(): Promise<void> {
   )`);
 }
 
-export async function ensureLivingBriefGateSchema(): Promise<void> {
-  await pool.query(`CREATE TABLE IF NOT EXISTS living_brief_gate_credentials (
+export async function ensureLivingBriefGateSchemaWithClient(client: QueryClient): Promise<void> {
+  await ensurePlatformSettingsSchema(client);
+  await client.query(`CREATE TABLE IF NOT EXISTS living_brief_gate_credentials (
     credential_key text PRIMARY KEY,
     password_hash text NOT NULL,
     version bigint NOT NULL DEFAULT 1,
@@ -30,7 +46,7 @@ export async function ensureLivingBriefGateSchema(): Promise<void> {
     CONSTRAINT living_brief_gate_key CHECK (credential_key = 'primary'),
     CONSTRAINT living_brief_gate_hash_not_default CHECK (password_hash <> 'BIMAI360')
   )`);
-  await pool.query(`CREATE TABLE IF NOT EXISTS living_brief_gate_audit (
+  await client.query(`CREATE TABLE IF NOT EXISTS living_brief_gate_audit (
     id serial PRIMARY KEY,
     action text NOT NULL,
     actor_user_id integer NOT NULL,
@@ -40,10 +56,10 @@ export async function ensureLivingBriefGateSchema(): Promise<void> {
     created_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT living_brief_gate_audit_action CHECK (action IN ('legacy_migrated','bootstrap','reset'))
   )`);
-  await pool.query(
+  await client.query(
     `CREATE INDEX IF NOT EXISTS living_brief_gate_audit_created_idx ON living_brief_gate_audit (created_at DESC NULLS FIRST)`,
   );
-  await pool.query(`WITH migrated AS (
+  await client.query(`WITH migrated AS (
       INSERT INTO living_brief_gate_credentials (credential_key, password_hash, version, created_at, updated_at, session_invalidated_at)
       SELECT 'primary', value, 1, now(), now(), now()
       FROM platform_settings
@@ -54,4 +70,19 @@ export async function ensureLivingBriefGateSchema(): Promise<void> {
     INSERT INTO living_brief_gate_audit (action, actor_user_id, actor_email, reason, credential_version)
     SELECT 'legacy_migrated', 0, 'system', 'Migrated existing Living Brief gate hash from legacy platform_settings without reseeding or overwriting.', version
     FROM migrated`);
+}
+
+export async function ensureLivingBriefGateSchema(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [LIVING_BRIEF_GATE_SCHEMA_LOCK]);
+    await ensureLivingBriefGateSchemaWithClient(client);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
 }

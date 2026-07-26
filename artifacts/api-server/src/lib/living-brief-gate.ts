@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { pool } from "@workspace/db";
+import { ensureLivingBriefGateSchema } from "./living-brief-migration";
 
 export const LIVING_BRIEF_GATE_KEY = "primary";
 
@@ -32,6 +33,18 @@ export class LivingBriefGateError extends Error {
   }
 }
 
+let gateSchemaReady: Promise<void> | null = null;
+
+export async function ensureLivingBriefGateReady(): Promise<void> {
+  if (!gateSchemaReady) {
+    gateSchemaReady = ensureLivingBriefGateSchema().catch((error) => {
+      gateSchemaReady = null;
+      throw error;
+    });
+  }
+  await gateSchemaReady;
+}
+
 function normalizeReason(value: string): string {
   return value.trim().replace(/\s+/g, " ");
 }
@@ -46,6 +59,7 @@ function validateResetInput(input: LivingBriefGateResetInput): string {
 }
 
 export async function getLivingBriefGateCredential(client: QueryClient = pool): Promise<LivingBriefGateCredential | null> {
+  if (client === pool) await ensureLivingBriefGateReady();
   const result = await client.query<LivingBriefGateCredential>(
     `SELECT credential_key, password_hash, version::int AS version, updated_at, session_invalidated_at
      FROM living_brief_gate_credentials
@@ -56,8 +70,8 @@ export async function getLivingBriefGateCredential(client: QueryClient = pool): 
   return result.rows[0] ?? null;
 }
 
-export async function verifyLivingBriefGatePassword(password: string): Promise<LivingBriefGateCredential | null> {
-  const credential = await getLivingBriefGateCredential();
+export async function verifyLivingBriefGatePassword(password: string, client: QueryClient = pool): Promise<LivingBriefGateCredential | null> {
+  const credential = await getLivingBriefGateCredential(client);
   if (!credential) return null;
   return await bcrypt.compare(password, credential.password_hash) ? credential : null;
 }
@@ -76,6 +90,7 @@ async function revalidateSuperAdminAccount(client: QueryClient, actorUserId: num
 
 export async function resetLivingBriefGateCredential(input: LivingBriefGateResetInput): Promise<{ version: number }> {
   const reason = validateResetInput(input);
+  await ensureLivingBriefGateReady();
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
