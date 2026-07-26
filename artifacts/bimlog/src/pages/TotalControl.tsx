@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
+import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { getMe } from "@workspace/api-client-react";
 import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Eye, EyeOff } from "lucide-react";
 
@@ -714,17 +715,20 @@ function TCActivityFeedTab({ token }: { token: string }) {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><TCTh>Project</TCTh><TCTh>User</TCTh><TCTh>Company</TCTh><TCTh>Action</TCTh><TCTh>Entity</TCTh><TCTh>Details</TCTh><TCTh>When</TCTh></tr></thead>
           <tbody>
-            {items.map((a: Record<string, unknown>) => (
-              <tr key={String(a.id)}>
-                <TCTd style={{ fontWeight: 500, fontSize: 12 }}>{String(a.projectName || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.userFullName || "")}</TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</TCTd>
-                <TCTd><Pill label={String(a.actionType || "")} color="#2563EB" /></TCTd>
-                <TCTd style={{ fontSize: 12 }}>{String(a.entityType || "")}</TCTd>
-                <TCTd style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "#9CA3AF" }}>{String(a.details || "")}</TCTd>
-                <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
-              </tr>
-            ))}
+            {items.map((a: Record<string, unknown>) => {
+              const detail = presentActivityDetails(a.details, { actionType: String(a.actionType || ""), entityType: String(a.entityType || "") });
+              return (
+                <tr key={String(a.id)}>
+                  <TCTd style={{ fontWeight: 500, fontSize: 12 }}>{String(a.projectName || "")}</TCTd>
+                  <TCTd style={{ fontSize: 12 }}>{String(a.userFullName || "")}</TCTd>
+                  <TCTd style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</TCTd>
+                  <TCTd><Pill label={String(a.actionType || "")} color="#2563EB" /></TCTd>
+                  <TCTd style={{ fontSize: 12 }}>{String(a.entityType || "")}</TCTd>
+                  <TCTd style={{ maxWidth: 400, fontSize: 11, color: "#9CA3AF" }}><span style={activityDetailsClampStyle}>{detail.summary || "—"}</span>{detail.meta.length > 0 && <span style={{ display: "block", marginTop: 3 }}>{detail.meta.join(" • ")}</span>}</TCTd>
+                  <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(a.createdAt)).toLocaleString()}</TCTd>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

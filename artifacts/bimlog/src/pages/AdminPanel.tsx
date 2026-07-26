@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logClientError } from "@/lib/client-log";
+import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -110,16 +111,19 @@ function OverviewTab({ token }: { token: string }) {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead><tr><Th>Project</Th><Th>User</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
               <tbody>
-                {data.activity.map((a: Record<string, unknown>) => (
-                  <tr key={String(a.id)}>
-                    <Td><span style={{ fontWeight: 500 }}>{String(a.projectName || "")}</span></Td>
-                    <Td><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></Td>
-                    <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
-                    <Td>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</Td>
-                    <Td style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere" }}><span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</span></Td>
-                    <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
-                  </tr>
-                ))}
+                {data.activity.map((a: Record<string, unknown>) => {
+                  const detail = presentActivityDetails(a.details, { actionType: String(a.actionType || ""), entityType: String(a.entityType || "") });
+                  return (
+                    <tr key={String(a.id)}>
+                      <Td><span style={{ fontWeight: 500 }}>{String(a.projectName || "")}</span></Td>
+                      <Td><div>{String(a.userFullName || "")}</div><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.userCompanyName || "")}</div></Td>
+                      <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
+                      <Td>{String(a.entityType || "")}{a.entityId ? ` #${a.entityId}` : ""}</Td>
+                      <Td style={{ maxWidth: 400 }}><span style={{ ...activityDetailsClampStyle, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{detail.summary || "—"}</span>{detail.meta.length > 0 && <span style={{ display: "block", marginTop: 3, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{detail.meta.join(" • ")}</span>}</Td>
+                      <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -519,17 +523,20 @@ function ActivityFeedTab({ token }: { token: string }) {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Project</Th><Th>User</Th><Th>Company</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
           <tbody>
-            {items.map((a: Record<string, unknown>) => (
-              <tr key={String(a.id)}>
-                <Td style={{ fontWeight: 500, fontSize: 12 }}>{String(a.projectName || "")}</Td>
-                <Td style={{ fontSize: 12 }}>{String(a.userFullName || "")}</Td>
-                <Td style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</Td>
-                <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
-                <Td style={{ fontSize: 12 }}>{String(a.entityType || "")}</Td>
-                <Td style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(a.details || "")}</Td>
-                <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
-              </tr>
-            ))}
+            {items.map((a: Record<string, unknown>) => {
+              const detail = presentActivityDetails(a.details, { actionType: String(a.actionType || ""), entityType: String(a.entityType || "") });
+              return (
+                <tr key={String(a.id)}>
+                  <Td style={{ fontWeight: 500, fontSize: 12 }}>{String(a.projectName || "")}</Td>
+                  <Td style={{ fontSize: 12 }}>{String(a.userFullName || "")}</Td>
+                  <Td style={{ fontSize: 12 }}>{String(a.userCompanyName || "")}</Td>
+                  <Td><Badge label={String(a.actionType || "")} color="#3b82f6" /></Td>
+                  <Td style={{ fontSize: 12 }}>{String(a.entityType || "")}</Td>
+                  <Td style={{ maxWidth: 400, fontSize: 11, color: "hsl(var(--muted-foreground))" }}><span style={activityDetailsClampStyle}>{detail.summary || "—"}</span>{detail.meta.length > 0 && <span style={{ display: "block", marginTop: 3 }}>{detail.meta.join(" • ")}</span>}</Td>
+                  <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(a.createdAt)).toLocaleString()}</Td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -606,7 +613,7 @@ function AdminActionsLogTab({ token }: { token: string }) {
                     <Td><Badge label={String(l.action || "")} color="#f59e0b" /></Td>
                     <Td style={{ fontSize: 12 }}>{String(l.targetType || "—")}</Td>
                     <Td style={{ fontSize: 12, fontFamily: "monospace" }}>{String(l.targetId || "—")}</Td>
-                    <Td style={{ maxWidth: 400, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere", fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{l.details ? JSON.stringify(l.details) : "—"}</Td>
+                    <Td style={{ maxWidth: 400, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{(() => { const detail = presentActivityDetails(l.details, { actionType: String(l.action || ""), entityType: String(l.targetType || "") }); return <><span style={activityDetailsClampStyle}>{detail.summary || "—"}</span>{detail.meta.length > 0 && <span style={{ display: "block", marginTop: 3 }}>{detail.meta.join(" • ")}</span>}</>; })()}</Td>
                     <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(l.createdAt)).toLocaleString()}</Td>
                   </tr>
                 ))}

@@ -3,6 +3,7 @@ import { useListActivity } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
 import { Shield, Activity, Download, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
+import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 
 const ACTION_CONFIG: Record<string, { badgeClass: string; dotColor: string; label: string }> = {
   upload:        { badgeClass: "badge-blue",   dotColor: "#2563EB", label: "UPLOAD" },
@@ -29,15 +30,19 @@ export function ActivityTab({ projectId }: { projectId: number }) {
   const [actionFilter, setActionFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const presentedDetails = (a: { details?: string | null; actionType?: string; entityType?: string | null }) =>
+    presentActivityDetails(a.details, { actionType: a.actionType, entityType: a.entityType ?? undefined });
 
   const filtered = (activities ?? []).filter(a => {
+    const detail = presentedDetails(a);
     const matchesSearch =
       !search ||
       a.userFullName?.toLowerCase().includes(search.toLowerCase()) ||
       a.userCompanyName?.toLowerCase().includes(search.toLowerCase()) ||
       a.fileNameAfter?.toLowerCase().includes(search.toLowerCase()) ||
       a.fileNameBefore?.toLowerCase().includes(search.toLowerCase()) ||
-      a.details?.toLowerCase().includes(search.toLowerCase());
+      detail.summary.toLowerCase().includes(search.toLowerCase()) ||
+      detail.meta.join(" ").toLowerCase().includes(search.toLowerCase());
     const matchesAction = actionFilter === "all" || a.actionType === actionFilter;
     const ts = new Date(a.createdAt).getTime();
     const matchesFrom = !dateFrom || ts >= new Date(dateFrom).getTime();
@@ -58,7 +63,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
       a.entityType ?? "",
       a.fileNameBefore ?? "",
       a.fileNameAfter ?? "",
-      a.details ?? "",
+      [presentedDetails(a).summary, ...presentedDetails(a).meta].filter(Boolean).join(" | "),
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -211,6 +216,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
                 {filtered.map(act => {
                   const cfg = ACTION_CONFIG[act.actionType] ?? { badgeClass: "badge-gray", dotColor: "#6B7280", label: act.actionType.toUpperCase() };
                   const avatarColor = getAvatarColor(act.userFullName ?? "?");
+                  const detail = presentedDetails(act);
 
                   return (
                     <tr key={act.id}>
@@ -243,9 +249,14 @@ export function ActivityTab({ projectId }: { projectId: number }) {
                         </span>
                       </td>
                       <td style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", maxWidth: 220 }}>
-                        {act.details && (
-                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
-                            {act.details}
+                        {detail.summary && (
+                          <span style={activityDetailsClampStyle}>
+                            {detail.summary}
+                          </span>
+                        )}
+                        {detail.meta.length > 0 && (
+                          <span style={{ display: "block", marginTop: 2, fontSize: 10 }}>
+                            {detail.meta.join(" • ")}
                           </span>
                         )}
                       </td>

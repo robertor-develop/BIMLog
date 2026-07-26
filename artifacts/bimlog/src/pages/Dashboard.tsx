@@ -12,6 +12,7 @@ import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 import { logClientError } from "@/lib/client-log";
+import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -685,6 +686,7 @@ export function Dashboard() {
                     {recentActivity.map(entry => {
                       const proj = projectMap.get(entry.projectId);
                       const s = actionStyle(entry.actionType);
+                      const detail = presentActivityDetails(entry.details, { actionType: entry.actionType, entityType: entry.entityType });
                       return (
                         <div key={entry.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "6px 8px", borderRadius: 6, background: "hsl(var(--secondary)/0.5)" }}>
                           <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 5px", borderRadius: 3, background: s.bg, color: s.color, flexShrink: 0, textTransform: "uppercase", marginTop: 1 }}>
@@ -695,9 +697,10 @@ export function Dashboard() {
                               {entry.userFullName}
                               {entry.userCompanyName ? <span style={{ color: "hsl(var(--muted-foreground))", fontWeight: 400 }}> · {entry.userCompanyName}</span> : null}
                             </div>
-                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", maxWidth: 500, wordBreak: "break-word", whiteSpace: "normal", overflowWrap: "anywhere" }}>
+                            <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", maxWidth: 500 }}>
                               {proj ? <span style={{ fontWeight: 500 }}>{proj.name}</span> : null}
-                              {entry.details ? ` — ${entry.details}` : ""}
+                              {detail.summary ? <span style={activityDetailsClampStyle}> {proj ? "— " : ""}{detail.summary}</span> : null}
+                              {detail.meta.length > 0 ? <span style={{ display: "block", marginTop: 2 }}>{detail.meta.join(" • ")}</span> : null}
                             </div>
                           </div>
                           <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>{timeAgo(entry.createdAt)}</span>

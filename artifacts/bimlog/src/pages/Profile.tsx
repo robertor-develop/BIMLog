@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
+import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
 import { FeaturePolicySettingsPanel } from "@/components/settings/FeaturePolicySettingsPanel";
@@ -1198,26 +1199,30 @@ export function Profile() {
             <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>No recent activity found.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {recentActivity.map((entry, i) => (
-                <div key={`${entry.id}-${i}`} style={{
-                  display: "flex", alignItems: "flex-start", gap: 12, padding: "8px 12px",
-                  background: "hsl(var(--muted)/0.3)", borderRadius: 7,
-                  borderLeft: "3px solid hsl(var(--primary)/0.4)",
-                }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <Badge variant="secondary" style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        {entry.actionType.replace(/_/g, " ")}
-                      </Badge>
-                      <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{entry.projectName}</span>
+              {recentActivity.map((entry, i) => {
+                const detail = presentActivityDetails(entry.details, { actionType: entry.actionType });
+                return (
+                  <div key={`${entry.id}-${i}`} style={{
+                    display: "flex", alignItems: "flex-start", gap: 12, padding: "8px 12px",
+                    background: "hsl(var(--muted)/0.3)", borderRadius: 7,
+                    borderLeft: "3px solid hsl(var(--primary)/0.4)",
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <Badge variant="secondary" style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          {entry.actionType.replace(/_/g, " ")}
+                        </Badge>
+                        <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{entry.projectName}</span>
+                      </div>
+                      {detail.summary && <div style={{ ...activityDetailsClampStyle, fontSize: 12, marginTop: 3, color: "hsl(var(--foreground))" }}>{detail.summary}</div>}
+                      {detail.meta.length > 0 && <div style={{ fontSize: 11, marginTop: 2, color: "hsl(var(--muted-foreground))" }}>{detail.meta.join(" • ")}</div>}
                     </div>
-                    {entry.details && <div style={{ fontSize: 12, marginTop: 3, color: "hsl(var(--foreground))" }}>{entry.details}</div>}
+                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0, whiteSpace: "nowrap" }}>
+                      {new Date(entry.createdAt).toLocaleDateString()} {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", flexShrink: 0, whiteSpace: "nowrap" }}>
-                    {new Date(entry.createdAt).toLocaleDateString()} {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </SectionCard>
