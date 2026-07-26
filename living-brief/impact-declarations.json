@@ -3930,6 +3930,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b986acc2f2dc2e53cfc5f6031e7f790ec66b67d30a7ab10c9103abda29f4825e"
+    },
+    {
+      "taskId": "uiux-auth-serialized-release-owner-browser-revalidation-correction",
+      "reviewedThroughCommit": "5c6700cc65b0d46beb5939b33e6a2041ebf8b057",
+      "reviewedAt": "2026-07-26T19:38:58-04:00",
+      "status": "accepted_source_integration_candidate",
+      "captureTiming": "browser_revalidation_after_serialized_release_candidate",
+      "summary": "Superseding local UI/auth/report-export release candidate fixes the two browser-acceptance blockers: Spanish mobile Dashboard labels and Meetings mobile project identity/context occlusion.",
+      "workstreams": [
+        "headquarters-ui",
+        "meetings-report-ux",
+        "finance-export-ux",
+        "living-brief-auth",
+        "serialized-release"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Evidence\\uiux-auth-serialized-release-owner-20260726-final\\browser\\browser-revalidation-5c6700c-summary.json",
+          "type": "sanitized_local_browser_revalidation",
+          "result": "pass",
+          "boundary": "Synthetic local-only API interception; no backend, database, production, customer data, or secrets."
+        }
+      ],
+      "authorities": [
+        {
+          "reason": "No ecosystem ownership, company relationship, market positioning, or product doctrine changes.",
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "The correction preserves the F-drive isolated worktree, serialized integration, no-production, no-Replit, no-publish, and no-deploy boundaries.",
+          "key": "claude",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "The correction closes bilingual exact-390px browser acceptance blockers without changing quality doctrine or authorization behavior.",
+          "key": "quality",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No roadmap, commercial promise, module ownership model, or customer-facing product category expansion is introduced.",
+          "key": "vision",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "The source changes stay within existing frontend shell/page surfaces and do not alter generated platform structure.",
+          "key": "platform",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No Navisworks plugin source, installation, synchronization, or field workflow changes.",
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "The Meetings route keeps existing report action behavior; no PDF, DOCX, XLSX renderer or report-design doctrine changes.",
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "No external standard, certification, citation, or compliance interpretation changes.",
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "reason": "Records the superseding browser-accepted local candidate and still-pending push/publication boundary.",
+          "key": "status",
+          "result": "updated"
+        },
+        {
+          "reason": "Records browser revalidation, remaining final gate, normal push, remote verification, and separate provider/Replit publication boundaries.",
+          "key": "open_loop",
+          "result": "updated"
+        },
+        {
+          "reason": "No historical audit certificate semantics or retained dated audit evidence changes.",
+          "key": "audit",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4d458c12a1ba5e1fed8b82a815d8a541bcdf90f685bdc546648bcaa98d1d4dce"
     }
   ]
 }

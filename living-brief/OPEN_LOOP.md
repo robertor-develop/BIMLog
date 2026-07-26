@@ -1486,6 +1486,19 @@ Future behavior:
   complete constraint-aware parity, and a complete empty or explicitly additive-only preview. Any emitted
   error, destructive statement, missing/truncated log, or unexplained change blocks Publish.
 
+### UI/Auth/Report Export Release - Browser Revalidation Passed
+
+- Superseding local candidate `5c6700cc65b0d46beb5939b33e6a2041ebf8b057` fixes the two browser blockers
+  in the serialized UI/auth/report-export release: Spanish exact 390px Dashboard KPI/CVR/helper labels and
+  Meetings mobile project identity/context occlusion with mixed-language visible copy.
+- Browser revalidation evidence:
+  `F:\BIMLog\Evidence\uiux-auth-serialized-release-owner-20260726-final\browser\browser-revalidation-5c6700c-summary.json`
+  plus paired Dashboard/Meetings Spanish 390px PNGs. The evidence is sanitized synthetic local interception
+  only, with no backend, database, production, customer data, or secrets.
+- Remaining release boundary: official final gate, normal push only if remote topology still matches the
+  accepted baseline, fetch/remote equality verification, and separate provider/Replit publication preflight.
+  Nothing is published or deployed by this local source release step.
+
 ## Closed / Shipped
 
 ### RFI List and Log Governed PDFs

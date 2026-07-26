@@ -311,6 +311,11 @@ is reserved for genuine completion.
 - Telegram Product Build 6: clean integration accepted locally on current master with 38/38 final built-runtime
   evidence. It adds only the deterministic RFI notification adapter and saved-RFI contextual controls on the
   Build 5 foundation; normal push verification remains pending, and nothing was published or deployed.
+- UI/auth/report-export release: superseding local candidate `5c6700cc65b0d46beb5939b33e6a2041ebf8b057`
+  resolves the browser-acceptance blockers from the serialized release candidate. English desktop remained
+  accepted; Spanish exact 390px Dashboard and Meetings revalidation passed with no document overflow, no
+  runtime/request failures, Spanish KPI/CVR/helper labels, and unobstructed Meetings project identity/context.
+  Normal push, remote equality verification, and any Replit/provider publication remain pending.
 - RFI Report Template Settings: independently accepted for clean source integration. It adds project-scoped
   RFI PDF/DOCX report template settings, a Ruben lean preset, canonical source/additional screenshot report
   controls, additive settings storage, and RFI-only UI/API wiring. Complete RFI PDF honors the same project
