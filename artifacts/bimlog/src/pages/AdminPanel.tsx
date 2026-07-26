@@ -18,6 +18,119 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
 
 const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback"];
 
+const ADMIN_PANEL_SHELL_CSS = `
+  .hq-admin-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at top left, rgba(239, 68, 68, 0.08), transparent 34rem),
+      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.38) 100%);
+  }
+  .hq-admin-shell { width: min(1400px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 36px; }
+  .hq-admin-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: start;
+    padding: 24px;
+    border: 1px solid hsl(var(--border));
+    border-radius: 22px;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  }
+  .hq-admin-kicker {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ef4444;
+  }
+  .hq-admin-title {
+    margin: 0;
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: hsl(var(--foreground));
+  }
+  .hq-admin-subtitle {
+    max-width: 820px;
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: hsl(var(--muted-foreground));
+  }
+  .hq-admin-scope-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .hq-admin-scope-card {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid hsl(var(--border));
+    border-radius: 16px;
+    background: hsl(var(--background) / 0.78);
+  }
+  .hq-admin-scope-card strong { display: block; margin-bottom: 4px; font-size: 12px; color: hsl(var(--foreground)); }
+  .hq-admin-scope-card span { display: block; font-size: 12px; line-height: 1.45; color: hsl(var(--muted-foreground)); }
+  .hq-admin-toolbar { display: flex; justify-content: flex-end; align-items: flex-start; }
+  .hq-admin-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 18px 0;
+    padding: 8px;
+    overflow-x: auto;
+    border: 1px solid hsl(var(--border));
+    border-radius: 18px;
+    background: hsl(var(--card) / 0.86);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  }
+  .hq-admin-tab {
+    flex: 0 0 auto;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 9px 14px;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .hq-admin-tab[data-active="true"] {
+    border-color: rgba(239, 68, 68, 0.22);
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+  .hq-admin-content {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid hsl(var(--border));
+    border-radius: 22px;
+    background: hsl(var(--card));
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.06);
+  }
+  .hq-admin-content div:has(> table) {
+    max-width: 100%;
+    overflow-x: auto !important;
+  }
+  .hq-admin-content table { min-width: 760px; }
+  @media (max-width: 720px) {
+    .hq-admin-shell { width: min(100% - 24px, 390px); padding: 14px 0 24px; }
+    .hq-admin-hero { grid-template-columns: 1fr; padding: 18px; border-radius: 18px; }
+    .hq-admin-toolbar { justify-content: stretch; }
+    .hq-admin-toolbar button { width: 100%; }
+    .hq-admin-scope-grid { grid-template-columns: 1fr; }
+    .hq-admin-tabs { margin: 14px 0; border-radius: 16px; }
+    .hq-admin-tab { padding: 9px 12px; font-size: 12px; }
+    .hq-admin-content { padding: 14px; border-radius: 18px; }
+  }
+`;
+
 const FLAG_LABELS: Record<string, string> = {
   ai_presubmission_check: "AI Pre-Submission Check",
   ai_name_suggestion: "AI Name Suggestion",
@@ -43,6 +156,21 @@ const STAT_LABELS: Record<string, string> = {
   filesLast24h: "Files (24h)",
   rfisLast7d: "RFIs (7d)",
 };
+const STAT_LABELS_ES: Record<string, string> = {
+  totalUsers: "Usuarios",
+  totalCompanies: "Compañías",
+  totalProjects: "Proyectos",
+  totalFiles: "Archivos",
+  totalRfis: "RFIs",
+  totalSubmittals: "Submittals",
+  activeProjects: "Proyectos Activos",
+  filesLast24h: "Archivos (24h)",
+  rfisLast7d: "RFIs (7d)",
+};
+
+function isSpanishUi() {
+  return typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+}
 
 const statusColor: Record<string, string> = {
   active: "#22c55e", archived: "#f59e0b", inactive: "#94a3b8",
@@ -92,24 +220,25 @@ function Td({ children, style }: { children: React.ReactNode; style?: React.CSSP
 function OverviewTab({ token }: { token: string }) {
   const [data, setData] = useState<{ stats: Record<string, number>; activity: Record<string, unknown>[] } | null>(null);
   useEffect(() => { apiFetch("/admin/overview?scope=mine", token).then(r => r.json()).then(setData).catch((error) => logClientError("admin overview load", error)); }, [token]);
-  if (!data) return <div style={{ padding: 32, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
+  const es = isSpanishUi();
+  if (!data) return <div style={{ padding: 32, color: "hsl(var(--muted-foreground))" }}>{es ? "Cargando..." : "Loading..."}</div>;
   return (
     <div>
       <div style={{ marginBottom: 16, padding: "8px 14px", borderRadius: 8, background: "#eff6ff", border: "1px solid #bfdbfe", fontSize: 12, color: "#1d4ed8", fontWeight: 600 }}>
-        Showing data scoped to projects you administer. Platform-wide data is available in Total Control (super admin only).
+        {es ? "Mostrando datos limitados a los proyectos que administras. Los datos de toda la plataforma están disponibles en Control Total (solo superadmin)." : "Showing data scoped to projects you administer. Platform-wide data is available in Total Control (super admin only)."}
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
         {Object.entries(data.stats).map(([k, v]) => (
-          <StatCard key={k} label={STAT_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
+          <StatCard key={k} label={(es ? STAT_LABELS_ES[k] : STAT_LABELS[k]) || k.replace(/([A-Z])/g, " $1").replace(/_/g, " ")} value={v} />
         ))}
       </div>
-      <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Project Activity Feed (last 50)</h3>
+      <h3 style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>{es ? "Actividad de Proyectos (últimos 50)" : "Project Activity Feed (last 50)"}</h3>
       {data.activity.length === 0
-        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No activity yet. Actions taken in projects will appear here.</div>
+        ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>{es ? "Sin actividad todavía. Las acciones tomadas en proyectos aparecerán aquí." : "No activity yet. Actions taken in projects will appear here."}</div>
         : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><Th>Project</Th><Th>User</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
+              <thead><tr><Th>{es ? "Proyecto" : "Project"}</Th><Th>{es ? "Usuario" : "User"}</Th><Th>{es ? "Acción" : "Action"}</Th><Th>{es ? "Entidad" : "Entity"}</Th><Th>{es ? "Detalle" : "Details"}</Th><Th>{es ? "Fecha" : "When"}</Th></tr></thead>
               <tbody>
                 {data.activity.map((a: Record<string, unknown>) => {
                   const detail = presentActivityDetails(a.details, { actionType: String(a.actionType || ""), entityType: String(a.entityType || "") });
@@ -990,43 +1119,97 @@ export function AdminPanel() {
   }, [token, setLocation]);
 
   if (checking || !token) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "hsl(var(--muted-foreground))" }}>Checking access...</div>;
+  const isSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const copy = isSpanish
+    ? {
+      kicker: "Sede BIMLog",
+      title: "Administración de Proyectos",
+      subtitle: "Espacio de administración de proyectos para compañías, usuarios, proyectos, eventos de correo, banderas, auditoría, uso de IA y comentarios vinculados a los proyectos que administras.",
+      scopeTitle: "Alcance: mis proyectos administrados",
+      scopeBody: "Todas las solicitudes conservan scope=mine; esta página no es una consola de toda la plataforma.",
+      authorityTitle: "Autoridad: administración de proyecto gobernada",
+      authorityBody: "Las acciones de usuarios, compañías, proyectos y banderas conservan sus permisos de ruta y confirmaciones existentes.",
+      auditTitle: "Auditoría: detalle legible",
+      auditBody: "La actividad y los registros administrativos muestran resúmenes legibles en lugar de bloques JSON sin procesar.",
+      back: "Volver a la Sede",
+      tabs: {
+        Overview: "Resumen",
+        Users: "Usuarios",
+        Companies: "Compañías",
+        Projects: "Proyectos",
+        "Email Log": "Correos",
+        "Activity Feed": "Actividad",
+        "Feature Flags": "Banderas",
+        "Admin Log": "Registro Admin",
+        "AI Usage": "Uso de IA",
+        Feedback: "Comentarios",
+      } as Record<string, string>,
+    }
+    : {
+      kicker: "BIMLog Headquarters",
+      title: "Project Administration",
+      subtitle: "Project-admin workspace for the companies, users, projects, email events, feature flags, audit activity, AI usage and feedback tied to projects you administer.",
+      scopeTitle: "Scope: my administered projects",
+      scopeBody: "All requests retain scope=mine; this page is not a platform-wide console.",
+      authorityTitle: "Authority: governed project admin",
+      authorityBody: "User, company, project and flag actions keep their existing route guards and confirmation behavior.",
+      auditTitle: "Audit detail: readable",
+      auditBody: "Activity and admin logs present summarized details instead of raw JSON blocks.",
+      back: "Back to Headquarters",
+      tabs: {} as Record<string, string>,
+    };
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(var(--background))" }}>
-      <div style={{ borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--card))", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, paddingTop: 20, paddingBottom: 0 }}>
+    <div className="hq-admin-page" data-testid="project-administration-page">
+      <style>{ADMIN_PANEL_SHELL_CSS}</style>
+      <div className="hq-admin-shell">
+        <section className="hq-admin-hero" aria-labelledby="project-administration-title">
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Project Administration</h1>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-              Scoped to your projects - companies, users, and data visible here belong to projects you administer.
+            <p className="hq-admin-kicker">{copy.kicker}</p>
+            <h1 id="project-administration-title" className="hq-admin-title">{copy.title}</h1>
+            <p className="hq-admin-subtitle">
+              {copy.subtitle}
             </p>
+            <div className="hq-admin-scope-grid" aria-label="Project Administration scope and controls">
+              <div className="hq-admin-scope-card">
+                <strong>{copy.scopeTitle}</strong>
+                <span>{copy.scopeBody}</span>
+              </div>
+              <div className="hq-admin-scope-card">
+                <strong>{copy.authorityTitle}</strong>
+                <span>{copy.authorityBody}</span>
+              </div>
+              <div className="hq-admin-scope-card">
+                <strong>{copy.auditTitle}</strong>
+                <span>{copy.auditBody}</span>
+              </div>
+            </div>
           </div>
-          <Button variant="ghost" size="sm" style={{ marginLeft: "auto", fontSize: 12 }} onClick={() => setLocation("/dashboard")}>Back to Dashboard</Button>
-        </div>
-        <div style={{ display: "flex", gap: 0, marginTop: 16, overflowX: "auto" }}>
+          <div className="hq-admin-toolbar">
+            <Button variant="outline" size="sm" style={{ fontSize: 12 }} onClick={() => setLocation("/dashboard")}>{copy.back}</Button>
+          </div>
+        </section>
+
+        <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => (
-            <button key={tab} onClick={() => setActiveTab(i)} style={{
-              padding: "10px 18px", fontSize: 13, fontWeight: activeTab === i ? 700 : 500, border: "none",
-              borderBottom: activeTab === i ? "2px solid #ef4444" : "2px solid transparent",
-              background: "none", cursor: "pointer", color: activeTab === i ? "#ef4444" : "hsl(var(--muted-foreground))",
-              whiteSpace: "nowrap", transition: "all 0.15s",
-            }}>
-              {tab}
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => setActiveTab(i)}>
+              {copy.tabs[tab] || tab}
             </button>
           ))}
-        </div>
-      </div>
-      <div style={{ padding: "28px 32px", maxWidth: 1400, margin: "0 auto" }}>
-        {activeTab === 0 && <OverviewTab token={token} />}
-        {activeTab === 1 && <UsersTab token={token} />}
-        {activeTab === 2 && <CompaniesTab token={token} />}
-        {activeTab === 3 && <ProjectsTab token={token} />}
-        {activeTab === 4 && <EmailLogTab token={token} />}
-        {activeTab === 5 && <ActivityFeedTab token={token} />}
-        {activeTab === 6 && <FeatureFlagsTab token={token} />}
-        {activeTab === 7 && <AdminActionsLogTab token={token} />}
-        {activeTab === 8 && <AiUsageTab token={token} />}
-        {activeTab === 9 && <FeedbackTab token={token} />}
+        </nav>
+
+        <main className="hq-admin-content">
+          {activeTab === 0 && <OverviewTab token={token} />}
+          {activeTab === 1 && <UsersTab token={token} />}
+          {activeTab === 2 && <CompaniesTab token={token} />}
+          {activeTab === 3 && <ProjectsTab token={token} />}
+          {activeTab === 4 && <EmailLogTab token={token} />}
+          {activeTab === 5 && <ActivityFeedTab token={token} />}
+          {activeTab === 6 && <FeatureFlagsTab token={token} />}
+          {activeTab === 7 && <AdminActionsLogTab token={token} />}
+          {activeTab === 8 && <AiUsageTab token={token} />}
+          {activeTab === 9 && <FeedbackTab token={token} />}
+        </main>
       </div>
     </div>
   );

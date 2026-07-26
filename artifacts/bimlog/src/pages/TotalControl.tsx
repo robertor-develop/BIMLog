@@ -47,6 +47,10 @@ const STATUS_COLOR: Record<string, string> = {
   sent: "#16A34A", failed: "#DC2626", skipped: "#D97706",
 };
 
+function isSpanishUi() {
+  return typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+}
+
 function TCTh({ children }: { children: React.ReactNode }) {
   return <th style={{ textAlign: "left", padding: "10px 14px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3AF", borderBottom: "1px solid #E5E7EB", background: "#F9FAFB" }}>{children}</th>;
 }
@@ -71,14 +75,161 @@ interface Project { id: number; code: string; name: string; status: string; comp
 
 const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed"];
 
+const TOTAL_CONTROL_SHELL_CSS = `
+  .hq-total-control-page {
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at top right, rgba(37, 99, 235, 0.15), transparent 32rem),
+      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .hq-total-control-shell { width: min(1400px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 36px; }
+  .hq-total-control-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: start;
+    padding: 26px;
+    border: 1px solid #dbe3ef;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.96) 0%, rgba(30, 58, 138, 0.94) 100%);
+    color: #fff;
+    box-shadow: 0 22px 56px rgba(15, 23, 42, 0.18);
+  }
+  .hq-total-control-kicker {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #93c5fd;
+  }
+  .hq-total-control-title {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.04;
+    font-weight: 900;
+    letter-spacing: -0.045em;
+  }
+  .hq-total-control-hero > div:first-child {
+    min-width: 0;
+    align-items: flex-start !important;
+  }
+  .hq-total-control-hero > div:first-child > div:first-child {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  }
+  .hq-total-control-hero #total-control-title {
+    display: block;
+    font-size: clamp(28px, 4vw, 42px) !important;
+    line-height: 1.04 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.045em !important;
+  }
+  .hq-total-control-hero #total-control-title + div {
+    max-width: 840px;
+    margin-top: 10px !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+  }
+  .hq-total-control-subtitle {
+    max-width: 840px;
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .hq-total-control-badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .hq-total-control-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .hq-total-control-toolbar { display: flex; justify-content: flex-end; }
+  .hq-total-control-back {
+    padding: 8px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.86);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .hq-total-control-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 18px 0;
+    padding: 8px;
+    overflow-x: auto;
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  }
+  .hq-total-control-tab {
+    flex: 0 0 auto;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 9px 14px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .hq-total-control-tab[data-active="true"] {
+    border-color: rgba(37, 99, 235, 0.22);
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+  }
+  .hq-total-control-content {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #dbe3ef;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+  }
+  .hq-total-control-content div:has(> table) {
+    max-width: 100%;
+    overflow-x: auto !important;
+  }
+  .hq-total-control-content table { min-width: 760px; }
+  @media (max-width: 720px) {
+    .hq-total-control-shell { width: min(100% - 24px, 390px); padding: 14px 0 24px; }
+    .hq-total-control-hero { grid-template-columns: 1fr; padding: 18px; border-radius: 18px; }
+    .hq-total-control-toolbar { justify-content: stretch; }
+    .hq-total-control-back { width: 100%; }
+    .hq-total-control-tabs { margin: 14px 0; border-radius: 16px; }
+    .hq-total-control-tab { padding: 9px 12px; font-size: 12px; }
+    .hq-total-control-content { padding: 14px; border-radius: 18px; }
+  }
+`;
+
 function HealthBar({ stats }: { stats: PlatformStats }) {
+  const es = isSpanishUi();
   const items = [
-    { key: "totalUsers", label: "Users", value: stats.totalUsers, color: "#2563EB", icon: <User size={16} /> },
-    { key: "totalCompanies", label: "Companies", value: stats.totalCompanies, color: "#7C3AED", icon: <Building2 size={16} /> },
-    { key: "totalProjects", label: "All Projects", value: stats.totalProjects, color: "#0891B2", icon: <Folder size={16} /> },
-    { key: "activeProjects", label: "Active Projects", value: stats.activeProjects, color: "#16A34A", icon: <Circle size={16} fill="#16A34A" /> },
-    { key: "totalFiles", label: "Files", value: stats.totalFiles, color: "#D97706", icon: <FileText size={16} /> },
-    { key: "filesLast24h", label: "Files 24h", value: stats.filesLast24h, color: "#EA580C", icon: <Zap size={16} /> },
+    { key: "totalUsers", label: es ? "Usuarios" : "Users", value: stats.totalUsers, color: "#2563EB", icon: <User size={16} /> },
+    { key: "totalCompanies", label: es ? "Compañías" : "Companies", value: stats.totalCompanies, color: "#7C3AED", icon: <Building2 size={16} /> },
+    { key: "totalProjects", label: es ? "Todos los Proyectos" : "All Projects", value: stats.totalProjects, color: "#0891B2", icon: <Folder size={16} /> },
+    { key: "activeProjects", label: es ? "Proyectos Activos" : "Active Projects", value: stats.activeProjects, color: "#16A34A", icon: <Circle size={16} fill="#16A34A" /> },
+    { key: "totalFiles", label: es ? "Archivos" : "Files", value: stats.totalFiles, color: "#D97706", icon: <FileText size={16} /> },
+    { key: "filesLast24h", label: es ? "Archivos 24h" : "Files 24h", value: stats.filesLast24h, color: "#EA580C", icon: <Zap size={16} /> },
     { key: "totalRfis", label: "RFIs", value: stats.totalRfis, color: "#DC2626", icon: <MessageSquare size={16} /> },
     { key: "totalSubmittals", label: "Submittals", value: stats.totalSubmittals, color: "#9333EA", icon: <ClipboardList size={16} /> },
     { key: "rfisLast7d", label: "RFIs (7d)", value: stats.rfisLast7d, color: "#DB2777", icon: <TrendingUp size={16} /> },
@@ -98,6 +249,7 @@ function HealthBar({ stats }: { stats: PlatformStats }) {
 
 function CompanyPanel({ companies, onSelect }: { companies: Company[]; onSelect: (c: Company) => void }) {
   const [sortKey, setSortKey] = useState<keyof Company>("projectCount");
+  const es = isSpanishUi();
   const sorted = [...companies].sort((a, b) => {
     const av = a[sortKey]; const bv = b[sortKey];
     if (typeof av === "number" && typeof bv === "number") return bv - av;
@@ -106,17 +258,17 @@ function CompanyPanel({ companies, onSelect }: { companies: Company[]; onSelect:
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Building2 size={14} /> Company Performance ({companies.length})</div>
+        <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Building2 size={14} /> {es ? "Rendimiento de Compañías" : "Company Performance"} ({companies.length})</div>
         <select value={String(sortKey)} onChange={e => setSortKey(e.target.value as keyof Company)} style={{ fontSize: 12, padding: "4px 10px", border: "1px solid #E5E7EB", borderRadius: 6, cursor: "pointer" }}>
-          <option value="projectCount">Sort: Projects</option>
-          <option value="fileCount">Sort: Files</option>
-          <option value="userCount">Sort: Users</option>
-          <option value="name">Sort: Name</option>
+          <option value="projectCount">{es ? "Ordenar: Proyectos" : "Sort: Projects"}</option>
+          <option value="fileCount">{es ? "Ordenar: Archivos" : "Sort: Files"}</option>
+          <option value="userCount">{es ? "Ordenar: Usuarios" : "Sort: Users"}</option>
+          <option value="name">{es ? "Ordenar: Nombre" : "Sort: Name"}</option>
         </select>
       </div>
       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Company", "Projects", "Users", "Files", "Joined"].map(h => <TCTh key={h}>{h}</TCTh>)}</tr></thead>
+          <thead><tr>{(es ? ["Compañía", "Proyectos", "Usuarios", "Archivos", "Ingreso"] : ["Company", "Projects", "Users", "Files", "Joined"]).map(h => <TCTh key={h}>{h}</TCTh>)}</tr></thead>
           <tbody>
             {sorted.map(c => (
               <tr key={c.id} onClick={() => onSelect(c)} style={{ cursor: "pointer" }} onMouseEnter={e => (e.currentTarget.style.background = "#EFF6FF")} onMouseLeave={e => (e.currentTarget.style.background = "")}>
@@ -146,15 +298,17 @@ function getProjectHealth(p: Project): { color: string; label: string } {
 
 function ProjectsGrid({ projects, onSelect }: { projects: Project[]; onSelect: (p: Project) => void }) {
   const [filter, setFilter] = useState("all");
+  const es = isSpanishUi();
   const filtered = filter === "all" ? projects : projects.filter(p => getProjectHealth(p).label.toLowerCase() === filter);
+  const filterLabels: Record<string, string> = es ? { all: "Todos", healthy: "Saludable", watch: "Vigilar", "high load": "Alta carga", archived: "Archivado" } : {};
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Folder size={14} /> Active Projects ({projects.length})</div>
+        <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><Folder size={14} /> {es ? "Proyectos Activos" : "Active Projects"} ({projects.length})</div>
         <div style={{ display: "flex", gap: 6 }}>
           {["all", "healthy", "watch", "high load", "archived"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, border: "1px solid #E5E7EB", background: filter === f ? "#1D4ED8" : "white", color: filter === f ? "white" : "#374151", cursor: "pointer" }}>
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {filterLabels[f] || f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
@@ -191,6 +345,7 @@ function BrainBrief({ token }: { token: string }) {
   const [brief, setBrief] = useState<{ summary: string; criticalItems: string[]; todaysDate: string; highlights?: string[] } | null>(null);
   const [loading, setLoading] = useState(false);
   const [shown, setShown] = useState(false);
+  const es = isSpanishUi();
   const load = async () => {
     if (shown) return;
     setLoading(true); setShown(true);
@@ -200,14 +355,14 @@ function BrainBrief({ token }: { token: string }) {
     <div style={{ border: "1.5px solid #BFDBFE", borderRadius: 14, background: "linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%)", overflow: "hidden" }}>
       <div style={{ padding: "16px 20px", borderBottom: "1px solid #DBEAFE", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 6 }}><Brain size={15} /> Brain Daily Brief</div>
-          <div style={{ fontSize: 12, color: "#3B82F6", marginTop: 2 }}>AI-powered platform intelligence snapshot</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 6 }}><Brain size={15} /> {es ? "Resumen Diario Brain" : "Brain Daily Brief"}</div>
+          <div style={{ fontSize: 12, color: "#3B82F6", marginTop: 2 }}>{es ? "Instantánea de inteligencia de plataforma con IA" : "AI-powered platform intelligence snapshot"}</div>
         </div>
-        {!shown && <button onClick={load} style={{ padding: "8px 16px", background: "#2563EB", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700 }}>Generate Brief</button>}
+        {!shown && <button onClick={load} style={{ padding: "8px 16px", background: "#2563EB", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700 }}>{es ? "Generar Resumen" : "Generate Brief"}</button>}
       </div>
       <div style={{ padding: "16px 20px" }}>
-        {loading && <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#2563EB", fontSize: 13 }}><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Generating AI brief...</div>}
-        {!loading && !brief && !shown && <div style={{ color: "#9CA3AF", fontSize: 13 }}>Click "Generate Brief" for an AI summary of platform activity.</div>}
+        {loading && <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#2563EB", fontSize: 13 }}><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> {es ? "Generando resumen de IA..." : "Generating AI brief..."}</div>}
+        {!loading && !brief && !shown && <div style={{ color: "#9CA3AF", fontSize: 13 }}>{es ? "Haz clic en \"Generar Resumen\" para obtener un resumen de IA de la actividad de la plataforma." : "Click \"Generate Brief\" for an AI summary of platform activity."}</div>}
         {!loading && brief && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
@@ -285,11 +440,12 @@ function TCOverviewTab({ token, stats, companies, projects, onRefresh }: { token
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [assignCode, setAssignCode] = useState<string | null>(null);
   const [, setLocation] = useLocation();
+  const es = isSpanishUi();
   return (
     <div>
       <div style={{ marginBottom: 16, padding: "8px 14px", borderRadius: 8, background: "#111827", border: "1px solid #374151", fontSize: 12, color: "#93C5FD", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
         <MapPin size={12} />
-        Platform-wide totals — all projects, companies, and users across the entire platform.
+        {es ? "Totales de toda la plataforma: todos los proyectos, compañías y usuarios de la plataforma completa." : "Platform-wide totals — all projects, companies, and users across the entire platform."}
       </div>
       <HealthBar stats={stats} />
       <div style={{ marginTop: 28 }}>
@@ -302,9 +458,9 @@ function TCOverviewTab({ token, stats, companies, projects, onRefresh }: { token
         <BrainBrief token={token} />
       </div>
       {selectedCompany && (
-        <TCModal title={`${selectedCompany.name} — Details`} onClose={() => setSelectedCompany(null)}>
+        <TCModal title={`${selectedCompany.name} — ${es ? "Detalle" : "Details"}`} onClose={() => setSelectedCompany(null)}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {[["Projects", String(selectedCompany.projectCount)], ["Users", String(selectedCompany.userCount)], ["Files", selectedCompany.fileCount.toLocaleString()], ["Joined", new Date(selectedCompany.createdAt).toLocaleDateString()]].map(([k, v]) => (
+            {[(es ? ["Proyectos", String(selectedCompany.projectCount)] : ["Projects", String(selectedCompany.projectCount)]), (es ? ["Usuarios", String(selectedCompany.userCount)] : ["Users", String(selectedCompany.userCount)]), (es ? ["Archivos", selectedCompany.fileCount.toLocaleString()] : ["Files", selectedCompany.fileCount.toLocaleString()]), (es ? ["Ingreso", new Date(selectedCompany.createdAt).toLocaleDateString()] : ["Joined", new Date(selectedCompany.createdAt).toLocaleDateString()])].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
@@ -316,7 +472,7 @@ function TCOverviewTab({ token, stats, companies, projects, onRefresh }: { token
       {selectedProject && (
         <TCModal title={`${selectedProject.code} — ${selectedProject.name}`} onClose={() => setSelectedProject(null)} wide>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-            {[["Company", selectedProject.companyName || "-"], ["Status", selectedProject.status], ["Members", String(selectedProject.memberCount)], ["Files", selectedProject.fileCount.toLocaleString()], ["RFIs", String(selectedProject.rfiCount ?? "-")], ["Submittals", String(selectedProject.submittalCount ?? "-")], ["Created", new Date(selectedProject.createdAt).toLocaleDateString()]].map(([k, v]) => (
+            {[(es ? ["Compañía", selectedProject.companyName || "-"] : ["Company", selectedProject.companyName || "-"]), (es ? ["Estado", selectedProject.status] : ["Status", selectedProject.status]), (es ? ["Miembros", String(selectedProject.memberCount)] : ["Members", String(selectedProject.memberCount)]), (es ? ["Archivos", selectedProject.fileCount.toLocaleString()] : ["Files", selectedProject.fileCount.toLocaleString()]), ["RFIs", String(selectedProject.rfiCount ?? "-")], ["Submittals", String(selectedProject.submittalCount ?? "-")], (es ? ["Creado", new Date(selectedProject.createdAt).toLocaleDateString()] : ["Created", new Date(selectedProject.createdAt).toLocaleDateString()])].map(([k, v]) => (
               <div key={k} style={{ padding: "10px 14px", border: "1px solid #E5E7EB", borderRadius: 8 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#9CA3AF", marginBottom: 3 }}>{k}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{v}</div>
@@ -704,16 +860,17 @@ function TCActivityFeedTab({ token }: { token: string }) {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const es = isSpanishUi();
   const load = useCallback(() => {
     apiFetch(`/admin/activity?page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("total control activity load", error));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
     <div>
-      <div style={{ marginBottom: 12, fontSize: 12, color: "#9CA3AF" }}>{total} total events across all projects (platform-wide)</div>
+      <div style={{ marginBottom: 12, fontSize: 12, color: "#9CA3AF" }}>{es ? `${total} eventos totales en todos los proyectos (toda la plataforma)` : `${total} total events across all projects (platform-wide)`}</div>
       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Project</TCTh><TCTh>User</TCTh><TCTh>Company</TCTh><TCTh>Action</TCTh><TCTh>Entity</TCTh><TCTh>Details</TCTh><TCTh>When</TCTh></tr></thead>
+          <thead><tr><TCTh>{es ? "Proyecto" : "Project"}</TCTh><TCTh>{es ? "Usuario" : "User"}</TCTh><TCTh>{es ? "Compañía" : "Company"}</TCTh><TCTh>{es ? "Acción" : "Action"}</TCTh><TCTh>{es ? "Entidad" : "Entity"}</TCTh><TCTh>{es ? "Detalle" : "Details"}</TCTh><TCTh>{es ? "Fecha" : "When"}</TCTh></tr></thead>
           <tbody>
             {items.map((a: Record<string, unknown>) => {
               const detail = presentActivityDetails(a.details, { actionType: String(a.actionType || ""), entityType: String(a.entityType || "") });
@@ -803,6 +960,29 @@ export function TotalControl() {
     activeProjects: Number(stats?.activeProjects ?? 0), filesLast24h: Number(stats?.filesLast24h ?? 0),
     rfisLast7d: Number(stats?.rfisLast7d ?? 0),
   };
+  const isSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const copy = isSpanish
+    ? {
+      title: "Control Total",
+      subtitle: "Consola de superadministración para todas las compañías, todos los proyectos y visibilidad operativa global. Conserva su autoridad de toda la plataforma y no reemplaza la administración de proyecto.",
+      scopeLine: "Super Admin · Alcance de toda la plataforma · Todos los proyectos y compañías",
+      back: "Volver a la Sede",
+      tabs: {
+        Overview: "Resumen",
+        Users: "Usuarios",
+        Companies: "Compañías",
+        Projects: "Proyectos",
+        "Email Log": "Correos",
+        "Activity Feed": "Actividad",
+      } as Record<string, string>,
+    }
+    : {
+      title: "Total Control",
+      subtitle: "Super-admin platform console for all companies, all projects and global operational visibility. This page keeps its existing platform-wide authority and does not replace project-scoped administration.",
+      scopeLine: "Super Admin · Platform-wide scope · All projects & companies",
+      back: "Back to Headquarters",
+      tabs: {} as Record<string, string>,
+    };
 
   if (authorized === null) {
     return (
@@ -831,32 +1011,27 @@ export function TotalControl() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
-      <div style={{ background: "#111827", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 56 }}>
+    <div className="hq-total-control-page" data-testid="total-control-page">
+      <style>{TOTAL_CONTROL_SHELL_CSS}</style>
+      <div className="hq-total-control-shell">
+        <section className="hq-total-control-hero" aria-labelledby="total-control-title">
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 32, height: 32, background: "#2563EB", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white" }}>TC</div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: "white", lineHeight: 1 }}>Total Control</div>
-              <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>Super Admin · Platform-wide scope · All projects & companies</div>
+              <div id="total-control-title" style={{ fontWeight: 800, fontSize: 15, color: "white", lineHeight: 1 }}>{copy.title}</div>
+              <div style={{ fontSize: 10, color: "#6B7280", marginTop: 1 }}>{copy.scopeLine}</div>
             </div>
           </div>
-          <button onClick={() => setLocation("/dashboard")} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, color: "rgba(255,255,255,0.7)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>Back to Dashboard</button>
-        </div>
-        <div style={{ display: "flex", gap: 0, overflowX: "auto" }}>
+          <button onClick={() => setLocation("/dashboard")} className="hq-total-control-back">{copy.back}</button>
+        </section>
+        <div className="hq-total-control-tabs" role="navigation" aria-label="Total Control sections">
           {TABS.map((tab, i) => (
-            <button key={tab} onClick={() => setActiveTab(i)} style={{
-              padding: "10px 18px", fontSize: 13, fontWeight: activeTab === i ? 700 : 500, border: "none",
-              borderBottom: activeTab === i ? "2px solid #3B82F6" : "2px solid transparent",
-              background: "none", cursor: "pointer", color: activeTab === i ? "#93C5FD" : "#D1D5DB",
-              whiteSpace: "nowrap", transition: "all 0.15s",
-            }}>
-              {tab}
+            <button key={tab} onClick={() => setActiveTab(i)} className="hq-total-control-tab" data-active={activeTab === i}>
+              {copy.tabs[tab] || tab}
             </button>
           ))}
         </div>
-      </div>
-      <div style={{ padding: "28px 32px", maxWidth: 1400, margin: "0 auto" }}>
+      <main className="hq-total-control-content">
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {[...Array(4)].map((_, i) => <div key={i} style={{ height: 80, background: "#E5E7EB", borderRadius: 12, animation: "pulse 1.5s infinite" }} />)}
@@ -871,6 +1046,7 @@ export function TotalControl() {
             {activeTab === 5 && token && <TCActivityFeedTab token={token} />}
           </>
         )}
+      </main>
       </div>
     </div>
   );
