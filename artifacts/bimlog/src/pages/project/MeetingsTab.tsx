@@ -3202,7 +3202,8 @@ export function MeetingsTab({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(150px, 100%), 1fr))",
             gap: 12,
             marginBottom: 20,
           }}
@@ -3236,12 +3237,20 @@ export function MeetingsTab({
                 border: "1px solid #E5E7EB",
                 borderRadius: 10,
                 padding: "14px 18px",
+                minWidth: 0,
               }}
             >
               <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>
                 {s.value}
               </div>
-              <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "#6B7280",
+                  marginTop: 2,
+                  overflowWrap: "anywhere",
+                }}
+              >
                 {s.label}
               </div>
             </div>
