@@ -531,21 +531,37 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
 
   return (
-    <div>
+    <div className="phasea-surface" data-phasea-surface="reports-hub">
+      <div className="phasea-page-hero">
+        <div>
+          <h2>{tl("Reports Hub", "Centro de reportes")}</h2>
+          <p>
+            {tl(
+              "Governed project reports, content-verification intelligence, and operational export entry points stay grouped by purpose.",
+              "Reportes gobernados, inteligencia de verificacion de contenido y exportaciones operativas agrupadas por proposito."
+            )}
+          </p>
+        </div>
+        <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
+      </div>
+
       {/* Project Intelligence Layer */}
       <ProjectIntelligenceView projectId={projectId} lang={lang} />
 
       {/* PDF Reports section */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontWeight: 700, fontSize: 16, color: "hsl(var(--foreground))" }}>
+      <div className="phasea-card" style={{ marginBottom: 28 }}>
+        <div className="phasea-card-header">
+          <div>
+            <div className="phasea-card-title">
             {tl("Project PDF Reports", "Reportes PDF del Proyecto")}
-          </div>
-          <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
+            </div>
+            <div className="phasea-card-subtitle">
             {tl("Download any report as a professionally formatted PDF", "Descarga cualquier reporte como PDF con formato profesional")}
+            </div>
           </div>
+          <span className="phasea-scope-pill">PDF</span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+        <div className="phasea-report-grid">
           {PDF_REPORTS.map(r => (
             <button
               key={r.key}
@@ -571,7 +587,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
         </div>
       </div>
 
-      <div className="section-header" style={{ marginBottom: 20 }}>
+      <div className="section-header phasea-card-header" style={{ marginBottom: 20 }}>
         <div>
           <div className="section-title" style={{ fontSize: 16 }}>CVR Reports</div>
           <div className="section-sub">Content Verification Results — flagged files and admin review workflow</div>
@@ -579,7 +595,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
       </div>
 
       {/* Date filter */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap" }}>
+      <div className="phasea-filter-row" style={{ marginBottom: 20 }}>
         <div>
           <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>From</label>
           <input

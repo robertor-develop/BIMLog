@@ -218,6 +218,268 @@ iframe[aria-label*="Replit" i],
 .sidebar-nav-item.active { color: #fff; background: rgba(37,99,235,0.28); }
 .sidebar-nav-item .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
 .sidebar-nav-item.active .nav-dot { background: #2563EB; }
+
+/* Phase A Wix-inspired BIMLog shell foundations.
+   Neutral application UX only: no final module/report color identity is selected here. */
+.phasea-project-sidebar {
+  width: 248px;
+  transition: width 0.18s ease;
+}
+.phasea-project-sidebar.collapsed {
+  width: 78px;
+}
+.phasea-sidebar-collapse {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 10px 0;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.78);
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.phasea-sidebar-collapse:hover,
+.phasea-sidebar-collapse:focus-visible {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  outline: 2px solid rgba(147,197,253,0.9);
+  outline-offset: 2px;
+}
+.phasea-nav-list {
+  padding-top: 8px;
+}
+.phasea-nav-group {
+  margin: 2px 0 6px;
+}
+.phasea-nav-group-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.76);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  text-align: left;
+}
+.phasea-nav-group-trigger:hover,
+.phasea-nav-group-trigger:focus-visible,
+.phasea-nav-group.active-parent > .phasea-nav-group-trigger {
+  background: rgba(37,99,235,0.18);
+  color: #fff;
+  outline: none;
+}
+.phasea-nav-group-trigger:focus-visible {
+  box-shadow: 0 0 0 2px rgba(147,197,253,0.95);
+}
+.phasea-nav-chevron,
+.phasea-nav-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.phasea-nav-group-body {
+  display: none;
+  padding: 2px 0 6px;
+}
+.phasea-nav-group-body.open {
+  display: block;
+}
+.phasea-nav-item {
+  border: 0;
+  width: 100%;
+  background: transparent;
+}
+.phasea-nav-button {
+  text-align: left;
+}
+.phasea-nav-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.phasea-project-sidebar.collapsed .sidebar-utilities,
+.phasea-project-sidebar.collapsed .sidebar-project,
+.phasea-project-sidebar.collapsed .sidebar-footer > div,
+.phasea-project-sidebar.collapsed .sidebar-footer > div:last-child,
+.phasea-project-sidebar.collapsed .phasea-nav-group-label,
+.phasea-project-sidebar.collapsed .phasea-nav-chevron,
+.phasea-project-sidebar.collapsed .phasea-nav-text,
+.phasea-project-sidebar.collapsed .phasea-sidebar-collapse span {
+  display: none;
+}
+.phasea-project-sidebar.collapsed .phasea-sidebar-collapse,
+.phasea-project-sidebar.collapsed .phasea-nav-group-trigger,
+.phasea-project-sidebar.collapsed .phasea-nav-item {
+  justify-content: center;
+}
+.phasea-project-sidebar.collapsed .phasea-nav-item {
+  padding-left: 9px;
+  padding-right: 9px;
+}
+.phasea-project-sidebar.collapsed .phasea-nav-group-body {
+  display: block;
+}
+.phasea-mobile-nav-trigger {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 12px 0;
+  padding: 8px 11px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 9px;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.phasea-mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15,23,42,0.48);
+}
+.phasea-mobile-nav-panel {
+  width: min(340px, 88vw);
+  height: 100%;
+  overflow-y: auto;
+  background: hsl(var(--sidebar));
+  color: #fff;
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: 20px 0 60px rgba(15,23,42,0.28);
+  padding: 12px 10px;
+}
+.phasea-mobile-nav-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.phasea-mobile-project-card {
+  margin-top: 12px;
+}
+.phasea-nav-mobile-list .phasea-nav-group-body {
+  display: block;
+}
+.phasea-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.phasea-page-hero,
+.phasea-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+  background: hsl(var(--card));
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+}
+.phasea-page-hero {
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.phasea-page-hero h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.phasea-page-hero p {
+  margin: 6px 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  line-height: 1.5;
+}
+.phasea-scope-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border: 1px solid #BFDBFE;
+  border-radius: 999px;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.phasea-card {
+  padding: 16px 18px;
+}
+.phasea-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.phasea-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+.phasea-card-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.45;
+}
+.phasea-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.phasea-filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+@media (max-width: 720px) {
+  .phasea-mobile-nav-trigger {
+    display: inline-flex;
+  }
+  .app-shell > .phasea-project-sidebar.sidebar {
+    display: none;
+  }
+  .phasea-page-hero,
+  .phasea-card-header {
+    flex-direction: column;
+  }
+  .phasea-page-hero h2 {
+    font-size: 20px;
+  }
+  .phasea-report-grid {
+    grid-template-columns: 1fr;
+  }
+  .phasea-filter-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .phasea-filter-row button,
+  .phasea-filter-row input {
+    width: 100%;
+  }
+}
 .nav-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
 .nav-badge-red { background: rgba(239,68,68,0.2); color: #F87171; }
 .nav-badge-blue { background: rgba(37,99,235,0.2); color: #60A5FA; }
