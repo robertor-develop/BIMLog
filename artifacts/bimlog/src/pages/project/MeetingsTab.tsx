@@ -302,6 +302,17 @@ export function MeetingsTab({
   const { getOptions, getLabel } = useConfig();
   const { token } = useAuthStore();
   const t = (en: string, es: string) => (lang === "es" ? es : en);
+  const statusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      open: t("Open", "Abierta"),
+      completed: t("Completed", "Completada"),
+      closed: t("Closed", "Cerrada"),
+      pending: t("Pending", "Pendiente"),
+      in_progress: t("In Progress", "En progreso"),
+      overdue: t("Overdue", "Vencida"),
+    };
+    return labels[status] ?? humanLabel(status);
+  };
   const rfiStatusOptions = [
     ...new Map(getOptions("rfi_status").map((option) => [option.value, option]))
       .values(),
@@ -775,7 +786,7 @@ export function MeetingsTab({
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
-    setImportMsg("Reading document with AI...");
+    setImportMsg(t("Reading document with AI...", "Leyendo documento con IA..."));
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -786,16 +797,19 @@ export function MeetingsTab({
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        setImportMsg(d.message || "Import failed");
+        setImportMsg(d.message || t("Import failed", "No se pudo importar"));
         return;
       }
       const data = await res.json();
       setImportMsg(
-        `Meeting imported successfully ? ${data.title || "untitled"}`,
+        t(
+          `Meeting imported successfully - ${data.title || "untitled"}`,
+          `Acta importada correctamente - ${data.title || "sin título"}`,
+        ),
       );
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
-      setImportMsg("Import failed ? please try again");
+      setImportMsg(t("Import failed - please try again", "No se pudo importar; inténtelo de nuevo"));
     } finally {
       setImporting(false);
       e.target.value = "";
@@ -3157,7 +3171,7 @@ export function MeetingsTab({
             <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
               {t(
                 "Record meetings, track deliverables, and manage action items",
-                "Registra reuniones, entregables y acción items",
+                "Registra reuniones, entregables y acciones",
               )}
             </p>
           </div>
@@ -3277,7 +3291,7 @@ export function MeetingsTab({
 
         {loading && (
           <div style={{ color: "#6B7280", padding: 40, textAlign: "center" }}>
-            {t("Loading?", "Cargando?")}
+            {t("Loading...", "Cargando...")}
           </div>
         )}
 
@@ -4452,7 +4466,7 @@ export function MeetingsTab({
                                   : "#D97706",
                           }}
                         >
-                          {ai.status}
+                          {statusLabel(ai.status)}
                         </span>
                       </td>
                       <td style={{ padding: "10px 12px" }}>
@@ -4866,11 +4880,13 @@ export function MeetingsTab({
               marginBottom: 2,
             }}
           >
-            Upload Meeting Recording ? Coming Soon
+            {t("Upload Meeting Recording - Coming Soon", "Subir grabación de reunión - Próximamente")}
           </div>
           <div style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.5 }}>
-            Upload an audio or video file and AI will auto-fill this form.
-            Available in the next update.
+            {t(
+              "Upload an audio or video file and AI will auto-fill this form. Available in the next update.",
+              "Suba un archivo de audio o video y la IA completará este formulario. Disponible en la próxima actualización.",
+            )}
           </div>
         </div>
         <div
@@ -4884,7 +4900,7 @@ export function MeetingsTab({
             fontWeight: 600,
           }}
         >
-          COMING SOON
+          {t("COMING SOON", "PRÓXIMAMENTE")}
         </div>
       </div>
 
@@ -5989,7 +6005,7 @@ export function MeetingsTab({
                           }}
                         >
                           {submittal.disciplineBucket === bucket
-                            ? humanLabel(submittal.status)
+                            ? statusLabel(submittal.status)
                             : "?"}
                         </td>
                       ))}

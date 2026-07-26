@@ -292,11 +292,11 @@ export function Dashboard() {
   );
   // Collect unique attention items
   const attentionRows: { pid: number; issue: string; color: string; href: string }[] = [];
-  overdueRfiPids.forEach(pid => attentionRows.push({ pid, issue: "Has overdue RFIs", color: "#D97706", href: `/projects/${pid}/rfis` }));
-  rejectedFilePids.forEach(pid => attentionRows.push({ pid, issue: "Naming violations detected", color: "#D97706", href: `/projects/${pid}/files` }));
+  overdueRfiPids.forEach(pid => attentionRows.push({ pid, issue: tt("Has overdue RFIs", "Tiene RFI vencidos"), color: "#D97706", href: `/projects/${pid}/rfis` }));
+  rejectedFilePids.forEach(pid => attentionRows.push({ pid, issue: tt("Naming violations detected", "Se detectaron incumplimientos de nomenclatura"), color: "#D97706", href: `/projects/${pid}/files` }));
   pendingSubPids.forEach(pid => {
     if (!overdueRfiPids.has(pid) && !rejectedFilePids.has(pid))
-      attentionRows.push({ pid, issue: "Pending submittals", color: "#2563EB", href: `/projects/${pid}/submittals` });
+      attentionRows.push({ pid, issue: tt("Pending submittals", "Submittals pendientes"), color: "#2563EB", href: `/projects/${pid}/submittals` });
   });
 
   // ── Your Pending Items ─────────────────────────────────────────────────────
@@ -388,33 +388,33 @@ export function Dashboard() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
               {/* FIX 3: each card navigates to the correct section */}
               <StatCard
-                label="Active Projects"
+                label={tt("Active Projects", "Proyectos activos")}
                 value={stats?.activeProjects ?? 0}
-                sub={`${projects?.length ?? 0} total`}
+                sub={`${projects?.length ?? 0} ${tt("total", "en total")}`}
                 navigate={() => setLocation("/projects")}
               />
               <StatCard
-                label="Files Processed"
+                label={tt("Files Processed", "Archivos procesados")}
                 value={stats?.filesProcessed ?? 0}
-                sub="Across all projects"
+                sub={tt("Across all projects", "En todos los proyectos")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/files` : "/projects")}
               />
               <StatCard
-                label="Open RFIs"
+                label={tt("Open RFIs", "RFI abiertos")}
                 value={stats?.openRfis ?? 0}
-                sub="Across all projects"
+                sub={tt("Across all projects", "En todos los proyectos")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/rfis` : "/projects")}
               />
               <StatCard
-                label="Pending Submittals"
+                label={tt("Pending Submittals", "Submittals pendientes")}
                 value={stats?.pendingSubmittals ?? 0}
-                sub="Awaiting review"
+                sub={tt("Awaiting review", "En espera de revisión")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
               <StatCard
-                label="Compliance Rate"
+                label={tt("Compliance Rate", "Tasa de cumplimiento")}
                 value={stats?.complianceRate === null || stats?.complianceRate === undefined ? "—" : `${stats.complianceRate}%`}
-                sub="Completed uploads only"
+                sub={tt("Completed uploads only", "Solo cargas completadas")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/analytics` : "/projects")}
               />
             </div>
@@ -424,27 +424,27 @@ export function Dashboard() {
           {stats && (stats.totalClashes ?? 0) + (stats.submittalTrackers ?? 0) > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginTop: 16 }}>
               <StatCard
-                label="Total Clashes"
+                label={tt("Total Clashes", "Total de interferencias")}
                 value={stats?.totalClashes ?? 0}
-                sub={`${stats?.p1Clashes ?? 0} P1 Critical`}
+                sub={`${stats?.p1Clashes ?? 0} ${tt("P1 Critical", "P1 críticas")}`}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
               />
               <StatCard
-                label="Open Clashes"
+                label={tt("Open Clashes", "Interferencias abiertas")}
                 value={stats?.openClashes ?? 0}
-                sub="Unresolved coordination issues"
+                sub={tt("Unresolved coordination issues", "Problemas de coordinación sin resolver")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
               />
               <StatCard
-                label="Submittal Tracking"
+                label={tt("Submittal Tracking", "Seguimiento de submittals")}
                 value={stats?.submittalTrackers ?? 0}
-                sub="Active tracking logs"
+                sub={tt("Active tracking logs", "Registros activos de seguimiento")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
               <StatCard
-                label="Open Submittals"
+                label={tt("Open Submittals", "Submittals abiertos")}
                 value={stats?.openSubmittalItems ?? 0}
-                sub="Items needing attention"
+                sub={tt("Items needing attention", "Elementos que requieren atención")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
             </div>
@@ -485,7 +485,7 @@ export function Dashboard() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <Shield style={{ width: 14, height: 14, color: "hsl(var(--muted-foreground))" }} />
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))" }}>
-                      CVR Platform Health
+                      {tt("CVR Platform Health", "Salud de CVR")}
                     </span>
                     <span style={{
                       padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
@@ -493,28 +493,28 @@ export function Dashboard() {
                       color: cvrHealth.healthStatus === "green" ? "#16A34A" : cvrHealth.healthStatus === "amber" ? "#D97706" : "#DC2626",
                       border: `1px solid ${cvrHealth.healthStatus === "green" ? "#BBF7D0" : cvrHealth.healthStatus === "amber" ? "#FDE68A" : "#FECACA"}`,
                     }}>
-                      {cvrHealth.healthStatus === "green" ? "All Clear" : cvrHealth.healthStatus === "amber" ? "Attention" : "Action Required"}
+                      {cvrHealth.healthStatus === "green" ? tt("All Clear", "Todo claro") : cvrHealth.healthStatus === "amber" ? tt("Attention", "Atención") : tt("Action Required", "Acción requerida")}
                     </span>
                   </div>
                   <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
                     {cvrHealth.healthStatus === "green"
-                      ? "No content verification issues pending — all files are clear."
+                      ? tt("No content verification issues pending — all files are clear.", "No hay verificaciones de contenido pendientes; todos los archivos están correctos.")
                       : cvrHealth.healthStatus === "amber"
-                        ? `${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} pending admin review after a content mismatch flag.`
-                        : `${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} have been pending review for over 24 hours — immediate action required.`}
+                        ? tt(`${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} pending admin review after a content mismatch flag.`, `${cvrHealth.totalPendingReview} archivo${cvrHealth.totalPendingReview !== 1 ? "s" : ""} pendiente${cvrHealth.totalPendingReview !== 1 ? "s" : ""} de revisión administrativa por una alerta de contenido.`)
+                        : tt(`${cvrHealth.totalPendingReview} file${cvrHealth.totalPendingReview !== 1 ? "s" : ""} have been pending review for over 24 hours — immediate action required.`, `${cvrHealth.totalPendingReview} archivo${cvrHealth.totalPendingReview !== 1 ? "s llevan" : " lleva"} más de 24 horas pendiente${cvrHealth.totalPendingReview !== 1 ? "s" : ""} de revisión; se requiere acción inmediata.`)}
                   </div>
                 </div>
 
                 <div style={{ display: "flex", gap: 24, flexShrink: 0 }}>
                   <div>
                     <div style={{ fontSize: 20, fontWeight: 700, color: "hsl(var(--foreground))" }}>{cvrHealth.totalFlagged}</div>
-                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>AI Flagged</div>
+                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{tt("AI Flagged", "Marcados por IA")}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 20, fontWeight: 700, color: cvrHealth.totalPendingReview > 0 ? "#7C3AED" : "hsl(var(--foreground))" }}>
                       {cvrHealth.totalPendingReview}
                     </div>
-                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>Pending Review</div>
+                    <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{tt("Pending Review", "Revisión pendiente")}</div>
                   </div>
                 </div>
               </div>
@@ -527,11 +527,11 @@ export function Dashboard() {
 
               {/* Needs Attention */}
               <div style={panel}>
-                <div style={panelTitle}>Needs Attention</div>
+                <div style={panelTitle}>{tt("Needs Attention", "Requiere atención")}</div>
                 {agg.loading ? loadingText : attentionRows.length === 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                     <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
-                    <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All clear — no issues detected</span>
+                    <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>{tt("All clear — no issues detected", "Todo claro; no se detectaron problemas")}</span>
                   </div>
                 ) : attentionRows.slice(0, 6).map((row, i) => {
                   const proj = projectMap.get(row.pid);
@@ -544,7 +544,7 @@ export function Dashboard() {
                         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{row.issue}</div>
                       </div>
                       <Link href={row.href} style={{ fontSize: 10, fontWeight: 600, color: row.color, textDecoration: "none", padding: "3px 8px", borderRadius: 4, border: `1px solid ${row.color}40`, background: `${row.color}10`, whiteSpace: "nowrap", flexShrink: 0 }}>
-                        Go to Project
+                        {tt("Go to Project", "Ir al proyecto")}
                       </Link>
                     </div>
                   );
@@ -553,7 +553,7 @@ export function Dashboard() {
 
               {/* Pending Items — FIX 6: real aggregate counts */}
               <div style={panel}>
-                <div style={panelTitle}>Pending Items</div>
+                <div style={panelTitle}>{tt("Pending Items", "Elementos pendientes")}</div>
                 {(() => {
                   const openRfisCount      = stats?.openRfis ?? 0;
                   const pendingSubsCount   = stats?.pendingSubmittals ?? 0;
@@ -563,25 +563,25 @@ export function Dashboard() {
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                         <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
-                        <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All items up to date</span>
+                        <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>{tt("All items up to date", "Todos los elementos están al día")}</span>
                       </div>
                     );
                   }
                   const rows: { label: string; count: number; color: string; bg: string; border: string; href: string }[] = [
                     {
-                      label: "Open RFIs",
+                      label: tt("Open RFIs", "RFI abiertos"),
                       count: openRfisCount,
                       color: "#D97706", bg: "#FFFBEB", border: "#FDE68A",
                       href: "/pending?type=rfis",
                     },
                     {
-                      label: "Pending Submittals",
+                      label: tt("Pending Submittals", "Submittals pendientes"),
                       count: pendingSubsCount,
                       color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE",
                       href: "/pending?type=submittals",
                     },
                     {
-                      label: "Files Needing Attention",
+                      label: tt("Files Needing Attention", "Archivos que requieren atención"),
                       count: filesAttnCount,
                       color: "#DC2626", bg: "#FEF2F2", border: "#FECACA",
                       href: "/pending?type=files",
@@ -593,7 +593,7 @@ export function Dashboard() {
                         <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", marginBottom: 6, borderRadius: 6, background: r.bg, border: `1px solid ${r.border}`, cursor: "pointer" }} onClick={() => setLocation(r.href)}>
                           <div style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))" }}>{r.label}</div>
                           <span style={{ fontWeight: 700, fontSize: 13, color: r.color, background: "white", border: `1px solid ${r.border}`, padding: "1px 8px", borderRadius: 4 }}>{r.count}</span>
-                          <span style={{ fontSize: 10, color: r.color, flexShrink: 0 }}>Go →</span>
+                           <span style={{ fontSize: 10, color: r.color, flexShrink: 0 }}>{tt("Go →", "Ir →")}</span>
                         </div>
                       ))}
                     </>
@@ -612,7 +612,10 @@ export function Dashboard() {
                   {t("dashboard.title")}
                 </h2>
                 <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
-                  {projects?.length ?? 0} project{(projects?.length ?? 0) !== 1 ? "s" : ""} · {totalFiles} files · {totalMembers} team members
+                  {tt(
+                    `${projects?.length ?? 0} project${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} files · ${totalMembers} team members`,
+                    `${projects?.length ?? 0} proyecto${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} archivo${totalFiles !== 1 ? "s" : ""} · ${totalMembers} miembro${totalMembers !== 1 ? "s" : ""} del equipo`,
+                  )}
                 </p>
               </div>
               <Button onClick={() => setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>

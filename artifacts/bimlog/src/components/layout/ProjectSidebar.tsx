@@ -76,6 +76,17 @@ function SidebarModal({ onClose, children }: { onClose: () => void; children: Re
 export function ProjectSidebar({ projectId, projectCode, projectName, projectDesc, activeTab, isAdmin, memberRole }: SidebarProps) {
   const { t, lang } = useI18n();
   const tr = (en: string, es: string) => lang === "es" ? es : en;
+  const roleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      project_admin: tr("Project Admin", "Administrador de Proyecto"),
+      convention_manager: tr("Convention Manager", "Gerente de Convención"),
+      discipline_lead: tr("Discipline Lead", "Líder de Disciplina"),
+      member: tr("Member", "Miembro"),
+      sub_trade: tr("Sub-trade", "Subcontratista"),
+      read_only: tr("Read Only", "Solo lectura"),
+    };
+    return labels[role] ?? role.replace(/_/g, " ");
+  };
   const { user } = useAuthStore();
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
@@ -261,7 +272,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
         onClick={() => setMobileOpen(true)}
       >
         <Menu style={{ width: 15, height: 15 }} />
-        {tr("Open project navigation", "Abrir navegacion del proyecto")}
+        {tr("Open project navigation", "Abrir navegación del proyecto")}
       </button>
 
       {mobileOpen && (
@@ -269,7 +280,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           <aside
             id="phasea-mobile-project-nav"
             className="phasea-mobile-nav-panel"
-            aria-label={tr("Project navigation", "Navegacion del proyecto")}
+            aria-label={tr("Project navigation", "Navegación del proyecto")}
             onClick={event => event.stopPropagation()}
           >
             <button type="button" className="phasea-mobile-nav-close" onClick={closeMobile}>
@@ -293,7 +304,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           type="button"
           className="phasea-sidebar-collapse"
           aria-pressed={collapsed}
-          title={collapsed ? tr("Expand navigation", "Expandir navegacion") : tr("Collapse navigation", "Contraer navegacion")}
+          title={collapsed ? tr("Expand navigation", "Expandir navegación") : tr("Collapse navigation", "Contraer navegación")}
           onClick={() => setCollapsed(prev => !prev)}
         >
           {collapsed ? <PanelLeftOpen style={{ width: 14, height: 14 }} /> : <PanelLeftClose style={{ width: 14, height: 14 }} />}
@@ -308,7 +319,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           </div>
           {memberRole && (
             <div style={{ padding: "8px 2px 0" }}>
-              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", padding: "2px 8px", borderRadius: 4 }}>{memberRole.replace("_", " ")}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", padding: "2px 8px", borderRadius: 4 }}>{roleLabel(memberRole)}</span>
             </div>
           )}
         </div>

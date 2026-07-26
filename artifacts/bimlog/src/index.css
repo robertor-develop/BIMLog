@@ -472,6 +472,9 @@ iframe[aria-label*="Replit" i],
     min-width: 0;
     flex-basis: 100%;
   }
+  .app-shell:has(.phasea-mobile-nav-trigger) > .main-area {
+    padding-top: 48px;
+  }
   .project-context-bar {
     min-width: 0;
     padding-left: 12px;

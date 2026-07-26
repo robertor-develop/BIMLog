@@ -33,7 +33,7 @@ export function ProjectDetail() {
   const tab = params?.tab || "analytics";
 
   const [, setLocation] = useLocation();
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
   const { user } = useAuthStore();
   const { adminRoles, writeRoles } = useConfig();
 
@@ -48,6 +48,8 @@ export function ProjectDetail() {
 
   const adminMember = members?.find(m => m.role === "project_admin");
   const myRoleInfo = getRole(memberRole);
+  const myRoleLabel = myRoleInfo ? (lang === "es" ? myRoleInfo.labelEs : myRoleInfo.label) : "";
+  const myRoleDescription = myRoleInfo ? (lang === "es" ? myRoleInfo.descriptionEs : myRoleInfo.description) : "";
 
   if (isLoading) {
     return (
@@ -95,7 +97,7 @@ export function ProjectDetail() {
           <div className="breadcrumb">
             <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}>
               <ChevronLeft style={{ width: 14, height: 14 }} />
-              Dashboard
+              {lang === "es" ? "Sede BIMLog" : "Dashboard"}
             </Link>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
             <span className="breadcrumb-active">{project.name}</span>
@@ -104,26 +106,26 @@ export function ProjectDetail() {
           <div className="project-context-actions">
             <span
               className="context-chip context-chip-mono"
-              title="Project Code (used in file naming)"
+              title={lang === "es" ? "Código del proyecto (usado en la nomenclatura de archivos)" : "Project Code (used in file naming)"}
             >
-              <span className="context-chip-label">CODE</span>
+              <span className="context-chip-label">{lang === "es" ? "CÓDIGO" : "CODE"}</span>
               {project.code}
             </span>
 
             {myRoleInfo && (
               <span
                 className="context-chip"
-                title={myRoleInfo.description}
+                title={myRoleDescription}
               >
                 <Shield style={{ width: 12, height: 12 }} />
-                {myRoleInfo.label}
+                {myRoleLabel}
               </span>
             )}
 
             {adminMember && (
               <span
                 className="context-chip context-chip-wide"
-                title={adminMember.userEmail ? `Project Admin: ${adminMember.userEmail}` : "Project Admin"}
+                title={adminMember.userEmail ? `${lang === "es" ? "Administrador de Proyecto" : "Project Admin"}: ${adminMember.userEmail}` : (lang === "es" ? "Administrador de Proyecto" : "Project Admin")}
               >
                 <span className="context-chip-strong">{adminMember.userFullName}</span>
                 {adminMember.userCompanyName && (
