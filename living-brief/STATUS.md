@@ -9,6 +9,15 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
+Project Insights API release correction and Activity presentation are accepted in the current combined source
+candidate based on authoritative master `715fd6ad8ff0a9e80f69b6e969cfde3ff3c511b0`. The Project Insights backend
+now preserves tenant isolation while allowing a legitimate legacy same-company project-admin read when older binding
+metadata is absent, calculates company metrics through the real files-to-users-to-companies relationship, emits live
+Command Center query names, and restores readable Spanish unavailable-reason copy. Activity presentation now renders
+safe human-readable details across Dashboard, Admin, Profile, Total Control, and Project Activity without exposing raw
+JSON payloads or internal implementation keys. This source state is not published, deployed, production verified,
+customer verified, or live accepted.
+
 RFI report generation and Visual Evidence usability are accepted in clean source integration on authoritative master
 baseline `7532a8d4f879aeca01136535a0abfd5cefc5eb00`. Every single-RFI PDF, DOCX, and Complete PDF export action opens
 the Generate RFI Report modal that loads active project defaults, supports one-time per-export section/field,

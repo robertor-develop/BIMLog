@@ -4,6 +4,20 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Project Insights API correction and Activity presentation combined source candidate
+
+- Combined source candidate is based on authoritative master `715fd6ad8ff0a9e80f69b6e969cfde3ff3c511b0` and combines
+  only the independently completed Project Insights backend/auth/metrics correction and Activity presentation lane.
+- Project Insights preserves tenant isolation, allows legitimate legacy same-company project-admin access when current
+  binding metadata is absent, uses the real `files -> users -> companies` relationship for company metrics, emits
+  live Command Center query parameters `ccView` and `ccPresentationStatus`, and fixes Spanish unavailable-reason text.
+- Activity presentation now provides readable user-facing detail summaries across Dashboard, Admin, Profile, Total
+  Control, and Project Activity without showing raw JSON payloads or internal keys.
+- Remaining gates are serialized candidate proofs, Living Brief check, typecheck, database safety, secret/privacy,
+  pre-push/final build validation, normal push, remote equality verification, and later deployment/customer acceptance
+  if separately authorized. No Replit, production/customer data, publish, deploy, dependency, lockfile, schema, RFI
+  export, Telegram product, or plugin work is part of this combined source candidate.
+
 ### RFI Visual Evidence UX clean integration; deployment and customer proof pending
 
 - Clean source integration on authoritative master baseline `7532a8d4f879aeca01136535a0abfd5cefc5eb00` preserves the

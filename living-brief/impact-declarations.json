@@ -3687,6 +3687,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d6cb6a177fe005ad5746fbd680146250bad92b0ed32e1851a513cf7f8179d458"
+    },
+    {
+      "taskId": "project-insights-activity-combined-release",
+      "reviewedThroughCommit": "715fd6ad8ff0a9e80f69b6e969cfde3ff3c511b0",
+      "status": "accepted_source_integration_candidate",
+      "captureTiming": "serialized_release_integration",
+      "summary": "Combined source candidate for Project Insights backend authorization/metrics/deep-link correction and safe Activity presentation.",
+      "workstreams": [
+        "project-insights",
+        "activity-presentation",
+        "serialized-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, company relationship, market positioning, or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows the F-drive worktree, serialized integration, isolated proof, no-production, no-Replit, and no-deploy boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing tenancy, authorization, bilingual, readable-output, privacy, and regression gates govern the accepted corrections without new quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, module ownership, or customer-facing product category changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source changes affect backend Project Insights query behavior and frontend activity presentation within existing platform structure; generated structural authority remains deterministic."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, install, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, spreadsheet, exported report, or report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the combined Project Insights and Activity source candidate, exact behavior, and non-deployed boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining serialized validation, normal push, remote verification, and deployment/customer acceptance boundaries."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate semantics or retained dated audit evidence changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/coordinator-command-center-build4-boundary-proof.ts",
+        "artifacts/api-server/scripts/project-insights-api-correction-proof.ts",
+        "artifacts/api-server/src/lib/coordinator-action-register.ts",
+        "artifacts/api-server/src/lib/project-insights-metrics.ts",
+        "artifacts/bimlog/src/lib/activity-presentation.ts",
+        "artifacts/bimlog/src/pages/AdminPanel.tsx",
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "artifacts/bimlog/src/pages/Profile.tsx",
+        "artifacts/bimlog/src/pages/TotalControl.tsx",
+        "artifacts/bimlog/src/pages/project/ActivityTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "10340f10b89f130cf1982c453c090f01606ca2c6213971f48d0a220bfef63d80",
+      "reviewedAt": "2026-07-26T11:44:50.7385064-04:00"
     }
   ]
 }
