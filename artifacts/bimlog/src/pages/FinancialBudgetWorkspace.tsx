@@ -653,9 +653,42 @@ function Snapshot({
             )}
           </p>
         </div>
-          <div className="fb-actions">
-            <ExportButton projectId={projectId} snapshotId={s.id} format="pdf" token={token} />
-            <ExportButton projectId={projectId} snapshotId={s.id} format="xlsx" token={token} />
+          <div className="fb-export-panel" aria-label={tt("Approved snapshot exports", "Exportaciones de instantánea aprobada")}>
+            <div>
+              <strong>{tt("Generate approved snapshot outputs", "Generar salidas de instantánea aprobada")}</strong>
+              <p>
+                {tt(
+                  "Choose the formal PDF report for sharing and record retention, or the XLSX workbook for reconciliation and analysis.",
+                  "Elija el reporte PDF formal para compartir y conservar el registro, o el libro XLSX para conciliación y análisis.",
+                )}
+              </p>
+            </div>
+            <div className="fb-actions">
+              <ExportButton
+                projectId={projectId}
+                snapshotId={s.id}
+                format="pdf"
+                token={token}
+                title={tt("Generate PDF Report", "Generar reporte PDF")}
+                description={tt(
+                  "Formal approved budget baseline report. Uses this immutable snapshot.",
+                  "Reporte formal de línea base presupuestaria aprobada. Usa esta instantánea inmutable.",
+                )}
+                deniedLabel={tt("PDF export denied.", "Exportación PDF denegada.")}
+              />
+              <ExportButton
+                projectId={projectId}
+                snapshotId={s.id}
+                format="xlsx"
+                token={token}
+                title={tt("Download XLSX Workbook", "Descargar libro XLSX")}
+                description={tt(
+                  "Spreadsheet workbook for analysis and reconciliation. Uses this same approved snapshot.",
+                  "Libro de cálculo para análisis y conciliación. Usa esta misma instantánea aprobada.",
+                )}
+                deniedLabel={tt("XLSX export denied.", "Exportación XLSX denegada.")}
+              />
+            </div>
           </div>
       </div>
       <div className="fb-meta">
@@ -694,17 +727,50 @@ function Snapshot({
     </section>
   );
 }
-function ExportButton({ projectId, snapshotId, format, token }: { projectId: number; snapshotId: string; format: "pdf" | "xlsx"; token: string }) {
+function ExportButton({
+  projectId,
+  snapshotId,
+  format,
+  token,
+  title,
+  description,
+  deniedLabel,
+}: {
+  projectId: number;
+  snapshotId: string;
+  format: "pdf" | "xlsx";
+  token: string;
+  title: string;
+  description: string;
+  deniedLabel: string;
+}) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const download = async () => {
     setBusy(true);
+    setError("");
     try {
       const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/snapshots/${snapshotId}/export.${format}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!response.ok) throw new Error("Export denied");
+      if (!response.ok) throw new Error(deniedLabel);
       const url = URL.createObjectURL(await response.blob()), link = document.createElement("a");
       link.href = url; link.download = `approved-budget-baseline.${format}`; link.click(); URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : deniedLabel);
     } finally { setBusy(false); }
   };
-  return <button onClick={download} disabled={busy}>{format.toUpperCase()}</button>;
+  return (
+    <div className="fb-export-option">
+      <button
+        onClick={download}
+        disabled={busy}
+        title={description}
+        aria-describedby={`budget-export-${format}-help`}
+      >
+        {busy ? `${title}...` : title}
+      </button>
+      <small id={`budget-export-${format}-help`}>{description}</small>
+      {error && <small className="fb-export-error" role="alert">{error}</small>}
+    </div>
+  );
 }
-const styles = `.fb-page{min-height:100vh;background:#f5f7fa;color:#15202b;padding:24px;overflow-x:hidden}.fb-page>*{max-width:1180px;margin-left:auto;margin-right:auto}.fb-header{display:flex;justify-content:space-between;gap:20px;align-items:end}.fb-header h1{font-size:28px;margin:8px 0}.fb-header p,.fb-panel p{color:#5b6572}.fb-back{font-size:13px}.fb-authority{max-width:330px;padding:10px 12px;background:#e8f2ff;border-radius:8px;font-size:12px}.fb-nav{display:flex;gap:8px;margin-top:20px;overflow-x:auto;padding-bottom:8px}.fb-nav a,.fb-actions a,.fb-actions button,.fb-state button,.fb-preview button{white-space:nowrap;border:1px solid #ccd5df;border-radius:7px;padding:8px 12px;background:white;color:#174b7a;text-decoration:none;cursor:pointer}.fb-boundary{margin:16px 0;padding:12px;border-left:4px solid #d58b16;background:#fff9ec}.fb-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.fb-card,.fb-panel{background:white;border:1px solid #dfe5eb;border-radius:10px;padding:18px}.fb-card span{display:block;color:#66717e;font-size:12px}.fb-card strong{display:block;font-size:20px;margin-top:7px;font-variant-numeric:tabular-nums}.fb-panel{margin-top:14px}.fb-panel h2{margin:0 0 8px}.fb-panel-title{display:flex;justify-content:space-between;gap:16px;align-items:start}.fb-meta,.fb-actions{display:flex;gap:10px;flex-wrap:wrap}.fb-meta{font-size:12px;color:#596574;margin:12px 0}.fb-table{overflow-x:auto;border:1px solid #e4e9ef;border-radius:8px}.fb-row{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,2fr) minmax(180px,1fr);gap:12px;padding:10px;border-bottom:1px solid #edf0f3;min-width:650px}.fb-head{font-size:11px;text-transform:uppercase;background:#f3f6f9;font-weight:700}.fb-empty,.fb-state{padding:36px;text-align:center;color:#66717e}.fb-error{color:#a22626}.fb-cards{display:grid;gap:10px}.fb-budget{border:1px solid #e2e7ed;border-radius:8px;padding:14px}.fb-budget>div:first-child{display:flex;justify-content:space-between}.fb-budget small,.fb-fingerprints code{display:block;overflow-wrap:anywhere;color:#697585}.fb-status{padding:3px 7px;border-radius:99px;background:#eef3f8;font-size:11px}.fb-message{padding:10px;background:#eef8ef;margin:10px 0}.fb-fingerprints{margin-top:14px}.fb-import{border:1px solid #dce4ec;border-radius:8px;padding:14px;margin:14px 0}.fb-import h3{margin:0}.fb-import-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fb-import-fields label{display:grid;gap:4px;font-size:12px;color:#596574}.fb-import-fields input{min-width:0;border:1px solid #ccd5df;border-radius:6px;padding:8px;background:white}.fb-preview{display:grid;gap:7px;margin-top:12px;padding:12px;background:#f4f8fc;border-radius:7px}.fb-preview code,.fb-preview small{overflow-wrap:anywhere}.fb-preview button{justify-self:start}@media(max-width:720px){.fb-page{padding:12px}.fb-header{display:block}.fb-authority{display:block;margin-top:10px}.fb-summary,.fb-import-fields{grid-template-columns:1fr}.fb-panel-title{display:block}.fb-row{min-width:0;grid-template-columns:1fr;gap:4px}.fb-head{display:none}.fb-table{overflow:visible}.fb-row span{overflow-wrap:anywhere}.fb-row span:last-child{font-variant-numeric:tabular-nums}.fb-actions{margin-top:10px}}`;
+const styles = `.fb-page{min-height:100vh;background:#f5f7fa;color:#15202b;padding:24px;overflow-x:hidden}.fb-page>*{max-width:1180px;margin-left:auto;margin-right:auto}.fb-header{display:flex;justify-content:space-between;gap:20px;align-items:end}.fb-header h1{font-size:28px;margin:8px 0}.fb-header p,.fb-panel p{color:#5b6572}.fb-back{font-size:13px}.fb-authority{max-width:330px;padding:10px 12px;background:#e8f2ff;border-radius:8px;font-size:12px}.fb-nav{display:flex;gap:8px;margin-top:20px;overflow-x:auto;padding-bottom:8px}.fb-nav a,.fb-actions a,.fb-actions button,.fb-state button,.fb-preview button{white-space:nowrap;border:1px solid #ccd5df;border-radius:7px;padding:8px 12px;background:white;color:#174b7a;text-decoration:none;cursor:pointer}.fb-boundary{margin:16px 0;padding:12px;border-left:4px solid #d58b16;background:#fff9ec}.fb-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.fb-card,.fb-panel{background:white;border:1px solid #dfe5eb;border-radius:10px;padding:18px}.fb-card span{display:block;color:#66717e;font-size:12px}.fb-card strong{display:block;font-size:20px;margin-top:7px;font-variant-numeric:tabular-nums}.fb-panel{margin-top:14px}.fb-panel h2{margin:0 0 8px}.fb-panel-title{display:flex;justify-content:space-between;gap:16px;align-items:start}.fb-meta,.fb-actions{display:flex;gap:10px;flex-wrap:wrap}.fb-meta{font-size:12px;color:#596574;margin:12px 0}.fb-export-panel{display:grid;gap:12px;min-width:320px;max-width:430px;padding:12px;border:1px solid #ccdff1;border-radius:10px;background:#f8fbff}.fb-export-panel strong{display:block;color:#123f68;font-size:13px}.fb-export-panel p{margin:4px 0 0;font-size:12px;line-height:1.45}.fb-export-option{display:grid;gap:5px;max-width:210px}.fb-export-option small{font-size:11px;line-height:1.35;color:#596574;white-space:normal}.fb-export-error{color:#a22626}.fb-table{overflow-x:auto;border:1px solid #e4e9ef;border-radius:8px}.fb-row{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,2fr) minmax(180px,1fr);gap:12px;padding:10px;border-bottom:1px solid #edf0f3;min-width:650px}.fb-head{font-size:11px;text-transform:uppercase;background:#f3f6f9;font-weight:700}.fb-empty,.fb-state{padding:36px;text-align:center;color:#66717e}.fb-error{color:#a22626}.fb-cards{display:grid;gap:10px}.fb-budget{border:1px solid #e2e7ed;border-radius:8px;padding:14px}.fb-budget>div:first-child{display:flex;justify-content:space-between}.fb-budget small,.fb-fingerprints code{display:block;overflow-wrap:anywhere;color:#697585}.fb-status{padding:3px 7px;border-radius:99px;background:#eef3f8;font-size:11px}.fb-message{padding:10px;background:#eef8ef;margin:10px 0}.fb-fingerprints{margin-top:14px}.fb-import{border:1px solid #dce4ec;border-radius:8px;padding:14px;margin:14px 0}.fb-import h3{margin:0}.fb-import-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fb-import-fields label{display:grid;gap:4px;font-size:12px;color:#596574}.fb-import-fields input{min-width:0;border:1px solid #ccd5df;border-radius:6px;padding:8px;background:white}.fb-preview{display:grid;gap:7px;margin-top:12px;padding:12px;background:#f4f8fc;border-radius:7px}.fb-preview code,.fb-preview small{overflow-wrap:anywhere}.fb-preview button{justify-self:start}@media(max-width:720px){.fb-page{padding:12px}.fb-header{display:block}.fb-authority{display:block;margin-top:10px}.fb-summary,.fb-import-fields{grid-template-columns:1fr}.fb-panel-title{display:block}.fb-export-panel{min-width:0;max-width:none;margin-top:12px}.fb-export-option{max-width:none}.fb-row{min-width:0;grid-template-columns:1fr;gap:4px}.fb-head{display:none}.fb-table{overflow:visible}.fb-row span{overflow-wrap:anywhere}.fb-row span:last-child{font-variant-numeric:tabular-nums}.fb-actions{margin-top:10px}}`;
