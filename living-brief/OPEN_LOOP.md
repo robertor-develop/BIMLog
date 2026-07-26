@@ -4,22 +4,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
-### RFI report-generation modal local candidate; review and acceptance pending
+### RFI Visual Evidence UX clean integration; deployment and customer proof pending
 
-- Local candidate on `origin/master` `7c12615fe521e9797a381e2e8b145bcf35b188e5` adds the platform-wide Generate RFI
-  Report modal for single-RFI PDF, DOCX, and Complete PDF actions.
-- The modal loads active project defaults, supports one-time per-export overrides without mutating defaults, keeps
-  neutral Full Template and Focused Template presets, and exposes explicit Save Project Defaults only to authorized
-  project authorities.
-- Standard PDF, DOCX, and Complete PDF use the same canonical report-settings model. Complete PDF also applies the
-  modal choices to appended attachment/source-image package pages so hidden choices are not silently included.
-- RFI Type remains mandatory in the identity/status section. Sections 3, 5, 6, and 7, source viewpoint screenshot,
-  ordered additional screenshots, attachments, and empty-field behavior are configurable through the same model.
-- Focused proofs currently pass for report-settings parity and provider-governance/router-shadow behavior; mojibake
-  and typecheck pass. Remaining local gates are Living Brief state regeneration, production build, final source
-  review, local candidate commit, and independent review.
-- This is not integration, push, publication, deployment, production/customer access, customer verification, or live
-  acceptance. Security `adm-zip`, Plans entitlements, Finance, plugins, and Telegram product code remain out of scope.
+- Clean source integration on authoritative master baseline `7532a8d4f879aeca01136535a0abfd5cefc5eb00` preserves the
+  platform-wide Generate RFI Report modal and adds the RFI-owned Visual Evidence usability correction.
+- RFI create/detail now makes source viewpoint and additional screenshots explicit, with empty state, preview
+  thumbnails, add/upload/paste/capture affordances, captions, order/remove controls, and visible PDF/DOCX/Complete PDF
+  inclusion wording. The approved normal-zoom RFI form layout is preserved.
+- Editable response-capable states expose exactly one Save Response action after reconciling the dedicated response bar
+  with the sticky action matrix.
+- Existing evidence remains valid: artifact proof manifest
+  `F:\BIMLog\Evidence\rfi-visual-evidence-ux-slice\20260725-visual-evidence\rfi-visual-evidence-artifact-proof.json`
+  has SHA-256 `6590B2E18910DAE1A10CAA11BA32E8F24696FCCF8B1252F3669328303D5568C8`, and browser CDP proof manifest
+  `F:\BIMLog\Evidence\rfi-visual-evidence-ux-slice\20260725-visual-evidence\browser-cdp\browser-cdp-proof-manifest.json`
+  has SHA-256 `F5F07B0178C1E883372F59DE4DECBE3A3B1E39F926D8D9E9E62D77E3E38D6731`.
+- Remaining gates are normal source push, later deployment/publication if separately authorized, Roberto/Ruben
+  downloaded artifact confirmation for real RFIs, and customer field acceptance. No Replit, production/customer data,
+  schema/database, dependency/lockfile, plugin, Telegram product, publish, or deploy action occurred in this lane.
 
 ### Deterministic Replit API artifact closure accepted locally; Republish proof pending
 

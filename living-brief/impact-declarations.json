@@ -3609,6 +3609,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4dfdcac8f97aaa5225d9fff32f15938bba7b014de46313630b1fb531e89e3670"
+    },
+    {
+      "taskId": "rfi-visual-evidence-governance-integration",
+      "reviewedThroughCommit": "7532a8d4f879aeca01136535a0abfd5cefc5eb00",
+      "reviewedAt": "2026-07-26T10:30:28.0753269-04:00",
+      "status": "accepted_source_integration",
+      "captureTiming": "serialized_governance_integration",
+      "summary": "RFI Visual Evidence usability and exactly-one Save Response clean source integration.",
+      "workstreams": [
+        "rfi-customer-delivery",
+        "report-generation",
+        "release-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, company relationship, or market-positioning authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows the F-drive worktree, serialized integration, no-production, no-publish, and sole-writer boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing RFI quality and evidence gates cover the visual-evidence and single-action correction without new quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, or product-category expansion is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated platform structure, hosting architecture, schema publication, or deployment behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, install, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves RFI screen discoverability and inclusion wording while preserving the existing canonical report settings and export renderers."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or citation interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the clean source integration state, Visual Evidence usability behavior, and non-deployed boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining normal push, deployment, downloaded-artifact, and customer field acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate semantics or retained evidence claims are changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/rfi/RfiImagePresentationControls.tsx",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d6cb6a177fe005ad5746fbd680146250bad92b0ed32e1851a513cf7f8179d458"
     }
   ]
 }

@@ -9,15 +9,18 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
-RFI report-generation modal is a local review candidate on authoritative master
-`7c12615fe521e9797a381e2e8b145bcf35b188e5`. It makes every single-RFI PDF, DOCX, and Complete PDF export action open
-a Generate RFI Report modal that loads the active project defaults, supports one-time per-export section/field,
+RFI report generation and Visual Evidence usability are accepted in clean source integration on authoritative master
+baseline `7532a8d4f879aeca01136535a0abfd5cefc5eb00`. Every single-RFI PDF, DOCX, and Complete PDF export action opens
+the Generate RFI Report modal that loads active project defaults, supports one-time per-export section/field,
 attachment, source-viewpoint screenshot, additional-screenshot, and empty-field choices, and allows only authorized
 project authorities to explicitly save project defaults. The export routes consume one canonical settings model for
 standard PDF, DOCX, and Complete PDF, reject malformed one-time choices with a client validation response, and do not
 export soft-deleted RFIs. The related Autodesk legacy connector guard is scoped so unavailable Autodesk behavior does
-not shadow later RFI/cloud routes. This candidate is not integrated, pushed, published, deployed, production verified,
-customer verified, or live accepted.
+not shadow later RFI/cloud routes. The RFI detail experience now makes Visual Evidence unmistakable with source
+viewpoint and additional screenshot management, preview thumbnails, captions, ordering/removal, and explicit
+PDF/DOCX/Complete PDF inclusion wording while preserving the approved normal-zoom RFI layout. Editable
+response-capable states expose exactly one Save Response action. This source state is not published, deployed,
+production verified, customer verified, or live accepted.
 
 The deterministic Replit API artifact closure is accepted locally in source at product commit
 `76addb6eb7b791a7579ca5c2e7d95a6526b544a1`. The production build now bundles compatible pure-JavaScript
