@@ -1358,7 +1358,7 @@ function filterRfisForRegisterPdf(
     })
     .filter(rfi => {
       if (!q) return true;
-      return [rfi.number, rfi.subject, rfi.rfiType, rfi.ballInCourt, rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
+      return [rfi.number, rfi.subject, rfi.rfiType, rfiRegisterBallInCourt(rfi), rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
         .some(value => String(value || "").toLowerCase().includes(q));
     })
     .sort((left, right) => {
