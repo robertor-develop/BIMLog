@@ -1166,7 +1166,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   };
   const rfiBallInCourtValue = (rfi: Rfi) => {
     if (rfi.status === "closed") return "Closed";
-    return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+    return getBallInCourt(rfi)?.label || "Unassigned";
   };
   const rfiBallInCourtDisplay = (value: string) =>
     value === "Closed" ? w("Closed", "Cerrado", lang) : value === "Unassigned" ? w("Unassigned", "Sin asignar", lang) : value;
