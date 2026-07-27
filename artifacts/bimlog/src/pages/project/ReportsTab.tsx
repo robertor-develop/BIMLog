@@ -453,19 +453,18 @@ function CvrBadge({ result }: { result: string }) {
   );
 }
 
-const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; icon: React.ReactNode }[] = [
-  { key: "project-health",    labelEn: "Project Health",       labelEs: "Salud del Proyecto",      icon: <Activity size={20} /> },
-  { key: "compliance",        labelEn: "Compliance Report",    labelEs: "Cumplimiento",             icon: <CheckCircle2 size={20} /> },
-  { key: "rfi-aging",         labelEn: "RFI Aging",            labelEs: "Antigüedad de RFIs",       icon: <Clock size={20} /> },
-  { key: "submittal-status",  labelEn: "Submittal Status",     labelEs: "Estado de Submittals",     icon: <ClipboardList size={20} /> },
-  { key: "performance",       labelEn: "Team Performance",     labelEs: "Rendimiento del Equipo",   icon: <BarChart2 size={20} /> },
-  { key: "audit-certificate", labelEn: "Audit Certificate",    labelEs: "Certificado de Auditoría", icon: <Award size={20} /> },
-  { key: "meeting-minutes",   labelEn: "Meeting Minutes Log",  labelEs: "Log de Actas",             icon: <FileText size={20} /> },
-  { key: "change-order-log",  labelEn: "Change Order Log",     labelEs: "Log de Órdenes de Cambio", icon: <RefreshCw size={20} /> },
-  { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",     icon: <Send size={20} /> },
-  { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",     icon: <Search size={20} /> },
+const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: string; scopeEs: string; icon: React.ReactNode }[] = [
+  { key: "project-health",    labelEn: "Project Health",       labelEs: "Salud del Proyecto",        scopeEn: "Project-wide status snapshot",       scopeEs: "Instantanea general del proyecto",        icon: <Activity size={20} /> },
+  { key: "compliance",        labelEn: "Compliance Report",    labelEs: "Cumplimiento",              scopeEn: "Compliance and audit readiness",     scopeEs: "Cumplimiento y preparacion de auditoria", icon: <CheckCircle2 size={20} /> },
+  { key: "rfi-aging",         labelEn: "RFI Aging",            labelEs: "Antiguedad de RFIs",         scopeEn: "Open RFI aging overview",            scopeEs: "Resumen de antiguedad de RFIs abiertos",  icon: <Clock size={20} /> },
+  { key: "submittal-status",  labelEn: "Submittal Status",     labelEs: "Estado de Submittals",       scopeEn: "Submittal status overview",          scopeEs: "Resumen del estado de submittals",         icon: <ClipboardList size={20} /> },
+  { key: "performance",       labelEn: "Team Performance",     labelEs: "Rendimiento del Equipo",     scopeEn: "Team response and activity summary", scopeEs: "Resumen de respuesta y actividad",         icon: <BarChart2 size={20} /> },
+  { key: "audit-certificate", labelEn: "Audit Certificate",    labelEs: "Certificado de Auditoria",   scopeEn: "Project audit evidence package",     scopeEs: "Paquete de evidencia de auditoria",        icon: <Award size={20} /> },
+  { key: "meeting-minutes",   labelEn: "Meeting Minutes Log",  labelEs: "Log de Actas",               scopeEn: "Meeting record library",             scopeEs: "Biblioteca de registros de reuniones",     icon: <FileText size={20} /> },
+  { key: "change-order-log",  labelEn: "Change Order Log",     labelEs: "Log de Ordenes de Cambio",   scopeEn: "Change order register",              scopeEs: "Registro de ordenes de cambio",            icon: <RefreshCw size={20} /> },
+  { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",       scopeEn: "Transmittal register",               scopeEs: "Registro de transmisiones",                icon: <Send size={20} /> },
+  { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
-
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -529,6 +528,14 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   };
 
   const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+  const activeCvrFilterSummary = from || to
+    ? tl(`CVR date range: ${from || "Any start"} to ${to || "Any end"}`, `Rango CVR: ${from || "Sin inicio"} a ${to || "Sin fin"}`)
+    : tl("CVR date range: All dates", "Rango CVR: Todas las fechas");
+  const generatedContext = tl("Generated at download time", "Generado al descargar");
+  const sourceScreenExportNote = tl(
+    "This hub is the master PDF library and bulk launcher. Current-view PDFs for filtered source screens remain on the source tabs.",
+    "Este centro es la biblioteca maestra de PDFs y lanzador general. Los PDFs de vista actual filtrada permanecen en las pestanas de origen."
+  );
 
   return (
     <div className="phasea-surface" data-phasea-surface="reports-hub">
@@ -545,27 +552,66 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
         <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
       </div>
 
-      {/* Project Intelligence Layer */}
-      <ProjectIntelligenceView projectId={projectId} lang={lang} />
-
-      {/* PDF Reports section */}
-      <div className="phasea-card" style={{ marginBottom: 28 }}>
+      {/* PDF Reports section: must stay first on Insights & Reports */}
+      <div className="phasea-card" style={{ marginBottom: 28, borderColor: "#BFDBFE", boxShadow: "0 12px 28px rgba(37, 99, 235, 0.08)" }}>
         <div className="phasea-card-header">
           <div>
             <div className="phasea-card-title">
             {tl("Project PDF Reports", "Reportes PDF del Proyecto")}
             </div>
             <div className="phasea-card-subtitle">
-            {tl("Download any report as a professionally formatted PDF", "Descarga cualquier reporte como PDF con formato profesional")}
+            {tl("Download governed, project-wide PDFs before reviewing intelligence details below.", "Descarga PDFs gobernados de alcance general antes de revisar la inteligencia inferior.")}
             </div>
           </div>
-          <span className="phasea-scope-pill">PDF</span>
+          <span className="phasea-scope-pill">{tl("Top report library", "Biblioteca principal")}</span>
         </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 10,
+            padding: "10px 12px",
+            marginBottom: 14,
+            borderRadius: 10,
+            background: "#EFF6FF",
+            border: "1px solid #DBEAFE",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.4 }}>
+              {tl("Report scope", "Alcance del reporte")}
+            </div>
+            <div style={{ fontSize: 12, color: "#1E3A8A", marginTop: 2 }}>
+              {tl("Project-wide snapshot PDFs", "PDFs de instantanea general del proyecto")}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.4 }}>
+              {tl("Context", "Contexto")}
+            </div>
+            <div style={{ fontSize: 12, color: "#1E3A8A", marginTop: 2 }}>
+              {tl(`Project ID ${projectId} | ${generatedContext}`, `Proyecto ${projectId} | ${generatedContext}`)}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.4 }}>
+              {tl("Current-view exports", "Exportaciones de vista actual")}
+            </div>
+            <div style={{ fontSize: 12, color: "#1E3A8A", marginTop: 2 }}>
+              {tl("Use source tabs for filtered view PDFs", "Usa las pestanas de origen para PDFs filtrados")}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", lineHeight: 1.55, marginBottom: 14 }}>
+          {sourceScreenExportNote}
+        </div>
+
         <div className="phasea-report-grid">
           {PDF_REPORTS.map(r => (
             <button
               key={r.key}
-              title={tl(`Download ${r.labelEn} PDF`, `Descargar PDF: ${r.labelEs}`)}
+              title={tl(`Download ${r.labelEn} PDF - ${r.scopeEn}`, `Descargar PDF: ${r.labelEs} - ${r.scopeEs}`)}
               onClick={() => window.open(`/api/v1/projects/${projectId}/reports/${r.key}/pdf?token=${token}`, "_blank")}
               style={{
                 display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
@@ -580,12 +626,16 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               <span style={{ display: "flex", alignItems: "center" }}>{r.icon}</span>
               <div>
                 <div>{tl(r.labelEn, r.labelEs)}</div>
-                <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>PDF</div>
+                <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>{tl(r.scopeEn, r.scopeEs)}</div>
               </div>
             </button>
           ))}
         </div>
       </div>
+
+
+      {/* Project Intelligence Layer */}
+      <ProjectIntelligenceView projectId={projectId} lang={lang} />
 
       <div className="section-header phasea-card-header" style={{ marginBottom: 20 }}>
         <div>
@@ -628,7 +678,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
             fontWeight: 600, cursor: "pointer",
           }}
         >
-          Apply Filter
+          {tl("Apply Filter", "Aplicar filtro")}
         </button>
         {(from || to) && (
           <button
@@ -639,9 +689,13 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               fontSize: 12, fontWeight: 600, cursor: "pointer",
             }}
           >
-            Clear
+            {tl("Clear", "Limpiar")}
           </button>
         )}
+        <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexBasis: "100%" }}>
+          {activeCvrFilterSummary}
+          {report ? ` | ${tl(`${report.issues.length} visible CVR issue(s)`, `${report.issues.length} incidencia(s) CVR visibles`)}` : ""}
+        </div>
       </div>
 
       {loading && (
