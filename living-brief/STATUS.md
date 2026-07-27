@@ -8,6 +8,19 @@ This file states accepted `origin/master` source truth. Accepted source, deploye
 synchronization, and field/customer verification are separate states. The current semantic-content
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
+
+### Ruben T1 current-view export release candidate - local validation in progress
+
+Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498`, based on
+`adbdecc0757f517a214484f6e5f2869a7cb364b2`, changes only the existing Reports Hub, RFI, and Submittal
+frontend/route surfaces. Reports Hub remains the master library and launcher; source-screen exports preserve the
+current filtered view. RFI and Submittal handlers gain additive optional query-filter behavior with existing
+project authorization, nondeleted scope, privacy defaults, filter/count context, and fail-closed validation.
+Frontend and API typechecks and the standalone Living Brief integrity check passed. The production build has not
+been rerun yet. Browser/runtime scenarios, seven failure gates, English desktop, Spanish exact-390px,
+every-page PDF/XLSX inspection, push, Replit preview, publication, deployment, production verification, customer
+verification, and live acceptance remain not run.
+
 UI/auth and report-export UX release bundle is accepted in local serialized integration source at $head. It combines the Living Brief authentication gate durability correction, Headquarters global navigation and shell clarity, Meetings report-generation UX, Headquarters Admin/Total Control polish, and Finance Budget/Contract export UX labels. The integrated source preserves the frozen baseline c3d135c24c1432b63d74898a1de83e67ba54c394, excludes superseded Headquarters Slice 2 commit d7bcf76be2d14eae49ef0c7a10d17d55a198f59e, and remains not published, deployed, production verified, customer verified, or live accepted. Replit/provider publication remains a separate fail-closed step tied to the exact final pushed commit and preview.
 
 UI/UX Foundation Phase A is accepted in the current serialized source candidate based on authoritative master

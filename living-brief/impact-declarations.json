@@ -4016,6 +4016,110 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4d458c12a1ba5e1fed8b82a815d8a541bcdf90f685bdc546648bcaa98d1d4dce"
+    },
+    {
+      "taskId": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
+      "reviewedAt": "2026-07-27T15:29:08-04:00",
+      "status": "ready_for_sole_governance_writer",
+      "captureTiming": "independent_evidence_before_serialized_governance_write",
+      "summary": "Independently reviewed the complete Ruben T1 effective source delta: Reports Hub truthfully remains the master report library and launcher, while RFI and Submittal source screens export their governed current filtered views. The corrected combined tree remains local and is not published, deployed, live, or runtime-accepted.",
+      "workstreams": [
+        "reports-hub-current-view-boundary",
+        "submittal-filtered-export",
+        "rfi-filtered-current-view-pdf",
+        "serialized-release-governance"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Evidence\\ruben-pdf-ux-t1-release-provenance-review-20260727\\20260727T150336-0400\\bill-of-materials.json",
+          "type": "independent_release_bill_of_materials",
+          "result": "pass",
+          "boundary": "Six accepted candidate commits, five product paths, no LFS-managed T1 path, and no release authorization."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\ruben-pdf-ux-t1-final-combined-attestation-20260727\\20260727T151127-0400\\attestation.json",
+          "type": "independent_first_combined_tree_attestation",
+          "result": "blocked_then_superseded_by_bounded_correction",
+          "boundary": "Provenance passed; frontend typecheck failed only on undeclared Rfi.ballInCourt access."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\ruben-pdf-ux-t1-bounded-correction-attestation-20260727\\20260727T152010-0400\\attestation.json",
+          "type": "independent_bounded_correction_attestation",
+          "result": "pass",
+          "boundary": "One typed RFI presenter correction; downstream Living Brief and runtime gates remain separate."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\ruben-pdf-ux-t1-serialized-release-20260727\\20260727T150018-0400\\release-state.json",
+          "type": "release_owner_gate_state",
+          "result": "living_brief_blocked",
+          "boundary": "Records passed source/type gates, Living Brief production-build failure, and all remaining NOT_RUN gates."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current-view export work changes no ecosystem ownership, partner posture, provider boundary, commercial relationship, or moat doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing operating authority already requires source-screen filter parity, governed PDF and Excel outputs, bilingual UI, truthful evidence, authorization, and serialized release handling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes implement existing quality doctrine that report outputs use the same records and filters as live tables; no quality principle or acceptance threshold changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap category, customer promise, product positioning, financial workflow, or module ownership model changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-path delta stays inside existing Reports, RFI, and Submittal UI and route modules; it adds no route registry, shared foundation, schema, package, lockfile, or deployment architecture change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, installer, model identity, synchronization, project-import, or field workflow behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Narrative truth expands the accepted current-view contract: Reports Hub is the master library and launcher, RFI List and Log add type, responsibility, destination, date, and sort parity, and Submittal PDF/XLSX export only matching visible rows with filter summaries and zero-result fail-closed behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory interpretation, compliance citation, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the corrected local combined commit, exact five-path scope, passed static/type gates, current Living Brief blocker, and explicitly pending runtime, publication, deployment, and acceptance gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The open-loop register preserves the remaining serialized Living Brief, production-build, browser, failure, EN desktop, ES 390px, PDF/XLSX inspection, push, provider, publication, deployment, and live-acceptance work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate, database proof, production observation, customer evidence, or retained dated audit semantics were created by this source-only review."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "85d853041bc28542e17271149f1d24cffa464d2b9b7f39186f42a9c1b0fdd45d"
     }
   ]
 }

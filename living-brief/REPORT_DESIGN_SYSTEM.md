@@ -130,6 +130,26 @@ Phase 2 did not change database schema, filters, report record selection, or mod
   existing package pipeline succeeds; a failed package response records no success event and no report content is
   copied into the notification adapter.
 
+### Ruben T1 current-view export convergence (local release candidate)
+
+- Insights & Reports remains the master report library and bulk launcher. It does not replace governed export
+  actions on the RFI and Submittal source screens.
+- RFI List and Log current-view PDFs preserve visible status, search, type, current-responsibility, historical
+  sent-to destination, selected date field/range, and sort choices. Current responsibility (Ball in Court) and
+  historical transmission (Sent To Company) remain distinct. The server validates and reapplies these choices
+  within authorized, nondeleted project rows.
+- Submittal current-view PDF and XLSX exports preserve visible search, status, and type filters. The server exports
+  only matching nondeleted project rows, includes filter/count context, and fails closed when no rows match.
+- This is additive optional query-filter behavior in existing authenticated RFI and Submittal export handlers. It
+  adds no endpoint registration, generated API schema, database schema or mutation, or provider contract.
+- The default export scope is the current filtered visible view. Existing project-member authorization remains in
+  force, and outputs must not expose storage paths, credentials, secrets, provider URLs, private entitlement data,
+  or cross-tenant hidden records.
+- Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` is local only. Frontend and API
+  typechecks passed. Production build, browser/runtime scenarios, seven failure gates, English desktop, Spanish
+  exact-390px, every-page PDF/XLSX inspection, push, Replit preview, publication, deployment, and live acceptance
+  remain not run.
+
 ## Delivery boundary
 
 Report design owns the factual artifact, canonical title, native fidelity, filename, manifest, and privacy.

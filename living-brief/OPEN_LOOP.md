@@ -4,6 +4,24 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
+### Ruben T1 current-view export release validation
+
+- Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` is local and tracked clean on
+  baseline `adbdecc0757f517a214484f6e5f2869a7cb364b2`. It changes only the Reports Hub, RFI, and Submittal
+  frontend/route surfaces.
+- Reports Hub remains the master library and launcher. RFI and Submittal source-screen exports preserve current
+  visible filter scope; the existing authenticated handlers gain additive optional query-filter behavior with
+  project/nondeleted scope, privacy defaults, count context, and fail-closed validation.
+- Frontend and API typechecks and the standalone Living Brief integrity check passed. The previous production-build
+  attempt stopped at Living Brief integrity and has not yet been rerun.
+- Remaining serialized gates are: a separate governance commit; production build; an
+  independently reviewed source-specific acceptance adapter; all 19 runtime scenarios and seven failure gates;
+  English desktop and Spanish exact-390px browser checks; every-page PDF/XLSX inspection; final independent
+  combined-tree attestation; normal push and remote equality; and separate Replit preview, exact-commit approval,
+  publication, deployment, production verification, customer verification, and live acceptance.
+- Browser, PDF/XLSX generation, provider/Replit, database, production/customer data, push, publication, deployment,
+  and live acceptance remain not run. No release-ready, deployed, published, or accepted claim is made.
+
 ### UI/auth and report-export UX serialized release integration
 
 - Local release integration source currently ends at $head and combines only the authorized chain: Living Brief auth ac8df1334707666669f1697a40f2d593a32e5bd; Headquarters Slice 1 chain through e005d810ee328ff5bdca375592f9c7db8df79cfa; Meetings chain through 3c9df321bd92c54fe8850e54d8ea8184f3632836; Headquarters Slice 2 634d08d0b90af5913273c4e951673fd1418bbc76; Finance Budget d6a7ac1f245e761d1aafa5a101d4dccfc95537d2; and Finance Contract 982f1440f557587323f30cb032ac1eb55be8134d.
