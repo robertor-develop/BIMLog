@@ -417,14 +417,14 @@ function ProjectIntelligenceView({ projectId, lang }: { projectId: number; lang:
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-    pending_admin_review: { label: "Pending Review", color: "#7C3AED", bg: "#F5F3FF", icon: <Clock style={{ width: 10, height: 10 }} /> },
-    admin_approved: { label: "Approved", color: "#16A34A", bg: "#F0FDF4", icon: <ThumbsUp style={{ width: 10, height: 10 }} /> },
-    admin_rejected: { label: "Rejected", color: "#DC2626", bg: "#FEF2F2", icon: <ThumbsDown style={{ width: 10, height: 10 }} /> },
-    clean: { label: "Clean", color: "#64748B", bg: "#F8FAFC", icon: <CheckCircle2 style={{ width: 10, height: 10 }} /> },
+function StatusBadge({ status, lang }: { status: string; lang: string }) {
+  const map: Record<string, { labelEn: string; labelEs: string; color: string; bg: string; icon: React.ReactNode }> = {
+    pending_admin_review: { labelEn: "Pending Review", labelEs: "Revision pendiente", color: "#7C3AED", bg: "#F5F3FF", icon: <Clock style={{ width: 10, height: 10 }} /> },
+    admin_approved: { labelEn: "Approved", labelEs: "Aprobado", color: "#16A34A", bg: "#F0FDF4", icon: <ThumbsUp style={{ width: 10, height: 10 }} /> },
+    admin_rejected: { labelEn: "Rejected", labelEs: "Rechazado", color: "#DC2626", bg: "#FEF2F2", icon: <ThumbsDown style={{ width: 10, height: 10 }} /> },
+    clean: { labelEn: "Clean", labelEs: "Limpio", color: "#64748B", bg: "#F8FAFC", icon: <CheckCircle2 style={{ width: 10, height: 10 }} /> },
   };
-  const s = map[status] ?? { label: status, color: "#64748B", bg: "#F8FAFC", icon: null };
+  const s = map[status] ?? { labelEn: status, labelEs: status, color: "#64748B", bg: "#F8FAFC", icon: null };
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px",
@@ -432,12 +432,12 @@ function StatusBadge({ status }: { status: string }) {
       color: s.color, background: s.bg, border: `1px solid ${s.color}30`,
     }}>
       {s.icon}
-      {s.label}
+      {lang === "es" ? s.labelEs : s.labelEn}
     </span>
   );
 }
 
-function CvrBadge({ result }: { result: string }) {
+function CvrBadge({ result, lang }: { result: string; lang: string }) {
   const isClear = result === "clear_mismatch";
   return (
     <span style={{
@@ -448,7 +448,9 @@ function CvrBadge({ result }: { result: string }) {
       border: `1px solid ${isClear ? "#DC262630" : "#D9770630"}`,
     }}>
       <AlertCircle style={{ width: 10, height: 10 }} />
-      {isClear ? "Clear Mismatch" : "Possible Mismatch"}
+      {isClear
+        ? (lang === "es" ? "Discrepancia clara" : "Clear Mismatch")
+        : (lang === "es" ? "Posible discrepancia" : "Possible Mismatch")}
     </span>
   );
 }
@@ -503,7 +505,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   const handleAdminAction = async (fileId: number, action: "approve" | "reject") => {
     const reason = approvalReason[fileId] || "";
     if (action === "reject" && !reason.trim()) {
-      alert("A reason is required to reject a file.");
+      alert(tl("A reason is required to reject a file.", "Se requiere una razon para rechazar un archivo."));
       return;
     }
     setApprovalLoading(fileId);
@@ -639,8 +641,13 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
 
       <div className="section-header phasea-card-header" style={{ marginBottom: 20 }}>
         <div>
-          <div className="section-title" style={{ fontSize: 16 }}>CVR Reports</div>
-          <div className="section-sub">Content Verification Results — flagged files and admin review workflow</div>
+          <div className="section-title" style={{ fontSize: 16 }}>{tl("CVR Reports", "Reportes CVR")}</div>
+          <div className="section-sub">
+            {tl(
+              "Content Verification Results - flagged files and admin review workflow",
+              "Resultados de verificacion de contenido - archivos marcados y flujo de revision administrativa"
+            )}
+          </div>
         </div>
       </div>
 
@@ -700,7 +707,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
 
       {loading && (
         <div style={{ textAlign: "center", padding: "40px 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
-          Loading report…
+          {tl("Loading report...", "Cargando reporte...")}
         </div>
       )}
 
@@ -716,23 +723,23 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
             <div style={statStyle}>
               <div style={{ fontSize: 22, fontWeight: 700, color: "hsl(var(--foreground))" }}>{report.totalFilesProcessed}</div>
-              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Total Files</div>
+              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>{tl("Total Files", "Total de archivos")}</div>
             </div>
             <div style={{ ...statStyle, borderColor: "#D97706", background: "#FFFBEB" }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#D97706" }}>{report.totalFlagged}</div>
-              <div style={{ fontSize: 11, color: "#92400E", marginTop: 2 }}>Flagged by AI</div>
+              <div style={{ fontSize: 11, color: "#92400E", marginTop: 2 }}>{tl("Flagged by AI", "Marcados por IA")}</div>
             </div>
             <div style={{ ...statStyle, borderColor: "#7C3AED", background: "#F5F3FF" }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#7C3AED" }}>{report.totalPendingReview}</div>
-              <div style={{ fontSize: 11, color: "#5B21B6", marginTop: 2 }}>Pending Review</div>
+              <div style={{ fontSize: 11, color: "#5B21B6", marginTop: 2 }}>{tl("Pending Review", "Revision pendiente")}</div>
             </div>
             <div style={{ ...statStyle, borderColor: "#16A34A", background: "#F0FDF4" }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#16A34A" }}>{report.totalAdminApproved}</div>
-              <div style={{ fontSize: 11, color: "#166534", marginTop: 2 }}>Admin Approved</div>
+              <div style={{ fontSize: 11, color: "#166534", marginTop: 2 }}>{tl("Admin Approved", "Aprobado por admin")}</div>
             </div>
             <div style={{ ...statStyle, borderColor: "#DC2626", background: "#FEF2F2" }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: "#DC2626" }}>{report.totalAdminRejected}</div>
-              <div style={{ fontSize: 11, color: "#991B1B", marginTop: 2 }}>Admin Rejected</div>
+              <div style={{ fontSize: 11, color: "#991B1B", marginTop: 2 }}>{tl("Admin Rejected", "Rechazado por admin")}</div>
             </div>
           </div>
 
@@ -812,21 +819,21 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               </div>
               <div className="empty-title" style={{ color: report.totalFilesProcessed === 0 ? "#6B7280" : "#16A34A" }}>
                 {report.totalFilesProcessed === 0
-                  ? "No files uploaded yet"
+                  ? tl("No files uploaded yet", "Aun no hay archivos cargados")
                   : (from || to)
-                    ? "No CVR flags in selected date range"
+                    ? tl("No CVR flags in selected date range", "No hay alertas CVR en el rango seleccionado")
                     : report.totalFlagged === 0
-                      ? "No CVR flags found"
-                      : "No pending issues"}
+                      ? tl("No CVR flags found", "No se encontraron alertas CVR")
+                      : tl("No pending issues", "No hay incidencias pendientes")}
               </div>
               <div className="empty-desc">
                 {report.totalFilesProcessed === 0
-                  ? "No files have been uploaded to this project. CVR analysis runs automatically when files are submitted."
+                  ? tl("No files have been uploaded to this project. CVR analysis runs automatically when files are submitted.", "No se han cargado archivos en este proyecto. El analisis CVR se ejecuta automaticamente al enviar archivos.")
                   : (from || to)
-                    ? "No content verification flags were raised in the selected date range."
+                    ? tl("No content verification flags were raised in the selected date range.", "No se generaron alertas de verificacion de contenido en el rango seleccionado.")
                     : report.totalFlagged === 0
-                      ? "All uploaded files passed content verification. No mismatches were detected."
-                      : "All flagged files have been resolved — no items pending admin review."}
+                      ? tl("All uploaded files passed content verification. No mismatches were detected.", "Todos los archivos cargados pasaron la verificacion de contenido. No se detectaron discrepancias.")
+                      : tl("All flagged files have been resolved - no items pending admin review.", "Todos los archivos marcados fueron resueltos - no hay elementos pendientes de revision administrativa.")}
               </div>
             </div>
           ) : (
@@ -860,8 +867,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                        <CvrBadge result={issue.contentVerificationResult} />
-                        <StatusBadge status={issue.cvrWorkflowStatus || "clean"} />
+                        <CvrBadge result={issue.contentVerificationResult} lang={lang} />
+                        <StatusBadge status={issue.cvrWorkflowStatus || "clean"} lang={lang} />
                       </div>
                     </button>
 
@@ -875,7 +882,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                             fontSize: 12, color: "hsl(var(--foreground))", lineHeight: 1.6,
                           }}>
                             <div style={{ fontWeight: 700, marginBottom: 4, color: issue.contentVerificationResult === "clear_mismatch" ? "#DC2626" : "#D97706" }}>
-                              AI Assessment
+                              {tl("AI Assessment", "Evaluacion IA")}
                             </div>
                             {issue.hashComparisonNote}
                           </div>
@@ -883,28 +890,28 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
 
                         {issue.cvrUserReason && (
                           <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 6, background: "hsl(var(--muted) / 0.5)", fontSize: 12 }}>
-                            <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>User explanation: </span>
+                            <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>{tl("User explanation", "Explicacion del usuario")}: </span>
                             <span style={{ color: "hsl(var(--muted-foreground))" }}>{issue.cvrUserReason}</span>
                           </div>
                         )}
 
                         {issue.cvrAdminAction && (
                           <div style={{ marginTop: 10, padding: "8px 12px", borderRadius: 6, background: "hsl(var(--muted) / 0.5)", fontSize: 12 }}>
-                            <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>Admin decision: </span>
+                            <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>{tl("Admin decision", "Decision administrativa")}: </span>
                             <span style={{ color: "hsl(var(--muted-foreground))" }}>{issue.cvrAdminAction}</span>
                             {issue.cvrAdminActionAt && (
-                              <span style={{ color: "hsl(var(--muted-foreground))" }}> · {format(new Date(issue.cvrAdminActionAt), "MMM d, yyyy HH:mm")}</span>
+                              <span style={{ color: "hsl(var(--muted-foreground))" }}> - {format(new Date(issue.cvrAdminActionAt), "MMM d, yyyy HH:mm")}</span>
                             )}
                           </div>
                         )}
 
                         {isAdmin && issue.cvrWorkflowStatus === "pending_admin_review" && (
                           <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))" }}>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>Admin Decision</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>{tl("Admin Decision", "Decision administrativa")}</div>
                             <textarea
                               value={approvalReason[issue.id] || ""}
                               onChange={e => setApprovalReason(prev => ({ ...prev, [issue.id]: e.target.value }))}
-                              placeholder="Notes or reason (required to reject)…"
+                              placeholder={tl("Notes or reason (required to reject)...", "Notas o razon (obligatoria para rechazar)...")}
                               style={{
                                 width: "100%", minHeight: 60, padding: "8px 10px",
                                 borderRadius: 6, border: "1px solid hsl(var(--border))",
@@ -925,7 +932,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                                 }}
                               >
                                 <ThumbsUp style={{ width: 12, height: 12 }} />
-                                Approve
+                                {tl("Approve", "Aprobar")}
                               </button>
                               <button
                                 disabled={approvalLoading === issue.id}
@@ -938,7 +945,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                                 }}
                               >
                                 <ThumbsDown style={{ width: 12, height: 12 }} />
-                                Reject
+                                {tl("Reject", "Rechazar")}
                               </button>
                             </div>
                           </div>
@@ -952,8 +959,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           )}
 
           <div style={{ marginTop: 16, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-            Report generated {format(new Date(report.generatedAt), "MMM d, yyyy HH:mm")} ·{" "}
-            {from || to ? "Filtered date range" : "Showing pending issues only (use date filter to view all)"}
+            {tl("Report generated", "Reporte generado")} {format(new Date(report.generatedAt), "MMM d, yyyy HH:mm")} -{" "}
+            {from || to ? tl("Filtered date range", "Rango de fechas filtrado") : tl("Showing pending issues only (use date filter to view all)", "Mostrando solo incidencias pendientes (usa el filtro de fecha para ver todo)")}
           </div>
         </>
       )}
