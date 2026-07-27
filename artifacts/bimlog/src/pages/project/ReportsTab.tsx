@@ -654,7 +654,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
       {/* Date filter */}
       <div className="phasea-filter-row" style={{ marginBottom: 20 }}>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>From</label>
+          <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>{tl("From", "Desde")}</label>
           <input
             type="date"
             value={from}
@@ -666,7 +666,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           />
         </div>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>To</label>
+          <label style={{ fontSize: 11, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "block", marginBottom: 4 }}>{tl("To", "Hasta")}</label>
           <input
             type="date"
             value={to}
@@ -862,8 +862,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                           {issue.fileName}
                         </div>
                         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
-                          Uploaded {format(new Date(issue.createdAt), "MMM d, yyyy")}
-                          {issue.uploadedByName ? ` by ${issue.uploadedByName}` : ""}
+                          {tl("Uploaded", "Cargado")} {format(new Date(issue.createdAt), "MMM d, yyyy")}
+                          {issue.uploadedByName ? ` ${tl("by", "por")} ${issue.uploadedByName}` : ""}
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
