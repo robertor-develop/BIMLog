@@ -1014,6 +1014,13 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [view, setView] = useState<"list" | "log">("list");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [ballInCourtFilter, setBallInCourtFilter] = useState<string>("all");
+  const [sentToCompanyFilter, setSentToCompanyFilter] = useState<string>("all");
+  const [dateField, setDateField] = useState<"created" | "requested" | "required" | "answered">("required");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortBy, setSortBy] = useState<"created_asc" | "created_desc" | "required_asc" | "required_desc" | "number_asc" | "number_desc" | "status_asc">("created_asc");
   const [showCreate, setShowCreate] = useState(false);
   const [showReportSettings, setShowReportSettings] = useState(false);
   const [reportRequest, setReportRequest] = useState<RfiReportRequest | null>(null);
@@ -1149,10 +1156,44 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     }
   };
 
+  const rfiTypeOptions = getOptions("rfi_type");
+  const typeFilterOptions = rfiTypeOptions.length ? rfiTypeOptions.map(option => option.value) : DEFAULT_RFI_TYPES;
+  const rfiDateValue = (rfi: Rfi, field: typeof dateField) => {
+    if (field === "requested") return rfi.dateRequested || rfi.createdAt;
+    if (field === "required") return rfi.dateRequired || rfi.dueDate;
+    if (field === "answered") return rfi.dateAnswered || rfi.respondedAt;
+    return rfi.createdAt;
+  };
+  const rfiBallInCourtValue = (rfi: Rfi) => {
+    if (rfi.status === "closed") return "Closed";
+    return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+  };
+  const rfiBallInCourtDisplay = (value: string) =>
+    value === "Closed" ? w("Closed", "Cerrado", lang) : value === "Unassigned" ? w("Unassigned", "Sin asignar", lang) : value;
+  const uniqueRfiValues = (values: Array<string | null | undefined>) =>
+    [...new Set(values.map(value => String(value || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const ballInCourtOptions = useMemo(() => uniqueRfiValues((rfis || []).map(rfi => rfiBallInCourtValue(rfi))), [rfis]);
+  const sentToCompanyOptions = useMemo(() => uniqueRfiValues((rfis || []).map(rfi => rfi.submittedToCompany || rfi.submittedToPerson)), [rfis]);
+  const buildCurrentViewParams = (mode?: "download" | "print") => {
+    const params = new URLSearchParams({
+      view,
+      status: statusFilter,
+      search: search.trim(),
+      rfi_type: typeFilter,
+      ball_in_court: ballInCourtFilter,
+      sent_to_company: sentToCompanyFilter,
+      date_field: dateField,
+      sort: sortBy,
+    });
+    if (dateFrom) params.set("date_from", dateFrom);
+    if (dateTo) params.set("date_to", dateTo);
+    if (mode === "print") params.set("disposition", "inline");
+    return params;
+  };
+
   const handleRfiViewPdf = async (mode: "download" | "print") => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-    const params = new URLSearchParams({ view, status: statusFilter, search });
-    if (mode === "print") params.set("disposition", "inline");
+    const params = buildCurrentViewParams(mode);
     if (mode === "download") setExportingViewPdf(true);
     try {
       const response = await fetch(`/api/v1/projects/${projectId}/rfis/export-pdf?${params.toString()}`, {
@@ -1189,16 +1230,59 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     if (!rfis) return [];
     return rfis
       .filter(r => statusFilter === "all" || r.status === statusFilter)
+      .filter(r => typeFilter === "all" || (r.rfiType || "") === typeFilter)
+      .filter(r => ballInCourtFilter === "all" || rfiBallInCourtValue(r) === ballInCourtFilter)
+      .filter(r => sentToCompanyFilter === "all" || (r.submittedToCompany || r.submittedToPerson || "") === sentToCompanyFilter)
       .filter(r => {
-        if (!search) return true;
-        const s = search.toLowerCase();
-        return r.number.toLowerCase().includes(s) ||
-          r.subject.toLowerCase().includes(s) ||
-          (r.submittedByCompany || "").toLowerCase().includes(s) ||
-          (r.submittedToCompany || "").toLowerCase().includes(s);
+        if (!dateFrom && !dateTo) return true;
+        const raw = rfiDateValue(r, dateField);
+        if (!raw) return false;
+        const value = new Date(raw).getTime();
+        if (dateFrom && value < new Date(`${dateFrom}T00:00:00`).getTime()) return false;
+        if (dateTo && value > new Date(`${dateTo}T23:59:59`).getTime()) return false;
+        return true;
       })
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  }, [rfis, statusFilter, search]);
+      .filter(r => {
+        const q = search.trim().toLowerCase();
+        if (!q) return true;
+        return [
+          r.number,
+          r.subject,
+          r.rfiType,
+          rfiBallInCourtValue(r),
+          r.submittedByCompany,
+          r.submittedByContact,
+          r.submittedToCompany,
+          r.submittedToPerson,
+        ].some(value => String(value || "").toLowerCase().includes(q));
+      })
+      .sort((a, b) => {
+        if (sortBy === "created_desc") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (sortBy === "required_asc" || sortBy === "required_desc") {
+          const left = new Date(a.dateRequired || a.dueDate || "9999-12-31").getTime();
+          const right = new Date(b.dateRequired || b.dueDate || "9999-12-31").getTime();
+          return sortBy === "required_desc" ? right - left : left - right;
+        }
+        if (sortBy === "number_asc" || sortBy === "number_desc") {
+          const result = a.number.localeCompare(b.number, undefined, { numeric: true, sensitivity: "base" });
+          return sortBy === "number_desc" ? -result : result;
+        }
+        if (sortBy === "status_asc") return `${a.status}-${a.number}`.localeCompare(`${b.status}-${b.number}`, undefined, { numeric: true, sensitivity: "base" });
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+  }, [ballInCourtFilter, dateField, dateFrom, dateTo, rfis, search, sentToCompanyFilter, sortBy, statusFilter, typeFilter]);
+
+  const currentViewSummary = useMemo(() => [
+    `${w("View", "Vista", lang)}: ${view === "log" ? w("RFI Log", "Registro RFI", lang) : w("RFI List", "Lista RFI", lang)}`,
+    `${w("Status", "Estado", lang)}: ${statusFilter === "all" ? w("All", "Todos", lang) : getLabel("rfi_status", statusFilter)}`,
+    `${w("Type", "Tipo", lang)}: ${typeFilter === "all" ? w("All", "Todos", lang) : typeFilter}`,
+    search.trim() ? `${w("Search", "Busqueda", lang)}: ${search.trim()}` : "",
+    ballInCourtFilter !== "all" ? `${w("Ball in Court", "Responsable", lang)}: ${rfiBallInCourtDisplay(ballInCourtFilter)}` : "",
+    sentToCompanyFilter !== "all" ? `${w("Sent To Company", "Empresa Destino", lang)}: ${sentToCompanyFilter}` : "",
+    dateFrom || dateTo ? `${w("Date Range", "Rango de Fechas", lang)} (${dateField}): ${dateFrom || w("Any", "Cualquiera", lang)} - ${dateTo || w("Any", "Cualquiera", lang)}` : "",
+    `${w("Sort", "Orden", lang)}: ${sortBy.replace(/_/g, " ")}`,
+    `${w("Visible", "Visible", lang)}: ${filtered.length}/${rfis?.length ?? 0}`,
+  ].filter(Boolean), [ballInCourtFilter, dateField, dateFrom, dateTo, filtered.length, getLabel, lang, rfis?.length, search, sentToCompanyFilter, sortBy, statusFilter, typeFilter, view]);
 
   const stats = useMemo(() => ({
     total: rfis?.length ?? 0,
@@ -1318,22 +1402,22 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                 variant="outline"
                 size="sm"
                 onClick={() => void handleRfiViewPdf("print")}
-                title={w(`Print governed PDF for the current ${view === "log" ? "RFI Log" : "RFI List"} view, including active filters and search.`, `Imprimir PDF gobernado de la vista actual ${view === "log" ? "Registro RFI" : "Lista RFI"}, con filtros y busqueda activos.`, lang)}
+                title={w("Print a governed PDF for the current RFI List or Log view, including active filters, sorting, and search.", "Imprimir un PDF gobernado para la vista actual de Lista o Registro RFI, con filtros, orden y busqueda activos.", lang)}
                 style={{ gap: 5, fontSize: 11 }}
               >
                 <Printer style={{ width: 12, height: 12 }} />
-                {w(`Print ${view === "log" ? "RFI Log" : "RFI List"} PDF`, `Imprimir PDF ${view === "log" ? "Registro RFI" : "Lista RFI"}`, lang)}
+                {w("Print Current View PDF", "Imprimir PDF Vista Actual", lang)}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => void handleRfiViewPdf("download")}
                 disabled={exportingViewPdf}
-                title={w(`Export governed PDF for the current ${view === "log" ? "RFI Log" : "RFI List"} view, including active filters and search.`, `Exportar PDF gobernado de la vista actual ${view === "log" ? "Registro RFI" : "Lista RFI"}, con filtros y busqueda activos.`, lang)}
+                title={w("Export a governed PDF for the current RFI List or Log view, including active filters, sorting, and search.", "Exportar un PDF gobernado para la vista actual de Lista o Registro RFI, con filtros, orden y busqueda activos.", lang)}
                 style={{ gap: 5, fontSize: 11 }}
               >
                 {exportingViewPdf ? <Loader2 className="animate-spin" style={{ width: 12, height: 12 }} /> : <FileText style={{ width: 12, height: 12 }} />}
-                {exportingViewPdf ? w("Exporting PDF...", "Exportando PDF...", lang) : w(`Export ${view === "log" ? "RFI Log" : "RFI List"} PDF`, `Exportar PDF ${view === "log" ? "Registro RFI" : "Lista RFI"}`, lang)}
+                {exportingViewPdf ? w("Exporting PDF...", "Exportando PDF...", lang) : w("Export Current View PDF", "Exportar PDF Vista Actual", lang)}
               </Button>
             </>
           )}
@@ -1397,9 +1481,67 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         {overdueCount > 0 && <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#BE123C" }}>{overdueCount} {w("overdue", "vencido(s)", lang)}</span>}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
-        <Input placeholder={w("Search RFIs…", "Buscar RFIs…", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 280, fontSize: 12 }} />
-        <div style={{ display: "flex", gap: 4 }}>
+      <div style={{ display: "grid", gap: 10, marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--card))" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8, alignItems: "end" }}>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Search", "Busqueda", lang)}
+            <Input placeholder={w("Search RFI number, subject, company, responsible...", "Buscar numero RFI, asunto, empresa, responsable...", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ fontSize: 12 }} />
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Type", "Tipo", lang)}
+            <select className="input" value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ fontSize: 12 }}>
+              <option value="all">{w("All types", "Todos los tipos", lang)}</option>
+              {typeFilterOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Ball in Court", "Responsable", lang)}
+            <select className="input" value={ballInCourtFilter} onChange={e => setBallInCourtFilter(e.target.value)} style={{ fontSize: 12 }}>
+              <option value="all">{w("All responsible parties", "Todos los responsables", lang)}</option>
+              {ballInCourtOptions.map(value => <option key={value} value={value}>{rfiBallInCourtDisplay(value)}</option>)}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Sent To Company", "Empresa Destino", lang)}
+            <select className="input" value={sentToCompanyFilter} onChange={e => setSentToCompanyFilter(e.target.value)} style={{ fontSize: 12 }}>
+              <option value="all">{w("All sent-to companies", "Todas las empresas destino", lang)}</option>
+              {sentToCompanyOptions.map(value => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Date Field", "Campo de Fecha", lang)}
+            <select className="input" value={dateField} onChange={e => setDateField(e.target.value as typeof dateField)} style={{ fontSize: 12 }}>
+              <option value="required">{w("Date Required", "Fecha Requerida", lang)}</option>
+              <option value="requested">{w("Date Requested", "Fecha Solicitada", lang)}</option>
+              <option value="answered">{w("Date Answered", "Fecha Respondida", lang)}</option>
+              <option value="created">{w("Created", "Creado", lang)}</option>
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("From", "Desde", lang)}
+            <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ fontSize: 12 }} />
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("To", "Hasta", lang)}
+            <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ fontSize: 12 }} />
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Sort", "Orden", lang)}
+            <select className="input" value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={{ fontSize: 12 }}>
+              <option value="created_asc">{w("Created oldest first", "Creado mas antiguo primero", lang)}</option>
+              <option value="created_desc">{w("Created newest first", "Creado mas reciente primero", lang)}</option>
+              <option value="required_asc">{w("Required date ascending", "Fecha requerida ascendente", lang)}</option>
+              <option value="required_desc">{w("Required date descending", "Fecha requerida descendente", lang)}</option>
+              <option value="number_asc">{w("RFI number ascending", "Numero RFI ascendente", lang)}</option>
+              <option value="number_desc">{w("RFI number descending", "Numero RFI descendente", lang)}</option>
+              <option value="status_asc">{w("Status then number", "Estado y numero", lang)}</option>
+            </select>
+          </label>
+          <Button type="button" variant="outline" size="sm" onClick={() => { setSearch(""); setStatusFilter("all"); setTypeFilter("all"); setBallInCourtFilter("all"); setSentToCompanyFilter("all"); setDateField("required"); setDateFrom(""); setDateTo(""); setSortBy("created_asc"); }}>
+            {w("Clear Filters", "Limpiar Filtros", lang)}
+          </Button>
+        </div>
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
           {["all", ...([...new Set(statusOptions.map(o => o.value))])].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)} style={{
               padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
@@ -1409,6 +1551,11 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             }}>
               {s === "all" ? w("All", "Todos", lang) : getLabel("rfi_status", s)}
             </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {currentViewSummary.map(part => (
+            <span key={part} style={{ display: "inline-flex", padding: "4px 7px", borderRadius: 6, border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", fontSize: 11, fontWeight: 800 }}>{part}</span>
           ))}
         </div>
       </div>

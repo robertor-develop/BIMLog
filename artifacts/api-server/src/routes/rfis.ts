@@ -1272,29 +1272,119 @@ function makeRfiListPdf(
 
 // ─── GET /projects/:projectId/rfis ──────────────────────────────────────────
 type RfiRegisterView = "list" | "log";
+type RfiRegisterDateField = "created" | "requested" | "required" | "answered";
+type RfiRegisterSort = "created_asc" | "created_desc" | "required_asc" | "required_desc" | "number_asc" | "number_desc" | "status_asc";
+type RfiRegisterFilters = {
+  status: string;
+  search: string;
+  rfiType: string;
+  ballInCourt: string;
+  sentToCompany: string;
+  dateField: RfiRegisterDateField;
+  dateFrom: Date | null;
+  dateTo: Date | null;
+  sort: RfiRegisterSort;
+};
+
+function textQuery(value: unknown, fallback = ""): string {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return typeof raw === "string" ? raw.trim().slice(0, 160) : fallback;
+}
+
+function parseDateQuery(value: unknown, label: string): Date | null {
+  const raw = textQuery(value);
+  if (!raw) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw new RfiAttachmentError(`Invalid ${label}.`, 400);
+  const parsed = new Date(`${raw}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) throw new RfiAttachmentError(`Invalid ${label}.`, 400);
+  return parsed;
+}
+
+function rfiRegisterDateValue(rfi: typeof rfisTable.$inferSelect, field: RfiRegisterDateField) {
+  if (field === "requested") return rfi.dateRequested || rfi.createdAt;
+  if (field === "required") return rfi.dateRequired || rfi.dueDate;
+  if (field === "answered") return rfi.dateAnswered || rfi.respondedAt;
+  return rfi.createdAt;
+}
+
+function rfiRegisterBallInCourt(rfi: typeof rfisTable.$inferSelect) {
+  if (rfi.status === "closed") return "Closed";
+  return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+}
+
+function parseRfiRegisterFilters(query: Record<string, unknown>): RfiRegisterFilters {
+  const dateField = textQuery(query.date_field, "required");
+  const sort = textQuery(query.sort, "created_asc");
+  if (!["created", "requested", "required", "answered"].includes(dateField)) throw new RfiAttachmentError("Invalid RFI date field.", 400);
+  if (!["created_asc", "created_desc", "required_asc", "required_desc", "number_asc", "number_desc", "status_asc"].includes(sort)) throw new RfiAttachmentError("Invalid RFI sort.", 400);
+  const dateFrom = parseDateQuery(query.date_from, "date_from");
+  const dateTo = parseDateQuery(query.date_to, "date_to");
+  if (dateFrom && dateTo && dateFrom > dateTo) throw new RfiAttachmentError("date_from must be on or before date_to.", 400);
+  return {
+    status: textQuery(query.status, "all") || "all",
+    search: textQuery(query.search),
+    rfiType: textQuery(query.rfi_type, "all") || "all",
+    ballInCourt: textQuery(query.ball_in_court, "all") || "all",
+    sentToCompany: textQuery(query.sent_to_company, "all") || "all",
+    dateField: dateField as RfiRegisterDateField,
+    dateFrom,
+    dateTo,
+    sort: sort as RfiRegisterSort,
+  };
+}
 
 function filterRfisForRegisterPdf(
   rfis: (typeof rfisTable.$inferSelect)[],
-  filters: { status: string; search: string },
+  filters: RfiRegisterFilters,
 ) {
   const q = filters.search.trim().toLowerCase();
   return rfis
     .filter(rfi => filters.status === "all" || rfi.status === filters.status)
+    .filter(rfi => filters.rfiType === "all" || (rfi.rfiType || "") === filters.rfiType)
+    .filter(rfi => filters.ballInCourt === "all" || rfiRegisterBallInCourt(rfi) === filters.ballInCourt)
+    .filter(rfi => filters.sentToCompany === "all" || (rfi.submittedToCompany || rfi.submittedToPerson || "") === filters.sentToCompany)
+    .filter(rfi => {
+      if (!filters.dateFrom && !filters.dateTo) return true;
+      const dateValue = rfiRegisterDateValue(rfi, filters.dateField);
+      if (!dateValue) return false;
+      const date = new Date(dateValue);
+      if (filters.dateFrom && date < filters.dateFrom) return false;
+      if (filters.dateTo) {
+        const end = new Date(filters.dateTo);
+        end.setHours(23, 59, 59, 999);
+        if (date > end) return false;
+      }
+      return true;
+    })
     .filter(rfi => {
       if (!q) return true;
-      return [rfi.number, rfi.subject, rfi.submittedByCompany, rfi.submittedToCompany]
+      return [rfi.number, rfi.subject, rfi.rfiType, rfi.ballInCourt, rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
         .some(value => String(value || "").toLowerCase().includes(q));
     })
-    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime());
+    .sort((left, right) => {
+      if (filters.sort === "created_desc") return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+      if (filters.sort === "required_asc" || filters.sort === "required_desc") {
+        const leftDate = new Date(left.dateRequired || left.dueDate || "9999-12-31").getTime();
+        const rightDate = new Date(right.dateRequired || right.dueDate || "9999-12-31").getTime();
+        return filters.sort === "required_desc" ? rightDate - leftDate : leftDate - rightDate;
+      }
+      if (filters.sort === "number_asc" || filters.sort === "number_desc") {
+        const result = left.number.localeCompare(right.number, undefined, { numeric: true, sensitivity: "base" });
+        return filters.sort === "number_desc" ? -result : result;
+      }
+      if (filters.sort === "status_asc") return `${left.status}-${left.number}`.localeCompare(`${right.status}-${right.number}`, undefined, { numeric: true, sensitivity: "base" });
+      return new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+    });
 }
 
 export function renderGovernedRfiRegisterPdf(args: {
   view: RfiRegisterView;
   rfis: (typeof rfisTable.$inferSelect)[];
+  totalCount: number;
   project: typeof projectsTable.$inferSelect | undefined;
   generatedAt: Date;
   generatedBy: string;
-  filters: { status: string; search: string };
+  filters: RfiRegisterFilters;
 }) {
   const title = args.view === "log" ? "RFI Log Report" : "RFI List Report";
   const theme = args.view === "log" ? REPORT_THEMES.rfi.log : REPORT_THEMES.rfi.list;
@@ -1311,11 +1401,17 @@ export function renderGovernedRfiRegisterPdf(args: {
   const projectCode = args.project?.code || undefined;
   const reportDate = args.generatedAt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" });
   const reportNumber = `${args.view === "log" ? "RFI-LOG" : "RFI-LIST"}-${args.project?.id || "PROJECT"}-${args.generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+  const fmtFilterDate = (date: Date | null) => date ? date.toISOString().slice(0, 10) : "Any";
   const filterLabel = [
     `View: ${args.view === "log" ? "Log" : "List"}`,
     `Status: ${args.filters.status === "all" ? "All" : args.filters.status.replace(/_/g, " ")}`,
+    `Type: ${args.filters.rfiType === "all" ? "All" : args.filters.rfiType}`,
     args.filters.search ? `Search: ${args.filters.search}` : "Search: None",
-    `Rows: ${args.rfis.length}`,
+    args.filters.ballInCourt !== "all" ? `Ball In Court: ${args.filters.ballInCourt}` : "Ball In Court: All",
+    args.filters.sentToCompany !== "all" ? `Sent To Company: ${args.filters.sentToCompany}` : "Sent To Company: All",
+    `Date: ${args.filters.dateField} ${fmtFilterDate(args.filters.dateFrom)} to ${fmtFilterDate(args.filters.dateTo)}`,
+    `Sort: ${args.filters.sort.replace(/_/g, " ")}`,
+    `Rows: ${args.rfis.length} of ${args.totalCount}`,
     `Prepared by: ${args.generatedBy}`,
   ].join(" | ");
   const drawHeader = () => {
@@ -1337,31 +1433,31 @@ export function renderGovernedRfiRegisterPdf(args: {
   const fmtD = (d: Date | string | null | undefined) =>
     d ? new Date(d).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }) : "-";
   const clean = (value: string | null | undefined) => String(value || "-").replace(/_/g, " ");
-  const ballInCourt = (rfi: typeof rfisTable.$inferSelect) => {
-    if (rfi.status === "closed") return "Closed";
-    return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
-  };
 
   const columns = args.view === "log"
     ? [
-        { label: "RFI #", width: 62, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
-        { label: "Description", width: 170, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
-        { label: "Req. By Co.", width: 92, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
-        { label: "Sent To Co.", width: 96, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
-        { label: "Forwarded", width: 64, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequested || r.createdAt) },
-        { label: "Answered", width: 64, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateAnswered || r.respondedAt) },
-        { label: "Status", width: 70, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
-        { label: "Sched. Impact", width: 102, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.scheduleImpact && r.scheduleImpact !== "No Schedule Impact" ? `${r.scheduleImpact}${r.scheduleImpactDays != null ? ` (${r.scheduleImpactDays}d)` : ""}` : "None" },
+        { label: "RFI #", width: 58, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
+        { label: "Description", width: 128, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
+        { label: "Type", width: 58, format: (r: typeof rfisTable.$inferSelect) => r.rfiType || "-" },
+        { label: "Req. By Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
+        { label: "Sent To Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
+        { label: "Ball In Court", width: 78, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r) },
+        { label: "Forwarded", width: 58, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequested || r.createdAt) },
+        { label: "Answered", width: 58, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateAnswered || r.respondedAt) },
+        { label: "Status", width: 58, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
+        { label: "Sched. Impact", width: 72, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.scheduleImpact && r.scheduleImpact !== "No Schedule Impact" ? `${r.scheduleImpact}${r.scheduleImpactDays != null ? ` (${r.scheduleImpactDays}d)` : ""}` : "None" },
       ]
     : [
-        { label: "RFI #", width: 62, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
-        { label: "Subject", width: 190, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
-        { label: "Status", width: 74, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
-        { label: "Priority", width: 62, format: (r: typeof rfisTable.$inferSelect) => clean(r.priority) },
-        { label: "Ball In Court", width: 122, wrap: true, format: (r: typeof rfisTable.$inferSelect) => ballInCourt(r) },
-        { label: "Submitted By", width: 92, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
-        { label: "Date Req.", width: 62, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequired || r.dueDate) },
-        { label: "Days Out", width: 56, align: "right" as const, format: (r: typeof rfisTable.$inferSelect) => String(daysSince(r.createdAt)) },
+        { label: "RFI #", width: 58, bold: true, format: (r: typeof rfisTable.$inferSelect) => r.number },
+        { label: "Subject", width: 158, wrap: true, format: (r: typeof rfisTable.$inferSelect) => r.subject },
+        { label: "Type", width: 56, format: (r: typeof rfisTable.$inferSelect) => r.rfiType || "-" },
+        { label: "Status", width: 58, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
+        { label: "Priority", width: 54, format: (r: typeof rfisTable.$inferSelect) => clean(r.priority) },
+        { label: "Ball In Court", width: 102, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r) },
+        { label: "Sent To Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
+        { label: "Submitted By", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
+        { label: "Date Req.", width: 50, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequired || r.dueDate) },
+        { label: "Days Out", width: 32, align: "right" as const, format: (r: typeof rfisTable.$inferSelect) => String(daysSince(r.createdAt)) },
       ];
 
   drawTable(doc, {
@@ -1395,6 +1491,8 @@ export function renderGovernedRfiRegisterPdf(args: {
       ballInCourt: rfi.ballInCourt,
       submittedByCompany: rfi.submittedByCompany,
       submittedToCompany: rfi.submittedToCompany,
+      submittedToPerson: rfi.submittedToPerson,
+      rfiType: rfi.rfiType,
       dateRequired: rfi.dateRequired,
       dateRequested: rfi.dateRequested,
       dateAnswered: rfi.dateAnswered,
@@ -1448,11 +1546,14 @@ router.get("/projects/:projectId/rfis", authMiddleware, requireProjectMember(), 
 router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const status = String(req.query.status || "all");
-    const search = String(req.query.search || "").trim();
+    const filters = parseRfiRegisterFilters(req.query as Record<string, unknown>);
     const view = String(req.query.view || "list") === "log" ? "log" : "list";
-    if (status !== "all" && !(await validateConfigValue("rfi_status", status))) {
+    if (filters.status !== "all" && !(await validateConfigValue("rfi_status", filters.status))) {
       res.status(422).json({ error: "Invalid RFI status filter." });
+      return;
+    }
+    if (filters.rfiType !== "all" && filters.rfiType.length > 80) {
+      res.status(422).json({ error: "Invalid RFI type filter." });
       return;
     }
 
@@ -1461,15 +1562,16 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
       where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
       orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
     });
-    const rfis = filterRfisForRegisterPdf(allRfis, { status, search });
+    const rfis = filterRfisForRegisterPdf(allRfis, filters);
     const generatedAt = new Date();
     const output = renderGovernedRfiRegisterPdf({
       view,
       rfis,
+      totalCount: allRfis.length,
       project,
       generatedAt,
       generatedBy: req.user!.fullName || "BIMLog user",
-      filters: { status, search },
+      filters,
     });
     const buffer = await output.buffer;
     await db.insert(activityLogTable).values({
@@ -1485,8 +1587,12 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
         success: true,
         title: output.title,
         filename: output.filename,
-        statusFilter: status,
-        searchApplied: Boolean(search),
+        filters: {
+          ...filters,
+          dateFrom: filters.dateFrom?.toISOString().slice(0, 10) ?? null,
+          dateTo: filters.dateTo?.toISOString().slice(0, 10) ?? null,
+        },
+        searchApplied: Boolean(filters.search),
         matchingRfis: rfis.length,
         totalRfis: allRfis.length,
         generatedAt: generatedAt.toISOString(),
@@ -1499,6 +1605,10 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
     res.setHeader("Content-Length", buffer.length);
     res.send(buffer);
   } catch (error) {
+    if (error instanceof RfiAttachmentError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
     console.error("[rfis] RFI governed PDF generation failed:", error instanceof Error ? error.message : error);
     res.status(500).json({ error: "RFI governed PDF could not be generated." });
   }
