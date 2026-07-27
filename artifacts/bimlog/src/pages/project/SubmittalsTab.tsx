@@ -231,6 +231,7 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 type TrackerExportFilters = { floor?: string; trade?: string; type?: string; date?: string; status?: string };
+type SubmittalLogExportFilters = { search?: string; status?: string; type?: string };
 type FilterOption = { label: string; value: string };
 
 async function downloadSubmittalTracker(projectId: number, format: "pdf" | "excel", filters: TrackerExportFilters = {}) {
@@ -246,6 +247,21 @@ async function downloadSubmittalTracker(projectId: number, format: "pdf" | "exce
   if (!response.ok) throw new Error("Shop Drawing Control export failed");
   const blob = await response.blob();
   downloadBlob(blob, format === "pdf" ? "Shop-Drawing-Control-Report.pdf" : `Shop-Drawing-Control-Project${projectId}.xlsx`);
+}
+
+async function downloadSubmittalLog(projectId: number, format: "pdf" | "excel", filters: SubmittalLogExportFilters = {}) {
+  const endpoint = format === "pdf"
+    ? `/api/v1/projects/${projectId}/submittals/export-all`
+    : `/api/v1/projects/${projectId}/submittals/export-excel`;
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+  const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
+  if (!response.ok) throw new Error("Submittal log export failed");
+  const blob = await response.blob();
+  downloadBlob(blob, format === "pdf" ? "Filtered-Submittal-Log.pdf" : `Filtered-Submittal-Log-Project${projectId}.xlsx`);
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -1144,30 +1160,27 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
   const [filterType, setFilterType] = useState("");
 
   const handleExport = async (format: "pdf" | "excel") => {
-    if (format === "excel") {
-      const r = await fetch(`/api/v1/projects/${projectId}/submittals/export-excel`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
+    if (filtered.length === 0) {
+      toast({
+        title: w("No visible submittals to export", "No hay entregables visibles para exportar", lang),
+        variant: "destructive",
       });
-      if (!r.ok) {
-        toast({ title: w("Excel export failed", "Error al exportar Excel", lang), variant: "destructive" });
-        return;
-      }
-      const blob = await r.blob();
-      downloadBlob(blob, `Submittal-Log-Project${projectId}.xlsx`);
-      toast({ title: w("Excel exported", "Excel exportado", lang) });
       return;
     }
-    toast({ title: w("Generating PDF…", "Generando PDF…", lang) });
-    const r = await fetch(`/api/v1/projects/${projectId}/submittals/export-all`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    if (r.ok) {
-      const blob = await r.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = "Submittal-Log.pdf"; a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      toast({ title: w("PDF export failed", "Error al exportar PDF", lang), variant: "destructive" });
+    try {
+      await downloadSubmittalLog(projectId, format, { search, status: filterStatus, type: filterType });
+      toast({
+        title: format === "pdf"
+          ? w("Filtered PDF exported", "PDF filtrado exportado", lang)
+          : w("Filtered Excel exported", "Excel filtrado exportado", lang),
+      });
+    } catch {
+      toast({
+        title: format === "pdf"
+          ? w("PDF export failed", "Error al exportar PDF", lang)
+          : w("Excel export failed", "Error al exportar Excel", lang),
+        variant: "destructive",
+      });
     }
   };
 
@@ -1186,7 +1199,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
   };
 
   const filtered = submittals.filter(s => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
     const matchQ = !q || s.title.toLowerCase().includes(q) || s.number.toLowerCase().includes(q) || (s.specSection || "").toLowerCase().includes(q) || (s.manufacturer || "").toLowerCase().includes(q);
     const matchStatus = !filterStatus || s.status === filterStatus;
     const matchType = !filterType || s.submittalCategory === filterType || s.submittalType === filterType;
@@ -1235,10 +1248,22 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
           size="sm"
           title={w("Export the visible Submittals table to Excel.", "Exporta la tabla visible de entregables a Excel.", lang)}
           style={{ fontSize: 11, gap: 5 }}
+          disabled={filtered.length === 0}
           onClick={() => handleExport("excel")}
         >
           <Download style={{ width: 12, height: 12 }} />
-          {w("Export Submittal Log", "Exportar Log de Entregables", lang)}
+          {w("Export Visible Excel", "Exportar Excel Visible", lang)}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          title={w("Export the visible Submittals table to PDF.", "Exporta la tabla visible de entregables a PDF.", lang)}
+          style={{ fontSize: 11, gap: 5 }}
+          disabled={filtered.length === 0}
+          onClick={() => handleExport("pdf")}
+        >
+          <Download style={{ width: 12, height: 12 }} />
+          {w("Export Visible PDF", "Exportar PDF Visible", lang)}
         </Button>
       </div>
 

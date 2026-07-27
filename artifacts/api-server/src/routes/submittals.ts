@@ -164,6 +164,36 @@ function filterTrackerSubmittals(req: Request, subs: Array<typeof submittalsTabl
   });
 }
 
+function filterSubmittalLogExport(req: Request, subs: Array<typeof submittalsTable.$inferSelect>) {
+  const search = String(req.query.search || "").trim().toLowerCase();
+  const status = String(req.query.status || "").trim();
+  const type = String(req.query.type || "").trim();
+
+  return subs.filter((submittal) => {
+    if (search) {
+      const searchable = [
+        submittal.title,
+        submittal.number,
+        submittal.specSection,
+        submittal.manufacturer,
+      ].map(value => String(value || "").toLowerCase());
+      if (!searchable.some(value => value.includes(search))) return false;
+    }
+    if (status && submittal.status !== status) return false;
+    if (type && submittal.submittalCategory !== type && submittal.submittalType !== type) return false;
+    return true;
+  });
+}
+
+function submittalLogFilterSummary(req: Request, shown: number, total: number): string {
+  return [
+    req.query.search ? `Search: ${req.query.search}` : "Search: All",
+    req.query.status ? `Status: ${req.query.status}` : "Status: All",
+    req.query.type ? `Type: ${req.query.type}` : "Type: All",
+    `Visible rows: ${shown} of ${total}`,
+  ].join(" | ");
+}
+
 function attachmentDisplayName(value: string): string {
   try {
     const url = new URL(value, "https://bimlog.app");
@@ -495,13 +525,19 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
       .where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt)))
       .orderBy(submittalsTable.createdAt);
 
+    const filteredSubs = filterSubmittalLogExport(req, subs);
+    if (filteredSubs.length === 0) {
+      res.status(400).json({ error: "No visible submittals match the export filters" });
+      return;
+    }
+    const filterSummary = submittalLogFilterSummary(req, filteredSubs.length, subs.length);
     const projectLabel = project ? `${project.name}${project.code ? ` (${project.code})` : ""}` : `Project ${projectId}`;
     const fmt = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("en-US") : "";
     const daysOutstanding = (value: Date | string | null | undefined) => {
       if (!value) return "";
       return Math.ceil((new Date(value).getTime() - Date.now()) / 86400000);
     };
-    const rows = subs.map(s => ({
+    const rows = filteredSubs.map(s => ({
       "Number": s.number,
       "Title": s.title,
       "Trade": s.trade || "",
@@ -528,10 +564,11 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet([
       ["BIMLog by IgniteSmart", projectLabel],
-      ["Submittal Log", `Generated ${new Date().toLocaleString("en-US")}`],
+      ["Filtered Submittal Log - Excel", `Generated ${new Date().toLocaleString("en-US")}`],
+      ["Filters", filterSummary],
       [],
     ]);
-    XLSX.utils.sheet_add_json(worksheet, rows, { origin: "A4" });
+    XLSX.utils.sheet_add_json(worksheet, rows, { origin: "A5" });
     const headers = Object.keys(rows[0] || {
       "Number": "", "Title": "", "Trade": "", "Floor": "", "Responsible Company": "", "Type": "", "Status": "", "Spec Section": "",
       "Submitted By Company": "", "Submitted By Contact": "", "Submitted By Email": "", "Submitted To Company": "", "Submitted To Contact": "",
@@ -544,15 +581,15 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     });
     worksheet["!autofilter"] = {
       ref: XLSX.utils.encode_range({
-        s: { r: 3, c: 0 },
-        e: { r: Math.max(rows.length + 3, 3), c: headers.length - 1 },
+        s: { r: 4, c: 0 },
+        e: { r: Math.max(rows.length + 4, 4), c: headers.length - 1 },
       }),
     };
     XLSX.utils.book_append_sheet(workbook, worksheet, "Submittal Log");
     const buffer = XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }));
     const fileBase = String(project?.code || project?.name || `Project${projectId}`).replace(/[^\w.-]+/g, "-");
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename="${fileBase}-Submittal-Log.xlsx"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${fileBase}-Filtered-Submittal-Log.xlsx"`);
     res.send(buffer);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
@@ -567,6 +604,12 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       .orderBy(submittalsTable.createdAt);
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
+    const filteredSubs = filterSubmittalLogExport(req, subs);
+    if (filteredSubs.length === 0) {
+      res.status(400).json({ error: "No visible submittals match the export filters" });
+      return;
+    }
+    const filterSummary = submittalLogFilterSummary(req, filteredSubs.length, subs.length);
     const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
@@ -574,7 +617,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     doc.on("end", () => {
       const buf = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Submittal Log")}"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Filtered Submittal Log")}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -582,14 +625,16 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     let y = LOG_MARGIN;
 
     // Header band
-    doc.rect(0, 0, LOG_W, 52).fill(REPORT_THEMES.submittal.log.dark);
+    doc.rect(0, 0, LOG_W, 60).fill(REPORT_THEMES.submittal.log.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text("SUBMITTAL LOG", LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false });
+      .text("FILTERED SUBMITTAL LOG - PDF", LOG_MARGIN, 10, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
-      .text(`${project?.name || "Project"} | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 32, { width: LOG_CONTENT_W, lineBreak: false });
+      .text(`${project?.name || "Project"} | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 29, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(9)
-      .text(`${subs.length} submittals | BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 200, 32, { width: 200, align: "right", lineBreak: false });
-    y = 62;
+      .text(`${filteredSubs.length} visible of ${subs.length} submittals | BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 260, 29, { width: 260, align: "right", lineBreak: false });
+    doc.fillColor("#DBEAFE").fontSize(7.5)
+      .text(filterSummary, LOG_MARGIN, 45, { width: LOG_CONTENT_W, lineBreak: false });
+    y = 70;
 
     // Column defs (landscape 792-72=720 content)
     const COLS = [
@@ -621,7 +666,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       revise_resubmit: "#EA580C", under_review: "#B45309", submitted: "#374151", pending: "#9CA3AF",
     };
 
-    subs.forEach((sub, idx) => {
+    filteredSubs.forEach((sub, idx) => {
       const rowH = 15;
       if (y + rowH > LOG_CONTENT_BOT) {
         doc.addPage(); doc.page.margins.bottom = 0; y = LOG_MARGIN;
