@@ -11,6 +11,11 @@ its review, clean commit, push, and later deployment gates pass.
 
 ### Ruben T1 current-view export release candidate - local validation in progress
 
+Successor product correction `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` closes the independently identified
+RFI current-view parity defects: visible and exported Ball in Court values now share the same lifecycle-aware
+computation, and both sides use the inclusive `23:59:59.999` end-date boundary. Bounded static parity and
+path-scoped diff checks pass. Successor typecheck is not run because the isolated worktree has no dependencies.
+
 Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498`, based on
 `adbdecc0757f517a214484f6e5f2869a7cb364b2`, changes only the existing Reports Hub, RFI, and Submittal
 frontend/route surfaces. Reports Hub remains the master library and launcher; source-screen exports preserve the

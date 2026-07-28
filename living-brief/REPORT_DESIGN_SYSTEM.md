@@ -138,6 +138,9 @@ Phase 2 did not change database schema, filters, report record selection, or mod
   sent-to destination, selected date field/range, and sort choices. Current responsibility (Ball in Court) and
   historical transmission (Sent To Company) remain distinct. The server validates and reapplies these choices
   within authorized, nondeleted project rows.
+- Successor product correction `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` makes the lifecycle-aware Ball in
+  Court value identical across visible rows, filter options, search, PDF filtering, PDF rows, and the report
+  fingerprint. It also aligns the UI and API to the same inclusive `23:59:59.999` end-of-day boundary.
 - Submittal current-view PDF and XLSX exports preserve visible search, status, and type filters. The server exports
   only matching nondeleted project rows, includes filter/count context, and fails closed when no rows match.
 - This is additive optional query-filter behavior in existing authenticated RFI and Submittal export handlers. It
@@ -145,8 +148,10 @@ Phase 2 did not change database schema, filters, report record selection, or mod
 - The default export scope is the current filtered visible view. Existing project-member authorization remains in
   force, and outputs must not expose storage paths, credentials, secrets, provider URLs, private entitlement data,
   or cross-tenant hidden records.
-- Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` is local only. Frontend and API
-  typechecks passed. Production build, browser/runtime scenarios, seven failure gates, English desktop, Spanish
+- Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` and successor RFI parity commit
+  `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` are local only. Earlier frontend and API typechecks passed; the
+  successor has bounded static parity proof, while successor typecheck remains not run because dependencies are
+  absent from its isolated worktree. Production build, browser/runtime scenarios, seven failure gates, English desktop, Spanish
   exact-390px, every-page PDF/XLSX inspection, push, Replit preview, publication, deployment, and live acceptance
   remain not run.
 

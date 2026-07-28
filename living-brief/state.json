@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
+  "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "d1296bd75f254b2f7c6e06090f0d5c56b8165dbe9fa8e36cb65e0486316392fb",
+  "bundleSha256": "3f015051fcf01238a893f1518553c962372a9f257b7e75e1a4798b84d339dec1",
   "impact": {
-    "baselineCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
+    "baselineCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
       "living-brief/REPORT_DESIGN_SYSTEM.md",
@@ -25,11 +25,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "claude",
@@ -37,11 +37,11 @@
       "sha256": "f50708783683946ce3de1243c8b2584c0e9432f4bc7b4c175dd72b703b249f8e",
       "sourceChangedAt": "2026-07-24T11:29:16-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "quality",
@@ -49,11 +49,11 @@
       "sha256": "cc0159ae3d074ae0b199f4a8dc3045a23485b3d7e42820045d4d2f1e7e20808d",
       "sourceChangedAt": "2026-07-25T08:35:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "vision",
@@ -61,11 +61,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "platform",
@@ -73,11 +73,11 @@
       "sha256": "27ee0ffe0a1752d18ca1bdcad75a787057f369ae9d192ba902d9000c9858451e",
       "sourceChangedAt": "2026-07-25T10:45:10-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "plugin",
@@ -85,23 +85,23 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "report_design_system",
       "file": "REPORT_DESIGN_SYSTEM.md",
-      "sha256": "859a84f2e81e0b2d145eadf84d9a855b400d1a46fc72b8c25a09d2897c392775",
-      "sourceChangedAt": "2026-07-27T19:29:08.000Z",
+      "sha256": "c5e2fad988fbbc55e7f063eeae727d03ecd3d3d7b3832adf6a3dacbc67a972ec",
+      "sourceChangedAt": "2026-07-28T00:28:26.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "standards_register",
@@ -109,35 +109,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "41bfb8ade7b03836be2b32ebbc58b4d18d3baab3af4029ff4052e2c2053c7d34",
-      "sourceChangedAt": "2026-07-27T19:29:08.000Z",
+      "sha256": "011a0927a6595bfb8884cc978dcd054dece12291beffcb07d858ef14b44ff282",
+      "sourceChangedAt": "2026-07-28T00:28:26.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "9c622a2ead1db3208fcbf7e143f5755351e41932a61106ed1a3a25aa77d80a3b",
-      "sourceChangedAt": "2026-07-27T19:29:08.000Z",
+      "sha256": "7f4a04d2b47e7e2aff0a7d619317ce796a17271116c494871cb025c62b8faaac",
+      "sourceChangedAt": "2026-07-28T00:28:26.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     },
     {
       "key": "audit",
@@ -145,11 +145,11 @@
       "sha256": "81e6a10e3157c34ada153b2c82ecce95df18fb64cd4ff586e655217156c4549e",
       "sourceChangedAt": "2026-07-25T09:08:17-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewedThroughCommit": "27d4c07cfc0448810bebdc3a5d6974bc257c9498",
-      "semanticReviewTask": "ruben-pdf-ux-t1-independent-semantic-review-20260727",
+      "reconciledThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "semanticReviewTask": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-27T15:29:08-04:00"
+      "semanticReviewedAt": "2026-07-27T20:28:26-04:00"
     }
   ]
 }

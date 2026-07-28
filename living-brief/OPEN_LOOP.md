@@ -6,6 +6,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ### Ruben T1 current-view export release validation
 
+- Successor product correction `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` aligns the RFI visible list,
+  filter options, search, PDF filtering, PDF rows, and fingerprint to the same lifecycle-aware Ball in Court
+  computation. Draft, stored-responsibility, responded, sent fallback, closed, and unassigned states now use the
+  same value on both sides. The visible end-date cutoff now matches the API's inclusive `23:59:59.999` boundary.
+- The corrected RFI source has bounded static parity proof and path-scoped diff validation. Dependencies are absent
+  from the isolated worktree, so focused typecheck, production build, browser, and rendered PDF proof remain pending.
 - Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` is local and tracked clean on
   baseline `adbdecc0757f517a214484f6e5f2869a7cb364b2`. It changes only the Reports Hub, RFI, and Submittal
   frontend/route surfaces.

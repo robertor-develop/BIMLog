@@ -4120,6 +4120,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "85d853041bc28542e17271149f1d24cffa464d2b9b7f39186f42a9c1b0fdd45d"
+    },
+    {
+      "taskId": "ruben-pdf-ux-t1-rfi-parity-correction-20260727",
+      "reviewedThroughCommit": "6cb212b368a20c6aaf5af61f34de5cc28c7e501d",
+      "reviewedAt": "2026-07-27T20:28:26-04:00",
+      "status": "ready_for_independent_review",
+      "captureTiming": "serialized_governance_reconciliation_after_product_correction",
+      "summary": "Reconciles only the RFI current-view parity claims invalidated by independent review. The successor uses one lifecycle-aware Ball in Court computation for visible and PDF behavior and one inclusive final-millisecond end-date boundary; runtime and publication gates remain pending.",
+      "workstreams": [
+        "rfi-ball-in-court-current-view-parity",
+        "rfi-end-date-current-view-parity",
+        "serialized-release-governance"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Evidence\\bimlog-ruben-pdf-release-candidate-independent-review-20260727\\20260727T201450-0400\\INDEPENDENT-REVIEW.md",
+          "type": "independent_source_blocker",
+          "result": "bounded_correction_applied",
+          "boundary": "B1 and B2 are corrected in the two RFI source files; B3 is reconciled in the directly invalidated Living Brief paths. Independent successor review remains pending."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded RFI parity correction changes no ecosystem ownership, partner posture, provider boundary, commercial relationship, or product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing operating authority already requires visible and exported current-view parity, truthful evidence, bounded ownership, and serialized release handling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction enforces the existing quality rule that current-view exports use the same filters and presented values as the live screen."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, customer promise, product positioning, financial workflow, or module ownership decision changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction remains inside the existing RFI frontend and route and adds no route registry, schema, package, lockfile, provider, or deployment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, installer, model identity, synchronization, project import, or field workflow behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Records the corrected lifecycle-aware Ball in Court parity and identical inclusive final-millisecond end-date boundary for RFI current-view PDFs."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory interpretation, compliance citation, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local RFI successor correction, bounded static proof, absent-dependency typecheck limitation, and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the corrected RFI parity source and preserves typecheck, build, browser, PDF, publication, deployment, and live-acceptance work as pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate, database proof, production observation, customer evidence, or retained dated audit semantics were created."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0cecf755326a49521365c51381a9449cbdfd3653f0c67254a5ebf23131ddd3db"
     }
   ]
 }
