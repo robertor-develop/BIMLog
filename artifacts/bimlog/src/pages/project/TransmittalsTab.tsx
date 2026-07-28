@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { Trash2, Sparkles, Send } from "lucide-react";
+import { FileText, Trash2, Sparkles, Send } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -31,6 +32,9 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [newTxPhone, setNewTxPhone] = useState("");
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("created_desc");
+  const [exportingViewPdf, setExportingViewPdf] = useState(false);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,6 +63,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
+  const [exportError, setExportError] = useState("");
   const [filter, setFilter] = useState("all");
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
@@ -108,6 +113,45 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
     window.open(`${API}/projects/${projectId}/transmittals/${id}/export?token=${token}`, "_blank");
   };
 
+  const buildCurrentViewParams = () => {
+    const params = new URLSearchParams({
+      status: filter,
+      search: search.trim(),
+      sort: sortBy,
+    });
+    return params;
+  };
+
+  const filenameFromDisposition = (header: string, fallback: string) => {
+    const match = /filename="?([^";]+)"?/i.exec(header);
+    return match?.[1] || fallback;
+  };
+
+  const exportCurrentViewPdf = async () => {
+    setExportingViewPdf(true);
+    setExportError("");
+    try {
+      const res = await fetch(`${API}/projects/${projectId}/transmittals/export-pdf?${buildCurrentViewParams().toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Transmittals PDF export failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filenameFromDisposition(res.headers.get("Content-Disposition") || "", "Transmittals-Current-View-Report.pdf");
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : t("Transmittals PDF export failed", "Error al exportar PDF de transmisiones"));
+    } finally {
+      setExportingViewPdf(false);
+    }
+  };
+
   const aiDraft = async (id: number) => {
     setAiLoading(true);
     try {
@@ -123,7 +167,35 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
     draft: "#6B7280", sent: "#2563EB", acknowledged: "#16A34A",
   };
 
-  const filtered = filter === "all" ? items : items.filter(i => i.status === filter);
+  const recipientText = (tx: Transmittal) =>
+    Array.isArray(tx.sentTo) && tx.sentTo.length
+      ? tx.sentTo.map(r => [r?.name, r?.email].filter(Boolean).join(" <")).filter(Boolean).join(", ")
+      : "—";
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items
+      .filter(i => filter === "all" || i.status === filter)
+      .filter(i => {
+        if (!q) return true;
+        return [i.number, i.title, i.purpose, i.status, recipientText(i)]
+          .some(value => String(value || "").toLowerCase().includes(q));
+      })
+      .sort((a, b) => {
+        if (sortBy === "created_asc") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        if (sortBy === "sent_desc") return new Date(b.sentAt || b.createdAt).getTime() - new Date(a.sentAt || a.createdAt).getTime();
+        if (sortBy === "title_asc") return a.title.localeCompare(b.title);
+        if (sortBy === "status_asc") return a.status.localeCompare(b.status) || a.number.localeCompare(b.number);
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }, [filter, items, search, sortBy]);
+
+  const currentViewSummary = [
+    `${t("Status", "Estado")}: ${filter === "all" ? t("All", "Todos") : t(filter.charAt(0).toUpperCase() + filter.slice(1), filter === "draft" ? "Borrador" : filter === "sent" ? "Enviado" : "Acusado")}`,
+    search.trim() ? `${t("Search", "Búsqueda")}: ${search.trim()}` : "",
+    `${t("Sort", "Orden")}: ${sortBy.replace(/_/g, " ")}`,
+    `${t("Visible", "Visible")}: ${filtered.length}/${items.length}`,
+  ].filter(Boolean);
 
   const statusBadge = (s: string) => (
     <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 20, background: `${statusColor[s] ?? "#6B7280"}20`, color: statusColor[s] ?? "#6B7280", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>
@@ -156,13 +228,56 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {["all", "draft", "sent", "acknowledged"].map(s => (
-          <button key={s} className={`btn btn-sm ${filter === s ? "btn-primary" : "btn-outline"}`} onClick={() => setFilter(s)}>
-            {t(s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1),
-              s === "all" ? "Todos" : s === "draft" ? "Borrador" : s === "sent" ? "Enviado" : "Acusado")}
-          </button>
-        ))}
+      <div style={{ display: "grid", gap: 10, marginBottom: 16, padding: 12, border: "1px solid #E5E7EB", borderRadius: 10, background: "#FFFFFF" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>{t("Current view report", "Reporte de vista actual")}</div>
+            <div style={{ color: "#6B7280", fontSize: 12 }}>{t("Export a governed PDF of the filtered Transmittals view shown below.", "Exporta un PDF gobernado de la vista filtrada de transmisiones que se muestra abajo.")}</div>
+          </div>
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => void exportCurrentViewPdf()}
+            loading={exportingViewPdf}
+            disabled={loading}
+          />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, alignItems: "end" }}>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {t("Search", "Búsqueda")}
+            <input className="input" value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Number, title, purpose, recipient...", "Número, título, propósito, destinatario...")} style={{ fontSize: 12 }} />
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {t("Status", "Estado")}
+            <select className="input" value={filter} onChange={e => setFilter(e.target.value)} style={{ fontSize: 12 }}>
+              {["all", "draft", "sent", "acknowledged"].map(s => (
+                <option key={s} value={s}>
+                  {t(s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1),
+                    s === "all" ? "Todos" : s === "draft" ? "Borrador" : s === "sent" ? "Enviado" : "Acusado")}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {t("Sort", "Orden")}
+            <select className="input" value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ fontSize: 12 }}>
+              <option value="created_desc">{t("Newest first", "Más recientes primero")}</option>
+              <option value="created_asc">{t("Oldest first", "Más antiguos primero")}</option>
+              <option value="sent_desc">{t("Sent date newest", "Fecha de envío reciente")}</option>
+              <option value="title_asc">{t("Title A-Z", "Título A-Z")}</option>
+              <option value="status_asc">{t("Status A-Z", "Estado A-Z")}</option>
+            </select>
+          </label>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {currentViewSummary.map(part => (
+            <span key={part} style={{ display: "inline-flex", padding: "4px 7px", borderRadius: 6, border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", fontSize: 11, fontWeight: 800 }}>{part}</span>
+          ))}
+        </div>
+        {exportError && (
+          <div className="alert alert-danger" style={{ margin: 0, fontSize: 12 }}>
+            {exportError}
+          </div>
+        )}
       </div>
 
       {showForm && (
@@ -256,7 +371,16 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
           <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Send size={40} color="#D1D5DB" /></div>
-          <div style={{ fontWeight: 600 }}>{t("No transmittals yet", "Sin transmisiones aún")}</div>
+          <div style={{ fontWeight: 600 }}>
+            {items.length === 0
+              ? t("No transmittals yet", "Sin transmisiones aún")
+              : t("No transmittals match the current filters", "No hay transmisiones que coincidan con los filtros actuales")}
+          </div>
+          {items.length > 0 && (
+            <div style={{ fontSize: 12, marginTop: 6 }}>
+              {t("Adjust the status, search, or sort controls above to change the current view.", "Ajusta el estado, la búsqueda o el orden arriba para cambiar la vista actual.")}
+            </div>
+          )}
         </div>
       )}
 
@@ -286,7 +410,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
                   {tx.status === "sent" && canWrite && (
                     <button className="btn btn-sm btn-outline" onClick={() => acknowledge(tx.id)}>{t("Acknowledge", "Acusar")}</button>
                   )}
-                  <button className="btn btn-sm btn-outline" title={t("Download this transmittal report as PDF", "Descargar este reporte de transmisión en PDF")} onClick={() => exportPdf(tx.id)}>{t("Transmittal PDF", "PDF de transmisión")}</button>
+                  <button className="btn btn-sm btn-outline" title={t("Download this individual transmittal report as PDF", "Descargar este reporte individual de transmisión en PDF")} onClick={() => exportPdf(tx.id)}>{t("Individual Transmittal PDF", "PDF individual de transmisión")}</button>
                   {canWrite && (
                     <button
                       title={t("Delete", "Eliminar")}

@@ -10,7 +10,17 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import { PDFParse as PDFParseClass } from "pdf-parse";
-import { createPdfDocument, REPORT_THEMES } from "../lib/pdf-kit";
+import {
+  PALETTE,
+  REPORT_THEMES,
+  addPageNumbers,
+  computeContentHash,
+  createPdfDocument,
+  drawBrandedHeader,
+  drawTable,
+  reportFileName,
+  type TableColumn,
+} from "../lib/pdf-kit";
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 async function pdfParse(buffer: Buffer) {
@@ -478,6 +488,299 @@ router.get("/projects/:projectId/files", authMiddleware, requireProjectMember(),
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
     res.status(500).json({ error: message });
+  }
+});
+
+type FileExportColumn = "name" | "type" | "status" | "declaration" | "uploader" | "date" | "versions";
+type ExportableFile = {
+  id: number;
+  fileName: string;
+  fileType: string;
+  version: number;
+  parentFileId: number | null;
+  status: string;
+  uploadedById: number;
+  documentRelationship: string | null;
+  source: string | null;
+  createdAt: Date;
+  uploadedByName: string;
+  uploadedByCompany: string;
+};
+
+const FILE_EXPORT_COLUMNS: readonly FileExportColumn[] = [
+  "name",
+  "type",
+  "status",
+  "declaration",
+  "uploader",
+  "date",
+  "versions",
+];
+
+function singleQuery(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function selectedFileColumns(raw: unknown): FileExportColumn[] {
+  const requested = singleQuery(raw).split(",").map((value) => value.trim()).filter(Boolean);
+  const columns = FILE_EXPORT_COLUMNS.filter((column) => requested.includes(column));
+  return columns.length > 0 ? columns : [...FILE_EXPORT_COLUMNS];
+}
+
+function exportDate(raw: unknown): Date | null {
+  const value = singleQuery(raw);
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+router.get("/projects/:projectId/files/current-view.pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+      res.status(400).json({ error: "Invalid project id" });
+      return;
+    }
+    const [project] = await db.select({
+      name: projectsTable.name,
+      code: projectsTable.code,
+    }).from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+
+    const lang = singleQuery(req.query.lang) === "es" ? "es" : "en";
+    const tr = (en: string, es: string) => lang === "es" ? es : en;
+    const qRaw = singleQuery(req.query.q).slice(0, 100);
+    const q = qRaw.toLocaleLowerCase();
+    const type = /^[a-z0-9]{1,12}$/.test(singleQuery(req.query.type).toLocaleLowerCase())
+      ? singleQuery(req.query.type).toLocaleLowerCase()
+      : "all";
+    const status = ["valid", "rejected"].includes(singleQuery(req.query.status))
+      ? singleQuery(req.query.status)
+      : "all";
+    const declaration = ["created", "modified", "reference", "supporting"].includes(singleQuery(req.query.declaration))
+      ? singleQuery(req.query.declaration)
+      : "all";
+    const uploader = singleQuery(req.query.uploader).slice(0, 120);
+    const dateFrom = exportDate(req.query.dateFrom);
+    const dateTo = exportDate(req.query.dateTo);
+    if ((req.query.dateFrom && !dateFrom) || (req.query.dateTo && !dateTo) || (dateFrom && dateTo && dateFrom > dateTo)) {
+      res.status(400).json({ error: "Invalid date range" });
+      return;
+    }
+    const selectedColumns = selectedFileColumns(req.query.columns);
+
+    const databaseFiles = await db.select({
+      id: filesTable.id,
+      fileName: filesTable.fileName,
+      fileType: filesTable.fileType,
+      version: filesTable.version,
+      parentFileId: filesTable.parentFileId,
+      status: filesTable.status,
+      uploadedById: filesTable.uploadedById,
+      documentRelationship: filesTable.documentRelationship,
+      source: filesTable.source,
+      createdAt: filesTable.createdAt,
+    }).from(filesTable).where(eq(filesTable.projectId, projectId));
+    const uploaderIds = Array.from(new Set(databaseFiles.map((file) => file.uploadedById)));
+    const uploaderRows = uploaderIds.length > 0
+      ? await db.select({
+        id: usersTable.id,
+        fullName: usersTable.fullName,
+        companyId: usersTable.companyId,
+      }).from(usersTable).where(inArray(usersTable.id, uploaderIds))
+      : [];
+    const companyIds = Array.from(new Set(uploaderRows.map((user) => user.companyId)));
+    const companyRows = companyIds.length > 0
+      ? await db.select({ id: companiesTable.id, name: companiesTable.name })
+        .from(companiesTable).where(inArray(companiesTable.id, companyIds))
+      : [];
+    const companyNameById = new Map(companyRows.map((company) => [company.id, company.name]));
+    const uploaderById = new Map(uploaderRows.map((user) => [user.id, {
+      name: user.fullName,
+      company: companyNameById.get(user.companyId) || "",
+    }]));
+    const exportableFiles: ExportableFile[] = databaseFiles.map((file) => ({
+      ...file,
+      uploadedByName: uploaderById.get(file.uploadedById)?.name || "",
+      uploadedByCompany: uploaderById.get(file.uploadedById)?.company || "",
+    }));
+    const roots = exportableFiles.filter((file) => file.parentFileId === null);
+    const childrenByRoot = new Map<number, ExportableFile[]>();
+    exportableFiles.filter((file) => file.parentFileId !== null).forEach((file) => {
+      const rootId = file.parentFileId!;
+      const children = childrenByRoot.get(rootId) || [];
+      children.push(file);
+      childrenByRoot.set(rootId, children);
+    });
+    const families = roots.map((root) => ({
+      root,
+      versions: [root, ...(childrenByRoot.get(root.id) || [])].sort((a, b) => a.version - b.version),
+    })).sort((a, b) =>
+      b.versions[b.versions.length - 1].createdAt.getTime() - a.versions[a.versions.length - 1].createdAt.getTime());
+
+    const filteredFamilies = families.filter(({ root, versions }) => {
+      const latest = versions[versions.length - 1];
+      const extension = (latest.fileName.split(".").pop() || "file").toLocaleLowerCase();
+      return (!q || root.fileName.toLocaleLowerCase().includes(q) || latest.fileName.toLocaleLowerCase().includes(q))
+        && (type === "all" || extension === type)
+        && (status === "all" || (status === "rejected" ? latest.status === "rejected" : latest.status !== "rejected"))
+        && (declaration === "all" || (latest.documentRelationship || "created") === declaration)
+        && (!uploader || latest.uploadedByName === uploader)
+        && (!dateFrom || latest.createdAt >= dateFrom)
+        && (!dateTo || latest.createdAt <= dateTo);
+    });
+    const statusLabels = {
+      valid: tr("Valid", "Válido"),
+      rejected: tr("Rejected", "Rechazado"),
+    } as const;
+    const declarationLabels = {
+      created: tr("Created", "Creado"),
+      modified: tr("Modified", "Modificado"),
+      reference: tr("Reference", "Referencia"),
+      supporting: tr("Supporting", "Soporte"),
+    } as const;
+    const rows = filteredFamilies.map(({ root, versions }) => {
+      const latest = versions[versions.length - 1];
+      const latestStatus = latest.status === "rejected" ? "rejected" : "valid";
+      const latestDeclaration = latest.documentRelationship || "created";
+      return {
+        name: root.fileName,
+        type: (latest.fileName.split(".").pop() || latest.fileType || "file").toUpperCase(),
+        status: statusLabels[latestStatus],
+        declaration: declarationLabels[latestDeclaration as keyof typeof declarationLabels] || tr("Unknown declaration", "Declaración desconocida"),
+        uploader: latest.source === "system-generated"
+          ? "BIMLog Auto"
+          : [latest.uploadedByName, latest.uploadedByCompany].filter(Boolean).join(" — "),
+        date: latest.createdAt.toLocaleString(lang === "es" ? "es-ES" : "en-US"),
+        versions: String(versions.length),
+      };
+    });
+
+    const timestamp = new Date();
+    const labels: Record<FileExportColumn, string> = {
+      name: tr("Name", "Nombre"),
+      type: tr("Type", "Tipo"),
+      status: tr("Status", "Estado"),
+      declaration: tr("Declaration", "Declaración"),
+      uploader: tr("Uploader", "Cargado por"),
+      date: tr("Date", "Fecha"),
+      versions: tr("Versions", "Versiones"),
+    };
+    const activeFilters = [
+      q ? `${labels.name}: ${qRaw}` : "",
+      type !== "all" ? `${labels.type}: ${type.toUpperCase()}` : "",
+      status !== "all" ? `${labels.status}: ${statusLabels[status as keyof typeof statusLabels]}` : "",
+      declaration !== "all" ? `${labels.declaration}: ${declarationLabels[declaration as keyof typeof declarationLabels]}` : "",
+      uploader ? `${labels.uploader}: ${uploader}` : "",
+      dateFrom ? `${tr("From", "Desde")}: ${dateFrom.toLocaleDateString(lang === "es" ? "es-ES" : "en-US")}` : "",
+      dateTo ? `${tr("To", "Hasta")}: ${dateTo.toLocaleDateString(lang === "es" ? "es-ES" : "en-US")}` : "",
+    ].filter(Boolean);
+    const weights: Record<FileExportColumn, number> = {
+      name: 2.7,
+      type: 0.65,
+      status: 0.85,
+      declaration: 1.05,
+      uploader: 1.55,
+      date: 1.35,
+      versions: 0.75,
+    };
+    const contentWidth = 712;
+    const weightTotal = selectedColumns.reduce((sum, column) => sum + weights[column], 0);
+    const widths = selectedColumns.map((column) => Math.round(contentWidth * weights[column] / weightTotal));
+    widths[widths.length - 1] += contentWidth - widths.reduce((sum, width) => sum + width, 0);
+    const tableColumns: TableColumn[] = selectedColumns.map((column, index) => ({
+      key: column,
+      label: labels[column],
+      width: widths[index],
+      wrap: column === "name" || column === "uploader",
+      bold: column === "name",
+      align: column === "versions" ? "center" : "left",
+    }));
+    const snapshot = {
+      projectId,
+      companyId: req.user!.companyId,
+      userId: req.user!.userId,
+      lang,
+      filters: { q, type, status, declaration, uploader, dateFrom: dateFrom?.toISOString(), dateTo: dateTo?.toISOString() },
+      columns: selectedColumns,
+      rows,
+      generatedAt: timestamp.toISOString(),
+    };
+    const contentHash = computeContentHash(snapshot);
+    const reportNumber = `FILES-${project.code}-${timestamp.toISOString().slice(0, 10).replace(/-/g, "")}`;
+    const doc = createPdfDocument({
+      size: "LETTER",
+      layout: "landscape",
+      margin: PALETTE.MARGIN,
+      bufferPages: true,
+    });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+    const complete = new Promise<void>((resolve, reject) => {
+      doc.on("end", resolve);
+      doc.on("error", reject);
+    });
+    const header = () => drawBrandedHeader(doc, {
+      companyName: req.user!.companyName,
+      title: tr("Files — Current View", "Archivos — Vista actual"),
+      subtitle: tr("Visible document-family register", "Registro visible de familias de documentos"),
+      projectName: project.name,
+      projectCode: project.code,
+      reportNumber,
+      reportDate: timestamp,
+      theme: REPORT_THEMES.files.register,
+    });
+    let y = header();
+    doc.font(PALETTE.FONT).fontSize(8).fillColor(PALETTE.TEXT)
+      .text(`${tr("Generated", "Generado")}: ${timestamp.toLocaleString(lang === "es" ? "es-ES" : "en-US")}  |  ${tr("Prepared by", "Preparado por")}: ${req.user!.fullName}`, PALETTE.MARGIN, y, { width: contentWidth });
+    y += 14;
+    doc.text(`${tr("Results", "Resultados")}: ${rows.length}  |  ${tr("Selected columns", "Columnas seleccionadas")}: ${selectedColumns.map((column) => labels[column]).join(", ")}`, PALETTE.MARGIN, y, { width: contentWidth });
+    y += 14;
+    doc.text(`${tr("Active filters", "Filtros activos")}: ${activeFilters.length > 0 ? activeFilters.join(" | ") : tr("None", "Ninguno")}`, PALETTE.MARGIN, y, { width: contentWidth });
+    y += 18;
+    if (rows.length === 0) {
+      doc.rect(PALETTE.MARGIN, y, contentWidth, 46).fill(PALETTE.ROW_ALT);
+      doc.font(PALETTE.FONT_BOLD).fontSize(10).fillColor(PALETTE.MUTED)
+        .text(tr("No files match the current filters.", "Ningún archivo coincide con los filtros actuales."), PALETTE.MARGIN + 12, y + 17, { width: contentWidth - 24, align: "center" });
+    } else {
+      drawTable(doc, {
+        x: PALETTE.MARGIN,
+        startY: y,
+        columns: tableColumns,
+        rows,
+        fontSize: 7,
+        rowMinHeight: 25,
+        pageBottom: 540,
+        headerFill: REPORT_THEMES.files.register.dark,
+        onPageBreak: () => {
+          doc.addPage({ size: "LETTER", layout: "landscape", margin: PALETTE.MARGIN });
+          return header();
+        },
+      });
+    }
+    addPageNumbers(doc, {
+      companyName: req.user!.companyName,
+      projectName: project.name,
+      reportNumber,
+      timestamp: timestamp.toISOString(),
+      contentHash,
+      footerY: 570,
+      fingerprintY: 558,
+    });
+    doc.end();
+    await complete;
+    res.type("application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(tr("Files Current View", "Archivos Vista Actual"))}"`);
+    res.send(Buffer.concat(chunks));
+  } catch (error) {
+    console.error("[files-current-view-pdf] generation failed", error instanceof Error ? error.message : "unknown error");
+    res.status(500).json({
+      error: "The files PDF could not be generated.",
+      errorEs: "No se pudo generar el PDF de archivos.",
+    });
   }
 });
 

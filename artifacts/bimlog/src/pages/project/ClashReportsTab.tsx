@@ -5,6 +5,7 @@ import { Upload, ChevronLeft, AlertTriangle, Download, Trash2 } from "lucide-rea
 import { isDebug } from "@/lib/debug";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LensViewpointsView } from "./LensViewpointsView";
+import { downloadAuthenticatedPdf, PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
 
 const API = "/api/v1";
 
@@ -69,6 +70,20 @@ function fmtUpdated(v: any): string {
   return d.toLocaleDateString();
 }
 
+function clashStatusLabel(status: string, t: (en: string, es: string) => string) {
+  const labels: Record<string, string> = {
+    all: t("All statuses", "Todos los estados"),
+    open: t("Active", "Activo"),
+    follow_up: t("Follow Up", "Seguimiento"),
+    waiting_design: t("Waiting Design", "Esperando Diseno"),
+    in_progress: t("In Progress", "En Progreso"),
+    approved: t("Approved", "Aprobado"),
+    resolved: t("Resolved", "Resuelto"),
+    wont_fix: t("Won't Fix", "No se corregira"),
+  };
+  return labels[status] || status.replace(/_/g, " ");
+}
+
 export function ClashReportsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { token } = useAuthStore();
   const { lang } = useI18n();
@@ -85,6 +100,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [selectedReport, setSelectedReport] = useState<ClashReport | null>(null);
   const [clashes, setClashes] = useState<Clash[]>([]);
   const [clashLoading, setClashLoading] = useState(false);
+  const [clashExporting, setClashExporting] = useState(false);
   const [filterPriority, setFilterPriority] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
@@ -259,6 +275,39 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       return (order[a.priority as keyof typeof order] ?? 4) - (order[b.priority as keyof typeof order] ?? 4);
     });
 
+  const clashCurrentViewSummary = selectedReport ? [
+    `${t("Report", "Reporte")}: ${selectedReport.reportNumber || selectedReport.fileName}`,
+    `${t("View", "Vista")}: ${viewMode === "grouped" ? t("Grouped", "Agrupado") : t("Normal", "Normal")}`,
+    `${t("Priority", "Prioridad")}: ${filterPriority === "all" ? t("All priorities", "Todas las prioridades") : filterPriority}`,
+    `${t("Status", "Estado")}: ${clashStatusLabel(filterStatus, t)}`,
+    search.trim() ? `${t("Search", "Busqueda")}: ${search.trim()}` : "",
+    `${t("Visible", "Visible")}: ${filteredClashes.length}/${clashes.length}`,
+  ].filter(Boolean) : [];
+
+  const exportClashCurrentViewPdf = async () => {
+    if (!selectedReport || !token) return;
+    const params = new URLSearchParams({
+      lang,
+      priority: filterPriority,
+      status: filterStatus,
+      search: search.trim(),
+      view: viewMode,
+    });
+    setClashExporting(true);
+    setError("");
+    try {
+      await downloadAuthenticatedPdf(
+        `${API}/projects/${projectId}/clash-reports/${selectedReport.id}/current-view/pdf?${params.toString()}`,
+        token,
+        `clash-current-view-${selectedReport.id}.pdf`,
+      );
+    } catch {
+      setError(t("Could not prepare the current Clash view PDF.", "No se pudo preparar el PDF de la vista actual de Choques."));
+    } finally {
+      setClashExporting(false);
+    }
+  };
+
   const getRecordOptions = (type: string) => {
     if (type === "rfi") return linkableItems.rfis.map((r: any) => `<option value="${r.id}">${r.number} — ${r.subject}</option>`).join("");
     if (type === "meeting") return linkableItems.meetings.map((m: any) => `<option value="${m.id}">${m.title}</option>`).join("");
@@ -277,7 +326,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         warning={t("Linked items (RFIs, submittals) will be detached.", "Los elementos enlazados serán desvinculados.")}
       />
     )}
-    <div className="tab-content-wrapper">
+    <div id="clash-reports-list-current-view" className="tab-content-wrapper">
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <button className="btn btn-outline btn-sm" onClick={() => setSelectedReport(null)}
           style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -328,6 +377,15 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         >
           <Download size={14} /> {t("Export Clash PDF", "Exportar PDF de Choques")}
         </a>
+        <PrintPdfButton lang={lang} onClick={() => void exportClashCurrentViewPdf()} loading={clashExporting} disabled={clashLoading} />
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "-8px 0 14px" }}>
+        {clashCurrentViewSummary.map(part => (
+          <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
+            {part}
+          </span>
+        ))}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 16 }}>
@@ -732,6 +790,12 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             {t("Upload clash register from Navisworks, Revit, or Excel — AI ranks every clash by priority","Sube el registro de choques — IA clasifica por prioridad")}
           </p>
         </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => printCurrentView("clash-reports-list-current-view")}
+            disabled={loading}
+          />
         {canWrite && (
           <button
             className="btn btn-sm btn-outline"
@@ -764,6 +828,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             </div>
           </label>
         )}
+        </div>
       </div>
 
       {error && (

@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
 import * as XLSX from "xlsx";
@@ -455,6 +456,14 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   if (submittals.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => undefined}
+            disabled
+            disabledReason={w("No Shop Drawing Control rows are available to print.", "No hay filas de Control de Shop Drawings para imprimir.", lang)}
+          />
+        </div>
         <ClipboardList size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
         <div style={{ fontWeight: 600, marginBottom: 10 }}>
           {w("No submittals yet. Create submittals in the Submittals tab to see them here.",
@@ -541,15 +550,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
             <Download style={{ width: 13, height: 13, marginRight: 4 }} />
             {w("Export Control Excel", "Exportar Control Excel", lang)}
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            title={w("Export the filtered Shop Drawing Control table to PDF.", "Exporta la tabla filtrada de control de shop drawings a PDF.", lang)}
-            onClick={() => downloadTracker("pdf")}
-          >
-            <Download style={{ width: 13, height: 13, marginRight: 4 }} />
-            {w("Export Control PDF", "Exportar Control PDF", lang)}
-          </Button>
+          <PrintPdfButton lang={lang} onClick={() => void downloadTracker("pdf")} />
         </div>
       </div>
 
@@ -757,7 +758,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
   }).length;
 
   return (
-    <div>
+    <div id="submittal-register-current-view">
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
         <div>
@@ -994,6 +995,11 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
           </div>
         </div>
         <div style={{ flex: 1 }} />
+        <PrintPdfButton
+          lang={lang}
+          onClick={() => printCurrentView("submittal-register-current-view")}
+          disabled={loading}
+        />
         {canWrite && (
           <>
             <input ref={csvRef} type="file" accept=".csv,.xlsx,.xls" style={{ display: "none" }} onChange={handleCSV} />
@@ -1254,17 +1260,12 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
           <Download style={{ width: 12, height: 12 }} />
           {w("Export Visible Excel", "Exportar Excel Visible", lang)}
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          title={w("Export the visible Submittals table to PDF.", "Exporta la tabla visible de entregables a PDF.", lang)}
-          style={{ fontSize: 11, gap: 5 }}
+        <PrintPdfButton
+          lang={lang}
           disabled={filtered.length === 0}
-          onClick={() => handleExport("pdf")}
-        >
-          <Download style={{ width: 12, height: 12 }} />
-          {w("Export Visible PDF", "Exportar PDF Visible", lang)}
-        </Button>
+          disabledReason={w("No visible Submittals are available to print.", "No hay entregables visibles para imprimir.", lang)}
+          onClick={() => void handleExport("pdf")}
+        />
       </div>
 
       {submittals.length === 0 ? (

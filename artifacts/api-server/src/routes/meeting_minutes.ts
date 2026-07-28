@@ -28,6 +28,7 @@ import {
   companiesTable,
   projectDirectoryTable,
   meetingDraftsTable,
+  projectsTable,
 } from "@workspace/db/schema";
 import {
   eq,
@@ -45,6 +46,7 @@ import {
   authMiddleware,
   requireProjectMember,
   requirePermission,
+  verifyToken,
 } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
@@ -58,8 +60,65 @@ import {
   MeetingSubmittalLinkError,
 } from "../lib/meeting-canonical-links";
 import { resolveFfmpegPath } from "../lib/ffmpeg-capability";
+import {
+  createPdfDocument,
+  drawTable,
+  PALETTE,
+  reportFileName,
+  REPORT_THEMES,
+} from "../lib/pdf-kit";
 
 const router: Router = Router();
+
+const meetingPdfAuth: typeof authMiddleware = (req, res, next) => {
+  const token =
+    typeof req.query.token === "string" && req.query.token.trim()
+      ? req.query.token
+      : undefined;
+  if (!token) return authMiddleware(req, res, next);
+  try {
+    req.user = verifyToken(token);
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
+};
+
+const safePdfText = (value: unknown, fallback = "—") => {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).replace(/\s+/g, " ").trim();
+  return text || fallback;
+};
+
+const formatPdfDate = (value: unknown, language: "en" | "es" = "en") => {
+  if (!value) return "—";
+  const date = new Date(value as string | Date);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(language === "es" ? "es-US" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const labelFor = (language: "en" | "es", en: string, es: string) =>
+  language === "es" ? es : en;
+
+const meetingCurrentViewSectionLabel = (
+  token: string,
+  language: "en" | "es",
+) => {
+  const labels: Record<string, { en: string; es: string }> = {
+    summary: { en: "Summary", es: "Resumen" },
+    meetings: { en: "Meeting Register", es: "Registro de reuniones" },
+    actions: { en: "Actions", es: "Acciones" },
+    linked_records: { en: "Linked Records", es: "Registros vinculados" },
+  };
+  const label = labels[token];
+  return label ? label[language] : "";
+};
 
 const draftKeyFor = (meetingId?: number | null) =>
   meetingId ? `edit:${meetingId}` : "new";
@@ -1338,6 +1397,397 @@ router.get(
         .json({
           error: err instanceof Error ? err.message : "Internal server error",
         });
+    }
+  },
+);
+
+// ── GET /projects/:projectId/meetings/current-view/pdf ────────────────────────
+router.get(
+  "/projects/:projectId/meetings/current-view/pdf",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const language = req.query.lang === "es" ? "es" : "en";
+    const view = req.query.view === "actions" ? "actions" : "meetings";
+    const sectionInput =
+      typeof req.query.sections === "string" ? req.query.sections : "";
+    const allowedSections = new Set(["summary", "meetings", "actions", "linked_records"]);
+    const requestedSections = sectionInput
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => allowedSections.has(value));
+    const sections = new Set(
+      requestedSections.length
+        ? requestedSections
+        : view === "actions"
+          ? ["summary", "actions"]
+          : ["summary", "meetings", "linked_records"],
+    );
+
+    try {
+      const [project] = await db
+        .select({
+          id: projectsTable.id,
+          name: projectsTable.name,
+          code: projectsTable.code,
+          clientCompany: projectsTable.clientCompany,
+          location: projectsTable.location,
+        })
+        .from(projectsTable)
+        .where(eq(projectsTable.id, projectId))
+        .limit(1);
+      if (!project) {
+        res.status(404).json({ error: "project_not_found" });
+        return;
+      }
+
+      const meetings = await db
+        .select()
+        .from(meetingMinutesTable)
+        .where(
+          and(
+            eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
+          ),
+        )
+        .orderBy(desc(meetingMinutesTable.meetingDate));
+
+      const actionItems = await db
+        .select()
+        .from(actionItemsTable)
+        .where(
+          and(
+            eq(actionItemsTable.projectId, projectId),
+            ne(actionItemsTable.status, "cancelled"),
+          ),
+        )
+        .orderBy(desc(actionItemsTable.createdAt));
+
+      const linkedCounts = new Map<
+        number,
+        { attendees: number; rfis: number; submittals: number; lens: number; clashes: number; buckets: number }
+      >();
+      await Promise.all(
+        meetings.map(async (meeting) => {
+          const [attendees, rfis, submittals, lens, clashes, buckets] = await Promise.all([
+            db
+              .select({ id: meetingAttendeesTable.id })
+              .from(meetingAttendeesTable)
+              .where(eq(meetingAttendeesTable.meetingId, meeting.id)),
+            getMeetingRfiLinks(meeting.id),
+            getMeetingSubmittalLinks(meeting.id),
+            getMeetingLensViewpointLinks(meeting.id),
+            getMeetingClashLinks(meeting.id),
+            getMeetingScheduleBucketLinks(meeting.id),
+          ]);
+          linkedCounts.set(meeting.id, {
+            attendees: attendees.length,
+            rfis: rfis.length,
+            submittals: submittals.length,
+            lens: lens.length,
+            clashes: clashes.links.length,
+            buckets: buckets.length,
+          });
+        }),
+      );
+
+      const actionByMeeting = new Map<number, typeof actionItems>();
+      for (const item of actionItems) {
+        if (!item.meetingId) continue;
+        const rows = actionByMeeting.get(item.meetingId) ?? [];
+        rows.push(item);
+        actionByMeeting.set(item.meetingId, rows);
+      }
+      const now = Date.now();
+      const openActionCount = actionItems.filter(
+        (item) => item.status !== "completed" && item.status !== "cancelled",
+      ).length;
+      const overdueActionCount = actionItems.filter(
+        (item) =>
+          item.status !== "completed" &&
+          item.status !== "cancelled" &&
+          item.dueDate &&
+          new Date(item.dueDate).getTime() < now,
+      ).length;
+
+      const generatedAt = new Date();
+      const title = labelFor(
+        language,
+        view === "actions"
+          ? "Meetings Action Items - Current View"
+          : "Meeting Minutes Register - Current View",
+        view === "actions"
+          ? "Acciones de Actas - Vista actual"
+          : "Registro de Actas - Vista actual",
+      );
+      const sourceView = labelFor(
+        language,
+        view === "actions" ? "Action Items tab" : "Meetings tab",
+        view === "actions" ? "Pestaña de acciones" : "Pestaña de reuniones",
+      );
+      const sectionSummary = Array.from(sections)
+        .map((section) => meetingCurrentViewSectionLabel(section, language))
+        .filter(Boolean)
+        .join(", ");
+      const activeFilters = labelFor(
+        language,
+        `Project scope: ${project.name}; View: ${sourceView}; Sections: ${sectionSummary}`,
+        `Alcance del proyecto: ${project.name}; Vista: ${sourceView}; Secciones: ${sectionSummary}`,
+      );
+      const resultCount = view === "actions" ? actionItems.length : meetings.length;
+      const theme = REPORT_THEMES.meeting.log;
+      const doc = createPdfDocument({
+        size: "LETTER",
+        layout: "landscape",
+        margin: 40,
+        bufferPages: true,
+        autoFirstPage: true,
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${reportFileName(title)}"`,
+      );
+      doc.pipe(res);
+
+      const M = 40;
+      const pageWidth = 792;
+      const contentWidth = pageWidth - M * 2;
+      const pageBottom = 560;
+      const header = () => {
+        doc.rect(0, 0, pageWidth, 82).fill(theme.dark);
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(18)
+          .fillColor("white")
+          .text(title, M, 20, { width: contentWidth * 0.62 });
+        doc
+          .font("Helvetica")
+          .fontSize(8)
+          .fillColor("#DBEAFE")
+          .text(
+            `${safePdfText(project.name)} (${safePdfText(project.code)})`,
+            M,
+            48,
+            { width: contentWidth * 0.62 },
+          );
+        doc
+          .font("Helvetica")
+          .fontSize(8)
+          .fillColor("#DBEAFE")
+          .text(
+            `${labelFor(language, "Generated", "Generado")}: ${formatPdfDate(generatedAt, language)}`,
+            M,
+            62,
+            { width: contentWidth * 0.62 },
+          );
+        doc
+          .font("Helvetica")
+          .fontSize(8)
+          .fillColor("#DBEAFE")
+          .text(
+            `${labelFor(language, "Prepared by", "Preparado por")}: ${safePdfText(req.user?.fullName)} · ${safePdfText(req.user?.companyName)}`,
+            M,
+            48,
+            { width: contentWidth, align: "right" },
+          );
+        return 108;
+      };
+      let y = header();
+
+      const ensureSpace = (height: number) => {
+        if (y + height <= pageBottom) return;
+        doc.addPage();
+        y = header();
+      };
+
+      if (sections.has("summary")) {
+        const cards = [
+          [labelFor(language, "Source view", "Vista fuente"), sourceView],
+          [labelFor(language, "Filtered results", "Resultados filtrados"), String(resultCount)],
+          [labelFor(language, "Total meetings", "Total reuniones"), String(meetings.length)],
+          [labelFor(language, "Open actions", "Acciones abiertas"), String(openActionCount)],
+          [labelFor(language, "Overdue actions", "Acciones vencidas"), String(overdueActionCount)],
+        ];
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .fillColor(PALETTE.TEXT)
+          .text(labelFor(language, "Current View Summary", "Resumen de vista actual"), M, y);
+        y += 18;
+        const cardWidth = Math.floor((contentWidth - 32) / 5);
+        cards.forEach(([label, value], index) => {
+          const x = M + index * (cardWidth + 8);
+          doc.rect(x, y, cardWidth, 54).fill(index % 2 === 0 ? "#F8FAFC" : "#EFF6FF");
+          doc.rect(x, y, cardWidth, 54).stroke(PALETTE.BORDER);
+          doc
+            .font("Helvetica-Bold")
+            .fontSize(8)
+            .fillColor(PALETTE.MUTED)
+            .text(label, x + 8, y + 8, { width: cardWidth - 16 });
+          doc
+            .font("Helvetica-Bold")
+            .fontSize(value.length > 12 ? 12 : 16)
+            .fillColor(theme.dark)
+            .text(value, x + 8, y + 28, { width: cardWidth - 16, ellipsis: true });
+        });
+        y += 68;
+        doc.font("Helvetica").fontSize(8).fillColor(PALETTE.MUTED).text(activeFilters, M, y, {
+          width: contentWidth,
+        });
+        y += 28;
+      }
+
+      if (view === "meetings" && sections.has("meetings")) {
+        ensureSpace(90);
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .fillColor(PALETTE.TEXT)
+          .text(labelFor(language, "Meeting Register", "Registro de reuniones"), M, y);
+        y += 16;
+        if (meetings.length === 0) {
+          doc
+            .font("Helvetica")
+            .fontSize(10)
+            .fillColor(PALETTE.MUTED)
+            .text(
+              labelFor(language, "No meetings match the current view.", "Ninguna reunión coincide con la vista actual."),
+              M,
+              y,
+            );
+          y += 20;
+        } else {
+          y = drawTable(doc, {
+            x: M,
+            startY: y,
+            pageBottom,
+            columns: [
+              { label: labelFor(language, "Date", "Fecha"), key: "date", width: 82 },
+              { label: labelFor(language, "Title", "Título"), key: "title", width: 210, wrap: true, bold: true },
+              { label: labelFor(language, "Location", "Ubicación"), key: "location", width: 110 },
+              { label: labelFor(language, "Attendees", "Asistentes"), key: "attendees", width: 58, align: "right" },
+              { label: labelFor(language, "Actions", "Acciones"), key: "actions", width: 58, align: "right" },
+              { label: labelFor(language, "Linked records", "Registros vinculados"), key: "linked", width: 190, wrap: true },
+            ],
+            rows: meetings.map((meeting) => {
+              const counts = linkedCounts.get(meeting.id);
+              const meetingActions = actionByMeeting.get(meeting.id) ?? [];
+              return {
+                date: formatPdfDate(meeting.meetingDate, language),
+                title: safePdfText(meeting.title),
+                location: safePdfText(meeting.location),
+                attendees: String(counts?.attendees ?? 0),
+                actions: String(meetingActions.length),
+                linked: [
+                  `${labelFor(language, "RFIs", "RFI")}: ${counts?.rfis ?? 0}`,
+                  `${labelFor(language, "Submittals", "Submittals")}: ${counts?.submittals ?? 0}`,
+                  `${labelFor(language, "Lens", "Lens")}: ${counts?.lens ?? 0}`,
+                  `${labelFor(language, "Clashes", "Clashes")}: ${counts?.clashes ?? 0}`,
+                  `${labelFor(language, "Schedule", "Planificación")}: ${counts?.buckets ?? 0}`,
+                ].join(" · "),
+              };
+            }),
+            onPageBreak: header,
+          });
+          y += 18;
+        }
+      }
+
+      if (sections.has("actions")) {
+        ensureSpace(90);
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .fillColor(PALETTE.TEXT)
+          .text(labelFor(language, "Action Items", "Acciones"), M, y);
+        y += 16;
+        if (actionItems.length === 0) {
+          doc
+            .font("Helvetica")
+            .fontSize(10)
+            .fillColor(PALETTE.MUTED)
+            .text(
+              labelFor(language, "No action items match the current view.", "Ninguna acción coincide con la vista actual."),
+              M,
+              y,
+            );
+          y += 20;
+        } else {
+          y = drawTable(doc, {
+            x: M,
+            startY: y,
+            pageBottom,
+            columns: [
+              { label: labelFor(language, "Description", "Descripción"), key: "description", width: 310, wrap: true, bold: true },
+              { label: labelFor(language, "Assigned", "Asignado"), key: "assigned", width: 126 },
+              { label: labelFor(language, "Due", "Fecha"), key: "due", width: 86 },
+              { label: labelFor(language, "Status", "Estado"), key: "status", width: 76 },
+              { label: labelFor(language, "Meeting", "Reunión"), key: "meeting", width: 110, wrap: true },
+            ],
+            rows: actionItems.map((item) => {
+              const meeting = meetings.find((row) => row.id === item.meetingId);
+              return {
+                description: safePdfText(item.description),
+                assigned: safePdfText(item.assignedToName),
+                due: formatPdfDate(item.dueDate, language),
+                status: safePdfText(item.status),
+                meeting: safePdfText(meeting?.title),
+              };
+            }),
+            onPageBreak: header,
+          });
+          y += 18;
+        }
+      }
+
+      if (view === "meetings" && sections.has("linked_records")) {
+        ensureSpace(70);
+        doc
+          .font("Helvetica-Bold")
+          .fontSize(12)
+          .fillColor(PALETTE.TEXT)
+          .text(labelFor(language, "Linked Record Scope", "Alcance de registros vinculados"), M, y);
+        y += 16;
+        doc
+          .font("Helvetica")
+          .fontSize(9)
+          .fillColor(PALETTE.MUTED)
+          .text(
+            labelFor(
+              language,
+              "This current-view PDF includes linked-record counts only. Official per-meeting minutes PDFs remain the canonical detailed artifact for saved attendees, notes, action items, and linked record snapshots.",
+              "Este PDF de vista actual incluye solo conteos de registros vinculados. Los PDF oficiales por reunión siguen siendo el artefacto canónico detallado para asistentes, notas, acciones y snapshots vinculados.",
+            ),
+            M,
+            y,
+            { width: contentWidth },
+          );
+      }
+
+      const range = doc.bufferedPageRange();
+      for (let index = 0; index < range.count; index++) {
+        doc.switchToPage(index);
+        doc
+          .font("Helvetica")
+          .fontSize(7)
+          .fillColor(PALETTE.FOOTER)
+          .text(
+            `BIMLog by IgniteSmart · ${labelFor(language, "Page", "Página")} ${index + 1} ${labelFor(language, "of", "de")} ${range.count} · ${labelFor(language, "Generated", "Generado")} ${formatPdfDate(generatedAt, language)}`,
+            M,
+            570,
+            { width: contentWidth, align: "center" },
+          );
+      }
+      doc.end();
+    } catch (err) {
+      if (!res.headersSent) {
+        res.status(500).json({ error: "meeting_current_view_export_failed" });
+      } else {
+        res.end();
+      }
     }
   },
 );

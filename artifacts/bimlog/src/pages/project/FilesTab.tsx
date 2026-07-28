@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox } from "lucide-react";
+import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
 
@@ -73,6 +74,10 @@ interface DocumentFamily {
   versions: FileRow[];
 }
 
+type FileExportColumn = "name" | "type" | "status" | "declaration" | "uploader" | "date" | "versions";
+
+const FILE_EXPORT_COLUMNS: readonly FileExportColumn[] = ["name", "type", "status", "declaration", "uploader", "date", "versions"];
+
 function buildFamilies(files: FileRow[]): DocumentFamily[] {
   const roots = files.filter(f => f.parentFileId == null);
   const childrenByRoot = new Map<number, FileRow[]>();
@@ -99,9 +104,10 @@ function versionColor(v: number): string {
 }
 
 export function FilesTab({ projectId, canWrite = true }: { projectId: number; canWrite?: boolean }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const tr = (en: string, es: string) => lang === "es" ? es : en;
   const [, setLocation] = useLocation();
-  const { data: files, isLoading } = useListFiles(projectId);
+  const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
   const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -112,6 +118,16 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const [mismatchOverride, setMismatchOverride] = useState<Map<number, boolean>>(new Map());
   const [explainOpen, setExplainOpen] = useState<Map<number, boolean>>(new Map());
   const [explanationText, setExplanationText] = useState<Map<number, string>>(new Map());
+  const [fileQuery, setFileQuery] = useState("");
+  const [fileType, setFileType] = useState("all");
+  const [fileStatus, setFileStatus] = useState("all");
+  const [declaration, setDeclaration] = useState("all");
+  const [uploader, setUploader] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [exportColumns, setExportColumns] = useState<Set<FileExportColumn>>(new Set(FILE_EXPORT_COLUMNS));
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
 
   const toggleFamily = (rootId: number) =>
     setExpanded(prev => { const s = new Set(prev); s.has(rootId) ? s.delete(rootId) : s.add(rootId); return s; });
@@ -204,21 +220,173 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
 
   const families = files ? buildFamilies(files) : [];
   const versionedCount = families.filter(f => f.versions.length > 1).length;
+  const fileTypes = Array.from(new Set(families.map(({ versions }) => (versions[versions.length - 1].fileName.split(".").pop() || "file").toLowerCase()))).sort();
+  const uploaders = Array.from(new Set(families.map(({ versions }) => versions[versions.length - 1].uploadedByName || "").filter(Boolean))).sort();
+  const filteredFamilies = families.filter(({ root, versions }) => {
+    const latest = versions[versions.length - 1];
+    const query = fileQuery.trim().toLocaleLowerCase();
+    const extension = (latest.fileName.split(".").pop() || "file").toLowerCase();
+    const latestDate = new Date(latest.createdAt).getTime();
+    const from = dateFrom ? new Date(`${dateFrom}T00:00:00`).getTime() : null;
+    const to = dateTo ? new Date(`${dateTo}T23:59:59.999`).getTime() : null;
+    return (!query || root.fileName.toLocaleLowerCase().includes(query) || latest.fileName.toLocaleLowerCase().includes(query))
+      && (fileType === "all" || extension === fileType)
+      && (fileStatus === "all" || (fileStatus === "rejected" ? latest.status === "rejected" : latest.status !== "rejected"))
+      && (declaration === "all" || (latest.documentRelationship || "created") === declaration)
+      && (uploader === "all" || (latest.uploadedByName || "") === uploader)
+      && (from === null || latestDate >= from)
+      && (to === null || latestDate <= to);
+  });
+
+  const toggleExportColumn = (column: FileExportColumn) => {
+    setExportColumns((current) => {
+      const next = new Set(current);
+      next.has(column) ? next.delete(column) : next.add(column);
+      return next;
+    });
+  };
+
+  const exportCurrentView = async () => {
+    if (exportColumns.size === 0) return;
+    setExporting(true);
+    setExportError("");
+    try {
+      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+      if (!token) throw new Error("missing auth");
+      const params = new URLSearchParams({
+        lang,
+        columns: FILE_EXPORT_COLUMNS.filter((column) => exportColumns.has(column)).join(","),
+      });
+      if (fileQuery.trim()) params.set("q", fileQuery.trim());
+      if (fileType !== "all") params.set("type", fileType);
+      if (fileStatus !== "all") params.set("status", fileStatus);
+      if (declaration !== "all") params.set("declaration", declaration);
+      if (uploader !== "all") params.set("uploader", uploader);
+      if (dateFrom) params.set("dateFrom", new Date(`${dateFrom}T00:00:00`).toISOString());
+      if (dateTo) params.set("dateTo", new Date(`${dateTo}T23:59:59.999`).toISOString());
+      const response = await fetch(`/api/v1/projects/${projectId}/files/current-view.pdf?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error(`export ${response.status}`);
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `files-current-view-${projectId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(tr("The PDF could not be generated. Your filters were not changed.", "No se pudo generar el PDF. Tus filtros no cambiaron."));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const filterControlStyle = {
+    width: "100%",
+    minWidth: 0,
+    boxSizing: "border-box" as const,
+    marginTop: 5,
+    padding: "8px 9px",
+    border: "1px solid hsl(var(--border))",
+    borderRadius: 7,
+    background: "hsl(var(--background))",
+    color: "hsl(var(--foreground))",
+    fontSize: 12,
+  };
 
   return (
-    <div>
+    <div style={{ minWidth: 0 }}>
       {/* Header */}
-      <div className="section-header" style={{ marginBottom: 16 }}>
-        <div>
+      <div className="section-header" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
           <div className="section-title" style={{ fontSize: 16 }}>{t("project.tabs.files")}</div>
           <div className="section-sub">
-            {families.length} document{families.length !== 1 ? "s" : ""}
-            {" "}·{" "}{files?.length ?? 0} total versions
-            {" "}·{" "}{validCount} valid · {rejectedCount} rejected
-            {versionedCount > 0 && <> · <span style={{ color: "#7C3AED", fontWeight: 600 }}>{versionedCount} versioned</span></>}
+            {tr(`${filteredFamilies.length} of ${families.length} documents`, `${filteredFamilies.length} de ${families.length} documentos`)}
+            {" "}·{" "}{files?.length ?? 0} {tr("total versions", "versiones totales")}
+            {" "}·{" "}{validCount} {tr("valid", "válidos")} · {rejectedCount} {tr("rejected", "rechazados")}
+            {versionedCount > 0 && <> · <span style={{ color: "#7C3AED", fontWeight: 600 }}>{versionedCount} {tr("versioned", "con versiones")}</span></>}
           </div>
         </div>
+        <PrintPdfButton
+          lang={lang}
+          onClick={() => void exportCurrentView()}
+          loading={exporting}
+          disabled={isLoading || exportColumns.size === 0}
+          disabledReason={exportColumns.size === 0 ? tr("Select at least one visible column", "Selecciona al menos una columna visible") : undefined}
+          className="min-h-10 flex-[0_1_230px] whitespace-normal"
+        />
       </div>
+
+      <section aria-label={tr("Current view controls", "Controles de vista actual")} style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, marginBottom: 14, background: "hsl(var(--card))" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 145px), 1fr))", gap: 9 }}>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("Name", "Nombre")}
+            <input value={fileQuery} onChange={(event) => setFileQuery(event.target.value)} placeholder={tr("Search files", "Buscar archivos")} style={filterControlStyle} />
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("Type", "Tipo")}
+            <select value={fileType} onChange={(event) => setFileType(event.target.value)} style={filterControlStyle}>
+              <option value="all">{tr("All types", "Todos los tipos")}</option>
+              {fileTypes.map((type) => <option key={type} value={type}>{type.toUpperCase()}</option>)}
+            </select>
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("Status", "Estado")}
+            <select value={fileStatus} onChange={(event) => setFileStatus(event.target.value)} style={filterControlStyle}>
+              <option value="all">{tr("All statuses", "Todos los estados")}</option>
+              <option value="valid">{tr("Valid", "Válido")}</option>
+              <option value="rejected">{tr("Rejected", "Rechazado")}</option>
+            </select>
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("Declaration", "Declaración")}
+            <select value={declaration} onChange={(event) => setDeclaration(event.target.value)} style={filterControlStyle}>
+              <option value="all">{tr("All declarations", "Todas las declaraciones")}</option>
+              <option value="created">{tr("Created", "Creado")}</option>
+              <option value="modified">{tr("Modified", "Modificado")}</option>
+              <option value="reference">{tr("Reference", "Referencia")}</option>
+              <option value="supporting">{tr("Supporting", "Soporte")}</option>
+            </select>
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("Uploader", "Cargado por")}
+            <select value={uploader} onChange={(event) => setUploader(event.target.value)} style={filterControlStyle}>
+              <option value="all">{tr("All uploaders", "Todos los usuarios")}</option>
+              {uploaders.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("From", "Desde")}
+            <input type="date" value={dateFrom} max={dateTo || undefined} onChange={(event) => setDateFrom(event.target.value)} style={filterControlStyle} />
+          </label>
+          <label style={{ minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+            {tr("To", "Hasta")}
+            <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(event) => setDateTo(event.target.value)} style={filterControlStyle} />
+          </label>
+        </div>
+        <div style={{ marginTop: 11, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 11 }}>
+          <strong>{tr("PDF columns:", "Columnas PDF:")}</strong>
+          {FILE_EXPORT_COLUMNS.map((column) => {
+            const labels: Record<FileExportColumn, [string, string]> = {
+              name: ["Name", "Nombre"],
+              type: ["Type", "Tipo"],
+              status: ["Status", "Estado"],
+              declaration: ["Declaration", "Declaración"],
+              uploader: ["Uploader", "Cargado por"],
+              date: ["Date", "Fecha"],
+              versions: ["Versions", "Versiones"],
+            };
+            return (
+              <label key={column} style={{ display: "inline-flex", gap: 5, alignItems: "center" }}>
+                <input type="checkbox" checked={exportColumns.has(column)} onChange={() => toggleExportColumn(column)} />
+                {tr(...labels[column])}
+              </label>
+            );
+          })}
+        </div>
+        {exportColumns.size === 0 && <div style={{ marginTop: 8, color: "#B45309", fontSize: 11 }}>{tr("Select at least one PDF column.", "Selecciona al menos una columna PDF.")}</div>}
+        {exportError && <div role="alert" style={{ marginTop: 8, color: "#B91C1C", fontSize: 11 }}>{exportError}</div>}
+      </section>
 
       {/* Inline compliance notice */}
       {rejectedCount > 0 && (
@@ -247,9 +415,15 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         </div>
       )}
 
+      {isError && !isLoading && (
+        <div role="alert" style={{ padding: 18, border: "1px solid #FECACA", background: "#FEF2F2", borderRadius: 9, color: "#991B1B", fontSize: 13 }}>
+          {tr("Files could not be loaded. No export was generated.", "No se pudieron cargar los archivos. No se generó ninguna exportación.")}
+        </div>
+      )}
+
       {/* Document families table */}
-      {!isLoading && (
-        families.length > 0 ? (
+      {!isLoading && !isError && (
+        filteredFamilies.length > 0 ? (
           <div className="table-card">
             <table className="data-table">
               <thead>
@@ -264,7 +438,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                 </tr>
               </thead>
               <tbody>
-                {families.map(({ root, versions }) => {
+                {filteredFamilies.map(({ root, versions }) => {
                   const latest = versions[versions.length - 1];
                   const isMulti = versions.length > 1;
                   const isExp = expanded.has(root.id);
@@ -766,17 +940,24 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
             <div className="empty-icon">
               <FileText style={{ width: 22, height: 22, color: "hsl(var(--muted-foreground))" }} />
             </div>
-            <div className="empty-title">No files yet</div>
-            <div className="empty-desc" style={{ maxWidth: 460, margin: "0 auto" }}>
-              Files appear here automatically once you confirm them in the <strong>Coordination Hub</strong>.
-              The Hub reads each upload, proposes the correct name from your active convention, and writes the result here with full provenance.
-            </div>
-            <Link href={`/projects/${projectId}/coordination`}>
-              <Button size="sm" style={{ marginTop: 14, gap: 6 }}>
-                <Inbox style={{ width: 13, height: 13 }} />
-                Go to Coordination Hub
-              </Button>
-            </Link>
+            <div className="empty-title">{families.length === 0 ? tr("No files yet", "Aún no hay archivos") : tr("No files match the current filters", "Ningún archivo coincide con los filtros actuales")}</div>
+            {families.length === 0 ? (
+              <>
+                <div className="empty-desc" style={{ maxWidth: 460, margin: "0 auto" }}>
+                  {tr("Files appear here after they are confirmed in the Coordination Hub, with their provenance preserved.", "Los archivos aparecen aquí después de confirmarse en el Centro de Coordinación, con su procedencia conservada.")}
+                </div>
+                <Link href={`/projects/${projectId}/coordination`}>
+                  <Button size="sm" style={{ marginTop: 14, gap: 6 }}>
+                    <Inbox style={{ width: 13, height: 13 }} />
+                    {tr("Go to Coordination Hub", "Ir al Centro de Coordinación")}
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <div className="empty-desc" style={{ maxWidth: 460, margin: "0 auto" }}>
+                {tr("Adjust or clear a filter to restore matching records.", "Ajusta o elimina un filtro para recuperar registros coincidentes.")}
+              </div>
+            )}
           </div>
         )
       )}

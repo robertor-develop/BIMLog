@@ -2,13 +2,26 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import {
   companiesTable, projectDirectoryTable, usersTable, activityLogTable, projectInvitations,
+  projectsTable, projectMembersTable,
 } from "@workspace/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, asc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { sendEmail } from "../lib/email";
 import { singleFileUpload } from "../middlewares/multipart";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
+import {
+  addPageNumbers,
+  computeContentHash,
+  createPdfDocument,
+  drawBrandedHeader,
+  drawTable,
+  PALETTE,
+  REPORT_THEMES,
+  reportFileName,
+  sectionBar,
+  type TableColumn,
+} from "../lib/pdf-kit";
 
 const router: Router = Router();
 
@@ -24,6 +37,202 @@ const companyDirectoryEmail = (projectId: number, companyId: number, companyName
   return `project-${projectId}-company-${companyId}-${slug}@project-directory.local`;
 };
 
+type DirectoryScope = "all" | "members" | "contacts";
+type DirectoryRoleFilter = "all" | "admin" | "member" | "external";
+type DirectoryStatusFilter = "all" | "active" | "invited" | "external";
+type DirectorySort = "name" | "company" | "role" | "status";
+type DirectoryLang = "en" | "es";
+
+type DirectoryExportRow = {
+  source: "member" | "contact";
+  fullName: string;
+  email: string;
+  companyName: string | null;
+  role: string;
+  status: "active" | "invited" | "external";
+};
+
+const DIRECTORY_SCOPES = new Set<DirectoryScope>(["all", "members", "contacts"]);
+const DIRECTORY_ROLES = new Set<DirectoryRoleFilter>(["all", "admin", "member", "external"]);
+const DIRECTORY_STATUSES = new Set<DirectoryStatusFilter>(["all", "active", "invited", "external"]);
+const DIRECTORY_SORTS = new Set<DirectorySort>(["name", "company", "role", "status"]);
+
+function readEnum<T extends string>(value: unknown, allowed: Set<T>, fallback: T): T | null {
+  if (value === undefined || value === null || value === "") return fallback;
+  const normalized = String(value).trim().toLowerCase() as T;
+  return allowed.has(normalized) ? normalized : null;
+}
+
+function boolQuery(value: unknown, fallback: boolean): boolean | null {
+  if (value === undefined || value === null || value === "") return fallback;
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  return null;
+}
+
+function readLang(value: unknown): DirectoryLang {
+  return String(value ?? "").trim().toLowerCase() === "es" ? "es" : "en";
+}
+
+function normalizeSearch(value: unknown) {
+  return String(value ?? "").trim().slice(0, 120).toLowerCase();
+}
+
+function cleanPdfText(value: string | null | undefined) {
+  const text = String(value ?? "").trim();
+  return text || "-";
+}
+
+function directoryLabels(lang: DirectoryLang) {
+  const es = lang === "es";
+  return {
+    reportTitle: es ? "Vista actual del Directorio del Proyecto" : "Project Directory Current View",
+    reportSubtitle: es ? "Exportación filtrada del directorio del proyecto" : "Filtered project directory export",
+    preparedBy: es ? "Preparado por" : "Prepared by",
+    generated: es ? "Generado" : "Generated",
+    matching: es ? "Coincidencias" : "Matching",
+    of: es ? "de" : "of",
+    currentViewFilters: es ? "Filtros de vista actual" : "Current view filters",
+    visibleColumns: es ? "Columnas visibles" : "Visible columns",
+    selectedSections: es ? "Secciones seleccionadas" : "Selected sections",
+    sourceView: es ? "Vista origen" : "Source view",
+    projectDirectory: es ? "Directorio del Proyecto" : "Project Directory",
+    search: es ? "Búsqueda" : "Search",
+    scope: es ? "Alcance" : "Scope",
+    role: es ? "Rol" : "Role",
+    status: es ? "Estado" : "Status",
+    sort: es ? "Orden" : "Sort",
+    all: es ? "Todos" : "All",
+    none: es ? "Ninguna" : "None",
+    name: es ? "Nombre" : "Name",
+    email: es ? "Correo" : "Email",
+    company: es ? "Empresa" : "Company",
+    projectMembers: es ? "Miembros del Proyecto" : "Project Members",
+    additionalContacts: es ? "Contactos Adicionales" : "Additional Contacts",
+    allDirectoryRecords: es ? "Todos los registros" : "All Directory Records",
+    allRoles: es ? "Todos los roles" : "All Roles",
+    administrators: es ? "Administradores" : "Administrators",
+    externalContacts: es ? "Contactos Externos" : "External Contacts",
+    allStatuses: es ? "Todos los estados" : "All Statuses",
+    bimlogActive: es ? "BIMLog Activo" : "BIMLog Active",
+    invited: es ? "Invitado" : "Invited",
+    external: es ? "Externo" : "External",
+    directoryEmpty: es ? "Directorio vacío" : "Directory Empty",
+    filteredViewEmpty: es ? "Vista filtrada vacía" : "Filtered View Empty",
+    emptyProject: es ? "No se han agregado registros al directorio de este proyecto." : "No directory records have been added to this project.",
+    emptyFiltered: es ? "Ningún registro del directorio coincide con los filtros actuales." : "No directory records match the current filters.",
+    noMemberMatches: es ? "Ningún miembro del proyecto coincide con esta vista." : "No project members match this view.",
+    noContactMatches: es ? "Ningún contacto adicional coincide con esta vista." : "No additional contacts match this view.",
+    duplicateConsolidation: es ? "Correos duplicados consolidados bajo Miembros del Proyecto" : "Duplicate contact emails consolidated under Project Members",
+  };
+}
+
+function scopeLabel(scope: DirectoryScope, labels: ReturnType<typeof directoryLabels>) {
+  if (scope === "members") return labels.projectMembers;
+  if (scope === "contacts") return labels.additionalContacts;
+  return labels.allDirectoryRecords;
+}
+
+function roleLabel(role: DirectoryRoleFilter, labels: ReturnType<typeof directoryLabels>) {
+  if (role === "admin") return labels.administrators;
+  if (role === "member") return labels.projectMembers;
+  if (role === "external") return labels.externalContacts;
+  return labels.allRoles;
+}
+
+function statusLabel(status: DirectoryStatusFilter, labels: ReturnType<typeof directoryLabels>) {
+  if (status === "active") return labels.bimlogActive;
+  if (status === "invited") return labels.invited;
+  if (status === "external") return labels.external;
+  return labels.allStatuses;
+}
+
+function sortLabel(sort: DirectorySort, labels: ReturnType<typeof directoryLabels>) {
+  if (sort === "company") return labels.company;
+  if (sort === "role") return labels.role;
+  if (sort === "status") return labels.status;
+  return labels.name;
+}
+
+function directoryStatusLabel(status: DirectoryExportRow["status"], labels: ReturnType<typeof directoryLabels>) {
+  if (status === "active") return labels.bimlogActive;
+  if (status === "invited") return labels.invited;
+  return labels.external;
+}
+
+async function buildDirectoryRows(projectId: number): Promise<DirectoryExportRow[]> {
+  const [members, directoryRows] = await Promise.all([
+    db.select({
+      memberId: projectMembersTable.id,
+      fullName: usersTable.fullName,
+      email: usersTable.email,
+      companyName: companiesTable.name,
+      role: projectMembersTable.role,
+    })
+      .from(projectMembersTable)
+      .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
+      .leftJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+      .where(eq(projectMembersTable.projectId, projectId))
+      .orderBy(asc(usersTable.fullName)),
+    db.select().from(projectDirectoryTable)
+      .where(eq(projectDirectoryTable.projectId, projectId))
+      .orderBy(asc(projectDirectoryTable.fullName)),
+  ]);
+
+  const memberEmails = new Set(members.map(m => (m.email || "").trim().toLowerCase()));
+  const memberRows: DirectoryExportRow[] = members.map(m => ({
+    source: "member",
+    fullName: m.fullName,
+    email: m.email,
+    companyName: m.companyName || null,
+    role: m.role,
+    status: "active",
+  }));
+  const contactRows: DirectoryExportRow[] = directoryRows
+    .filter(row => !memberEmails.has((row.email || "").trim().toLowerCase()))
+    .map(row => ({
+      source: "contact",
+      fullName: row.fullName,
+      email: row.email,
+      companyName: row.companyName || null,
+      role: row.role,
+      status: row.bimlogStatus === "invited" ? "invited" : "external",
+    }));
+  return [...memberRows, ...contactRows];
+}
+
+function filterDirectoryRows(rows: DirectoryExportRow[], options: {
+  search: string;
+  scope: DirectoryScope;
+  role: DirectoryRoleFilter;
+  status: DirectoryStatusFilter;
+  sort: DirectorySort;
+  includeMembers: boolean;
+  includeContacts: boolean;
+}) {
+  const filtered = rows.filter(row => {
+    if (!options.includeMembers && row.source === "member") return false;
+    if (!options.includeContacts && row.source === "contact") return false;
+    if (options.scope === "members" && row.source !== "member") return false;
+    if (options.scope === "contacts" && row.source !== "contact") return false;
+    if (options.role === "admin" && !["admin", "project_admin"].includes(row.role)) return false;
+    if (options.role === "member" && (row.source !== "member" || ["admin", "project_admin"].includes(row.role))) return false;
+    if (options.role === "external" && row.source !== "contact") return false;
+    if (options.status !== "all" && row.status !== options.status) return false;
+    if (!options.search) return true;
+    return [row.fullName, row.email, row.companyName, row.role, row.status]
+      .some(value => String(value || "").toLowerCase().includes(options.search));
+  });
+  const read = (row: DirectoryExportRow) => {
+    if (options.sort === "company") return row.companyName || "";
+    if (options.sort === "role") return row.role || "";
+    if (options.sort === "status") return row.status || "";
+    return row.fullName || "";
+  };
+  return filtered.sort((a, b) => read(a).localeCompare(read(b)) || a.fullName.localeCompare(b.fullName));
+}
+
 // ── GET /projects/:projectId/directory ────────────────────────────────────────
 router.get("/projects/:projectId/directory", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
@@ -38,6 +247,186 @@ router.get("/projects/:projectId/directory", authMiddleware, requireProjectMembe
 });
 
 // ── POST /projects/:projectId/directory ───────────────────────────────────────
+router.get("/projects/:projectId/directory/export-pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const reportDate = new Date();
+  try {
+    const lang = readLang(req.query.lang);
+    const labels = directoryLabels(lang);
+    const scope = readEnum(req.query.scope, DIRECTORY_SCOPES, "all");
+    const role = readEnum(req.query.role, DIRECTORY_ROLES, "all");
+    const status = readEnum(req.query.status, DIRECTORY_STATUSES, "all");
+    const sort = readEnum(req.query.sort, DIRECTORY_SORTS, "name");
+    if (!scope || !role || !status || !sort) {
+      res.status(400).json({ error: "Invalid directory export filter" });
+      return;
+    }
+
+    const includeMembers = boolQuery(req.query.include_members, true);
+    const includeContacts = boolQuery(req.query.include_contacts, true);
+    const includeEmail = boolQuery(req.query.include_email, true);
+    const includeCompany = boolQuery(req.query.include_company, true);
+    const includeRole = boolQuery(req.query.include_role, true);
+    const includeStatus = boolQuery(req.query.include_status, true);
+    if (includeMembers === null || includeContacts === null || includeEmail === null || includeCompany === null || includeRole === null || includeStatus === null) {
+      res.status(400).json({ error: "Invalid directory export boolean option" });
+      return;
+    }
+
+    const options = {
+      search: normalizeSearch(req.query.search),
+      scope,
+      role,
+      status,
+      sort,
+      includeMembers,
+      includeContacts,
+      includeEmail,
+      includeCompany,
+      includeRole,
+      includeStatus,
+    };
+    if (!options.includeMembers && !options.includeContacts) {
+      res.status(400).json({ error: "Select at least one directory section" });
+      return;
+    }
+
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
+
+    const allRows = await buildDirectoryRows(projectId);
+    const filteredRows = filterDirectoryRows(allRows, options);
+    const memberRows = filteredRows.filter(row => row.source === "member");
+    const contactRows = filteredRows.filter(row => row.source === "contact");
+    const duplicateContactCount = Math.max(0, (await db.select().from(projectDirectoryTable).where(eq(projectDirectoryTable.projectId, projectId))).length - allRows.filter(row => row.source === "contact").length);
+    const reportNumber = `DIR-${project.code}-${reportDate.toISOString().replace(/[-:TZ.]/g, "").slice(0, 14)}`;
+    const reportTitle = labels.reportTitle;
+    const fileName = reportFileName(reportTitle);
+    const filterSummary = [
+      `${labels.search}: ${options.search || labels.all}`,
+      `${labels.scope}: ${scopeLabel(scope, labels)}`,
+      `${labels.role}: ${roleLabel(role, labels)}`,
+      `${labels.status}: ${statusLabel(status, labels)}`,
+      `${labels.sort}: ${sortLabel(sort, labels)}`,
+    ];
+    const selectedSections = [
+      options.includeMembers ? labels.projectMembers : "",
+      options.includeContacts ? labels.additionalContacts : "",
+    ].filter(Boolean);
+    const visibleColumns = [
+      labels.name,
+      options.includeEmail ? labels.email : "",
+      options.includeCompany ? labels.company : "",
+      options.includeRole ? labels.role : "",
+      options.includeStatus ? labels.status : "",
+    ].filter(Boolean);
+    const snapshot = {
+      projectId,
+      reportNumber,
+      generatedAt: reportDate.toISOString(),
+      filters: { ...options, labels: { scope: scopeLabel(scope, labels), role: roleLabel(role, labels), status: statusLabel(status, labels), sort: sortLabel(sort, labels) } },
+      selectedSections,
+      visibleColumns,
+      matchingCount: filteredRows.length,
+      totalCount: allRows.length,
+      duplicateContactCount,
+      rows: filteredRows,
+    };
+    const contentHash = computeContentHash(snapshot);
+
+    const doc = createPdfDocument({ size: "LETTER", margin: 40, bufferPages: true, autoFirstPage: true });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("X-Report-Filename", fileName);
+    doc.pipe(res);
+
+    const theme = REPORT_THEMES.platform.standard;
+    doc.y = drawBrandedHeader(doc, {
+      margin: 40,
+      companyName: "BIMLog",
+      title: reportTitle,
+      subtitle: labels.reportSubtitle,
+      projectName: project.name,
+      projectCode: project.code,
+      reportNumber,
+      reportDate,
+      theme,
+    }) + 12;
+
+    doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.TEXT)
+      .text(`${labels.preparedBy}: ${req.user!.fullName} | ${labels.generated}: ${reportDate.toISOString()} | ${labels.matching}: ${filteredRows.length} ${labels.of} ${allRows.length}`, 40, doc.y, { width: 532 });
+    doc.moveDown(0.6);
+    doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.MUTED)
+      .text(`${labels.currentViewFilters}: ${filterSummary.join(" | ")}`, 40, doc.y, { width: 532 });
+    doc.moveDown(0.5);
+    doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.MUTED)
+      .text(`${labels.selectedSections}: ${selectedSections.join(", ") || labels.none} | ${labels.visibleColumns}: ${visibleColumns.join(", ")} | ${labels.sourceView}: ${labels.projectDirectory}`, 40, doc.y, { width: 532 });
+    if (duplicateContactCount > 0) {
+      doc.moveDown(0.5);
+      doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.MUTED)
+        .text(`${labels.duplicateConsolidation}: ${duplicateContactCount}`, 40, doc.y, { width: 532 });
+    }
+    doc.moveDown(1);
+
+    const makeColumns = (): TableColumn[] => {
+      const columns: TableColumn[] = [
+        { label: labels.name, width: 125, wrap: true, bold: true, format: row => cleanPdfText(row.fullName) },
+      ];
+      if (options.includeEmail) columns.push({ label: labels.email, width: 135, wrap: true, format: row => cleanPdfText(row.email) });
+      if (options.includeCompany) columns.push({ label: labels.company, width: 115, wrap: true, format: row => cleanPdfText(row.companyName) });
+      if (options.includeRole) columns.push({ label: labels.role, width: 80, wrap: true, format: row => cleanPdfText(row.role) });
+      if (options.includeStatus) columns.push({ label: labels.status, width: 75, format: row => directoryStatusLabel(row.status, labels) });
+      return columns;
+    };
+    const columns = makeColumns();
+    const pageHeader = () => {
+      doc.addPage();
+      return drawBrandedHeader(doc, {
+        margin: 40,
+        companyName: "BIMLog",
+        title: reportTitle,
+        projectName: project.name,
+        projectCode: project.code,
+        reportNumber,
+        reportDate,
+        theme,
+      }) + 12;
+    };
+    let y = doc.y;
+    if (filteredRows.length === 0) {
+      const message = allRows.length === 0
+        ? labels.emptyProject
+        : labels.emptyFiltered;
+      y = sectionBar(doc, allRows.length === 0 ? labels.directoryEmpty : labels.filteredViewEmpty, y, { theme });
+      doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(message, 40, y, { width: 532 });
+    } else {
+      if (options.includeMembers) {
+        y = sectionBar(doc, `${labels.projectMembers} (${memberRows.length})`, y, { theme });
+        if (memberRows.length) y = drawTable(doc, { x: 40, startY: y, columns, rows: memberRows, fontSize: 7, headerFontSize: 7, rowMinHeight: 26, pageBottom: 710, onPageBreak: pageHeader });
+        else doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(labels.noMemberMatches, 40, y, { width: 532 });
+        y = doc.y + 12;
+      }
+      if (options.includeContacts) {
+        if (y > 650) y = pageHeader();
+        y = sectionBar(doc, `${labels.additionalContacts} (${contactRows.length})`, y, { theme });
+        if (contactRows.length) drawTable(doc, { x: 40, startY: y, columns, rows: contactRows, fontSize: 7, headerFontSize: 7, rowMinHeight: 26, pageBottom: 710, onPageBreak: pageHeader });
+        else doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(labels.noContactMatches, 40, y, { width: 532 });
+      }
+    }
+
+    addPageNumbers(doc, {
+      margin: 40,
+      projectName: project.name,
+      timestamp: reportDate.toLocaleDateString("en-US"),
+      reportNumber,
+      contentHash,
+    });
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ error: "directory_export_failed" });
+  }
+});
+
 router.post("/projects/:projectId/directory", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const { full_name, email, company_name, role, notes } = req.body as {

@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import AdmZip from "adm-zip";
+import { createHash } from "crypto";
 import { FinancialControlError } from "./financial-control-contract";
 import { exactSignedDecimal } from "./financial-budget-contract";
 
@@ -47,6 +48,129 @@ const safe = (v: unknown) => {
     return "Protected value";
   return s;
 };
+
+export type BudgetCurrentViewExport = {
+  project: { name: string; code: string; companyName: string };
+  generatedAt: string;
+  generatedBy: string;
+  reportTitle: string;
+  reportNumber: string;
+  view: "structure" | "budget" | "history" | "snapshot";
+  language: "en" | "es";
+  filters: string[];
+  totals: Array<{ label: string; value: string }>;
+  sections: Array<{
+    title: string;
+    emptyLabel: string;
+    columns: string[];
+    rows: string[][];
+  }>;
+  hashPayload: unknown;
+};
+
+export function budgetCurrentViewFileName(data: Pick<BudgetCurrentViewExport, "view" | "project" | "language">) {
+  const title = data.language === "es" ? "presupuesto-vista-actual" : "budget-current-view";
+  const view = safe(data.view).replace(/[^A-Za-z0-9]+/g, "-");
+  const code = safe(data.project.code).replace(/[^A-Za-z0-9]+/g, "-");
+  return `${title}-${view}-${code}.pdf`.replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
+export async function buildBudgetCurrentViewPdf(data: BudgetCurrentViewExport): Promise<Buffer> {
+  const doc = new PDFDocument({
+      size: "LETTER",
+      layout: "landscape",
+      margin: 40,
+      bufferPages: true,
+      info: {
+        Title: safe(data.reportTitle),
+        Author: "BIMLog",
+        Subject: "Budget current-view export",
+      },
+    }),
+    chunks: Buffer[] = [];
+  doc.on("data", (c) => chunks.push(c));
+  const contentHash = createHash("sha256").update(JSON.stringify(data.hashPayload)).digest("hex");
+  const width = doc.page.width - 80;
+  const chrome = {
+    generated: data.language === "es" ? "Generado" : "Generated",
+    by: data.language === "es" ? "Por" : "By",
+    reportNo: data.language === "es" ? "Reporte No." : "Report No.",
+    fingerprint: data.language === "es" ? "Huella SHA-256" : "SHA-256 fingerprint",
+    page: data.language === "es" ? "Pagina" : "Page",
+    of: data.language === "es" ? "de" : "of",
+  };
+  const drawHeader = () => {
+    doc.rect(0, 0, doc.page.width, 58).fill("#1E3A5F");
+    doc.fillColor("#FFFFFF").fontSize(16).font("Helvetica-Bold").text("BIMLog", 40, 14, { width: 180 });
+    doc.fontSize(13).text(safe(data.reportTitle), 260, 14, { width: doc.page.width - 300, align: "right" });
+    doc.fontSize(8).font("Helvetica").text(`${safe(data.project.name)} (${safe(data.project.code)})`, 260, 34, { width: doc.page.width - 300, align: "right" });
+    doc.fillColor("#000000");
+    return 74;
+  };
+  let y = drawHeader();
+  doc.fontSize(10).font("Helvetica").text(`${safe(data.project.companyName)} | ${chrome.generated}: ${safe(data.generatedAt)} | ${chrome.by}: ${safe(data.generatedBy)}`, 40, y, { width });
+  y += 16;
+  doc.fontSize(8).fillColor("#5B6572").text(data.filters.map(safe).join(" | "), 40, y, { width, lineGap: 2 });
+  y = doc.y + 12;
+  const cardWidth = Math.min(170, (width - 24) / Math.max(1, data.totals.length));
+  data.totals.forEach((card, index) => {
+    const x = 40 + index * (cardWidth + 8);
+    doc.rect(x, y, cardWidth, 42).stroke("#D1D5DB");
+    doc.fontSize(7).font("Helvetica-Bold").fillColor("#5B6572").text(safe(card.label).toUpperCase(), x + 7, y + 8, { width: cardWidth - 14 });
+    doc.fontSize(12).fillColor("#000000").text(safe(card.value), x + 7, y + 22, { width: cardWidth - 14 });
+  });
+  y += data.totals.length ? 58 : 8;
+  for (const section of data.sections) {
+    if (y > 500) {
+      doc.addPage();
+      y = drawHeader();
+    }
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("#1E3A5F").text(safe(section.title), 40, y);
+    y += 18;
+    if (!section.rows.length) {
+      doc.fontSize(9).font("Helvetica").fillColor("#5B6572").text(safe(section.emptyLabel), 40, y, { width });
+      y = doc.y + 16;
+      continue;
+    }
+    const colWidth = width / section.columns.length;
+    doc.rect(40, y, width, 18).fill("#EEF3F8");
+    section.columns.forEach((column, index) => {
+      doc.fillColor("#000000").fontSize(7).font("Helvetica-Bold").text(safe(column), 44 + index * colWidth, y + 5, { width: colWidth - 8, lineBreak: false, ellipsis: true });
+    });
+    y += 18;
+    section.rows.forEach((row, rowIndex) => {
+      const rowHeight = 26;
+      if (y + rowHeight > 540) {
+        doc.addPage();
+        y = drawHeader();
+      }
+      if (rowIndex % 2) doc.rect(40, y, width, rowHeight).fill("#F8FAFC");
+      row.forEach((value, index) => {
+        doc.fillColor("#000000").fontSize(7).font("Helvetica").text(safe(value), 44 + index * colWidth, y + 5, { width: colWidth - 8, height: rowHeight - 8, ellipsis: true });
+      });
+      doc.rect(40, y, width, rowHeight).stroke("#E5E7EB");
+      y += rowHeight;
+    });
+    y += 16;
+  }
+  if (y > 500) {
+    doc.addPage();
+    y = drawHeader();
+  }
+  doc.fontSize(8).fillColor("#5B6572").text(`${chrome.reportNo}: ${safe(data.reportNumber)}`, 40, Math.max(y, 500), { width });
+  doc.text(`${chrome.fingerprint}: ${contentHash}`, 40, doc.y + 4, { width });
+  const range = doc.bufferedPageRange();
+  for (let i = 0; i < range.count; i++) {
+    doc.switchToPage(i);
+    doc.fontSize(8).fillColor("#6B7280").text(`BIMLog by IgniteSmart | ${safe(data.reportNumber)} | ${chrome.page} ${i + 1} ${chrome.of} ${range.count}`, 40, 558, { width, align: "center" });
+  }
+  doc.end();
+  return new Promise((resolve, reject) => {
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+  });
+}
+
 export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
   const doc = new PDFDocument({
       size: "LETTER",

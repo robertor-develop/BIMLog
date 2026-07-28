@@ -109,6 +109,22 @@ function escapeJsonStringControlChars(text: string): { repaired: string; fixes: 
 
 const router: Router = Router();
 
+const currentViewLabel = (lang: "en" | "es", en: string, es: string) => (lang === "es" ? es : en);
+
+const clashStatusPdfLabel = (status: string, lang: "en" | "es") => {
+  const labels: Record<string, { en: string; es: string }> = {
+    all: { en: "All statuses", es: "Todos los estados" },
+    open: { en: "Active", es: "Activo" },
+    follow_up: { en: "Follow Up", es: "Seguimiento" },
+    waiting_design: { en: "Waiting Design", es: "Esperando Diseno" },
+    in_progress: { en: "In Progress", es: "En Progreso" },
+    approved: { en: "Approved", es: "Aprobado" },
+    resolved: { en: "Resolved", es: "Resuelto" },
+    wont_fix: { en: "Won't Fix", es: "No se corregira" },
+  };
+  return labels[status]?.[lang] || status.replace(/_/g, " ");
+};
+
 // Thrown inside the reassign transaction when the old row is no longer active by
 // the time we go to supersede it (concurrent double-submit). Maps to HTTP 409.
 class ReassignConflict extends Error {
@@ -2183,6 +2199,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const includeNonActive = body.includeNonActive === true;
       const includeResolved = body.includeResolved !== false;
       const showGroupIds = body.showGroupIds !== false;
+      const showLifecycleState = body.showLifecycleState !== false;
+      const showRevisionColumn = body.showRevisionColumn !== false;
       const includeAuditRecords = body.includeAuditRecords === true;
       const includeReportHistory = body.includeReportHistory === true;
       // The Revision History appendix can be omitted entirely (default: included).
@@ -2298,7 +2316,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -2384,6 +2402,11 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return predecessor ? codeOf(predecessor) : "-";
       };
       const groupTokenOf = (v: typeof vps[number]) => v.issueGroupId ? `G:${String(v.issueGroupId).replace(/-/g, "").slice(0, 4).toUpperCase()}` : "-";
+      const lensRegisterColumnSummary = [
+        showGroupIds ? "Group" : "",
+        showLifecycleState ? "State" : "",
+        showRevisionColumn ? "Revision" : "",
+      ].filter(Boolean).join(", ") || "Standard";
 
       // -- COVER PAGE (shared helper) --
       const projectAddress = typeof project.location === "string" ? project.location.trim() : "";
@@ -2440,7 +2463,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       vps.forEach(v => { const s = v.lifecycleStatus ?? "active"; if (lcCounts[s] !== undefined) lcCounts[s]++; });
       doc.fontSize(8).font("Helvetica").fillColor("#6B7280")
         .text(`State:  Current ${lcCounts.active}   |   Superseded ${lcCounts.superseded}   |   Voided ${lcCounts.voided}`, M, cardY + 60, { width: CW });
-      doc.y = cardY + 78;
+      doc.fontSize(8).font("Helvetica").fillColor("#6B7280")
+        .text(`Visible columns: ${lensRegisterColumnSummary}`, M, cardY + 72, { width: CW });
+      doc.y = cardY + 90;
 
       // Breakdown columns: by trade / floor / status
       const tally = (key: "trade" | "floor" | "status") => {
@@ -2505,16 +2530,19 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
 
+        const dynamicNoteWidth = Math.max(96, 214 - (showGroupIds ? 40 : 0) - (showLifecycleState ? 48 : 0) - (showRevisionColumn ? 34 : 0));
         const registerColumns = [
           { label: "ID", width: 54, bold: true, format: (v: any) => idText(v) },
           { label: "From", width: 44, format: (v: any) => predecessorCodeOf(v) },
           ...(showGroupIds ? [{ label: "Group", width: 40, format: (v: any) => groupTokenOf(v) }] : []),
+          ...(showLifecycleState ? [{ label: "State", width: 48, format: (v: any) => lifecycleLabel(v.lifecycleStatus ?? "active") }] : []),
+          ...(showRevisionColumn ? [{ label: "Rev", width: 34, align: "center" as const, format: (v: any) => v.revisionNumber ?? 1 }] : []),
           { label: "Priority", width: 42, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
           { label: "Trade", width: 56, format: (v: any) => v.trade || "-" },
           { label: "Responsible", width: 74, format: (v: any) => v.responsibleCompany || "-" },
           { label: "Report Type", width: 62, format: (v: any) => v.reportType || "-" },
           { label: "Floor", width: 38, format: (v: any) => v.floor || "-" },
-          { label: "Note", width: showGroupIds ? 174 : 214, wrap: true, format: (v: any) => v.note || "-" },
+          { label: "Note", width: dynamicNoteWidth, wrap: true, format: (v: any) => v.note || "-" },
           { label: "Status", width: 54, format: (v: any) => statusLabel(v.status) },
           { label: "Captured", width: 54, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
         ];
@@ -2665,6 +2693,221 @@ router.get("/projects/:projectId/clashes/:clashId", authMiddleware, requireProje
     res.json(row);
   } catch { res.status(500).json({ error: "clash_lookup_failed" }); }
 });
+
+router.get(
+  "/projects/:projectId/clash-reports/:reportId/current-view/pdf",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const reportId = Number(req.params.reportId);
+    const lang = req.query.lang === "es" ? "es" : "en";
+    const priority = typeof req.query.priority === "string" ? req.query.priority : "all";
+    const status = typeof req.query.status === "string" ? req.query.status : "all";
+    const search = typeof req.query.search === "string" ? req.query.search.trim().toLowerCase() : "";
+    const view = typeof req.query.view === "string" ? req.query.view : "normal";
+    const allowedPriorities = new Set(["all", "P1", "P2", "P3", "P4"]);
+    const allowedStatuses = new Set(["all", "open", "follow_up", "waiting_design", "in_progress", "approved", "resolved", "wont_fix"]);
+    const allowedViews = new Set(["normal", "grouped"]);
+    if (!Number.isInteger(reportId) || reportId <= 0) {
+      res.status(400).json({ error: "invalid_report_id" });
+      return;
+    }
+    if (!allowedPriorities.has(priority)) {
+      res.status(400).json({ error: "invalid_priority" });
+      return;
+    }
+    if (!allowedStatuses.has(status)) {
+      res.status(400).json({ error: "invalid_status" });
+      return;
+    }
+    if (!allowedViews.has(view)) {
+      res.status(400).json({ error: "invalid_view" });
+      return;
+    }
+    try {
+      const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+      if (!project) {
+        res.status(404).json({ error: "project_not_found" });
+        return;
+      }
+      const [report] = await db.select().from(clashReportsTable)
+        .where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)))
+        .limit(1);
+      if (!report) {
+        res.status(404).json({ error: "report_not_found" });
+        return;
+      }
+      const allClashes = await db.select().from(clashesTable)
+        .where(and(eq(clashesTable.clashReportId, reportId), isNull(clashesTable.deletedAt)));
+      const order: Record<string, number> = { P1: 0, P2: 1, P3: 2, P4: 3 };
+      const filtered = allClashes
+        .filter(c => priority === "all" || c.priority === priority)
+        .filter(c => status === "all" || c.status === status)
+        .filter(c => {
+          if (!search) return true;
+          const haystack = [c.description, c.element1].filter(Boolean).join(" ").toLowerCase();
+          return haystack.includes(search);
+        })
+        .sort((a, b) => (order[a.priority ?? ""] ?? 4) - (order[b.priority ?? ""] ?? 4));
+
+      const generatedAt = new Date();
+      const title = currentViewLabel(lang, "Clash Current View PDF", "PDF de vista actual de Choques");
+      const reportNumber = report.reportNumber || `Clash-${reportId}`;
+      const sourceView = view === "grouped"
+        ? currentViewLabel(lang, "Grouped", "Agrupado")
+        : currentViewLabel(lang, "Normal", "Normal");
+      const filterSummary = [
+        `${currentViewLabel(lang, "Project", "Proyecto")}: ${project.name}`,
+        `${currentViewLabel(lang, "Report", "Reporte")}: ${reportNumber}`,
+        `${currentViewLabel(lang, "Source view", "Vista fuente")}: ${sourceView}`,
+        `${currentViewLabel(lang, "Priority", "Prioridad")}: ${priority === "all" ? currentViewLabel(lang, "All priorities", "Todas las prioridades") : priority}`,
+        `${currentViewLabel(lang, "Status", "Estado")}: ${clashStatusPdfLabel(status, lang)}`,
+        search ? `${currentViewLabel(lang, "Search", "Busqueda")}: ${search}` : "",
+        `${currentViewLabel(lang, "Result count", "Cantidad de resultados")}: ${filtered.length}/${allClashes.length}`,
+      ].filter(Boolean);
+      const contentHash = computeContentHash({
+        projectId,
+        reportId,
+        generatedAt: generatedAt.toISOString(),
+        filters: { priority, status, search, view },
+        rows: filtered.map(c => ({
+          id: c.id,
+          clashIdOriginal: c.clashIdOriginal,
+          description: c.description,
+          priority: c.priority,
+          status: c.status,
+          discipline1: c.discipline1,
+          discipline2: c.discipline2,
+          level: c.level,
+          floor: c.level,
+          assignedToName: c.assignedToName,
+          dueDate: c.dueDate,
+        })),
+      });
+      const theme = REPORT_THEMES.clash.coordination;
+      const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(`${reportNumber} - Clash Current View`)}"`);
+      doc.pipe(res);
+
+      const M = 40;
+      const W = doc.page.width;
+      const CW = W - M * 2;
+      doc.rect(0, 0, W, 88).fill(theme.dark);
+      doc.fontSize(18).font("Helvetica-Bold").fillColor("white").text(title, M, 22, { width: CW });
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
+        .text(`${currentViewLabel(lang, "Generated", "Generado")}: ${generatedAt.toLocaleString("en-US")}`, M, 50, { width: CW });
+      doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
+        .text(`${currentViewLabel(lang, "Prepared by", "Preparado por")}: ${req.user!.fullName ?? ""}`, M, 64, { width: CW });
+      doc.y = 108;
+      doc.fontSize(12).font("Helvetica-Bold").fillColor(PALETTE.TEXT).text(project.name, M, doc.y);
+      doc.moveDown(0.4);
+      doc.fontSize(8).font("Helvetica").fillColor(PALETTE.MUTED).text(filterSummary.join(" | "), M, doc.y, { width: CW });
+      doc.moveDown(1);
+
+      const cards: Array<[string, string]> = [
+        [currentViewLabel(lang, "Visible clashes", "Choques visibles"), String(filtered.length)],
+        ["P1", String(filtered.filter(c => c.priority === "P1").length)],
+        ["P2", String(filtered.filter(c => c.priority === "P2").length)],
+        [currentViewLabel(lang, "Open", "Abiertos"), String(filtered.filter(c => c.status === "open").length)],
+      ];
+      const cardW = (CW - 24) / 4;
+      const cardY = doc.y;
+      cards.forEach(([label, value], index) => {
+        const x = M + index * (cardW + 8);
+        doc.rect(x, cardY, cardW, 44).stroke(PALETTE.LINE);
+        doc.fontSize(7).font(PALETTE.FONT_BOLD).fillColor(PALETTE.MUTED).text(label.toUpperCase(), x + 8, cardY + 8, { width: cardW - 16 });
+        doc.fontSize(16).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT).text(value, x + 8, cardY + 22, { width: cardW - 16 });
+      });
+      doc.y = cardY + 62;
+
+      const columns = [
+        { label: currentViewLabel(lang, "Priority", "Prioridad"), width: 48, format: (r: any) => r.priority || "-" },
+        { label: currentViewLabel(lang, "Viewpoint", "Vista"), width: 70, format: (r: any) => r.clashIdOriginal || "-" },
+        { label: currentViewLabel(lang, "Description", "Descripcion"), width: 190, wrap: true, format: (r: any) => r.description || "-" },
+        { label: currentViewLabel(lang, "Trade", "Disciplina"), width: 70, format: (r: any) => r.discipline1 || "-" },
+        { label: currentViewLabel(lang, "Floor", "Piso"), width: 70, format: (r: any) => r.floor || r.level || "-" },
+        { label: currentViewLabel(lang, "Status", "Estado"), width: 80, format: (r: any) => clashStatusPdfLabel(r.status || "open", lang) },
+        { label: currentViewLabel(lang, "Responsible", "Responsable"), width: 95, format: (r: any) => r.assignedToName || "-" },
+        { label: currentViewLabel(lang, "Deadline", "Fecha limite"), width: 70, format: (r: any) => r.dueDate && !String(r.dueDate).startsWith("1970") ? new Date(r.dueDate).toLocaleDateString("en-US") : "-" },
+      ];
+      if (filtered.length > 0) {
+        const onPageBreak = () => {
+          doc.rect(0, 0, W, 25).fill(theme.dark);
+          doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${project.name} - ${title}`, M, 8, { width: CW });
+          return 35;
+        };
+        const renderRows = (rows: typeof filtered) => drawTable(doc, {
+          x: M,
+          startY: doc.y,
+          columns,
+          rows,
+          fontSize: 7,
+          headerFontSize: 7,
+          rowMinHeight: 26,
+          pageBottom: 540,
+          onPageBreak,
+        });
+        if (view === "grouped") {
+          const buildings: Record<string, Record<string, Record<string, typeof filtered>>> = {};
+          for (const c of filtered) {
+            const building = ((c as any).building?.toString().trim()) || currentViewLabel(lang, "Unassigned Building", "Edificio sin asignar");
+            const floor = (c.level?.toString().trim()) || currentViewLabel(lang, "Unassigned Floor", "Piso sin asignar");
+            const rowStatus = (c.status?.toString().trim()) || "open";
+            if (!buildings[building]) buildings[building] = {};
+            if (!buildings[building][floor]) buildings[building][floor] = {};
+            if (!buildings[building][floor][rowStatus]) buildings[building][floor][rowStatus] = [];
+            buildings[building][floor][rowStatus].push(c);
+          }
+          for (const building of Object.keys(buildings).sort()) {
+            const floors = buildings[building];
+            const buildingCount = Object.values(floors).reduce((n, statuses) => n + Object.values(statuses).reduce((m, rows) => m + rows.length, 0), 0);
+            if (doc.y + 48 > 540) doc.y = onPageBreak();
+            doc.rect(M, doc.y, CW, 18).fill(theme.dark);
+            doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(`${building} (${buildingCount})`, M + 6, doc.y + 5, { width: CW - 12 });
+            doc.y += 22;
+            for (const floor of Object.keys(floors).sort()) {
+              const statuses = floors[floor];
+              const floorCount = Object.values(statuses).reduce((m, rows) => m + rows.length, 0);
+              if (doc.y + 42 > 540) doc.y = onPageBreak();
+              doc.rect(M, doc.y, CW, 16).fill("#EFF3F8");
+              doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT).text(`${floor} (${floorCount})`, M + 6, doc.y + 4, { width: CW - 12 });
+              doc.y += 20;
+              for (const rowStatus of Object.keys(statuses).sort()) {
+                const rows = statuses[rowStatus];
+                if (doc.y + 40 > 540) doc.y = onPageBreak();
+                doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor(PALETTE.MUTED).text(`${clashStatusPdfLabel(rowStatus, lang)} (${rows.length})`, M + 6, doc.y, { width: CW - 12 });
+                doc.y += 12;
+                doc.y = renderRows(rows);
+                doc.moveDown(0.4);
+              }
+            }
+          }
+        } else {
+          renderRows(filtered);
+        }
+      } else {
+        doc.fontSize(11).font("Helvetica").fillColor(PALETTE.MUTED)
+          .text(currentViewLabel(lang, "No clashes match the selected current-view filters.", "Ningun choque coincide con los filtros actuales seleccionados."), M, doc.y, { width: CW });
+      }
+      addPageNumbers(doc, {
+        margin: M,
+        footerY: 558,
+        fingerprintY: 544,
+        contentHash,
+        companyName: req.user!.companyName || "BIMLog",
+        projectName: project.name,
+        reportNumber,
+        timestamp: generatedAt.toLocaleString("en-US"),
+      });
+      doc.end();
+    } catch (err) {
+      console.error("[clash.current_view_pdf_failed]", { name: err instanceof Error ? err.name : "UnknownError" });
+      if (!res.headersSent) res.status(500).json({ error: "Clash current-view PDF export failed." });
+    }
+  },
+);
 
 router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requireProjectMember(), async (req, res, next) => {
   const reportIdParam = Array.isArray(req.params.reportId) ? req.params.reportId[0] : req.params.reportId;

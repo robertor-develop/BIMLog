@@ -9,7 +9,18 @@ import { eq, and, desc, inArray, isNull, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { singleFileUpload } from "../middlewares/multipart";
-import { createPdfDocument, drawBrandedHeader, drawFooter, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
+import {
+  addPageNumbers,
+  computeContentHash,
+  createPdfDocument,
+  drawBrandedHeader,
+  drawFooter,
+  drawTable,
+  PALETTE,
+  REPORT_THEMES,
+  reportFileName,
+  type TableColumn,
+} from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
@@ -73,7 +84,210 @@ router.post("/projects/:projectId/change-orders", authMiddleware, requirePermiss
   }
 });
 
-// ── GET /projects/:projectId/change-orders/:changeOrderId ─────────────────────
+// ── GET /projects/:projectId/change-orders/current-view/pdf ───────────────────
+router.get("/projects/:projectId/change-orders/current-view/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const lang = req.query.lang === "es" ? "es" : "en";
+  const label = (en: string, es: string) => lang === "es" ? es : en;
+  const status = typeof req.query.status === "string" ? req.query.status : "all";
+  const search = typeof req.query.search === "string" ? req.query.search.trim().toLowerCase() : "";
+  const sort = typeof req.query.sort === "string" ? req.query.sort : "created_desc";
+  const boolQuery = (value: unknown, fallback = true): boolean | "invalid" => {
+    if (value === undefined) return fallback;
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return "invalid";
+  };
+  const includeFinancial = boolQuery(req.query.include_financial);
+  const includeSchedule = boolQuery(req.query.include_schedule);
+  const includeCompany = boolQuery(req.query.include_company);
+  const includeDates = boolQuery(req.query.include_dates);
+  const allowedStatuses = new Set(["all", "draft", "pending_approval", "approved", "rejected"]);
+  const allowedSorts = new Set(["created_desc", "created_asc", "number_asc", "number_desc", "status_asc"]);
+  if (!Number.isInteger(projectId) || projectId <= 0) { res.status(400).json({ error: "invalid_project_id" }); return; }
+  if (!allowedStatuses.has(status)) { res.status(400).json({ error: "invalid_status" }); return; }
+  if (!allowedSorts.has(sort)) { res.status(400).json({ error: "invalid_sort" }); return; }
+  if (search.length > 200) { res.status(400).json({ error: "invalid_search" }); return; }
+  if ([includeFinancial, includeSchedule, includeCompany, includeDates].includes("invalid")) {
+    res.status(400).json({ error: "invalid_include_option" });
+    return;
+  }
+  try {
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) { res.status(404).json({ error: "project_not_found" }); return; }
+
+    const allRows = await db.select().from(changeOrdersTable)
+      .where(and(eq(changeOrdersTable.projectId, projectId), isNull(changeOrdersTable.deletedAt)));
+    const statusText = (value: string) => value.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    const filtered = allRows
+      .filter(row => status === "all" || row.status === status)
+      .filter(row => {
+        if (!search) return true;
+        const haystack = [
+          row.number,
+          row.title,
+          row.description,
+          row.status,
+          row.contractValueImpact,
+          row.scheduleImpactDays == null ? "" : String(row.scheduleImpactDays),
+          row.initiatedByCompany,
+        ].filter(Boolean).join(" ").toLowerCase();
+        return haystack.includes(search);
+      })
+      .sort((a, b) => {
+        if (sort === "created_asc") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        if (sort === "number_asc") return a.number.localeCompare(b.number);
+        if (sort === "number_desc") return b.number.localeCompare(a.number);
+        if (sort === "status_asc") return a.status.localeCompare(b.status) || a.number.localeCompare(b.number);
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+    const generatedAt = new Date();
+    const reportTitle = label("Change Orders Current View PDF", "PDF de vista actual de Ordenes de Cambio");
+    const reportNumber = `CO-CURRENT-${project.code || projectId}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+    const sortLabel = sort === "created_desc" ? label("Newest first", "Mas recientes")
+      : sort === "created_asc" ? label("Oldest first", "Mas antiguos")
+      : sort === "number_asc" ? label("Number A-Z", "Numero A-Z")
+      : sort === "number_desc" ? label("Number Z-A", "Numero Z-A")
+      : label("Status", "Estado");
+    const visibleColumns = [
+      includeFinancial ? label("Financial", "Financiero") : "",
+      includeSchedule ? label("Schedule", "Cronograma") : "",
+      includeCompany ? label("Company", "Empresa") : "",
+      includeDates ? label("Dates", "Fechas") : "",
+    ].filter(Boolean).join(", ") || label("Standard", "Estandar");
+    const filterSummary = [
+      `${label("Status", "Estado")}: ${status === "all" ? label("All", "Todos") : statusText(status)}`,
+      `${label("Search", "Busqueda")}: ${search || label("None", "Ninguna")}`,
+      `${label("Sort", "Orden")}: ${sortLabel}`,
+      `${label("Rows", "Filas")}: ${filtered.length}/${allRows.length}`,
+      `${label("Columns", "Columnas")}: ${visibleColumns}`,
+      `${label("Generated by", "Generado por")}: ${req.user!.fullName || "-"}`,
+    ];
+    const contentHash = computeContentHash({
+      projectId,
+      reportNumber,
+      generatedAt: generatedAt.toISOString(),
+      filters: { status, search, sort, includeFinancial, includeSchedule, includeCompany, includeDates },
+      rows: filtered.map(row => ({
+        id: row.id,
+        number: row.number,
+        title: row.title,
+        description: row.description,
+        status: row.status,
+        initiatedByCompany: row.initiatedByCompany,
+        contractValueImpact: row.contractValueImpact,
+        scheduleImpactDays: row.scheduleImpactDays,
+        createdAt: row.createdAt,
+        approvedAt: row.approvedAt,
+        updatedAt: row.updatedAt,
+      })),
+    });
+
+    const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(reportTitle)}"`);
+    doc.pipe(res);
+    const theme = REPORT_THEMES.changeOrder.log;
+    const drawHeader = () => {
+      const y = drawBrandedHeader(doc, {
+        margin: 40,
+        companyName: req.user!.companyName || "BIMLog",
+        title: reportTitle,
+        subtitle: label("Current visible Change Orders register", "Registro visible de Ordenes de Cambio"),
+        projectName: project.name,
+        projectCode: project.code || undefined,
+        reportNumber,
+        reportDate: generatedAt,
+        theme,
+      });
+      doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.MUTED)
+        .text(filterSummary.join(" | "), 40, y, { width: 712, lineBreak: false, ellipsis: true });
+      return y + 18;
+    };
+    let y = drawHeader();
+    const cardWidth = 132;
+    const cards: Array<[string, string]> = [
+      [label("Visible", "Visible"), String(filtered.length)],
+      [label("Draft", "Borrador"), String(filtered.filter(row => row.status === "draft").length)],
+      [label("Pending", "Pendiente"), String(filtered.filter(row => row.status === "pending_approval").length)],
+      [label("Approved", "Aprobado"), String(filtered.filter(row => row.status === "approved").length)],
+      [label("Rejected", "Rechazado"), String(filtered.filter(row => row.status === "rejected").length)],
+    ];
+    cards.forEach(([name, value], index) => {
+      const x = 40 + index * (cardWidth + 8);
+      doc.rect(x, y, cardWidth, 42).stroke(PALETTE.LINE);
+      doc.fontSize(7).font(PALETTE.FONT_BOLD).fillColor(PALETTE.MUTED).text(name.toUpperCase(), x + 7, y + 8, { width: cardWidth - 14, lineBreak: false });
+      doc.fontSize(15).font(PALETTE.FONT_BOLD).fillColor(PALETTE.TEXT).text(value, x + 7, y + 22, { width: cardWidth - 14, lineBreak: false });
+    });
+    y += 58;
+
+    const fmtDate = (value: Date | string | null | undefined) => {
+      if (!value) return "-";
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? "-" : d.toLocaleDateString("en-US");
+    };
+    const nextAction = (row: typeof changeOrdersTable.$inferSelect) => {
+      if (row.status === "draft") return label("Submit for approval", "Enviar para aprobacion");
+      if (row.status === "pending_approval") return label("Approve or reject", "Aprobar o rechazar");
+      if (row.status === "approved") return label("Track execution", "Dar seguimiento");
+      if (row.status === "rejected") return label("Revise scope or close", "Revisar alcance o cerrar");
+      return label("Review", "Revisar");
+    };
+    const columns: TableColumn[] = [
+      { label: label("CO #", "OC #"), width: 64, bold: true, format: row => row.number },
+      { label: label("Title / Scope", "Titulo / Alcance"), width: 130, wrap: true, format: row => row.title || "-" },
+      { label: label("Status", "Estado"), width: 58, format: row => statusText(row.status) },
+      ...(includeCompany ? [{ label: label("Company", "Empresa"), width: 72, format: (row: typeof changeOrdersTable.$inferSelect) => row.initiatedByCompany || "-" }] : []),
+      ...(includeFinancial ? [{ label: label("Value Impact", "Impacto Valor"), width: 68, format: (row: typeof changeOrdersTable.$inferSelect) => row.contractValueImpact || "-" }] : []),
+      ...(includeSchedule ? [{ label: label("Sched. Days", "Dias Cron."), width: 45, align: "right" as const, format: (row: typeof changeOrdersTable.$inferSelect) => row.scheduleImpactDays == null ? "-" : String(row.scheduleImpactDays) }] : []),
+      ...(includeDates ? [
+        { label: label("Created", "Creada"), width: 50, format: (row: typeof changeOrdersTable.$inferSelect) => fmtDate(row.createdAt) },
+        { label: label("Approved", "Aprobada"), width: 50, format: (row: typeof changeOrdersTable.$inferSelect) => fmtDate(row.approvedAt) },
+      ] : []),
+      { label: label("Next Action", "Proxima accion"), width: 70, wrap: true, format: row => nextAction(row) },
+      { label: label("Description", "Descripcion"), width: 75, wrap: true, format: row => row.description || "-" },
+    ];
+    if (filtered.length > 0) {
+      drawTable(doc, {
+        x: 40,
+        startY: y,
+        columns,
+        rows: filtered,
+        fontSize: 6.8,
+        headerFontSize: 6.5,
+        rowMinHeight: 26,
+        pageBottom: 540,
+        headerFill: theme.primary,
+        onPageBreak: () => {
+          doc.addPage();
+          return drawHeader();
+        },
+      });
+    } else {
+      doc.fontSize(11).font(PALETTE.FONT).fillColor(PALETTE.MUTED)
+        .text(allRows.length === 0
+          ? label("No change orders exist for this project.", "No existen ordenes de cambio para este proyecto.")
+          : label("No change orders match the current filters.", "Ninguna orden de cambio coincide con los filtros actuales."),
+        40, y, { width: 712 });
+    }
+    addPageNumbers(doc, {
+      margin: 40,
+      footerY: 558,
+      fingerprintY: 544,
+      contentHash,
+      companyName: req.user!.companyName || "BIMLog",
+      projectName: project.name,
+      reportNumber,
+      timestamp: generatedAt.toLocaleString("en-US"),
+    });
+    doc.end();
+  } catch (err) {
+    console.error("[change_orders.current_view_pdf_failed]", { name: err instanceof Error ? err.name : "UnknownError" });
+    if (!res.headersSent) res.status(500).json({ error: "Change Orders current-view PDF export failed." });
+  }
+});
+
 router.get("/projects/:projectId/change-orders/:changeOrderId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const coId = Number(req.params.changeOrderId);

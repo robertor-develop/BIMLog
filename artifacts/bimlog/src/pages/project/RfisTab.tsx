@@ -11,6 +11,7 @@ import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { Button } from "@/components/ui/button";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -1402,32 +1403,13 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               <Table2 style={{ width: 13, height: 13 }} />{w("Log", "Registro", lang)}
             </button>
           </div>
-          {rfis && rfis.length > 0 && (
-            <>
-              <Button
-                className="rfi-current-view-action"
-                variant="outline"
-                size="sm"
-                onClick={() => void handleRfiViewPdf("print")}
-                title={w("Print a governed PDF for the current RFI List or Log view, including active filters, sorting, and search.", "Imprimir un PDF gobernado para la vista actual de Lista o Registro RFI, con filtros, orden y busqueda activos.", lang)}
-                style={{ gap: 5, fontSize: 11 }}
-              >
-                <Printer style={{ width: 12, height: 12 }} />
-                {w("Print Current View PDF", "Imprimir PDF Vista Actual", lang)}
-              </Button>
-              <Button
-                className="rfi-current-view-action"
-                variant="outline"
-                size="sm"
-                onClick={() => void handleRfiViewPdf("download")}
-                disabled={exportingViewPdf}
-                title={w("Export a governed PDF for the current RFI List or Log view, including active filters, sorting, and search.", "Exportar un PDF gobernado para la vista actual de Lista o Registro RFI, con filtros, orden y busqueda activos.", lang)}
-                style={{ gap: 5, fontSize: 11 }}
-              >
-                {exportingViewPdf ? <Loader2 className="animate-spin" style={{ width: 12, height: 12 }} /> : <FileText style={{ width: 12, height: 12 }} />}
-                {exportingViewPdf ? w("Exporting PDF...", "Exportando PDF...", lang) : w("Export Current View PDF", "Exportar PDF Vista Actual", lang)}
-              </Button>
-            </>
+          {rfis && (
+            <PrintPdfButton
+              className="rfi-current-view-action"
+              lang={lang}
+              loading={exportingViewPdf}
+              onClick={() => void handleRfiViewPdf("download")}
+            />
           )}
           {rfis && rfis.length > 0 && (
             <Button variant="outline" size="sm" onClick={handleExportAllExcel} disabled={exportingRegister} style={{ gap: 5, fontSize: 11 }}>

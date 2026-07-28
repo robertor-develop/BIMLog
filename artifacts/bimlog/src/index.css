@@ -971,3 +971,27 @@ select:focus { outline: none; border-color: hsl(var(--primary)); box-shadow: 0 0
     white-space: normal;
   }
 }
+@media print {
+  body[data-current-view-printing="true"] * {
+    visibility: hidden !important;
+  }
+
+  body[data-current-view-printing="true"] [data-current-view-print-active="true"],
+  body[data-current-view-printing="true"] [data-current-view-print-active="true"] * {
+    visibility: visible !important;
+  }
+
+  body[data-current-view-printing="true"] [data-current-view-print-active="true"] {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  body[data-current-view-printing="true"] [data-current-view-print-active="true"] button,
+  body[data-current-view-printing="true"] [data-current-view-print-active="true"] [data-page-level-print-pdf="true"] {
+    display: none !important;
+  }
+}

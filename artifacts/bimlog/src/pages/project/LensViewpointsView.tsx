@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 
 const API = "/api/v1";
 const PLUGIN_BASE = "http://localhost:8765";
@@ -143,6 +144,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const t = (en: string, es: string) => (lang === "es" ? es : en);
   const headers = { Authorization: `Bearer ${token}` };
   const [, setLoc] = useLocation();
+  const [isExportModalNarrow, setIsExportModalNarrow] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 480 : false
+  );
 
   const [viewpoints, setViewpoints] = useState<LensViewpoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -171,6 +175,13 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   useEffect(() => {
     try { localStorage.setItem(VIEW_OPTS_KEY, JSON.stringify(viewOpts)); } catch { /* storage blocked - view simply will not persist */ }
   }, [VIEW_OPTS_KEY, viewOpts]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => setIsExportModalNarrow(window.innerWidth <= 480);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
   const { showGroupCol, showLifecycleCol, showRevisionCol, idFormatView, lifecycleScope } = viewOpts;
   const [showGuidance, setShowGuidance] = useState(() => {
     try { return localStorage.getItem(GUIDANCE_KEY) !== "off"; } catch { return true; }
@@ -233,6 +244,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     includeNonActive: false,
     includeResolved: true,
     showGroupIds: true,
+    showLifecycleState: true,
+    showRevisionColumn: true,
     includeAuditRecords: false,
     includeReportHistory: false,
     includeRevisionHistory: true,
@@ -244,8 +257,19 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const openReportModal = async () => {
     // Seed the export from the live on-screen view so the PDF defaults to exactly
     // what the user is currently looking at (row filters + ID format + state
-    // scope). The PDF keeps its fixed register columns by design.
-    setForm(f => ({ ...f, fTrade, fStatus, fFloor, fReportType, idFormat: idFormatView, includeNonActive: lifecycleScope !== "active" }));
+    // scope + visible register columns).
+    setForm(f => ({
+      ...f,
+      fTrade,
+      fStatus,
+      fFloor,
+      fReportType,
+      idFormat: idFormatView,
+      includeNonActive: lifecycleScope !== "active",
+      showGroupIds: showGroupCol,
+      showLifecycleState: showLifecycleCol,
+      showRevisionColumn: showRevisionCol,
+    }));
     setReportModalOpen(true);
     try {
       const [meRes, memRes] = await Promise.all([
@@ -754,6 +778,35 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
   const filteredIds = filtered.map(v => v.id);
   const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => selectedIds.has(id));
+  const lensCurrentViewSummary = [
+    `${t("Trade", "Disciplina")}: ${fTrade === "all" ? t("All", "Todas") : fTrade}`,
+    `${t("Floor", "Piso")}: ${fFloor === "all" ? t("All", "Todos") : fFloor}`,
+    `${t("Report Type", "Tipo de Reporte")}: ${fReportType === "all" ? t("All", "Todos") : fReportType}`,
+    `${t("Status", "Estado")}: ${fStatus === "all" ? t("All", "Todos") : lensStatusLabel(fStatus)}`,
+    `${t("State", "Estado de registro")}: ${lifecycleScope === "active" ? t("Current only", "Solo actuales") : t("All lifecycle records", "Todos los registros de ciclo")}`,
+    `${t("ID", "ID")}: ${idFormatView === "code" ? t("Trade-Floor-Seq", "Disciplina-Piso-Secuencia") : t("Display ID", "ID visible")}`,
+    `${t("Columns", "Columnas")}: ${[showGroupCol ? t("Group", "Grupo") : "", showLifecycleCol ? t("State", "Estado") : "", showRevisionCol ? t("Revision", "Revision") : ""].filter(Boolean).join(", ") || t("Standard", "Estandar")}`,
+    `${t("Visible", "Visible")}: ${filtered.length}/${viewpoints.length}`,
+  ];
+  const pendingExportRows = viewpoints
+    .filter(v => form.fTrade === "all" || v.trade === form.fTrade)
+    .filter(v => form.fFloor === "all" || v.floor === form.fFloor)
+    .filter(v => form.fReportType === "all" || v.reportType === form.fReportType)
+    .filter(v => form.fStatus === "all" || v.status === form.fStatus)
+    .filter(v => form.fPriority === "all" || String(v.priority ?? "") === String(form.fPriority))
+    .filter(v => form.includeResolved || v.status !== "resolved")
+    .filter(v => form.includeNonActive || (v.lifecycleStatus ?? "active") === "active");
+  const lensPendingExportSummary = [
+    `${t("Trade", "Disciplina")}: ${form.fTrade === "all" ? t("All", "Todas") : form.fTrade}`,
+    `${t("Floor", "Piso")}: ${form.fFloor === "all" ? t("All", "Todos") : form.fFloor}`,
+    `${t("Report Type", "Tipo de Reporte")}: ${form.fReportType === "all" ? t("All", "Todos") : form.fReportType}`,
+    `${t("Priority", "Prioridad")}: ${form.fPriority === "all" ? t("All", "Todas") : `P${form.fPriority}`}`,
+    `${t("Status", "Estado")}: ${form.fStatus === "all" ? t("All", "Todos") : lensStatusLabel(form.fStatus)}`,
+    `${t("State", "Estado de registro")}: ${form.includeNonActive ? t("All lifecycle records", "Todos los registros de ciclo") : t("Current only", "Solo actuales")}`,
+    `${t("ID", "ID")}: ${form.idFormat === "code" ? t("Trade-Floor-Seq", "Disciplina-Piso-Secuencia") : t("Display ID", "ID visible")}`,
+    `${t("Columns", "Columnas")}: ${[form.showGroupIds ? t("Group", "Grupo") : "", form.showLifecycleState ? t("State", "Estado") : "", form.showRevisionColumn ? t("Revision", "Revision") : ""].filter(Boolean).join(", ") || t("Standard", "Estandar")}`,
+    `${t("Export rows", "Filas de exportacion")}: ${pendingExportRows.length}/${viewpoints.length}`,
+  ];
 
   // Summary counts respect the trade/floor/report-type filters but ignore the lifecycle
   // scope so the strip can show the full Active/Superseded/Voided breakdown at once.
@@ -853,6 +906,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           includeNonActive: form.includeNonActive,
           includeResolved: form.includeResolved,
           showGroupIds: form.showGroupIds,
+          showLifecycleState: form.showLifecycleState,
+          showRevisionColumn: form.showRevisionColumn,
           includeAuditRecords: form.includeAuditRecords,
           includeReportHistory: form.includeReportHistory,
           includeRevisionHistory: form.includeRevisionHistory,
@@ -906,21 +961,21 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
               : pluginConnected
                 ? t("Plugin connected", "Plugin conectado")
                 : t("Plugin not connected", "Plugin no conectado")}
-          </div>
         </div>
+        <PrintPdfButton lang={lang} onClick={openReportModal} disabled={loading} className="shrink-0" />
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "-4px 0 14px" }}>
+        {lensCurrentViewSummary.map(part => (
+          <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
+            {part}
+          </span>
+        ))}
+      </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-sm btn-outline" onClick={exportExcel}
             title={t("Download the current Lens table as an Excel register", "Descargar la tabla Lens actual como registro Excel")}
             style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Download size={14} /> {t("Lens Register Excel", "Excel del registro Lens")}
-          </button>
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={openReportModal}
-            title={t("Create a formatted coordination PDF report from the current Lens filters", "Crear un reporte PDF de coordinacion con los filtros Lens actuales")}
-            style={{ display: "flex", alignItems: "center", gap: 6 }}
-          >
-            <FileDown size={14} /> {t("Lens Coordination PDF", "PDF de coordinación Lens")}
           </button>
           {canWrite && (
             <button
@@ -1682,15 +1737,15 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       {reportModalOpen && (
         <div
           onClick={() => !generating && setReportModalOpen(false)}
-          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 16, overflowY: "auto" }}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isExportModalNarrow ? 8 : 16, overflowY: "auto", boxSizing: "border-box" }}
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24, margin: "24px 0" }}
+            style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, minWidth: 0, boxSizing: "border-box", boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: isExportModalNarrow ? 14 : 24, margin: isExportModalNarrow ? "8px 0" : "24px 0" }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16, minWidth: 0 }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>
-                {t("Generate Lens Viewpoints Report", "Generar Reporte de Vistas Lens")}
+                {t("PDF options", "Opciones de PDF")}
               </h3>
               <button
                 onClick={() => !generating && setReportModalOpen(false)}
@@ -1700,8 +1755,20 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                 <X size={20} />
               </button>
             </div>
+            <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 12px", marginBottom: 14, boxSizing: "border-box", minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: "#1E3A5F", textTransform: "uppercase", marginBottom: 6 }}>
+                {t("Pending Lens export state", "Estado pendiente de exportacion Lens")}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {lensPendingExportSummary.map(part => (
+                  <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#FFFFFF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
+                    {part}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isExportModalNarrow ? "minmax(0, 1fr)" : "1fr 1fr", gap: 12, minWidth: 0 }}>
               <label style={lblStyle}>
                 {t("Company Name", "Nombre de Empresa")}
                 <input value={form.companyName} onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))}
@@ -1758,7 +1825,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
             <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #E5E7EB" }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8 }}>{t("Filters", "Filtros")}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isExportModalNarrow ? "minmax(0, 1fr)" : "1fr 1fr 1fr 1fr", gap: 10, minWidth: 0 }}>
                 <label style={lblStyle}>
                   {t("Priority", "Prioridad")}
                   <select value={form.fPriority} onChange={e => setForm(f => ({ ...f, fPriority: e.target.value }))} style={inpStyle}>
@@ -1852,14 +1919,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
               <select
                 value={form.idFormat}
                 onChange={e => setForm(f => ({ ...f, idFormat: e.target.value }))}
-                style={{ border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13, padding: "6px 10px", minWidth: 240 }}
+                style={{ border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 13, padding: "6px 10px", minWidth: 0, width: "100%", boxSizing: "border-box" }}
               >
                 <option value="displayId">{t("Display ID (plugin code)", "ID de visualizacion (codigo del plugin)")}</option>
                 <option value="code">{t("Viewpoint code (Trade-Floor-Seq)", "Codigo de vista (Disciplina-Piso-Sec)")}</option>
               </select>
             </label>
 
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 20 }}>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 20, flexWrap: "wrap", minWidth: 0 }}>
               <button className="btn btn-sm btn-outline" disabled={generating} onClick={() => setReportModalOpen(false)}
                 style={{ fontSize: 13, padding: "8px 16px" }}>
                 {t("Cancel", "Cancelar")}
@@ -1877,5 +1944,5 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   );
 }
 
-const lblStyle = { display: "flex", flexDirection: "column", gap: 4, fontSize: 12, fontWeight: 600, color: "#374151" } as const;
-const inpStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "8px 10px", fontSize: 13, fontWeight: 400 } as const;
+const lblStyle = { display: "flex", flexDirection: "column", gap: 4, fontSize: 12, fontWeight: 600, color: "#374151", minWidth: 0 } as const;
+const inpStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "8px 10px", fontSize: 13, fontWeight: 400, minWidth: 0, width: "100%", boxSizing: "border-box" } as const;

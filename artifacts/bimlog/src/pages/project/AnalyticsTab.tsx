@@ -12,6 +12,7 @@ import {
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 
 interface AnalyticsTabProps {
   projectId: number;
@@ -41,6 +42,9 @@ type InsightSummary = {
     complianceRate: number | null;
     unavailable: boolean;
     companies: Array<{ company: string; rejected: number }>;
+    companyPerformanceRedacted?: boolean;
+    companyPerformanceUnavailableReason?: string;
+    companyPerformanceUnavailableReasonEs?: string;
     links: { source: string; report: string };
   };
   rfiPerformance: {
@@ -58,8 +62,32 @@ type InsightSummary = {
   aiUsed: false;
 };
 
-const statusLabel = (status: string) =>
-  status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const RFI_STATUS_LABELS: Record<string, { en: string; es: string }> = {
+  answered: { en: "Answered", es: "Respondido" },
+  closed: { en: "Closed", es: "Cerrado" },
+  draft: { en: "Draft", es: "Borrador" },
+  open: { en: "Open", es: "Abierto" },
+  overdue: { en: "Overdue", es: "Vencido" },
+  pending: { en: "Pending", es: "Pendiente" },
+  rejected: { en: "Rejected", es: "Rechazado" },
+  reviewed: { en: "Reviewed", es: "Revisado" },
+  submitted: { en: "Submitted", es: "Enviado" },
+  unknown: { en: "Unknown", es: "Desconocido" },
+};
+
+const UNAVAILABLE_METRIC_LABELS: Record<string, { en: string; es: string }> = {
+  historical_trends: { en: "Historical trends", es: "Tendencias históricas" },
+  schedule_forecast_causes: { en: "Schedule forecast causes", es: "Causas del pronóstico del cronograma" },
+};
+
+const statusLabel = (status: string, lang: "en" | "es") => {
+  const key = status.toLowerCase();
+  return RFI_STATUS_LABELS[key]?.[lang] ??
+    status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+const unavailableMetricLabel = (key: string, lang: "en" | "es") =>
+  UNAVAILABLE_METRIC_LABELS[key.toLowerCase()]?.[lang] ?? statusLabel(key, lang);
 
 function MetricCard({
   label,
@@ -106,6 +134,16 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [exportSections, setExportSections] = useState({
+    operational: true,
+    compliance: true,
+    company: true,
+    rfi: true,
+    unavailable: true,
+    boundaries: true,
+  });
 
   useEffect(() => {
     if (!token) return;
@@ -173,6 +211,56 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
 
   const complianceRate =
     data.compliance.complianceRate == null ? "—" : `${data.compliance.complianceRate}%`;
+  const exportLang = lang === "es" ? "es" : "en";
+  const exportSectionOptions = [
+    { key: "operational", label: tr("Operational context", "Contexto operativo") },
+    { key: "compliance", label: tr("Naming compliance", "Cumplimiento de nombres") },
+    { key: "company", label: tr("Company performance", "Desempeño por empresa") },
+    { key: "rfi", label: tr("RFI status performance", "Desempeño por estado RFI") },
+    { key: "unavailable", label: tr("Unavailable analytics", "Analítica no disponible") },
+    { key: "boundaries", label: tr("Surface boundaries", "Límites de superficie") },
+  ] as const;
+  const selectedExportSections = exportSectionOptions
+    .filter((option) => exportSections[option.key])
+    .map((option) => option.key);
+  const exportCurrentViewPdf = async () => {
+    if (!token) return;
+    if (!selectedExportSections.length) {
+      setExportError(tr("Select at least one visible section before exporting.", "Selecciona al menos una sección visible antes de exportar."));
+      return;
+    }
+    setExporting(true);
+    setExportError("");
+    try {
+      const params = new URLSearchParams({
+        timezone,
+        lang,
+        sections: selectedExportSections.join(","),
+      });
+      const response = await fetch(`/api/v1/projects/${projectId}/project-insights/export-pdf?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(lang === "es" ? body.messageEs || "No se pudo exportar el PDF." : body.message || "The PDF could not be exported.");
+      }
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") || "";
+      const filename = /filename="?([^";]+)"?/i.exec(disposition)?.[1] || "Project-Insights-Current-View.pdf";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setExporting(false);
+    }
+  };
   const maxCompany = Math.max(1, ...data.compliance.companies.map((row) => row.rejected));
   const rfiStatuses = Object.entries(data.rfiPerformance.byStatus).sort(([a], [b]) =>
     a.localeCompare(b),
@@ -180,6 +268,38 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
 
   return (
     <section className="ccc-shell project-insights" aria-labelledby="project-insights-title">
+      <style>{`
+        @media (max-width: 520px) {
+          .project-insights .col-3,
+          .project-insights .col-2 {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+          .project-insights .card-padded,
+          .project-insights .ccc-trust-card,
+          .project-insights .ccc-active-summary {
+            min-width: 0;
+            overflow-wrap: anywhere;
+          }
+          .project-insights .bar-chart-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(88px, 1.2fr) minmax(24px, auto);
+            gap: 8px;
+            align-items: center;
+          }
+          .project-insights .bar-chart-label {
+            width: auto;
+            min-width: 0;
+            white-space: normal;
+          }
+          .project-insights .bar-chart-track {
+            min-width: 0;
+          }
+          .project-insights .bar-chart-val {
+            width: auto;
+            min-width: 24px;
+          }
+        }
+      `}</style>
       <header className="ccc-hero">
         <div className="ccc-hero-copy">
           <div className="ccc-eyebrow">
@@ -205,6 +325,44 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
                 "Los conteos, fechas límite y permisos vienen de las definiciones métricas del Coordinador.",
               )}
             </span>
+          </div>
+        </div>
+        <div className="ccc-trust-card" style={{ alignItems: "stretch" }}>
+          <Download size={17} />
+          <div style={{ minWidth: 0 }}>
+            <strong>{tr("Export current view PDF", "Exportar PDF de vista actual")}</strong>
+            <span>
+              {tr(
+                "Exports these visible Analytics sections only. Report links remain informational and do not grant authority.",
+                "Exporta solo estas secciones visibles de Analítica. Los enlaces de informe siguen siendo informativos y no otorgan autoridad.",
+              )}
+            </span>
+            <div style={{ display: "grid", gap: 6, marginTop: 10 }}>
+              {exportSectionOptions.map((option) => (
+                <label key={option.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, minWidth: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={exportSections[option.key]}
+                    onChange={(event) => setExportSections((current) => ({ ...current, [option.key]: event.target.checked }))}
+                  />
+                  <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{option.label}</span>
+                </label>
+              ))}
+            </div>
+            <PrintPdfButton
+              lang={lang}
+              className="mt-2.5 w-full"
+              onClick={exportCurrentViewPdf}
+              loading={exporting}
+              disabled={!selectedExportSections.length}
+              disabledReason={tr("Select at least one visible section", "Selecciona al menos una sección visible")}
+            />
+            {!selectedExportSections.length && (
+              <div role="alert" className="section-sub" style={{ color: "#DC2626", marginTop: 8 }}>
+                {tr("Select at least one visible section before exporting.", "Selecciona al menos una sección visible antes de exportar.")}
+              </div>
+            )}
+            {exportError && <div role="alert" className="section-sub" style={{ color: "#DC2626", marginTop: 8 }}>{exportError}</div>}
           </div>
         </div>
       </header>
@@ -330,7 +488,18 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
             </div>
             <BarChart3 size={17} />
           </div>
-          {data.compliance.companies.length ? (
+          {data.compliance.companyPerformanceRedacted ? (
+            <div className="empty-state" style={{ padding: "20px 0" }}>
+              <div className="empty-title">
+                {tr("Company performance redacted", "Desempeño por empresa redactado")}
+              </div>
+              <div className="empty-desc">
+                {lang === "es"
+                  ? data.compliance.companyPerformanceUnavailableReasonEs || "El desempeño por empresa no está disponible para este rol."
+                  : data.compliance.companyPerformanceUnavailableReason || "Company-level performance is unavailable for this role."}
+              </div>
+            </div>
+          ) : data.compliance.companies.length ? (
             <div style={{ marginTop: 8 }}>
               {data.compliance.companies.map((row) => (
                 <div key={row.company} className="bar-chart-row">
@@ -373,7 +542,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
             <div style={{ marginTop: 12 }}>
               {rfiStatuses.map(([status, count]) => (
                 <div key={status} className="bar-chart-row">
-                  <div className="bar-chart-label">{statusLabel(status)}</div>
+                  <div className="bar-chart-label">{statusLabel(status, exportLang)}</div>
                   <div className="bar-chart-track">
                     <div
                       className="bar-chart-fill"
@@ -407,7 +576,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
             {data.unavailable.map((entry) => (
               <div key={entry.key} className="ccc-active-summary">
-                <strong>{statusLabel(entry.key)}</strong>
+                <strong>{unavailableMetricLabel(entry.key, exportLang)}</strong>
                 <span>{lang === "es" ? entry.reasonEs : entry.reason}</span>
               </div>
             ))}

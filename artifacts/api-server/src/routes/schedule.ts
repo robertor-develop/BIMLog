@@ -492,10 +492,15 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     const statusFilter = String(req.query.status || "all");
     const typeFilter = String(req.query.item_type || "all");
     const bucketFilter = req.query.bucket_id ? Number(req.query.bucket_id) : null;
+    const assignedUserFilter = req.query.assigned_user_id ? Number(req.query.assigned_user_id) : null;
+    const searchFilter = String(req.query.search || "").trim().toLowerCase();
     const startDate = req.query.start_date ? new Date(String(req.query.start_date)) : null;
     const endDate = req.query.end_date ? new Date(String(req.query.end_date)) : null;
+    if (bucketFilter !== null && (!Number.isInteger(bucketFilter) || bucketFilter <= 0)) { res.status(400).json({ error: "Invalid bucket_id" }); return; }
+    if (assignedUserFilter !== null && (!Number.isInteger(assignedUserFilter) || assignedUserFilter <= 0)) { res.status(400).json({ error: "Invalid assigned_user_id" }); return; }
     if (startDate && Number.isNaN(startDate.getTime())) { res.status(400).json({ error: "Invalid start_date" }); return; }
     if (endDate && Number.isNaN(endDate.getTime())) { res.status(400).json({ error: "Invalid end_date" }); return; }
+    if (startDate && endDate && startDate > endDate) { res.status(400).json({ error: "start_date must be on or before end_date" }); return; }
 
     const options = {
       includeProgress: boolQuery(req.query.include_progress, true),
@@ -517,7 +522,22 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
         if (due > endInclusive) return false;
       }
       if (typeFilter !== "all" && scheduleTypeKey(item) !== typeFilter) return false;
-      if (view === "board" && bucketFilter && item.bucketId !== bucketFilter) return false;
+      if (bucketFilter && item.bucketId !== bucketFilter) return false;
+      if (assignedUserFilter && item.assignedUserId !== assignedUserFilter) return false;
+      if (searchFilter) {
+        const searchText = [
+          item.label,
+          item.title,
+          item.bucketName,
+          item.buildingLevel,
+          item.trade,
+          item.responsibleCompany,
+          item.company,
+          item.assignedUserName,
+          item.status,
+        ].filter(Boolean).join(" ").toLowerCase();
+        if (!searchText.includes(searchFilter)) return false;
+      }
       if (statusFilter === "overdue" && !(item.isOverdue && !isDone(item.status))) return false;
       if (statusFilter === "action" && !(item.status === "pending" || item.status === "open" || (item.isOverdue && !isDone(item.status)))) return false;
       if (!["all", "overdue", "action"].includes(statusFilter) && item.status !== statusFilter) return false;
@@ -544,7 +564,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       projectId,
       reportNumber,
       generatedAt: reportDate.toISOString(),
-      filters: { view, statusFilter, typeFilter, bucketFilter, startDate, endDate, options },
+      filters: { view, statusFilter, typeFilter, bucketFilter, assignedUserFilter, searchFilter, startDate, endDate, options },
       items: filtered,
       rolloverHistory: filteredHistories,
     };
@@ -571,7 +591,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       preparedBy: req.user!.fullName,
       projectName: project.name,
       projectAddress: project.location || undefined,
-      projectMeta: `Project Code: ${project.code} | Items: ${filtered.length} | View: ${view.toUpperCase()}`,
+      projectMeta: `Project Code: ${project.code} | Items: ${filtered.length} of ${events.length} | View: ${view.toUpperCase()}`,
       isoStamp: false,
       theme,
     });
@@ -590,7 +610,10 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       `Date Range: ${startDate ? formatDate(startDate) : "All"} to ${endDate ? formatDate(endDate) : "All"}`,
       `Status: ${statusFilter.replace(/_/g, " ")}`,
       `Item Type: ${typeFilter.replace(/_/g, " ")}`,
-      view === "board" && bucketFilter ? `Bucket/Sprint: ${buckets.find(b => b.id === bucketFilter)?.name || bucketFilter}` : "",
+      searchFilter ? `Search: ${searchFilter}` : "",
+      bucketFilter ? `Bucket/Sprint: ${buckets.find(b => b.id === bucketFilter)?.name || bucketFilter}` : "",
+      assignedUserFilter ? `Assigned User: ${filtered.find(i => i.assignedUserId === assignedUserFilter)?.assignedUserName || assignedUserFilter}` : "",
+      `Result Count: ${filtered.length} of ${events.length}`,
     ].filter(Boolean);
     doc.fontSize(10).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(filterLines.join(" | "), 40, y, { width: 712 });
     y = doc.y + 14;
@@ -749,7 +772,8 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     });
     doc.end();
   } catch (err) {
-    if (!res.headersSent) res.status(500).json({ error: err instanceof Error ? err.message : "Schedule PDF export failed" });
+    console.error("[schedule.current_view_pdf_failed]", { name: err instanceof Error ? err.name : "UnknownError" });
+    if (!res.headersSent) res.status(500).json({ error: "Schedule current-view PDF export failed." });
   }
 });
 

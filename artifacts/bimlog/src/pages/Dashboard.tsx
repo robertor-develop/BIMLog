@@ -4,9 +4,10 @@ import { useI18n } from "@/lib/i18n";
 import { useListProjects, useCreateProject, useListMembers } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield, Sparkles } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield, Sparkles, Download } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -64,6 +65,31 @@ async function fetchJson(url: string, token: string) {
     const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     return r.ok ? r.json() : [];
   } catch { return []; }
+}
+
+function filenameFromDisposition(disposition: string | null, fallback: string): string {
+  if (!disposition) return fallback;
+  const utf8 = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8?.[1]) {
+    try {
+      const decoded = decodeURIComponent(utf8[1]).split(/[\\/]/).pop()?.trim();
+      if (decoded) return decoded;
+    } catch { /* use quoted filename or fallback */ }
+  }
+  const quoted = disposition.match(/filename="([^"]+)"/i)?.[1] ?? disposition.match(/filename=([^;]+)/i)?.[1];
+  const clean = quoted?.replace(/^"|"$/g, "").split(/[\\/]/).pop()?.trim();
+  return clean || fallback;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function timeAgo(iso: string) {
@@ -157,13 +183,15 @@ function AiBriefingCard({ token }: { token?: string }) {
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export function Dashboard() {
-  const { t, tt } = useI18n();
+  const { t, tt, lang } = useI18n();
   const [, setLocation] = useLocation();
   const { data: projects, isLoading, isError, error, refetch } = useListProjects();
   const logout = useAuthStore(s => s.logout);
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportError, setExportError] = useState("");
   function handleProjectCreated(newId: number) {
     console.log("REDIRECT TARGET", `/projects/${newId}/convention`);
     setShowCreate(false);
@@ -211,7 +239,7 @@ export function Dashboard() {
     if (!projects || !token || projects.length === 0) return;
     setAgg(prev => ({ ...prev, loading: true }));
     Promise.all(
-      projects.map(async p => {
+      (projects as any[]).map(async (p: any) => {
         const base = `${API_BASE}/api/v1/projects/${p.id}`;
         const [rfis, submittals, activity, files] = await Promise.all([
           fetchJson(`${base}/rfis`, token),
@@ -221,12 +249,12 @@ export function Dashboard() {
         ]);
         return { rfis, submittals, activity, files };
       })
-    ).then(results => {
+    ).then((results: Array<{ rfis: any[]; submittals: any[]; activity: any[]; files: any[] }>) => {
       setAgg({
-        rfis:       results.flatMap(r => r.rfis),
-        submittals: results.flatMap(r => r.submittals),
-        activity:   results.flatMap(r => r.activity),
-        files:      results.flatMap(r => r.files),
+        rfis:       results.flatMap((r: { rfis: any[] }) => r.rfis),
+        submittals: results.flatMap((r: { submittals: any[] }) => r.submittals),
+        activity:   results.flatMap((r: { activity: any[] }) => r.activity),
+        files:      results.flatMap((r: { files: any[] }) => r.files),
         loading:    false,
       });
     }).catch(() => setAgg(prev => ({ ...prev, loading: false })));
@@ -239,9 +267,10 @@ export function Dashboard() {
     window.location.href = "/";
   }
 
-  const activeProjects = projects?.filter(p => p.status === "active") ?? [];
-  const totalFiles = projects?.reduce((sum, p) => sum + (p.fileCount || 0), 0) ?? 0;
-  const totalMembers = projects?.reduce((sum, p) => sum + (p.memberCount || 0), 0) ?? 0;
+  const projectRows = (projects ?? []) as Array<any>;
+  const activeProjects = projectRows.filter((p: any) => p.status === "active");
+  const totalFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
+  const totalMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
 
   async function handleDelete(projectId: number, projectName: string) {
     const confirmed = window.confirm(
@@ -257,8 +286,34 @@ export function Dashboard() {
     }
   }
 
+  async function exportCurrentViewPdf() {
+    if (!token || isLoading || agg.loading) return;
+    setExportingPdf(true);
+    setExportError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/dashboard/export-pdf`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ lang }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || tt("Dashboard PDF export failed.", "Error al exportar PDF del tablero."));
+      }
+      const blob = await response.blob();
+      downloadBlob(blob, filenameFromDisposition(response.headers.get("Content-Disposition"), "bimlog-headquarters-dashboard-current-view.pdf"));
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : tt("Dashboard PDF export failed.", "Error al exportar PDF del tablero."));
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   // ── Derived aggregate stats ────────────────────────────────────────────────
-  const projectMap = new Map((projects ?? []).map(p => [p.id, p]));
+  const projectMap = new Map<number, any>(projectRows.map((p: any) => [Number(p.id), p]));
 
   const openRfis        = agg.rfis.filter(r => r.status !== "closed");
   const pendingSubmittals = agg.submittals.filter(s => ["pending", "under_review"].includes(s.status));
@@ -274,7 +329,7 @@ export function Dashboard() {
   const confirmedViolations = agg.files.filter(f => (f as any).userConfirmedNonCompliant === true);
   // FIX 6: files needing attention = non-compliant or CVR-flagged completed files
   const filesNeedingAttention = agg.files.filter(f =>
-    (f.status === "rejected" || (f as any).cvrStatus === "flagged") && f.status !== "in_progress"
+    (f.status === "rejected" || (f as any).contentVerificationResult === "possible_mismatch" || (f as any).contentVerificationResult === "clear_mismatch") && f.status !== "in_progress"
   );
 
   // ── Needs Attention ────────────────────────────────────────────────────────
@@ -356,6 +411,18 @@ export function Dashboard() {
             box-sizing: border-box;
             overflow-x: hidden;
           }
+          .headquarters-dashboard-page .headquarters-heading-row,
+          .headquarters-dashboard-page .dashboard-export-actions {
+            align-items: stretch !important;
+            flex-direction: column !important;
+          }
+          .headquarters-dashboard-page .dashboard-export-actions > button {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .headquarters-dashboard-page .headquarters-two-column {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
       {onboardingVisible && (
@@ -368,7 +435,8 @@ export function Dashboard() {
         <div className="headquarters-content" style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px" }}>
 
           {/* SECTION 1 — Page heading */}
-          <div style={{ marginBottom: 24 }}>
+          <div className="headquarters-heading-row" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 24 }}>
+            <div style={{ minWidth: 0 }}>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 4 }}>
               {tt("BIMLog Headquarters", "Sede BIMLog")}
             </h1>
@@ -378,6 +446,26 @@ export function Dashboard() {
                 `${projects?.length ?? 0} proyecto${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} archivos procesados · Vista general entre proyectos y entrada de administración`,
               )}
             </p>
+              {exportError && (
+                <div style={{ marginTop: 8, fontSize: 12, color: "#DC2626", fontWeight: 600 }}>{exportError}</div>
+              )}
+            </div>
+            <div className="dashboard-export-actions" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0, minWidth: 0 }}>
+              <PrintPdfButton
+                lang={lang}
+                loading={exportingPdf}
+                disabled={!token || isLoading || agg.loading}
+                disabledReason={!token
+                  ? tt("Sign in to print this dashboard.", "Inicie sesion para imprimir este tablero.")
+                  : tt("Wait until the current dashboard view finishes loading.", "Espere a que termine de cargar la vista actual del tablero.")}
+                onClick={() => void exportCurrentViewPdf()}
+              />
+              {(!token || isLoading || agg.loading) && (
+                <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", maxWidth: 260, textAlign: "right" }}>
+                  {!token ? tt("Sign in is required.", "Se requiere iniciar sesion.") : tt("Available after the current dashboard data loads.", "Disponible despues de cargar los datos actuales del tablero.")}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* AI Briefing banner */}
@@ -523,7 +611,7 @@ export function Dashboard() {
 
           {/* SECTION 3 — Needs Attention + Your Pending Items */}
           {!isLoading && (projects?.length ?? 0) > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div className="headquarters-two-column" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
 
               {/* Needs Attention */}
               <div style={panel}>
@@ -557,7 +645,7 @@ export function Dashboard() {
                 {(() => {
                   const openRfisCount      = stats?.openRfis ?? 0;
                   const pendingSubsCount   = stats?.pendingSubmittals ?? 0;
-                  const filesAttnCount     = stats?.filesNeedingAttention ?? 0;
+                  const filesAttnCount     = agg.loading ? (stats?.filesNeedingAttention ?? 0) : filesNeedingAttention.length;
                   const allClear = stats !== undefined && openRfisCount === 0 && pendingSubsCount === 0 && filesAttnCount === 0;
                   if (allClear) {
                     return (
@@ -672,7 +760,7 @@ export function Dashboard() {
               <>
                 {(projects?.length ?? 0) > 0 ? (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
-                    {projects!.map(project => (
+                    {projectRows.map((project: any) => (
                       <ProjectCard
                         key={project.id}
                         project={project}
@@ -695,7 +783,7 @@ export function Dashboard() {
 
           {/* SECTION 5 — Recent Activity + Top Naming Violators */}
           {!isLoading && (projects?.length ?? 0) > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div className="headquarters-two-column" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
 
               {/* Recent Activity */}
               <div style={panel}>
@@ -798,9 +886,9 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
   const { data: members } = useListMembers(project.id);
-  const adminMember = members?.find(m => m.role === "project_admin");
+  const adminMember = (members as any[] | undefined)?.find((m: any) => m.role === "project_admin");
   const adminInitials = adminMember?.userFullName
-    ? adminMember.userFullName.split(/\s+/).map(s => s.charAt(0).toUpperCase()).slice(0, 2).join("")
+    ? adminMember.userFullName.split(/\s+/).map((s: string) => s.charAt(0).toUpperCase()).slice(0, 2).join("")
     : "?";
 
   return (
@@ -947,7 +1035,7 @@ function CreateProjectForm({ onClose, onCreated }: { onClose: () => void; onCrea
 
   const { mutate, isPending } = useCreateProject({
     mutation: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         console.log("CREATE PROJECT SUCCESS PAYLOAD", data);
         queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
         onCreated(data.id);

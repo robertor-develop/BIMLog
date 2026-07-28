@@ -6,6 +6,7 @@ import { useListMembers } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Trash2, Search, ExternalLink, RefreshCw, X } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { isDebug } from "@/lib/debug";
 import { MeetingClashesPanel } from "./MeetingClashesPanel";
 import {
@@ -606,6 +607,10 @@ export function MeetingsTab({
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [currentViewExportMode, setCurrentViewExportMode] = useState<
+    "current" | "summary"
+  >("current");
+  const [currentViewExporting, setCurrentViewExporting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
   const [expandedSections, setExpandedSections] = useState<
@@ -1398,8 +1403,41 @@ export function MeetingsTab({
     `${API}/projects/${projectId}/reports/meeting-minutes/pdf?meeting_id=${meetingId}&token=${reportToken()}`;
   const downloadMeetingPdf = (meeting: Meeting) =>
     window.open(meetingPdfUrl(meeting.id), "_blank", "noopener,noreferrer");
-  const printMeeting = (meeting: Meeting) =>
-    window.open(meetingPdfUrl(meeting.id), "_blank", "noopener,noreferrer");
+  const currentViewPdfUrl = () => {
+    const exportView = view === "actions" ? "actions" : "meetings";
+    const sections =
+      currentViewExportMode === "summary"
+        ? "summary"
+        : exportView === "actions"
+          ? "summary,actions"
+          : "summary,meetings,linked_records";
+    const params = new URLSearchParams({
+      lang,
+      view: exportView,
+      sections,
+    });
+    return `${API}/projects/${projectId}/meetings/current-view/pdf?${params.toString()}`;
+  };
+  const exportCurrentViewPdf = async () => {
+    if (!token) return;
+    setCurrentViewExporting(true);
+    setError("");
+    try {
+      await downloadAuthenticatedPdf(
+        currentViewPdfUrl(),
+        token,
+        `meetings-current-view-${projectId}.pdf`,
+      );
+    } catch {
+      setError(t("Could not prepare the current Meetings view PDF.", "No se pudo preparar el PDF de la vista actual de Reuniones."));
+    } finally {
+      setCurrentViewExporting(false);
+    }
+  };
+  const currentViewExportHelp = t(
+    "Exports the current Meetings screen as a project-scoped PDF using the active tab, visible result counts, selected sections, and saved meeting data.",
+    "Exporta la vista actual de Actas como PDF del proyecto usando la pestaña activa, conteos visibles, secciones seleccionadas y datos guardados.",
+  );
   const meetingReportScopeLabel = (meeting: Meeting) =>
     `${meeting.title || t("Selected meeting", "Reunión seleccionada")} · ${new Date(
       meeting.meetingDate,
@@ -1407,10 +1445,6 @@ export function MeetingsTab({
   const meetingReportHelp = t(
     "Creates the official meeting minutes PDF for the selected meeting, including the current saved attendees, notes, action items, and linked records supported by the report.",
     "Crea el PDF oficial de actas para la reunión seleccionada, incluyendo los asistentes, notas, acciones y registros vinculados guardados que admite el reporte.",
-  );
-  const meetingPrintHelp = t(
-    "Opens the same PDF report in a new tab so it can be printed from the browser.",
-    "Abre el mismo reporte PDF en una nueva pestaña para imprimirlo desde el navegador.",
   );
   const openOriginalLensViewpoint = (lensViewpointId: number) =>
     window.location.assign(
@@ -3175,7 +3209,56 @@ export function MeetingsTab({
               )}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "#475569",
+              }}
+            >
+              <span>{t("PDF includes", "PDF incluye")}</span>
+              <select
+                value={currentViewExportMode}
+                onChange={(event) =>
+                  setCurrentViewExportMode(
+                    event.target.value === "summary" ? "summary" : "current",
+                  )
+                }
+                aria-label={t(
+                  "Current view PDF sections",
+                  "Secciones del PDF de vista actual",
+                )}
+                style={{
+                  minHeight: 34,
+                  border: "1px solid #CBD5E1",
+                  borderRadius: 8,
+                  padding: "0 8px",
+                  background: "white",
+                  maxWidth: "100%",
+                }}
+              >
+                <option value="current">
+                  {view === "actions"
+                    ? t("Summary + Actions", "Resumen + acciones")
+                    : t(
+                        "Summary + Meeting Register",
+                        "Resumen + registro de reuniones",
+                      )}
+                </option>
+                <option value="summary">
+                  {t("Summary only", "Solo resumen")}
+                </option>
+              </select>
+            </label>
+            <PrintPdfButton
+              lang={lang}
+              onClick={() => void exportCurrentViewPdf()}
+              loading={currentViewExporting}
+              disabledReason={currentViewExportHelp}
+            />
             {canWrite && (
               <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
                 <input
@@ -3428,18 +3511,7 @@ export function MeetingsTab({
                           )}
                         >
                           <Download size={12} style={{ marginRight: 4 }} />
-                          {t("Generate PDF Report", "Generar reporte PDF")}
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline"
-                          onClick={() => printMeeting(m)}
-                          title={meetingPrintHelp}
-                          aria-label={t(
-                            "Open meeting minutes PDF report to print",
-                            "Abrir reporte PDF de actas para imprimir",
-                          )}
-                        >
-                          {t("Open PDF to Print", "Abrir PDF para imprimir")}
+                          {t("Meeting Minutes PDF", "PDF de Actas")}
                         </button>
                       </div>
                       <div style={{ fontSize: 11, color: "#64748B" }}>
@@ -4573,18 +4645,7 @@ export function MeetingsTab({
                 )}
               >
                 <Download size={12} style={{ marginRight: 4 }} />
-                {t("Generate PDF Report", "Generar reporte PDF")}
-              </button>
-              <button
-                className="btn btn-outline"
-                onClick={() => printMeeting(editingMeeting)}
-                title={meetingPrintHelp}
-                aria-label={t(
-                  "Open meeting minutes PDF report to print",
-                  "Abrir reporte PDF de actas para imprimir",
-                )}
-              >
-                {t("Open PDF to Print", "Abrir PDF para imprimir")}
+                {t("Meeting Minutes PDF", "PDF de Actas")}
               </button>
             </div>
           )}

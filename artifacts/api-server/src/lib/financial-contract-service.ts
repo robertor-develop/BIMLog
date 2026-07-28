@@ -435,6 +435,14 @@ export async function getContractWorkspace(input: { actorUserId: number; project
   return { projectId, boundary: { operationalOnly: true, accounting: false, payments: false, externalPortal: false, automaticAi: false }, totals: { executedCommitments: decimalFromScaled(totals), currencies: [...new Set(contracts.map((c) => c.currency))] }, contracts, detail };
 }
 
+export async function contractCurrentViewExportData(input: { actorUserId: number; projectId: unknown }) {
+  const projectId = positiveId(input.projectId, "projectId");
+  await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.export", operation: "export" });
+  const workspace = await getContractWorkspace({ actorUserId: input.actorUserId, projectId });
+  const project = (await pool.query(`SELECT p.name,p.code,c.name company_name FROM projects p JOIN project_company_binding_versions b ON b.project_id=p.id JOIN companies c ON c.id=b.company_id WHERE p.id=$1 ORDER BY b.version DESC LIMIT 1`, [projectId])).rows[0];
+  return { project: { name: project.name, code: project.code, companyName: project.company_name }, contracts: workspace.contracts, totals: workspace.totals, generatedAt: new Date().toISOString() };
+}
+
 export async function contractExportData(input: { actorUserId: number; projectId: unknown; contractId: unknown }) {
   const projectId = positiveId(input.projectId, "projectId"), contractId = boundedText(input.contractId, "contractId", 3, 100);
   const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.export", operation: "export" });

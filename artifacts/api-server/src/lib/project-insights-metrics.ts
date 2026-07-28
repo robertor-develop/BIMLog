@@ -32,6 +32,8 @@ function baseRegisterQuery(timezone: string): RegisterQuery {
   };
 }
 
+export type ProjectInsightsSummary = Awaited<ReturnType<typeof loadProjectInsightsSummary>>;
+
 export async function loadProjectInsightsSummary(input: {
   userId: number;
   projectId: number;
@@ -47,7 +49,7 @@ export async function loadProjectInsightsSummary(input: {
     superAdminReason: input.superAdminReason,
   });
 
-  const [fileStatus, fileCompanies, rfiStatus, rfiAging, members] =
+  const [fileStatus, fileCompanies, rfiStatus, rfiAging, members, actorAccess] =
     await Promise.all([
       pool.query(
         `SELECT lower(COALESCE(status,'unknown')) AS status,count(*)::int AS count
@@ -83,8 +85,13 @@ export async function loadProjectInsightsSummary(input: {
          WHERE pm.project_id=$1 AND pm.status='active'`,
         [input.projectId],
       ),
+      pool.query(
+        `SELECT pm.role,pm.status
+         FROM project_members pm
+         WHERE pm.project_id=$2 AND pm.user_id=$1 LIMIT 1`,
+        [input.userId, input.projectId],
+      ),
     ]);
-
   const fileCounts = Object.fromEntries(
     fileStatus.rows.map((row) => [String(row.status), safeCount(row.count)]),
   );
@@ -101,6 +108,11 @@ export async function loadProjectInsightsSummary(input: {
     totalFiles > 0 ? Math.round((validFiles / totalFiles) * 100) : null;
   const rfiAgingRow = rfiAging.rows[0] ?? {};
   const memberRow = members.rows[0] ?? {};
+  const actorRow = actorAccess.rows[0] ?? {};
+  const canViewCompanyPerformance =
+    register.accessMode === "super_admin_explicit" ||
+    (actorRow.status === "active" &&
+      ["project_admin", "admin"].includes(String(actorRow.role ?? "")));
 
   const commandCenterBase = `/projects/${input.projectId}/command-center`;
   const reportsBase = `/projects/${input.projectId}/reports`;
@@ -114,7 +126,7 @@ export async function loadProjectInsightsSummary(input: {
       es: "Perspectivas e Informes del Proyecto",
     },
     metricAuthority: {
-      source: "coordinator-action-register",
+      source: "BIMLog governed project metrics",
       definitions: COORDINATOR_CONTEXT_METRICS,
       timezone: register.timezone,
       partial: register.partial,
@@ -135,10 +147,17 @@ export async function loadProjectInsightsSummary(input: {
       rejectedFiles,
       complianceRate,
       unavailable: totalFiles === 0,
-      companies: fileCompanies.rows.map((row) => ({
-        company: String(row.company),
-        rejected: safeCount(row.rejected),
-      })),
+      companies: canViewCompanyPerformance
+        ? fileCompanies.rows.map((row) => ({
+            company: String(row.company),
+            rejected: safeCount(row.rejected),
+          }))
+        : [],
+      companyPerformanceRedacted: !canViewCompanyPerformance,
+      companyPerformanceUnavailableReason:
+        "Company-level performance is redacted for project-member roles. Project administrators and explicit super-admin project-read access can view it.",
+      companyPerformanceUnavailableReasonEs:
+        "El desempeño por empresa está redactado para roles de miembro del proyecto. Los administradores de proyecto y el acceso explícito de superadministrador pueden verlo.",
       links: {
         source: filesBase,
         report: `${reportsBase}?report=naming-compliance`,

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History } from "lucide-react";
 import { format } from "date-fns";
+import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
 
 interface CvrIssue {
   id: number;
@@ -540,7 +541,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   );
 
   return (
-    <div className="phasea-surface" data-phasea-surface="reports-hub">
+    <div id="reports-hub-current-view" className="phasea-surface" data-phasea-surface="reports-hub">
       <div className="phasea-page-hero">
         <div>
           <h2>{tl("Reports Hub", "Centro de reportes")}</h2>
@@ -551,7 +552,10 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
             )}
           </p>
         </div>
-        <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <PrintPdfButton lang={lang} onClick={() => printCurrentView("reports-hub-current-view")} />
+          <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
+        </div>
       </div>
 
       {/* PDF Reports section: must stay first on Insights & Reports */}

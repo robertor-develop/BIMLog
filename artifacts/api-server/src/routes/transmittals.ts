@@ -10,11 +10,177 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
 import { singleFileUpload } from "../middlewares/multipart";
-import { createPdfDocument, drawBrandedHeader, drawFooter, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
+import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, drawFooter, drawTable, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 const router: Router = Router();
+
+type TransmittalRow = typeof transmittalsTable.$inferSelect;
+
+type TransmittalRegisterFilters = {
+  status: string;
+  search: string;
+  sort: "created_desc" | "created_asc" | "sent_desc" | "title_asc" | "status_asc";
+};
+
+const TRANSMITTAL_STATUSES = new Set(["all", "draft", "sent", "acknowledged"]);
+const TRANSMITTAL_SORTS = new Set(["created_desc", "created_asc", "sent_desc", "title_asc", "status_asc"]);
+
+function textQuery(value: unknown, fallback = "") {
+  if (typeof value !== "string") return fallback;
+  return value.trim();
+}
+
+function parseTransmittalRegisterFilters(query: Record<string, unknown>): TransmittalRegisterFilters {
+  const status = textQuery(query.status, "all") || "all";
+  const search = textQuery(query.search);
+  const sort = textQuery(query.sort, "created_desc") || "created_desc";
+  if (!TRANSMITTAL_STATUSES.has(status)) throw new Error("Invalid transmittal status filter.");
+  if (!TRANSMITTAL_SORTS.has(sort)) throw new Error("Invalid transmittal sort.");
+  if (search.length > 160) throw new Error("Transmittal search is too long.");
+  return { status, search, sort: sort as TransmittalRegisterFilters["sort"] };
+}
+
+function transmittalRecipients(tx: TransmittalRow) {
+  const recipients = Array.isArray(tx.sentTo) ? tx.sentTo as Array<{ name?: string; email?: string }> : [];
+  return recipients
+    .map(recipient => [recipient?.name, recipient?.email].filter(Boolean).join(" <"))
+    .filter(Boolean)
+    .join(", ") || "—";
+}
+
+function filterTransmittalsForRegisterPdf(rows: TransmittalRow[], filters: TransmittalRegisterFilters) {
+  const q = filters.search.toLowerCase();
+  return rows
+    .filter(tx => filters.status === "all" || tx.status === filters.status)
+    .filter(tx => {
+      if (!q) return true;
+      return [tx.number, tx.title, tx.purpose, tx.status, transmittalRecipients(tx)]
+        .some(value => String(value || "").toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      if (filters.sort === "created_asc") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      if (filters.sort === "sent_desc") return new Date(b.sentAt || b.createdAt).getTime() - new Date(a.sentAt || a.createdAt).getTime();
+      if (filters.sort === "title_asc") return String(a.title || "").localeCompare(String(b.title || ""));
+      if (filters.sort === "status_asc") return String(a.status || "").localeCompare(String(b.status || "")) || String(a.number || "").localeCompare(String(b.number || ""));
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+}
+
+function fmtDate(value: Date | string | null | undefined) {
+  if (!value) return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("en-US");
+}
+
+function renderTransmittalsCurrentViewPdf(args: {
+  transmittals: TransmittalRow[];
+  totalCount: number;
+  project: typeof projectsTable.$inferSelect | undefined;
+  generatedAt: Date;
+  generatedBy: string;
+  filters: TransmittalRegisterFilters;
+}) {
+  const title = "Transmittals Current View Report";
+  const filename = reportFileName(title);
+  const contentHash = computeContentHash({
+    title,
+    projectId: args.project?.id ?? null,
+    generatedAt: args.generatedAt.toISOString(),
+    generatedBy: args.generatedBy,
+    filters: args.filters,
+    totalCount: args.totalCount,
+    transmittals: args.transmittals.map(tx => ({
+      id: tx.id,
+      number: tx.number,
+      title: tx.title,
+      purpose: tx.purpose,
+      status: tx.status,
+      recipients: transmittalRecipients(tx),
+      createdAt: tx.createdAt,
+      sentAt: tx.sentAt,
+      acknowledgedAt: tx.acknowledgedAt,
+    })),
+  });
+  const doc = createPdfDocument({ size: "LETTER", margin: 40, bufferPages: true });
+  const chunks: Buffer[] = [];
+  const buffer = new Promise<Buffer>((resolve, reject) => {
+    doc.on("data", chunk => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+  });
+  const theme = REPORT_THEMES.transmittal.log;
+  const reportDate = args.generatedAt.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  const filterSummary = [
+    `Status: ${args.filters.status === "all" ? "All" : args.filters.status}`,
+    args.filters.search ? `Search: ${args.filters.search}` : "",
+    `Sort: ${args.filters.sort.replace(/_/g, " ")}`,
+    `Rows: ${args.transmittals.length} of ${args.totalCount}`,
+    `Prepared by: ${args.generatedBy}`,
+  ].filter(Boolean).join(" | ");
+
+  doc.y = drawBrandedHeader(doc, {
+    margin: 40,
+    companyName: "BIMLog",
+    title,
+    subtitle: "Current filtered Transmittals view",
+    projectName: args.project?.name ?? "Project",
+    projectCode: args.project?.code,
+    reportDate: args.generatedAt,
+    theme,
+  }) + 12;
+  doc.fontSize(8).font("Helvetica").fillColor("#4B5563").text(filterSummary, 40, doc.y, { width: 532 });
+  doc.moveDown(0.8);
+
+  const columns = [
+    { label: "Number", width: 68, format: (tx: TransmittalRow) => tx.number || "—" },
+    { label: "Title", width: 136, wrap: true, format: (tx: TransmittalRow) => tx.title || "—" },
+    { label: "Status", width: 70, format: (tx: TransmittalRow) => String(tx.status || "—").toUpperCase() },
+    { label: "Recipients", width: 128, wrap: true, format: (tx: TransmittalRow) => transmittalRecipients(tx) },
+    { label: "Created", width: 58, format: (tx: TransmittalRow) => fmtDate(tx.createdAt) },
+    { label: "Sent/Ack.", width: 72, format: (tx: TransmittalRow) => [fmtDate(tx.sentAt), fmtDate(tx.acknowledgedAt)].filter(v => v !== "—").join(" / ") || "—" },
+  ];
+
+  if (args.transmittals.length === 0) {
+    doc.fontSize(12).font("Helvetica-Bold").fillColor(theme.dark).text("No transmittals match the selected view.", 40, doc.y + 20, { width: 532, align: "center" });
+  } else {
+    drawTable(doc, {
+      x: 40,
+      startY: doc.y,
+      columns,
+      rows: args.transmittals,
+      fontSize: 7,
+      headerFontSize: 7,
+      rowMinHeight: 26,
+      pageBottom: 720,
+      headerFill: theme.primary,
+      onPageBreak: () => {
+        doc.addPage();
+        return drawBrandedHeader(doc, {
+          margin: 40,
+          companyName: "BIMLog",
+          title,
+          projectName: args.project?.name ?? "Project",
+          projectCode: args.project?.code,
+          theme,
+        }) + 10;
+      },
+    });
+  }
+
+  addPageNumbers(doc, {
+    margin: 40,
+    footerY: 756,
+    fingerprintY: 742,
+    contentHash,
+    companyName: "BIMLog",
+    projectName: args.project?.name,
+    timestamp: reportDate,
+  });
+  doc.end();
+  return { title, filename, contentHash, buffer };
+}
 
 async function nextTransmittalNumber(projectId: number, projectCode: string): Promise<string> {
   const existing = await db.select({ id: transmittalsTable.id })
@@ -69,6 +235,63 @@ router.post("/projects/:projectId/transmittals", authMiddleware, requirePermissi
     res.status(201).json(tx);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+  }
+});
+
+// ── GET /projects/:projectId/transmittals/export-pdf ──────────────────────────
+router.get("/projects/:projectId/transmittals/export-pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  if (!Number.isInteger(projectId) || projectId <= 0) { res.status(400).json({ error: "Invalid project id." }); return; }
+  try {
+    const filters = parseTransmittalRegisterFilters(req.query as Record<string, unknown>);
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const allTransmittals = await db.select().from(transmittalsTable)
+      .where(and(eq(transmittalsTable.projectId, projectId), isNull(transmittalsTable.deletedAt)))
+      .orderBy(desc(transmittalsTable.createdAt));
+    const transmittals = filterTransmittalsForRegisterPdf(allTransmittals, filters);
+    const generatedAt = new Date();
+    const output = renderTransmittalsCurrentViewPdf({
+      transmittals,
+      totalCount: allTransmittals.length,
+      project,
+      generatedAt,
+      generatedBy: req.user!.fullName || "BIMLog user",
+      filters,
+    });
+    const buffer = await output.buffer;
+    await db.insert(activityLogTable).values({
+      projectId,
+      userId: req.user!.userId,
+      userFullName: req.user!.fullName || "User",
+      userCompanyName: req.user!.companyName || "",
+      actionType: "export",
+      entityType: "transmittal",
+      entityId: projectId,
+      fileNameBefore: null,
+      fileNameAfter: output.filename,
+      details: JSON.stringify({
+        event: "transmittal.current_view_pdf_exported",
+        title: output.title,
+        filename: output.filename,
+        filters,
+        matchingTransmittals: transmittals.length,
+        totalTransmittals: allTransmittals.length,
+        generatedAt: generatedAt.toISOString(),
+        contentHash: output.contentHash,
+      }),
+    });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${output.filename}"`);
+    res.setHeader("Content-Length", buffer.length);
+    res.send(buffer);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Transmittals PDF export failed.";
+    if (message.startsWith("Invalid") || message.includes("too long")) {
+      res.status(400).json({ error: message });
+      return;
+    }
+    console.error("[transmittals.current_view_pdf_failed]", { name: err instanceof Error ? err.name : "UnknownError" });
+    res.status(500).json({ error: "Transmittals current-view PDF export failed." });
   }
 });
 

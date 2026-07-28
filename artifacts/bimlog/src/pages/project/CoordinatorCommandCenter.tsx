@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Download,
   ExternalLink,
   Filter,
   Focus,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { CoordinatorBulkActions } from "./CoordinatorBulkActions";
 
 type SourceModule = "lens" | "rfi" | "submittal" | "meeting" | "schedule";
@@ -223,6 +225,7 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
   const [savedViewError, setSavedViewError] = useState("");
   const [activeSavedViewId, setActiveSavedViewId] = useState("");
   const [savedViewBusy, setSavedViewBusy] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Record<string, ActionItem>>({});
   const [selectionError, setSelectionError] = useState("");
   const urlInitialized = useRef(false);
@@ -423,6 +426,34 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
     if (company || person || floor || discipline || search) values.push(tr("Operational details", "Detalles operativos"));
     return values;
   }, [builtInView, modules, lensStatus, originalStatus, presentationStatus, deadline, dueFrom, dueTo, meetingId, company, person, floor, discipline, search, lang]);
+
+  const exportFilteredPdf = async () => {
+    if (!token) return;
+    setExportingPdf(true);
+    setError("");
+    try {
+      const params = new URLSearchParams(queryString);
+      params.set("lang", lang);
+      const response = await fetch(`/api/v1/projects/${projectId}/coordinator-actions/export.pdf?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error((lang === "es" ? payload.messageEs : payload.message) || tr("The Command Center PDF could not be exported.", "No se pudo exportar el PDF del Centro de Control."));
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Coordinator-Command-Center-${projectId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (exportError) {
+      setError(exportError instanceof Error ? exportError.message : tr("The Command Center PDF could not be exported.", "No se pudo exportar el PDF del Centro de Control."));
+    } finally {
+      setExportingPdf(false);
+    }
+  };
 
   useEffect(() => {
     if (!token || modules.length === 0) {
@@ -685,6 +716,13 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
         <div className="ccc-filter-heading">
           <Filter size={15} /> <strong>{tr("Operational filters", "Filtros operativos")}</strong>
           <div className="ccc-filter-reset">
+            <PrintPdfButton
+              lang={lang}
+              loading={exportingPdf}
+              disabled={!token}
+              disabledReason={tr("Sign in to print this view.", "Inicia sesion para imprimir esta vista.")}
+              onClick={() => void exportFilteredPdf()}
+            />
             <button type="button" onClick={clearFilters}><RotateCcw size={12} /> {tr("Clear all", "Limpiar todo")}</button>
             <button
               type="button"
