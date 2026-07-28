@@ -4205,6 +4205,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0cecf755326a49521365c51381a9449cbdfd3653f0c67254a5ebf23131ddd3db"
+    },
+    {
+      "taskId": "ruben-pdf-ux-t1-rfi-sidebar-governance-reconciliation-20260728",
+      "reviewedThroughCommit": "05fe1390739a433dfac392b03ee7f51e90dd3de2",
+      "reviewedAt": "2026-07-28T08:56:52-04:00",
+      "status": "ready_for_independent_review",
+      "captureTiming": "serialized_governance_reconciliation_after_accepted_successors",
+      "summary": "Reconciles the independently accepted RFI parity, nullable frontend contract, and sidebar viewport-layout successors through 05fe1390 while preserving the blocked production-build boundary and all unrun browser, PDF, provider, publication, deployment, and live-acceptance gates.",
+      "workstreams": [
+        "rfi-current-view-parity",
+        "rfi-api-contract",
+        "project-sidebar-viewport-layout",
+        "serialized-release-governance"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Evidence\\bimlog-ruben-pdf-corrected-candidate-independent-review-20260728\\20260728T075800-0400\\INDEPENDENT-REVIEW.md",
+          "type": "independent_rfi_parity_source_review",
+          "result": "accepted_for_final_gates",
+          "boundary": "Accepts the RFI parity source and governance candidate; runtime, build, browser, artifact, provider, and release gates remain separate."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\bimlog-rfi-type-contract-successor-independent-review-20260728\\20260728T082334-0400\\INDEPENDENT-REVIEW.md",
+          "type": "independent_rfi_contract_review",
+          "result": "accepted_for_final_gates",
+          "boundary": "Accepts the optional nullable frontend contract and leaves full Orval/Zod generated-model reconciliation as a separate concern."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\bimlog-sidebar-layout-successor-independent-review-20260728\\20260728T084409-0400\\REVIEW.md",
+          "type": "independent_sidebar_source_review",
+          "result": "accepted_for_combined_final_gates",
+          "boundary": "Accepts the one-file CSS correction while requiring the combined real-app browser gate."
+        },
+        {
+          "path": "F:\\BIMLog\\Evidence\\bimlog-ruben-pdf-final-gates-combined-20260728\\20260728T084559-0400\\FINAL-GATE-SUMMARY.md",
+          "type": "combined_heavy_gate_result",
+          "result": "blocked_at_living_brief",
+          "boundary": "Offline install, library prerequisite, and frontend typecheck passed; production build stopped before compilation and all later visual, artifact, provider, and release gates stayed NOT_RUN."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted RFI parity, type contract, and sidebar layout corrections change no ecosystem ownership, customer relationship, commercial posture, provider boundary, or permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution authority already requires bounded ownership, truthful gate reporting, independent review, generated-governance reconciliation, and separate provider and field acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted changes apply existing filter-parity, contract-integrity, responsive-layout, and evidence-quality rules without changing their thresholds or acceptance definitions."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap category, customer promise, product positioning, module ownership, or future-product decision changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The lineage changes existing RFI route/UI contracts and foundational shell CSS without adding routes, schema, startup behavior, packages, deployment topology, or generated platform inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, model identity, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The RFI current-view report semantics were already reconciled at 6cb212b; the later nullable type declaration and sidebar CSS correction do not change report selection, fields, styling, or artifact requirements."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory interpretation, compliance citation, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact accepted lineage, independent reviews, passed frontend typecheck, Living Brief build stop, and all later gates as pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the safe build-resume point, remaining real-app and artifact gates, provider and release boundaries, and the separate generated-client provenance decision."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate, production observation, database evidence, customer evidence, publication event, or deployment record was created."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1c30c1ae82bcbdde3a8c5a2027befa4c5d114e9b0c984ff2ed6653e29854dcf9"
     }
   ]
 }

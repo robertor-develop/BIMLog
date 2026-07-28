@@ -9,22 +9,22 @@ synchronization, and field/customer verification are separate states. The curren
 reconciliation is an independent integration candidate and does not become accepted or deployed truth until
 its review, clean commit, push, and later deployment gates pass.
 
-### Ruben T1 current-view export release candidate - local validation in progress
+### Ruben T1 current-view export and sidebar release candidate - governance reconciled
 
-Successor product correction `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` closes the independently identified
-RFI current-view parity defects: visible and exported Ball in Court values now share the same lifecycle-aware
-computation, and both sides use the inclusive `23:59:59.999` end-date boundary. Bounded static parity and
-path-scoped diff checks pass. Successor typecheck is not run because the isolated worktree has no dependencies.
+The accepted local lineage is `5db399450adc5df92420012c2d30380444d681f5` ->
+`6cb212b368a20c6aaf5af61f34de5cc28c7e501d` -> `122d3b5216266fedd1eaee9f723ac398f2791281` ->
+`2be2ac0fa464ecc86ce95b7f5194e29a0dd7bfa1` -> `05fe1390739a433dfac392b03ee7f51e90dd3de2`.
+Independent source reviews accepted the RFI Ball in Court and inclusive end-date parity correction, the nullable
+`Rfi.ballInCourt` OpenAPI/generated React contract correction, and the one-file viewport-height sidebar layout
+correction for combined final gates.
 
-Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498`, based on
-`adbdecc0757f517a214484f6e5f2869a7cb364b2`, changes only the existing Reports Hub, RFI, and Submittal
-frontend/route surfaces. Reports Hub remains the master library and launcher; source-screen exports preserve the
-current filtered view. RFI and Submittal handlers gain additive optional query-filter behavior with existing
-project authorization, nondeleted scope, privacy defaults, filter/count context, and fail-closed validation.
-Frontend and API typechecks and the standalone Living Brief integrity check passed. The production build has not
-been rerun yet. Browser/runtime scenarios, seven failure gates, English desktop, Spanish exact-390px,
-every-page PDF/XLSX inspection, push, Replit preview, publication, deployment, production verification, customer
-verification, and live acceptance remain not run.
+Offline dependency materialization, the TypeScript library prerequisite, and frontend typecheck passed on
+`05fe1390`. The production build then stopped only at stale Living Brief reconciliation, before application
+compilation or bundling. Isolated startup, real-app English desktop and Spanish exact-390px browser acceptance,
+RFI/Submittal PDF generation and every-page inspection, provider alignment, push, publication, deployment,
+production verification, customer verification, and live acceptance remain not run. The broader generated-client
+provenance decision for the already-narrower Orval/Zod RFI response models remains a separate open concern; this
+candidate neither regenerates nor claims reconciliation of those models.
 
 UI/auth and report-export UX release bundle is accepted in local serialized integration source at $head. It combines the Living Brief authentication gate durability correction, Headquarters global navigation and shell clarity, Meetings report-generation UX, Headquarters Admin/Total Control polish, and Finance Budget/Contract export UX labels. The integrated source preserves the frozen baseline c3d135c24c1432b63d74898a1de83e67ba54c394, excludes superseded Headquarters Slice 2 commit d7bcf76be2d14eae49ef0c7a10d17d55a198f59e, and remains not published, deployed, production verified, customer verified, or live accepted. Replit/provider publication remains a separate fail-closed step tied to the exact final pushed commit and preview.
 

@@ -4,29 +4,27 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## Current terminal truth - 2026-07-23
 
-### Ruben T1 current-view export release validation
+### Ruben T1 current-view export and sidebar release validation
 
-- Successor product correction `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` aligns the RFI visible list,
-  filter options, search, PDF filtering, PDF rows, and fingerprint to the same lifecycle-aware Ball in Court
-  computation. Draft, stored-responsibility, responded, sent fallback, closed, and unassigned states now use the
-  same value on both sides. The visible end-date cutoff now matches the API's inclusive `23:59:59.999` boundary.
-- The corrected RFI source has bounded static parity proof and path-scoped diff validation. Dependencies are absent
-  from the isolated worktree, so focused typecheck, production build, browser, and rendered PDF proof remain pending.
-- Corrected combined source commit `27d4c07cfc0448810bebdc3a5d6974bc257c9498` is local and tracked clean on
-  baseline `adbdecc0757f517a214484f6e5f2869a7cb364b2`. It changes only the Reports Hub, RFI, and Submittal
-  frontend/route surfaces.
-- Reports Hub remains the master library and launcher. RFI and Submittal source-screen exports preserve current
-  visible filter scope; the existing authenticated handlers gain additive optional query-filter behavior with
-  project/nondeleted scope, privacy defaults, count context, and fail-closed validation.
-- Frontend and API typechecks and the standalone Living Brief integrity check passed. The previous production-build
-  attempt stopped at Living Brief integrity and has not yet been rerun.
-- Remaining serialized gates are: a separate governance commit; production build; an
-  independently reviewed source-specific acceptance adapter; all 19 runtime scenarios and seven failure gates;
-  English desktop and Spanish exact-390px browser checks; every-page PDF/XLSX inspection; final independent
-  combined-tree attestation; normal push and remote equality; and separate Replit preview, exact-commit approval,
-  publication, deployment, production verification, customer verification, and live acceptance.
-- Browser, PDF/XLSX generation, provider/Replit, database, production/customer data, push, publication, deployment,
-  and live acceptance remain not run. No release-ready, deployed, published, or accepted claim is made.
+- Accepted local lineage: `5db399450adc5df92420012c2d30380444d681f5` ->
+  `6cb212b368a20c6aaf5af61f34de5cc28c7e501d` -> `122d3b5216266fedd1eaee9f723ac398f2791281` ->
+  `2be2ac0fa464ecc86ce95b7f5194e29a0dd7bfa1` -> `05fe1390739a433dfac392b03ee7f51e90dd3de2`.
+- Independent review accepted the RFI lifecycle-aware Ball in Court and inclusive `23:59:59.999` end-date parity
+  correction, the optional nullable `Rfi.ballInCourt` OpenAPI/generated React contract correction, and the
+  one-file desktop sidebar viewport/independent-scroll correction for combined final gates.
+- Offline dependency materialization, the TypeScript library prerequisite, and frontend typecheck passed on
+  `05fe1390`. The production build stopped during `check:living-brief` before compilation/bundling because
+  `state.json`, `STATUS.md`, and `OPEN_LOOP.md` had not yet been reconciled through the sidebar implementation unit.
+- After independent acceptance of this governance-only successor, the heavy-gate owner must rerun the production
+  build once on the exact accepted source. Only after a build pass may the real-app English desktop, Spanish
+  exact-390px, RFI PDF, Submittal PDF, every-page visual, metrics, request-log, and hash evidence run.
+- The full Orval/Zod generated RFI response inventory was already narrower than the runtime API and was outside the
+  bounded type-contract correction. A separately authorized generated-client provenance decision must determine
+  whether and how to regenerate/reconcile that wider inventory; do not silently treat the two-line contract fix as
+  full generated-model convergence.
+- Normal push and remote equality, provider/Replit alignment and complete preview, exact-source approval,
+  publication, deployment, production verification, customer verification, and live acceptance remain pending.
+  No provider, database, production/customer data, push, publication, or deployment action occurred in this lane.
 
 ### UI/auth and report-export UX serialized release integration
 
