@@ -1307,9 +1307,20 @@ function rfiRegisterDateValue(rfi: typeof rfisTable.$inferSelect, field: RfiRegi
   return rfi.createdAt;
 }
 
-function rfiRegisterBallInCourt(rfi: typeof rfisTable.$inferSelect) {
+function rfiRegisterBallInCourt(
+  rfi: typeof rfisTable.$inferSelect,
+  creatorNames: ReadonlyMap<number, string>,
+) {
   if (rfi.status === "closed") return "Closed";
-  return rfi.ballInCourt || rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+  if (rfi.sendStatus !== "sent" && !rfi.sentAt) {
+    return `${rfi.submittedByCompany || creatorNames.get(rfi.createdById) || "Author"} — to send`;
+  }
+  const storedResponsibility = rfi.ballInCourt?.trim();
+  if (storedResponsibility) return storedResponsibility;
+  if (rfi.status === "responded") {
+    return rfi.submittedByCompany || creatorNames.get(rfi.createdById) || "Unassigned";
+  }
+  return rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
 }
 
 function parseRfiRegisterFilters(query: Record<string, unknown>): RfiRegisterFilters {
@@ -1336,12 +1347,13 @@ function parseRfiRegisterFilters(query: Record<string, unknown>): RfiRegisterFil
 function filterRfisForRegisterPdf(
   rfis: (typeof rfisTable.$inferSelect)[],
   filters: RfiRegisterFilters,
+  creatorNames: ReadonlyMap<number, string>,
 ) {
   const q = filters.search.trim().toLowerCase();
   return rfis
     .filter(rfi => filters.status === "all" || rfi.status === filters.status)
     .filter(rfi => filters.rfiType === "all" || (rfi.rfiType || "") === filters.rfiType)
-    .filter(rfi => filters.ballInCourt === "all" || rfiRegisterBallInCourt(rfi) === filters.ballInCourt)
+    .filter(rfi => filters.ballInCourt === "all" || rfiRegisterBallInCourt(rfi, creatorNames) === filters.ballInCourt)
     .filter(rfi => filters.sentToCompany === "all" || (rfi.submittedToCompany || rfi.submittedToPerson || "") === filters.sentToCompany)
     .filter(rfi => {
       if (!filters.dateFrom && !filters.dateTo) return true;
@@ -1358,7 +1370,7 @@ function filterRfisForRegisterPdf(
     })
     .filter(rfi => {
       if (!q) return true;
-      return [rfi.number, rfi.subject, rfi.rfiType, rfiRegisterBallInCourt(rfi), rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
+      return [rfi.number, rfi.subject, rfi.rfiType, rfiRegisterBallInCourt(rfi, creatorNames), rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
         .some(value => String(value || "").toLowerCase().includes(q));
     })
     .sort((left, right) => {
@@ -1385,6 +1397,7 @@ export function renderGovernedRfiRegisterPdf(args: {
   generatedAt: Date;
   generatedBy: string;
   filters: RfiRegisterFilters;
+  creatorNames: ReadonlyMap<number, string>;
 }) {
   const title = args.view === "log" ? "RFI Log Report" : "RFI List Report";
   const theme = args.view === "log" ? REPORT_THEMES.rfi.log : REPORT_THEMES.rfi.list;
@@ -1441,7 +1454,7 @@ export function renderGovernedRfiRegisterPdf(args: {
         { label: "Type", width: 58, format: (r: typeof rfisTable.$inferSelect) => r.rfiType || "-" },
         { label: "Req. By Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
         { label: "Sent To Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
-        { label: "Ball In Court", width: 78, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r) },
+        { label: "Ball In Court", width: 78, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r, args.creatorNames) },
         { label: "Forwarded", width: 58, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequested || r.createdAt) },
         { label: "Answered", width: 58, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateAnswered || r.respondedAt) },
         { label: "Status", width: 58, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
@@ -1453,7 +1466,7 @@ export function renderGovernedRfiRegisterPdf(args: {
         { label: "Type", width: 56, format: (r: typeof rfisTable.$inferSelect) => r.rfiType || "-" },
         { label: "Status", width: 58, format: (r: typeof rfisTable.$inferSelect) => clean(r.status) },
         { label: "Priority", width: 54, format: (r: typeof rfisTable.$inferSelect) => clean(r.priority) },
-        { label: "Ball In Court", width: 102, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r) },
+        { label: "Ball In Court", width: 102, wrap: true, format: (r: typeof rfisTable.$inferSelect) => rfiRegisterBallInCourt(r, args.creatorNames) },
         { label: "Sent To Co.", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedToCompany || r.submittedToPerson || "-" },
         { label: "Submitted By", width: 76, format: (r: typeof rfisTable.$inferSelect) => r.submittedByCompany || "-" },
         { label: "Date Req.", width: 50, format: (r: typeof rfisTable.$inferSelect) => fmtD(r.dateRequired || r.dueDate) },
@@ -1488,7 +1501,7 @@ export function renderGovernedRfiRegisterPdf(args: {
       subject: rfi.subject,
       status: rfi.status,
       priority: rfi.priority,
-      ballInCourt: rfi.ballInCourt,
+      ballInCourt: rfiRegisterBallInCourt(rfi, args.creatorNames),
       submittedByCompany: rfi.submittedByCompany,
       submittedToCompany: rfi.submittedToCompany,
       submittedToPerson: rfi.submittedToPerson,
@@ -1562,7 +1575,12 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
       where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
       orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
     });
-    const rfis = filterRfisForRegisterPdf(allRfis, filters);
+    const creatorIds = [...new Set(allRfis.map(rfi => rfi.createdById))];
+    const creators = creatorIds.length
+      ? await db.select({ id: usersTable.id, fullName: usersTable.fullName }).from(usersTable).where(inArray(usersTable.id, creatorIds))
+      : [];
+    const creatorNames = new Map(creators.map(creator => [creator.id, creator.fullName || ""]));
+    const rfis = filterRfisForRegisterPdf(allRfis, filters, creatorNames);
     const generatedAt = new Date();
     const output = renderGovernedRfiRegisterPdf({
       view,
@@ -1572,6 +1590,7 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
       generatedAt,
       generatedBy: req.user!.fullName || "BIMLog user",
       filters,
+      creatorNames,
     });
     const buffer = await output.buffer;
     await db.insert(activityLogTable).values({

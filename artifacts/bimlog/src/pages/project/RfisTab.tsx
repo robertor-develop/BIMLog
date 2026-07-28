@@ -557,16 +557,26 @@ function normalizePackageItems(value: unknown, attachments: string[], files: Pro
   }).map((item, order) => ({ ...item, order }));
 }
 
-function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
-  if (rfi.status === "closed") return null;
+function rfiBallInCourtValue(rfi: Rfi): string {
+  if (rfi.status === "closed") return "Closed";
   // Not sent yet: the author still holds it — nobody is "responding" to a draft.
   if (rfi.sendStatus !== "sent" && !rfi.sentAt) {
-    return { label: `${rfi.submittedByCompany || rfi.createdByName || "Author"} — to send`, color: "#B45309" };
+    return `${rfi.submittedByCompany || rfi.createdByName || "Author"} — to send`;
   }
+  const storedResponsibility = rfi.ballInCourt?.trim();
+  if (storedResponsibility) return storedResponsibility;
   if (rfi.status === "responded") {
-    return { label: rfi.submittedByCompany || rfi.createdByName || "Submitter", color: "#7C3AED" };
+    return rfi.submittedByCompany || rfi.createdByName || "Unassigned";
   }
-  return { label: rfi.submittedToCompany || rfi.submittedToPerson || "Reviewer", color: "#0369A1" };
+  return rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
+}
+
+function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
+  if (rfi.status === "closed") return null;
+  return {
+    label: rfiBallInCourtValue(rfi),
+    color: rfi.sendStatus !== "sent" && !rfi.sentAt ? "#B45309" : rfi.status === "responded" ? "#7C3AED" : "#0369A1",
+  };
 }
 
 function daysColor(days: number, isOverdue: boolean) {
@@ -1164,10 +1174,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     if (field === "answered") return rfi.dateAnswered || rfi.respondedAt;
     return rfi.createdAt;
   };
-  const rfiBallInCourtValue = (rfi: Rfi) => {
-    if (rfi.status === "closed") return "Closed";
-    return getBallInCourt(rfi)?.label || "Unassigned";
-  };
   const rfiBallInCourtDisplay = (value: string) =>
     value === "Closed" ? w("Closed", "Cerrado", lang) : value === "Unassigned" ? w("Unassigned", "Sin asignar", lang) : value;
   const uniqueRfiValues = (values: Array<string | null | undefined>) =>
@@ -1239,7 +1245,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         if (!raw) return false;
         const value = new Date(raw).getTime();
         if (dateFrom && value < new Date(`${dateFrom}T00:00:00`).getTime()) return false;
-        if (dateTo && value > new Date(`${dateTo}T23:59:59`).getTime()) return false;
+        if (dateTo && value > new Date(`${dateTo}T23:59:59.999`).getTime()) return false;
         return true;
       })
       .filter(r => {
