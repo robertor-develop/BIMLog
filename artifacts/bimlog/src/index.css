@@ -938,3 +938,36 @@ select:focus { outline: none; border-color: hsl(var(--primary)); box-shadow: 0 0
   .ccc-bulk-error { align-items: flex-start; flex-wrap: wrap; }
   .ccc-bulk-error button { width: 100%; }
 }
+
+@media (max-width: 720px) {
+  .rfi-register-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rfi-register-heading {
+    min-width: 0;
+    width: 100%;
+  }
+  .rfi-register-heading .section-title {
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+  .rfi-register-actions {
+    align-items: stretch !important;
+    flex-wrap: wrap;
+    min-width: 0;
+    width: 100%;
+  }
+  .rfi-register-view-tabs {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+  .rfi-current-view-action {
+    flex: 1 1 100%;
+    height: auto;
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+}

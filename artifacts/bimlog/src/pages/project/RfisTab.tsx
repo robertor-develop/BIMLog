@@ -1386,15 +1386,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         />
       )}
       {/* Header */}
-      <div className="section-header" style={{ marginBottom: 12 }}>
-        <div>
+      <div className="section-header rfi-register-header" style={{ marginBottom: 12 }}>
+        <div className="rfi-register-heading">
           <div className="section-title" style={{ fontSize: 16 }}>{w("RFIs", "Solicitudes de Información", lang)}</div>
           <div className="section-sub">
             {stats.total} {w("total", "total", lang)} · {stats.open} {w("open", "abierto", lang)} · {stats.inReview} {w("in review", "en revisión", lang)} · {stats.responded} {w("responded", "respondido", lang)} · {stats.closed} {w("closed", "cerrado", lang)}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{ display: "flex", border: "1px solid hsl(var(--border))", borderRadius: 6, overflow: "hidden" }}>
+        <div className="rfi-register-actions" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div className="rfi-register-view-tabs" style={{ display: "flex", border: "1px solid hsl(var(--border))", borderRadius: 6, overflow: "hidden" }}>
             <button onClick={() => setView("list")} style={{ padding: "5px 10px", background: view === "list" ? "hsl(var(--primary))" : "transparent", color: view === "list" ? "white" : "hsl(var(--muted-foreground))", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
               <LayoutList style={{ width: 13, height: 13 }} />{w("List", "Lista", lang)}
             </button>
@@ -1405,6 +1405,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           {rfis && rfis.length > 0 && (
             <>
               <Button
+                className="rfi-current-view-action"
                 variant="outline"
                 size="sm"
                 onClick={() => void handleRfiViewPdf("print")}
@@ -1415,6 +1416,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                 {w("Print Current View PDF", "Imprimir PDF Vista Actual", lang)}
               </Button>
               <Button
+                className="rfi-current-view-action"
                 variant="outline"
                 size="sm"
                 onClick={() => void handleRfiViewPdf("download")}
