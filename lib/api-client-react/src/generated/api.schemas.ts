@@ -186,6 +186,7 @@ export interface Rfi {
   distributionList?: string[];
   emailDescription?: string;
   emailDraft?: string;
+  ballInCourt?: string | null;
   attachmentsJson?: string[];
   attachmentPackageJson?: Record<string, unknown>[];
   imagePresentationJson?: Record<string, unknown> | null;

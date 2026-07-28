@@ -920,6 +920,9 @@ components:
           type: string
         emailDraft:
           type: string
+        ballInCourt:
+          type: string
+          nullable: true
         sendStatus:
           type: string
         sentAt:
