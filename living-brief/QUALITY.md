@@ -409,6 +409,29 @@ Ready/acceptance boundary, where its semantic declaration is still mandatory bef
   deployment, save/reopen, exact-model, or customer field gate.
 - Navisworks mutation is preserve-first: create a detached unique copy, apply final identity, insert it, and
   reacquire the saved-viewpoint collection after every mutation. Later identity safeguards surround this rule.
+
+### UI/UX implementation-owner Definition of Done
+
+Before handoff, the implementation owner must inspect every affected production screen in every
+applicable populated, empty, loading, error, denied, disabled, and permission-limited state. Verify
+affected desktop and exact-390px behavior, plus English and Spanish where the surface is localized.
+Compare related screens side by side for consistent terminology, action names, placement, hierarchy,
+spacing, typography, colors, component patterns, navigation/back behavior, shell/sidebar behavior,
+responsive wrapping, and empty/error presentation.
+
+The affected experience must have no clipping, overlap, horizontal overflow, duplicate or
+contradictory controls, broken navigation, browser-native fallback where a governed workflow is
+required, mojibake or broken glyphs, affected console errors, failed application requests, or
+hidden unauthorized data. Family-wide changes require a compact screenshot/contact-sheet
+comparison; a bounded one-control correction requires focused evidence only. Evidence and testing
+must remain proportional to the actual delta, with no unrelated full regression or governance
+expansion.
+
+The owner corrects obvious defects before requesting review and reports remaining limitations
+honestly. Independent review confirms completed owner self-QA and is not the first real product
+inspection. Before recommending release, the orchestrator inspects the actual screenshots and
+runtime outputs rather than accepting a text `PASS`.
+
 Evidence-based decision-making is part of Quality 4.0, not a reporting formality. Synthetic
 evidence is itself a quality failure because it hides the actual condition of the product and
 prevents sound corrective action. Human oversight remains mandatory: the builder supplies

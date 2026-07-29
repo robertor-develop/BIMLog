@@ -4,7 +4,7 @@ import { FileInput, FolderOpen, LockKeyhole, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
-import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 interface IntegrationsTabProps {
   projectId: number;
@@ -37,6 +37,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [category, setCategory] = useState("all");
   const [availability, setAvailability] = useState("all");
   const [connection, setConnection] = useState("all");
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -78,6 +79,41 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
     });
   }, [availability, category, connection, connections, lang, providers, search]);
 
+  const exportCurrentView = async () => {
+    if (!token) return;
+    setExporting(true);
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "integrations",
+        lang,
+        context: [
+          `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
+          `${tr("Category", "Categoria")}: ${category}`,
+          `${tr("Availability", "Disponibilidad")}: ${availability}`,
+          `${tr("Connection", "Conexion")}: ${connection}`,
+          `${tr("Visible", "Visibles")}: ${visibleProviders.length}/${providers.length}`,
+        ],
+        columns: [
+          tr("Integration", "Integracion"),
+          tr("Category", "Categoria"),
+          tr("Availability", "Disponibilidad"),
+          tr("Connection", "Conexion"),
+        ],
+        rows: visibleProviders.map((provider) => [
+          lang === "es" ? provider.label.es : provider.label.en,
+          provider.category.replace(/_/g, " "),
+          provider.availability.replace(/_/g, " "),
+          connected(provider.key) ? tr("Connected", "Conectado") : tr("Not connected", "No conectado"),
+        ]),
+        emptyMessage: tr("No approved integrations match the current filters.", "Ninguna integracion aprobada coincide con los filtros actuales."),
+      }, "integrations-current-view.pdf");
+    } catch (error) {
+      logClientError("integrations current-view PDF", error);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   function openProvider(provider: CatalogProvider) {
     if (provider.route) {
       navigate(`/projects/${projectId}/${provider.route}`);
@@ -106,8 +142,9 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         </div>
         <PrintPdfButton
           lang={lang}
-          onClick={() => printCurrentView("integrations-current-view")}
+          onClick={() => void exportCurrentView()}
           disabled={loading}
+          loading={exporting}
           currentViewSummary={[
             `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
             `${tr("Category", "Categoria")}: ${category}`,

@@ -5,7 +5,7 @@ import { Upload, ChevronLeft, AlertTriangle, Download, Trash2 } from "lucide-rea
 import { isDebug } from "@/lib/debug";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LensViewpointsView } from "./LensViewpointsView";
-import { downloadAuthenticatedPdf, PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
+import { downloadAuthenticatedPdf, downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 const API = "/api/v1";
 
@@ -101,6 +101,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [clashes, setClashes] = useState<Clash[]>([]);
   const [clashLoading, setClashLoading] = useState(false);
   const [clashExporting, setClashExporting] = useState(false);
+  const [listExporting, setListExporting] = useState(false);
   const [filterPriority, setFilterPriority] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
@@ -305,6 +306,38 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       setError(t("Could not prepare the current Clash view PDF.", "No se pudo preparar el PDF de la vista actual de Choques."));
     } finally {
       setClashExporting(false);
+    }
+  };
+
+  const exportClashReportListPdf = async () => {
+    if (!token) return;
+    setListExporting(true);
+    setError("");
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "clash-reports",
+        lang,
+        context: [`${t("Visible reports", "Reportes visibles")}: ${reports.length}`],
+        columns: [
+          t("Report", "Reporte"),
+          t("File", "Archivo"),
+          t("Status", "Estado"),
+          t("Clashes", "Choques"),
+          t("Created", "Creado"),
+        ],
+        rows: reports.map((report) => [
+          report.reportNumber || String(report.id),
+          report.fileName,
+          report.status,
+          String(report.totalClashes),
+          new Date(report.createdAt).toLocaleDateString(),
+        ]),
+        emptyMessage: t("No clash reports are available.", "No hay reportes de choques disponibles."),
+      }, "clash-reports-current-view.pdf");
+    } catch {
+      setError(t("Could not prepare the Clash Reports PDF.", "No se pudo preparar el PDF de Reportes de Choques."));
+    } finally {
+      setListExporting(false);
     }
   };
 
@@ -793,8 +826,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
           <PrintPdfButton
             lang={lang}
-            onClick={() => printCurrentView("clash-reports-list-current-view")}
+            onClick={() => void exportClashReportListPdf()}
             disabled={loading}
+            loading={listExporting}
           />
         {canWrite && (
           <button

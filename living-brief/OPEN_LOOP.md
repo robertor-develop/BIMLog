@@ -35,6 +35,39 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    the candidate local until real
    desktop/exact-390px checks, representative every-page PDF inspection, and
    independent review finish.
+   Before that handoff, the PDF owner must complete the mandatory family-wide
+   generation, every-page inspection, contact-sheet comparison, correction,
+   and selective re-render gate in `REPORT_DESIGN_SYSTEM.md` and `CLAUDE.md`.
+   Roberto's review of 28 downloaded PDFs left these exact production findings
+   unresolved:
+   - Submittal title/branding/Ball-in-Court clipping;
+   - native browser print on Clash Hits, Reports Hub, and Integrations;
+   - accidental blank or nearly blank pages in Activity Log, Schedule, Project
+     Insights, Project Health, Naming Compliance, RFI Aging, and Submittal
+     Status;
+   - inconsistent identity/headers across report families and missing nested
+     `Reports & PDFs` origin;
+   - weak or sparse Audit Certificate, Meeting Minutes, Project Performance,
+     Change Order, and Transmittal presentations;
+   - inconsistent source hierarchy in RFI and Submittal record artifacts;
+   - `PDF` in the Project Team title and a Lens title/header collision;
+   - project 26 needs audited `BIMCorp Inc` binding and appropriate Roberto
+     test-admin financial authority without email hard-code or tenant bypass;
+   - `Validate and Download` currently only routes to Files and must be removed
+     from or relocated out of Integrations.
+9. The continuation implementation resolves the source-level native-print,
+   title/filename, nested company/source identity, Submittal clipping, and
+   sparse report-presentation findings without changing tenancy or financial
+   authorization. The single local production build passed. Fifteen
+   representative governed PDFs covering every affected family were
+   regenerated from the built API and all 28 rendered pages were checked with
+   a compact contact sheet plus page-level text/page-number inspection; no
+   blank or footer-only page remains. Real desktop/exact-390px EN/ES state
+   evidence remains blocked because the connected Chrome control runtime
+   fails during initialization with `Cannot redefine property: process`.
+   Keep the work local for a clean candidate commit, coordinator callback,
+   and the existing independent-review dependency; do not treat the browser
+   gate as passed.
 
 ## Current terminal truth - 2026-07-23
 

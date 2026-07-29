@@ -2752,7 +2752,7 @@ router.get(
         .sort((a, b) => (order[a.priority ?? ""] ?? 4) - (order[b.priority ?? ""] ?? 4));
 
       const generatedAt = new Date();
-      const title = currentViewLabel(lang, "Clash Current View PDF", "PDF de vista actual de Choques");
+      const title = currentViewLabel(lang, "Clash - Current View", "Choques - Vista actual");
       const reportNumber = report.reportNumber || `Clash-${reportId}`;
       const sourceView = view === "grouped"
         ? currentViewLabel(lang, "Grouped", "Agrupado")

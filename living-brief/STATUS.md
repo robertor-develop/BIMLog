@@ -31,6 +31,26 @@ accepted, deployed, or live state.
   report content or authorization. Focused frontend and API
   typechecks and the local production build pass; independent artifact/UI
   acceptance remains a separate gate.
+- The continuation working tree on accepted source `ac63d72f` now contains the
+  bounded production correction for the post-publication PDF findings:
+  governed current-view PDF generation replaces native browser print on
+  Reports Hub, Integrations, Clash Reports, and Required Submittal Register;
+  report-family titles and filenames no longer add `Filtered`, `PDF`, or
+  `Report` to current-view identity; nested Reports & PDFs output binds the
+  exporting member's authorized company identity; Submittal record and
+  current-view layouts use bounded title/value regions; and sparse Project
+  Performance, Document Audit, Meeting Minutes, Change Order, and Transmittal
+  reports use structured context, KPIs, tables, repeated headers, and numbered
+  governed footers without adding inferred analytics. Frontend and API
+  typechecks, source safety checks, and the single local production build
+  pass. Fifteen representative governed PDFs covering every affected family
+  were regenerated from the built API, rendered into 28 pages, and inspected
+  with a compact contact sheet plus page-level text/page-number checks; no
+  blank or footer-only page remains. Real desktop/exact-390px EN/ES state
+  evidence remains blocked because the connected Chrome control runtime
+  fails during initialization with `Cannot redefine property: process`.
+  Independent review therefore remains an acceptance gate; this working tree
+  is not deployed or live accepted.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.

@@ -143,7 +143,7 @@ router.get("/projects/:projectId/change-orders/current-view/pdf", authMiddleware
       });
 
     const generatedAt = new Date();
-    const reportTitle = label("Change Orders Current View PDF", "PDF de vista actual de Ordenes de Cambio");
+    const reportTitle = label("Change Orders - Current View", "Ordenes de Cambio - Vista actual");
     const reportNumber = `CO-CURRENT-${project.code || projectId}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
     const sortLabel = sort === "created_desc" ? label("Newest first", "Mas recientes")
       : sort === "created_asc" ? label("Oldest first", "Mas antiguos")

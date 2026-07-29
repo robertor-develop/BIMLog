@@ -17,6 +17,7 @@ import {
   actionItemsTable,
   projectMembersTable,
   usersTable,
+  companiesTable,
   namingConventionsTable,
   namingFieldsTable,
   namingConventionVersionsTable,
@@ -55,17 +56,25 @@ async function verifyReportToken(req: any, res: any): Promise<number | null> {
 
 const router: Router = Router();
 
+const currentViewTitles = {
+  "reports-hub": { en: "Reports Hub - Current View", es: "Centro de reportes - Vista actual" },
+  integrations: { en: "Integrations - Current View", es: "Integraciones - Vista actual" },
+  "clash-reports": { en: "Clash Reports - Current View", es: "Reportes de choques - Vista actual" },
+  "submittal-register": { en: "Required Submittal Register - Current View", es: "Registro de entregables requeridos - Vista actual" },
+} as const;
+
 function pdfHeader(
   doc: PDFKit.PDFDocument,
-  project: { name: string; code: string },
+  project: { name: string; code: string; companyName?: string },
   title: string,
   theme: ReportTheme,
 ) {
   doc.y =
     drawBrandedHeader(doc, {
       margin: 50,
-      companyName: "BIMLog",
+      companyName: project.companyName || "BIMLog",
       title,
+      subtitle: "Reports & PDFs",
       projectName: project.name,
       projectCode: project.code,
       reportDate: new Date(),
@@ -95,10 +104,11 @@ function row(
   doc.moveDown(0.3);
 }
 
-function pdfFooter(doc: PDFKit.PDFDocument, project: { name: string }) {
+function pdfFooter(doc: PDFKit.PDFDocument, project: { name: string; companyName?: string }) {
   drawFooter(doc, {
     margin: 50,
     y: doc.page.height - 30,
+    companyName: project.companyName,
     projectName: project.name,
     timestamp: new Date().toLocaleDateString("en-US"),
   });
@@ -138,12 +148,12 @@ function drawKpis(doc: PDFKit.PDFDocument, values: Array<[string, string]>, them
   doc.y = y + 60;
 }
 
-function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: string }, reportNumber: string, snapshot: unknown) {
+function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: string; companyName?: string }, reportNumber: string, snapshot: unknown) {
   addPageNumbers(doc, {
     margin: 50,
     footerY: doc.page.height - 24,
     fingerprintY: doc.page.height - 36,
-    companyName: "BIMLog",
+    companyName: project.companyName || "BIMLog",
     projectName: project.name,
     reportNumber,
     timestamp: new Date().toLocaleString("en-US"),
@@ -154,12 +164,97 @@ function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: stri
 
 async function getProject(projectId: number, userId: number) {
   const [p] = await db
-    .select({ project: projectsTable })
+    .select({ project: projectsTable, companyName: companiesTable.name })
     .from(projectsTable)
     .innerJoin(projectMembersTable, and(eq(projectMembersTable.projectId, projectsTable.id), eq(projectMembersTable.userId, userId)))
+    .innerJoin(usersTable, eq(usersTable.id, projectMembersTable.userId))
+    .innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
     .where(eq(projectsTable.id, projectId));
-  return p?.project;
+  return p ? { ...p.project, companyName: p.companyName } : undefined;
 }
+
+router.post(
+  "/projects/:projectId/reports/current-view/pdf",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const surface = String(req.body?.surface || "") as keyof typeof currentViewTitles;
+    const definition = currentViewTitles[surface];
+    if (!definition) {
+      res.status(400).json({ error: "Unsupported current-view surface" });
+      return;
+    }
+    const project = await getProject(projectId, req.user!.userId);
+    if (!project) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
+    const lang = req.body?.lang === "es" ? "es" : "en";
+    const clean = (value: unknown, limit = 180) =>
+      String(value ?? "").replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, limit);
+    const context = Array.isArray(req.body?.context)
+      ? req.body.context.slice(0, 12).map((value: unknown) => clean(value))
+      : [];
+    const columns: string[] = Array.isArray(req.body?.columns)
+      ? req.body.columns.slice(0, 6).map((value: unknown) => clean(value, 60))
+      : [];
+    const rows: string[][] = Array.isArray(req.body?.rows)
+      ? req.body.rows.slice(0, 250).map((record: unknown) =>
+          Array.isArray(record)
+            ? record.slice(0, columns.length).map((value: unknown) => clean(value))
+            : [],
+        )
+      : [];
+    if (!columns.length || rows.some((record: string[]) => record.length !== columns.length)) {
+      res.status(400).json({ error: "Invalid current-view table" });
+      return;
+    }
+    const title = definition[lang];
+    const doc = createPdfDocument({ size: "LETTER", layout: columns.length > 4 ? "landscape" : "portrait", margin: 50, bufferPages: true });
+    res.type("application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
+    doc.pipe(res);
+    pdfHeader(doc, project, title, REPORT_THEMES.platform.standard);
+    doc.y = sectionBar(doc, lang === "es" ? "Contexto de la vista" : "Current View Context", doc.y, {
+      margin: 50,
+      theme: REPORT_THEMES.platform.standard,
+    });
+    doc.fontSize(8).font("Helvetica").fillColor("#334155")
+      .text(context.length ? context.join("  |  ") : (lang === "es" ? "Sin filtros activos." : "No active filters."), 50, doc.y, { width: doc.page.width - 100 });
+    doc.y += 28;
+    if (rows.length) {
+      const availableWidth = doc.page.width - 100;
+      const width = availableWidth / columns.length;
+      drawTable(doc, {
+        x: 50,
+        startY: doc.y,
+        pageBottom: doc.page.height - 54,
+        columns: columns.map((label, index) => ({
+          label,
+          key: `c${index}`,
+          width,
+          wrap: index === 1,
+        })),
+        rows: rows.map((record) => Object.fromEntries(record.map((value, index) => [`c${index}`, value]))),
+        onPageBreak: () => {
+          doc.addPage();
+          pdfHeader(doc, project, title, REPORT_THEMES.platform.standard);
+          return doc.y;
+        },
+      });
+    } else {
+      doc.roundedRect(50, doc.y, doc.page.width - 100, 58, 5).fill("#F8FAFC");
+      doc.fontSize(10).font("Helvetica").fillColor("#64748B")
+        .text(clean(req.body?.emptyMessage) || (lang === "es" ? "No hay resultados en la vista actual." : "No results in the current view."), 66, doc.y + 20, {
+          width: doc.page.width - 132,
+          align: "center",
+        });
+    }
+    const reportNumber = `VIEW-${computeContentHash({ projectId, surface, context, columns, rows }).slice(0, 10).toUpperCase()}`;
+    finishProfessionalReport(doc, project, reportNumber, { projectId, surface, context, columns, rows });
+  },
+);
 
 // ── PROJECT HEALTH ─────────────────────────────────────────────────────────────
 router.get(
@@ -460,8 +555,14 @@ router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
         .from(projectMembersTable)
         .where(eq(projectMembersTable.projectId, projectId)),
     ]);
-    const now = Date.now();
-    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+    const options = reportRequestOptions(req);
+    const visibleRfis = rfis.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+    const visibleSubs = subs.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+    const visibleFiles = files.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+    const closedRfis = visibleRfis.filter((record) => record.status === "closed").length;
+    const approvedSubs = visibleSubs.filter((record) => record.status === "approved").length;
+    const validFiles = visibleFiles.filter((record) => record.status === "valid").length;
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
     res.setHeader("Content-Type", "application/pdf");
     const title = "Project Performance Report";
     res.setHeader(
@@ -471,29 +572,39 @@ router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
     doc.pipe(res);
     pdfHeader(doc, project, title, REPORT_THEMES.platform.performance);
 
-    row(doc, "Team Members", String(members.length));
-    row(doc, "Total RFIs", String(rfis.length));
-    row(
-      doc,
-      "Closed RFIs",
-      String(rfis.filter((r) => r.status === "closed").length),
+    drawReportContext(doc, options, visibleRfis.length + visibleSubs.length + visibleFiles.length, rfis.length + subs.length + files.length, REPORT_THEMES.platform.performance);
+    drawKpis(doc, [
+      ["TEAM MEMBERS", String(members.length)],
+      ["CLOSED RFIS", `${closedRfis}/${visibleRfis.length}`],
+      ["APPROVED SUBMITTALS", `${approvedSubs}/${visibleSubs.length}`],
+      ["VALID FILES", `${validFiles}/${visibleFiles.length}`],
+    ], REPORT_THEMES.platform.performance);
+    doc.y = sectionBar(doc, "Authoritative Project Snapshot", doc.y, { margin: 50, theme: REPORT_THEMES.platform.performance });
+    drawTable(doc, {
+      x: 50,
+      startY: doc.y,
+      pageBottom: doc.page.height - 54,
+      columns: [
+        { label: "Domain", key: "domain", width: 150 },
+        { label: "Visible", key: "visible", width: 90, align: "right" },
+        { label: "Completed / Valid", key: "complete", width: 120, align: "right" },
+        { label: "Rate", key: "rate", width: 152, align: "right" },
+      ],
+      rows: [
+        { domain: "RFIs", visible: visibleRfis.length, complete: closedRfis, rate: visibleRfis.length ? `${Math.round(closedRfis / visibleRfis.length * 100)}%` : "Not applicable" },
+        { domain: "Submittals", visible: visibleSubs.length, complete: approvedSubs, rate: visibleSubs.length ? `${Math.round(approvedSubs / visibleSubs.length * 100)}%` : "Not applicable" },
+        { domain: "Files", visible: visibleFiles.length, complete: validFiles, rate: visibleFiles.length ? `${Math.round(validFiles / visibleFiles.length * 100)}%` : "Not applicable" },
+      ],
+    });
+    doc.y += 16;
+    doc.fontSize(8).font("Helvetica").fillColor("#64748B").text(
+      "This report presents recorded project counts only. It does not infer productivity, responsibility, causation, or performance beyond the displayed source states.",
+      50,
+      doc.y,
+      { width: doc.page.width - 100 },
     );
-    row(doc, "Total Submittals", String(subs.length));
-    row(
-      doc,
-      "Approved Submittals",
-      String(subs.filter((s) => s.status === "approved").length),
-    );
-    row(doc, "Total Files", String(files.length));
-    row(
-      doc,
-      "Compliance Rate",
-      files.length
-        ? `${Math.round((files.filter((f) => f.status === "valid").length / files.length) * 100)}%`
-        : "—",
-    );
-    pdfFooter(doc, project);
-    doc.end();
+    const reportNumber = `PERFORMANCE-${computeContentHash({ projectId, options, visibleRfis, visibleSubs, visibleFiles, members }).slice(0, 10).toUpperCase()}`;
+    finishProfessionalReport(doc, project, reportNumber, { projectId, options, visibleRfis, visibleSubs, visibleFiles, members });
   } catch (err) {
     res
       .status(500)
@@ -529,7 +640,7 @@ router.get(
         )
         .orderBy(activityLogTable.createdAt);
 
-      const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+      const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
       res.setHeader("Content-Type", "application/pdf");
       const title = `Dispute Report - ${module.toUpperCase()} ${itemId}`;
       res.setHeader(
@@ -585,7 +696,7 @@ router.get(
         .select()
         .from(filesTable)
         .where(eq(filesTable.projectId, projectId));
-      const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+      const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
       res.setHeader("Content-Type", "application/pdf");
       const title = "Document Audit Certificate";
       res.setHeader(
@@ -595,23 +706,53 @@ router.get(
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.files.audit);
 
-      row(doc, "Certificate Date", new Date().toLocaleDateString());
-      row(doc, "Total Documents", String(files.length));
-      row(
-        doc,
-        "Verified Documents",
-        String(files.filter((f) => f.fileHash).length),
-      );
-      doc.moveDown();
+      const hashedFiles = files.filter((file) => file.fileHash);
+      const validFiles = files.filter((file) => file.status === "valid");
+      drawKpis(doc, [
+        ["DOCUMENTS", String(files.length)],
+        ["HASH RECORDED", String(hashedFiles.length)],
+        ["MARKED VALID", String(validFiles.length)],
+      ], REPORT_THEMES.files.audit);
+      doc.y = sectionBar(doc, "Certificate Scope", doc.y, { margin: 50, theme: REPORT_THEMES.files.audit });
       doc
         .fontSize(9)
         .font("Helvetica")
         .fillColor("#374151")
         .text(
-          "This certificate confirms that all listed documents were processed through BIMLog's document control system with immutable activity logging, SHA-256 hash verification, and audit trail preservation.",
+          "This certificate summarizes the document records visible in BIMLog at generation time. A hash-recorded count confirms only that a stored hash is present; it does not make a legal, compliance, authorship, or completeness determination.",
+          50,
+          doc.y,
+          { width: doc.page.width - 100 },
         );
-      pdfFooter(doc, project);
-      doc.end();
+      doc.y += 38;
+      doc.y = sectionBar(doc, "Document Evidence Register", doc.y, { margin: 50, theme: REPORT_THEMES.files.audit });
+      if (files.length) {
+        drawTable(doc, {
+          x: 50,
+          startY: doc.y,
+          pageBottom: doc.page.height - 54,
+          columns: [
+            { label: "Document", key: "name", width: 246, wrap: true },
+            { label: "Status", key: "status", width: 96 },
+            { label: "Hash", key: "hash", width: 170 },
+          ],
+          rows: files.map((file) => ({
+            name: file.fileName,
+            status: file.status || "Not recorded",
+            hash: file.fileHash ? `${file.fileHash.slice(0, 16)}...` : "Not recorded",
+          })),
+          onPageBreak: () => {
+            doc.addPage();
+            pdfHeader(doc, project, title, REPORT_THEMES.files.audit);
+            return doc.y;
+          },
+        });
+      } else {
+        doc.fontSize(10).font("Helvetica").fillColor("#64748B")
+          .text("No document records are available for this project.", 50, doc.y, { width: doc.page.width - 100, align: "center" });
+      }
+      const reportNumber = `AUDIT-${computeContentHash({ projectId, files }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, files });
     } catch (err) {
       res
         .status(500)
@@ -678,7 +819,7 @@ router.get(
               ),
         )
         .orderBy(desc(meetingMinutesTable.meetingDate));
-      const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+      const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
       res.setHeader("Content-Type", "application/pdf");
       const title =
         requestedMeetingId !== null && meetings[0]
@@ -690,13 +831,24 @@ router.get(
       );
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.meeting.log);
+      drawKpis(doc, [
+        ["MEETINGS", String(meetings.length)],
+        ["SCOPE", requestedMeetingId === null ? "REGISTER" : "RECORD"],
+      ], REPORT_THEMES.meeting.log);
 
       for (const m of meetings) {
+        doc.y = sectionBar(
+          doc,
+          `${new Date(m.meetingDate).toLocaleDateString()} - ${m.title}`,
+          doc.y,
+          { margin: 50, theme: REPORT_THEMES.meeting.log },
+        );
         doc
-          .fontSize(10)
-          .font("Helvetica-Bold")
-          .fillColor("#111")
-          .text(`${new Date(m.meetingDate).toLocaleDateString()} — ${m.title}`);
+          .fontSize(8)
+          .font("Helvetica")
+          .fillColor("#64748B")
+          .text(`Meeting record ${m.id}`, 50, doc.y, { width: doc.page.width - 100 });
+        doc.y += 14;
         if (m.location)
           doc
             .fontSize(8)
@@ -917,8 +1069,8 @@ router.get(
           .fontSize(10)
           .fillColor("#666")
           .text("No meetings recorded.", { align: "center" });
-      pdfFooter(doc, project);
-      doc.end();
+      const reportNumber = `MEETING-${computeContentHash({ projectId, requestedMeetingId, meetings }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, requestedMeetingId, meetings });
     } catch (err) {
       res
         .status(500)
@@ -951,6 +1103,7 @@ router.get(
         size: "LETTER",
         margin: 50,
         layout: "landscape",
+        bufferPages: true,
       });
       res.setHeader("Content-Type", "application/pdf");
       const title = "Change Order Log";
@@ -960,24 +1113,44 @@ router.get(
       );
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.changeOrder.log);
-
-      cos.forEach((co) => {
-        doc
-          .fontSize(8)
-          .font("Helvetica")
-          .fillColor("#111")
-          .text(
-            `${co.number} | ${co.title} | ${co.status.replace(/_/g, " ")} | Impact: ${co.contractValueImpact ?? "—"} | Schedule: ${co.scheduleImpactDays ? co.scheduleImpactDays + "d" : "—"}`,
-            { indent: 5 },
-          );
-      });
-      if (!cos.length)
+      drawKpis(doc, [
+        ["CHANGE ORDERS", String(cos.length)],
+        ["APPROVED", String(cos.filter((record) => record.status === "approved").length)],
+        ["OPEN", String(cos.filter((record) => !["approved", "closed", "rejected"].includes(record.status)).length)],
+      ], REPORT_THEMES.changeOrder.log);
+      if (cos.length) {
+        drawTable(doc, {
+          x: 50,
+          startY: doc.y,
+          pageBottom: doc.page.height - 54,
+          columns: [
+            { label: "Number", key: "number", width: 85 },
+            { label: "Title", key: "title", width: 220, wrap: true },
+            { label: "Status", key: "status", width: 95 },
+            { label: "Value Impact", key: "value", width: 120 },
+            { label: "Schedule", key: "schedule", width: 100 },
+          ],
+          rows: cos.map((record) => ({
+            number: record.number,
+            title: record.title,
+            status: record.status.replace(/_/g, " "),
+            value: record.contractValueImpact ?? "Not recorded",
+            schedule: record.scheduleImpactDays === null ? "Not recorded" : `${record.scheduleImpactDays} days`,
+          })),
+          onPageBreak: () => {
+            doc.addPage();
+            pdfHeader(doc, project, title, REPORT_THEMES.changeOrder.log);
+            return doc.y;
+          },
+        });
+      } else {
         doc
           .fontSize(10)
           .fillColor("#666")
-          .text("No change orders.", { align: "center" });
-      pdfFooter(doc, project);
-      doc.end();
+          .text("No change orders are recorded for this project.", { align: "center" });
+      }
+      const reportNumber = `CHANGE-${computeContentHash({ projectId, cos }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, cos });
     } catch (err) {
       res
         .status(500)
@@ -1010,6 +1183,7 @@ router.get(
         size: "LETTER",
         margin: 50,
         layout: "landscape",
+        bufferPages: true,
       });
       res.setHeader("Content-Type", "application/pdf");
       const title = "Transmittal Log";
@@ -1019,24 +1193,44 @@ router.get(
       );
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.transmittal.log);
-
-      txs.forEach((tx) => {
-        doc
-          .fontSize(8)
-          .font("Helvetica")
-          .fillColor("#111")
-          .text(
-            `${tx.number} | ${tx.title} | ${tx.status} | ${tx.sentAt ? new Date(tx.sentAt).toLocaleDateString() : "Draft"}`,
-            { indent: 5 },
-          );
-      });
-      if (!txs.length)
+      drawKpis(doc, [
+        ["TRANSMITTALS", String(txs.length)],
+        ["SENT", String(txs.filter((record) => record.sentAt).length)],
+        ["ACKNOWLEDGED", String(txs.filter((record) => record.acknowledgedAt).length)],
+      ], REPORT_THEMES.transmittal.log);
+      if (txs.length) {
+        drawTable(doc, {
+          x: 50,
+          startY: doc.y,
+          pageBottom: doc.page.height - 54,
+          columns: [
+            { label: "Number", key: "number", width: 95 },
+            { label: "Title", key: "title", width: 235, wrap: true },
+            { label: "Purpose", key: "purpose", width: 135, wrap: true },
+            { label: "Status", key: "status", width: 90 },
+            { label: "Sent / Acknowledged", key: "dates", width: 140, wrap: true },
+          ],
+          rows: txs.map((record) => ({
+            number: record.number,
+            title: record.title,
+            purpose: record.purpose || "Not recorded",
+            status: record.status.replace(/_/g, " "),
+            dates: `${record.sentAt ? new Date(record.sentAt).toLocaleDateString() : "Not sent"} / ${record.acknowledgedAt ? new Date(record.acknowledgedAt).toLocaleDateString() : "Not acknowledged"}`,
+          })),
+          onPageBreak: () => {
+            doc.addPage();
+            pdfHeader(doc, project, title, REPORT_THEMES.transmittal.log);
+            return doc.y;
+          },
+        });
+      } else {
         doc
           .fontSize(10)
           .fillColor("#666")
-          .text("No transmittals.", { align: "center" });
-      pdfFooter(doc, project);
-      doc.end();
+          .text("No transmittals are recorded for this project.", { align: "center" });
+      }
+      const reportNumber = `TRANSMITTAL-${computeContentHash({ projectId, txs }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, txs });
     } catch (err) {
       res
         .status(500)
@@ -1110,7 +1304,7 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
       (f) => f.contentVerificationResult === "not_applicable",
     ).length;
 
-    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
     res.setHeader("Content-Type", "application/pdf");
     const title = "Content Verification Report";
     res.setHeader(
@@ -1364,8 +1558,8 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
         );
     }
 
-    pdfFooter(doc, project);
-    doc.end();
+    const reportNumber = `CVR-${computeContentHash({ projectId, allFiles, convention, fields, versions }).slice(0, 10).toUpperCase()}`;
+    finishProfessionalReport(doc, project, reportNumber, { projectId, allFiles, convention, fields, versions });
   } catch (err) {
     res
       .status(500)

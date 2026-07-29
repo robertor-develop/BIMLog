@@ -232,7 +232,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       const link = document.createElement("a");
       link.href = url;
       link.download = parseContentDispositionFileName(res.headers.get("Content-Disposition"))
-        || safePdfFileNameFromTitle(t("Change Orders Current View PDF", "PDF de vista actual de Ordenes de Cambio"));
+        || safePdfFileNameFromTitle(t("Change Orders - Current View", "Ordenes de Cambio - Vista actual"));
       document.body.appendChild(link);
       link.click();
       link.remove();

@@ -270,7 +270,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
       logoType,
       companyName,
       reportTitle,
-      reportSubtitle: "Filtered current view export",
+      reportSubtitle: "Project Insights",
       reportNumber,
       reportDate: generatedAt,
       preparedBy: input.fullName || "Authenticated user",

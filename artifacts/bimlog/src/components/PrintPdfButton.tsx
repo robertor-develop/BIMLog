@@ -14,29 +14,10 @@ type PrintPdfButtonProps = {
   configurationInvalid?: boolean;
 };
 
-export function printCurrentView(targetId: string) {
-  const target = document.getElementById(targetId);
-  if (!target) return false;
-  const cleanup = () => {
-    delete document.body.dataset.currentViewPrinting;
-    delete target.dataset.currentViewPrintActive;
-  };
-  document.body.dataset.currentViewPrinting = "true";
-  target.dataset.currentViewPrintActive = "true";
-  window.addEventListener("afterprint", cleanup, { once: true });
-  window.print();
-  cleanup();
-  return true;
-}
-
-export async function downloadAuthenticatedPdf(
-  url: string,
-  token: string,
+async function downloadPdfResponse(
+  response: Response,
   fallbackFileName: string,
 ) {
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
   if (!response.ok) throw new Error("current_view_pdf_failed");
   const blob = await response.blob();
   const disposition = response.headers.get("Content-Disposition") || "";
@@ -64,6 +45,41 @@ export async function downloadAuthenticatedPdf(
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(objectUrl);
+}
+
+export async function downloadAuthenticatedPdf(
+  url: string,
+  token: string,
+  fallbackFileName: string,
+) {
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  await downloadPdfResponse(response, fallbackFileName);
+}
+
+export async function downloadGovernedCurrentViewPdf(
+  projectId: number,
+  token: string,
+  payload: {
+    surface: "reports-hub" | "integrations" | "clash-reports" | "submittal-register";
+    lang: string;
+    context: string[];
+    columns: string[];
+    rows: string[][];
+    emptyMessage: string;
+  },
+  fallbackFileName: string,
+) {
+  const response = await fetch(`/api/v1/projects/${projectId}/reports/current-view/pdf`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  await downloadPdfResponse(response, fallbackFileName);
 }
 
 export function PrintPdfButton({

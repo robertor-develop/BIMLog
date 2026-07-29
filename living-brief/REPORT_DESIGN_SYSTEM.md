@@ -24,6 +24,29 @@ This section supersedes conflicting interaction guidance below.
 - Browser/current-view printing must not be represented as an official record
   package, and official record artifacts must not replace page-level current
   view printing.
+- Before reporting ready for independent review or release, the PDF implementation
+  owner must generate every affected current-view report, nested report, and record
+  artifact with representative authorized data and honest empty states; open,
+  extract, and render every PDF page; visually inspect every rendered page; and
+  create one compact family-wide contact sheet. The owner must compare the entire
+  family side by side for company/project/source/report identity, branding, titles,
+  typography, margins, alignment, tables, repeated headers, footers, numbering,
+  useful page density, empty states, and consistency. Before handoff, correct
+  obvious clipping, overlap, blank or nearly blank pages, duplicate controls,
+  vague or inconsistent naming, mojibake, broken glyphs, and browser-native
+  print-preview fallbacks. Re-render only outputs invalidated by a correction.
+  Independent review confirms completed owner QA and is not the first real
+  inspection; the coordinator must inspect the actual artifacts and contact sheet,
+  not accept a text `PASS`.
+- Canonical visible identity is:
+  - current-view: project company + `{Module} — Current View` + project/code/context;
+  - nested report: project company + `Reports & PDFs` + exact report title +
+    project/code/context;
+  - record artifact: project company + originating section + exact
+    record/artifact title.
+  `BIMLog by IgniteSmart` is secondary product attribution. Do not put `Filtered`
+  or `PDF` in visible report titles; filters belong in context. A page-level
+  `Print PDF` must generate a governed BIMLog PDF, never browser print preview.
 - The 19-path successor preserved at
   `0fd469acbbafa7af323629dc0cbad1126b5aaeb4` is local and unvalidated.
   Platform-wide consistency across all required pages, exact-390px behavior,

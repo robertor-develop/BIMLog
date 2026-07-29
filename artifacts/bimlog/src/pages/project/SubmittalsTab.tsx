@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
 import * as XLSX from "xlsx";
@@ -262,7 +262,7 @@ async function downloadSubmittalLog(projectId: number, format: "pdf" | "excel", 
   const response = await fetch(url, { headers: { Authorization: `Bearer ${getToken()}` } });
   if (!response.ok) throw new Error("Submittal log export failed");
   const blob = await response.blob();
-  downloadBlob(blob, format === "pdf" ? "Filtered-Submittal-Log.pdf" : `Filtered-Submittal-Log-Project${projectId}.xlsx`);
+  downloadBlob(blob, format === "pdf" ? "Submittals-Current-View.pdf" : `Submittals-Current-View-Project${projectId}.xlsx`);
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -897,6 +897,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [exporting, setExporting] = useState(false);
   const csvRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ specSection: "", description: "", trade: "", submittalType: "", requiredByDate: "", leadTimeDays: "", responsibleCompany: "", status: "pending" });
 
@@ -983,6 +984,40 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
     grouped[k].push(item);
   });
 
+  const exportRegisterCurrentView = async () => {
+    const token = getToken();
+    if (!token) return;
+    setExporting(true);
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "submittal-register",
+        lang,
+        context: [`${w("Visible requirements", "Requisitos visibles", lang)}: ${items.length}`],
+        columns: [
+          w("Spec Section", "Seccion", lang),
+          w("Description", "Descripcion", lang),
+          w("Trade", "Especialidad", lang),
+          w("Type", "Tipo", lang),
+          w("Required By", "Requerido para", lang),
+          w("Status", "Estado", lang),
+        ],
+        rows: items.map((item) => [
+          item.specSection,
+          item.description,
+          item.trade || "-",
+          item.submittalType || "-",
+          item.requiredByDate ? fmtDate(item.requiredByDate) : "-",
+          item.status || "-",
+        ]),
+        emptyMessage: w("No required submittals are recorded.", "No hay entregables requeridos registrados.", lang),
+      }, "required-submittal-register-current-view.pdf");
+    } catch {
+      toast({ title: w("Failed to prepare PDF", "Error al preparar el PDF", lang), variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center" }}>
@@ -997,8 +1032,9 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
         <div style={{ flex: 1 }} />
         <PrintPdfButton
           lang={lang}
-          onClick={() => printCurrentView("submittal-register-current-view")}
+          onClick={() => void exportRegisterCurrentView()}
           disabled={loading}
+          loading={exporting}
         />
         {canWrite && (
           <>
@@ -1177,8 +1213,8 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
       await downloadSubmittalLog(projectId, format, { search, status: filterStatus, type: filterType });
       toast({
         title: format === "pdf"
-          ? w("Filtered PDF exported", "PDF filtrado exportado", lang)
-          : w("Filtered Excel exported", "Excel filtrado exportado", lang),
+          ? w("Current-view PDF exported", "PDF de vista actual exportado", lang)
+          : w("Current-view Excel exported", "Excel de vista actual exportado", lang),
       });
     } catch {
       toast({

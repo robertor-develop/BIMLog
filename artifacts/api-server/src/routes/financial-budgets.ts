@@ -220,7 +220,7 @@ router.get(
       project: workspace.project,
       generatedAt: new Date().toISOString(),
       generatedBy: req.user.fullName || "BIMLog user",
-      reportTitle: label("Budget Current View PDF", "PDF de Vista Actual del Presupuesto"),
+      reportTitle: label("Project Budget - Current View", "Presupuesto del Proyecto - Vista actual"),
       reportNumber: `BUDGET-CURRENT-${workspace.project.code}-${Date.now()}`,
       view: view as BudgetCurrentViewExport["view"],
       language: lang,

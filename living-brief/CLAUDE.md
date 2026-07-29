@@ -91,6 +91,10 @@ expectations, and claim restrictions. Do not duplicate or infer that metadata he
   complete current implementation before editing. It must list the exact files that must be
   read first, define files/modules that are out of scope, define required behavior and
   non-regression constraints, and finish with exact verification and final-report requirements.
+- Every UI/UX task directive must name up front the applicable acceptance states and comparison
+  family required by [QUALITY.md's UI/UX implementation-owner Definition of Done](./QUALITY.md#uiux-implementation-owner-definition-of-done).
+  The coordinator returns an incomplete handoff to the same owner rather than creating a duplicate
+  task or accepting narrower checkbox proof.
 - Focused task chats must verify against the repository and current runtime evidence, never
   compressed chat memory. If a claimed defect is not reproduced, they must report the evidence
   rather than creating a duplicate control or alternate workflow.
@@ -137,7 +141,24 @@ does not prove that an artifact is useful or complete.
 
 - PDF: inspect page count, dimensions, MediaBox/CropBox/rotation where relevant, every rendered
   page, extracted text, embedded images, page numbering, headers/footers, fingerprint, and
-  attachment completeness.
+  attachment completeness. Before reporting ready for independent review or release, the PDF
+  implementation owner must generate every affected current-view report, nested report, and
+  record artifact with representative authorized data and honest empty states; open, extract,
+  render, and visually inspect every page; create one compact family-wide contact sheet; and
+  compare the full family side by side for company/project/source/report identity, branding,
+  titles, typography, margins, alignment, tables, repeated headers, footers, numbering, useful
+  page density, empty states, and consistency. Correct clipping, overlap, blank or nearly blank
+  pages, duplicate controls, vague or inconsistent naming, mojibake, broken glyphs, and
+  browser-native print-preview fallbacks before handoff; re-render only invalidated outputs.
+  Independent review confirms completed owner QA and is not the first real inspection. The
+  coordinator must inspect the actual artifacts and contact sheet, not accept a text `PASS`.
+  Enforce the canonical identities in `REPORT_DESIGN_SYSTEM.md`: project company + `{Module} —
+  Current View` + project/code/context for current views; project company + `Reports & PDFs` +
+  exact report title + project/code/context for nested reports; and project company +
+  originating section + exact record/artifact title for record artifacts. `BIMLog by
+  IgniteSmart` is secondary attribution; visible titles must not add `Filtered` or `PDF`;
+  filters belong in context; and page-level `Print PDF` must generate a governed BIMLog PDF,
+  never browser print preview.
 - DOCX: validate the package; inspect page size, sections, and embedded media; render with an
   Office-compatible converter; visually inspect every page; verify headers, footers, tables,
   numbering, images, and content.

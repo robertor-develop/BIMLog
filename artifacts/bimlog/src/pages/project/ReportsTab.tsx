@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History, X } from "lucide-react";
 import { format } from "date-fns";
-import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 interface CvrIssue {
   id: number;
@@ -482,6 +482,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   const [approvalReason, setApprovalReason] = useState<Record<number, string>>({});
   const [selectedReport, setSelectedReport] = useState<(typeof PDF_REPORTS)[number] | null>(null);
   const [reportOptions, setReportOptions] = useState<ReportLauncherOptions>({ from: "", to: "", status: "all", includeDetails: true });
+  const [currentViewExporting, setCurrentViewExporting] = useState(false);
 
   const openReportLauncher = (reportDefinition: (typeof PDF_REPORTS)[number]) => {
     setReportOptions({
@@ -555,6 +556,31 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   };
 
   const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+  const exportReportsHubCurrentView = async () => {
+    if (!token) return;
+    setCurrentViewExporting(true);
+    setError(null);
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "reports-hub",
+        lang,
+        context: [
+          from || to ? `${tl("CVR dates", "Fechas CVR")}: ${from || ".."} - ${to || ".."}` : tl("CVR dates: All", "Fechas CVR: Todas"),
+          report ? `${tl("Visible CVR issues", "Incidencias CVR visibles")}: ${report.issues.length}` : tl("CVR data pending", "Datos CVR pendientes"),
+        ],
+        columns: [tl("Report", "Reporte"), tl("Purpose", "Proposito")],
+        rows: PDF_REPORTS.map((item) => [
+          lang === "es" ? item.labelEs : item.labelEn,
+          lang === "es" ? item.scopeEs : item.scopeEn,
+        ]),
+        emptyMessage: tl("No governed reports are available.", "No hay reportes gobernados disponibles."),
+      }, "reports-hub-current-view.pdf");
+    } catch {
+      setError(tl("Could not prepare the Reports Hub PDF.", "No se pudo preparar el PDF del Centro de reportes."));
+    } finally {
+      setCurrentViewExporting(false);
+    }
+  };
   const activeCvrFilterSummary = from || to
     ? tl(`CVR date range: ${from || "Any start"} to ${to || "Any end"}`, `Rango CVR: ${from || "Sin inicio"} a ${to || "Sin fin"}`)
     : tl("CVR date range: All dates", "Rango CVR: Todas las fechas");
@@ -579,7 +605,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
           <PrintPdfButton
             lang={lang}
-            onClick={() => printCurrentView("reports-hub-current-view")}
+            onClick={() => void exportReportsHubCurrentView()}
+            loading={currentViewExporting}
             currentViewSummary={[
               from || to ? `${tl("CVR dates", "Fechas CVR")}: ${from || ".."} - ${to || ".."}` : tl("CVR dates: All", "Fechas CVR: Todas"),
               report ? `${tl("Visible CVR issues", "Incidencias CVR visibles")}: ${report.issues.length}` : tl("CVR data pending", "Datos CVR pendientes"),

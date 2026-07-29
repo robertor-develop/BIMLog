@@ -4575,6 +4575,110 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d49987e79d2a92d9774fd6492a328f35713f75a00d571767e8a750d553b4edd8"
+    },
+    {
+      "taskId": "production-pdf-report-ui-correction-20260729",
+      "reviewedThroughCommit": "ac63d72fbf1f8eb6eb4b2a532e776b689a98df3b",
+      "reviewedAt": "2026-07-29T14:35:00-04:00",
+      "status": "local_candidate_validation",
+      "captureTiming": "acceptance_boundary",
+      "summary": "Implements the bounded production PDF identity, layout, governed current-view generation, and report-family presentation correction while preserving authorization and local-only release boundaries.",
+      "workstreams": [
+        "platform-pdf-ux",
+        "report-family-design",
+        "local-release-validation"
+      ],
+      "evidence": [
+        {
+          "path": "local focused checks, production build, and tmp/pdfs/candidate family evidence",
+          "type": "owner_validation",
+          "result": "pass",
+          "boundary": "Local source/build and representative every-family PDF validation passed. Connected Chrome control initialization failed with Cannot redefine property: process, so desktop/exact-390px EN/ES states and independent review remain separate gates; no provider, production, or customer action occurred."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, product boundary, human-authority, or permanent business doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Adds the approved owner self-QA and canonical report-identity requirements for governed PDF work."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds the approved UI state, responsive, localization, contact-sheet, and artifact inspection owner gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, market direction, product promise, or strategic relationship changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, dependency, provider, hosting, tenancy model, or production environment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, model mutation, synchronization, or field workflow change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Defines canonical company, project, section, report-family identity and mandatory family-wide visual inspection."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local source correction, successful build and PDF inspection, exact browser-control blocker, and keeps review, deployment, and live states separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the resolved source/build/PDF findings and the remaining browser-control, commit, and review gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider inspection, production observation, customer data, publication, deployment, or destructive cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/pdf-kit.ts",
+        "artifacts/api-server/src/lib/project-analytics-current-view-export.ts",
+        "artifacts/api-server/src/routes/change_orders.ts",
+        "artifacts/api-server/src/routes/clash_reports.ts",
+        "artifacts/api-server/src/routes/dashboard_briefing.ts",
+        "artifacts/api-server/src/routes/financial-budgets.ts",
+        "artifacts/api-server/src/routes/members.ts",
+        "artifacts/api-server/src/routes/reports.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/api-server/src/routes/transmittals.ts",
+        "artifacts/bimlog/src/components/PrintPdfButton.tsx",
+        "artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx",
+        "artifacts/bimlog/src/pages/project/ClashReportsTab.tsx",
+        "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+        "artifacts/bimlog/src/pages/project/ReportsTab.tsx",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/QUALITY.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e16f5d062bdba29035fe702dbc307073422bc9a066eec085b3ac2e2f750cad3b"
     }
   ]
 }

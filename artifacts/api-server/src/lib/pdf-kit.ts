@@ -256,7 +256,14 @@ export function drawBrandedHeader(doc: Doc, o: BrandedHeaderOptions): number {
   } else {
     doc.fontSize(16).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 14);
   }
-  doc.fontSize(13).font(PALETTE.FONT_BOLD).fillColor("white").text(o.title, M, 12, { align: "right", width: CW });
+  const titleX = M + CW * 0.44;
+  const titleW = CW * 0.56;
+  doc.fontSize(12).font(PALETTE.FONT_BOLD).fillColor("white")
+    .text(o.title, titleX, 12, { align: "right", width: titleW, lineBreak: false, ellipsis: true });
+  if (o.subtitle) {
+    doc.fontSize(7.5).font(PALETTE.FONT).fillColor("#D1D5DB")
+      .text(o.subtitle, titleX, 31, { align: "right", width: titleW, lineBreak: false, ellipsis: true });
+  }
   const projLine = [o.projectName, o.projectCode ? `(${o.projectCode})` : ""].filter(Boolean).join(" ");
   doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB").text(projLine, M, 38, { width: CW * 0.6 });
   if (o.reportNumber) {
@@ -316,8 +323,14 @@ export function appendFingerprint(doc: Doc, contentHash: string, o: FingerprintO
   const M = o.margin ?? PALETTE.MARGIN;
   const W = doc.page.width;
   const CW = W - M * 2;
-  doc.fontSize(o.fontSize ?? 6.5).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
-    .text(`Document SHA-256: ${contentHash}`, M, o.y ?? 548, { width: CW, align: "center", lineBreak: false });
+  const originalBottomMargin = doc.page.margins.bottom;
+  doc.page.margins.bottom = 0;
+  try {
+    doc.fontSize(o.fontSize ?? 6.5).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
+      .text(`Document SHA-256: ${contentHash}`, M, o.y ?? 548, { width: CW, align: "center", lineBreak: false });
+  } finally {
+    doc.page.margins.bottom = originalBottomMargin;
+  }
 }
 
 // ── Footer ──

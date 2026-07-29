@@ -175,7 +175,7 @@ export function TeamTab({ projectId, isAdmin = false }: { projectId: number; isA
       const link = document.createElement("a");
       link.href = url;
       link.download = parseContentDispositionFileName(res.headers.get("Content-Disposition"))
-        || safePdfFileNameFromTitle(tt("Project Team Current View PDF", "PDF de vista actual del Equipo del Proyecto"));
+        || safePdfFileNameFromTitle(tt("Project Team - Current View", "Equipo del Proyecto - Vista actual"));
       document.body.appendChild(link);
       link.click();
       link.remove();
