@@ -8,7 +8,10 @@ accepted, deployed, or live state.
 
 - Canonical local recovery repository: `F:\BIMLog\Repositories\bimlog`.
 - Recovery branch: `recovery/platform-print-pdf-successor-20260728`.
-- Accepted platform-PDF base: `c3430f4ac121cbbb00445a0ff72d87d423bf6c10`.
+- Preserved platform-PDF candidate base:
+  `c3430f4ac121cbbb00445a0ff72d87d423bf6c10`. It exists on the remote
+  release branch but is not merged into `origin/main` and is not accepted or
+  deployed by this recovery.
 - Preserved successor: `0fd469acbbafa7af323629dc0cbad1126b5aaeb4`.
 - The successor contains exactly 19 PDF/report UX paths. It is a local,
   unvalidated recovery candidate. It is not independently accepted, pushed,
@@ -16,9 +19,14 @@ accepted, deployed, or live state.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.
-- Thirteen dirty and five unreadable historical worktrees remain
-  `UNKNOWN-PRESERVE`. None is authorized for cleanup, deletion, reset, or
-  reuse until separately classified.
+- The current registry contains 157 worktrees: 143 clean and 14 dirty, with
+  zero missing or unreadable in the corrected scan. All 14 dirty worktrees
+  remain `UNKNOWN-PRESERVE`. None is authorized for cleanup, deletion, reset,
+  or reuse until separately classified.
+- Roberto-approved BIMTech architecture is planned direction only. It does not
+  claim implemented Shop Drawing Production, SharePoint/Excel/Access
+  ingestion, Microsoft connectivity, Power BI projections, customer-data
+  migration, or live BIMTech behavior.
 - Normal BIMLog development remains paused until the F: repository is
   registered as the saved Codex project root and Roberto explicitly chooses
   which existing task to resume.

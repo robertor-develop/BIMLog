@@ -4395,6 +4395,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6f6f3dd7834c348bd5ec7b2e06ec2e97fc426265856ce9e6af98c7e6428fb1b0"
+    },
+    {
+      "taskId": "bimlog-current-source-and-bimtech-plan-reconciliation-20260728",
+      "reviewedThroughCommit": "23ccce09bbd63f375e22dc16ba7ba440707da86b",
+      "reviewedAt": "2026-07-28T20:47:20-04:00",
+      "status": "current_truth_reconciled_pending_joint_priority_review",
+      "captureTiming": "serialized_recovery_after_corrected_full_worktree_inventory",
+      "summary": "Corrects the PDF base from accepted to candidate status, records the current 157-worktree inventory, and records Roberto-approved BIMTech architecture strictly as planned direction rather than implemented behavior.",
+      "workstreams": [
+        "source-truth-reconciliation",
+        "worktree-inventory",
+        "bimtech-planned-direction"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Evidence\\recovery\\worktree-inventory-20260728.json",
+          "type": "complete_registered_worktree_inventory",
+          "result": "pass",
+          "boundary": "Read-only registry and status scan; no cleanup, reset, move, fetch, source edit, provider action, or deployment."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes status precision and planned-direction wording without changing ecosystem ownership, commercial relationships, or permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Workspace-root, task-authority, approval-budget, and orchestration rules were already reconciled in the prior recovery unit."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No acceptance threshold changes; the correction reinforces that candidate source is not accepted, deployed, or live."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Records the approved BIMTech architecture as planned direction only and explicitly denies implementation or live-integration claims."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime route, schema, package, dependency, hosting, connector, or provider behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or other plugin source, installation, model identity, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The one-button modal-based current-view PDF authority remains unchanged; only candidate-status wording is corrected."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory interpretation, compliance citation, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records current remote ancestry, corrected worktree counts, candidate status, and BIMTech planned-direction boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing recovery loop already preserves project registration, validation, task authority, and joint-priority dependencies."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider inspection, production observation, customer data, publication, deployment, or destructive cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5d3d657ea1b52c6de9c5d5cc9a43d8f9088a1b1d822e8b580d3aa3cd4958b1f0"
     }
   ]
 }
