@@ -6,7 +6,7 @@ import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
   PALETTE, statusText, priorityText, computeContentHash, createPdfDocument,
-  drawCoverPage, sectionBar, drawTable, addPageNumbers, REPORT_THEMES, reportFileName,
+  drawBrandedHeader, drawCoverPage, sectionBar, drawTable, addPageNumbers, REPORT_THEMES, reportFileName,
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
@@ -2657,6 +2657,20 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         projectMeta: `Project Code: ${project.code}  |  Report Rows: ${total}  |  Access: ${scope.label}`,
         theme: reportTheme,
       });
+      const addLensContinuationPage = (subtitle = "Lens viewpoints — continued") => {
+        doc.addPage();
+        return drawBrandedHeader(doc, {
+          margin: M,
+          companyName,
+          title: reportTitle,
+          subtitle,
+          projectName: project.name,
+          projectCode: project.code,
+          reportNumber,
+          reportDate,
+          theme: reportTheme,
+        }) + 12;
+      };
 
       // Health score block (monochrome; optional via the modal toggle)
       let cursorY = 198;
@@ -2744,7 +2758,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
 
         // Compact sign-off so even the one-pager ends with an approval block.
-        if (doc.y + 70 > PAGE_BOTTOM) { doc.addPage(); doc.y = 45; }
+        if (doc.y + 70 > PAGE_BOTTOM) doc.y = addLensContinuationPage("Approval & sign-off");
         const oY = doc.y + 14;
         doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, oY);
         const oSigW = (CW - 60) / 2;
@@ -2757,7 +2771,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.y = oY + 58;
       } else {
         // -- MAIN VIEWPOINTS TABLE (shared drawTable helper) --
-        if (doc.y + 60 > PAGE_BOTTOM - 5) { doc.addPage(); doc.y = 40; }
+        if (doc.y + 60 > PAGE_BOTTOM - 5) doc.y = addLensContinuationPage("Viewpoints register");
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
 
@@ -2788,35 +2802,36 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           headerFontSize: 6.2,
           rowMinHeight: 24,
           onPageBreak: () => {
-            doc.addPage();
-            doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
-            doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Lens Viewpoints Report`, M, 8, { width: CW });
-            return 35;
+            return addLensContinuationPage("Viewpoints register — continued");
           },
         });
         doc.y = endY;
 
-        // -- SIGNATURE BLOCK (last page) --
-        if (doc.y + 110 > PAGE_BOTTOM) { doc.addPage(); doc.y = 45; }
-        doc.moveDown(1);
-        const sgY = doc.y + 10;
-        doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, sgY);
-        const blockY = sgY + 26;
-        const sigW = (CW - 60) / 2;
-        const sigBlocks = [
-          { role: "BIM Coordinator" },
-          { role: "GC Representative" },
-        ];
-        sigBlocks.forEach((b, i) => {
-          const x = M + i * (sigW + 60);
-          doc.moveTo(x, blockY + 34).lineTo(x + sigW, blockY + 34).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
-          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Signature", x, blockY + 38);
-          doc.moveTo(x, blockY + 70).lineTo(x + sigW * 0.6, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
-          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Name", x, blockY + 74);
-          doc.moveTo(x + sigW * 0.65, blockY + 70).lineTo(x + sigW, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
-          doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Date", x + sigW * 0.65, blockY + 74);
-          doc.fontSize(9).font("Helvetica-Bold").fillColor("#1E3A5F").text(b.role, x, blockY + 12);
-        });
+        // Keep sign-off with revision history when it exists, avoiding a
+        // dedicated near-empty page between two small controlled sections.
+        const drawSignoff = () => {
+          if (doc.y + 110 > PAGE_BOTTOM) doc.y = addLensContinuationPage("Approval & sign-off");
+          doc.moveDown(1);
+          const sgY = doc.y + 10;
+          doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, sgY);
+          const blockY = sgY + 26;
+          const sigW = (CW - 60) / 2;
+          const sigBlocks = [
+            { role: "BIM Coordinator" },
+            { role: "GC Representative" },
+          ];
+          sigBlocks.forEach((b, i) => {
+            const x = M + i * (sigW + 60);
+            doc.moveTo(x, blockY + 34).lineTo(x + sigW, blockY + 34).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+            doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Signature", x, blockY + 38);
+            doc.moveTo(x, blockY + 70).lineTo(x + sigW * 0.6, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+            doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Name", x, blockY + 74);
+            doc.moveTo(x + sigW * 0.65, blockY + 70).lineTo(x + sigW, blockY + 70).strokeColor("#9CA3AF").lineWidth(0.7).stroke();
+            doc.fontSize(8).font("Helvetica").fillColor("#6B7280").text("Date", x + sigW * 0.65, blockY + 74);
+            doc.fontSize(9).font("Helvetica-Bold").fillColor("#1E3A5F").text(b.role, x, blockY + 12);
+          });
+          doc.y = blockY + 88;
+        };
 
         // -- REVISION HISTORY APPENDIX (full report only) --
         // Scope the appendix to the revision chains of the viewpoints actually in
@@ -2838,10 +2853,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
           .filter(r => (r.revisionNumber ?? 1) > 1 || (r.lifecycleStatus ?? "active") !== "active" || r.supersedesId != null)
           .sort((a, b) => codeOf(a).localeCompare(codeOf(b)) || ((a.revisionNumber ?? 1) - (b.revisionNumber ?? 1))) : [];
         if (revisionRows.length) {
-          doc.addPage();
-          doc.y = 45;
+          doc.y = addLensContinuationPage("Revision history");
           doc.y = sectionBar(doc, "Revision History", doc.y, { margin: M });
-          drawTable(doc, {
+          doc.y = drawTable(doc, {
             x: M,
             startY: doc.y,
             rows: revisionRows,
@@ -2857,17 +2871,14 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
               { label: "Captured", width: 72, color: PALETTE.MUTED, format: (r) => fmtShort(r.capturedAt) },
             ],
             onPageBreak: () => {
-              doc.addPage();
-              doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
-              doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Revision History`, M, 8, { width: CW });
-              return 35;
+              return addLensContinuationPage("Revision history — continued");
             },
           });
         }
+        drawSignoff();
 
         if (includeReportHistory && reportHistoryRows.length) {
-          doc.addPage();
-          doc.y = 45;
+          doc.y = addLensContinuationPage("Report history");
           doc.y = sectionBar(doc, "Report History", doc.y, { margin: M });
           drawTable(doc, {
             x: M,
@@ -2884,10 +2895,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
               { label: "Type", width: 70, format: (r) => r.isExecutiveOnePager ? "Executive" : "Full" },
             ],
             onPageBreak: () => {
-              doc.addPage();
-              doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
-              doc.fontSize(8).font("Helvetica-Bold").fillColor("white").text(`${companyName} | ${project.name} (${project.code}) - Report History`, M, 8, { width: CW });
-              return 35;
+              return addLensContinuationPage("Report history — continued");
             },
           });
         }
@@ -3132,7 +3140,7 @@ router.get(
         footerY: 558,
         fingerprintY: 544,
         contentHash,
-        companyName: req.user!.companyName || "BIMLog",
+        companyName: req.user!.companyName || "Company",
         projectName: project.name,
         reportNumber,
         timestamp: generatedAt.toLocaleString("en-US"),

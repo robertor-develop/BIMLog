@@ -4,7 +4,7 @@ import { activityLogTable, projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { ListActivityParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import { createPdfDocument, PALETTE } from "../lib/pdf-kit";
+import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
 
 const router: IRouter = Router();
 
@@ -195,26 +195,6 @@ async function activityProjectContext(projectId: number) {
   return project ?? { id: projectId, name: `Project ${projectId}`, code: String(projectId) };
 }
 
-function finishPdfPages(doc: PDFKit.PDFDocument, footer: string) {
-  const range = doc.bufferedPageRange();
-  for (let i = range.start; i < range.start + range.count; i += 1) {
-    doc.switchToPage(i);
-    const originalBottomMargin = doc.page.margins.bottom;
-    doc.page.margins.bottom = 0;
-    try {
-      doc
-        .fontSize(8)
-        .fillColor(PALETTE.FOOTER)
-        .text(`${footer} · Page ${i + 1} of ${range.count}`, doc.page.margins.left, doc.page.height - 28, {
-          width: doc.page.width - doc.page.margins.left - doc.page.margins.right,
-          align: "center",
-        });
-    } finally {
-      doc.page.margins.bottom = originalBottomMargin;
-    }
-  }
-}
-
 function ensurePdfSpace(doc: PDFKit.PDFDocument, y: number, needed = 44) {
   const bottom = doc.page.height - doc.page.margins.bottom;
   if (y + needed <= bottom) return y;
@@ -222,8 +202,9 @@ function ensurePdfSpace(doc: PDFKit.PDFDocument, y: number, needed = 44) {
   return doc.page.margins.top;
 }
 
-function sendActivityPdf(res: import("express").Response, input: {
+export function sendActivityPdf(res: import("express").Response, input: {
   project: { id: number; name: string; code: string };
+  companyName: string;
   rows: ActivityRow[];
   totalRows: number;
   query: Record<string, unknown>;
@@ -237,11 +218,21 @@ function sendActivityPdf(res: import("express").Response, input: {
   doc.pipe(res);
 
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-  let y = doc.page.margins.top;
-  doc.fillColor(PALETTE.NAVY).font("Helvetica-Bold").fontSize(18).text(label("Activity Log", "Registro de Actividad"), doc.page.margins.left, y);
-  y = doc.y + 4;
-  doc.fillColor(PALETTE.MUTED).font("Helvetica").fontSize(9).text(`${input.project.name} (${input.project.code || input.project.id}) · ${label("Generated", "Generado")}: ${new Date().toISOString()}`, doc.page.margins.left, y);
-  y = doc.y + 12;
+  const generatedAt = new Date();
+  const title = label("Activity Log", "Registro de Actividad");
+  const reportNumber = `ACT-${input.project.code || input.project.id}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+  const pageHeader = () => drawBrandedHeader(doc, {
+    margin: 36,
+    companyName: input.companyName,
+    title,
+    subtitle: label("Immutable project activity register", "Registro inmutable de actividad del proyecto"),
+    projectName: input.project.name,
+    projectCode: input.project.code,
+    reportNumber,
+    reportDate: generatedAt,
+    theme: REPORT_THEMES.platform.standard,
+  }) + 10;
+  let y = pageHeader();
   const summary = [
     `${label("Filtered rows", "Filas filtradas")}: ${input.rows.length}`,
     `${label("Total rows", "Filas totales")}: ${input.totalRows}`,
@@ -284,7 +275,10 @@ function sendActivityPdf(res: import("express").Response, input: {
     drawHeader();
     input.rows.forEach((row, index) => {
       y = ensurePdfSpace(doc, y, 38);
-      if (y === doc.page.margins.top) drawHeader();
+      if (y === doc.page.margins.top) {
+        y = pageHeader();
+        drawHeader();
+      }
       const rowY = y;
       const rowHeight = 34;
       doc.rect(left, rowY, width, rowHeight).fill(index % 2 ? PALETTE.WHITE : PALETTE.ROW_ALT);
@@ -302,7 +296,16 @@ function sendActivityPdf(res: import("express").Response, input: {
       y += rowHeight;
     });
   }
-  finishPdfPages(doc, "BIMLog · Activity Log");
+  addPageNumbers(doc, {
+    margin: 36,
+    footerY: doc.page.height - 24,
+    fingerprintY: doc.page.height - 36,
+    companyName: input.companyName,
+    projectName: input.project.name,
+    reportNumber,
+    timestamp: generatedAt.toISOString(),
+    contentHash: computeContentHash({ projectId: input.project.id, filters, rows: input.rows }),
+  });
   doc.end();
 }
 
@@ -342,6 +345,7 @@ router.get("/projects/:projectId/activity/export.pdf", authMiddleware, requirePr
     res.setHeader("Cache-Control", "private, no-store");
     sendActivityPdf(res, {
       project,
+      companyName: req.user!.companyName || "Company",
       rows: filterActivityRows(entries, req.query as Record<string, unknown>),
       totalRows: entries.length,
       query: req.query as Record<string, unknown>,

@@ -74,10 +74,11 @@ function fmtDate(value: Date | string | null | undefined) {
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("en-US");
 }
 
-function renderTransmittalsCurrentViewPdf(args: {
+export function renderTransmittalsCurrentViewPdf(args: {
   transmittals: TransmittalRow[];
   totalCount: number;
   project: typeof projectsTable.$inferSelect | undefined;
+  companyName: string;
   generatedAt: Date;
   generatedBy: string;
   filters: TransmittalRegisterFilters;
@@ -122,9 +123,9 @@ function renderTransmittalsCurrentViewPdf(args: {
 
   doc.y = drawBrandedHeader(doc, {
     margin: 40,
-    companyName: "BIMLog",
+    companyName: args.companyName,
     title,
-    subtitle: "Current filtered Transmittals view",
+    subtitle: "Governed transmittal register",
     projectName: args.project?.name ?? "Project",
     projectCode: args.project?.code,
     reportDate: args.generatedAt,
@@ -159,7 +160,7 @@ function renderTransmittalsCurrentViewPdf(args: {
         doc.addPage();
         return drawBrandedHeader(doc, {
           margin: 40,
-          companyName: "BIMLog",
+          companyName: args.companyName,
           title,
           projectName: args.project?.name ?? "Project",
           projectCode: args.project?.code,
@@ -174,7 +175,7 @@ function renderTransmittalsCurrentViewPdf(args: {
     footerY: 756,
     fingerprintY: 742,
     contentHash,
-    companyName: "BIMLog",
+    companyName: args.companyName,
     projectName: args.project?.name,
     timestamp: reportDate,
   });
@@ -254,6 +255,7 @@ router.get("/projects/:projectId/transmittals/export-pdf", authMiddleware, requi
       transmittals,
       totalCount: allTransmittals.length,
       project,
+      companyName: req.user!.companyName || "Company",
       generatedAt,
       generatedBy: req.user!.fullName || "BIMLog user",
       filters,
@@ -450,7 +452,7 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
 
-    doc.y = drawBrandedHeader(doc, { margin: 50, companyName: "BIMLog", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.transmittal.detail }) + 12;
+    doc.y = drawBrandedHeader(doc, { margin: 50, companyName: req.user!.companyName || "Company", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.transmittal.detail }) + 12;
 
     // Fields
     const field = (label: string, value: string) => {

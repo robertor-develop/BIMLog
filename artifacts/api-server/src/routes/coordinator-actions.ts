@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import { projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import { createPdfDocument, PALETTE } from "../lib/pdf-kit";
+import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
 import { authMiddleware } from "../middlewares/auth";
 import {
   CoordinatorRegisterError,
@@ -52,26 +52,6 @@ function ensurePdfSpace(doc: PDFKit.PDFDocument, y: number, needed = 48) {
   return doc.page.margins.top;
 }
 
-function finishPdfPages(doc: PDFKit.PDFDocument, footer: string) {
-  const range = doc.bufferedPageRange();
-  for (let i = range.start; i < range.start + range.count; i += 1) {
-    doc.switchToPage(i);
-    const originalBottomMargin = doc.page.margins.bottom;
-    doc.page.margins.bottom = 0;
-    try {
-      doc
-        .fontSize(8)
-        .fillColor(PALETTE.FOOTER)
-        .text(`${footer} · Page ${i + 1} of ${range.count}`, doc.page.margins.left, doc.page.height - 28, {
-          width: doc.page.width - doc.page.margins.left - doc.page.margins.right,
-          align: "center",
-        });
-    } finally {
-      doc.page.margins.bottom = originalBottomMargin;
-    }
-  }
-}
-
 async function coordinatorProjectContext(projectId: number) {
   const [project] = await db
     .select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code })
@@ -111,8 +91,9 @@ function coordinatorFilterSummary(query: RegisterQuery, lang: "en" | "es"): Arra
   return fields.length ? fields : [[label("Filters", "Filtros"), label("All actionable current records", "Todos los registros accionables vigentes")]];
 }
 
-function sendCoordinatorPdf(res: Response, input: {
+export function sendCoordinatorPdf(res: Response, input: {
   project: { id: number; name: string; code: string };
+  companyName: string;
   generatedAt: Date;
   lang: "en" | "es";
   filters: Array<[string, string]>;
@@ -126,11 +107,20 @@ function sendCoordinatorPdf(res: Response, input: {
   doc.pipe(res);
 
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-  let y = doc.page.margins.top;
-  doc.fillColor(PALETTE.NAVY).font("Helvetica-Bold").fontSize(18).text(label("Coordinator Command Center", "Centro de Control de Coordinación"), doc.page.margins.left, y);
-  y = doc.y + 4;
-  doc.fillColor(PALETTE.MUTED).font("Helvetica").fontSize(9).text(`${input.project.name} (${input.project.code || input.project.id}) · ${label("Generated", "Generado")}: ${input.generatedAt.toISOString()}`, doc.page.margins.left, y);
-  y = doc.y + 12;
+  const title = label("Coordinator Command Center", "Centro de Control de Coordinación");
+  const reportNumber = `CCC-${input.project.code || input.project.id}-${input.generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+  const pageHeader = () => drawBrandedHeader(doc, {
+    margin: 36,
+    companyName: input.companyName,
+    title,
+    subtitle: label("Authorized coordination action register", "Registro autorizado de acciones de coordinación"),
+    projectName: input.project.name,
+    projectCode: input.project.code,
+    reportNumber,
+    reportDate: input.generatedAt,
+    theme: REPORT_THEMES.platform.standard,
+  }) + 10;
+  let y = pageHeader();
   doc.fillColor(PALETTE.TEXT).font("Helvetica-Bold").fontSize(10).text(label("Active filter summary", "Resumen de filtros activos"), doc.page.margins.left, y);
   y = doc.y + 4;
   doc.font("Helvetica").fontSize(8).fillColor(PALETTE.TEXT);
@@ -178,7 +168,10 @@ function sendCoordinatorPdf(res: Response, input: {
     drawHeader();
     for (const item of input.result.items) {
       y = ensurePdfSpace(doc, y, 42);
-      if (y === doc.page.margins.top) drawHeader();
+      if (y === doc.page.margins.top) {
+        y = pageHeader();
+        drawHeader();
+      }
       const rowY = y;
       const rowHeight = 38;
       doc.rect(left, rowY, width, rowHeight).fill(input.result.items.indexOf(item) % 2 ? PALETTE.WHITE : PALETTE.ROW_ALT);
@@ -202,7 +195,16 @@ function sendCoordinatorPdf(res: Response, input: {
       y += rowHeight;
     }
   }
-  finishPdfPages(doc, "BIMLog · Coordinator Command Center");
+  addPageNumbers(doc, {
+    margin: 36,
+    footerY: doc.page.height - 24,
+    fingerprintY: doc.page.height - 36,
+    companyName: input.companyName,
+    projectName: input.project.name,
+    reportNumber,
+    timestamp: input.generatedAt.toISOString(),
+    contentHash: computeContentHash({ projectId: input.project.id, filters: input.filters, rows: input.result.items }),
+  });
   doc.end();
 }
 
@@ -317,6 +319,7 @@ router.get(
       res.setHeader("Cache-Control", "private, no-store");
       sendCoordinatorPdf(res, {
         project,
+        companyName: req.user!.companyName || "Company",
         generatedAt,
         lang,
         filters: coordinatorFilterSummary(parsedQuery, lang),

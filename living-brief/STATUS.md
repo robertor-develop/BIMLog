@@ -75,6 +75,17 @@ accepted, deployed, or live state.
   passed with synthetic local fixtures. The clean local seal is the remaining
   step; no schema, Meeting Minutes, Proposed-RFI,
   provider, production, publication, or deployment behavior is included.
+- The same report owner has a bounded production-PDF family addendum on sealed
+  Lens candidate `352586b`. It applies compact deep-blue customer/project chrome
+  and canonical current-view identity across the supplied 18-family regression
+  set, removes RFI metadata collision and cover-page waste, corrects Submittal
+  continuation wrapping/chrome, and keeps Lens revision history with sign-off.
+  Nineteen synthetic local artifacts cover the full 18-family set plus the
+  changed record-level Submittal; all 45 rendered pages form the final owner-QA
+  set. The supplied production originals remain read-only references. Evidence
+  is bound at local candidate sealing; no provider,
+  production/customer data, database mutation, push, publication, or deployment
+  is included.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.

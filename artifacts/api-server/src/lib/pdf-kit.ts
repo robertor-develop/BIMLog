@@ -156,56 +156,59 @@ export function drawCoverPage(doc: Doc, o: CoverPageOptions): number {
   const isoStamp = o.isoStamp !== false;
 
   // Navy header band
-  const headerBandH = 148;
+  const headerBandH = 96;
   const projectBandY = headerBandH;
   const theme = o.theme ?? REPORT_THEMES.platform.standard;
   doc.rect(0, 0, W, headerBandH).fill(theme.dark);
   if (o.logoBase64 && o.logoType) {
     try {
       doc.image(o.logoBase64, M, 15, { height: 50, fit: [120, 50] });
-      doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M + 130, 22);
+      doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M + 130, 18, { width: CW - 450, lineBreak: false, ellipsis: true });
     } catch {
-      doc.fontSize(26).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 20);
+      doc.fontSize(20).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 16, { width: CW - 330, lineBreak: false, ellipsis: true });
     }
   } else {
-    doc.fontSize(26).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 20);
+    doc.fontSize(20).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 16, { width: CW - 330, lineBreak: false, ellipsis: true });
   }
-  const rightBlockW = 170;
+  const rightBlockW = Math.min(320, CW * 0.48);
   const rightBlockX = W - M - rightBlockW;
   const rightTextInset = 10;
-  doc.fontSize(11).font(PALETTE.FONT_BOLD).fillColor("white")
-    .text(o.reportTitle, rightBlockX, 16, { align: "left", width: rightBlockW, lineBreak: false });
+  const titleSize = o.reportTitle.length > 44 ? 9 : o.reportTitle.length > 32 ? 10 : 11;
+  doc.fontSize(titleSize).font(PALETTE.FONT_BOLD).fillColor("white")
+    .text(o.reportTitle, rightBlockX, 13, { align: "right", width: rightBlockW, height: 15, lineBreak: false, ellipsis: true });
   if (o.reportSubtitle) {
     doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB")
-      .text(o.reportSubtitle, rightBlockX, 32, { align: "left", width: rightBlockW, lineBreak: false });
+      .text(o.reportSubtitle, rightBlockX, 30, { align: "right", width: rightBlockW, lineBreak: false, ellipsis: true });
   }
 
-  // ISO 19650 compliance stamp shares the same left and right edge as the report title block.
+  // Compact ISO marker stays inside the metadata row without forcing a tall cover.
   if (isoStamp) {
-    const isoY = 54;
-    doc.rect(rightBlockX, isoY, rightBlockW, 30).lineWidth(1).stroke("#FFFFFF");
-    doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white")
-      .text("ISO 19650", rightBlockX + rightTextInset, isoY + 7, { width: rightBlockW - rightTextInset * 2, align: "center", lineBreak: false });
-    doc.fontSize(7).font(PALETTE.FONT).fillColor("white")
-      .text("COMPLIANT", rightBlockX + rightTextInset, isoY + 18, { width: rightBlockW - rightTextInset * 2, align: "center", lineBreak: false });
+    const isoW = 92;
+    const isoX = W - M - isoW;
+    const isoY = 53;
+    doc.rect(isoX, isoY, isoW, 23).lineWidth(0.8).stroke("#FFFFFF");
+    doc.fontSize(7).font(PALETTE.FONT_BOLD).fillColor("white")
+      .text("ISO 19650", isoX + rightTextInset, isoY + 5, { width: isoW - rightTextInset * 2, align: "center", lineBreak: false });
+    doc.fontSize(6).font(PALETTE.FONT).fillColor("white")
+      .text("COMPLIANT", isoX + rightTextInset, isoY + 14, { width: isoW - rightTextInset * 2, align: "center", lineBreak: false });
   }
-  doc.moveTo(M, 92).lineTo(W - M, 92).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
-  doc.fontSize(10).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 100);
-  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 114);
-  doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M, 128);
+  doc.moveTo(M, 47).lineTo(W - M, 47).strokeColor("#FFFFFF").lineWidth(0.5).stroke();
+  doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white").text(`Report No: ${o.reportNumber}`, M, 56, { width: CW * 0.32, lineBreak: false, ellipsis: true });
+  doc.fontSize(8).font(PALETTE.FONT).fillColor("white").text(`Date: ${fmtLongDate(o.reportDate)}`, M, 70, { width: CW * 0.32, lineBreak: false });
+  doc.fontSize(8).font(PALETTE.FONT).fillColor("white").text(`Prepared by: ${o.preparedBy ?? ""}`, M + CW * 0.34, 56, { width: CW * 0.34, lineBreak: false, ellipsis: true });
   if (o.submittedTo) {
-    doc.fontSize(9).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW / 2, 114, { width: CW / 2, align: "left" });
+    doc.fontSize(8).font(PALETTE.FONT).fillColor("white").text(`Submitted to: ${o.submittedTo}`, M + CW * 0.34, 70, { width: CW * 0.34, align: "left", lineBreak: false, ellipsis: true });
   }
   if (o.issuedTo) {
-    doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW / 2, 128, { width: CW / 2, align: "left" });
+    doc.fontSize(8).font(PALETTE.FONT_BOLD).fillColor("white").text(o.issuedTo, M + CW * 0.69, 70, { width: CW * 0.17, align: "right", lineBreak: false, ellipsis: true });
   }
 
   // Project info band (neutral light grey)
   const address = o.projectAddress?.trim() ? o.projectAddress.trim() : "";
-  const bandH = address ? 58 : 48;
+  const bandH = address ? 52 : 42;
   doc.rect(0, projectBandY, W, bandH).fill(PALETTE.BAND);
-  doc.fontSize(18).font(PALETTE.FONT_BOLD).fillColor(theme.dark).text(o.projectName, M, projectBandY + 8);
-  let infoY = projectBandY + 30;
+  doc.fontSize(15).font(PALETTE.FONT_BOLD).fillColor(theme.dark).text(o.projectName, M, projectBandY + 7, { width: CW, lineBreak: false, ellipsis: true });
+  let infoY = projectBandY + 25;
   if (address) {
     doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(address, M, infoY, { width: CW });
     infoY += 14;

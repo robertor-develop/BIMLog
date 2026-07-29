@@ -13,7 +13,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
 import { singleFileUpload } from "../middlewares/multipart";
-import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
+import { addPageNumbers, computeContentHash, createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import * as XLSX from "xlsx";
@@ -612,7 +612,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
 
     const filteredSubs = filterSubmittalLogExport(req, subs);
     const filterSummary = submittalLogFilterSummary(req, filteredSubs.length, subs.length);
-    const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
+    const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true, bufferPages: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -629,11 +629,11 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     // Header band
     doc.rect(0, 0, LOG_W, 60).fill(REPORT_THEMES.submittal.log.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text(`${exportingCompany?.name || "BIMLog"}  |  SUBMITTALS — CURRENT VIEW`, LOG_MARGIN, 10, { width: LOG_CONTENT_W, lineBreak: false, ellipsis: true });
+      .text(`${exportingCompany?.name || "Company"}  |  SUBMITTALS — CURRENT VIEW`, LOG_MARGIN, 10, { width: LOG_CONTENT_W, lineBreak: false, ellipsis: true });
     doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
       .text(`${project?.name || "Project"} | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 29, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(9)
-      .text(`${filteredSubs.length} visible of ${subs.length} submittals | BIMLog by IgniteSmart`, LOG_MARGIN + LOG_CONTENT_W - 260, 29, { width: 260, align: "right", lineBreak: false });
+      .text(`${filteredSubs.length} visible of ${subs.length} submittals`, LOG_MARGIN + LOG_CONTENT_W - 260, 29, { width: 260, align: "right", lineBreak: false });
     doc.fillColor("#DBEAFE").fontSize(7.5)
       .text(filterSummary, LOG_MARGIN, 45, { width: LOG_CONTENT_W, lineBreak: false });
     y = 70;
@@ -670,16 +670,6 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, headerHeight).stroke("#BFDBFE");
       y += headerHeight;
     };
-    const drawFooter = () => {
-      doc.page.margins.bottom = 0;
-      doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
-        .text(
-          `${exportingCompany?.name || "BIMLog"} | ${project?.name || ""} | Submittals | Page ${pageNumber} | BIMLog by IgniteSmart`,
-          LOG_MARGIN,
-          LOG_H - 22,
-          { width: LOG_CONTENT_W, align: "center", lineBreak: false },
-        );
-    };
     drawColumnHeader();
 
     const STATUS_COLORS: Record<string, string> = {
@@ -690,14 +680,17 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     filteredSubs.forEach((sub, idx) => {
       const rowH = 30;
       if (y + rowH > LOG_CONTENT_BOT) {
-        drawFooter();
         doc.addPage();
         doc.page.margins.bottom = 0;
         pageNumber += 1;
-        y = LOG_MARGIN;
-        doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold")
-          .text("SUBMITTALS — CURRENT VIEW — CONTINUED", LOG_MARGIN, y, { width: LOG_CONTENT_W, lineBreak: false });
-        y += 16;
+        doc.rect(0, 0, LOG_W, 60).fill(REPORT_THEMES.submittal.log.dark);
+        doc.fillColor("white").fontSize(14).font("Helvetica-Bold")
+          .text(`${exportingCompany?.name || "Company"}  |  SUBMITTALS — CURRENT VIEW — CONTINUED`, LOG_MARGIN, 12, { width: LOG_CONTENT_W, lineBreak: false, ellipsis: true });
+        doc.fillColor("#DBEAFE").fontSize(8).font("Helvetica")
+          .text(`${project?.name || "Project"}${project?.code ? ` (${project.code})` : ""}`, LOG_MARGIN, 33, { width: LOG_CONTENT_W - 120, lineBreak: false, ellipsis: true });
+        doc.fillColor("#DBEAFE").fontSize(8).font("Helvetica")
+          .text(`Page ${pageNumber}`, LOG_MARGIN + LOG_CONTENT_W - 120, 33, { width: 120, align: "right", lineBreak: false });
+        y = 70;
         drawColumnHeader();
       }
       const bg = idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC";
@@ -708,11 +701,12 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
         : null;
       const daysStr = days !== null ? (days < 0 ? `${Math.abs(days)}d over` : `${days}d`) : "-";
 
+      const rawStatus = sub.status || "-";
       const vals = [
         sub.number,
         sub.title,
-        (sub.submittalCategory || sub.submittalType || "").replace("_", " "),
-        sub.status || "-",
+        (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " "),
+        rawStatus.replace(/_/g, " "),
         sub.submittedByCompany || "-",
         sub.submittedToCompany || "-",
         sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "-",
@@ -723,7 +717,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
 
       cx = LOG_MARGIN;
       COLS.forEach((col, ci) => {
-        const color = ci === 3 ? (STATUS_COLORS[vals[ci]] || "#374151") : "#374151";
+        const color = ci === 3 ? (STATUS_COLORS[rawStatus] || "#374151") : "#374151";
         doc.fillColor(color).fontSize(6.5).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
           .text(String(vals[ci] ?? "-"), cx + 3, y + 4, {
             width: col.w - 6,
@@ -745,7 +739,30 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
           { width: LOG_CONTENT_W, align: "center" },
         );
     }
-    drawFooter();
+    const generatedAt = new Date();
+    const reportNumber = `SUB-CURRENT-${project?.code || projectId}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+    addPageNumbers(doc, {
+      margin: LOG_MARGIN,
+      footerY: LOG_H - 22,
+      fingerprintY: LOG_H - 34,
+      companyName: exportingCompany?.name || "Company",
+      projectName: project?.name,
+      reportNumber,
+      timestamp: generatedAt.toISOString(),
+      contentHash: computeContentHash({
+        projectId,
+        filterSummary,
+        rows: filteredSubs.map((sub) => ({
+          id: sub.id,
+          number: sub.number,
+          title: sub.title,
+          status: sub.status,
+          dateSubmitted: sub.dateSubmitted,
+          dateRequired: sub.dateRequired,
+          ballInCourt: sub.ballInCourt,
+        })),
+      }),
+    });
     doc.end();
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
@@ -1419,7 +1436,8 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
       .where(eq(usersTable.id, req.user!.userId))
       .limit(1);
 
-    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true });
+    const generatedAt = new Date();
+    const doc = createPdfDocument({ margin: MARGIN, size: "LETTER", autoFirstPage: true, bufferPages: true });
     doc.page.margins.bottom = 0;
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
@@ -1478,11 +1496,11 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     // ── Cover header ──────────────────────────────────────────────────────────
     doc.rect(MARGIN, y, CONTENT_W, 54).fill(REPORT_THEMES.submittal.detail.dark);
     doc.fillColor("white").fontSize(13).font("Helvetica-Bold")
-      .text(exportingCompany?.name || "BIMLog", MARGIN + 12, y + 8, { width: 190, lineBreak: false, ellipsis: true });
+      .text(exportingCompany?.name || "Company", MARGIN + 12, y + 8, { width: 190, lineBreak: false, ellipsis: true });
     doc.fontSize(14).font("Helvetica-Bold")
       .text(`${sub.number} - Submittal`, MARGIN + 206, y + 8, { width: CONTENT_W - 218, align: "right", lineBreak: false, ellipsis: true });
     doc.fillColor("#DBEAFE").fontSize(8).font("Helvetica")
-      .text(`Submittals  |  ${project?.name || `Project ${projectId}`}${project?.code ? ` (${project.code})` : ""}  |  BIMLog by IgniteSmart`, MARGIN + 12, y + 31, { width: CONTENT_W - 24, lineBreak: false, ellipsis: true });
+      .text(`Submittals  |  ${project?.name || `Project ${projectId}`}${project?.code ? ` (${project.code})` : ""}`, MARGIN + 12, y + 31, { width: CONTENT_W - 24, lineBreak: false, ellipsis: true });
     doc.fillColor("black"); y += 62;
 
     // ── Rapid approval warning ────────────────────────────────────────────────
@@ -1578,7 +1596,21 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
       y += 6;
     }
 
-    drawFooter(doc, `${exportingCompany?.name || "BIMLog"} · ${project?.name || ""} · Submittals · ${sub.number} · Generated ${new Date().toLocaleString()} · BIMLog by IgniteSmart`);
+    addPageNumbers(doc, {
+      margin: MARGIN,
+      footerY: 768,
+      fingerprintY: 750,
+      companyName: exportingCompany?.name || "Company",
+      projectName: project?.name || `Project ${projectId}`,
+      reportNumber: sub.number,
+      timestamp: `Generated ${generatedAt.toLocaleString()}`,
+      contentHash: computeContentHash({
+        projectId,
+        submittalId,
+        submittal: sub,
+        ballInCourtHistory: bic,
+      }),
+    });
     doc.end();
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

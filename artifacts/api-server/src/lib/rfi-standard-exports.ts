@@ -505,7 +505,7 @@ export function buildCanonicalRfiExportModel(input: {
 
   return {
     generatedAt: generatedAt.toISOString(),
-    project: { companyName: cleanText(input.project.companyName, "BIMLog"), name: cleanText(input.project.name), code: cleanText(input.project.code), address: projectAddress },
+    project: { companyName: cleanText(input.project.companyName, "Company"), name: cleanText(input.project.name), code: cleanText(input.project.code), address: projectAddress },
     header: {
       number: cleanText(rfi.number), subject: cleanText(rfi.subject), type: cleanText(rfi.rfiType), priority: humanize(rfi.priority),
       revision: (rfi.revisionNumber || 0) > 0 ? `Revision ${rfi.revisionNumber}` : "Original issue",
@@ -583,7 +583,7 @@ class PdfFlow {
     this.doc.rect(0, 0, this.doc.page.width, 54).fill(REPORT_THEMES.rfi.detail.dark);
     this.doc.fillColor("white").font(PALETTE.FONT_BOLD).fontSize(15).text(this.companyName, PDF_MARGIN, 14, { width: PDF_CONTENT_WIDTH * 0.46, lineBreak: false, ellipsis: true });
     this.doc.fontSize(10).text(this.title, PDF_MARGIN, 15, { width: PDF_CONTENT_WIDTH, align: "right", lineBreak: false });
-    this.doc.fillColor("#DCE7F3").font(PALETTE.FONT).fontSize(8).text(`RFIs | ${this.project} | ${this.number} | BIMLog by IgniteSmart`, PDF_MARGIN, 36, { width: PDF_CONTENT_WIDTH, lineBreak: false, ellipsis: true });
+    this.doc.fillColor("#DCE7F3").font(PALETTE.FONT).fontSize(8).text(`RFIs | ${this.project} | ${this.number}`, PDF_MARGIN, 36, { width: PDF_CONTENT_WIDTH, lineBreak: false, ellipsis: true });
     this.y = 68;
   }
 

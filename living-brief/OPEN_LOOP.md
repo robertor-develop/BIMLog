@@ -90,6 +90,19 @@ This is the operating register for unfinished BIMLog work. It exists so customer
     with synthetic local fixtures. Seal only the clean evidence-bound local
     candidate. Meeting Minutes, Proposed-RFI, schema, provider,
     production, push, publication, and deployment remain excluded.
+12. The production-PDF family addendum on local Lens candidate `352586b`
+    normalizes the supplied 18-family regression set to compact deep-blue
+    company/project/report chrome, canonical current-view em dashes, repeated
+    table headers, consistent footers and page numbering, and efficient content
+    flow. It removes the RFI List metadata collision, generic customer identity,
+    white Submittals continuation headers, Schedule and Project Insights cover
+    waste, and avoidable Lens revision/sign-off pagination while preserving
+    record-artifact boundaries, filters, permissions, and tenant scope.
+    Nineteen synthetic local artifacts (the complete 18-family set plus the
+    changed record-level Submittal) and all 45 pages form the final owner-QA
+    evidence set; the 18 supplied production originals remain read-only
+    regression references. Provider, production/customer data,
+    database mutation, push, publication, and deployment remain excluded.
 
 ## Current terminal truth - 2026-07-23
 

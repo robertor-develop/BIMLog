@@ -4867,6 +4867,111 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0cf21787647ff5224f4e331d4569cccd3740329d84ae3f3e96578597b3a1bad7"
+    },
+    {
+      "taskId": "production-pdf-family-addendum-20260729",
+      "reviewedThroughCommit": "352586b7a47c0c23722f162f870ae76210b8d999",
+      "reviewedAt": "2026-07-29T17:46:16-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "acceptance_boundary",
+      "summary": "Normalizes the complete supplied production PDF family to compact governed company/project/report chrome, canonical titles, efficient pagination, and consistent identity while preserving existing authorization and record boundaries.",
+      "workstreams": [
+        "production-pdf-family",
+        "report-design-system",
+        "focused-local-release-validation"
+      ],
+      "evidence": [
+        {
+          "path": "tmp/pdf-family-addendum-evidence",
+          "type": "owner_validation",
+          "result": "passed",
+          "boundary": "Synthetic local generation and read-only supplied production regression references only; provider, production/customer data, database mutation, push, publication, and deploy remain excluded."
+        },
+        {
+          "path": "tmp/production-pdf-addendum-20260729",
+          "type": "read_only_regression_reference",
+          "result": "reviewed",
+          "boundary": "Rendered comparison of the 18 supplied production originals; originals remain unchanged in Downloads."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, or permanent business doctrine change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing owner artifact-generation, every-page inspection, and release-boundary requirements govern the work."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing PDF family generation, rendering, contact-sheet, title scan, and build gates are applied."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, or strategic relationship change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, dependency, provider, hosting, tenancy, or production environment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, or field workflow change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies the committed compact chrome, company identity, current-view separator, pagination, and footer rules without changing their authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the bounded local PDF-family addendum and keeps local candidate, provider, and deployed truth separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records only the remaining focused build, evidence binding, and clean local seal."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider inspection, production observation, customer data, publication, deployment, or destructive cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/pdf-kit.ts",
+        "artifacts/api-server/src/lib/project-analytics-current-view-export.ts",
+        "artifacts/api-server/src/lib/rfi-standard-exports.ts",
+        "artifacts/api-server/src/routes/activity.ts",
+        "artifacts/api-server/src/routes/change_orders.ts",
+        "artifacts/api-server/src/routes/clash_reports.ts",
+        "artifacts/api-server/src/routes/coordinator-actions.ts",
+        "artifacts/api-server/src/routes/meeting_minutes.ts",
+        "artifacts/api-server/src/routes/members.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/api-server/src/routes/reports.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "artifacts/api-server/src/routes/schedule.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/api-server/src/routes/transmittals.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "19f58c39205db1fc4db0009314db2dd6e69c19b75064203cf56dc7b6ccb6fff2"
     }
   ]
 }

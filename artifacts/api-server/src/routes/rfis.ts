@@ -571,7 +571,7 @@ async function buildSavedRfiExportModel(params: {
       rfi,
       responses,
       project: {
-        companyName: boundProjectCompany?.name || creatorCompany?.name || "BIMLog",
+        companyName: boundProjectCompany?.name || creatorCompany?.name || "Company",
         name: project?.name,
         code: project?.code,
         location: project?.location,
@@ -1412,6 +1412,7 @@ export function renderGovernedRfiRegisterPdf(args: {
   rfis: (typeof rfisTable.$inferSelect)[];
   totalCount: number;
   project: typeof projectsTable.$inferSelect | undefined;
+  companyName: string;
   generatedAt: Date;
   generatedBy: string;
   filters: RfiRegisterFilters;
@@ -1447,9 +1448,9 @@ export function renderGovernedRfiRegisterPdf(args: {
   ].join(" | ");
   const drawHeader = () => {
     const y = drawBrandedHeader(doc, {
-      companyName: "BIMLog",
+      companyName: args.companyName,
       title,
-      subtitle: filterLabel,
+      subtitle: args.view === "log" ? "Governed RFI log register" : "Governed RFI current-view register",
       projectName,
       projectCode,
       reportNumber,
@@ -1536,7 +1537,7 @@ export function renderGovernedRfiRegisterPdf(args: {
     footerY: 570,
     fingerprintY: 558,
     contentHash,
-    companyName: "BIMLog",
+    companyName: args.companyName,
     projectName,
     reportNumber,
     timestamp: `Generated ${reportDate}`,
@@ -1605,6 +1606,7 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
       rfis,
       totalCount: allRfis.length,
       project,
+      companyName: req.user!.companyName || "Company",
       generatedAt,
       generatedBy: req.user!.fullName || "BIMLog user",
       filters,

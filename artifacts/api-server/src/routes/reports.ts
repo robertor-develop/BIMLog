@@ -72,7 +72,7 @@ function pdfHeader(
   doc.y =
     drawBrandedHeader(doc, {
       margin: 50,
-      companyName: project.companyName || "BIMLog",
+      companyName: project.companyName || "Company",
       title,
       subtitle: "Reports & PDFs",
       projectName: project.name,
@@ -153,7 +153,7 @@ function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: stri
     margin: 50,
     footerY: doc.page.height - 24,
     fingerprintY: doc.page.height - 36,
-    companyName: project.companyName || "BIMLog",
+    companyName: project.companyName || "Company",
     projectName: project.name,
     reportNumber,
     timestamp: new Date().toLocaleString("en-US"),

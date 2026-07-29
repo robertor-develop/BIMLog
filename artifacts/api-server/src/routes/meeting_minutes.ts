@@ -61,7 +61,10 @@ import {
 } from "../lib/meeting-canonical-links";
 import { resolveFfmpegPath } from "../lib/ffmpeg-capability";
 import {
+  addPageNumbers,
+  computeContentHash,
   createPdfDocument,
+  drawBrandedHeader,
   drawTable,
   PALETTE,
   reportFileName,
@@ -1518,8 +1521,8 @@ router.get(
           ? "Meetings Action Items — Current View"
           : "Meeting Minutes Register — Current View",
         view === "actions"
-          ? "Acciones de Actas - Vista actual"
-          : "Registro de Actas - Vista actual",
+          ? "Acciones de Actas — Vista actual"
+          : "Registro de Actas — Vista actual",
       );
       const sourceView = labelFor(
         language,
@@ -1556,45 +1559,18 @@ router.get(
       const pageWidth = 792;
       const contentWidth = pageWidth - M * 2;
       const pageBottom = 560;
-      const header = () => {
-        doc.rect(0, 0, pageWidth, 82).fill(theme.dark);
-        doc
-          .font("Helvetica-Bold")
-          .fontSize(18)
-          .fillColor("white")
-          .text(title, M, 20, { width: contentWidth * 0.62 });
-        doc
-          .font("Helvetica")
-          .fontSize(8)
-          .fillColor("#DBEAFE")
-          .text(
-            `${safePdfText(project.name)} (${safePdfText(project.code)})`,
-            M,
-            48,
-            { width: contentWidth * 0.62 },
-          );
-        doc
-          .font("Helvetica")
-          .fontSize(8)
-          .fillColor("#DBEAFE")
-          .text(
-            `${labelFor(language, "Generated", "Generado")}: ${formatPdfDate(generatedAt, language)}`,
-            M,
-            62,
-            { width: contentWidth * 0.62 },
-          );
-        doc
-          .font("Helvetica")
-          .fontSize(8)
-          .fillColor("#DBEAFE")
-          .text(
-            `${labelFor(language, "Prepared by", "Preparado por")}: ${safePdfText(req.user?.fullName)} · ${safePdfText(req.user?.companyName)}`,
-            M,
-            48,
-            { width: contentWidth, align: "right" },
-          );
-        return 108;
-      };
+      const reportNumber = `MEET-${safePdfText(project.code)}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
+      const header = () => drawBrandedHeader(doc, {
+        margin: M,
+        companyName: safePdfText(req.user?.companyName) || "Company",
+        title,
+        subtitle: `${sourceView} · ${labelFor(language, "Prepared by", "Preparado por")}: ${safePdfText(req.user?.fullName)}`,
+        projectName: safePdfText(project.name),
+        projectCode: safePdfText(project.code),
+        reportNumber,
+        reportDate: generatedAt,
+        theme,
+      }) + 12;
       let y = header();
 
       const ensureSpace = (height: number) => {
@@ -1767,26 +1743,23 @@ router.get(
           );
       }
 
-      const range = doc.bufferedPageRange();
-      for (let index = 0; index < range.count; index++) {
-        doc.switchToPage(index);
-        const originalBottomMargin = doc.page.margins.bottom;
-        doc.page.margins.bottom = 0;
-        try {
-          doc
-            .font("Helvetica")
-            .fontSize(7)
-            .fillColor(PALETTE.FOOTER)
-            .text(
-              `BIMLog by IgniteSmart · ${labelFor(language, "Page", "Página")} ${index + 1} ${labelFor(language, "of", "de")} ${range.count} · ${labelFor(language, "Generated", "Generado")} ${formatPdfDate(generatedAt, language)}`,
-              M,
-              570,
-              { width: contentWidth, align: "center" },
-            );
-        } finally {
-          doc.page.margins.bottom = originalBottomMargin;
-        }
-      }
+      addPageNumbers(doc, {
+        margin: M,
+        footerY: 570,
+        fingerprintY: 558,
+        companyName: safePdfText(req.user?.companyName) || "Company",
+        projectName: safePdfText(project.name),
+        reportNumber,
+        timestamp: generatedAt.toISOString(),
+        contentHash: computeContentHash({
+          projectId,
+          view,
+          sections: Array.from(sections),
+          meetings,
+          actionItems,
+          linkedCounts: Array.from(linkedCounts.entries()),
+        }),
+      });
       doc.end();
     } catch (err) {
       if (!res.headersSent) {

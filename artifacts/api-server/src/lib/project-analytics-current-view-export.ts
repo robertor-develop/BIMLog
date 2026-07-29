@@ -1,10 +1,9 @@
 import { pool } from "@workspace/db";
-import { getCompanyLogo } from "./pdf-logo";
 import {
   addPageNumbers,
   computeContentHash,
   createPdfDocument,
-  drawCoverPage,
+  drawBrandedHeader,
   drawTable,
   PALETTE,
   REPORT_THEMES,
@@ -110,17 +109,9 @@ function drawKeyValueGrid(doc: PDFKit.PDFDocument, y: number, rows: Array<[strin
   return y + Math.ceil(rows.length / 4) * (cardH + 8) + 4;
 }
 
-function ensureSpace(doc: PDFKit.PDFDocument, y: number, needed = 90) {
-  if (y + needed > 545) {
-    doc.addPage();
-    return 52;
-  }
-  return y;
-}
-
 async function projectContext(projectId: number) {
   const result = await pool.query(
-    `SELECT p.id,p.name,p.code,p.location,COALESCE(NULLIF(c.name,''),'BIMLog') AS owner_company
+    `SELECT p.id,p.name,p.code,p.location,COALESCE(NULLIF(c.name,''),'Company') AS owner_company
      FROM projects p
      JOIN users creator ON creator.id=p.created_by_id
      LEFT JOIN companies c ON c.id=creator.company_id
@@ -141,44 +132,6 @@ function activeSummary(summary: ProjectInsightsSummary, sections: AnalyticsSecti
     `${t(lang, "Metric authority", "Autoridad métrica")}: ${publicMetricAuthorityLabel(lang)}`,
     `${t(lang, "Partial source state", "Estado parcial de fuentes")}: ${summary.metricAuthority.partial ? t(lang, "Partial", "Parcial") : t(lang, "Complete", "Completo")}`,
   ];
-}
-
-function drawSpanishCoverPage(
-  doc: PDFKit.PDFDocument,
-  input: {
-    companyName: string;
-    reportTitle: string;
-    reportSubtitle: string;
-    reportNumber: string;
-    reportDate: Date;
-    preparedBy: string;
-    projectName: string;
-    projectAddress?: string;
-    projectMeta: string;
-  },
-) {
-  doc.rect(0, 0, 612, 792).fill("#F8FAFC");
-  doc.rect(0, 0, 612, 138).fill(REPORT_THEMES.platform.performance.primary);
-  doc.font(PALETTE.FONT_BOLD).fontSize(11).fillColor("#DBEAFE").text(input.companyName, 40, 32, { width: 520 });
-  doc.font(PALETTE.FONT_BOLD).fontSize(28).fillColor("#FFFFFF").text(input.reportTitle, 40, 62, { width: 520 });
-  doc.font(PALETTE.FONT).fontSize(12).fillColor("#DBEAFE").text(input.reportSubtitle, 40, 105, { width: 520 });
-  doc.rect(40, 182, 532, 150).fill("#FFFFFF").stroke("#D7DEE8");
-  doc.font(PALETTE.FONT_BOLD).fontSize(16).fillColor(PALETTE.NAVY).text(input.projectName, 64, 206, { width: 484 });
-  if (input.projectAddress) {
-    doc.font(PALETTE.FONT).fontSize(10).fillColor(PALETTE.MUTED).text(input.projectAddress, 64, 230, { width: 484 });
-  }
-  doc.font(PALETTE.FONT).fontSize(9).fillColor(PALETTE.TEXT).text(input.projectMeta, 64, 258, { width: 484 });
-  const rows = [
-    ["N.º de informe", input.reportNumber],
-    ["Fecha", input.reportDate.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })],
-    ["Preparado por", input.preparedBy],
-  ];
-  let y = 370;
-  rows.forEach(([label, value]) => {
-    doc.font(PALETTE.FONT_BOLD).fontSize(8).fillColor(PALETTE.MUTED).text(label.toUpperCase(), 64, y, { width: 130 });
-    doc.font(PALETTE.FONT).fontSize(10).fillColor(PALETTE.TEXT).text(value, 220, y, { width: 310 });
-    y += 30;
-  });
 }
 
 function addSpanishPageNumbers(
@@ -239,7 +192,6 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
     summary,
   };
   const contentHash = computeContentHash(snapshot);
-  const { logoBase64, logoType } = await getCompanyLogo(input.userId);
   const doc = createPdfDocument({ size: "LETTER", margin: 40, bufferPages: true, autoFirstPage: true });
   const chunks: Buffer[] = [];
   doc.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -248,42 +200,36 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
     doc.on("error", reject);
   });
 
-  const companyName = input.companyName || clean(project.owner_company) || "BIMLog";
+  const companyName = input.companyName || clean(project.owner_company) || "Company";
   const projectName = clean(project.name) || `Project ${input.projectId}`;
   const projectMeta = `${t(lang, "Project Code", "Código de proyecto")}: ${clean(project.code) || "—"} | ${t(lang, "Sections", "Secciones")}: ${sections.length}`;
-  if (lang === "es") {
-    drawSpanishCoverPage(doc, {
-      companyName,
-      reportTitle,
-      reportSubtitle: "Exportación de vista actual filtrada",
-      reportNumber,
-      reportDate: generatedAt,
-      preparedBy: input.fullName || "Usuario autenticado",
-      projectName,
-      projectAddress: clean(project.location) || undefined,
-      projectMeta,
-    });
-  } else {
-    drawCoverPage(doc, {
+  let y = drawBrandedHeader(doc, {
+    margin: 40,
+    companyName,
+    title: reportTitle,
+    subtitle: `${t(lang, "Project Insights", "Perspectivas del Proyecto")} | ${projectMeta} | ${t(lang, "Prepared by", "Preparado por")}: ${input.fullName || t(lang, "Authenticated user", "Usuario autenticado")}`,
+    projectName,
+    projectCode: clean(project.code) || undefined,
+    reportNumber,
+    reportDate: generatedAt,
+    theme: REPORT_THEMES.platform.performance,
+  }) + 12;
+  const continuationHeader = () => {
+    doc.addPage();
+    return drawBrandedHeader(doc, {
       margin: 40,
-      logoBase64,
-      logoType,
       companyName,
-      reportTitle,
-      reportSubtitle: "Project Insights",
+      title: reportTitle,
+      subtitle: t(lang, "Current-view report — continued", "Informe de vista actual — continuación"),
+      projectName,
+      projectCode: clean(project.code) || undefined,
       reportNumber,
       reportDate: generatedAt,
-      preparedBy: input.fullName || "Authenticated user",
-      projectName,
-      projectAddress: clean(project.location) || undefined,
-      projectMeta,
-      isoStamp: false,
       theme: REPORT_THEMES.platform.performance,
-    });
-  }
-
-  doc.addPage();
-  let y = 46;
+    }) + 12;
+  };
+  const ensureInsightsSpace = (currentY: number, needed = 90) =>
+    currentY + needed > 545 ? continuationHeader() : currentY;
   y = sectionBar(doc, t(lang, "Active filter summary", "Resumen de filtros activos"), y, { theme: REPORT_THEMES.platform.performance });
   for (const line of activeSummary(summary, sections, lang)) {
     doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(line, 48, y, { width: 500 });
@@ -292,7 +238,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   y += 8;
 
   if (summary.metricAuthority.partial) {
-    y = ensureSpace(doc, y, 54);
+    y = ensureInsightsSpace(y, 54);
     doc.rect(40, y, 532, 42).fill("#FFF7ED").stroke("#FED7AA");
     doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor("#9A3412").text(t(lang, "Partial source data", "Datos parciales"), 50, y + 8);
     doc.fontSize(8).font(PALETTE.FONT).fillColor("#9A3412").text(t(lang, "One or more authorized sources could not report. Missing sources are not counted as zero.", "Una o más fuentes autorizadas no pudieron reportar. Las fuentes faltantes no se cuentan como cero."), 50, y + 22, { width: 500 });
@@ -300,7 +246,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   if (sections.includes("operational")) {
-    y = ensureSpace(doc, y, 115);
+    y = ensureInsightsSpace(y, 115);
     y = sectionBar(doc, SECTION_LABELS.operational[lang], y, { theme: REPORT_THEMES.platform.performance });
     y = drawKeyValueGrid(doc, y, [
       [t(lang, "Actionable", "Accionables"), String(summary.operationalContext.actionable)],
@@ -311,7 +257,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   if (sections.includes("compliance")) {
-    y = ensureSpace(doc, y, 120);
+    y = ensureInsightsSpace(y, 120);
     y = sectionBar(doc, SECTION_LABELS.compliance[lang], y, { theme: REPORT_THEMES.platform.performance });
     y = drawKeyValueGrid(doc, y, [
       [t(lang, "Total files", "Archivos totales"), String(summary.compliance.totalFiles)],
@@ -326,7 +272,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   if (sections.includes("company")) {
-    y = ensureSpace(doc, y, 118);
+    y = ensureInsightsSpace(y, 118);
     y = sectionBar(doc, SECTION_LABELS.company[lang], y, { theme: REPORT_THEMES.platform.performance });
     if (summary.compliance.companyPerformanceRedacted) {
       doc.rect(40, y, 532, 42).fill("#F8FAFC").stroke("#CBD5E1");
@@ -344,7 +290,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
         ],
         rows,
         pageBottom: 545,
-        onPageBreak: () => { doc.addPage(); return 52; },
+        onPageBreak: continuationHeader,
       }) + 12;
     } else {
       doc.fontSize(8).font(PALETTE.FONT).fillColor(PALETTE.MUTED).text(t(lang, "Company performance will appear when authoritative data exists.", "El desempeño aparecerá cuando existan datos autorizados."), 48, y, { width: 500 });
@@ -353,7 +299,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   if (sections.includes("rfi")) {
-    y = ensureSpace(doc, y, 140);
+    y = ensureInsightsSpace(y, 140);
     y = sectionBar(doc, SECTION_LABELS.rfi[lang], y, { theme: REPORT_THEMES.platform.performance });
     y = drawKeyValueGrid(doc, y, [
       [t(lang, "Total RFIs", "RFIs totales"), String(summary.rfiPerformance.total)],
@@ -363,7 +309,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
     ]);
     const statusRows = Object.entries(summary.rfiPerformance.byStatus).sort(([a], [b]) => a.localeCompare(b)).map(([status, count]) => ({ status: displayStatusLabel(status, lang), count }));
     if (statusRows.length) {
-      y = drawTable(doc, { x: 40, startY: y, columns: [{ label: t(lang, "Status", "Estado"), width: 400, key: "status" }, { label: t(lang, "Count", "Conteo"), width: 100, key: "count", align: "right" }], rows: statusRows, pageBottom: 545, onPageBreak: () => { doc.addPage(); return 52; } }) + 12;
+      y = drawTable(doc, { x: 40, startY: y, columns: [{ label: t(lang, "Status", "Estado"), width: 400, key: "status" }, { label: t(lang, "Count", "Conteo"), width: 100, key: "count", align: "right" }], rows: statusRows, pageBottom: 545, onPageBreak: continuationHeader }) + 12;
     } else {
       doc.fontSize(9).font(PALETTE.FONT_BOLD).fillColor(PALETTE.NAVY).text(t(lang, "No RFIs yet", "Aún no hay RFIs"), 48, y, { width: 500 });
       y += 18;
@@ -371,14 +317,14 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   if (sections.includes("unavailable")) {
-    y = ensureSpace(doc, y, 100);
+    y = ensureInsightsSpace(y, 100);
     y = sectionBar(doc, SECTION_LABELS.unavailable[lang], y, { theme: REPORT_THEMES.platform.performance });
     const rows = summary.unavailable.map((entry) => ({ metric: unavailableMetricLabel(entry.key, lang), reason: lang === "es" ? entry.reasonEs : entry.reason }));
-    y = drawTable(doc, { x: 40, startY: y, columns: [{ label: t(lang, "Metric", "Métrica"), width: 150, key: "metric" }, { label: t(lang, "Reason", "Razón"), width: 350, key: "reason", wrap: true }], rows, pageBottom: 545, onPageBreak: () => { doc.addPage(); return 52; } }) + 12;
+    y = drawTable(doc, { x: 40, startY: y, columns: [{ label: t(lang, "Metric", "Métrica"), width: 150, key: "metric" }, { label: t(lang, "Reason", "Razón"), width: 350, key: "reason", wrap: true }], rows, pageBottom: 545, onPageBreak: continuationHeader }) + 12;
   }
 
   if (sections.includes("boundaries")) {
-    y = ensureSpace(doc, y, 90);
+    y = ensureInsightsSpace(y, 90);
     y = sectionBar(doc, SECTION_LABELS.boundaries[lang], y, { theme: REPORT_THEMES.platform.performance });
     const boundaries = [
       t(lang, "Report-navigation links are informational and do not grant authority.", "Los enlaces de informes son informativos y no otorgan autoridad."),

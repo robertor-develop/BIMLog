@@ -88,7 +88,7 @@ function directoryLabels(lang: DirectoryLang) {
   const es = lang === "es";
   return {
     reportTitle: es ? "Directorio del Proyecto — Vista actual" : "Project Directory — Current View",
-    reportSubtitle: es ? "Exportación filtrada del directorio del proyecto" : "Filtered project directory export",
+    reportSubtitle: es ? "Directorio autorizado del proyecto" : "Authorized project directory",
     preparedBy: es ? "Preparado por" : "Prepared by",
     generated: es ? "Generado" : "Generated",
     matching: es ? "Coincidencias" : "Matching",
@@ -343,7 +343,7 @@ router.get("/projects/:projectId/directory/export-pdf", authMiddleware, requireP
     const theme = REPORT_THEMES.platform.standard;
     doc.y = drawBrandedHeader(doc, {
       margin: 40,
-      companyName: "BIMLog",
+      companyName: req.user!.companyName || "Company",
       title: reportTitle,
       subtitle: labels.reportSubtitle,
       projectName: project.name,
@@ -383,7 +383,7 @@ router.get("/projects/:projectId/directory/export-pdf", authMiddleware, requireP
       doc.addPage();
       return drawBrandedHeader(doc, {
         margin: 40,
-        companyName: "BIMLog",
+        companyName: req.user!.companyName || "Company",
         title: reportTitle,
         projectName: project.name,
         projectCode: project.code,
@@ -416,6 +416,9 @@ router.get("/projects/:projectId/directory/export-pdf", authMiddleware, requireP
 
     addPageNumbers(doc, {
       margin: 40,
+      footerY: 756,
+      fingerprintY: 742,
+      companyName: req.user!.companyName || "Company",
       projectName: project.name,
       timestamp: reportDate.toLocaleDateString("en-US"),
       reportNumber,

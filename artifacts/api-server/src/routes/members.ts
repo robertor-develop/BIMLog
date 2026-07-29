@@ -173,7 +173,7 @@ router.get("/projects/:projectId/members/current-view/pdf", authMiddleware, requ
     const reportNumber = `TEAM-${projectId}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
     const header = () => drawBrandedHeader(doc, {
       margin: 40,
-      companyName: req.user!.companyName || "BIMLog",
+      companyName: req.user!.companyName || "Company",
       title,
       subtitle: label("Export Current View", "Exportar vista actual"),
       projectName: project.name,
@@ -246,7 +246,7 @@ router.get("/projects/:projectId/members/current-view/pdf", authMiddleware, requ
       footerY: 560,
       fingerprintY: 548,
       contentHash,
-      companyName: req.user!.companyName || "BIMLog",
+      companyName: req.user!.companyName || "Company",
       projectName: project.name,
       reportNumber,
       timestamp: generatedAt.toISOString(),

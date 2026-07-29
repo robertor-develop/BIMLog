@@ -14,13 +14,11 @@ import {
 } from "@workspace/db/schema";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { authMiddleware, requirePermission, requireProjectMember } from "../middlewares/auth";
-import { getCompanyLogo } from "../lib/pdf-logo";
 import {
   addPageNumbers,
   computeContentHash,
   createPdfDocument,
   drawBrandedHeader,
-  drawCoverPage,
   drawTable,
   PALETTE,
   REPORT_THEMES,
@@ -564,8 +562,7 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
       rolloverHistory: filteredHistories,
     };
     const contentHash = computeContentHash(snapshot);
-    const { logoBase64, logoType } = await getCompanyLogo(req.user!.userId);
-    const companyName = req.user!.companyName || "BIMLog";
+    const companyName = req.user!.companyName || "Company";
     const reportTitle = view === "calendar" ? "Schedule Calendar Report" : view === "board" ? "Schedule Board Report" : "Schedule List Report";
     const theme = REPORT_THEMES.schedule[view];
     const fileName = reportFileName(reportTitle);
@@ -575,29 +572,15 @@ router.get("/projects/:projectId/schedule/export-pdf", authMiddleware, requirePr
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
     doc.pipe(res);
 
-    drawCoverPage(doc, {
+    let y = drawBrandedHeader(doc, {
       margin: 40,
-      logoBase64,
-      logoType,
-      companyName,
-      reportTitle,
-      reportNumber,
-      reportDate,
-      preparedBy: req.user!.fullName,
-      projectName: project.name,
-      projectAddress: project.location || undefined,
-      projectMeta: `Project Code: ${project.code} | Items: ${filtered.length} of ${events.length} | View: ${view.toUpperCase()}`,
-      isoStamp: false,
-      theme,
-    });
-
-    let y = addReportPage(doc, {
       companyName,
       title: reportTitle,
-      projectName: project.name,
-      projectCode: project.code,
       reportNumber,
       reportDate,
+      projectName: project.name,
+      projectCode: project.code,
+      subtitle: `Items: ${filtered.length} of ${events.length} | View: ${view.toUpperCase()} | Prepared by: ${req.user!.fullName}`,
       theme,
     }) + 10;
 

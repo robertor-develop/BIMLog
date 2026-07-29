@@ -192,7 +192,7 @@ router.get("/projects/:projectId/change-orders/current-view/pdf", authMiddleware
     const drawHeader = () => {
       const y = drawBrandedHeader(doc, {
         margin: 40,
-        companyName: req.user!.companyName || "BIMLog",
+        companyName: req.user!.companyName || "Company",
         title: reportTitle,
         subtitle: label("Current visible Change Orders register", "Registro visible de Ordenes de Cambio"),
         projectName: project.name,
@@ -276,7 +276,7 @@ router.get("/projects/:projectId/change-orders/current-view/pdf", authMiddleware
       footerY: 558,
       fingerprintY: 544,
       contentHash,
-      companyName: req.user!.companyName || "BIMLog",
+      companyName: req.user!.companyName || "Company",
       projectName: project.name,
       reportNumber,
       timestamp: generatedAt.toLocaleString("en-US"),
@@ -429,7 +429,7 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
 
-    doc.y = drawBrandedHeader(doc, { margin: 50, companyName: "BIMLog", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.changeOrder.detail }) + 12;
+    doc.y = drawBrandedHeader(doc, { margin: 50, companyName: req.user!.companyName || "Company", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.changeOrder.detail }) + 12;
 
     const field = (label: string, value: string) => {
       doc.fontSize(9).font("Helvetica-Bold").text(label + ": ", { continued: true });
