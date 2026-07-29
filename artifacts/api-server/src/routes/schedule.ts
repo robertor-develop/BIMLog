@@ -84,18 +84,13 @@ function daysOverdue(dueDate: Date | string, status: string | null | undefined) 
 
 async function ensureDefaultBuckets(projectId: number, userId?: number) {
   for (const bucket of DEFAULT_BUCKETS) {
-    const existing = await db.select({ id: scheduleBucketsTable.id })
-      .from(scheduleBucketsTable)
-      .where(and(eq(scheduleBucketsTable.projectId, projectId), eq(scheduleBucketsTable.name, bucket.name)))
-      .limit(1);
-    if (existing.length > 0) continue;
     await db.insert(scheduleBucketsTable).values({
       projectId,
       name: bucket.name,
       bucketType: bucket.bucketType,
       sortOrder: bucket.sortOrder,
       createdById: userId ?? null,
-    });
+    }).onConflictDoNothing();
   }
 }
 

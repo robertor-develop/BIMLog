@@ -22,6 +22,19 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    the same action stops the task; it must never become an approval loop.
 7. Reconcile the remaining historical worktree ledger only after the current
    PDF candidate reaches a terminal accepted, rejected, or preserved state.
+8. Completion review corrected the inline PDF-only checklist on Project
+   Insights, the Submittal current-view zero-result rejection, and unlabeled
+   Activity Log operational filters found during local acceptance. Schedule
+   now inherits the visible operational state and keeps only PDF-specific
+   sections in the shared modal; Clash Reports list printing now targets its
+   visible list branch; Schedule default buckets now initialize idempotently
+   under parallel first-load requests. Contracts now gates its entire
+   financial workspace and Print PDF action behind successful financial
+   authorization. Shared and domain-specific footer stamping now prevents
+   footer-only trailing PDF pages found during rendered-page inspection. Keep
+   the candidate local until real
+   desktop/exact-390px checks, representative every-page PDF inspection, and
+   independent review finish.
 
 ## Current terminal truth - 2026-07-23
 

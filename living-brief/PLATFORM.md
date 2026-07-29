@@ -201,6 +201,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/overdue-notifier.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
+- artifacts/api-server/src/lib/project-analytics-current-view-export.ts
 - artifacts/api-server/src/lib/project-insights-metrics.ts
 - artifacts/api-server/src/lib/project-intelligence.ts
 - artifacts/api-server/src/lib/provider-governance.ts

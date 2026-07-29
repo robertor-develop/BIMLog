@@ -769,7 +769,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
         warning={t("Linked items will be detached.", "Los elementos enlazados serán desvinculados.")}
       />
     )}
-    <div className="tab-content-wrapper">
+    <div id="clash-reports-list-current-view" className="tab-content-wrapper">
       <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
         {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
           <button key={k} onClick={() => selectTab(k)}

@@ -605,10 +605,6 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
     const filteredSubs = filterSubmittalLogExport(req, subs);
-    if (filteredSubs.length === 0) {
-      res.status(400).json({ error: "No visible submittals match the export filters" });
-      return;
-    }
     const filterSummary = submittalLogFilterSummary(req, filteredSubs.length, subs.length);
     const doc = createPdfDocument({ margin: LOG_MARGIN, size: "LETTER", layout: "landscape", autoFirstPage: true });
     doc.page.margins.bottom = 0;
@@ -650,16 +646,30 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       { label: "Ball in Court", w: LOG_CONTENT_W - (65+130+70+75+85+85+72+72+46) },
     ];
 
-    // Column header row
-    doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).fill("#EFF6FF");
+    let pageNumber = 1;
     let cx = LOG_MARGIN;
-    COLS.forEach(col => {
-      doc.fillColor("#1E3A5F").fontSize(7).font("Helvetica-Bold")
-        .text(col.label, cx + 3, y + 4, { width: col.w - 4, lineBreak: false });
-      cx += col.w;
-    });
-    doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).stroke("#BFDBFE");
-    y += 16;
+    const drawColumnHeader = () => {
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).fill("#EFF6FF");
+      cx = LOG_MARGIN;
+      COLS.forEach(col => {
+        doc.fillColor("#1E3A5F").fontSize(7).font("Helvetica-Bold")
+          .text(col.label, cx + 3, y + 4, { width: col.w - 4, lineBreak: false });
+        cx += col.w;
+      });
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).stroke("#BFDBFE");
+      y += 16;
+    };
+    const drawFooter = () => {
+      doc.page.margins.bottom = 0;
+      doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
+        .text(
+          `Submittal Log | ${project?.name || ""} | BIMLog by IgniteSmart | Page ${pageNumber}`,
+          LOG_MARGIN,
+          LOG_H - 22,
+          { width: LOG_CONTENT_W, align: "center", lineBreak: false },
+        );
+    };
+    drawColumnHeader();
 
     const STATUS_COLORS: Record<string, string> = {
       approved: "#15803D", approved_as_noted: "#1D4ED8", rejected: "#DC2626",
@@ -669,7 +679,15 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     filteredSubs.forEach((sub, idx) => {
       const rowH = 15;
       if (y + rowH > LOG_CONTENT_BOT) {
-        doc.addPage(); doc.page.margins.bottom = 0; y = LOG_MARGIN;
+        drawFooter();
+        doc.addPage();
+        doc.page.margins.bottom = 0;
+        pageNumber += 1;
+        y = LOG_MARGIN;
+        doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold")
+          .text("FILTERED SUBMITTAL LOG - CONTINUED", LOG_MARGIN, y, { width: LOG_CONTENT_W, lineBreak: false });
+        y += 16;
+        drawColumnHeader();
       }
       const bg = idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC";
       doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).fill(bg);
@@ -703,10 +721,16 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       y += rowH;
     });
 
-    // Footer
-    doc.page.margins.bottom = 0;
-    doc.fontSize(7).fillColor("#94A3B8").font("Helvetica")
-      .text(`Submittal Log | ${project?.name || ""} | BIMLog by IgniteSmart`, LOG_MARGIN, LOG_H - 22, { width: LOG_CONTENT_W, align: "center", lineBreak: false });
+    if (filteredSubs.length === 0) {
+      doc.fillColor("#64748B").fontSize(10).font("Helvetica")
+        .text(
+          "No submittals match the selected current-view filters. This empty result is intentional.",
+          LOG_MARGIN,
+          y + 24,
+          { width: LOG_CONTENT_W, align: "center" },
+        );
+    }
+    drawFooter();
     doc.end();
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });

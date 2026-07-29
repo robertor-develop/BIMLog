@@ -210,6 +210,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
               color: "hsl(var(--muted-foreground))", pointerEvents: "none"
             }} />
             <select
+              aria-label={tt("Action", "Acción")}
               value={actionFilter}
               onChange={e => setActionFilter(e.target.value)}
               style={{ height: 34, paddingLeft: 26, paddingRight: 10, fontSize: 12, minWidth: 130 }}
@@ -225,6 +226,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>{tt("From", "Desde")}</span>
             <input
+              aria-label={tt("From", "Desde")}
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
@@ -232,6 +234,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
             />
             <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>{tt("To", "Hasta")}</span>
             <input
+              aria-label={tt("To", "Hasta")}
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}

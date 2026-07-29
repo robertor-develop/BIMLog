@@ -44,7 +44,7 @@ export function FinancialContractWorkspace() {
   const [, params] = useRoute("/projects/:id/financial/contracts");
   const projectId = Number(params?.id);
   const [data, setData] = useState<any>(null), [budget, setBudget] = useState<any>(null), [snapshot, setSnapshot] = useState<any>(null);
-  const [error, setError] = useState(""), [busy, setBusy] = useState(""), [showCreate, setShowCreate] = useState(false);
+  const [error, setError] = useState(""), [loading, setLoading] = useState(true), [busy, setBusy] = useState(""), [showCreate, setShowCreate] = useState(false);
   const [exportError, setExportError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -64,7 +64,7 @@ export function FinancialContractWorkspace() {
   const [lines, setLines] = useState<SovDraft[]>([emptyLine()]);
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }), [token]);
   const api = async (path: string, options?: RequestInit) => { const response = await fetch(`${API_BASE}/api/v1${path}`, { ...options, headers: { ...headers, ...(options?.headers ?? {}) } }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body?.error?.[language] ?? tt("Financial contract access was denied.", "Se denegó el acceso al contrato financiero.")); return body; };
-  const load = async () => { setError(""); try { const [contracts, budgets] = await Promise.all([api(`/projects/${projectId}/financial/contracts`), api(`/projects/${projectId}/financial/workspace`)]); setData(contracts); setBudget(budgets); const selected = form.budgetSnapshotId || budgets.snapshots?.[0]?.id || ""; if (selected) { setForm((current) => ({ ...current, budgetSnapshotId: selected, currency: budgets.snapshots?.find((s: any) => s.id === selected)?.currency ?? current.currency })); setSnapshot(await api(`/projects/${projectId}/financial/snapshots/${selected}`)); } } catch (e) { setError(e instanceof Error ? e.message : String(e)); } };
+  const load = async () => { setLoading(true); setError(""); try { const [contracts, budgets] = await Promise.all([api(`/projects/${projectId}/financial/contracts`), api(`/projects/${projectId}/financial/workspace`)]); setData(contracts); setBudget(budgets); const selected = form.budgetSnapshotId || budgets.snapshots?.[0]?.id || ""; if (selected) { setForm((current) => ({ ...current, budgetSnapshotId: selected, currency: budgets.snapshots?.find((s: any) => s.id === selected)?.currency ?? current.currency })); setSnapshot(await api(`/projects/${projectId}/financial/snapshots/${selected}`)); } } catch (e) { setData(null); setBudget(null); setSnapshot(null); setError(e instanceof Error ? e.message : String(e)); } finally { setLoading(false); } };
   useEffect(() => { if (projectId && token) void load(); }, [projectId, token, language]);
   const selectSnapshot = async (id: string) => { const meta = budget?.snapshots?.find((s: any) => s.id === id); setForm({ ...form, budgetSnapshotId: id, currency: meta?.currency ?? form.currency }); setLines([emptyLine()]); if (id) setSnapshot(await api(`/projects/${projectId}/financial/snapshots/${id}`)); };
   const chooseBudgetLine = (index: number, id: string) => { const item = snapshot?.snapshot?.lines?.find((line: any) => line.id === id); setLines(lines.map((line, i) => i === index ? { ...line, budgetSnapshotLineId: id, projectCostNodeId: item?.project_cost_node_id ?? "", description: line.description || item?.description || "" } : line)); };
@@ -130,6 +130,12 @@ export function FinancialContractWorkspace() {
       link.href = url; link.download = safePdfFileName(contentDispositionFileName(response.headers.get("Content-Disposition")), "contracts-current-view.pdf"); link.click(); URL.revokeObjectURL(url);
     } catch (e) { setExportError(e instanceof Error ? e.message : String(e)); } finally { setBusy(""); }
   };
+  if (loading && !data) {
+    return <FinancialProjectShell projectId={projectId} activeTab="contracts"><main style={{ maxWidth: 760, margin: "24px auto", padding: 24, border: "1px solid #D7DEE8", borderRadius: 12, background: "#FFFFFF" }}><h1>{tt("Contracts & Commitments", "Contratos y Compromisos")}</h1><p>{tt("Loading controlled financial records...", "Cargando registros financieros controlados...")}</p></main></FinancialProjectShell>;
+  }
+  if (error && !data) {
+    return <FinancialProjectShell projectId={projectId} activeTab="contracts"><main role="alert" style={{ maxWidth: 760, margin: "24px auto", padding: 24, border: "1px solid #F0B4B4", borderRadius: 12, background: "#FFF7F7" }}><h1>{tt("Financial access denied", "Acceso financiero denegado")}</h1><p>{error}</p><button type="button" onClick={() => void load()}>{tt("Retry", "Reintentar")}</button></main></FinancialProjectShell>;
+  }
   return <FinancialProjectShell projectId={projectId} activeTab="contracts"><div className="fc-page"><style>{styles}</style>
     <header className="fc-header"><div><Link href={`/projects/${projectId}/financial/budget`}>← {tt("Project Budget", "Presupuesto del Proyecto")}</Link><h1>{tt("Contracts & Commitments", "Contratos y Compromisos")}</h1><p>{tt("Exact, versioned contract terms and schedules of values", "Términos y SOV exactos y versionados")}</p></div><button onClick={() => setShowCreate(!showCreate)}>{showCreate ? tt("Close", "Cerrar") : tt("New contract", "Nuevo contrato")}</button></header>
     <section className="fc-boundary">{tt("Operational project control only. Approval is separate from signed-document execution. No accounting posting, invoice payment, bank movement, external portal, or automatic AI.", "Solo control operativo del proyecto. La aprobación está separada de la ejecución con documento firmado. Sin asientos contables, pago de facturas, movimientos bancarios, portal externo ni IA automática.")}</section>

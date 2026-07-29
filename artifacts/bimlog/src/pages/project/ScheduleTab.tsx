@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import {
   AlertTriangle, Calendar, CheckCircle2, Clock, ExternalLink, History,
-  FileDown, LayoutGrid, List, Loader2, MoveRight, Plus, Trash2,
+  LayoutGrid, List, Loader2, MoveRight, Plus, Trash2,
 } from "lucide-react";
 
 interface ScheduleItem {
@@ -154,7 +154,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [trades, setTrades] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
@@ -207,24 +206,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     status: "pending",
     notes: "",
   });
-  const [exportOptions, setExportOptions] = useState({
-    view: viewMode,
-    start_date: "",
-    end_date: "",
-    status: "all",
-    item_type: "all",
-    bucket_id: "",
-    assigned_user_id: "",
-    search: "",
-    include_progress: true,
-    include_kpis: true,
-    include_action_needed: true,
-    include_completed: true,
-    include_overdue: true,
-    include_rollover_history: false,
-    include_ownership_columns: true,
-  });
-
   const authHeader = { Authorization: `Bearer ${token}` };
   const jsonHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -564,35 +545,28 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     toast({ title: editingBucket ? t("Bucket updated", "Bucket actualizado") : t("Bucket created", "Bucket creado") });
   };
 
-  const openExportModal = () => {
-    setError("");
-    setExportOptions(o => ({
-      ...o,
-      view: viewMode,
-      status: filter,
-      start_date: startDateFilter,
-      end_date: endDateFilter,
-      bucket_id: bucketFilter,
-      assigned_user_id: assignedFilter,
-      search: searchQuery.trim(),
-      item_type: itemTypeFilter,
-      include_action_needed: includeActionNeededFilter,
-      include_completed: includeCompletedFilter,
-      include_overdue: includeOverdueFilter,
-      include_progress: includeProgressFilter,
-      include_kpis: includeKpisFilter,
-      include_rollover_history: includeRolloverHistoryFilter,
-      include_ownership_columns: includeOwnershipColumnsFilter,
-    }));
-    setShowExportModal(true);
-  };
-
   const exportSchedulePdf = async () => {
     setExporting(true);
     setError("");
     try {
       const params = new URLSearchParams();
-      const options = { ...exportOptions, view: exportOptions.view || viewMode };
+      const options = {
+        view: viewMode,
+        status: filter,
+        start_date: startDateFilter,
+        end_date: endDateFilter,
+        bucket_id: bucketFilter,
+        assigned_user_id: assignedFilter,
+        search: searchQuery.trim(),
+        item_type: itemTypeFilter,
+        include_action_needed: includeActionNeededFilter,
+        include_completed: includeCompletedFilter,
+        include_overdue: includeOverdueFilter,
+        include_progress: includeProgressFilter,
+        include_kpis: includeKpisFilter,
+        include_rollover_history: includeRolloverHistoryFilter,
+        include_ownership_columns: includeOwnershipColumnsFilter,
+      };
       Object.entries(options).forEach(([key, value]) => {
         if (value === "" || value === null || value === undefined) return;
         params.set(key, String(value));
@@ -613,7 +587,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      setShowExportModal(false);
       toast({ title: t("Schedule PDF exported", "PDF de cronograma exportado") });
     } finally {
       setExporting(false);
@@ -658,18 +631,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     includeCompleted: includeCompletedFilter,
     includeOverdue: includeOverdueFilter,
   };
-  const exportFilterOptions: ScheduleFilterOptions = {
-    search: exportOptions.search,
-    bucketId: exportOptions.bucket_id,
-    assignedUserId: exportOptions.assigned_user_id,
-    startDate: exportOptions.start_date,
-    endDate: exportOptions.end_date,
-    status: exportOptions.status,
-    itemType: exportOptions.item_type,
-    includeActionNeeded: exportOptions.include_action_needed,
-    includeCompleted: exportOptions.include_completed,
-    includeOverdue: exportOptions.include_overdue,
-  };
   const filtered = useMemo(() => applyScheduleFilters(items, visibleFilterOptions), [
     assignedFilter,
     bucketFilter,
@@ -683,7 +644,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     searchQuery,
     startDateFilter,
   ]);
-  const exportFiltered = useMemo(() => applyScheduleFilters(items, exportFilterOptions), [exportOptions, items]);
 
   const total = items.length;
   const completed = items.filter(m => isDone(m.status)).length;
@@ -757,8 +717,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   };
   const includeRowsSummary = (options: { includeActionNeeded: boolean; includeCompleted: boolean; includeOverdue: boolean }) =>
     `${t("Rows", "Filas")}: ${t("Open", "Abiertos")} ${options.includeActionNeeded ? t("yes", "si") : "no"}, ${t("Completed", "Completados")} ${options.includeCompleted ? t("yes", "si") : "no"}, ${t("Overdue", "Vencidos")} ${options.includeOverdue ? t("yes", "si") : "no"}`;
-  const includeSectionsSummary = (options: { includeProgress: boolean; includeKpis: boolean; includeRolloverHistory: boolean; includeOwnershipColumns: boolean }) =>
-    `${t("PDF", "PDF")}: ${t("Progress", "Progreso")} ${options.includeProgress ? t("yes", "si") : "no"}, KPI ${options.includeKpis ? t("yes", "si") : "no"}, ${t("Rollover", "Transferencias")} ${options.includeRolloverHistory ? t("yes", "si") : "no"}, ${t("Ownership", "Responsables")} ${options.includeOwnershipColumns ? t("yes", "si") : "no"}`;
   const currentViewFilterSummary = [
     `${t("View", "Vista")}: ${viewMode === "calendar" ? t("Calendar", "Calendario") : viewMode === "board" ? t("Board", "Tablero") : t("List", "Lista")}`,
     `${t("Status", "Estado")}: ${filter === "all" ? t("All", "Todos") : filter.replace(/_/g, " ")}`,
@@ -768,20 +726,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     assignedFilter ? `${t("Assigned", "Asignado")}: ${members.find(m => String(m.userId) === assignedFilter)?.userFullName || assignedFilter}` : "",
     startDateFilter || endDateFilter ? `${t("Dates", "Fechas")}: ${startDateFilter || t("Any", "Cualquiera")} - ${endDateFilter || t("Any", "Cualquiera")}` : "",
     includeRowsSummary({ includeActionNeeded: includeActionNeededFilter, includeCompleted: includeCompletedFilter, includeOverdue: includeOverdueFilter }),
-    includeSectionsSummary({ includeProgress: includeProgressFilter, includeKpis: includeKpisFilter, includeRolloverHistory: includeRolloverHistoryFilter, includeOwnershipColumns: includeOwnershipColumnsFilter }),
     `${t("Visible", "Visible")}: ${filtered.length}/${items.length}`,
-  ].filter(Boolean);
-  const exportFilterSummary = [
-    `${t("View", "Vista")}: ${exportOptions.view === "calendar" ? t("Calendar", "Calendario") : exportOptions.view === "board" ? t("Board", "Tablero") : t("List", "Lista")}`,
-    `${t("Status", "Estado")}: ${exportOptions.status === "all" ? t("All", "Todos") : exportOptions.status.replace(/_/g, " ")}`,
-    `${t("Item Type", "Tipo")}: ${itemTypeLabel(exportOptions.item_type)}`,
-    exportOptions.search.trim() ? `${t("Search", "Busqueda")}: ${exportOptions.search.trim()}` : "",
-    exportOptions.bucket_id ? `${t("Bucket", "Bucket")}: ${visibleBuckets.find(b => String(b.id) === exportOptions.bucket_id)?.name || exportOptions.bucket_id}` : "",
-    exportOptions.assigned_user_id ? `${t("Assigned", "Asignado")}: ${members.find(m => String(m.userId) === exportOptions.assigned_user_id)?.userFullName || exportOptions.assigned_user_id}` : "",
-    exportOptions.start_date || exportOptions.end_date ? `${t("Dates", "Fechas")}: ${exportOptions.start_date || t("Any", "Cualquiera")} - ${exportOptions.end_date || t("Any", "Cualquiera")}` : "",
-    includeRowsSummary({ includeActionNeeded: exportOptions.include_action_needed, includeCompleted: exportOptions.include_completed, includeOverdue: exportOptions.include_overdue }),
-    includeSectionsSummary({ includeProgress: exportOptions.include_progress, includeKpis: exportOptions.include_kpis, includeRolloverHistory: exportOptions.include_rollover_history, includeOwnershipColumns: exportOptions.include_ownership_columns }),
-    `${t("Result", "Resultado")}: ${exportFiltered.length}/${items.length}`,
   ].filter(Boolean);
 
   const smallButtonStyle = {
@@ -858,7 +803,32 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <PrintPdfButton lang={lang} onClick={openExportModal} disabled={loading} />
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => void exportSchedulePdf()}
+            loading={exporting}
+            disabled={loading}
+            currentViewSummary={currentViewFilterSummary}
+            options={(
+              <div style={{ display: "grid", gap: 8 }}>
+                {[
+                  [t("Overall progress", "Progreso general"), includeProgressFilter, setIncludeProgressFilter],
+                  [t("KPI summary cards", "Tarjetas KPI"), includeKpisFilter, setIncludeKpisFilter],
+                  [t("Rollover history", "Historial de transferencias"), includeRolloverHistoryFilter, setIncludeRolloverHistoryFilter],
+                  [t("Assigned user/company/trade/level columns", "Columnas usuario/empresa/disciplina/nivel"), includeOwnershipColumnsFilter, setIncludeOwnershipColumnsFilter],
+                ].map(([label, checked, setter]) => (
+                  <label key={String(label)} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(checked)}
+                      onChange={event => (setter as (value: boolean) => void)(event.target.checked)}
+                    />
+                    {label as string}
+                  </label>
+                ))}
+              </div>
+            )}
+          />
           {canWrite && (
             <button className="btn btn-primary" onClick={() => { setForm(f => ({ ...f, bucket_id: String(defaultBucketId || "") })); setShowForm(true); }} type="button">
               <Plus size={14} />
@@ -947,10 +917,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               setIncludeActionNeededFilter(true);
               setIncludeCompletedFilter(true);
               setIncludeOverdueFilter(true);
-              setIncludeProgressFilter(true);
-              setIncludeKpisFilter(true);
-              setIncludeRolloverHistoryFilter(false);
-              setIncludeOwnershipColumnsFilter(true);
             }}
           >
             {t("Clear Filters", "Limpiar Filtros")}
@@ -963,10 +929,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               ["include_action_needed", t("Open/action-needed rows", "Filas abiertas/requieren accion"), includeActionNeededFilter, setIncludeActionNeededFilter],
               ["include_completed", t("Completed rows", "Filas completadas"), includeCompletedFilter, setIncludeCompletedFilter],
               ["include_overdue", t("Overdue rows", "Filas vencidas"), includeOverdueFilter, setIncludeOverdueFilter],
-              ["include_progress", t("Overall progress in PDF", "Progreso general en PDF"), includeProgressFilter, setIncludeProgressFilter],
-              ["include_kpis", t("KPI summary in PDF", "Resumen KPI en PDF"), includeKpisFilter, setIncludeKpisFilter],
-              ["include_rollover_history", t("Rollover history in PDF", "Historial de transferencias en PDF"), includeRolloverHistoryFilter, setIncludeRolloverHistoryFilter],
-              ["include_ownership_columns", t("Ownership columns in PDF", "Columnas de responsables en PDF"), includeOwnershipColumnsFilter, setIncludeOwnershipColumnsFilter],
             ].map(([key, label, checked, setter]) => (
               <label key={String(key)} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>
                 <input type="checkbox" checked={Boolean(checked)} onChange={e => (setter as (value: boolean) => void)(e.target.checked)} />
@@ -1140,119 +1102,6 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </form>
           <datalist id="schedule-trades">{trades.map(v => <option key={v} value={v} />)}</datalist>
           <datalist id="schedule-companies">{companies.map(v => <option key={v} value={v} />)}</datalist>
-        </div>
-      )}
-
-      {showExportModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.35)", zIndex: 1100 }} onClick={() => setShowExportModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="card" style={{ position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "min(760px, calc(100vw - 32px))", maxHeight: "calc(100vh - 48px)", overflowY: "auto", padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", marginBottom: 14 }}>
-              <div>
-                <h3 style={{ margin: 0, color: "#0F172A", fontWeight: 900 }}>{t("Export Schedule PDF", "Exportar PDF de Cronograma")}</h3>
-                <p style={{ margin: "4px 0 0", color: "#64748B", fontSize: 12 }}>
-                  {t("Generate a formal BIMLog PDF for calendar, board, or register sharing.", "Genera un PDF formal BIMLog para calendario, tablero o registro.")}
-                </p>
-              </div>
-              <button className="btn btn-sm btn-outline" type="button" onClick={() => setShowExportModal(false)}>{t("Close", "Cerrar")}</button>
-            </div>
-            {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
-            <div style={{ border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 8, padding: 10, marginBottom: 12 }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: "#1E3A5F", textTransform: "uppercase", marginBottom: 6 }}>
-                {t("Current view to be exported", "Vista actual que se exportara")}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {exportFilterSummary.map(part => (
-                  <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#FFFFFF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
-                    {part}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <Field label={t("Report View", "Vista del Reporte")}>
-                <select className="input" value={exportOptions.view} onChange={e => {
-                  const nextView = e.target.value as ScheduleViewMode;
-                  setExportOptions(o => ({ ...o, view: nextView }));
-                }}>
-                  <option value="calendar">{t("Calendar", "Calendario")}</option>
-                  <option value="board">{t("Board / Sprint", "Tablero / Sprint")}</option>
-                  <option value="list">{t("List / Register", "Lista / Registro")}</option>
-                </select>
-              </Field>
-              <Field label={t("Status Filter", "Filtro de Estado")}>
-                <select className="input" value={exportOptions.status} onChange={e => setExportOptions(o => ({ ...o, status: e.target.value }))}>
-                  <option value="all">{t("All", "Todos")}</option>
-                  <option value="action">{t("Action Needed", "Requiere Accion")}</option>
-                  <option value="pending">{t("Pending", "Pendiente")}</option>
-                  <option value="in_progress">{t("In Progress", "En Progreso")}</option>
-                  <option value="completed">{t("Completed", "Completado")}</option>
-                  <option value="overdue">{t("Overdue", "Vencidos")}</option>
-                </select>
-              </Field>
-              <Field label={t("Search", "Busqueda")}>
-                <input className="input" value={exportOptions.search} onChange={e => setExportOptions(o => ({ ...o, search: e.target.value }))} placeholder={t("Export visible search", "Exportar busqueda visible")} />
-              </Field>
-              <Field label={t("Assigned User", "Usuario Asignado")}>
-                <select className="input" value={exportOptions.assigned_user_id} onChange={e => setExportOptions(o => ({ ...o, assigned_user_id: e.target.value }))}>
-                  <option value="">{t("All assignees", "Todos los asignados")}</option>
-                  {members.map(m => <option key={m.userId} value={m.userId}>{m.userFullName}</option>)}
-                </select>
-              </Field>
-              <Field label={t("Start Date", "Fecha Inicial")}>
-                <input className="input" type="date" value={exportOptions.start_date} onChange={e => setExportOptions(o => ({ ...o, start_date: e.target.value }))} />
-              </Field>
-              <Field label={t("End Date", "Fecha Final")}>
-                <input className="input" type="date" value={exportOptions.end_date} onChange={e => setExportOptions(o => ({ ...o, end_date: e.target.value }))} />
-              </Field>
-              <Field label={t("Item Type Filter", "Filtro de Tipo")}>
-                <select className="input" value={exportOptions.item_type} onChange={e => setExportOptions(o => ({ ...o, item_type: e.target.value }))}>
-                  <option value="all">{t("All", "Todos")}</option>
-                  <option value="milestone">{t("Milestone", "Hito")}</option>
-                  <option value="rfi">RFI</option>
-                  <option value="submittal">{t("Submittal", "Entregable")}</option>
-                  <option value="change_order">{t("Change Order", "Orden de Cambio")}</option>
-                  <option value="meeting">{t("Meeting", "Reunion")}</option>
-                  <option value="3d_model">{t("3D Model", "Modelo 3D")}</option>
-                </select>
-              </Field>
-              <Field label={t("Bucket / Sprint Filter", "Filtro Bucket / Sprint")}>
-                <select className="input" value={exportOptions.bucket_id} onChange={e => setExportOptions(o => ({ ...o, bucket_id: e.target.value }))}>
-                  <option value="">{t("All buckets", "Todos los buckets")}</option>
-                  {visibleBuckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-              </Field>
-            </div>
-            <div style={{ marginTop: 14, borderTop: "1px solid #E5E7EB", paddingTop: 14 }}>
-              <div className="label">{t("Include", "Incluir")}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {[
-                  ["include_progress", t("Overall progress", "Progreso general")],
-                  ["include_kpis", t("KPI summary cards", "Tarjetas KPI")],
-                  ["include_action_needed", t("Open/action-needed items", "Items abiertos/requieren accion")],
-                  ["include_completed", t("Completed items", "Items completados")],
-                  ["include_overdue", t("Overdue items", "Items vencidos")],
-                  ["include_rollover_history", t("Rollover history", "Historial de transferencias")],
-                  ["include_ownership_columns", t("Assigned user/company/trade/level columns", "Columnas usuario/empresa/disciplina/nivel")],
-                ].map(([key, label]) => (
-                  <label key={key} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>
-                    <input
-                      type="checkbox"
-                      checked={Boolean((exportOptions as any)[key])}
-                      onChange={e => setExportOptions(o => ({ ...o, [key]: e.target.checked }))}
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" }}>
-              <button className="btn btn-outline" type="button" onClick={() => setShowExportModal(false)}>{t("Cancel", "Cancelar")}</button>
-              <button className="btn btn-primary" type="button" disabled={exporting} onClick={exportSchedulePdf}>
-                {exporting ? <Loader2 size={13} style={{ marginRight: 4, animation: "spin 1s linear infinite" }} /> : <FileDown size={13} />}
-                {exporting ? t("Generating...", "Generando...") : t("Generate Schedule PDF", "Generar PDF del cronograma")}
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

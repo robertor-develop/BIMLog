@@ -56,13 +56,19 @@ function finishPdfPages(doc: PDFKit.PDFDocument, footer: string) {
   const range = doc.bufferedPageRange();
   for (let i = range.start; i < range.start + range.count; i += 1) {
     doc.switchToPage(i);
-    doc
-      .fontSize(8)
-      .fillColor(PALETTE.FOOTER)
-      .text(`${footer} · Page ${i + 1} of ${range.count}`, doc.page.margins.left, doc.page.height - 28, {
-        width: doc.page.width - doc.page.margins.left - doc.page.margins.right,
-        align: "center",
-      });
+    const originalBottomMargin = doc.page.margins.bottom;
+    doc.page.margins.bottom = 0;
+    try {
+      doc
+        .fontSize(8)
+        .fillColor(PALETTE.FOOTER)
+        .text(`${footer} · Page ${i + 1} of ${range.count}`, doc.page.margins.left, doc.page.height - 28, {
+          width: doc.page.width - doc.page.margins.left - doc.page.margins.right,
+          align: "center",
+        });
+    } finally {
+      doc.page.margins.bottom = originalBottomMargin;
+    }
   }
 }
 

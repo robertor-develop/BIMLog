@@ -1262,8 +1262,6 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
         </Button>
         <PrintPdfButton
           lang={lang}
-          disabled={filtered.length === 0}
-          disabledReason={w("No visible Submittals are available to print.", "No hay entregables visibles para imprimir.", lang)}
           onClick={() => void handleExport("pdf")}
         />
       </div>

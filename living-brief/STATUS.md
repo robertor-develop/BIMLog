@@ -16,6 +16,21 @@ accepted, deployed, or live state.
 - The successor contains exactly 19 PDF/report UX paths. It is a local,
   unvalidated recovery candidate. It is not independently accepted, pushed,
   deployed, production verified, customer verified, or live accepted.
+- Local completion review corrected the remaining successor defects: Project
+  Insights PDF-only section choices now live inside the shared Print PDF
+  modal, and the filtered Submittal Log PDF now preserves an honest zero-result
+  view with repeated table headers and numbered branded footers. Activity Log
+  operational action/date filters now expose exact bilingual accessible labels,
+  and Schedule inherits visible operational filters while keeping PDF-only
+  sections inside the shared modal. Clash Reports list printing now binds to
+  its actual visible list target, and Schedule default-bucket creation is
+  atomic under parallel first-load requests. Contracts now withholds all
+  financial controls, including Print PDF, when financial access is denied
+  while preserving the normal project shell. Shared and domain-specific PDF
+  footer stamping now suppresses footer-only trailing pages without changing
+  report content or authorization. Focused frontend and API
+  typechecks and the local production build pass; independent artifact/UI
+  acceptance remains a separate gate.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.

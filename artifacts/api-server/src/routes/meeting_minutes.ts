@@ -1770,16 +1770,22 @@ router.get(
       const range = doc.bufferedPageRange();
       for (let index = 0; index < range.count; index++) {
         doc.switchToPage(index);
-        doc
-          .font("Helvetica")
-          .fontSize(7)
-          .fillColor(PALETTE.FOOTER)
-          .text(
-            `BIMLog by IgniteSmart · ${labelFor(language, "Page", "Página")} ${index + 1} ${labelFor(language, "of", "de")} ${range.count} · ${labelFor(language, "Generated", "Generado")} ${formatPdfDate(generatedAt, language)}`,
-            M,
-            570,
-            { width: contentWidth, align: "center" },
-          );
+        const originalBottomMargin = doc.page.margins.bottom;
+        doc.page.margins.bottom = 0;
+        try {
+          doc
+            .font("Helvetica")
+            .fontSize(7)
+            .fillColor(PALETTE.FOOTER)
+            .text(
+              `BIMLog by IgniteSmart · ${labelFor(language, "Page", "Página")} ${index + 1} ${labelFor(language, "of", "de")} ${range.count} · ${labelFor(language, "Generated", "Generado")} ${formatPdfDate(generatedAt, language)}`,
+              M,
+              570,
+              { width: contentWidth, align: "center" },
+            );
+        } finally {
+          doc.page.margins.bottom = originalBottomMargin;
+        }
       }
       doc.end();
     } catch (err) {

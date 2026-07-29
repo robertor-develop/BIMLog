@@ -337,31 +337,37 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
                 "Exporta solo estas secciones visibles de Analítica. Los enlaces de informe siguen siendo informativos y no otorgan autoridad.",
               )}
             </span>
-            <div style={{ display: "grid", gap: 6, marginTop: 10 }}>
-              {exportSectionOptions.map((option) => (
-                <label key={option.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, minWidth: 0 }}>
-                  <input
-                    type="checkbox"
-                    checked={exportSections[option.key]}
-                    onChange={(event) => setExportSections((current) => ({ ...current, [option.key]: event.target.checked }))}
-                  />
-                  <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{option.label}</span>
-                </label>
-              ))}
-            </div>
             <PrintPdfButton
               lang={lang}
               className="mt-2.5 w-full"
               onClick={exportCurrentViewPdf}
               loading={exporting}
-              disabled={!selectedExportSections.length}
+              configurationInvalid={!selectedExportSections.length}
               disabledReason={tr("Select at least one visible section", "Selecciona al menos una sección visible")}
+              currentViewSummary={[
+                tr("Project Insights: current authorized metrics", "Perspectivas del proyecto: métricas autorizadas actuales"),
+                `${tr("Timezone", "Zona horaria")}: ${timezone}`,
+              ]}
+              options={(
+                <div style={{ display: "grid", gap: 8 }}>
+                  {exportSectionOptions.map((option) => (
+                    <label key={option.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, minWidth: 0 }}>
+                      <input
+                        type="checkbox"
+                        checked={exportSections[option.key]}
+                        onChange={(event) => setExportSections((current) => ({ ...current, [option.key]: event.target.checked }))}
+                      />
+                      <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{option.label}</span>
+                    </label>
+                  ))}
+                  {!selectedExportSections.length && (
+                    <div role="alert" className="section-sub" style={{ color: "#DC2626" }}>
+                      {tr("Select at least one section before printing.", "Selecciona al menos una sección antes de imprimir.")}
+                    </div>
+                  )}
+                </div>
+              )}
             />
-            {!selectedExportSections.length && (
-              <div role="alert" className="section-sub" style={{ color: "#DC2626", marginTop: 8 }}>
-                {tr("Select at least one visible section before exporting.", "Selecciona al menos una sección visible antes de exportar.")}
-              </div>
-            )}
             {exportError && <div role="alert" className="section-sub" style={{ color: "#DC2626", marginTop: 8 }}>{exportError}</div>}
           </div>
         </div>

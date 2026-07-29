@@ -4478,6 +4478,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5d3d657ea1b52c6de9c5d5cc9a43d8f9088a1b1d822e8b580d3aa3cd4958b1f0"
+    },
+    {
+      "taskId": "platform-print-pdf-successor-completion-20260728",
+      "reviewedThroughCommit": "23ccce09bbd63f375e22dc16ba7ba440707da86b",
+      "reviewedAt": "2026-07-28T21:56:00-04:00",
+      "status": "local_candidate_validation",
+      "captureTiming": "acceptance_boundary",
+      "summary": "Completes focused successor review by moving Project Insights PDF-only choices into the shared modal, preserving honest zero-result Submittal current-view PDFs, withholding Contracts controls when financial access is denied, and preventing footer-only trailing PDF pages.",
+      "workstreams": [
+        "platform-pdf-ux",
+        "submittal-current-view-report",
+        "local-release-validation"
+      ],
+      "evidence": [
+        {
+          "path": "local focused frontend and API typechecks",
+          "type": "source_validation",
+          "result": "pass",
+          "boundary": "Local synthetic-free source validation only; no provider, production, customer, publication, or deployment access."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership, product boundary, human-authority, or permanent product-law change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized focused workflow, local-only boundary, and independent-review requirement remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, UI, artifact, and deployment gates apply without changing their acceptance thresholds."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, market direction, future product claim, or strategic product relationship changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, tenancy model, provider, hosting, integration contract, or production environment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, packaging, installation, or field behavior change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction implements the already-governing modal-only PDF configuration and honest current-view output rules."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance claim, edition, or standards evidence change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the two local successor corrections and keeps build and independent acceptance states separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining local build, browser, PDF artifact, and independent-review gates without release expansion."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production observation, customer evidence, provider action, publication, deployment, or historical audit change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/pdf-kit.ts",
+        "artifacts/api-server/src/routes/activity.ts",
+        "artifacts/api-server/src/routes/coordinator-actions.ts",
+        "artifacts/api-server/src/routes/meeting_minutes.ts",
+        "artifacts/api-server/src/routes/schedule.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/project/ActivityTab.tsx",
+        "artifacts/bimlog/src/pages/project/AnalyticsTab.tsx",
+        "artifacts/bimlog/src/pages/project/ClashReportsTab.tsx",
+        "artifacts/bimlog/src/pages/project/ScheduleTab.tsx",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d49987e79d2a92d9774fd6492a328f35713f75a00d571767e8a750d553b4edd8"
     }
   ]
 }

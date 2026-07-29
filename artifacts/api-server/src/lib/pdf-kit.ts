@@ -346,8 +346,14 @@ export function drawFooter(doc: Doc, o: FooterOptions = {}): void {
     .map((p) => (p ? String(p).trim() : ""))
     .filter(Boolean);
   parts.push("BIMLog by IgniteSmart");
-  doc.fontSize(o.fontSize ?? 7).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
-    .text(parts.join(" | "), M, o.y ?? 560, { align: "center", width: CW, lineBreak: false });
+  const originalBottomMargin = doc.page.margins.bottom;
+  doc.page.margins.bottom = 0;
+  try {
+    doc.fontSize(o.fontSize ?? 7).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
+      .text(parts.join(" | "), M, o.y ?? 560, { align: "center", width: CW, lineBreak: false });
+  } finally {
+    doc.page.margins.bottom = originalBottomMargin;
+  }
 }
 
 // ── Page numbering + per-page chrome ──
