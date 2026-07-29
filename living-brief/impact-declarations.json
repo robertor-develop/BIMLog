@@ -4972,6 +4972,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "19f58c39205db1fc4db0009314db2dd6e69c19b75064203cf56dc7b6ccb6fff2"
+    },
+    {
+      "taskId": "project-insights-active-summary-wrap-20260729",
+      "reviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
+      "reviewedAt": "2026-07-29T18:25:00-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "acceptance_boundary",
+      "summary": "Corrects only the Project Insights active-filter-summary vertical advancement so wrapped rows use measured text height and cannot overlap the following summary row.",
+      "workstreams": [
+        "production-pdf-family",
+        "focused-local-release-validation"
+      ],
+      "evidence": [
+        {
+          "path": "tmp/pdf-family-addendum-evidence",
+          "type": "owner_validation",
+          "result": "passed",
+          "boundary": "Complete 19-PDF synthetic family regeneration and 45-page review, with focused Project Insights page-one proof; provider, production/customer data, database mutation, push, publication, and deploy remain excluded."
+        },
+        {
+          "path": "tmp/spreadsheet-reviewer-fix-v3",
+          "type": "regression_validation",
+          "result": "passed",
+          "boundary": "Both unchanged Lens workbooks and all 16 sheets regenerated and visually inspected from synthetic local fixtures."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, or permanent business doctrine change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing focused owner correction and exact evidence-binding requirements govern the work."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing complete-family regeneration, every-page inspection, workbook rendering, and focused build gates are applied."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, or strategic relationship change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, dependency, provider, hosting, tenancy, or production environment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, or field workflow change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves the committed chrome and typography while making wrapped summary-row spacing deterministic."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded local candidate and provider/deployment truth remain accurately separated."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product scope or deferred implementation obligation is introduced."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider inspection, production observation, customer data, publication, deployment, or destructive cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/project-analytics-current-view-export.ts",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f8593ca2ec1a3477227be5f80c69b7c676718d653f199435ec49f54a4ef3de24"
     }
   ]
 }

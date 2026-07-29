@@ -232,8 +232,10 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
     currentY + needed > 545 ? continuationHeader() : currentY;
   y = sectionBar(doc, t(lang, "Active filter summary", "Resumen de filtros activos"), y, { theme: REPORT_THEMES.platform.performance });
   for (const line of activeSummary(summary, sections, lang)) {
-    doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.TEXT).text(line, 48, y, { width: 500 });
-    y += 14;
+    doc.fontSize(9).font(PALETTE.FONT).fillColor(PALETTE.TEXT);
+    const lineHeight = Math.max(14, doc.heightOfString(line, { width: 500 }) + 2);
+    doc.text(line, 48, y, { width: 500 });
+    y += lineHeight;
   }
   y += 8;
 
