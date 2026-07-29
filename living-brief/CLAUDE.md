@@ -75,8 +75,18 @@ expectations, and claim restrictions. Do not duplicate or infer that metadata he
 - The master does not create, send to, archive, rename, or otherwise manage tasks unless Roberto
   explicitly requests that action. It independently reviews focused-task evidence, does not
   accept a builder's report as proof, and declares whether each acceptance gate passed or failed.
-- Every focused-task directive must name the real repository explicitly. The BIMLog platform
-  repository is `C:\Dev\bimlog`; never assume the task chat's mounted folder is the repository.
+- Every focused-task directive must name the real repository explicitly. The canonical BIMLog
+  Codex project repository is `F:\BIMLog\Repositories\bimlog`; new worktrees belong under
+  `F:\BIMLog\Worktrees`. `C:\Dev\bimlog` is preserved legacy dirty source only, and the
+  C: Documents project is a pointer/instruction workspace—not a product-work root.
+- Before a task starts, verify its saved Codex project root, current working directory, Git
+  top-level, Git metadata location, assigned worktree, writable build/temp/cache/evidence
+  paths, and one-approval budget. If the task root cannot write the assigned worktree, stop
+  before implementation. A message cannot re-root a task.
+- Never retry unchanged approval requests, create a temporary task to bypass a sandbox,
+  or create/fork/replace/reactivate/rename/archive a task without Roberto's explicit
+  authority. One denied, timed-out, or repeated request for the same action class activates
+  the circuit breaker.
 - The directive must require the task chat to verify `git status`, recent commits, and the
   complete current implementation before editing. It must list the exact files that must be
   read first, define files/modules that are out of scope, define required behavior and

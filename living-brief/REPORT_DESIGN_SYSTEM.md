@@ -2,6 +2,34 @@
 
 Audit date: 2026-07-10 (Phase 2)
 
+## Current platform-wide PDF UX authority - 2026-07-28
+
+This section supersedes conflicting interaction guidance below.
+
+- Each primary page exposes exactly one page-level action named `Print PDF` in
+  English and `Imprimir PDF` in Spanish.
+- Selecting that action opens the page's PDF configuration modal. PDF-specific
+  columns, sections, report scope, and related choices belong inside that
+  modal—not permanently inline on the page.
+- The generated PDF must use the current visible page state: active search,
+  filters, date ranges, tabs, view mode, sort order, authorized columns, and
+  honest zero-result state. It must never silently fall back to unfiltered
+  records.
+- CSV and Excel are separate data exports and retain explicit `Export CSV` or
+  `Export Excel` labels. Terms such as `Visible`, `Current View`, and
+  `Customize PDF` are not separate competing page actions.
+- Official record artifacts remain distinct and explicitly named, including
+  RFI PDF/DOCX/audit packages, Submittal record artifacts, Transmittal PDFs,
+  meeting-minutes artifacts, and other governed record outputs.
+- Browser/current-view printing must not be represented as an official record
+  package, and official record artifacts must not replace page-level current
+  view printing.
+- The 19-path successor preserved at
+  `0fd469acbbafa7af323629dc0cbad1126b5aaeb4` is local and unvalidated.
+  Platform-wide consistency across all required pages, exact-390px behavior,
+  modal behavior, filter parity, professional rendered output, and deployment
+  remains pending.
+
 ## Governance and ownership
 
 [ECOSYSTEM_DOCTRINE.md](./ECOSYSTEM_DOCTRINE.md) is the permanent product-doctrine authority

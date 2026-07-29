@@ -1,5 +1,28 @@
 # STATUS.md - Current Accepted Platform State
 
+## Current recovery truth - 2026-07-28
+
+This section supersedes any conflicting current-state wording below. Older
+entries remain historical records and must not be interpreted as the current
+accepted, deployed, or live state.
+
+- Canonical local recovery repository: `F:\BIMLog\Repositories\bimlog`.
+- Recovery branch: `recovery/platform-print-pdf-successor-20260728`.
+- Accepted platform-PDF base: `c3430f4ac121cbbb00445a0ff72d87d423bf6c10`.
+- Preserved successor: `0fd469acbbafa7af323629dc0cbad1126b5aaeb4`.
+- The successor contains exactly 19 PDF/report UX paths. It is a local,
+  unvalidated recovery candidate. It is not independently accepted, pushed,
+  deployed, production verified, customer verified, or live accepted.
+- Current GitHub, Replit, and production equality are not established by this
+  recovery. The last known deployment evidence does not prove the current
+  PDF/report UX.
+- Thirteen dirty and five unreadable historical worktrees remain
+  `UNKNOWN-PRESERVE`. None is authorized for cleanup, deletion, reset, or
+  reuse until separately classified.
+- Normal BIMLog development remains paused until the F: repository is
+  registered as the saved Codex project root and Roberto explicitly chooses
+  which existing task to resume.
+
 Status: Active current-state record
 Accepted source reconciled through: `6f96a3f2385a08c3e364099178617d4ec16dfcf5`
 Reconciliation date: 2026-07-23

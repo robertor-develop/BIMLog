@@ -4308,6 +4308,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1c30c1ae82bcbdde3a8c5a2027befa4c5d114e9b0c984ff2ed6653e29854dcf9"
+    },
+    {
+      "taskId": "bimlog-workspace-root-and-current-truth-recovery-20260728",
+      "reviewedThroughCommit": "0fd469acbbafa7af323629dc0cbad1126b5aaeb4",
+      "reviewedAt": "2026-07-28T20:29:34-04:00",
+      "status": "recovery_truth_reconciled_pending_product_validation",
+      "captureTiming": "serialized_recovery_after_exact_candidate_preservation",
+      "summary": "Separates the preserved 19-path PDF/report UX candidate from accepted, pushed, deployed, and live truth; records the canonical F-drive repository and the mandatory workspace-root and approval-loop controls.",
+      "workstreams": [
+        "workspace-root-recovery",
+        "approval-loop-prevention",
+        "platform-pdf-current-state",
+        "living-brief-truth-reconciliation"
+      ],
+      "evidence": [
+        {
+          "path": "F:\\BIMLog\\Backups\\platform-pdf-successor-root-recovery-20260728\\tracked-changes.patch",
+          "type": "preserved_tracked_successor_patch",
+          "result": "pass",
+          "boundary": "Local preservation only; no acceptance, push, provider, deployment, production, or customer claim."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The recovery changes execution hygiene and status truth without changing ecosystem ownership, customers, providers, or product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the canonical F-drive task root, explicit task authority, one-approval budget, and prohibition on sandbox-bypass task proliferation."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Clarifies that preserved source is not accepted and that platform PDF consistency requires focused, rendered, responsive, and filter-parity acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap category, commercial commitment, module ownership, or customer-facing product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reconciliation records current source state but adds no runtime route, schema, dependency, infrastructure, or provider behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or other plugin source, installer, model identity, synchronization, or field workflow behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Establishes one page-level Print PDF action, modal-based PDF configuration, current-visible-state parity, and separation from official record artifacts."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory interpretation, compliance citation, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Separates the accepted c3430f4 base from the preserved unvalidated 0fd469a successor and explicitly denies deployment or live-acceptance claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records project registration, task-stop, candidate-validation, worktree-preservation, approval-budget, and later reconciliation dependencies."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit certificate, provider observation, production access, customer evidence, publication, deployment, or cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6f6f3dd7834c348bd5ec7b2e06ec2e97fc426265856ce9e6af98c7e6428fb1b0"
     }
   ]
 }

@@ -2,6 +2,27 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Recovery control loop - 2026-07-28
+
+1. Register `F:\BIMLog\Repositories\bimlog` as the saved Codex BIMLog project.
+   The C: Documents project is a pointer only and must never own product work.
+2. Keep every task stopped until Roberto explicitly names the existing task to
+   resume. Do not create, fork, replace, reactivate, rename, or archive tasks
+   automatically.
+3. Treat `0fd469acbbafa7af323629dc0cbad1126b5aaeb4` as a preserved,
+   unvalidated 19-path PDF/report UX candidate. Its next permitted sequence is
+   focused checks, build, independent UI/PDF acceptance, source freeze, then a
+   separate release decision.
+4. Preserve all 13 dirty and five unreadable historical worktrees as
+   `UNKNOWN-PRESERVE`. No cleanup is authorized merely because a candidate
+   looks old or duplicated.
+5. Keep accepted source, local candidates, pushed source, deployed source, and
+   live-accepted behavior as separate facts in every status report.
+6. Enforce one approval budget per task. A repeated or timed-out request for
+   the same action stops the task; it must never become an approval loop.
+7. Reconcile the remaining historical worktree ledger only after the current
+   PDF candidate reaches a terminal accepted, rejected, or preserved state.
+
 ## Current terminal truth - 2026-07-23
 
 ### Ruben T1 current-view export and sidebar release validation
