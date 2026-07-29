@@ -226,7 +226,7 @@ export async function buildProjectAnalyticsCurrentViewPdf(input: {
   }
 
   const generatedAt = new Date();
-  const reportTitle = t(lang, "Project Insights Current View", "Vista actual de Perspectivas del Proyecto");
+  const reportTitle = t(lang, "Project Insights — Current View", "Perspectivas del Proyecto — Vista actual");
   const reportNumber = `PI-${clean(project.code || project.id)}-${generatedAt.toISOString().replace(/[-:TZ.]/g, "").slice(0, 14)}`;
   const fileName = reportFileName(reportTitle);
   const snapshot = {

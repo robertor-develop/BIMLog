@@ -68,6 +68,15 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    Keep the work local for a clean candidate commit, coordinator callback,
    and the existing independent-review dependency; do not treat the browser
    gate as passed.
+10. The bounded follow-up to local candidate `4f69ba8c` removes the misplaced
+    Integrations `Validate and Download` Files shortcut, aligns governed
+    visible current-view titles to `{Module} — Current View`, and corrects RFI
+    record headers from product-only identity to the audited project company.
+    The affected Integrations desktop/exact-390px EN/ES browser checks,
+    current-view title checks, and record-level RFI/Submittal rendered-page
+    inspection passed with synthetic local fixtures. Preserve the accepted
+    family evidence these changes did not invalidate and keep provider,
+    production, push, publication, and deployment outside this local seal.
 
 ## Current terminal truth - 2026-07-23
 

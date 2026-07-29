@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { rfisTable, usersTable, companiesTable, activityLogTable, projectsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable, rfiReportSettingsTable } from "@workspace/db/schema";
+import { rfisTable, usersTable, companiesTable, activityLogTable, projectsTable, projectCompanyBindingVersionsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable, rfiReportSettingsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
 import { eq, and, count, max, isNull, or, ne, asc, desc, sql, inArray } from "drizzle-orm";
@@ -553,11 +553,29 @@ async function buildSavedRfiExportModel(params: {
     caption: item.caption || item.file.fileName,
     description: item.description || undefined,
   }));
+  const [boundProjectCompany] = await db.select({ name: companiesTable.name })
+    .from(projectCompanyBindingVersionsTable)
+    .innerJoin(companiesTable, eq(companiesTable.id, projectCompanyBindingVersionsTable.companyId))
+    .where(eq(projectCompanyBindingVersionsTable.projectId, rfi.projectId))
+    .orderBy(desc(projectCompanyBindingVersionsTable.version))
+    .limit(1);
+  const [creatorCompany] = project?.createdById
+    ? await db.select({ name: companiesTable.name })
+      .from(usersTable)
+      .innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+      .where(eq(usersTable.id, project.createdById))
+      .limit(1)
+    : [];
   return {
     model: buildCanonicalRfiExportModel({
       rfi,
       responses,
-      project: { name: project?.name, code: project?.code, location: project?.location },
+      project: {
+        companyName: boundProjectCompany?.name || creatorCompany?.name || "BIMLog",
+        name: project?.name,
+        code: project?.code,
+        location: project?.location,
+      },
       manualReferences,
       attachments,
       responseAttachments,

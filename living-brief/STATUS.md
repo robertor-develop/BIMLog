@@ -51,6 +51,17 @@ accepted, deployed, or live state.
   fails during initialization with `Cannot redefine property: process`.
   Independent review therefore remains an acceptance gate; this working tree
   is not deployed or live accepted.
+- The bounded successor on sealed local candidate `4f69ba8c` removes the
+  misplaced `Validate and Download` Files shortcut from Integrations, enforces
+  the committed `{Module} — Current View` visible-title separator, and binds
+  RFI record artifacts to the audited project-company identity while retaining
+  `BIMLog by IgniteSmart` as secondary attribution. No permission, tenancy,
+  financial authority, provider, schema, or record data behavior changes.
+  Focused desktop/exact-390px EN/ES browser acceptance and rendered-page
+  inspection passed with synthetic local fixtures, including corrected
+  record-level Submittal wrapping and RFI project-company identity. The local
+  successor is ready to seal; provider, production, push, publication, and
+  deployment remain excluded.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.

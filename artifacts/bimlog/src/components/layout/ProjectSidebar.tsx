@@ -168,7 +168,6 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEs: "Integraciones aprobadas y BIMLog Sync Agent.",
       items: byId(["integrations"]),
       actions: [
-        { id: "validate-download", labelEn: "Validate and Download", labelEs: "Validar y Descargar", onClick: () => navigate(`/projects/${projectId}/files`) },
         { id: "sync-agent", labelEn: "BIMLog Sync Agent", labelEs: "BIMLog Sync Agent", onClick: () => setShowSyncAgent(true) },
       ],
     },

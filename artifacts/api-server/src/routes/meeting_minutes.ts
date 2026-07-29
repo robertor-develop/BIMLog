@@ -1515,8 +1515,8 @@ router.get(
       const title = labelFor(
         language,
         view === "actions"
-          ? "Meetings Action Items - Current View"
-          : "Meeting Minutes Register - Current View",
+          ? "Meetings Action Items — Current View"
+          : "Meeting Minutes Register — Current View",
         view === "actions"
           ? "Acciones de Actas - Vista actual"
           : "Registro de Actas - Vista actual",

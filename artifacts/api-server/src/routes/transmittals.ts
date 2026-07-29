@@ -82,7 +82,7 @@ function renderTransmittalsCurrentViewPdf(args: {
   generatedBy: string;
   filters: TransmittalRegisterFilters;
 }) {
-  const title = "Transmittals - Current View";
+  const title = "Transmittals — Current View";
   const filename = reportFileName(title);
   const contentHash = computeContentHash({
     title,

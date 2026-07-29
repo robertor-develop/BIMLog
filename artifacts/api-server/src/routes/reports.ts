@@ -57,10 +57,10 @@ async function verifyReportToken(req: any, res: any): Promise<number | null> {
 const router: Router = Router();
 
 const currentViewTitles = {
-  "reports-hub": { en: "Reports Hub - Current View", es: "Centro de reportes - Vista actual" },
-  integrations: { en: "Integrations - Current View", es: "Integraciones - Vista actual" },
-  "clash-reports": { en: "Clash Reports - Current View", es: "Reportes de choques - Vista actual" },
-  "submittal-register": { en: "Required Submittal Register - Current View", es: "Registro de entregables requeridos - Vista actual" },
+  "reports-hub": { en: "Reports Hub — Current View", es: "Centro de reportes — Vista actual" },
+  integrations: { en: "Integrations — Current View", es: "Integraciones — Vista actual" },
+  "clash-reports": { en: "Clash Reports — Current View", es: "Reportes de choques — Vista actual" },
+  "submittal-register": { en: "Required Submittal Register — Current View", es: "Registro de entregables requeridos — Vista actual" },
 } as const;
 
 function pdfHeader(

@@ -574,7 +574,7 @@ function renderDashboardPdf(args: {
 function renderPendingPdf(args: { lang: Lang; generatedAt: Date; generatedBy: string; companyName: string; type: PendingType; rows: any[] }) {
   const { lang, generatedAt, generatedBy, companyName, type, rows } = args;
   const typeLabel = { rfis: label(lang, "Open RFIs", "RFI abiertos"), submittals: label(lang, "Pending Submittals", "Submittals pendientes"), files: label(lang, "Files Needing Attention", "Archivos que requieren atencion") }[type];
-  const reportTitle = `${typeLabel} - ${label(lang, "Current View", "Vista actual")}`;
+  const reportTitle = `${typeLabel} — ${label(lang, "Current View", "Vista actual")}`;
   const contentHash = computeContentHash({ report: "pending-current-view", type, lang, generatedBy, rows });
   const reportNumber = `PEND-${type.toUpperCase()}-${contentHash.slice(0, 10).toUpperCase()}`;
   const normalizedRows = rows.map((row: any) => ({

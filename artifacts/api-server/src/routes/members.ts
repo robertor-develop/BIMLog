@@ -135,7 +135,7 @@ router.get("/projects/:projectId/members/current-view/pdf", authMiddleware, requ
     const filteredCompanyCount = new Set(filtered.map(row => row.company)).size;
     const adminCount = rows.filter(row => row.role === "project_admin").length;
     const filteredAdminCount = filtered.filter(row => row.role === "project_admin").length;
-    const title = label("Project Team - Current View", "Equipo del Proyecto - Vista actual");
+    const title = label("Project Team — Current View", "Equipo del Proyecto — Vista actual");
     const generatedAt = new Date();
     const sortLabel = sort === "name_asc" ? label("Name A-Z", "Nombre A-Z")
       : sort === "name_desc" ? label("Name Z-A", "Nombre Z-A")

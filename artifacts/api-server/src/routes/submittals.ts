@@ -564,7 +564,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet([
       ["BIMLog by IgniteSmart", projectLabel],
-      ["Submittals - Current View", `Generated ${new Date().toLocaleString("en-US")}`],
+      ["Submittals — Current View", `Generated ${new Date().toLocaleString("en-US")}`],
       ["Filters", filterSummary],
       [],
     ]);
@@ -619,7 +619,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     doc.on("end", () => {
       const buf = Buffer.concat(chunks);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Submittals - Current View")}"`);
+      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName("Submittals — Current View")}"`);
       res.setHeader("Content-Length", buf.length);
       res.send(buf);
     });
@@ -1434,18 +1434,25 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     };
 
     const row2 = (l1: string, v1: string, l2?: string, v2?: string) => {
-      if (y > CONTENT_BOT - 14) { doc.addPage(); doc.page.margins.bottom = 0; y = MARGIN; }
       const lw = 100; const half = CONTENT_W / 2 - 2;
-      doc.rect(MARGIN, y, lw, 14).fill("#F8FAFC");
+      const valueWidth = half - lw - 6;
+      doc.fontSize(7.5).font("Helvetica");
+      const rowHeight = Math.max(
+        14,
+        doc.heightOfString(v1 || "—", { width: valueWidth }) + 8,
+        l2 !== undefined ? doc.heightOfString(v2 || "—", { width: valueWidth }) + 8 : 0,
+      );
+      if (y + rowHeight > CONTENT_BOT) { doc.addPage(); doc.page.margins.bottom = 0; y = MARGIN; }
+      doc.rect(MARGIN, y, lw, rowHeight).fill("#F8FAFC");
       doc.fillColor("#64748B").fontSize(6.5).font("Helvetica-Bold").text(l1, MARGIN + 3, y + 4, { width: lw - 4, lineBreak: false });
-      doc.fillColor("#1E293B").fontSize(7.5).font("Helvetica").text(v1 || "—", MARGIN + lw + 3, y + 4, { width: half - lw - 6, lineBreak: false, ellipsis: true });
+      doc.fillColor("#1E293B").fontSize(7.5).font("Helvetica").text(v1 || "—", MARGIN + lw + 3, y + 4, { width: valueWidth, height: rowHeight - 8, ellipsis: true });
       if (l2 !== undefined) {
         const col2x = MARGIN + half + 4;
-        doc.rect(col2x, y, lw, 14).fill("#F8FAFC");
+        doc.rect(col2x, y, lw, rowHeight).fill("#F8FAFC");
         doc.fillColor("#64748B").fontSize(6.5).font("Helvetica-Bold").text(l2, col2x + 3, y + 4, { width: lw - 4, lineBreak: false });
-        doc.fillColor("#1E293B").fontSize(7.5).font("Helvetica").text(v2 || "—", col2x + lw + 3, y + 4, { width: half - lw - 6, lineBreak: false, ellipsis: true });
+        doc.fillColor("#1E293B").fontSize(7.5).font("Helvetica").text(v2 || "—", col2x + lw + 3, y + 4, { width: valueWidth, height: rowHeight - 8, ellipsis: true });
       }
-      y += 14;
+      y += rowHeight;
     };
 
     const textBlock = (label: string, value: string) => {

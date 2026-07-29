@@ -87,7 +87,7 @@ function cleanPdfText(value: string | null | undefined) {
 function directoryLabels(lang: DirectoryLang) {
   const es = lang === "es";
   return {
-    reportTitle: es ? "Vista actual del Directorio del Proyecto" : "Project Directory Current View",
+    reportTitle: es ? "Directorio del Proyecto — Vista actual" : "Project Directory — Current View",
     reportSubtitle: es ? "Exportación filtrada del directorio del proyecto" : "Filtered project directory export",
     preparedBy: es ? "Preparado por" : "Prepared by",
     generated: es ? "Generado" : "Generated",

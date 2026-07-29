@@ -106,7 +106,7 @@ export type RfiResponseExportSource = {
 
 export type CanonicalRfiExportModel = {
   generatedAt: string;
-  project: { name: string; code: string; address: string };
+  project: { companyName: string; name: string; code: string; address: string };
   header: {
     number: string;
     subject: string;
@@ -457,7 +457,7 @@ function parseDistribution(entry: string, directory: Map<string, DirectoryRecipi
 export function buildCanonicalRfiExportModel(input: {
   rfi: RfiExportSource;
   responses: RfiResponseExportSource[];
-  project: { name?: string | null; code?: string | null; location?: string | null };
+  project: { companyName?: string | null; name?: string | null; code?: string | null; location?: string | null };
   manualReferences: string[];
   attachments: string[];
   responseAttachments: Map<number, string[]>;
@@ -505,7 +505,7 @@ export function buildCanonicalRfiExportModel(input: {
 
   return {
     generatedAt: generatedAt.toISOString(),
-    project: { name: cleanText(input.project.name), code: cleanText(input.project.code), address: projectAddress },
+    project: { companyName: cleanText(input.project.companyName, "BIMLog"), name: cleanText(input.project.name), code: cleanText(input.project.code), address: projectAddress },
     header: {
       number: cleanText(rfi.number), subject: cleanText(rfi.subject), type: cleanText(rfi.rfiType), priority: humanize(rfi.priority),
       revision: (rfi.revisionNumber || 0) > 0 ? `Revision ${rfi.revisionNumber}` : "Original issue",
@@ -572,7 +572,7 @@ function wrappedLines(doc: PDFKit.PDFDocument, text: string, width: number): str
 class PdfFlow {
   y = 0;
   private first = true;
-  constructor(private readonly doc: PDFKit.PDFDocument, private readonly title: string, private readonly project: string, private readonly number: string) {
+  constructor(private readonly doc: PDFKit.PDFDocument, private readonly title: string, private readonly companyName: string, private readonly project: string, private readonly number: string) {
     this.startPage();
   }
 
@@ -581,9 +581,9 @@ class PdfFlow {
     this.first = false;
     this.doc.page.margins.bottom = 0;
     this.doc.rect(0, 0, this.doc.page.width, 54).fill(REPORT_THEMES.rfi.detail.dark);
-    this.doc.fillColor("white").font(PALETTE.FONT_BOLD).fontSize(15).text("BIMLog", PDF_MARGIN, 14, { lineBreak: false });
+    this.doc.fillColor("white").font(PALETTE.FONT_BOLD).fontSize(15).text(this.companyName, PDF_MARGIN, 14, { width: PDF_CONTENT_WIDTH * 0.46, lineBreak: false, ellipsis: true });
     this.doc.fontSize(10).text(this.title, PDF_MARGIN, 15, { width: PDF_CONTENT_WIDTH, align: "right", lineBreak: false });
-    this.doc.fillColor("#DCE7F3").font(PALETTE.FONT).fontSize(8).text(`${this.project} | ${this.number}`, PDF_MARGIN, 36, { width: PDF_CONTENT_WIDTH, lineBreak: false });
+    this.doc.fillColor("#DCE7F3").font(PALETTE.FONT).fontSize(8).text(`RFIs | ${this.project} | ${this.number} | BIMLog by IgniteSmart`, PDF_MARGIN, 36, { width: PDF_CONTENT_WIDTH, lineBreak: false, ellipsis: true });
     this.y = 68;
   }
 
@@ -762,7 +762,7 @@ export function renderCanonicalRfiPdf(doc: PDFKit.PDFDocument, model: CanonicalR
   doc.info.Author = "BIMLog by IgniteSmart";
   doc.info.Subject = model.header.subject;
   doc.info.Keywords = "BIMLog, RFI, Request for Information, construction record";
-  const flow = new PdfFlow(doc, "REQUEST FOR INFORMATION", model.project.name, model.header.number);
+  const flow = new PdfFlow(doc, "REQUEST FOR INFORMATION", model.project.companyName, model.project.name, model.header.number);
   visibleSections(settings).forEach((section, index) => {
     flow.section(sectionNumber(index), section.inventory.label);
     if (section.id === "header") flow.keyValues(configuredPairs(settings, section, [
@@ -819,7 +819,7 @@ export function renderCanonicalRfiPdf(doc: PDFKit.PDFDocument, model: CanonicalR
   });
   addPageNumbers(doc, {
     margin: PDF_MARGIN, footerY: 768, fingerprintY: 750, contentHash: computeContentHash({ model, reportSettings: snapshot, reportImages: [image, ...additionalImages].filter(Boolean).map(item => ({ id: item?.id, fileName: item?.fileName, kind: item?.kind, caption: item?.caption, crop: item?.crop })) }),
-    companyName: "BIMLog", projectName: model.project.name, reportNumber: model.header.number, timestamp: reportTimestamp(model),
+    companyName: model.project.companyName, projectName: model.project.name, reportNumber: model.header.number, timestamp: reportTimestamp(model),
     watermarkText: model.header.lifecycleState === "Draft" ? "DRAFT" : undefined,
   });
 }
@@ -919,7 +919,7 @@ export function buildCanonicalRfiDocx(model: CanonicalRfiExportModel, image: Rfi
   const snapshot = settingsSnapshot || makeRfiReportSettingsSnapshot(null);
   const settings = snapshot.settings;
   const children: Array<Paragraph | Table> = [
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: "BIMLog", bold: true, color: "173F6B", size: 28, font: "Arial" })] }),
+    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: model.project.companyName, bold: true, color: "173F6B", size: 28, font: "Arial" })] }),
     new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: "REQUEST FOR INFORMATION", bold: true, color: "173F6B", size: 34, font: "Arial" })] }),
     new Paragraph({ spacing: { after: 180 }, children: [new TextRun({ text: `${model.header.number} | ${model.header.subject}`, bold: true, color: "2563A6", size: 24, font: "Arial" })] }),
   ];
@@ -986,7 +986,7 @@ export function buildCanonicalRfiDocx(model: CanonicalRfiExportModel, image: Rfi
     },
     sections: [{
       properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 900, right: 1440, bottom: 900, left: 1440, header: 450, footer: 450 } } },
-      headers: { default: new Header({ children: [new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "2563A6" } }, children: [new TextRun({ text: `BIMLog | ${model.project.name} | ${model.header.number}`, bold: true, color: "173F6B", size: 16, font: "Arial" })] })] }) },
+      headers: { default: new Header({ children: [new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "2563A6" } }, children: [new TextRun({ text: `${model.project.companyName} | RFIs | ${model.project.name} | ${model.header.number}`, bold: true, color: "173F6B", size: 16, font: "Arial" })] })] }) },
       footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${reportTimestamp(model)} | Page `, color: "6B7280", size: 15, font: "Arial" }), new TextRun({ children: [PageNumber.CURRENT], color: "6B7280", size: 15, font: "Arial" }), new TextRun({ text: " of ", color: "6B7280", size: 15, font: "Arial" }), new TextRun({ children: [PageNumber.TOTAL_PAGES], color: "6B7280", size: 15, font: "Arial" }), new TextRun({ text: " | BIMLog by IgniteSmart", color: "6B7280", size: 15, font: "Arial" })] })] }) },
       children,
     }],
@@ -1078,7 +1078,7 @@ export function renderRfiAuditPdf(doc: PDFKit.PDFDocument, model: CanonicalRfiEx
   doc.info.Title = `${model.header.number} - RFI Audit Report`;
   doc.info.Author = "BIMLog by IgniteSmart";
   doc.info.Subject = `Lifecycle and custody evidence for ${model.header.number}`;
-  const flow = new PdfFlow(doc, "RFI AUDIT REPORT", model.project.name, model.header.number);
+  const flow = new PdfFlow(doc, "RFI AUDIT REPORT", model.project.companyName, model.project.name, model.header.number);
   flow.section("A", "Record Identity and Generation");
   flow.keyValues([
     ["Project", model.project.name], ["Project Code", model.project.code], ["RFI Number", model.header.number], ["Subject", model.header.subject],
@@ -1106,6 +1106,6 @@ export function renderRfiAuditPdf(doc: PDFKit.PDFDocument, model: CanonicalRfiEx
   else flow.table(["Timestamp", "User", "Company"], [180, 170, 170], audit.views.map(view => [view.timestamp, view.actor, view.company]));
   addPageNumbers(doc, {
     margin: PDF_MARGIN, footerY: 768, fingerprintY: 750, contentHash: computeContentHash({ model, audit }),
-    companyName: "BIMLog", projectName: model.project.name, reportNumber: `${model.header.number} Audit`, timestamp: reportTimestamp(model),
+    companyName: model.project.companyName, projectName: model.project.name, reportNumber: `${model.header.number} Audit`, timestamp: reportTimestamp(model),
   });
 }
