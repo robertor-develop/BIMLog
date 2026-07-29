@@ -155,7 +155,7 @@ export function ActivityTab({ projectId }: { projectId: number }) {
                 }}
               >
                 <Download style={{ width: 12, height: 12 }} />
-                {tt("Export filtered CSV", "Exportar CSV filtrado")}
+                {tt("Export CSV", "Exportar CSV")}
               </button>
             </>
           )}

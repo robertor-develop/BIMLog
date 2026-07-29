@@ -945,8 +945,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-        <div>
+      <div className="lens-current-view-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
+        <div style={{ minWidth: 0, flex: "1 1 320px" }}>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Lens Viewpoints", "Vistas Lens")}</h2>
           <p style={{ margin: "4px 0 0", color: "#6B7280", fontSize: 13 }}>
             {t("Last synced", "Ultima sincronizacion")}: {fmtCaptured(lastSynced)}
@@ -961,16 +961,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
               : pluginConnected
                 ? t("Plugin connected", "Plugin conectado")
                 : t("Plugin not connected", "Plugin no conectado")}
+          </div>
         </div>
-        <PrintPdfButton lang={lang} onClick={openReportModal} disabled={loading} className="shrink-0" />
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "-4px 0 14px" }}>
-        {lensCurrentViewSummary.map(part => (
-          <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
-            {part}
-          </span>
-        ))}
-      </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flex: "0 1 auto" }}>
+          <PrintPdfButton lang={lang} onClick={openReportModal} disabled={loading} className="lens-current-view-print shrink-0" currentViewSummary={lensCurrentViewSummary} />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-sm btn-outline" onClick={exportExcel}
             title={t("Download the current Lens table as an Excel register", "Descargar la tabla Lens actual como registro Excel")}
@@ -1003,6 +997,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           <input type="checkbox" checked={showGuidance} onChange={e => setShowGuidance(e.target.checked)} />
           {t("Guidance", "Guia")}: {showGuidance ? t("On", "Activa") : t("Off", "Inactiva")}
         </label>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "-4px 0 14px" }}>
+        {lensCurrentViewSummary.map(part => (
+          <span key={part} style={{ display: "inline-flex", border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", borderRadius: 6, padding: "4px 7px", fontSize: 11, fontWeight: 800 }}>
+            {part}
+          </span>
+        ))}
       </div>
 
 

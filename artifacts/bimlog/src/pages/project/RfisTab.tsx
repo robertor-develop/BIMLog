@@ -1471,7 +1471,17 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         {overdueCount > 0 && <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#BE123C" }}>{overdueCount} {w("overdue", "vencido(s)", lang)}</span>}
       </div>
 
-      <div style={{ display: "grid", gap: 10, marginBottom: 12, padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--card))" }}>
+      <section
+        data-current-view-filter-panel="rfis"
+        aria-label={w("Current view filters", "Filtros de vista actual", lang)}
+        style={{ display: "grid", gap: 10, marginBottom: 12, padding: "12px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--card))" }}
+      >
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 800 }}>{w("Current view filters", "Filtros de vista actual", lang)}</div>
+          <div style={{ marginTop: 2, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+            {w("Search, status, type, responsibility, destination, date range and sort remain visible and define Print PDF.", "Busqueda, estado, tipo, responsable, destino, rango de fechas y orden permanecen visibles y definen Imprimir PDF.", lang)}
+          </div>
+        </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8, alignItems: "end" }}>
           <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
             {w("Search", "Busqueda", lang)}
@@ -1548,7 +1558,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             <span key={part} style={{ display: "inline-flex", padding: "4px 7px", borderRadius: 6, border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", fontSize: 11, fontWeight: 800 }}>{part}</span>
           ))}
         </div>
-      </div>
+      </section>
 
       {isLoading && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>

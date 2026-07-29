@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
-import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, FileText, ThumbsUp, ThumbsDown, ChevronDown, ChevronRight, Activity, Award, BarChart2, RefreshCw, Send, Search, ClipboardList, AlertTriangle, GitBranch, Layers, Plus, Minus, History, X } from "lucide-react";
 import { format } from "date-fns";
 import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
 
@@ -468,6 +468,7 @@ const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: str
   { key: "transmittal-log",   labelEn: "Transmittal Log",      labelEs: "Log de Transmisiones",       scopeEn: "Transmittal register",               scopeEs: "Registro de transmisiones",                icon: <Send size={20} /> },
   { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
+type ReportLauncherOptions = { from: string; to: string; status: string; includeDetails: boolean };
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -479,6 +480,29 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [approvalLoading, setApprovalLoading] = useState<number | null>(null);
   const [approvalReason, setApprovalReason] = useState<Record<number, string>>({});
+  const [selectedReport, setSelectedReport] = useState<(typeof PDF_REPORTS)[number] | null>(null);
+  const [reportOptions, setReportOptions] = useState<ReportLauncherOptions>({ from: "", to: "", status: "all", includeDetails: true });
+
+  const openReportLauncher = (reportDefinition: (typeof PDF_REPORTS)[number]) => {
+    setReportOptions({
+      from: reportDefinition.key === "cvr" ? from : "",
+      to: reportDefinition.key === "cvr" ? to : "",
+      status: "all",
+      includeDetails: true,
+    });
+    setSelectedReport(reportDefinition);
+  };
+
+  const launchSelectedReport = () => {
+    if (!selectedReport) return;
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    const params = new URLSearchParams({ token, include_details: String(reportOptions.includeDetails) });
+    if (reportOptions.from) params.set("from", reportOptions.from);
+    if (reportOptions.to) params.set("to", reportOptions.to);
+    if (reportOptions.status !== "all") params.set("status", reportOptions.status);
+    window.open(`/api/v1/projects/${projectId}/reports/${selectedReport.key}/pdf?${params.toString()}`, "_blank");
+    setSelectedReport(null);
+  };
 
   const fetchReport = async () => {
     setLoading(true);
@@ -553,7 +577,14 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <PrintPdfButton lang={lang} onClick={() => printCurrentView("reports-hub-current-view")} />
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => printCurrentView("reports-hub-current-view")}
+            currentViewSummary={[
+              from || to ? `${tl("CVR dates", "Fechas CVR")}: ${from || ".."} - ${to || ".."}` : tl("CVR dates: All", "Fechas CVR: Todas"),
+              report ? `${tl("Visible CVR issues", "Incidencias CVR visibles")}: ${report.issues.length}` : tl("CVR data pending", "Datos CVR pendientes"),
+            ]}
+          />
           <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
         </div>
       </div>
@@ -618,7 +649,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
             <button
               key={r.key}
               title={tl(`Download ${r.labelEn} PDF - ${r.scopeEn}`, `Descargar PDF: ${r.labelEs} - ${r.scopeEs}`)}
-              onClick={() => window.open(`/api/v1/projects/${projectId}/reports/${r.key}/pdf?token=${token}`, "_blank")}
+              onClick={() => openReportLauncher(r)}
               style={{
                 display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
                 border: "1px solid hsl(var(--border))", borderRadius: 9,
@@ -637,6 +668,24 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
             </button>
           ))}
         </div>
+        {selectedReport && (
+          <div role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedReport(null); }} style={{ position: "fixed", inset: 0, zIndex: 1500, display: "grid", placeItems: "center", padding: 16, background: "rgba(15,23,42,.58)" }}>
+            <section role="dialog" aria-modal="true" aria-labelledby="report-launcher-title" style={{ width: "min(560px, 100%)", borderRadius: 14, border: "1px solid #CBD5E1", background: "white", color: "#17212B", boxShadow: "0 24px 80px rgba(15,23,42,.28)" }}>
+              <header style={{ display: "flex", justifyContent: "space-between", gap: 14, padding: "18px 20px", borderBottom: "1px solid #E2E8F0" }}>
+                <div><h2 id="report-launcher-title" style={{ margin: 0, fontSize: 19 }}>{tl(selectedReport.labelEn, selectedReport.labelEs)}</h2><p style={{ margin: "5px 0 0", color: "#64748B", fontSize: 12 }}>{tl(selectedReport.scopeEn, selectedReport.scopeEs)}</p></div>
+                <button type="button" onClick={() => setSelectedReport(null)} aria-label={tl("Close", "Cerrar")} style={{ border: 0, background: "transparent", cursor: "pointer" }}><X size={18} /></button>
+              </header>
+              <div style={{ padding: 20, display: "grid", gap: 13 }}>
+                <p style={{ margin: 0, padding: 11, borderRadius: 8, background: "#EFF6FF", color: "#1E3A5F", fontSize: 12 }}>{tl("Configure this report only. The Reports Hub current-view PDF remains a separate page-level action.", "Configura solo este reporte. El PDF de vista actual del Centro de reportes permanece como una accion separada.")}</p>
+                {["rfi-aging", "submittal-status", "change-order-log", "transmittal-log"].includes(selectedReport.key) && <label style={{ display: "grid", gap: 5, fontSize: 12 }}>{tl("Record status", "Estado del registro")}<select value={reportOptions.status} onChange={(event) => setReportOptions(current => ({ ...current, status: event.target.value }))}><option value="all">{tl("All statuses", "Todos los estados")}</option><option value="open">{tl("Open", "Abierto")}</option><option value="closed">{tl("Closed / complete", "Cerrado / completo")}</option><option value="overdue">{tl("Overdue", "Vencido")}</option></select></label>}
+                {["project-health", "performance", "audit-certificate", "meeting-minutes", "change-order-log", "transmittal-log", "cvr"].includes(selectedReport.key) && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}><label style={{ display: "grid", gap: 5, fontSize: 12 }}>{tl("From", "Desde")}<input type="date" value={reportOptions.from} onChange={(event) => setReportOptions(current => ({ ...current, from: event.target.value }))} /></label><label style={{ display: "grid", gap: 5, fontSize: 12 }}>{tl("To", "Hasta")}<input type="date" value={reportOptions.to} min={reportOptions.from || undefined} onChange={(event) => setReportOptions(current => ({ ...current, to: event.target.value }))} /></label></div>}
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}><input type="checkbox" checked={reportOptions.includeDetails} onChange={(event) => setReportOptions(current => ({ ...current, includeDetails: event.target.checked }))} />{tl("Include supporting detail table", "Incluir tabla de detalles")}</label>
+                <div style={{ fontSize: 11, color: "#64748B" }}>{tl("Selected filters", "Filtros seleccionados")}: {reportOptions.from || ".."} - {reportOptions.to || ".."} | {reportOptions.status} | {reportOptions.includeDetails ? tl("Details", "Detalles") : tl("Summary only", "Solo resumen")}</div>
+              </div>
+              <footer style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "14px 20px", borderTop: "1px solid #E2E8F0", background: "#F8FAFC" }}><button type="button" onClick={() => setSelectedReport(null)}>{tl("Cancel", "Cancelar")}</button><button type="button" onClick={launchSelectedReport} style={{ background: "#1E3A5F", color: "white" }}>{tl("Generate report PDF", "Generar PDF del reporte")}</button></footer>
+            </section>
+          </div>
+        )}
       </div>
 
 

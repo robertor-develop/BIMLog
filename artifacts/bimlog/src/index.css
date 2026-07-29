@@ -940,6 +940,13 @@ select:focus { outline: none; border-color: hsl(var(--primary)); box-shadow: 0 0
 }
 
 @media (max-width: 720px) {
+  .dashboard-current-view-filters {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .dashboard-current-view-filters > * {
+    min-width: 0;
+    width: 100%;
+  }
   .rfi-register-header {
     align-items: stretch;
     flex-direction: column;

@@ -3,6 +3,7 @@ import { Link, useRoute } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Mode = "structure" | "budget" | "history" | "snapshot";
@@ -197,13 +198,14 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
     ),
   };
   return (
+    <FinancialProjectShell projectId={projectId} activeTab="budget">
     <div className="fb-page">
       <style>{styles}</style>
       <style>{exportStyles}</style>
       <header className="fb-header">
         <div>
           <Link href={`/projects/${projectId}/dashboard`} className="fb-back">
-            ← BIMLog
+            ← {tt("Project", "Proyecto")}
           </Link>
           <h1>{titles[mode]}</h1>
           <p>
@@ -393,6 +395,7 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
         </main>
       )}
     </div>
+    </FinancialProjectShell>
   );
 }
 function Summary({ label, value }: { label: string; value: string }) {

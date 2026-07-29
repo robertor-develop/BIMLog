@@ -413,14 +413,35 @@ function renderDashboardPdf(args: {
   generatedBy: string;
   companyName: string;
   data: Awaited<ReturnType<typeof getDashboardExportData>>;
+  projectFilters: {
+    search: string;
+    status: string;
+    sort: "name_asc" | "name_desc" | "code_asc" | "status_asc";
+  };
 }) {
-  const { lang, generatedAt, generatedBy, companyName, data } = args;
-  const projects = data.projects as any[];
+  const { lang, generatedAt, generatedBy, companyName, data, projectFilters } = args;
+  const allProjects = data.projects as any[];
+  const search = projectFilters.search.toLowerCase();
+  const projects = allProjects
+    .filter((project: any) => projectFilters.status === "all" || project.status === projectFilters.status)
+    .filter((project: any) => !search || [
+      project.code,
+      project.name,
+      project.clientName,
+      project.clientCompany,
+      project.location,
+    ].some(value => String(value || "").toLowerCase().includes(search)))
+    .sort((left: any, right: any) => {
+      if (projectFilters.sort === "name_desc") return String(right.name || "").localeCompare(String(left.name || ""), undefined, { sensitivity: "base" });
+      if (projectFilters.sort === "code_asc") return String(left.code || "").localeCompare(String(right.code || ""), undefined, { numeric: true, sensitivity: "base" });
+      if (projectFilters.sort === "status_asc") return `${left.status || ""}-${left.name || ""}`.localeCompare(`${right.status || ""}-${right.name || ""}`, undefined, { sensitivity: "base" });
+      return String(left.name || "").localeCompare(String(right.name || ""), undefined, { sensitivity: "base" });
+    });
   const rfis = data.rfis as any[];
   const submittals = data.submittals as any[];
   const files = data.files as any[];
   const activity = data.activity as any[];
-  const projectMap = new Map<number, any>(projects.map((p: any) => [Number(p.id), p]));
+  const projectMap = new Map<number, any>(allProjects.map((p: any) => [Number(p.id), p]));
   const openRfis = rfis.filter((r: any) => r.status !== "closed");
   const pendingSubmittals = submittals.filter((s: any) => ["pending", "under_review"].includes(s.status));
   const completedFiles = files.filter((f: any) => f.status === "valid" || f.status === "rejected");
@@ -466,7 +487,7 @@ function renderDashboardPdf(args: {
     date: fmtDate(a.createdAt, lang),
   }));
   const stats = {
-    activeProjects: projects.filter((p: any) => p.status === "active").length,
+    activeProjects: allProjects.filter((p: any) => p.status === "active").length,
     filesProcessed: files.length,
     openRfis: openRfis.length,
     pendingSubmittals: pendingSubmittals.length,
@@ -474,7 +495,7 @@ function renderDashboardPdf(args: {
     filesNeedingAttention: filesNeedingAttention.length,
     ...data.clashStats,
   };
-  const contentHash = computeContentHash({ report: "dashboard-current-view", lang, generatedBy, stats, projects, needsAttention, recentActivity, topViolators });
+  const contentHash = computeContentHash({ report: "dashboard-current-view", lang, generatedBy, stats, projects, projectFilters, needsAttention, recentActivity, topViolators });
   const reportNumber = `DASH-${contentHash.slice(0, 10).toUpperCase()}`;
   return pdfBuffer(doc => {
     doc.info.Title = label(lang, "BIMLog Headquarters Dashboard", "Sede BIMLog");
@@ -493,7 +514,12 @@ function renderDashboardPdf(args: {
       [label(lang, "Company", "Empresa"), companyName || "-"],
       [label(lang, "Generated", "Generado"), generatedAt.toLocaleString(lang === "es" ? "es-US" : "en-US")],
       [label(lang, "Scope", "Alcance"), label(lang, "Authenticated user's project memberships", "Membresias de proyecto del usuario autenticado")],
-      [label(lang, "Visible filters", "Filtros visibles"), label(lang, "None - dashboard current view", "Ninguno - vista actual del tablero")],
+      [label(lang, "Visible filters", "Filtros visibles"), [
+        `${label(lang, "Project search", "Busqueda de proyecto")}: ${projectFilters.search || label(lang, "None", "Ninguna")}`,
+        `${label(lang, "Status", "Estado")}: ${projectFilters.status === "all" ? label(lang, "All", "Todos") : humanStatus(projectFilters.status)}`,
+        `${label(lang, "Sort", "Orden")}: ${projectFilters.sort.replace(/_/g, " ")}`,
+        `${label(lang, "Visible projects", "Proyectos visibles")}: ${projects.length}/${allProjects.length}`,
+      ].join(" | ")],
     ], 40, y, 532) + 10;
     y = sectionBar(doc, label(lang, "KPI Summary", "Resumen KPI"), y, { theme: REPORT_THEMES.platform.standard });
     const cardW = 126;
@@ -779,7 +805,21 @@ Return exactly:
 // ── GET /dashboard/pending/rfis ───────────────────────────────────────────────
 router.post("/dashboard/export-pdf", authMiddleware, async (req, res) => {
   try {
-    const lang = parseLang((req.body as { lang?: string } | undefined)?.lang);
+    const body = req.body as {
+      lang?: string;
+      projectSearch?: unknown;
+      projectStatus?: unknown;
+      projectSort?: unknown;
+    } | undefined;
+    const lang = parseLang(body?.lang);
+    const projectSearch = typeof body?.projectSearch === "string" ? body.projectSearch.trim() : "";
+    const projectStatus = typeof body?.projectStatus === "string" ? body.projectStatus.trim() : "all";
+    const projectSort = typeof body?.projectSort === "string" ? body.projectSort.trim() : "name_asc";
+    const dashboardSorts = new Set(["name_asc", "name_desc", "code_asc", "status_asc"]);
+    if (projectSearch.length > 160 || !/^(all|[a-z][a-z0-9_-]{0,31})$/.test(projectStatus) || !dashboardSorts.has(projectSort)) {
+      res.status(400).json({ error: "Invalid dashboard current-view filters." });
+      return;
+    }
     const generatedAt = new Date();
     const data = await getDashboardExportData(req.user!.userId);
     const pdf = await renderDashboardPdf({
@@ -788,6 +828,11 @@ router.post("/dashboard/export-pdf", authMiddleware, async (req, res) => {
       generatedBy: `${req.user!.fullName} <${req.user!.email}>`,
       companyName: req.user!.companyName || "BIMLog",
       data,
+      projectFilters: {
+        search: projectSearch,
+        status: projectStatus,
+        sort: projectSort as "name_asc" | "name_desc" | "code_asc" | "status_asc",
+      },
     });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", disposition("bimlog-headquarters-dashboard-current-view.pdf"));
@@ -795,6 +840,7 @@ router.post("/dashboard/export-pdf", authMiddleware, async (req, res) => {
       surface: "dashboard",
       userId: req.user!.userId,
       generatedAt: generatedAt.toISOString(),
+      projectFilters: { search: projectSearch, status: projectStatus, sort: projectSort },
       rowCounts: { projects: data.projects.length, rfis: data.rfis.length, submittals: data.submittals.length, files: data.files.length, activity: data.activity.length },
     }));
     res.send(pdf);

@@ -3210,54 +3210,32 @@ export function MeetingsTab({
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 12,
-                color: "#475569",
-              }}
-            >
-              <span>{t("PDF includes", "PDF incluye")}</span>
-              <select
-                value={currentViewExportMode}
-                onChange={(event) =>
-                  setCurrentViewExportMode(
-                    event.target.value === "summary" ? "summary" : "current",
-                  )
-                }
-                aria-label={t(
-                  "Current view PDF sections",
-                  "Secciones del PDF de vista actual",
-                )}
-                style={{
-                  minHeight: 34,
-                  border: "1px solid #CBD5E1",
-                  borderRadius: 8,
-                  padding: "0 8px",
-                  background: "white",
-                  maxWidth: "100%",
-                }}
-              >
-                <option value="current">
-                  {view === "actions"
-                    ? t("Summary + Actions", "Resumen + acciones")
-                    : t(
-                        "Summary + Meeting Register",
-                        "Resumen + registro de reuniones",
-                      )}
-                </option>
-                <option value="summary">
-                  {t("Summary only", "Solo resumen")}
-                </option>
-              </select>
-            </label>
             <PrintPdfButton
               lang={lang}
               onClick={() => void exportCurrentViewPdf()}
               loading={currentViewExporting}
               disabledReason={currentViewExportHelp}
+              currentViewSummary={[
+                `${t("View", "Vista")}: ${view === "actions" ? t("Actions", "Acciones") : t("Meetings", "Reuniones")}`,
+              ]}
+              options={
+                <label style={{ display: "grid", gap: 6, fontSize: 12, color: "#475569" }}>
+                  <span>{t("Included sections", "Secciones incluidas")}</span>
+                  <select
+                    value={currentViewExportMode}
+                    onChange={(event) => setCurrentViewExportMode(event.target.value === "summary" ? "summary" : "current")}
+                    aria-label={t("Current view PDF sections", "Secciones del PDF de vista actual")}
+                    style={{ minHeight: 36, border: "1px solid #CBD5E1", borderRadius: 8, padding: "0 8px", background: "white", maxWidth: "100%" }}
+                  >
+                    <option value="current">
+                      {view === "actions"
+                        ? t("Summary + Actions", "Resumen + acciones")
+                        : t("Summary + Meeting Register", "Resumen + registro de reuniones")}
+                    </option>
+                    <option value="summary">{t("Summary only", "Solo resumen")}</option>
+                  </select>
+                </label>
+              }
             />
             {canWrite && (
               <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>

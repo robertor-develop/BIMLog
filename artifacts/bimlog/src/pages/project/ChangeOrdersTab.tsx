@@ -276,6 +276,13 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
             onClick={exportCurrentViewPdf}
             loading={exportingPdf}
             disabled={loading || importing}
+            currentViewSummary={activeSummary.slice(0, 3)}
+            options={<div style={{ display: "flex", gap: 10, flexWrap: "wrap", fontSize: 12 }}>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><input type="checkbox" checked={includeFinancial} onChange={event => setIncludeFinancial(event.target.checked)} />{t("Financial columns", "Columnas financieras")}</label>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><input type="checkbox" checked={includeSchedule} onChange={event => setIncludeSchedule(event.target.checked)} />{t("Schedule columns", "Columnas de cronograma")}</label>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><input type="checkbox" checked={includeCompany} onChange={event => setIncludeCompany(event.target.checked)} />{t("Company column", "Columna empresa")}</label>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><input type="checkbox" checked={includeDates} onChange={event => setIncludeDates(event.target.checked)} />{t("Date columns", "Columnas de fechas")}</label>
+            </div>}
           />
           {canWrite && (
             <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
@@ -321,26 +328,6 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
           <option value="number_desc">{t("Number Z-A", "Numero Z-A")}</option>
           <option value="status_asc">{t("Status", "Estado")}</option>
         </select>
-      </div>
-
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 10, fontSize: 12, color: "#374151" }}>
-        <span style={{ fontWeight: 700 }}>{t("PDF columns", "Columnas PDF")}:</span>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
-          <input type="checkbox" checked={includeFinancial} onChange={e => setIncludeFinancial(e.target.checked)} />
-          {t("Financial", "Financiero")}
-        </label>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
-          <input type="checkbox" checked={includeSchedule} onChange={e => setIncludeSchedule(e.target.checked)} />
-          {t("Schedule", "Cronograma")}
-        </label>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
-          <input type="checkbox" checked={includeCompany} onChange={e => setIncludeCompany(e.target.checked)} />
-          {t("Company", "Empresa")}
-        </label>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" }}>
-          <input type="checkbox" checked={includeDates} onChange={e => setIncludeDates(e.target.checked)} />
-          {t("Dates", "Fechas")}
-        </label>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>

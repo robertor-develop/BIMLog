@@ -25,10 +25,14 @@ import { eq, and, inArray, desc, ne } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import {
   createPdfDocument,
+  addPageNumbers,
+  computeContentHash,
   drawBrandedHeader,
   drawFooter,
+  drawTable,
   REPORT_THEMES,
   reportFileName,
+  sectionBar,
   type ReportTheme,
 } from "../lib/pdf-kit";
 import jwt from "jsonwebtoken";
@@ -69,15 +73,6 @@ function pdfHeader(
     }) + 12;
 }
 
-function pdfFooter(doc: PDFKit.PDFDocument, project: { name: string }) {
-  drawFooter(doc, {
-    margin: 50,
-    y: doc.page.height - 30,
-    projectName: project.name,
-    timestamp: new Date().toLocaleDateString("en-US"),
-  });
-}
-
 function row(
   doc: PDFKit.PDFDocument,
   label: string,
@@ -100,12 +95,70 @@ function row(
   doc.moveDown(0.3);
 }
 
-async function getProject(projectId: number) {
+function pdfFooter(doc: PDFKit.PDFDocument, project: { name: string }) {
+  drawFooter(doc, {
+    margin: 50,
+    y: doc.page.height - 30,
+    projectName: project.name,
+    timestamp: new Date().toLocaleDateString("en-US"),
+  });
+}
+
+function reportRequestOptions(req: any) {
+  const from = typeof req.query.from === "string" ? req.query.from : "";
+  const to = typeof req.query.to === "string" ? req.query.to : "";
+  const status = typeof req.query.status === "string" ? req.query.status : "all";
+  const includeDetails = req.query.include_details !== "false";
+  return { from, to, status, includeDetails };
+}
+
+function inSelectedDateRange(value: unknown, from: string, to: string) {
+  const date = value ? new Date(value as any) : null;
+  if (!date || Number.isNaN(date.getTime())) return !from && !to;
+  const day = date.toISOString().slice(0, 10);
+  return (!from || day >= from) && (!to || day <= to);
+}
+
+function drawReportContext(doc: PDFKit.PDFDocument, options: ReturnType<typeof reportRequestOptions>, visible: number, total: number, theme: ReportTheme) {
+  let y = sectionBar(doc, "Report Context & Selected Filters", doc.y, { margin: 50, theme });
+  doc.fontSize(8).font("Helvetica").fillColor("#334155")
+    .text(`Generated: ${new Date().toLocaleString("en-US")}  |  Date range: ${options.from || "Any"} to ${options.to || "Any"}  |  Status: ${options.status}  |  Visible records: ${visible}/${total}`, 50, y, { width: doc.page.width - 100 });
+  doc.y += 24;
+}
+
+function drawKpis(doc: PDFKit.PDFDocument, values: Array<[string, string]>, theme: ReportTheme) {
+  const width = (doc.page.width - 100 - (values.length - 1) * 8) / values.length;
+  const y = doc.y;
+  values.forEach(([label, value], index) => {
+    const x = 50 + index * (width + 8);
+    doc.roundedRect(x, y, width, 48, 4).fill(theme.light);
+    doc.fontSize(16).font("Helvetica-Bold").fillColor(theme.dark).text(value, x + 8, y + 8, { width: width - 16, align: "center" });
+    doc.fontSize(7).font("Helvetica-Bold").fillColor("#475569").text(label.toUpperCase(), x + 5, y + 30, { width: width - 10, align: "center", lineBreak: false });
+  });
+  doc.y = y + 60;
+}
+
+function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: string }, reportNumber: string, snapshot: unknown) {
+  addPageNumbers(doc, {
+    margin: 50,
+    footerY: doc.page.height - 24,
+    fingerprintY: doc.page.height - 36,
+    companyName: "BIMLog",
+    projectName: project.name,
+    reportNumber,
+    timestamp: new Date().toLocaleString("en-US"),
+    contentHash: computeContentHash(snapshot),
+  });
+  doc.end();
+}
+
+async function getProject(projectId: number, userId: number) {
   const [p] = await db
-    .select()
+    .select({ project: projectsTable })
     .from(projectsTable)
+    .innerJoin(projectMembersTable, and(eq(projectMembersTable.projectId, projectsTable.id), eq(projectMembersTable.userId, userId)))
     .where(eq(projectsTable.id, projectId));
-  return p;
+  return p?.project;
 }
 
 // ── PROJECT HEALTH ─────────────────────────────────────────────────────────────
@@ -116,7 +169,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -129,20 +182,24 @@ router.get(
           .where(eq(submittalsTable.projectId, projectId)),
         db.select().from(filesTable).where(eq(filesTable.projectId, projectId)),
       ]);
+      const options = reportRequestOptions(req);
+      const visibleRfis = rfis.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+      const visibleSubs = subs.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+      const visibleFiles = files.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
       const now = Date.now();
-      const openRfis = rfis.filter((r) => r.status !== "closed");
+      const openRfis = visibleRfis.filter((r) => r.status !== "closed");
       const overdueRfis = openRfis.filter(
         (r) => r.dueDate && new Date(r.dueDate).getTime() < now,
       );
-      const pendingSubs = subs.filter((s) =>
+      const pendingSubs = visibleSubs.filter((s) =>
         ["pending", "under_review"].includes(s.status),
       );
-      const validFiles = files.filter((f) => f.status === "valid");
-      const compRate = files.length
-        ? Math.round((validFiles.length / files.length) * 100)
+      const validFiles = visibleFiles.filter((f) => f.status === "valid");
+      const compRate = visibleFiles.length
+        ? Math.round((validFiles.length / visibleFiles.length) * 100)
         : 0;
 
-      const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+      const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
       res.setHeader("Content-Type", "application/pdf");
       const title = "Project Health Report";
       res.setHeader(
@@ -151,27 +208,30 @@ router.get(
       );
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.platform.health);
-
-      row(doc, "Project Name", project.name);
-      row(doc, "Project Code", project.code);
-      row(doc, "Status", project.status.toUpperCase());
-      doc.moveDown(0.5);
-      doc
-        .fontSize(11)
-        .font("Helvetica-Bold")
-        .fillColor("#111")
-        .text("Summary Statistics");
-      doc.moveDown(0.3);
-      row(doc, "Total RFIs", String(rfis.length));
-      row(doc, "Open RFIs", String(openRfis.length));
-      row(doc, "Overdue RFIs", String(overdueRfis.length));
-      row(doc, "Total Submittals", String(subs.length));
-      row(doc, "Pending Submittals", String(pendingSubs.length));
-      row(doc, "Total Files", String(files.length));
-      row(doc, "Compliant Files", String(validFiles.length));
-      row(doc, "Compliance Rate", `${compRate}%`);
-      pdfFooter(doc, project);
-      doc.end();
+      drawReportContext(doc, options, visibleRfis.length + visibleSubs.length + visibleFiles.length, rfis.length + subs.length + files.length, REPORT_THEMES.platform.health);
+      drawKpis(doc, [["OPEN RFIS", String(openRfis.length)], ["OVERDUE RFIS", String(overdueRfis.length)], ["PENDING SUBMITTALS", String(pendingSubs.length)], ["FILE COMPLIANCE", `${compRate}%`]], REPORT_THEMES.platform.health);
+      doc.y = sectionBar(doc, "Executive Summary", doc.y, { margin: 50, theme: REPORT_THEMES.platform.health });
+      doc.fontSize(9).font("Helvetica").fillColor("#111827").text(
+        visibleRfis.length + visibleSubs.length + visibleFiles.length
+          ? `This current snapshot contains ${visibleRfis.length} RFIs, ${visibleSubs.length} submittals, and ${visibleFiles.length} files. ${overdueRfis.length} open RFI(s) are overdue and ${pendingSubs.length} submittal(s) remain pending review.`
+          : "No project records match the selected filters. KPI values remain zero and no analytics are fabricated.",
+        50, doc.y, { width: doc.page.width - 100 },
+      );
+      doc.y += 34;
+      if (options.includeDetails) {
+        drawTable(doc, {
+          x: 50, startY: doc.y, pageBottom: doc.page.height - 52,
+          columns: [{ label: "Domain", width: 120, key: "domain" }, { label: "Visible", width: 90, key: "visible", align: "right" }, { label: "Attention", width: 100, key: "attention", align: "right" }, { label: "Context", width: 202, key: "context", wrap: true }],
+          rows: [
+            { domain: "RFIs", visible: visibleRfis.length, attention: overdueRfis.length, context: "Attention = open records past due." },
+            { domain: "Submittals", visible: visibleSubs.length, attention: pendingSubs.length, context: "Attention = pending or under review." },
+            { domain: "Files", visible: visibleFiles.length, attention: visibleFiles.length - validFiles.length, context: "Attention = records not marked valid." },
+          ],
+          onPageBreak: () => { doc.addPage(); pdfHeader(doc, project, title, REPORT_THEMES.platform.health); return doc.y; },
+        });
+      }
+      const reportNumber = `HEALTH-${computeContentHash({ projectId, options, visibleRfis, visibleSubs, visibleFiles }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, options, visibleRfis, visibleSubs, visibleFiles });
     } catch (err) {
       res
         .status(500)
@@ -188,7 +248,7 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
   if (!userId) return;
   const projectId = Number(req.params.projectId);
   try {
-    const project = await getProject(projectId);
+    const project = await getProject(projectId, userId);
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -198,7 +258,9 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
       .from(filesTable)
       .where(eq(filesTable.projectId, projectId))
       .orderBy(desc(filesTable.createdAt));
-    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+    const options = reportRequestOptions(req);
+    const visibleFiles = files.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
     res.setHeader("Content-Type", "application/pdf");
     const title = "Naming Compliance Report";
     res.setHeader(
@@ -208,11 +270,10 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
     doc.pipe(res);
     pdfHeader(doc, project, title, REPORT_THEMES.files.compliance);
 
-    const valid = files.filter((f) => f.status === "valid");
-    const rejected = files.filter((f) => f.status === "rejected");
-    row(doc, "Total Files", String(files.length));
-    row(doc, "Compliant", String(valid.length));
-    row(doc, "Non-Compliant", String(rejected.length));
+    const valid = visibleFiles.filter((f) => f.status === "valid");
+    const rejected = visibleFiles.filter((f) => f.status === "rejected");
+    drawReportContext(doc, options, visibleFiles.length, files.length, REPORT_THEMES.files.compliance);
+    drawKpis(doc, [["FILES", String(visibleFiles.length)], ["COMPLIANT", String(valid.length)], ["NON-COMPLIANT", String(rejected.length)], ["COMPLIANCE", visibleFiles.length ? `${Math.round((valid.length / visibleFiles.length) * 100)}%` : "0%"]], REPORT_THEMES.files.compliance);
     row(
       doc,
       "Compliance Rate",
@@ -221,19 +282,18 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
         : "—",
     );
     doc.moveDown();
-    if (rejected.length) {
-      doc.fontSize(10).font("Helvetica-Bold").text("Non-Compliant Files:");
-      doc.moveDown(0.3);
-      rejected.slice(0, 30).forEach((f) => {
-        doc
-          .fontSize(8)
-          .font("Helvetica")
-          .fillColor("#DC2626")
-          .text(`Failed: ${f.fileName}`, { indent: 10 });
+    if (!visibleFiles.length) {
+      doc.fontSize(9).fillColor("#64748B").text("No accessible files match the selected filters. No compliance result is inferred.", { align: "center" });
+    } else if (options.includeDetails) {
+      drawTable(doc, {
+        x: 50, startY: sectionBar(doc, "File Compliance Detail", doc.y, { margin: 50, theme: REPORT_THEMES.files.compliance }), pageBottom: doc.page.height - 52,
+        columns: [{ label: "File", width: 300, key: "fileName", wrap: true }, { label: "Status", width: 100, format: (item) => String(item.status || "unclassified").replace(/_/g, " ") }, { label: "Uploaded", width: 112, format: (item) => item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-US") : "—" }],
+        rows: visibleFiles,
+        onPageBreak: () => { doc.addPage(); pdfHeader(doc, project, title, REPORT_THEMES.files.compliance); return doc.y; },
       });
     }
-    pdfFooter(doc, project);
-    doc.end();
+    const reportNumber = `COMP-${computeContentHash({ projectId, options, visibleFiles }).slice(0, 10).toUpperCase()}`;
+    finishProfessionalReport(doc, project, reportNumber, { projectId, options, visibleFiles });
   } catch (err) {
     res
       .status(500)
@@ -249,7 +309,7 @@ router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
   if (!userId) return;
   const projectId = Number(req.params.projectId);
   try {
-    const project = await getProject(projectId);
+    const project = await getProject(projectId, userId);
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -261,11 +321,17 @@ router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
         and(eq(rfisTable.projectId, projectId), ne(rfisTable.status, "closed")),
       )
       .orderBy(rfisTable.createdAt);
+    const options = reportRequestOptions(req);
     const now = Date.now();
+    const dateFilteredRfis = rfis.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+    const visibleRfis = options.status === "overdue"
+      ? dateFilteredRfis.filter((record) => record.dueDate && new Date(record.dueDate).getTime() < now)
+      : dateFilteredRfis;
     const doc = createPdfDocument({
       size: "LETTER",
       margin: 50,
       layout: "landscape",
+      bufferPages: true,
     });
     res.setHeader("Content-Type", "application/pdf");
     const title = "RFI Aging Report";
@@ -276,27 +342,25 @@ router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
     doc.pipe(res);
     pdfHeader(doc, project, title, REPORT_THEMES.rfi.log);
 
-    rfis.forEach((rfi) => {
-      const ageDays = Math.floor(
-        (now - new Date(rfi.createdAt).getTime()) / 86400000,
-      );
-      const overdue = rfi.dueDate && new Date(rfi.dueDate).getTime() < now;
-      doc
-        .fontSize(8)
-        .font(overdue ? "Helvetica-Bold" : "Helvetica")
-        .fillColor(overdue ? "#DC2626" : "#111")
-        .text(
-          `${rfi.number} | ${rfi.subject} | ${rfi.status} | Age: ${ageDays}d${overdue ? " OVERDUE" : ""}`,
-          { indent: 5 },
-        );
+    const rows = visibleRfis.map((rfi) => {
+      const ageDays = Math.max(0, Math.floor((now - new Date(rfi.createdAt).getTime()) / 86400000));
+      const overdue = Boolean(rfi.dueDate && new Date(rfi.dueDate).getTime() < now);
+      return { ...rfi, ageDays, overdue: overdue ? "Yes" : "No" };
     });
-    if (!rfis.length)
-      doc
-        .fontSize(10)
-        .fillColor("#666")
-        .text("No open RFIs.", { align: "center" });
-    pdfFooter(doc, project);
-    doc.end();
+    drawReportContext(doc, options, rows.length, rfis.length, REPORT_THEMES.rfi.log);
+    drawKpis(doc, [["OPEN RFIS", String(rows.length)], ["OVERDUE", String(rows.filter((item) => item.overdue === "Yes").length)], ["0-7 DAYS", String(rows.filter((item) => item.ageDays <= 7).length)], ["30+ DAYS", String(rows.filter((item) => item.ageDays >= 30).length)]], REPORT_THEMES.rfi.log);
+    if (!rows.length) {
+      doc.fontSize(9).fillColor("#64748B").text("No open RFIs match the selected filters.", { align: "center" });
+    } else if (options.includeDetails) {
+      drawTable(doc, {
+        x: 50, startY: sectionBar(doc, "Open RFI Aging Detail", doc.y, { margin: 50, theme: REPORT_THEMES.rfi.log }), pageBottom: doc.page.height - 52,
+        columns: [{ label: "RFI", width: 70, key: "number", bold: true }, { label: "Subject", width: 270, key: "subject", wrap: true }, { label: "Status", width: 95, format: (item) => String(item.status).replace(/_/g, " ") }, { label: "Age", width: 60, format: (item) => `${item.ageDays}d`, align: "right" }, { label: "Due", width: 90, format: (item) => item.dueDate ? new Date(item.dueDate).toLocaleDateString("en-US") : "—" }, { label: "Overdue", width: 70, key: "overdue" }],
+        rows,
+        onPageBreak: () => { doc.addPage(); pdfHeader(doc, project, title, REPORT_THEMES.rfi.log); return doc.y; },
+      });
+    }
+    const reportNumber = `RFI-AGING-${computeContentHash({ projectId, options, rows }).slice(0, 10).toUpperCase()}`;
+    finishProfessionalReport(doc, project, reportNumber, { projectId, options, rows });
   } catch (err) {
     res
       .status(500)
@@ -314,7 +378,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -324,10 +388,16 @@ router.get(
         .from(submittalsTable)
         .where(eq(submittalsTable.projectId, projectId))
         .orderBy(submittalsTable.number);
+      const options = reportRequestOptions(req);
+      const dateFilteredSubs = subs.filter((record) => inSelectedDateRange(record.createdAt, options.from, options.to));
+      const visibleSubs = options.status === "all"
+        ? dateFilteredSubs
+        : dateFilteredSubs.filter((record) => options.status === "closed" ? ["approved", "closed"].includes(record.status) : record.status === options.status);
       const doc = createPdfDocument({
         size: "LETTER",
         margin: 50,
         layout: "landscape",
+        bufferPages: true,
       });
       res.setHeader("Content-Type", "application/pdf");
       const title = "Submittal Status Report";
@@ -338,23 +408,25 @@ router.get(
       doc.pipe(res);
       pdfHeader(doc, project, title, REPORT_THEMES.submittal.log);
 
-      subs.forEach((s) => {
-        doc
-          .fontSize(8)
-          .font("Helvetica")
-          .fillColor("#111")
-          .text(
-            `${s.number} | ${s.title} | ${s.status.replace(/_/g, " ")} | Ball in Court: ${s.ballInCourt ?? "—"}`,
-            { indent: 5 },
-          );
-      });
-      if (!subs.length)
-        doc
-          .fontSize(10)
-          .fillColor("#666")
-          .text("No submittals found.", { align: "center" });
-      pdfFooter(doc, project);
-      doc.end();
+      drawReportContext(doc, options, visibleSubs.length, subs.length, REPORT_THEMES.submittal.log);
+      drawKpis(doc, [
+        ["SUBMITTALS", String(visibleSubs.length)],
+        ["PENDING", String(visibleSubs.filter((item) => item.status === "pending").length)],
+        ["UNDER REVIEW", String(visibleSubs.filter((item) => item.status === "under_review").length)],
+        ["APPROVED", String(visibleSubs.filter((item) => item.status === "approved").length)],
+      ], REPORT_THEMES.submittal.log);
+      if (!visibleSubs.length) {
+        doc.fontSize(9).fillColor("#64748B").text("No submittals match the selected filters.", { align: "center" });
+      } else if (options.includeDetails) {
+        drawTable(doc, {
+          x: 50, startY: sectionBar(doc, "Submittal Status Detail", doc.y, { margin: 50, theme: REPORT_THEMES.submittal.log }), pageBottom: doc.page.height - 52,
+          columns: [{ label: "No.", width: 80, key: "number", bold: true }, { label: "Title", width: 300, key: "title", wrap: true }, { label: "Status", width: 110, format: (item) => String(item.status).replace(/_/g, " ") }, { label: "Ball in Court", width: 170, format: (item) => item.ballInCourt || "—", wrap: true }],
+          rows: visibleSubs,
+          onPageBreak: () => { doc.addPage(); pdfHeader(doc, project, title, REPORT_THEMES.submittal.log); return doc.y; },
+        });
+      }
+      const reportNumber = `SUBMITTAL-${computeContentHash({ projectId, options, visibleSubs }).slice(0, 10).toUpperCase()}`;
+      finishProfessionalReport(doc, project, reportNumber, { projectId, options, visibleSubs });
     } catch (err) {
       res
         .status(500)
@@ -371,7 +443,7 @@ router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
   if (!userId) return;
   const projectId = Number(req.params.projectId);
   try {
-    const project = await getProject(projectId);
+    const project = await getProject(projectId, userId);
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -441,7 +513,7 @@ router.get(
     const module = req.params.module;
     const itemId = Number(req.params.itemId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -504,7 +576,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -558,7 +630,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -865,7 +937,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -924,7 +996,7 @@ router.get(
     if (!userId) return;
     const projectId = Number(req.params.projectId);
     try {
-      const project = await getProject(projectId);
+      const project = await getProject(projectId, userId);
       if (!project) {
         res.status(404).json({ error: "Project not found" });
         return;
@@ -981,7 +1053,7 @@ router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
   if (!userId) return;
   const projectId = Number(req.params.projectId);
   try {
-    const project = await getProject(projectId);
+    const project = await getProject(projectId, userId);
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;

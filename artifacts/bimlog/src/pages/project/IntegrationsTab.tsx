@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { FileInput, FolderOpen, LockKeyhole, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
+import { PrintPdfButton, printCurrentView } from "@/components/PrintPdfButton";
 
 interface IntegrationsTabProps {
   projectId: number;
@@ -32,6 +33,10 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [providers, setProviders] = useState<CatalogProvider[]>([]);
   const [connections, setConnections] = useState<SafeConnection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [availability, setAvailability] = useState("all");
+  const [connection, setConnection] = useState("all");
 
   useEffect(() => {
     if (!token) return;
@@ -59,6 +64,19 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
 
   const connected = (key: string) =>
     connections.some((connection) => connection.provider === key && connection.status === "connected");
+  const visibleProviders = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return providers.filter((provider) => {
+      const isConnected = connected(provider.key);
+      if (category !== "all" && provider.category !== category) return false;
+      if (availability !== "all" && provider.availability !== availability) return false;
+      if (connection === "connected" && !isConnected) return false;
+      if (connection === "not_connected" && isConnected) return false;
+      const label = lang === "es" ? provider.label.es : provider.label.en;
+      const description = lang === "es" ? provider.description.es : provider.description.en;
+      return !query || `${label} ${description}`.toLowerCase().includes(query);
+    });
+  }, [availability, category, connection, connections, lang, providers, search]);
 
   function openProvider(provider: CatalogProvider) {
     if (provider.route) {
@@ -73,7 +91,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   }
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1120 }}>
+    <div id="integrations-current-view" style={{ padding: "28px 32px", maxWidth: 1120 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "flex-start", marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 24, color: "hsl(var(--foreground))" }}>
@@ -86,6 +104,18 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             )}
           </p>
         </div>
+        <PrintPdfButton
+          lang={lang}
+          onClick={() => printCurrentView("integrations-current-view")}
+          disabled={loading}
+          currentViewSummary={[
+            `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
+            `${tr("Category", "Categoria")}: ${category}`,
+            `${tr("Availability", "Disponibilidad")}: ${availability}`,
+            `${tr("Connection", "Conexion")}: ${connection}`,
+            `${tr("Visible", "Visibles")}: ${visibleProviders.length}/${providers.length}`,
+          ]}
+        />
         <button
           onClick={() => navigate("/contact")}
           style={{ padding: "9px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 700, cursor: "pointer" }}
@@ -102,6 +132,18 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         )}
       </div>
 
+      <section data-current-view-filter-panel="integrations" aria-label={tr("Current view filters", "Filtros de vista actual")} style={{ padding: 14, marginBottom: 20, border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}>
+        <strong style={{ display: "block", marginBottom: 4, fontSize: 13 }}>{tr("Current view filters", "Filtros de vista actual")}</strong>
+        <p style={{ margin: "0 0 10px", color: "hsl(var(--muted-foreground))", fontSize: 11 }}>{tr("Filters govern the visible approved catalog and Print PDF. Credentials and provider internals are never included.", "Los filtros controlan el catalogo aprobado visible y el PDF. Nunca se incluyen credenciales ni datos internos del proveedor.")}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 9 }}>
+          <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Search", "Busqueda")}<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={tr("Name or capability", "Nombre o capacidad")} /></label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Category", "Categoria")}<select value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">{tr("All categories", "Todas")}</option><option value="file_source">{tr("File source", "Fuente de archivos")}</option><option value="open_format">{tr("Open format", "Formato abierto")}</option><option value="first_party">{tr("First party", "Primera parte")}</option><option value="governed">{tr("Governed", "Gobernada")}</option></select></label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Availability", "Disponibilidad")}<select value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">{tr("All availability", "Toda")}</option><option value="available">{tr("Available", "Disponible")}</option><option value="setup_required">{tr("Setup required", "Configuracion requerida")}</option><option value="review_required">{tr("Review required", "Revision requerida")}</option></select></label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Connection", "Conexion")}<select value={connection} onChange={(event) => setConnection(event.target.value)}><option value="all">{tr("All connection states", "Todos")}</option><option value="connected">{tr("Connected", "Conectado")}</option><option value="not_connected">{tr("Not connected", "No conectado")}</option></select></label>
+        </div>
+        <div style={{ marginTop: 9, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{tr("Visible", "Visibles")}: {visibleProviders.length}/{providers.length}</div>
+      </section>
+
       {loading ? (
         <div style={{ display: "flex", gap: 8, alignItems: "center", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
           <RefreshCw style={{ width: 15, height: 15 }} />
@@ -109,7 +151,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
-          {providers.map((provider) => {
+          {visibleProviders.map((provider) => {
             const isConnected = connected(provider.key);
             const label = lang === "es" ? provider.label.es : provider.label.en;
             const description = lang === "es" ? provider.description.es : provider.description.en;
@@ -149,6 +191,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
               </article>
             );
           })}
+          {visibleProviders.length === 0 && <div style={{ gridColumn: "1 / -1", padding: 28, textAlign: "center", border: "1px dashed hsl(var(--border))", borderRadius: 10, color: "hsl(var(--muted-foreground))" }}>{tr("No accessible integrations match the current filters.", "Ninguna integracion accesible coincide con los filtros actuales.")}</div>}
         </div>
       )}
     </div>

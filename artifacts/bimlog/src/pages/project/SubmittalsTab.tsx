@@ -1258,7 +1258,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
           onClick={() => handleExport("excel")}
         >
           <Download style={{ width: 12, height: 12 }} />
-          {w("Export Visible Excel", "Exportar Excel Visible", lang)}
+          {w("Export Excel", "Exportar Excel", lang)}
         </Button>
         <PrintPdfButton
           lang={lang}

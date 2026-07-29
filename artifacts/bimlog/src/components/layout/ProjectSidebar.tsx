@@ -174,7 +174,11 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     },
   ].filter(group => group.items.length || group.actions?.length);
 
-  const activeGroup = navGroups.find(group => group.items.some(item => item.id === activeTab))?.id ?? navGroups[0]?.id ?? "command";
+  const activeGroup = navGroups.find(
+    group =>
+      group.items.some(item => item.id === activeTab) ||
+      group.actions?.some(action => action.id === activeTab),
+  )?.id ?? navGroups[0]?.id ?? "command";
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => ({ [activeGroup]: true }));
 
   useEffect(() => {
@@ -224,18 +228,22 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
               </Link>
             );
           })}
-          {group.actions?.map(action => (
+          {group.actions?.map(action => {
+            const isActive = activeTab === action.id;
+            return (
             <button
               key={action.id}
               type="button"
-              className="sidebar-nav-item phasea-nav-item phasea-nav-button"
+              className={`sidebar-nav-item phasea-nav-item phasea-nav-button${isActive ? " active" : ""}`}
+              aria-current={isActive ? "page" : undefined}
               title={tr(action.labelEn, action.labelEs)}
               onClick={() => { action.onClick(); closeMobile(); }}
             >
               <div className="nav-dot" />
               <span className="phasea-nav-text">{tr(action.labelEn, action.labelEs)}</span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </section>
     );

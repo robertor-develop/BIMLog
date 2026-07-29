@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useListProjects, useCreateProject, useListMembers } from "@workspace/api-client-react";
@@ -234,6 +234,9 @@ export function Dashboard() {
 
   // ── Cross-project data ─────────────────────────────────────────────────────
   const [agg, setAgg] = useState<AggState>({ rfis: [], submittals: [], activity: [], files: [], loading: false });
+  const [projectSearch, setProjectSearch] = useState("");
+  const [projectStatus, setProjectStatus] = useState("all");
+  const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">("name_asc");
 
   useEffect(() => {
     if (!projects || !token || projects.length === 0) return;
@@ -267,10 +270,33 @@ export function Dashboard() {
     window.location.href = "/";
   }
 
-  const projectRows = (projects ?? []) as Array<any>;
-  const activeProjects = projectRows.filter((p: any) => p.status === "active");
-  const totalFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
-  const totalMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
+  const allProjectRows = (projects ?? []) as Array<any>;
+  const projectStatusOptions = useMemo(
+    () => [...new Set(allProjectRows.map((project: any) => String(project.status || "").trim()).filter(Boolean))].sort(),
+    [allProjectRows],
+  );
+  const projectRows = useMemo(() => {
+    const query = projectSearch.trim().toLowerCase();
+    return allProjectRows
+      .filter((project: any) => projectStatus === "all" || project.status === projectStatus)
+      .filter((project: any) => !query || [
+        project.code,
+        project.name,
+        project.clientName,
+        project.clientCompany,
+        project.location,
+      ].some(value => String(value || "").toLowerCase().includes(query)))
+      .sort((left: any, right: any) => {
+        if (projectSort === "name_desc") return String(right.name || "").localeCompare(String(left.name || ""), undefined, { sensitivity: "base" });
+        if (projectSort === "code_asc") return String(left.code || "").localeCompare(String(right.code || ""), undefined, { numeric: true, sensitivity: "base" });
+        if (projectSort === "status_asc") return `${left.status || ""}-${left.name || ""}`.localeCompare(`${right.status || ""}-${right.name || ""}`, undefined, { sensitivity: "base" });
+        return String(left.name || "").localeCompare(String(right.name || ""), undefined, { sensitivity: "base" });
+      });
+  }, [allProjectRows, projectSearch, projectSort, projectStatus]);
+  const activeProjects = allProjectRows.filter((p: any) => p.status === "active");
+  const totalFiles = allProjectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
+  const visibleProjectFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
+  const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
 
   async function handleDelete(projectId: number, projectName: string) {
     const confirmed = window.confirm(
@@ -297,7 +323,12 @@ export function Dashboard() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ lang }),
+        body: JSON.stringify({
+          lang,
+          projectSearch: projectSearch.trim(),
+          projectStatus,
+          projectSort,
+        }),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -313,7 +344,7 @@ export function Dashboard() {
   }
 
   // ── Derived aggregate stats ────────────────────────────────────────────────
-  const projectMap = new Map<number, any>(projectRows.map((p: any) => [Number(p.id), p]));
+  const projectMap = new Map<number, any>(allProjectRows.map((p: any) => [Number(p.id), p]));
 
   const openRfis        = agg.rfis.filter(r => r.status !== "closed");
   const pendingSubmittals = agg.submittals.filter(s => ["pending", "under_review"].includes(s.status));
@@ -458,6 +489,12 @@ export function Dashboard() {
                 disabledReason={!token
                   ? tt("Sign in to print this dashboard.", "Inicie sesion para imprimir este tablero.")
                   : tt("Wait until the current dashboard view finishes loading.", "Espere a que termine de cargar la vista actual del tablero.")}
+                currentViewSummary={[
+                  `${tt("Project search", "Busqueda de proyecto")}: ${projectSearch.trim() || tt("None", "Ninguna")}`,
+                  `${tt("Status", "Estado")}: ${projectStatus === "all" ? tt("All", "Todos") : projectStatus}`,
+                  `${tt("Sort", "Orden")}: ${projectSort.replace(/_/g, " ")}`,
+                  `${tt("Visible projects", "Proyectos visibles")}: ${projectRows.length}/${allProjectRows.length}`,
+                ]}
                 onClick={() => void exportCurrentViewPdf()}
               />
               {(!token || isLoading || agg.loading) && (
@@ -467,6 +504,56 @@ export function Dashboard() {
               )}
             </div>
           </div>
+
+          <section
+            data-current-view-filter-panel="dashboard"
+            aria-label={tt("Current view filters", "Filtros de vista actual")}
+            style={{ marginBottom: 20, padding: "14px 16px", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}
+          >
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "hsl(var(--foreground))" }}>{tt("Current view filters", "Filtros de vista actual")}</div>
+              <div style={{ marginTop: 2, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
+                {tt("Filter and sort the visible project register. Print PDF uses these exact controls.", "Filtra y ordena el registro visible de proyectos. Imprimir PDF usa exactamente estos controles.")}
+              </div>
+            </div>
+            <div className="dashboard-current-view-filters" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 2fr) repeat(2, minmax(140px, 1fr)) auto", gap: 10, alignItems: "end" }}>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Search projects", "Buscar proyectos")}
+                <Input
+                  value={projectSearch}
+                  onChange={event => setProjectSearch(event.target.value)}
+                  placeholder={tt("Name, code, client or location...", "Nombre, codigo, cliente o ubicacion...")}
+                />
+              </label>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Project status", "Estado del proyecto")}
+                <select className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
+                  <option value="all">{tt("All statuses", "Todos los estados")}</option>
+                  {projectStatusOptions.map(status => <option key={status} value={status}>{status.replace(/_/g, " ")}</option>)}
+                </select>
+              </label>
+              <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
+                {tt("Sort projects", "Ordenar proyectos")}
+                <select className="input" value={projectSort} onChange={event => setProjectSort(event.target.value as typeof projectSort)}>
+                  <option value="name_asc">{tt("Name A-Z", "Nombre A-Z")}</option>
+                  <option value="name_desc">{tt("Name Z-A", "Nombre Z-A")}</option>
+                  <option value="code_asc">{tt("Project code", "Codigo del proyecto")}</option>
+                  <option value="status_asc">{tt("Status, then name", "Estado y luego nombre")}</option>
+                </select>
+              </label>
+              <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("all"); setProjectSort("name_asc"); }}>
+                {tt("Clear filters", "Limpiar filtros")}
+              </Button>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>
+              <span>{tt("Visible projects", "Proyectos visibles")}: {projectRows.length}/{allProjectRows.length}</span>
+              <span>·</span>
+              <span>{tt("Status", "Estado")}: {projectStatus === "all" ? tt("All", "Todos") : projectStatus.replace(/_/g, " ")}</span>
+              <span>·</span>
+              <span>{tt("Sort", "Orden")}: {projectSort.replace(/_/g, " ")}</span>
+              {projectSearch.trim() && <><span>·</span><span>{tt("Search", "Busqueda")}: {projectSearch.trim()}</span></>}
+            </div>
+          </section>
 
           {/* AI Briefing banner */}
           <AiBriefingCard token={token ?? undefined} />
@@ -701,8 +788,8 @@ export function Dashboard() {
                 </h2>
                 <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
                   {tt(
-                    `${projects?.length ?? 0} project${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} files · ${totalMembers} team members`,
-                    `${projects?.length ?? 0} proyecto${(projects?.length ?? 0) !== 1 ? "s" : ""} · ${totalFiles} archivo${totalFiles !== 1 ? "s" : ""} · ${totalMembers} miembro${totalMembers !== 1 ? "s" : ""} del equipo`,
+                    `${projectRows.length}/${allProjectRows.length} project${projectRows.length !== 1 ? "s" : ""} visible · ${visibleProjectFiles} files · ${visibleProjectMembers} team members`,
+                    `${projectRows.length}/${allProjectRows.length} proyecto${projectRows.length !== 1 ? "s" : ""} visible${projectRows.length !== 1 ? "s" : ""} · ${visibleProjectFiles} archivo${visibleProjectFiles !== 1 ? "s" : ""} · ${visibleProjectMembers} miembro${visibleProjectMembers !== 1 ? "s" : ""} del equipo`,
                   )}
                 </p>
               </div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
-import { Download, SlidersHorizontal, UserCheck, UserPlus, Users } from "lucide-react";
+import { Download, UserCheck, UserPlus, Users } from "lucide-react";
 
 interface DirectoryEntry {
   id: number; fullName: string; email: string; companyName?: string;
@@ -60,7 +60,6 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showExportOptions, setShowExportOptions] = useState(false);
   const [search, setSearch] = useState("");
   const [scope, setScope] = useState<DirectoryScope>("all");
   const [roleFilter, setRoleFilter] = useState<DirectoryRoleFilter>("all");
@@ -344,16 +343,34 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <button className="btn btn-outline" type="button" onClick={() => setShowExportOptions(v => !v)}>
-            <SlidersHorizontal size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />
-            {t("Customize PDF", "Configurar PDF")}
-          </button>
           <PrintPdfButton
             lang={lang}
             onClick={exportCurrentViewPdf}
             loading={exporting}
-            disabled={selectedSectionCount === 0}
+            configurationInvalid={selectedSectionCount === 0}
             disabledReason={t("Select at least one PDF section", "Selecciona al menos una sección PDF")}
+            currentViewSummary={[...filterSummary, `${t("Showing", "Mostrando")}: ${rows.length}/${members.length + additionalContacts.length}`]}
+            options={
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+                {([
+                  ["includeMembers", t("Project Members section", "Sección Miembros del Proyecto")],
+                  ["includeContacts", t("Additional Contacts section", "Sección Contactos Adicionales")],
+                  ["includeEmail", t("Email column", "Columna correo")],
+                  ["includeCompany", t("Company column", "Columna empresa")],
+                  ["includeRole", t("Role column", "Columna rol")],
+                  ["includeStatus", t("Status column", "Columna estado")],
+                ] as const).map(([key, label]) => (
+                  <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                    <input
+                      type="checkbox"
+                      checked={pdfOptions[key]}
+                      onChange={event => setPdfOptions(current => ({ ...current, [key]: event.target.checked }))}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            }
           />
           {canWrite && (
             <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
@@ -430,39 +447,6 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
           )}
         </div>
       </div>
-
-      {showExportOptions && (
-        <div className="card" style={{ marginBottom: 16, padding: 16 }}>
-          <h3 style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px" }}>{t("PDF Contents", "Contenido del PDF")}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
-            {([
-              ["includeMembers", t("Project Members section", "Seccion Miembros del Proyecto")],
-              ["includeContacts", t("Additional Contacts section", "Seccion Contactos Adicionales")],
-              ["includeEmail", t("Email column", "Columna correo")],
-              ["includeCompany", t("Company column", "Columna empresa")],
-              ["includeRole", t("Role column", "Columna rol")],
-              ["includeStatus", t("Status column", "Columna estado")],
-            ] as const).map(([key, label]) => (
-              <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                <input
-                  type="checkbox"
-                  checked={pdfOptions[key]}
-                  onChange={e => setPdfOptions(o => ({ ...o, [key]: e.target.checked }))}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-          <p style={{ margin: "10px 0 0", fontSize: 12, color: "#6B7280" }}>
-            {t("The PDF uses these filters and sections exactly. Private notes and hidden fields are not exported.", "El PDF usa exactamente estos filtros y secciones. Las notas privadas y campos ocultos no se exportan.")}
-          </p>
-          {selectedSectionCount === 0 && (
-            <div className="alert alert-danger" style={{ marginTop: 10 }}>
-              {t("Select at least one section before exporting. Name is always included for record identity.", "Selecciona al menos una seccion antes de exportar. El nombre siempre se incluye para identificar el registro.")}
-            </div>
-          )}
-        </div>
-      )}
 
       {showForm && (
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>

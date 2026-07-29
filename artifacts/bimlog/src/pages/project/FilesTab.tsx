@@ -311,9 +311,36 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
           lang={lang}
           onClick={() => void exportCurrentView()}
           loading={exporting}
-          disabled={isLoading || exportColumns.size === 0}
+          disabled={isLoading}
+          configurationInvalid={exportColumns.size === 0}
           disabledReason={exportColumns.size === 0 ? tr("Select at least one visible column", "Selecciona al menos una columna visible") : undefined}
           className="min-h-10 flex-[0_1_230px] whitespace-normal"
+          currentViewSummary={[
+            tr(`Showing ${filteredFamilies.length} of ${families.length} documents`, `Mostrando ${filteredFamilies.length} de ${families.length} documentos`),
+            tr(`Search: ${fileQuery || "None"}`, `Búsqueda: ${fileQuery || "Ninguna"}`),
+            tr(`Date: ${dateFrom || ".."} to ${dateTo || ".."}`, `Fecha: ${dateFrom || ".."} a ${dateTo || ".."}`),
+          ]}
+          options={
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, fontSize: 12 }}>
+              {FILE_EXPORT_COLUMNS.map((column) => {
+                const labels: Record<FileExportColumn, [string, string]> = {
+                  name: ["Name", "Nombre"],
+                  type: ["Type", "Tipo"],
+                  status: ["Status", "Estado"],
+                  declaration: ["Declaration", "Declaración"],
+                  uploader: ["Uploader", "Cargado por"],
+                  date: ["Date", "Fecha"],
+                  versions: ["Versions", "Versiones"],
+                };
+                return (
+                  <label key={column} style={{ display: "inline-flex", gap: 5, alignItems: "center" }}>
+                    <input type="checkbox" checked={exportColumns.has(column)} onChange={() => toggleExportColumn(column)} />
+                    {tr(...labels[column])}
+                  </label>
+                );
+              })}
+            </div>
+          }
         />
       </div>
 
@@ -364,27 +391,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
             <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(event) => setDateTo(event.target.value)} style={filterControlStyle} />
           </label>
         </div>
-        <div style={{ marginTop: 11, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 11 }}>
-          <strong>{tr("PDF columns:", "Columnas PDF:")}</strong>
-          {FILE_EXPORT_COLUMNS.map((column) => {
-            const labels: Record<FileExportColumn, [string, string]> = {
-              name: ["Name", "Nombre"],
-              type: ["Type", "Tipo"],
-              status: ["Status", "Estado"],
-              declaration: ["Declaration", "Declaración"],
-              uploader: ["Uploader", "Cargado por"],
-              date: ["Date", "Fecha"],
-              versions: ["Versions", "Versiones"],
-            };
-            return (
-              <label key={column} style={{ display: "inline-flex", gap: 5, alignItems: "center" }}>
-                <input type="checkbox" checked={exportColumns.has(column)} onChange={() => toggleExportColumn(column)} />
-                {tr(...labels[column])}
-              </label>
-            );
-          })}
-        </div>
-        {exportColumns.size === 0 && <div style={{ marginTop: 8, color: "#B45309", fontSize: 11 }}>{tr("Select at least one PDF column.", "Selecciona al menos una columna PDF.")}</div>}
         {exportError && <div role="alert" style={{ marginTop: 8, color: "#B91C1C", fontSize: 11 }}>{exportError}</div>}
       </section>
 
