@@ -62,6 +62,19 @@ accepted, deployed, or live state.
   record-level Submittal wrapping and RFI project-company identity. The local
   successor is ready to seal; provider, production, push, publication, and
   deployment remain excluded.
+- The current bounded Lens reporting successor on clean base `5e0508f` replaces
+  Ruben's manual PivotTable step with generated hierarchy and summaries,
+  defaults reports to Open items, preserves source viewpoint identity/links,
+  and scopes non-admin exports to the authenticated responsible company or
+  person while retaining full project scope for roles carrying existing admin
+  permission metadata. It also corrects the two remaining uppercase
+  Submittals current-view separators and repairs the affected log's Ball in
+  Court column allocation and bounded wrapping. Focused typechecks, one
+  successful offline production build, actual manager/assigned XLSX generation,
+  every-sheet workbook inspection, and every-page Lens/Submittals PDF inspection
+  passed with synthetic local fixtures. The clean local seal is the remaining
+  step; no schema, Meeting Minutes, Proposed-RFI,
+  provider, production, publication, or deployment behavior is included.
 - Current GitHub, Replit, and production equality are not established by this
   recovery. The last known deployment evidence does not prove the current
   PDF/report UX.

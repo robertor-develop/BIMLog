@@ -1,5 +1,6 @@
 ﻿import { Router } from "express";
 import { db, pool } from "@workspace/db";
+import type { Request } from "express";
 import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
@@ -9,12 +10,15 @@ import {
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { getConfigOptionMeta } from "../middlewares/config-validator";
 import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, canonicalSpreadsheetWriteOptions, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createHash, randomUUID } from "crypto";
 import { LensImportValidationError, validateAndHashLensImportRequest } from "../lib/lens-import-contract";
+import { getAppUrl } from "../lib/email";
+import AdmZip from "adm-zip";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -22,6 +26,96 @@ function logLensImportInternal(scope: string, correlationId: string, err: unknow
 }
 
 type LensImportDbClient = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }>; release: () => void };
+
+async function lensReportScope<T extends { responsibleCompany: string | null }>(
+  req: Request,
+  rows: T[],
+): Promise<{ rows: T[]; label: string; fullProject: boolean }> {
+  const roleMeta = req.memberRole
+    ? await getConfigOptionMeta("member_role", req.memberRole)
+    : null;
+  if (roleMeta?.permission === "admin") {
+    return { rows, label: "Full project (authorized manager)", fullProject: true };
+  }
+  const normalizedIdentities = new Set(
+    [req.user?.companyName, req.user?.fullName]
+      .map(value => String(value ?? "").trim().toLocaleLowerCase())
+      .filter(Boolean),
+  );
+  const assigned = rows.filter(row =>
+    normalizedIdentities.has(String(row.responsibleCompany ?? "").trim().toLocaleLowerCase())
+  );
+  return {
+    rows: assigned,
+    label: `Assigned responsibility only (${req.user?.companyName || req.user?.fullName || "current user"})`,
+    fullProject: false,
+  };
+}
+
+function applyLensWorkbookOoxmlStyles(output: Buffer): Buffer {
+  const zip = new AdmZip(output);
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy-mm-dd"/></numFmts>
+  <fonts count="4">
+    <font><sz val="11"/><name val="Aptos"/><family val="2"/></font>
+    <font><b/><color rgb="FFFFFFFF"/><sz val="14"/><name val="Aptos Display"/><family val="2"/></font>
+    <font><color rgb="FF475569"/><sz val="9"/><name val="Aptos"/><family val="2"/></font>
+    <font><b/><color rgb="FFFFFFFF"/><sz val="9"/><name val="Aptos"/><family val="2"/></font>
+  </fonts>
+  <fills count="5">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF17365D"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF244F75"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF3F6F9"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border><left/><right/><top/><bottom style="thin"><color rgb="FFD7DEE7"/></bottom><diagonal/></border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="8">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="164" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+  <dxfs count="0"/>
+  <tableStyles count="0" defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/>
+</styleSheet>`;
+  zip.updateFile("xl/styles.xml", Buffer.from(styles, "utf8"));
+  const headerRows = [7, 6, 7, 5, 5, 5, 5, 5];
+  headerRows.forEach((headerRow, index) => {
+    const entryName = `xl/worksheets/sheet${index + 1}.xml`;
+    const entry = zip.getEntry(entryName);
+    if (!entry) throw new Error(`Lens workbook sheet missing: ${entryName}`);
+    const xml = entry.getData().toString("utf8").replace(
+      /<c r="([A-Z]+)(\d+)"([^>]*)>/g,
+      (match, column: string, rowText: string, attributes: string) => {
+        const row = Number(rowText);
+        let style = 0;
+        if (row === 1) style = 1;
+        else if (row < headerRow) style = 2;
+        else if (row === headerRow) style = 3;
+        else {
+          const shaded = (row - headerRow) % 2 === 0;
+          style = index === 0 && column === "A"
+            ? (shaded ? 7 : 6)
+            : (shaded ? 5 : 4);
+        }
+        return `<c r="${column}${rowText}"${attributes.replace(/\s+s="\d+"/g, "")} s="${style}">`;
+      },
+    );
+    zip.updateFile(entryName, Buffer.from(xml, "utf8"));
+  });
+  return zip.toBuffer();
+}
 
 // String-aware repair for the Navisworks plugin's malformed JSON. The plugin
 // runs under a non-invariant locale (e.g. es-*) so .NET formats decimal numbers
@@ -1056,15 +1150,17 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
     const trade = String(req.query.trade ?? "all");
     const floor = String(req.query.floor ?? "all");
     const reportType = String(req.query.reportType ?? "all");
-    const status = String(req.query.status ?? "all");
+    const status = String(req.query.status ?? "open");
     const lifecycleScope = String(req.query.lifecycleScope ?? "active");
     try {
       const [project] = await db.select({ name: projectsTable.name, code: projectsTable.code })
         .from(projectsTable)
         .where(eq(projectsTable.id, projectId));
-      const rows = await db.select().from(lensViewpointsTable)
+      const projectRows = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId))
         .orderBy(desc(lensViewpointsTable.capturedAt));
+      const scope = await lensReportScope(req, projectRows);
+      const rows = scope.rows;
       const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null; displayId: string | null; viewpointId: string }): string => {
         if (row.tradeFloorSeq != null) {
           const abbr = ((row.trade || "").length > 2 ? (row.trade || "").slice(0, 2) : (row.trade || "")).toUpperCase() || "??";
@@ -1093,10 +1189,12 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         .filter(v => status === "all" || v.status === status)
         .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
       const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status"];
+      const appBaseUrl = getAppUrl().replace(/\/+$/, "");
       const exportRows = filtered.map(v => ({
-        date: v.capturedAt ? new Date(v.capturedAt).toISOString().slice(0, 10) : "",
+        date: v.capturedAt ? new Date(v.capturedAt) : null,
         code: codeOf(v),
         viewpointId: v.viewpointId,
+        viewpointLink: `${appBaseUrl}/projects/${projectId}/clash-reports?view=lens&viewpoint=${v.id}`,
         floor: v.floor || "",
         trade: v.trade || "",
         responsibleCompany: v.responsibleCompany || "",
@@ -1113,6 +1211,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
         [`Exported: ${new Date().toISOString()}`],
         [`Rows: ${filtered.length}`],
+        [`Access scope: ${scope.label}`],
         [],
         header,
         ...exportRows.map(v => [
@@ -1133,15 +1232,23 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       ]);
       worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
       worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
-      worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 5, c: 0 }, e: { r: Math.max(5, filtered.length + 5), c: header.length - 1 } }) };
-      worksheet["!freeze"] = { xSplit: 0, ySplit: 6 };
+      worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 6, c: 0 }, e: { r: Math.max(6, filtered.length + 6), c: header.length - 1 } }) };
+      worksheet["!freeze"] = { xSplit: 0, ySplit: 7 };
+      exportRows.forEach((row, index) => {
+        const dateCell = worksheet[XLSX.utils.encode_cell({ r: index + 7, c: 0 })];
+        if (dateCell) dateCell.z = "yyyy-mm-dd";
+        const viewpointCell = worksheet[XLSX.utils.encode_cell({ r: index + 7, c: 2 })];
+        if (viewpointCell) viewpointCell.l = { Target: row.viewpointLink, Tooltip: "Open this source viewpoint in BIMLog" };
+      });
 
-      const dataStartRow = 7;
+      const dataStartRow = 8;
       const dataEndRow = Math.max(dataStartRow, dataStartRow + exportRows.length - 1);
       const summary = XLSX.utils.aoa_to_sheet([
         ["BIMLog Lens Export Summary"],
         [`Project`, `${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
         [`Generated`, new Date().toISOString()],
+        ["Access scope", scope.label],
+        ["Default/report filters", `Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; State=${lifecycleScope}`],
         [],
         ["Metric", "Value"],
         ["Total rows", { f: `COUNTA('Lens Viewpoints'!B${dataStartRow}:B${dataEndRow})` }],
@@ -1156,51 +1263,75 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       ]);
       summary["!cols"] = [{ wch: 28 }, { wch: 32 }];
 
-      const rubenRows: Array<Array<string>> = [];
+      const rubenRows: Array<Array<string | Date | null>> = [];
       const rubenSheetRows: Array<{ level?: number }> = [];
-      const pushRubenRow = (row: Array<string>, level?: number) => {
+      const pushRubenRow = (row: Array<string | Date | null>, level?: number) => {
         rubenRows.push(row);
         rubenSheetRows.push(level == null ? {} : { level });
       };
-      pushRubenRow(["Status", status === "all" ? "(Multiple Items)" : statusLabel(status)]);
+      pushRubenRow(["BIMLog Lens Open-Item Report"]);
+      pushRubenRow(["Project", `${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`]);
+      pushRubenRow(["Access Scope", scope.label]);
+      pushRubenRow(["Status", status === "all" ? "All statuses" : statusLabel(status)]);
       pushRubenRow([]);
-      pushRubenRow(["Trade", "Responsible Company", "Floor", "Code", "Note"]);
+      pushRubenRow(["Responsible Company / Person", "Report Type", "Floor", "Code", "Revision", "Open Item", "Note", "Viewpoint ID"]);
       const normalized = (value: string, fallback: string) => (value && value.trim()) || fallback;
       const rubenSorted = [...exportRows].sort((a, b) => [
-        normalized(a.trade, "Unassigned").localeCompare(normalized(b.trade, "Unassigned")),
         normalized(a.responsibleCompany, "Unassigned").localeCompare(normalized(b.responsibleCompany, "Unassigned")),
+        normalized(a.reportType, "Unassigned").localeCompare(normalized(b.reportType, "Unassigned")),
         normalized(a.floor, "Unassigned").localeCompare(normalized(b.floor, "Unassigned")),
         normalized(a.code, "").localeCompare(normalized(b.code, "")),
+        normalized(a.revision, "Rev 1").localeCompare(normalized(b.revision, "Rev 1")),
+        normalized(a.openItems, "").localeCompare(normalized(b.openItems, "")),
       ].find(n => n !== 0) ?? 0);
-      let lastTrade = "";
       let lastResponsibleCompany = "";
+      let lastReportType = "";
       let lastFloor = "";
+      let lastCode = "";
+      let lastRevision = "";
       for (const row of rubenSorted) {
-        const rowTrade = normalized(row.trade, "Unassigned");
         const rowResponsibleCompany = normalized(row.responsibleCompany, "Unassigned");
+        const rowReportType = normalized(row.reportType, "Unassigned");
         const rowFloor = normalized(row.floor, "Unassigned");
-        if (rowTrade !== lastTrade) {
-          pushRubenRow([rowTrade, "", "", "", ""], 0);
-          lastTrade = rowTrade;
-          lastResponsibleCompany = "";
-          lastFloor = "";
-        }
         if (rowResponsibleCompany !== lastResponsibleCompany) {
-          pushRubenRow(["", rowResponsibleCompany, "", "", ""], 1);
+          pushRubenRow([rowResponsibleCompany, "", "", "", "", "", "", ""], 0);
           lastResponsibleCompany = rowResponsibleCompany;
+          lastReportType = "";
           lastFloor = "";
+          lastCode = "";
+          lastRevision = "";
+        }
+        if (rowReportType !== lastReportType) {
+          pushRubenRow(["", rowReportType, "", "", "", "", "", ""], 1);
+          lastReportType = rowReportType;
+          lastFloor = "";
+          lastCode = "";
+          lastRevision = "";
         }
         if (rowFloor !== lastFloor) {
-          pushRubenRow(["", "", rowFloor, "", ""], 2);
+          pushRubenRow(["", "", rowFloor, "", "", "", "", ""], 2);
           lastFloor = rowFloor;
+          lastCode = "";
+          lastRevision = "";
         }
-        pushRubenRow(["", "", "", row.code, row.note], 3);
+        if (row.code !== lastCode) {
+          pushRubenRow(["", "", "", row.code, "", "", "", ""], 3);
+          lastCode = row.code;
+          lastRevision = "";
+        }
+        const revision = row.revision || "Rev 1";
+        if (revision !== lastRevision) {
+          pushRubenRow(["", "", "", "", revision, "", "", ""], 4);
+          lastRevision = revision;
+        }
+        pushRubenRow(["", "", "", "", "", row.openItems || "No open-item text recorded", row.note, row.viewpointId], 5);
       }
       const rubenReport = XLSX.utils.aoa_to_sheet(rubenRows);
-      rubenReport["!cols"] = [{ wch: 24 }, { wch: 30 }, { wch: 18 }, { wch: 16 }, { wch: 64 }];
+      rubenReport["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+      rubenReport["!cols"] = [{ wch: 32 }, { wch: 24 }, { wch: 18 }, { wch: 16 }, { wch: 12 }, { wch: 42 }, { wch: 52 }, { wch: 26 }];
       rubenReport["!rows"] = rubenSheetRows;
-      rubenReport["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 2, c: 0 }, e: { r: Math.max(2, rubenRows.length - 1), c: 4 } }) };
-      rubenReport["!freeze"] = { xSplit: 0, ySplit: 3 };
+      rubenReport["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 5, c: 0 }, e: { r: Math.max(5, rubenRows.length - 1), c: 7 } }) };
+      rubenReport["!freeze"] = { xSplit: 0, ySplit: 6 };
 
       const cleanGroup = (value: string, fallback: string) => (value && value.trim()) || fallback;
       const buildSummarySheet = (title: string, groupLabel: string, groupOf: (row: typeof exportRows[number]) => string) => {
@@ -1233,7 +1364,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         const sheet = XLSX.utils.aoa_to_sheet([
           [title],
           [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
-          [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; Scope=${lifecycleScope}`],
+          [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; State=${lifecycleScope}; Access=${scope.label}`],
           [],
           [groupLabel, "Total", "Current", "Superseded", "Voided", "Open", "Follow Up", "Waiting Design", "Approved", "Resolved", "P1", "P2", "P3", "P4", "P5"],
           ...table,
@@ -1256,7 +1387,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       const matrixSheet = XLSX.utils.aoa_to_sheet([
         ["Open Items Matrix"],
         [`Project: ${project?.name ?? `Project ${projectId}`} (${project?.code ?? projectId})`],
-        [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; Scope=${lifecycleScope}`],
+        [`Filters: Trade=${trade}; Floor=${floor}; Report Type=${reportType}; Status=${status}; State=${lifecycleScope}; Access=${scope.label}`],
         [],
         ["Floor", ...floorTradeKeys, "Total"],
         ...floorRows,
@@ -1266,16 +1397,96 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       matrixSheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: Math.max(4, floorRows.length + 4), c: floorTradeKeys.length + 1 } }) };
       matrixSheet["!freeze"] = { xSplit: 1, ySplit: 5 };
 
+      const levelSummary = buildSummarySheet("Summary by Building Level", "Building Level", row => row.floor);
+      const tradeSummary = buildSummarySheet("Summary by Trade", "Trade", row => row.trade);
+      const companySummary = buildSummarySheet("Summary by Responsible Company", "Responsible Company", row => row.responsibleCompany);
+      const statusSummary = buildSummarySheet("Summary by Review Status", "Review Status", row => row.status);
+      const applyReportPresentation = (
+        sheet: XLSX.WorkSheet,
+        headerRow: number,
+        titleEndColumn: number,
+      ) => {
+        const range = XLSX.utils.decode_range(sheet["!ref"] ?? "A1:A1");
+        sheet["!views"] = [{ showGridLines: false }];
+        sheet["!merges"] = [
+          ...(sheet["!merges"] ?? []),
+          ...((sheet["!merges"] ?? []).some(merge => merge.s.r === 0)
+            ? []
+            : [{ s: { r: 0, c: 0 }, e: { r: 0, c: titleEndColumn } }]),
+        ];
+        sheet["!rows"] = sheet["!rows"] ?? [];
+        sheet["!rows"]![0] = { ...(sheet["!rows"]![0] ?? {}), hpt: 26 };
+        sheet["!rows"]![headerRow] = { ...(sheet["!rows"]![headerRow] ?? {}), hpt: 24 };
+        for (let row = range.s.r; row <= range.e.r; row += 1) {
+          for (let col = range.s.c; col <= range.e.c; col += 1) {
+            const address = XLSX.utils.encode_cell({ r: row, c: col });
+            const cell = sheet[address] ?? (sheet[address] = { t: "s", v: "" });
+            const baseAlignment = {
+              vertical: "center",
+              wrapText: row >= headerRow,
+            };
+            if (row === 0) {
+              cell.s = {
+                font: { name: "Aptos Display", sz: 14, bold: true, color: { rgb: "FFFFFF" } },
+                fill: { patternType: "solid", fgColor: { rgb: "17365D" } },
+                alignment: { ...baseAlignment, horizontal: "left" },
+              };
+            } else if (row === headerRow) {
+              cell.s = {
+                font: { name: "Aptos", sz: 9, bold: true, color: { rgb: "FFFFFF" } },
+                fill: { patternType: "solid", fgColor: { rgb: "244F75" } },
+                alignment: { ...baseAlignment, horizontal: col === 0 ? "left" : "center" },
+                border: {
+                  bottom: { style: "thin", color: { rgb: "17365D" } },
+                },
+              };
+            } else if (row > headerRow) {
+              cell.s = {
+                font: { name: "Aptos", sz: 9, color: { rgb: "1F2937" } },
+                fill: {
+                  patternType: "solid",
+                  fgColor: { rgb: row % 2 === 0 ? "F3F6F9" : "FFFFFF" },
+                },
+                alignment: { ...baseAlignment, horizontal: col === 0 ? "left" : "center" },
+                border: {
+                  bottom: { style: "hair", color: { rgb: "D7DEE7" } },
+                },
+              };
+            } else {
+              cell.s = {
+                font: {
+                  name: "Aptos",
+                  sz: row === 1 ? 10 : 9,
+                  bold: row === 1,
+                  color: { rgb: row === 1 ? "17365D" : "475569" },
+                },
+                alignment: { ...baseAlignment, horizontal: "left" },
+              };
+            }
+          }
+        }
+      };
+      applyReportPresentation(worksheet, 6, 12);
+      applyReportPresentation(rubenReport, 5, 7);
+      applyReportPresentation(summary, 6, 1);
+      applyReportPresentation(levelSummary, 4, 14);
+      applyReportPresentation(tradeSummary, 4, 14);
+      applyReportPresentation(companySummary, 4, 14);
+      applyReportPresentation(statusSummary, 4, 14);
+      applyReportPresentation(matrixSheet, 4, Math.max(1, floorTradeKeys.length + 1));
+
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Lens Viewpoints");
       XLSX.utils.book_append_sheet(workbook, rubenReport, "Custom Report");
       XLSX.utils.book_append_sheet(workbook, summary, "Report Summary");
-      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Building Level", "Building Level", row => row.floor), "Summary by Level");
-      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Trade", "Trade", row => row.trade), "Summary by Trade");
-      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Responsible Company", "Responsible Company", row => row.responsibleCompany), "Summary by Company");
-      XLSX.utils.book_append_sheet(workbook, buildSummarySheet("Summary by Review Status", "Review Status", row => row.status), "Summary by Status");
+      XLSX.utils.book_append_sheet(workbook, levelSummary, "Summary by Level");
+      XLSX.utils.book_append_sheet(workbook, tradeSummary, "Summary by Trade");
+      XLSX.utils.book_append_sheet(workbook, companySummary, "Summary by Company");
+      XLSX.utils.book_append_sheet(workbook, statusSummary, "Summary by Status");
       XLSX.utils.book_append_sheet(workbook, matrixSheet, "Floor Trade Matrix");
-      const buffer = XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" }));
+      const buffer = applyLensWorkbookOoxmlStyles(
+        XLSX.write(workbook, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx" })),
+      );
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
       res.send(buffer);
@@ -2183,7 +2394,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const body = req.body ?? {};
       const filters = {
         priority: typeof body.filters?.priority === "string" ? body.filters.priority : "all",
-        status: typeof body.filters?.status === "string" ? body.filters.status : "all",
+        status: typeof body.filters?.status === "string" ? body.filters.status : "open",
         floor: typeof body.filters?.floor === "string" ? body.filters.floor : "all",
         trade: typeof body.filters?.trade === "string" ? body.filters.trade : "all",
         reportType: typeof body.filters?.reportType === "string" ? body.filters.reportType : "all",
@@ -2224,8 +2435,10 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // Pull all viewpoints, then apply the modal filters. Keep an all-row map so
       // successor rows can state which prior viewpoint they supersede, even when
       // the prior row is hidden by active-only filters.
-      const allLensRows = await db.select().from(lensViewpointsTable)
+      const projectLensRows = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId));
+      const scope = await lensReportScope(req, projectLensRows);
+      const allLensRows = scope.rows;
       const allLensById = new Map(allLensRows.map(v => [v.id, v]));
       let vps = allLensRows;
       // Void-records are plugin-side audit artifacts; the void itself is already
@@ -2242,8 +2455,22 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       // superseded/voided history.
       if (!includeNonActive) vps = vps.filter(v => (v.lifecycleStatus ?? "active") === "active" || (includeAuditRecords && v.reportType === "VOID-RECORD"));
 
-      const pOrder = (p: number | null | undefined) => p ?? 99;
-      vps.sort((a, b) => pOrder(a.priority) - pOrder(b.priority));
+      const normalizedSort = (value: unknown, fallback = "Unassigned") =>
+        String(value ?? "").trim() || fallback;
+      const codeForSort = (v: typeof vps[number]) => {
+        if (v.tradeFloorSeq == null) return v.displayId || v.viewpointId || "";
+        const tradeCode = (v.trade || "").slice(0, 2).toUpperCase() || "??";
+        return `${tradeCode}-${String(v.tradeFloorSeq).padStart(3, "0")}`;
+      };
+      vps.sort((a, b) => [
+        normalizedSort(a.responsibleCompany).localeCompare(normalizedSort(b.responsibleCompany)),
+        normalizedSort(a.reportType).localeCompare(normalizedSort(b.reportType)),
+        normalizedSort(a.floor).localeCompare(normalizedSort(b.floor)),
+        codeForSort(a).localeCompare(codeForSort(b)),
+        (a.revisionNumber ?? 1) - (b.revisionNumber ?? 1),
+        normalizedSort(a.openItems, "").localeCompare(normalizedSort(b.openItems, "")),
+      ].find(result => result !== 0) ?? 0);
+      const pOrder = (priority: number | null | undefined) => priority ?? 99;
 
       if (vps.length === 0) {
         res.status(400).json({ error: "no_viewpoints", message: "No viewpoints match the selected filters." });
@@ -2316,7 +2543,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       for (let attempt = 0; attempt < 12 && !inserted; attempt++) {
         reportNumber = `${code}-LV-${String(seq).padStart(3, "0")}`;
         if (usedNums.has(reportNumber)) { seq++; continue; }
-        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
+        contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
           await db.insert(lensViewpointReportsTable).values({
             projectId,
@@ -2348,7 +2575,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }
 
       // -- Build the PDF --
-      const reportHistoryRows = includeReportHistory ? await db.select({
+      const reportHistoryRows = includeReportHistory && scope.fullProject ? await db.select({
         reportNumber: lensViewpointReportsTable.reportNumber,
         generatedByName: lensViewpointReportsTable.generatedByName,
         generatedAt: lensViewpointReportsTable.generatedAt,
@@ -2359,7 +2586,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }).from(lensViewpointReportsTable)
         .where(eq(lensViewpointReportsTable.projectId, projectId))
         .orderBy(desc(lensViewpointReportsTable.generatedAt)) : [];
-      const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
+      const doc = createPdfDocument({ size: "TABLOID", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       const reportTitle = `${reportNumber} - Lens Coordination Report`;
       const reportTheme = REPORT_THEMES.lens.coordination;
       res.setHeader("Content-Type", "application/pdf");
@@ -2369,6 +2596,9 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const W = doc.page.width;
       const M = 40;
       const CW = W - M * 2;
+      const PAGE_BOTTOM = doc.page.height - 72;
+      const FOOTER_Y = doc.page.height - 34;
+      const FINGERPRINT_Y = doc.page.height - 50;
 
       // Formal engineering-deliverable palette comes from the shared pdf-kit
       // module. Navy header bars, white content, light-grey alternating rows,
@@ -2404,8 +2634,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const groupTokenOf = (v: typeof vps[number]) => v.issueGroupId ? `G:${String(v.issueGroupId).replace(/-/g, "").slice(0, 4).toUpperCase()}` : "-";
       const lensRegisterColumnSummary = [
         showGroupIds ? "Group" : "",
-        showLifecycleState ? "State" : "",
-        showRevisionColumn ? "Revision" : "",
+        "State",
+        "Revision",
       ].filter(Boolean).join(", ") || "Standard";
 
       // -- COVER PAGE (shared helper) --
@@ -2424,7 +2654,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         isoStamp: true,
         projectName: project.name,
         projectAddress,
-        projectMeta: `Project Code: ${project.code}  |  Report Rows: ${total}`,
+        projectMeta: `Project Code: ${project.code}  |  Report Rows: ${total}  |  Access: ${scope.label}`,
         theme: reportTheme,
       });
 
@@ -2467,8 +2697,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         .text(`Visible columns: ${lensRegisterColumnSummary}`, M, cardY + 72, { width: CW });
       doc.y = cardY + 90;
 
-      // Breakdown columns: by trade / floor / status
-      const tally = (key: "trade" | "floor" | "status") => {
+      // Breakdown columns replace Ruben's manual PivotTable step.
+      const tally = (key: "trade" | "floor" | "responsibleCompany" | "status") => {
         const m = new Map<string, number>();
         vps.forEach(v => {
           const raw = (v as any)[key];
@@ -2478,13 +2708,14 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         return Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
       };
       const breakdowns: { title: string; rows: [string, number][] }[] = [
+        { title: "By Level", rows: tally("floor") },
         { title: "By Trade", rows: tally("trade") },
-        { title: "By Floor", rows: tally("floor") },
+        { title: "By Responsible Company / Person", rows: tally("responsibleCompany") },
         { title: "By Status", rows: tally("status") },
       ];
       const bx0 = doc.y;
-      const colW = (CW - 20) / 3;
-      const maxRows = isOnePager ? 5 : 12;
+      const colW = (CW - 30) / 4;
+      const maxRows = isOnePager ? 5 : 10;
       breakdowns.forEach((bd, i) => {
         const x = M + i * (colW + 10);
         doc.rect(x, bx0, colW, 18).fill(NAVY);
@@ -2513,7 +2744,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         });
 
         // Compact sign-off so even the one-pager ends with an approval block.
-        if (doc.y + 70 > 535) { doc.addPage(); doc.y = 45; }
+        if (doc.y + 70 > PAGE_BOTTOM) { doc.addPage(); doc.y = 45; }
         const oY = doc.y + 14;
         doc.fontSize(10).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, oY);
         const oSigW = (CW - 60) / 2;
@@ -2526,33 +2757,36 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.y = oY + 58;
       } else {
         // -- MAIN VIEWPOINTS TABLE (shared drawTable helper) --
-        if (doc.y + 60 > 530) { doc.addPage(); doc.y = 40; }
+        if (doc.y + 60 > PAGE_BOTTOM - 5) { doc.addPage(); doc.y = 40; }
         doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Viewpoints Register", M, doc.y);
         doc.moveDown(0.4);
 
-        const dynamicNoteWidth = Math.max(96, 214 - (showGroupIds ? 40 : 0) - (showLifecycleState ? 48 : 0) - (showRevisionColumn ? 34 : 0));
         const registerColumns = [
-          { label: "ID", width: 54, bold: true, format: (v: any) => idText(v) },
-          { label: "From", width: 44, format: (v: any) => predecessorCodeOf(v) },
-          ...(showGroupIds ? [{ label: "Group", width: 40, format: (v: any) => groupTokenOf(v) }] : []),
-          ...(showLifecycleState ? [{ label: "State", width: 48, format: (v: any) => lifecycleLabel(v.lifecycleStatus ?? "active") }] : []),
-          ...(showRevisionColumn ? [{ label: "Rev", width: 34, align: "center" as const, format: (v: any) => v.revisionNumber ?? 1 }] : []),
+          { label: "Date", width: 64, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
+          { label: "Code", width: 58, bold: true, format: (v: any) => codeOf(v) },
+          { label: "Viewpoint ID", width: 95, format: (v: any) => v.viewpointId || "-" },
+          ...(showGroupIds ? [{ label: "Group", width: 55, format: (v: any) => groupTokenOf(v) }] : []),
+          { label: "Floor", width: 52, format: (v: any) => v.floor || "-" },
+          { label: "Trade", width: 52, format: (v: any) => v.trade || "-" },
+          { label: "Responsible Company / Person", width: 110, format: (v: any) => v.responsibleCompany || "-" },
+          { label: "Report Type", width: 72, format: (v: any) => v.reportType || "-" },
           { label: "Priority", width: 42, align: "center" as const, bold: true, format: (v: any) => (v.priority ? `P${v.priority}` : "-") },
-          { label: "Trade", width: 56, format: (v: any) => v.trade || "-" },
-          { label: "Responsible", width: 74, format: (v: any) => v.responsibleCompany || "-" },
-          { label: "Report Type", width: 62, format: (v: any) => v.reportType || "-" },
-          { label: "Floor", width: 38, format: (v: any) => v.floor || "-" },
-          { label: "Note", width: dynamicNoteWidth, wrap: true, format: (v: any) => v.note || "-" },
-          { label: "Status", width: 54, format: (v: any) => statusLabel(v.status) },
-          { label: "Captured", width: 54, color: PALETTE.MUTED, format: (v: any) => fmtShort(v.capturedAt) },
+          { label: "State", width: 58, format: (v: any) => lifecycleLabel(v.lifecycleStatus ?? "active") },
+          { label: "Revision", width: 42, align: "center" as const, format: (v: any) => v.revisionNumber ?? 1 },
+          { label: "Note", width: 180, wrap: true, format: (v: any) => v.note || "-" },
+          { label: "Open Items", width: 180, wrap: true, format: (v: any) => v.openItems || "-" },
+          { label: "Status", width: 66, format: (v: any) => statusLabel(v.status) },
         ];
 
         const endY = drawTable(doc, {
           x: M,
           startY: doc.y,
           rows: vps,
-          pageBottom: 535,
+          pageBottom: PAGE_BOTTOM,
           columns: registerColumns,
+          fontSize: 6.5,
+          headerFontSize: 6.2,
+          rowMinHeight: 24,
           onPageBreak: () => {
             doc.addPage();
             doc.rect(0, 0, W, 25).fill(PALETTE.NAVY);
@@ -2563,7 +2797,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         doc.y = endY;
 
         // -- SIGNATURE BLOCK (last page) --
-        if (doc.y + 110 > 535) { doc.addPage(); doc.y = 45; }
+        if (doc.y + 110 > PAGE_BOTTOM) { doc.addPage(); doc.y = 45; }
         doc.moveDown(1);
         const sgY = doc.y + 10;
         doc.fontSize(11).font("Helvetica-Bold").fillColor("#111827").text("Approval & Sign-off", M, sgY);
@@ -2611,7 +2845,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             x: M,
             startY: doc.y,
             rows: revisionRows,
-            pageBottom: 535,
+            pageBottom: PAGE_BOTTOM,
             columns: [
               { label: "ID", width: 70, bold: true, format: (r) => idText(r) },
               { label: "State", width: 70, format: (r) => lifecycleLabel(r.lifecycleStatus ?? "active") },
@@ -2639,7 +2873,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             x: M,
             startY: doc.y,
             rows: reportHistoryRows,
-            pageBottom: 535,
+            pageBottom: PAGE_BOTTOM,
             columns: [
               { label: "Report No.", width: 88, bold: true, format: (r) => r.reportNumber || "-" },
               { label: "Generated", width: 72, format: (r) => fmtShort(r.generatedAt) },
@@ -2663,6 +2897,8 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const footerDate = reportDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
       addPageNumbers(doc, {
         margin: M,
+        footerY: FOOTER_Y,
+        fingerprintY: FINGERPRINT_Y,
         watermarkText,
         contentHash,
         companyName,

@@ -77,6 +77,19 @@ This is the operating register for unfinished BIMLog work. It exists so customer
     inspection passed with synthetic local fixtures. Preserve the accepted
     family evidence these changes did not invalidate and keep provider,
     production, push, publication, and deployment outside this local seal.
+11. The Lens/Viewpoint reporting follow-up on `5e0508f` automates Ruben's
+    company/person, report-type, floor, code, revision, and open-item hierarchy;
+    adds generated summaries by level, trade, responsible company, and status;
+    defaults exports to Open; and applies existing role metadata so managers
+    retain full project scope while other responsible parties receive only
+    assigned rows. It also corrects the two remaining uppercase Submittals
+    current-view separators and the affected Ball in Court column allocation.
+    Focused typechecks, one successful offline production build, actual
+    manager/assigned XLSX generation, all-sheet workbook inspection, every-page
+    Lens/Submittals PDF inspection, and case-insensitive title scanning passed
+    with synthetic local fixtures. Seal only the clean evidence-bound local
+    candidate. Meeting Minutes, Proposed-RFI, schema, provider,
+    production, push, publication, and deployment remain excluded.
 
 ## Current terminal truth - 2026-07-23
 

@@ -158,7 +158,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [fTrade, setFTrade] = useState("all");
   const [fFloor, setFFloor] = useState("all");
   const [fReportType, setFReportType] = useState("all");
-  const [fStatus, setFStatus] = useState("all");
+  const [fStatus, setFStatus] = useState("open");
   // Per-user, per-project view options: which state/chain columns are shown,
   // how the ID renders, and which record states are listed. Persisted to
   // localStorage so the chosen view sticks between visits.
@@ -236,13 +236,13 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     showHealthScore: true,
     isExecutiveOnePager: false,
     fPriority: "all",
-    fStatus: "all",
+    fStatus: "open",
     fFloor: "all",
     fTrade: "all",
     fReportType: "all",
     idFormat: "code",
     includeNonActive: false,
-    includeResolved: true,
+    includeResolved: false,
     showGroupIds: true,
     showLifecycleState: true,
     showRevisionColumn: true,

@@ -4780,6 +4780,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4a8f8af725ca70b9f309469437002524f278759bfa8401eb04ba49a602d29b63"
+    },
+    {
+      "taskId": "lens-viewpoint-report-automation-20260729",
+      "reviewedThroughCommit": "5e0508f803515cedee859156aa0ad5bc3f7035b4",
+      "reviewedAt": "2026-07-29T17:09:00-04:00",
+      "status": "local_candidate_ready_for_seal",
+      "captureTiming": "acceptance_boundary",
+      "summary": "Automates the existing Lens Excel/PDF reporting hierarchy and summaries, applies existing role metadata to report scope, defaults to Open items, and corrects the two remaining uppercase Submittals current-view separators.",
+      "workstreams": [
+        "lens-viewpoint-reporting",
+        "spreadsheet-automation",
+        "focused-local-release-validation"
+      ],
+      "evidence": [
+        {
+          "path": "tmp/lens-report-evidence",
+          "type": "owner_validation",
+          "result": "passed",
+          "boundary": "Only synthetic local Lens XLSX/PDF and affected Submittals PDF evidence is in scope; schema, Meeting Minutes, Proposed-RFI, provider, production, push, publish, and deploy remain excluded."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human-authority, product boundary, or permanent business doctrine change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing owner QA and artifact-inspection requirements govern this bounded work."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing spreadsheet and PDF generation, rendering, and inspection gates remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, or strategic relationship change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, dependency, provider, hosting, tenancy, or production environment change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, or field workflow change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing current-view separator and professional report rules are applied without changing their authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the bounded local Lens reporting successor and keeps validation, review, deployment, and live states separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records only the focused artifact, build, evidence, and local sealing work still required."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider inspection, production observation, customer data, publication, deployment, or destructive cleanup occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/routes/clash_reports.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/src/pages/project/LensViewpointsView.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0cf21787647ff5224f4e331d4569cccd3740329d84ae3f3e96578597b3a1bad7"
     }
   ]
 }

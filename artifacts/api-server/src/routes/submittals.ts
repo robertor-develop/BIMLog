@@ -629,7 +629,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     // Header band
     doc.rect(0, 0, LOG_W, 60).fill(REPORT_THEMES.submittal.log.dark);
     doc.fillColor("white").fontSize(16).font("Helvetica-Bold")
-      .text(`${exportingCompany?.name || "BIMLog"}  |  SUBMITTALS - CURRENT VIEW`, LOG_MARGIN, 10, { width: LOG_CONTENT_W, lineBreak: false, ellipsis: true });
+      .text(`${exportingCompany?.name || "BIMLog"}  |  SUBMITTALS — CURRENT VIEW`, LOG_MARGIN, 10, { width: LOG_CONTENT_W, lineBreak: false, ellipsis: true });
     doc.fillColor("#93C5FD").fontSize(9).font("Helvetica")
       .text(`${project?.name || "Project"} | Generated ${new Date().toLocaleDateString()}`, LOG_MARGIN, 29, { width: LOG_CONTENT_W, lineBreak: false });
     doc.fillColor("white").fontSize(9)
@@ -640,30 +640,35 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
 
     // Column defs (landscape 792-72=720 content)
     const COLS = [
-      { label: "Number",        w: 65 },
-      { label: "Title",         w: 130 },
-      { label: "Type",          w: 70 },
-      { label: "Status",        w: 75 },
-      { label: "Submitted By",  w: 85 },
-      { label: "Submitted To",  w: 85 },
-      { label: "Date Submitted",w: 72 },
-      { label: "Date Required", w: 72 },
-      { label: "Days Out",      w: 46 },
-      { label: "Ball in Court", w: LOG_CONTENT_W - (65+130+70+75+85+85+72+72+46) },
+      { label: "Number",         w: 54 },
+      { label: "Title",          w: 128 },
+      { label: "Type",           w: 58 },
+      { label: "Status",         w: 62 },
+      { label: "Submitted By",   w: 72 },
+      { label: "Submitted To",   w: 72 },
+      { label: "Date Submitted", w: 60 },
+      { label: "Date Required",  w: 60 },
+      { label: "Days Out",       w: 44 },
+      { label: "Ball in Court",  w: 110 },
     ];
 
     let pageNumber = 1;
     let cx = LOG_MARGIN;
     const drawColumnHeader = () => {
-      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).fill("#EFF6FF");
+      const headerHeight = 24;
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, headerHeight).fill("#EFF6FF");
       cx = LOG_MARGIN;
       COLS.forEach(col => {
         doc.fillColor("#1E3A5F").fontSize(7).font("Helvetica-Bold")
-          .text(col.label, cx + 3, y + 4, { width: col.w - 4, lineBreak: false });
+          .text(col.label, cx + 3, y + 5, {
+            width: col.w - 6,
+            height: headerHeight - 8,
+            ellipsis: true,
+          });
         cx += col.w;
       });
-      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, 16).stroke("#BFDBFE");
-      y += 16;
+      doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, headerHeight).stroke("#BFDBFE");
+      y += headerHeight;
     };
     const drawFooter = () => {
       doc.page.margins.bottom = 0;
@@ -683,7 +688,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     };
 
     filteredSubs.forEach((sub, idx) => {
-      const rowH = 15;
+      const rowH = 30;
       if (y + rowH > LOG_CONTENT_BOT) {
         drawFooter();
         doc.addPage();
@@ -691,7 +696,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
         pageNumber += 1;
         y = LOG_MARGIN;
         doc.fillColor("#1E3A5F").fontSize(9).font("Helvetica-Bold")
-          .text("SUBMITTALS - CURRENT VIEW - CONTINUED", LOG_MARGIN, y, { width: LOG_CONTENT_W, lineBreak: false });
+          .text("SUBMITTALS — CURRENT VIEW — CONTINUED", LOG_MARGIN, y, { width: LOG_CONTENT_W, lineBreak: false });
         y += 16;
         drawColumnHeader();
       }
@@ -720,7 +725,11 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       COLS.forEach((col, ci) => {
         const color = ci === 3 ? (STATUS_COLORS[vals[ci]] || "#374151") : "#374151";
         doc.fillColor(color).fontSize(6.5).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
-          .text(vals[ci], cx + 3, y + 4, { width: col.w - 6, lineBreak: false });
+          .text(String(vals[ci] ?? "-"), cx + 3, y + 4, {
+            width: col.w - 6,
+            height: rowH - 8,
+            ellipsis: true,
+          });
         cx += col.w;
       });
       doc.rect(LOG_MARGIN, y, LOG_CONTENT_W, rowH).stroke("#F1F5F9");
