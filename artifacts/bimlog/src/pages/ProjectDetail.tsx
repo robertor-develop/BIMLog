@@ -27,10 +27,33 @@ import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 
+const PROJECT_TABS = new Set([
+  "command-center",
+  "coordination",
+  "analytics",
+  "files",
+  "rfis",
+  "submittals",
+  "submittal-tracker",
+  "activity",
+  "team",
+  "generator",
+  "convention",
+  "reports",
+  "integrations",
+  "directory",
+  "transmittals",
+  "change-orders",
+  "meetings",
+  "schedule",
+  "clash-reports",
+]);
+
 export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab");
   const projectId = params?.id ? parseInt(params.id) : 0;
   const tab = params?.tab || "analytics";
+  const isKnownTab = PROJECT_TABS.has(tab);
 
   const [, setLocation] = useLocation();
   const { lang, t } = useI18n();
@@ -68,7 +91,13 @@ export function ProjectDetail() {
       <div className="app-shell">
         <div className="sidebar" />
         <div className="main-area">
-          <div className="page-content" role="status" aria-live="polite" aria-busy="true">
+          <div
+            className="page-content"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            aria-label={lang === "es" ? "Verificando acceso al proyecto" : "Verifying project access"}
+          >
             <div className="skeleton" style={{ height: 20, width: 200, marginBottom: 12 }} />
             <div className="skeleton" style={{ height: 40, width: 320 }} />
             <span className="sr-only">{lang === "es" ? "Verificando acceso al proyecto…" : "Verifying project access…"}</span>
@@ -100,8 +129,13 @@ export function ProjectDetail() {
       <div className="app-shell">
         <div className="main-area">
           <div className="page-content" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <div role={denied ? "alert" : "status"} aria-live={denied ? "assertive" : "polite"} style={{ textAlign: "center", maxWidth: 520 }}>
-              <h1 tabIndex={-1} style={{ fontSize: 20, marginBottom: 8 }}>{heading}</h1>
+            <div
+              role={denied ? "alert" : "status"}
+              aria-live={denied ? "assertive" : "polite"}
+              aria-labelledby="project-load-state-title"
+              style={{ textAlign: "center", maxWidth: 520 }}
+            >
+              <h1 id="project-load-state-title" tabIndex={-1} style={{ fontSize: 20, marginBottom: 8 }}>{heading}</h1>
               <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>{detail}</p>
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
                 {!denied && !missing && (
@@ -109,7 +143,7 @@ export function ProjectDetail() {
                     {lang === "es" ? "Reintentar" : "Retry"}
                   </Button>
                 )}
-                <Link href="/dashboard"><Button variant="outline" size="sm">{lang === "es" ? "Volver a la sede" : "Back to Dashboard"}</Button></Link>
+                <Link href="/dashboard"><Button type="button" variant="outline" size="sm">{lang === "es" ? "Volver a la sede" : "Back to Dashboard"}</Button></Link>
               </div>
             </div>
           </div>
@@ -184,6 +218,25 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
+          {!isKnownTab && (
+            <section
+              role="alert"
+              aria-labelledby="project-tab-not-found-title"
+              style={{ display: "flex", minHeight: 240, alignItems: "center", justifyContent: "center", textAlign: "center" }}
+            >
+              <div>
+                <h1 id="project-tab-not-found-title" style={{ marginBottom: 8 }}>
+                  {t("notFound.title")}
+                </h1>
+                <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
+                  {t("notFound.message")}
+                </p>
+                <Link href={`/projects/${projectId}/analytics`}>
+                  <Button variant="outline" size="sm">{t("notFound.backHome")}</Button>
+                </Link>
+              </div>
+            </section>
+          )}
           {tab === "command-center" && <CoordinatorCommandCenter projectId={projectId} />}
           {tab === "coordination"   && <CoordinationHub  projectId={projectId} canWrite={canWrite} currentUserRole={memberRole} members={members ?? []} />}
           {tab === "analytics"      && <AnalyticsTab     projectId={projectId} />}
