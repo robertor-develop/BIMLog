@@ -19,7 +19,34 @@ type PdfDocumentOptions = ConstructorParameters<typeof PDFDocument>[0];
 export type ReportModule = "rfi" | "schedule" | "lens" | "clash" | "submittal" | "transmittal" | "change_order" | "meeting" | "files" | "platform";
 
 export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFDocument {
-  return new PDFDocument(options);
+  const doc = new PDFDocument(options);
+  const nativeAddPage = doc.addPage.bind(doc);
+
+  // PDFKit retains mutable cursor and page-option state between pages. That is
+  // convenient for prose, but unsafe for governed reports: an implicit
+  // continuation page can otherwise inherit a stale cursor or fall back to a
+  // different physical layout. Preserve the exact current MediaBox/margins and
+  // reset the content origin whenever a caller requests an implicit page.
+  doc.addPage = ((pageOptions?: PDFKit.PDFDocumentOptions) => {
+    const currentPage = doc.page;
+    const continuationOptions = !pageOptions && currentPage
+      ? {
+          size: [currentPage.width, currentPage.height] as [number, number],
+          margins: {
+            top: currentPage.margins.top,
+            right: currentPage.margins.right,
+            bottom: currentPage.margins.bottom,
+            left: currentPage.margins.left,
+          },
+        }
+      : pageOptions;
+    const result = nativeAddPage(continuationOptions);
+    doc.x = doc.page.margins.left;
+    doc.y = doc.page.margins.top;
+    return result;
+  }) as typeof doc.addPage;
+
+  return doc;
 }
 
 
@@ -38,6 +65,43 @@ export const PALETTE = {
   FONT_BOLD: "Helvetica-Bold",
   MARGIN: 40,
 } as const;
+
+function fitSingleLineFontSize(
+  doc: Doc,
+  text: string,
+  width: number,
+  preferred: number,
+  minimum: number,
+  font: string = PALETTE.FONT,
+): number {
+  let size = preferred;
+  doc.font(font);
+  while (size > minimum) {
+    doc.fontSize(size);
+    if (doc.widthOfString(text) <= width) break;
+    size = Math.max(minimum, size - 0.5);
+  }
+  return size;
+}
+
+function fitWrappedFontSize(
+  doc: Doc,
+  text: string,
+  width: number,
+  height: number,
+  preferred: number,
+  minimum: number,
+  font: string = PALETTE.FONT,
+): number {
+  let size = preferred;
+  doc.font(font);
+  while (size > minimum) {
+    doc.fontSize(size);
+    if (doc.heightOfString(text, { width }) <= height) break;
+    size = Math.max(minimum, size - 0.5);
+  }
+  return size;
+}
 
 export interface ReportTheme {
   module: ReportModule;
@@ -243,7 +307,7 @@ export function drawBrandedHeader(doc: Doc, o: BrandedHeaderOptions): number {
   const M = o.margin ?? PALETTE.MARGIN;
   const W = doc.page.width;
   const CW = W - M * 2;
-  const bandH = 58;
+  const bandH = 60;
 
   const theme = o.theme ?? REPORT_THEMES.platform.standard;
   doc.rect(0, 0, W, bandH).fill(theme.dark);
@@ -252,25 +316,40 @@ export function drawBrandedHeader(doc: Doc, o: BrandedHeaderOptions): number {
   if (o.logoBase64 && o.logoType) {
     try {
       doc.image(o.logoBase64, M, 10, { height: 36, fit: [110, 36] });
-      doc.fontSize(14).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M + 120, 14);
+      const companyWidth = Math.max(80, CW * 0.4 - 120);
+      const companySize = fitSingleLineFontSize(doc, o.companyName, companyWidth, 16, 8, PALETTE.FONT_BOLD);
+      doc.fontSize(companySize).font(PALETTE.FONT_BOLD).fillColor("white")
+        .text(o.companyName, M + 120, 12, { width: companyWidth, lineBreak: false });
     } catch {
-      doc.fontSize(16).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 14);
+      const companyWidth = CW * 0.4;
+      const companySize = fitSingleLineFontSize(doc, o.companyName, companyWidth, 16, 8, PALETTE.FONT_BOLD);
+      doc.fontSize(companySize).font(PALETTE.FONT_BOLD).fillColor("white")
+        .text(o.companyName, M, 12, { width: companyWidth, lineBreak: false });
     }
   } else {
-    doc.fontSize(16).font(PALETTE.FONT_BOLD).fillColor("white").text(o.companyName, M, 14);
+    const companyWidth = CW * 0.4;
+    const companySize = fitSingleLineFontSize(doc, o.companyName, companyWidth, 16, 8, PALETTE.FONT_BOLD);
+    doc.fontSize(companySize).font(PALETTE.FONT_BOLD).fillColor("white")
+      .text(o.companyName, M, 12, { width: companyWidth, lineBreak: false });
   }
-  const titleX = M + CW * 0.44;
-  const titleW = CW * 0.56;
-  doc.fontSize(12).font(PALETTE.FONT_BOLD).fillColor("white")
-    .text(o.title, titleX, 12, { align: "right", width: titleW, lineBreak: false, ellipsis: true });
-  if (o.subtitle) {
-    doc.fontSize(7.5).font(PALETTE.FONT).fillColor("#D1D5DB")
-      .text(o.subtitle, titleX, 31, { align: "right", width: titleW, lineBreak: false, ellipsis: true });
-  }
+  const titleX = M + CW * 0.43;
+  const titleW = CW * 0.57;
+  const titleH = 28;
+  const titleSize = fitWrappedFontSize(doc, o.title, titleW, titleH, 13, 8, PALETTE.FONT_BOLD);
+  doc.fontSize(titleSize).font(PALETTE.FONT_BOLD).fillColor("white")
+    .text(o.title, titleX, 8, { align: "right", width: titleW, height: titleH, lineBreak: true });
+
   const projLine = [o.projectName, o.projectCode ? `(${o.projectCode})` : ""].filter(Boolean).join(" ");
-  doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB").text(projLine, M, 38, { width: CW * 0.6 });
-  if (o.reportNumber) {
-    doc.fontSize(8).font(PALETTE.FONT).fillColor("#D1D5DB").text(o.reportNumber, M, 38, { align: "right", width: CW });
+  const projectWidth = CW * 0.4;
+  const projectSize = fitSingleLineFontSize(doc, projLine, projectWidth, 8, 6.5);
+  doc.fontSize(projectSize).font(PALETTE.FONT).fillColor("#D1D5DB")
+    .text(projLine, M, 40, { width: projectWidth, lineBreak: false });
+
+  const rightMeta = [o.subtitle, o.reportNumber].filter(Boolean).join(" | ");
+  if (rightMeta) {
+    const metaSize = fitSingleLineFontSize(doc, rightMeta, titleW, 7.5, 5.5);
+    doc.fontSize(metaSize).font(PALETTE.FONT).fillColor("#D1D5DB")
+      .text(rightMeta, titleX, 42, { align: "right", width: titleW, lineBreak: false });
   }
   return bandH + 6;
 }
@@ -357,16 +436,33 @@ export interface FooterOptions {
 export function drawFooter(doc: Doc, o: FooterOptions = {}): void {
   const M = o.margin ?? PALETTE.MARGIN;
   const W = doc.page.width;
+  const H = doc.page.height;
   const CW = W - M * 2;
-  const parts = [o.companyName, o.projectName, o.reportNumber, o.timestamp, o.pageLabel]
-    .map((p) => (p ? String(p).trim() : ""))
-    .filter(Boolean);
-  parts.push("BIMLog by IgniteSmart");
+  const left = [o.companyName, o.projectName].map((p) => (p ? String(p).trim() : "")).filter(Boolean).join(" | ");
+  const center = [o.reportNumber, o.pageLabel].map((p) => (p ? String(p).trim() : "")).filter(Boolean).join(" | ");
+  const right = [o.timestamp, "BIMLog by IgniteSmart"].map((p) => (p ? String(p).trim() : "")).filter(Boolean).join(" | ");
+  const requestedY = o.y ?? H - 28;
+  const footerY = Math.max(H - 40, Math.min(requestedY, H - 26));
+  const gap = 8;
+  const leftW = CW * 0.39;
+  const centerW = CW * 0.22;
+  const rightW = CW - leftW - centerW - gap * 2;
   const originalBottomMargin = doc.page.margins.bottom;
   doc.page.margins.bottom = 0;
   try {
-    doc.fontSize(o.fontSize ?? 7).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
-      .text(parts.join(" | "), M, o.y ?? 560, { align: "center", width: CW, lineBreak: false });
+    doc.moveTo(M, footerY - 5).lineTo(W - M, footerY - 5).lineWidth(0.35).strokeColor(PALETTE.LINE).stroke();
+    const preferred = o.fontSize ?? 6.5;
+    const leftSize = fitSingleLineFontSize(doc, left, leftW, preferred, 5);
+    doc.fontSize(leftSize).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
+      .text(left, M, footerY, { width: leftW, lineBreak: false });
+    const centerX = M + leftW + gap;
+    const centerSize = fitSingleLineFontSize(doc, center, centerW, preferred, 5);
+    doc.fontSize(centerSize).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
+      .text(center, centerX, footerY, { width: centerW, align: "center", lineBreak: false });
+    const rightX = centerX + centerW + gap;
+    const rightSize = fitSingleLineFontSize(doc, right, rightW, preferred, 5);
+    doc.fontSize(rightSize).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
+      .text(right, rightX, footerY, { width: rightW, align: "right", lineBreak: false });
   } finally {
     doc.page.margins.bottom = originalBottomMargin;
   }
@@ -463,16 +559,36 @@ export interface DrawTableOptions {
 export function drawTable(doc: Doc, o: DrawTableOptions): number {
   const columns = o.columns;
   const tableW = columns.reduce((s, c) => s + c.width, 0);
+  const physicalRight = doc.page.width - doc.page.margins.right;
+  if (o.x < doc.page.margins.left || o.x + tableW > physicalRight + 0.01) {
+    const layoutError = new Error(
+      `Governed table exceeds physical content bounds: x=${o.x}, width=${tableW}, `
+      + `left=${doc.page.margins.left}, right=${physicalRight}`,
+    );
+    layoutError.name = "GovernedPdfLayoutError";
+    throw layoutError;
+  }
   const fontSize = o.fontSize ?? 7;
   const headerFontSize = o.headerFontSize ?? 7;
   const rowMinHeight = o.rowMinHeight ?? 24;
-  const headerHeight = o.headerHeight ?? 18;
+  const requestedHeaderHeight = o.headerHeight ?? 20;
   const padX = o.cellPadX ?? 3;
   const padY = o.cellPadY ?? 5;
   const headerFill = o.headerFill ?? PALETTE.NAVY;
   const rowAltFill = o.rowAltFill ?? PALETTE.ROW_ALT;
   const textColor = o.textColor ?? PALETTE.TEXT;
   const borderColor = o.borderColor ?? PALETTE.BORDER;
+  const pageBottom = Math.min(o.pageBottom, doc.page.height - 42);
+
+  let measuredHeaderTextHeight = 0;
+  for (const col of columns) {
+    doc.fontSize(headerFontSize).font(PALETTE.FONT_BOLD);
+    measuredHeaderTextHeight = Math.max(
+      measuredHeaderTextHeight,
+      doc.heightOfString(col.label.toUpperCase(), { width: col.width - padX * 2 }),
+    );
+  }
+  const headerHeight = Math.max(requestedHeaderHeight, measuredHeaderTextHeight + 8);
 
   const cellText = (col: TableColumn, row: any, idx: number): string => {
     if (col.format) return col.format(row, idx);
@@ -485,7 +601,12 @@ export function drawTable(doc: Doc, o: DrawTableOptions): number {
     let cx = o.x;
     for (const col of columns) {
       doc.fontSize(headerFontSize).font(PALETTE.FONT_BOLD).fillColor("white")
-        .text(col.label.toUpperCase(), cx + padX, hy + 5, { width: col.width - padX * 2, lineBreak: false });
+        .text(col.label.toUpperCase(), cx + padX, hy + 4, {
+          width: col.width - padX * 2,
+          height: headerHeight - 7,
+          align: col.align ?? "left",
+          lineBreak: true,
+        });
       cx += col.width;
     }
     return hy + headerHeight + 2;
@@ -503,7 +624,7 @@ export function drawTable(doc: Doc, o: DrawTableOptions): number {
     }
     const rowH = wrapH > 0 ? Math.max(rowMinHeight, wrapH + padY + 3) : rowMinHeight;
 
-    if (y + rowH > o.pageBottom) {
+    if (y + rowH > pageBottom) {
       y = o.onPageBreak ? o.onPageBreak() : (doc.addPage(), o.startY);
       y = drawHeader(y);
     }

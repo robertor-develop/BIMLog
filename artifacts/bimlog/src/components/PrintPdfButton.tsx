@@ -1,6 +1,14 @@
-import { type ReactNode, useEffect, useState } from "react";
-import { Loader2, Printer, X } from "lucide-react";
+import { type ReactNode, useId, useRef, useState } from "react";
+import { Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type PrintPdfButtonProps = {
   lang: string;
@@ -51,9 +59,11 @@ export async function downloadAuthenticatedPdf(
   url: string,
   token: string,
   fallbackFileName: string,
+  signal?: AbortSignal,
 ) {
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
+    signal,
   });
   await downloadPdfResponse(response, fallbackFileName);
 }
@@ -62,7 +72,7 @@ export async function downloadGovernedCurrentViewPdf(
   projectId: number,
   token: string,
   payload: {
-    surface: "reports-hub" | "integrations" | "clash-reports" | "submittal-register";
+    surface: "reports-hub" | "integrations" | "clash-reports" | "submittal-register" | "naming-convention";
     lang: string;
     context: string[];
     columns: string[];
@@ -94,6 +104,10 @@ export function PrintPdfButton({
   configurationInvalid = false,
 }: PrintPdfButtonProps) {
   const [open, setOpen] = useState(false);
+  const statusId = useId();
+  const disabledReasonId = useId();
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const isSpanish = lang === "es";
   const label = loading
     ? isSpanish ? "Preparando PDF..." : "Preparing PDF..."
@@ -103,23 +117,15 @@ export function PrintPdfButton({
     : isSpanish
       ? "Imprime o descarga un PDF de la vista visible actual."
       : "Print or download a PDF of the current visible view.";
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, [open]);
-
   const confirm = () => {
     setOpen(false);
     onClick();
   };
 
   return (
-    <>
+    <Dialog open={open} onOpenChange={setOpen}>
       <Button
+        ref={triggerRef}
         type="button"
         variant="outline"
         size="sm"
@@ -128,6 +134,11 @@ export function PrintPdfButton({
         disabled={disabled || loading}
         title={title}
         aria-label={label}
+        aria-busy={loading}
+        aria-describedby={[
+          disabled && disabledReason ? disabledReasonId : "",
+          statusId,
+        ].filter(Boolean).join(" ") || undefined}
         onClick={() => setOpen(true)}
         style={{ gap: 6, whiteSpace: "normal" }}
       >
@@ -136,73 +147,77 @@ export function PrintPdfButton({
           : <Printer aria-hidden="true" style={{ width: 14, height: 14 }} />}
         <span>{label}</span>
       </Button>
-      {open && (
-        <div
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.currentTarget === event.target) setOpen(false);
-          }}
-          style={{ position: "fixed", inset: 0, zIndex: 1500, display: "grid", placeItems: "center", padding: 16, background: "rgba(15, 23, 42, 0.58)" }}
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="current-view-print-title"
-            style={{ width: "min(620px, 100%)", maxHeight: "min(760px, calc(100vh - 32px))", overflowY: "auto", borderRadius: 14, border: "1px solid #CBD5E1", background: "white", color: "#17212B", boxShadow: "0 24px 80px rgba(15,23,42,.28)" }}
-          >
-            <header style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, padding: "18px 20px", borderBottom: "1px solid #E2E8F0" }}>
-              <div>
-                <h2 id="current-view-print-title" style={{ margin: 0, fontSize: 19 }}>
-                  {isSpanish ? "Imprimir vista actual" : "Print current view"}
-                </h2>
-                <p style={{ margin: "5px 0 0", color: "#64748B", fontSize: 12, lineHeight: 1.5 }}>
-                  {isSpanish
-                    ? "Los filtros, búsqueda, orden, pestaña, fechas y vista visibles de la página se heredan automáticamente."
-                    : "The page's visible filters, search, sort, tab, dates, and view are inherited automatically."}
-                </p>
-              </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label={isSpanish ? "Cerrar" : "Close"} style={{ border: 0, background: "transparent", padding: 4, cursor: "pointer" }}>
-                <X aria-hidden="true" style={{ width: 18, height: 18 }} />
-              </button>
-            </header>
-            <div style={{ padding: 20, display: "grid", gap: 16 }}>
-              <section style={{ padding: 13, borderRadius: 9, border: "1px solid #BFDBFE", background: "#EFF6FF" }}>
-                <strong style={{ display: "block", marginBottom: 5, color: "#1E3A5F", fontSize: 13 }}>
-                  {isSpanish ? "Vista actual heredada" : "Inherited current view"}
-                </strong>
-                {currentViewSummary.length ? (
-                  <ul style={{ margin: 0, paddingLeft: 18, color: "#334155", fontSize: 12, lineHeight: 1.55 }}>
-                    {currentViewSummary.map((item) => <li key={item}>{item}</li>)}
-                  </ul>
-                ) : (
-                  <p style={{ margin: 0, color: "#334155", fontSize: 12, lineHeight: 1.55 }}>
-                    {isSpanish
-                      ? "Se usará exactamente el estado visible actual. Los resultados vacíos se muestran como vacíos, sin filas inventadas."
-                      : "The exact current visible state will be used. Empty results remain empty; no rows are fabricated."}
-                  </p>
-                )}
-              </section>
-              {options && (
-                <section>
-                  <strong style={{ display: "block", marginBottom: 9, fontSize: 13 }}>
-                    {isSpanish ? "Opciones solo del PDF" : "PDF-only options"}
-                  </strong>
-                  {options}
-                </section>
-              )}
-            </div>
-            <footer style={{ display: "flex", justifyContent: "flex-end", gap: 9, padding: "14px 20px", borderTop: "1px solid #E2E8F0", background: "#F8FAFC" }}>
-              <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
-                {isSpanish ? "Cancelar" : "Cancel"}
-              </Button>
-              <Button type="button" size="sm" onClick={confirm} disabled={disabled || configurationInvalid || loading} title={configurationInvalid ? disabledReason : undefined}>
-                <Printer aria-hidden="true" style={{ width: 14, height: 14, marginRight: 6 }} />
-                {isSpanish ? "Imprimir PDF" : "Print PDF"}
-              </Button>
-            </footer>
-          </section>
-        </div>
+      <span id={statusId} className="sr-only" role="status" aria-live="polite">
+        {loading ? label : ""}
+      </span>
+      {disabled && disabledReason && (
+        <span id={disabledReasonId} className="sr-only">{disabledReason}</span>
       )}
-    </>
+      <DialogContent
+        className="max-h-[calc(100vh-32px)] w-[calc(100vw-32px)] max-w-[620px] gap-0 overflow-y-auto border-slate-300 p-0 text-slate-900"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          cancelRef.current?.focus();
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          triggerRef.current?.focus();
+        }}
+      >
+        <DialogHeader className="border-b border-slate-200 px-5 py-[18px] pr-12 text-left">
+          <DialogTitle>
+            {isSpanish ? "Imprimir vista actual" : "Print current view"}
+          </DialogTitle>
+          <DialogDescription className="leading-5">
+            {isSpanish
+              ? "Los filtros, búsqueda, orden, pestaña, fechas y vista visibles de la página se heredan automáticamente."
+              : "The page's visible filters, search, sort, tab, dates, and view are inherited automatically."}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 p-5">
+          <section className="rounded-lg border border-blue-200 bg-blue-50 p-[13px]">
+            <strong className="mb-1 block text-[13px] text-[#1E3A5F]">
+              {isSpanish ? "Vista actual heredada" : "Inherited current view"}
+            </strong>
+            {currentViewSummary.length ? (
+              <ul className="m-0 list-disc pl-[18px] text-xs leading-[1.55] text-slate-700">
+                {currentViewSummary.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            ) : (
+              <p className="m-0 text-xs leading-[1.55] text-slate-700">
+                {isSpanish
+                  ? "Se usará exactamente el estado visible actual. Los resultados vacíos se muestran como vacíos, sin filas inventadas."
+                  : "The exact current visible state will be used. Empty results remain empty; no rows are fabricated."}
+              </p>
+            )}
+          </section>
+          {options && (
+            <section>
+              <strong className="mb-2 block text-[13px]">
+                {isSpanish ? "Opciones solo del PDF" : "PDF-only options"}
+              </strong>
+              {options}
+            </section>
+          )}
+        </div>
+        <DialogFooter className="flex-row flex-wrap gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3.5 sm:space-x-0">
+          <Button ref={cancelRef} type="button" variant="outline" size="sm" className="min-w-0 flex-1 sm:flex-none" onClick={() => setOpen(false)}>
+            {isSpanish ? "Cancelar" : "Cancel"}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            className="min-w-0 flex-1 whitespace-normal sm:flex-none"
+            onClick={confirm}
+            disabled={disabled || configurationInvalid || loading}
+            aria-describedby={configurationInvalid && disabledReason ? disabledReasonId : undefined}
+            title={configurationInvalid ? disabledReason : undefined}
+          >
+            <Printer aria-hidden="true" style={{ width: 14, height: 14, marginRight: 6 }} />
+            {isSpanish ? "Imprimir PDF" : "Print PDF"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

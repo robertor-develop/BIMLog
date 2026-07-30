@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { Download, Search, Trash2 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
-import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
 
 interface ChangeOrder {
@@ -168,8 +168,17 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
     } finally { setAiLoading(false); setActiveAi(null); }
   };
 
-  const exportPdf = (id: number) => {
-    window.open(`${API}/projects/${projectId}/change-orders/${id}/export?token=${token}`, "_blank");
+  const exportPdf = async (id: number) => {
+    if (!token) return;
+    try {
+      await downloadAuthenticatedPdf(
+        `${API}/projects/${projectId}/change-orders/${id}/export`,
+        token,
+        `change-order-${id}.pdf`,
+      );
+    } catch {
+      setError(t("Could not prepare the Change Order PDF.", "No se pudo preparar el PDF de la Orden de Cambio."));
+    }
   };
 
   const statusLabel = (s: string) =>

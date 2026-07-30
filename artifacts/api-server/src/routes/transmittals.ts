@@ -113,6 +113,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
   });
   const theme = REPORT_THEMES.transmittal.log;
   const reportDate = args.generatedAt.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  const reportNumber = `TX-${args.project?.code || args.project?.id || "PROJECT"}-${args.generatedAt.toISOString().replace(/\D/g, "").slice(0, 14)}`;
   const filterSummary = [
     `Status: ${args.filters.status === "all" ? "All" : args.filters.status}`,
     args.filters.search ? `Search: ${args.filters.search}` : "",
@@ -128,6 +129,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
     subtitle: "Governed transmittal register",
     projectName: args.project?.name ?? "Project",
     projectCode: args.project?.code,
+    reportNumber,
     reportDate: args.generatedAt,
     theme,
   }) + 12;
@@ -164,6 +166,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
           title,
           projectName: args.project?.name ?? "Project",
           projectCode: args.project?.code,
+          reportNumber,
           theme,
         }) + 10;
       },
@@ -177,6 +180,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
     contentHash,
     companyName: args.companyName,
     projectName: args.project?.name,
+    reportNumber,
     timestamp: reportDate,
   });
   doc.end();

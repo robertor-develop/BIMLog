@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
-import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu } from "lucide-react";
+import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -274,6 +274,7 @@ export function MasterSidebar() {
         )}
 
         <span className="sidebar-section-label">{t("Settings", "Configuración")}</span>
+        {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
         {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
         {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
         {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}

@@ -37,8 +37,20 @@ export function ProjectDetail() {
   const { user } = useAuthStore();
   const { adminRoles, writeRoles } = useConfig();
 
-  const { data: project, isLoading } = useGetProject(projectId);
-  const { data: members } = useListMembers(projectId);
+  const {
+    data: project,
+    isLoading: projectLoading,
+    isError: projectIsError,
+    error: projectError,
+    refetch: refetchProject,
+  } = useGetProject(projectId);
+  const {
+    data: members,
+    isLoading: membersLoading,
+    isError: membersIsError,
+    error: membersError,
+    refetch: refetchMembers,
+  } = useListMembers(projectId);
 
   const currentMember = members?.find(m => m.userId === user?.id);
   const memberRole = currentMember?.role || "";
@@ -51,28 +63,54 @@ export function ProjectDetail() {
   const myRoleLabel = myRoleInfo ? (lang === "es" ? myRoleInfo.labelEs : myRoleInfo.label) : "";
   const myRoleDescription = myRoleInfo ? (lang === "es" ? myRoleInfo.descriptionEs : myRoleInfo.description) : "";
 
-  if (isLoading) {
+  if (projectLoading || membersLoading) {
     return (
       <div className="app-shell">
         <div className="sidebar" />
         <div className="main-area">
-          <div className="page-content">
+          <div className="page-content" role="status" aria-live="polite" aria-busy="true">
             <div className="skeleton" style={{ height: 20, width: 200, marginBottom: 12 }} />
             <div className="skeleton" style={{ height: 40, width: 320 }} />
+            <span className="sr-only">{lang === "es" ? "Verificando acceso al proyecto…" : "Verifying project access…"}</span>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!project) {
+  const loadError = projectError ?? membersError;
+  const loadStatus = typeof loadError === "object" && loadError !== null && "status" in loadError
+    ? Number((loadError as { status?: number }).status)
+    : undefined;
+  const membershipDenied = Boolean(project && members && !currentMember);
+  if (projectIsError || membersIsError || !project || membershipDenied) {
+    const denied = loadStatus === 403 || membershipDenied;
+    const missing = loadStatus === 404 || (!project && !projectIsError);
+    const heading = denied
+      ? (lang === "es" ? "Acceso al proyecto denegado" : "Project access denied")
+      : missing
+        ? (lang === "es" ? "Proyecto no encontrado" : "Project not found")
+        : (lang === "es" ? "No se pudo cargar el proyecto" : "Project could not be loaded");
+    const detail = denied
+      ? (lang === "es" ? "Tu cuenta no tiene una membresía autorizada para este proyecto." : "Your account does not have an authorized membership for this project.")
+      : missing
+        ? (lang === "es" ? "El proyecto no existe o ya no está disponible." : "The project does not exist or is no longer available.")
+        : (lang === "es" ? "La solicitud falló. Puedes volver a intentarlo sin perder tu ubicación." : "The request failed. You can retry without losing your location.");
     return (
       <div className="app-shell">
         <div className="main-area">
           <div className="page-content" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <div style={{ textAlign: "center" }}>
-              <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>{t("project.notFound")}</p>
-              <Link href="/dashboard"><Button variant="outline" size="sm">Back to Dashboard</Button></Link>
+            <div role={denied ? "alert" : "status"} aria-live={denied ? "assertive" : "polite"} style={{ textAlign: "center", maxWidth: 520 }}>
+              <h1 tabIndex={-1} style={{ fontSize: 20, marginBottom: 8 }}>{heading}</h1>
+              <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>{detail}</p>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+                {!denied && !missing && (
+                  <Button type="button" size="sm" onClick={() => { void refetchProject(); void refetchMembers(); }}>
+                    {lang === "es" ? "Reintentar" : "Retry"}
+                  </Button>
+                )}
+                <Link href="/dashboard"><Button variant="outline" size="sm">{lang === "es" ? "Volver a la sede" : "Back to Dashboard"}</Button></Link>
+              </div>
             </div>
           </div>
         </div>

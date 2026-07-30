@@ -309,6 +309,20 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
     }
   };
 
+  const exportSelectedClashReportPdf = async () => {
+    if (!selectedReport || !token) return;
+    setError("");
+    try {
+      await downloadAuthenticatedPdf(
+        `${API}/projects/${projectId}/clash-reports/${selectedReport.id}/pdf`,
+        token,
+        `clash-report-${selectedReport.id}.pdf`,
+      );
+    } catch {
+      setError(t("Could not prepare the selected Clash Report PDF.", "No se pudo preparar el PDF del Reporte de Choques seleccionado."));
+    }
+  };
+
   const exportClashReportListPdf = async () => {
     if (!token) return;
     setListExporting(true);
@@ -400,16 +414,16 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
             </span>
           </div>
         </div>
-        <a
-          href={`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/pdf?token=${token}`}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          type="button"
+          onClick={() => void exportSelectedClashReportPdf()}
+          disabled={!token}
           title={t("Export the selected clash report as a PDF", "Exportar el reporte de choques seleccionado como PDF")}
           className="btn btn-primary btn-sm"
           style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", textDecoration: "none" }}
         >
           <Download size={14} /> {t("Export Clash PDF", "Exportar PDF de Choques")}
-        </a>
+        </button>
         <PrintPdfButton lang={lang} onClick={() => void exportClashCurrentViewPdf()} loading={clashExporting} disabled={clashLoading} />
       </div>
 

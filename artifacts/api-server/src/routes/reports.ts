@@ -61,6 +61,7 @@ const currentViewTitles = {
   integrations: { en: "Integrations — Current View", es: "Integraciones — Vista actual" },
   "clash-reports": { en: "Clash Reports — Current View", es: "Reportes de choques — Vista actual" },
   "submittal-register": { en: "Required Submittal Register — Current View", es: "Registro de entregables requeridos — Vista actual" },
+  "naming-convention": { en: "Naming Convention — Current View", es: "Convención de nombres — Vista actual" },
 } as const;
 
 function pdfHeader(

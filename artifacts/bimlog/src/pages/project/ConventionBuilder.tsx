@@ -15,6 +15,7 @@ import {
   Clock, GitMerge, Brain, Lock, ShieldAlert,
 } from "lucide-react";
 import { logClientError } from "@/lib/client-log";
+import { downloadGovernedCurrentViewPdf } from "@/components/PrintPdfButton";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -3007,9 +3008,11 @@ function Step4({ state, setState, lang }: { state: WizardState; setState: React.
 }
 
 // ─── review screen ────────────────────────────────────────────────────────────
-function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, lang, projectId }: {
-  state: WizardState; onEdit: (step: number) => void; onSave: () => void; isSaving: boolean; saved: boolean; savedMessage: string; lang: string; projectId: number;
+function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, lang, projectId, token }: {
+  state: WizardState; onEdit: (step: number) => void; onSave: () => void; isSaving: boolean; saved: boolean; savedMessage: string; lang: string; projectId: number; token: string;
 }) {
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportPdfError, setExportPdfError] = useState("");
   const levels = state.levelList.map(l => l.code);
   const revCodes = buildRevisionCodes(state.revisionFormat, state.customRevisions);
   const selectedDiscs = state.disciplines.filter(d => d.selected);
@@ -3031,29 +3034,41 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
   const sampleParts = rawSampleParts.filter((p, i) => i === 0 || p !== rawSampleParts[i - 1]);
   const sampleName = sampleParts.join(sep);
 
-  const handleExportPDF = () => {
-    const win = window.open("", "_blank");
-    if (!win) return;
-    const graceTo = state.gracePeriod ? new Date(Date.now() + state.graceDays * 86400000).toLocaleDateString() : null;
-    win.document.write(`<!DOCTYPE html><html><head><title>Naming Convention</title><style>body{font-family:Arial,sans-serif;max-width:850px;margin:40px auto;color:#111}h1{font-size:22px}h2{font-size:15px;margin:18px 0 6px;border-bottom:1px solid #ccc;padding-bottom:4px}.sample{font-family:monospace;font-size:20px;font-weight:900;background:#EFF6FF;padding:12px 16px;border-radius:6px;margin:12px 0;word-break:break-all}.chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}.chip{font-family:monospace;font-size:11px;font-weight:700;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;padding:2px 7px;border-radius:4px}.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:13px}.sig{margin-top:60px;border-top:1px solid #999;padding-top:12px;font-size:12px;color:#666}@media print{body{margin:20px}}</style></head><body>
-<h1>BIMLog — Naming Convention</h1>
-<div style="font-size:13px;color:#666;margin-bottom:16px;">Project ID: ${projectId} | Generated: ${new Date().toLocaleDateString()}</div>
-<div class="sample">${sampleName}</div>
-<h2>Summary</h2>
-<div class="row"><span>Separator</span><span><strong>${sep === "-" ? "Hyphen (-)" : "Underscore (_)"}</strong></span></div>
-<div class="row"><span>Enforce Uppercase</span><span><strong>${state.enforceUppercase ? "Yes" : "No"}</strong></span></div>
-<div class="row"><span>Sequence Format</span><span><strong>${state.seqDigits} digits</strong></span></div>
-<div class="row"><span>Revision Format</span><span><strong>${state.revisionFormat}</strong></span></div>
-<div class="row"><span>Grace Period</span><span><strong>${state.gracePeriod ? `${state.graceDays} days (until ${graceTo})` : "Off"}</strong></span></div>
-<h2>Companies</h2><div class="chips">${state.companies.map(c=>`<span class="chip">${c.code} — ${c.name}</span>`).join("")}</div>
-<h2>Disciplines</h2><div class="chips">${selectedDiscs.map(d=>`<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
-<h2>Building Levels (${levels.length})</h2><div class="chips">${levels.map(l=>`<span class="chip">${l}</span>`).join("")}</div>
-<h2>Document Types (${selectedDocs.length})</h2><div class="chips">${selectedDocs.map(d=>`<span class="chip">${d.code} — ${d.name}</span>`).join("")}</div>
-<h2>Status Codes</h2><div class="chips">${selectedStatus.map(sc=>`<span class="chip">${sc.code} — ${sc.meaning}</span>`).join("")}</div>
-<h2>Revision Codes</h2><div class="chips">${revCodes.map(r=>`<span class="chip">${r}</span>`).join("")}</div>
-<div class="sig"><p>I have read and understood the naming convention for this project.</p><br/><p>Name: _____________________________ &nbsp;&nbsp; Company: _____________________________</p><br/><p>Signature: _________________________ &nbsp;&nbsp; Date: ________________________________</p></div>
-</body></html>`);
-    win.document.close(); win.print();
+  const handleExportPDF = async () => {
+    if (!token || exportingPdf) return;
+    setExportingPdf(true);
+    setExportPdfError("");
+    const rows = [
+      [w("Sample file name", "Nombre de archivo de muestra", lang), sampleName],
+      [w("Separator", "Separador", lang), sep === "-" ? w("Hyphen (-)", "Guion (-)", lang) : w("Underscore (_)", "Guion bajo (_)", lang)],
+      [w("Uppercase", "Mayúsculas", lang), state.enforceUppercase ? w("Required", "Requeridas", lang) : w("Optional", "Opcionales", lang)],
+      [w("Sequence", "Secuencia", lang), `${state.seqDigits} ${w("digits", "dígitos", lang)}`],
+      [w("Revision format", "Formato de revisión", lang), state.revisionFormat],
+      [w("Grace period", "Período de gracia", lang), state.gracePeriod ? `${state.graceDays} ${w("days", "días", lang)}` : w("Off", "Inactivo", lang)],
+      [w("Companies", "Empresas", lang), state.companies.map(company => `${company.code} — ${company.name}`).join("; ") || "—"],
+      [w("Disciplines", "Disciplinas", lang), selectedDiscs.map(item => `${item.code} — ${item.name}`).join("; ") || "—"],
+      [w("Building levels", "Niveles del edificio", lang), levels.join("; ") || "—"],
+      [w("Document types", "Tipos de documento", lang), selectedDocs.map(item => `${item.code} — ${item.name}`).join("; ") || "—"],
+      [w("Status codes", "Códigos de estado", lang), selectedStatus.map(item => `${item.code} — ${item.meaning}`).join("; ") || "—"],
+      [w("Revision codes", "Códigos de revisión", lang), revCodes.join("; ") || "—"],
+    ];
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "naming-convention",
+        lang,
+        context: [
+          `${w("Project ID", "ID del proyecto", lang)}: ${projectId}`,
+          w("Governed naming rules visible in the review step.", "Reglas de nomenclatura gobernadas visibles en el paso de revisión.", lang),
+        ],
+        columns: [w("Rule", "Regla", lang), w("Configured value", "Valor configurado", lang)],
+        rows,
+        emptyMessage: w("No naming convention is configured.", "No hay una convención de nombres configurada.", lang),
+      }, "naming-convention-current-view.pdf");
+    } catch {
+      setExportPdfError(w("Could not prepare the Naming Convention PDF.", "No se pudo preparar el PDF de la Convención de nombres.", lang));
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   const sections = [
@@ -3121,10 +3136,11 @@ function ReviewScreen({ state, onEdit, onSave, isSaving, saved, savedMessage, la
         <Button onClick={onSave} disabled={isSaving} style={{ flex: 1, gap: 6, fontSize: 14, fontWeight: 700, height: 44 }}>
           {isSaving ? w("Saving…","Guardando…",lang) : w("Save Convention","Guardar Convención",lang)}
         </Button>
-        <Button variant="outline" onClick={handleExportPDF} style={{ gap: 6, fontSize: 13, height: 44 }}>
-          <Download style={{ width: 14, height: 14 }} />{w("Export PDF","Exportar PDF",lang)}
+        <Button variant="outline" onClick={() => void handleExportPDF()} disabled={exportingPdf || !token} aria-busy={exportingPdf} style={{ gap: 6, fontSize: 13, height: 44 }}>
+          <Download style={{ width: 14, height: 14 }} />{exportingPdf ? w("Preparing PDF…", "Preparando PDF…", lang) : w("Export PDF","Exportar PDF",lang)}
         </Button>
       </div>
+      <div role="alert" aria-live="assertive" style={{ minHeight: 18, marginTop: 8, color: "#B91C1C", fontSize: 12 }}>{exportPdfError}</div>
     </div>
   );
 }
@@ -4928,7 +4944,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
       {step === 1 && <Step2 state={ws} setState={setWs} lang={lang} needsRepair={levelsNeedRepair} />}
       {step === 2 && <Step3 state={ws} setState={setWs} lang={lang} />}
       {step === 3 && <Step4 state={ws} setState={setWs} lang={lang} />}
-      {step === 4 && <ReviewScreen state={ws} onEdit={s => setWs(prev => ({ ...prev, step: s }))} onSave={handleSave} isSaving={isSaving} saved={saved} savedMessage={savedMessage} lang={lang} projectId={projectId} />}
+      {step === 4 && <ReviewScreen state={ws} onEdit={s => setWs(prev => ({ ...prev, step: s }))} onSave={handleSave} isSaving={isSaving} saved={saved} savedMessage={savedMessage} lang={lang} projectId={projectId} token={token ?? ""} />}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24, paddingTop: 18, borderTop: "1px solid hsl(var(--border))" }}>
         <div>
           {step === 0

@@ -1,9 +1,9 @@
-import PDFDocument from "pdfkit";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import AdmZip from "adm-zip";
 import { FinancialControlError } from "./financial-control-contract";
 import { exactDelta, exactPositiveAmount } from "./financial-contract-contract";
+import { createPdfDocument } from "./pdf-kit";
 
 export type ContractExport = Awaited<ReturnType<typeof import("./financial-contract-service").contractExportData>>;
 export type ContractRegisterColumn = "legalNumber" | "title" | "counterparty" | "status" | "type" | "perspective" | "originalValue" | "currentCommitment" | "currency" | "approvedAt" | "executedAt";
@@ -28,7 +28,7 @@ const safe = (value: unknown, fallback = "") => {
 const money = (amount: unknown, currency: unknown) => `${safe(amount)} ${safe(currency)}`.trim();
 
 export async function buildContractCurrentViewPdf(data: ContractCurrentViewExport): Promise<Buffer> {
-  const doc = new PDFDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, info: { Title: "Contracts & Commitments — Current View", Author: "BIMLog", Subject: "Contracts and commitments current-view register" } });
+  const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 40, bufferPages: true, info: { Title: "Contracts & Commitments — Current View", Author: "BIMLog", Subject: "Contracts and commitments current-view register" } });
   const chunks: Buffer[] = [];
   doc.on("data", (chunk) => chunks.push(chunk));
   const pageWidth = doc.page.width - 80;
@@ -168,7 +168,7 @@ export async function buildContractCurrentViewPdf(data: ContractCurrentViewExpor
 }
 
 export async function buildContractPdf(data: ContractExport): Promise<Buffer> {
-  const doc = new PDFDocument({ size: "LETTER", margin: 42, bufferPages: true, info: { Title: `Contract ${safe(data.contract.legalNumber)}`, Author: "BIMLog", Subject: "Operational contract and schedule of values" } });
+  const doc = createPdfDocument({ size: "LETTER", margin: 42, bufferPages: true, info: { Title: `Contract ${safe(data.contract.legalNumber)}`, Author: "BIMLog", Subject: "Operational contract and schedule of values" } });
   const chunks: Buffer[] = []; doc.on("data", (chunk) => chunks.push(chunk));
   doc.fontSize(18).text("BIMLog Contract & Commitment Record").fontSize(9).text("Operational project-control record — not an accounting posting or payment authorization.").moveDown();
   doc.fontSize(11).text(`${safe(data.project.companyName)} | ${safe(data.project.name)} (${safe(data.project.code)})`);

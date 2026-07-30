@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { FileText, Trash2, Sparkles, Send } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
-import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -109,8 +109,17 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
     await load();
   };
 
-  const exportPdf = (id: number) => {
-    window.open(`${API}/projects/${projectId}/transmittals/${id}/export?token=${token}`, "_blank");
+  const exportPdf = async (id: number) => {
+    if (!token) return;
+    try {
+      await downloadAuthenticatedPdf(
+        `${API}/projects/${projectId}/transmittals/${id}/export`,
+        token,
+        `transmittal-${id}.pdf`,
+      );
+    } catch {
+      setError(t("Could not prepare the Transmittal PDF.", "No se pudo preparar el PDF de la Transmisión."));
+    }
   };
 
   const buildCurrentViewParams = () => {

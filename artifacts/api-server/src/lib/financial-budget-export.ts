@@ -1,10 +1,10 @@
-import PDFDocument from "pdfkit";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import AdmZip from "adm-zip";
 import { createHash } from "crypto";
 import { FinancialControlError } from "./financial-control-contract";
 import { exactSignedDecimal } from "./financial-budget-contract";
+import { createPdfDocument } from "./pdf-kit";
 
 export type BaselineExport = {
   project: { name: string; code: string; companyName: string };
@@ -76,7 +76,7 @@ export function budgetCurrentViewFileName(data: Pick<BudgetCurrentViewExport, "v
 }
 
 export async function buildBudgetCurrentViewPdf(data: BudgetCurrentViewExport): Promise<Buffer> {
-  const doc = new PDFDocument({
+  const doc = createPdfDocument({
       size: "LETTER",
       layout: "landscape",
       margin: 40,
@@ -172,7 +172,7 @@ export async function buildBudgetCurrentViewPdf(data: BudgetCurrentViewExport): 
 }
 
 export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
-  const doc = new PDFDocument({
+  const doc = createPdfDocument({
       size: "LETTER",
       margin: 42,
       bufferPages: true,

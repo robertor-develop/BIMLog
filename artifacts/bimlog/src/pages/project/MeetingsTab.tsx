@@ -1398,11 +1398,16 @@ export function MeetingsTab({
     void loadMeetingDraft(meeting.id);
   };
 
-  const reportToken = () => encodeURIComponent(token || "");
   const meetingPdfUrl = (meetingId: number) =>
-    `${API}/projects/${projectId}/reports/meeting-minutes/pdf?meeting_id=${meetingId}&token=${reportToken()}`;
-  const downloadMeetingPdf = (meeting: Meeting) =>
-    window.open(meetingPdfUrl(meeting.id), "_blank", "noopener,noreferrer");
+    `${API}/projects/${projectId}/reports/meeting-minutes/pdf?meeting_id=${meetingId}`;
+  const downloadMeetingPdf = async (meeting: Meeting) => {
+    if (!token) return;
+    try {
+      await downloadAuthenticatedPdf(meetingPdfUrl(meeting.id), token, `meeting-minutes-${meeting.id}.pdf`);
+    } catch {
+      setError(t("Could not prepare the Meeting Minutes PDF.", "No se pudo preparar el PDF del Acta de Reunión."));
+    }
+  };
   const currentViewPdfUrl = () => {
     const exportView = view === "actions" ? "actions" : "meetings";
     const sections =
