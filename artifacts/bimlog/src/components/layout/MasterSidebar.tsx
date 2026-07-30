@@ -41,6 +41,7 @@ export function MasterSidebar() {
   const [showBell, setShowBell] = useState(false);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [notificationLoadFailed, setNotificationLoadFailed] = useState(false);
+  const notificationRequestId = useRef(0);
   const bellRef = useRef<HTMLDivElement>(null);
 
   const [showSearch, setShowSearch] = useState(false);
@@ -93,6 +94,7 @@ export function MasterSidebar() {
 
   const loadNotifications = async () => {
     if (!token) return;
+    const requestId = ++notificationRequestId.current;
     setLoadingNotifs(true);
     setNotificationLoadFailed(false);
     try {
@@ -100,11 +102,16 @@ export function MasterSidebar() {
       if (!r.ok) throw new Error(`Notifications request failed (${r.status})`);
       const data = await r.json() as Notification[];
       if (!Array.isArray(data)) throw new Error("Notifications response was not a list");
+      if (requestId !== notificationRequestId.current) return;
       setNotifications(data);
     } catch (error) {
-      setNotificationLoadFailed(true);
-      logClientError("master sidebar notifications load", error);
-    } finally { setLoadingNotifs(false); }
+      if (requestId === notificationRequestId.current) {
+        setNotificationLoadFailed(true);
+        logClientError("master sidebar notifications load", error);
+      }
+    } finally {
+      if (requestId === notificationRequestId.current) setLoadingNotifs(false);
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
