@@ -186,39 +186,89 @@ function repositoryIdentity(rawRemote) {
   }
 }
 
-export function attestSource() {
-  const originIdentity = repositoryIdentity(git(["remote", "get-url", "origin"]));
+function escapeRegularExpression(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function attestSource({ runGit = git, environment = process.env } = {}) {
+  const readGit = (args) => {
+    try {
+      return runGit(args);
+    } catch {
+      throw new Error("Source attestation failed while reading sanitized Git state");
+    }
+  };
+  const configuredBranch = environment.BIMLOG_ACCEPTED_BRANCH;
+  const acceptedBranch = configuredBranch ?? "master";
+  if (
+    typeof acceptedBranch !== "string" ||
+    acceptedBranch.length === 0 ||
+    acceptedBranch !== acceptedBranch.trim() ||
+    acceptedBranch.startsWith("refs/")
+  ) {
+    throw new Error("BIMLOG_ACCEPTED_BRANCH must be an exact short branch name");
+  }
+  try {
+    if (readGit(["check-ref-format", "--branch", acceptedBranch]) !== acceptedBranch) {
+      throw new Error("branch normalization is not permitted");
+    }
+  } catch {
+    throw new Error("BIMLOG_ACCEPTED_BRANCH must be a valid short branch name");
+  }
+
+  const explicitAccepted = environment.BIMLOG_ACCEPTED_COMMIT;
+  if (explicitAccepted !== undefined && !/^[0-9a-f]{40}$/.test(explicitAccepted)) {
+    throw new Error("BIMLOG_ACCEPTED_COMMIT must be a full lowercase 40-character commit");
+  }
+  if (acceptedBranch !== "master" && !explicitAccepted) {
+    throw new Error("A named release branch requires BIMLOG_ACCEPTED_COMMIT");
+  }
+
+  const originIdentity = repositoryIdentity(readGit(["remote", "get-url", "origin"]));
   if (originIdentity !== authoritativeRemoteIdentity) {
     throw new Error("Source attestation refused an unexpected origin repository");
   }
 
-  const remoteResult = git(["ls-remote", "--exit-code", "origin", "refs/heads/master"]);
-  const remoteMatch = remoteResult.match(/^([0-9a-f]{40})\s+refs\/heads\/master$/i);
-  if (!remoteMatch) throw new Error("Source attestation could not resolve authoritative master");
-  const remoteMaster = remoteMatch[1].toLowerCase();
-  const trackedMaster = git(["rev-parse", "refs/remotes/origin/master"]).toLowerCase();
-  const head = git(["rev-parse", "HEAD"]).toLowerCase();
-  const explicitAccepted = process.env.BIMLOG_ACCEPTED_COMMIT?.toLowerCase();
-  if (explicitAccepted && !/^[0-9a-f]{40}$/.test(explicitAccepted)) {
-    throw new Error("BIMLOG_ACCEPTED_COMMIT must be a full 40-character commit");
+  const remoteRef = `refs/heads/${acceptedBranch}`;
+  const trackedRef = `refs/remotes/origin/${acceptedBranch}`;
+  const localRef = `refs/heads/${acceptedBranch}`;
+  const remoteResult = readGit(["ls-remote", "--exit-code", "origin", remoteRef]);
+  const remoteMatch = remoteResult.match(
+    new RegExp(`^([0-9a-f]{40})\\s+${escapeRegularExpression(remoteRef)}$`),
+  );
+  if (!remoteMatch) {
+    throw new Error("Source attestation could not resolve the exact accepted branch");
   }
-  const acceptedCommit = explicitAccepted ?? remoteMaster;
-  if (head !== acceptedCommit || trackedMaster !== acceptedCommit || remoteMaster !== acceptedCommit) {
+  const remoteCommit = remoteMatch[1];
+  const trackedCommit = readGit(["rev-parse", trackedRef]).toLowerCase();
+  const localCommit = readGit(["rev-parse", localRef]).toLowerCase();
+  const head = readGit(["rev-parse", "HEAD"]).toLowerCase();
+  const acceptedCommit = explicitAccepted ?? remoteCommit;
+  let currentBranch;
+  try {
+    currentBranch = readGit(["symbolic-ref", "--quiet", "--short", "HEAD"]);
+  } catch {
+    throw new Error("Source attestation requires the exact accepted local branch");
+  }
+  if (
+    currentBranch !== acceptedBranch ||
+    head !== acceptedCommit ||
+    localCommit !== acceptedCommit ||
+    trackedCommit !== acceptedCommit ||
+    remoteCommit !== acceptedCommit
+  ) {
     throw new Error(
-      "Source attestation refused stale or divergent source; HEAD, origin/master, remote master, and the accepted commit must match",
+      "Source attestation refused stale or divergent accepted branch state",
     );
   }
 
-  const branch = git(["symbolic-ref", "--quiet", "--short", "HEAD"]);
-  if (branch !== "master") {
-    throw new Error("Source attestation requires the authoritative master branch");
-  }
-  if (git(["status", "--porcelain", "--untracked-files=all"])) {
+  if (readGit(["status", "--porcelain", "--untracked-files=all"])) {
     throw new Error("Source attestation requires a clean workspace");
   }
   return {
+    acceptedBranch,
     acceptedCommit,
-    tree: git(["rev-parse", "HEAD^{tree}"]).toLowerCase(),
+    tree: readGit(["rev-parse", "HEAD^{tree}"]).toLowerCase(),
   };
 }
 

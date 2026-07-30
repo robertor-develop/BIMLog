@@ -69,6 +69,30 @@ credential-bearing remote URLs.
 No cached snapshot, detached stale commit, or remote `main` is an acceptable
 deployment source.
 
+### Explicit named release branch
+
+A reviewed release branch may be attested only when both bindings are explicit:
+`BIMLOG_ACCEPTED_BRANCH` must be its exact short branch name and
+`BIMLOG_ACCEPTED_COMMIT` must be its full lowercase 40-character commit. Full refs,
+detached commits, current-branch inference, advertised-default inference, and
+fallback to `master` are rejected.
+
+Because the attestation requires equality with the live remote branch, run it after
+the exact commit has been pushed normally to that named branch and the corresponding
+`refs/remotes/origin/<branch>` has been refreshed. Then require exact equality among
+`HEAD`, `refs/heads/<branch>`, `refs/remotes/origin/<branch>`, the live
+`refs/heads/<branch>`, and `BIMLOG_ACCEPTED_COMMIT`, plus a clean status including
+untracked files. For example:
+
+```sh
+export BIMLOG_ACCEPTED_BRANCH=recovery/platform-print-pdf-successor-20260728
+export BIMLOG_ACCEPTED_COMMIT=<full-lowercase-40-character-commit>
+pnpm run attest:publication-source
+```
+
+This named-branch attestation is post-push source verification, not permission to
+publish or deploy. A failed equality check stops the release.
+
 ## Enforced repository gates
 
 Run `pnpm run gate:pre-push` before pushing. The normal root build runs

@@ -5263,6 +5263,118 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "392d36109068c0a9f8dd4a16c3b3093c43ffbedc6b58211ab5c3d61c995a44bc"
+    },
+    {
+      "taskId": "named-release-branch-source-attestation-20260729",
+      "reviewedThroughCommit": "ad03cf5bbaa045337b4b6ad81a4928ae07dc27c4",
+      "reviewedAt": "2026-07-29T22:49:22-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Extends the fail-closed publication-source attestation to an explicitly named release branch and exact commit while preserving authoritative origin, clean-worktree, and full local/tracking/live-remote equality requirements.",
+      "immediateFindings": [
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The approved isolated release branch could not pass the master-only attestation even after every source and artifact gate passed; explicit branch binding resolves the contract mismatch without weakening remote equality."
+        }
+      ],
+      "workstreams": [
+        "database-publication-safety",
+        "release-preflight",
+        "living-brief-governance"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/check-database-safety.mjs",
+          "type": "named_branch_attestation_contract",
+          "result": "passed",
+          "boundary": "The source attestation validates an exact short branch and commit, authoritative origin, exact local/tracking/live-remote equality, symbolic branch identity, HEAD, and a clean all-untracked worktree; no provider or database action is performed."
+        },
+        {
+          "path": "scripts/test-database-safety.mjs",
+          "type": "synthetic_fail_closed_proof",
+          "result": "passed",
+          "boundary": "Injected deterministic Git fixtures cover named-release and master success plus malformed, detached, wrong-origin, missing, stale, divergent, dirty, and fallback rejection without network access."
+        },
+        {
+          "path": "docs/deployment/DATABASE_MIGRATION_SAFETY.md",
+          "type": "operator_sequence_contract",
+          "result": "reviewed",
+          "boundary": "The documented sequence requires a normal exact-branch push and tracking refresh before attestation because live-remote equality cannot be proven before the push; attestation remains separate from publish permission."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, organizational doctrine, or permanent relationship changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed Git publication authority remains intact and now accepts one explicitly named branch without inference."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deterministic synthetic coverage proves every identity mismatch and dirty state continues to fail closed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, strategic outcome, or customer-facing behavior changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime, hosting, provider configuration, dependency, schema, database, or deployment behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, workbook, report layout, typography, export, or visual identity behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local candidate, pushed source, attested source, provider preflight, and deployed truth remain explicitly separate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product scope is added; only the named-branch release attestation workflow is corrected and bounded."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The master-only blocker, correction, proofs, and post-push ordering are captured without provider or database access."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "docs/deployment/DATABASE_MIGRATION_SAFETY.md",
+        "living-brief/impact-declarations.json",
+        "scripts/check-database-safety.mjs",
+        "scripts/test-database-safety.mjs"
+      ],
+      "reviewedChangeSha256": "970a2631171a617c61b5ae21cf188abdd9880ca281431cf66a4cbd2b500d71c2"
     }
   ]
 }

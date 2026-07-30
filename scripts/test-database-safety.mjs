@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   analyzeSql,
+  attestSource,
   collectSchemaContract,
   runStaticGate,
 } from "./check-database-safety.mjs";
@@ -48,6 +49,185 @@ assert.ok(
   "comment-separated destructive SQL inside a source string must fail closed",
 );
 
+const attestedCommit = "a".repeat(40);
+const alternateCommit = "b".repeat(40);
+const attestedTree = "c".repeat(40);
+const releaseBranch = "recovery/platform-print-pdf-successor-20260728";
+
+function attestationFixture(overrides = {}) {
+  const branch = overrides.branch ?? releaseBranch;
+  const remoteCommit = overrides.remoteCommit ?? attestedCommit;
+  const trackedCommit = overrides.trackedCommit ?? attestedCommit;
+  const localCommit = overrides.localCommit ?? attestedCommit;
+  const head = overrides.head ?? attestedCommit;
+  const currentBranch = overrides.currentBranch ?? branch;
+  const environment = {
+    BIMLOG_ACCEPTED_BRANCH: branch,
+    BIMLOG_ACCEPTED_COMMIT: overrides.acceptedCommit ?? attestedCommit,
+  };
+  if (overrides.omitBranch) delete environment.BIMLOG_ACCEPTED_BRANCH;
+  if (overrides.omitCommit) delete environment.BIMLOG_ACCEPTED_COMMIT;
+  const calls = [];
+  const runGit = (args) => {
+    calls.push(args);
+    if (args[0] === "check-ref-format") {
+      if (overrides.rejectBranch) throw new Error("synthetic invalid branch");
+      return overrides.normalizedBranch ?? branch;
+    }
+    if (args.join("\0") === ["remote", "get-url", "origin"].join("\0")) {
+      return overrides.origin ?? "https://github.com/robertor-develop/BIMLog.git";
+    }
+    if (args[0] === "ls-remote") {
+      if (overrides.missingRemote) throw new Error("synthetic absent remote");
+      const remoteRef = `refs/heads/${branch}`;
+      return overrides.remoteResult ?? `${remoteCommit}\t${remoteRef}`;
+    }
+    if (
+      args.join("\0") ===
+      ["rev-parse", `refs/remotes/origin/${branch}`].join("\0")
+    ) {
+      return trackedCommit;
+    }
+    if (
+      args.join("\0") === ["rev-parse", `refs/heads/${branch}`].join("\0")
+    ) {
+      return localCommit;
+    }
+    if (args.join("\0") === ["rev-parse", "HEAD"].join("\0")) return head;
+    if (args[0] === "symbolic-ref") {
+      if (overrides.detached) throw new Error("synthetic detached head");
+      return currentBranch;
+    }
+    if (args[0] === "status") return overrides.dirty ?? "";
+    if (args.join("\0") === ["rev-parse", "HEAD^{tree}"].join("\0")) {
+      return attestedTree;
+    }
+    throw new Error(`unexpected synthetic git arguments: ${args.join(" ")}`);
+  };
+  return { calls, environment, runGit };
+}
+
+function expectAttestationFailure(overrides, expected) {
+  const fixture = attestationFixture(overrides);
+  assert.throws(
+    () => attestSource({ runGit: fixture.runGit, environment: fixture.environment }),
+    expected,
+  );
+}
+
+const releaseAttestation = attestationFixture();
+assert.deepEqual(
+  attestSource({
+    runGit: releaseAttestation.runGit,
+    environment: releaseAttestation.environment,
+  }),
+  {
+    acceptedBranch: releaseBranch,
+    acceptedCommit: attestedCommit,
+    tree: attestedTree,
+  },
+);
+assert.ok(
+  releaseAttestation.calls.some(
+    (args) =>
+      args.join("\0") ===
+      ["ls-remote", "--exit-code", "origin", `refs/heads/${releaseBranch}`].join(
+        "\0",
+      ),
+  ),
+);
+assert.ok(
+  releaseAttestation.calls.every((args) => !args.includes("refs/heads/master")),
+  "a named release attestation must never fall back to master",
+);
+
+const masterAttestation = attestationFixture({
+  branch: "master",
+  currentBranch: "master",
+  omitBranch: true,
+  omitCommit: true,
+});
+assert.deepEqual(
+  attestSource({
+    runGit: masterAttestation.runGit,
+    environment: masterAttestation.environment,
+  }),
+  {
+    acceptedBranch: "master",
+    acceptedCommit: attestedCommit,
+    tree: attestedTree,
+  },
+  "the existing exact-master attestation remains fail closed and compatible",
+);
+
+expectAttestationFailure(
+  { omitCommit: true },
+  /named release branch requires BIMLOG_ACCEPTED_COMMIT/,
+);
+expectAttestationFailure(
+  { branch: "refs/heads/release", currentBranch: "refs/heads/release" },
+  /exact short branch name/,
+);
+expectAttestationFailure(
+  { branch: "bad branch", currentBranch: "bad branch", rejectBranch: true },
+  /valid short branch name/,
+);
+expectAttestationFailure(
+  { normalizedBranch: "different-branch" },
+  /valid short branch name/,
+);
+expectAttestationFailure(
+  { acceptedCommit: attestedCommit.toUpperCase() },
+  /full lowercase 40-character commit/,
+);
+expectAttestationFailure(
+  { origin: "https://github.com/example/not-bimlog.git" },
+  /unexpected origin repository/,
+);
+expectAttestationFailure(
+  { missingRemote: true },
+  /failed while reading sanitized Git state/,
+);
+expectAttestationFailure(
+  { remoteResult: `${attestedCommit}\trefs/heads/master` },
+  /exact accepted branch/,
+);
+expectAttestationFailure(
+  { acceptedCommit: alternateCommit },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { trackedCommit: alternateCommit },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { localCommit: alternateCommit },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { remoteCommit: alternateCommit },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { head: alternateCommit },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { currentBranch: "master" },
+  /stale or divergent accepted branch state/,
+);
+expectAttestationFailure(
+  { detached: true },
+  /exact accepted local branch/,
+);
+expectAttestationFailure(
+  { dirty: " M synthetic-tracked-file" },
+  /clean workspace/,
+);
+expectAttestationFailure(
+  { dirty: "?? synthetic-untracked-file" },
+  /clean workspace/,
+);
 const rejectedPublishPreview = fs.readFileSync(
   path.resolve("scripts/fixtures/replit-publish-preview-c40d1c4.sql"),
   "utf8",
