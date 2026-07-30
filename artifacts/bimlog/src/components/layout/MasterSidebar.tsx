@@ -40,12 +40,15 @@ export function MasterSidebar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showBell, setShowBell] = useState(false);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
+  const [notificationLoadFailed, setNotificationLoadFailed] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
 
   const [showSearch, setShowSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchLoadFailed, setSearchLoadFailed] = useState(false);
+  const [searchRetryKey, setSearchRetryKey] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -91,10 +94,16 @@ export function MasterSidebar() {
   const loadNotifications = async () => {
     if (!token) return;
     setLoadingNotifs(true);
+    setNotificationLoadFailed(false);
     try {
       const r = await fetch(`${API_BASE}/api/v1/notifications`, { headers });
-      if (!r.ok) { console.error("Notifications fetch failed", r.status); return; }
-      setNotifications(await r.json());
+      if (!r.ok) throw new Error(`Notifications request failed (${r.status})`);
+      const data = await r.json() as Notification[];
+      if (!Array.isArray(data)) throw new Error("Notifications response was not a list");
+      setNotifications(data);
+    } catch (error) {
+      setNotificationLoadFailed(true);
+      logClientError("master sidebar notifications load", error);
     } finally { setLoadingNotifs(false); }
   };
 
@@ -131,17 +140,43 @@ export function MasterSidebar() {
   }, []);
 
   useEffect(() => {
-    if (!searchQ || searchQ.length < 2) { setSearchResults(null); return; }
-    if (searchTimer.current) clearTimeout(searchTimer.current);
+    let cancelled = false;
+    if (searchTimer.current) {
+      clearTimeout(searchTimer.current);
+      searchTimer.current = null;
+    }
+    if (!searchQ || searchQ.length < 2) {
+      setSearchResults(null);
+      setSearchLoadFailed(false);
+      setSearchLoading(false);
+      return;
+    }
     searchTimer.current = setTimeout(async () => {
       setSearchLoading(true);
+      setSearchLoadFailed(false);
       try {
         const r = await fetch(`${API_BASE}/api/v1/search?q=${encodeURIComponent(searchQ)}`, { headers });
-        if (!r.ok) { setSearchResults(null); return; }
-        setSearchResults(await r.json());
-      } finally { setSearchLoading(false); }
+        if (!r.ok) throw new Error(`Search request failed (${r.status})`);
+        const data = await r.json() as SearchResults;
+        if (!cancelled) setSearchResults(data);
+      } catch (error) {
+        logClientError("master sidebar search load", error);
+        if (!cancelled) {
+          setSearchResults(null);
+          setSearchLoadFailed(true);
+        }
+      } finally {
+        if (!cancelled) setSearchLoading(false);
+      }
     }, 300);
-  }, [searchQ]);
+    return () => {
+      cancelled = true;
+      if (searchTimer.current) {
+        clearTimeout(searchTimer.current);
+        searchTimer.current = null;
+      }
+    };
+  }, [searchQ, searchRetryKey, token]);
 
   const typeRoutes: Record<string, (item: { id: number; projectId: number }) => string> = {
     file: (i) => `/projects/${i.projectId}/files`,
@@ -223,31 +258,39 @@ export function MasterSidebar() {
       <SidebarUtilities activeTab="dashboard" />
 
       <div ref={searchRef} style={{ position: "relative", padding: "0 10px 10px" }}>
-        <button onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
+        <button type="button" onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
           <Search style={{ width: 13, height: 13 }} />
           {t("Search everything…", "Buscar todo…")}
         </button>
 
         {showSearch && (
-          <div style={{ position: "absolute", left: 10, top: "calc(100% - 4px)", width: "280px", zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
+          <div aria-busy={searchLoading} style={{ position: "absolute", left: 10, top: "calc(100% - 4px)", width: "280px", zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
             <div style={{ padding: "10px 12px", borderBottom: "1px solid #F3F4F6" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Search style={{ width: 14, height: 14, color: "#6B7280", flexShrink: 0 }} />
-                <input autoFocus value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder={t("Type to search…", "Escribe para buscar…")} style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#111" }} />
+                <input autoFocus value={searchQ} onChange={e => setSearchQ(e.target.value)} aria-label={t("Search", "Buscar")} placeholder={t("Type to search…", "Escribe para buscar…")} style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#111" }} />
                 {searchQ && (
-                  <button onClick={() => { setSearchQ(""); setSearchResults(null); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 2 }}>
+                  <button type="button" aria-label={t("Clear search", "Borrar búsqueda")} onClick={() => { setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 2 }}>
                     <X style={{ width: 13, height: 13 }} />
                   </button>
                 )}
               </div>
             </div>
             {searchLoading && (
-              <div style={{ padding: 16, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Searching…", "Buscando…")}</div>
+              <div role="status" aria-live="polite" style={{ padding: 16, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Searching…", "Buscando…")}</div>
             )}
-            {!searchLoading && searchQ.length >= 2 && allSearchResults.length === 0 && (
+            {!searchLoading && searchLoadFailed && (
+              <div role="alert" style={{ padding: 16, textAlign: "center", fontSize: 12, color: "#991B1B" }}>
+                <div>{t("Search could not be loaded.", "No se pudo cargar la búsqueda.")}</div>
+                <button type="button" onClick={() => setSearchRetryKey(value => value + 1)} style={{ marginTop: 8, border: "1px solid #FCA5A5", borderRadius: 6, background: "#FEF2F2", color: "#991B1B", cursor: "pointer", fontSize: 11, fontWeight: 700, padding: "5px 9px" }}>
+                  {t("Try again", "Intentar de nuevo")}
+                </button>
+              </div>
+            )}
+            {!searchLoading && !searchLoadFailed && searchQ.length >= 2 && allSearchResults.length === 0 && (
               <div style={{ padding: 16, textAlign: "center", fontSize: 12, color: "#9CA3AF" }}>{t("No results found", "Sin resultados")}</div>
             )}
-            {!searchLoading && allSearchResults.length > 0 && (
+            {!searchLoading && !searchLoadFailed && allSearchResults.length > 0 && (
               <div style={{ maxHeight: 320, overflowY: "auto" }}>
                 {allSearchResults.map((item, idx) => (
                 <button key={`${item.type}-${item.id}-${idx}`} onClick={() => { if (item.type !== "person" && item.projectId) { const route = typeRoutes[item.type]?.({ id: item.id, projectId: item.projectId }); if (route) setLocation(route); } setShowSearch(false); setMobileOpen(false); }} style={{ display: "flex", alignItems: "flex-start", gap: 10, width: "100%", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #F9FAFB" }} onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => (e.currentTarget.style.background = "none")}>
@@ -284,7 +327,7 @@ export function MasterSidebar() {
         <div style={{ padding: "0 0 8px" }}>
 
           <div ref={bellRef} style={{ position: "relative", padding: "0 14px 10px" }}>
-            <button onClick={() => { setShowBell(!showBell); if (!showBell) loadNotifications(); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)", fontSize: 12 }}>
+            <button type="button" aria-expanded={showBell} onClick={() => { setShowBell(!showBell); if (!showBell) void loadNotifications(); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)", fontSize: 12 }}>
               <Bell style={{ width: 14, height: 14 }} />
               <span style={{ flex: 1, textAlign: "left" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>
               {unreadCount > 0 && (
@@ -293,7 +336,7 @@ export function MasterSidebar() {
             </button>
 
             {showBell && (
-              <div style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 14, width: 300, zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
+              <div aria-busy={loadingNotifs} style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 14, width: 300, zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderBottom: "1px solid #F3F4F6" }}>
                   <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>
                   {unreadCount > 0 && (
@@ -303,9 +346,17 @@ export function MasterSidebar() {
                   )}
                 </div>
                 {loadingNotifs && (
-                  <div style={{ padding: 20, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Loading…", "Cargando…")}</div>
+                  <div role="status" aria-live="polite" style={{ padding: 20, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Loading…", "Cargando…")}</div>
                 )}
-                {!loadingNotifs && notifications.length === 0 && (
+                {!loadingNotifs && notificationLoadFailed && (
+                  <div role="alert" style={{ padding: 20, textAlign: "center", fontSize: 12, color: "#991B1B" }}>
+                    <div>{t("Notifications could not be loaded.", "No se pudieron cargar las notificaciones.")}</div>
+                    <button type="button" onClick={() => void loadNotifications()} style={{ marginTop: 8, border: "1px solid #FCA5A5", borderRadius: 6, background: "#FEF2F2", color: "#991B1B", cursor: "pointer", fontSize: 11, fontWeight: 700, padding: "5px 9px" }}>
+                      {t("Try again", "Intentar de nuevo")}
+                    </button>
+                  </div>
+                )}
+                {!loadingNotifs && !notificationLoadFailed && notifications.length === 0 && (
                   <div style={{ padding: 24, textAlign: "center", fontSize: 12, color: "#9CA3AF" }}>
                     <div style={{ marginBottom: 6, display: "flex", justifyContent: "center" }}><Bell style={{ width: 28, height: 28, color: "#9CA3AF" }} /></div>
                     {t("No notifications", "Sin notificaciones")}
