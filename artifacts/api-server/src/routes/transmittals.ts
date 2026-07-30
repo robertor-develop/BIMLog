@@ -173,12 +173,34 @@ export function renderTransmittalsCurrentViewPdf(args: {
         }) + 10;
       },
     });
+
+    // PDFKit may create a continuation page while resolving a wrapped cell
+    // before drawTable reaches its explicit break callback. Stamp the governed
+    // running identity across every buffered continuation page so both paths
+    // produce identical chrome.
+    const range = doc.bufferedPageRange();
+    for (let pageIndex = 1; pageIndex < range.count; pageIndex += 1) {
+      doc.switchToPage(range.start + pageIndex);
+      doc.x = 40;
+      doc.y = 40;
+      drawBrandedHeader(doc, {
+        margin: 40,
+        companyName: args.companyName,
+        title,
+        subtitle: "Governed transmittal register",
+        projectName: args.project?.name ?? "Project",
+        projectCode: args.project?.code,
+        reportNumber,
+        reportDate: args.generatedAt,
+        theme,
+      });
+    }
   }
 
   addPageNumbers(doc, {
     margin: 40,
-    footerY: 744,
-    fingerprintY: 730,
+    footerY: 736,
+    fingerprintY: 722,
     contentHash,
     companyName: args.companyName,
     projectName: args.project?.name,
