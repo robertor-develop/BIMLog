@@ -156,7 +156,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
       fontSize: 7,
       headerFontSize: 7,
       rowMinHeight: 26,
-      pageBottom: 720,
+      pageBottom: 704,
       headerFill: theme.primary,
       onPageBreak: () => {
         doc.addPage();
@@ -164,9 +164,11 @@ export function renderTransmittalsCurrentViewPdf(args: {
           margin: 40,
           companyName: args.companyName,
           title,
+          subtitle: "Governed transmittal register",
           projectName: args.project?.name ?? "Project",
           projectCode: args.project?.code,
           reportNumber,
+          reportDate: args.generatedAt,
           theme,
         }) + 10;
       },
@@ -175,8 +177,8 @@ export function renderTransmittalsCurrentViewPdf(args: {
 
   addPageNumbers(doc, {
     margin: 40,
-    footerY: 756,
-    fingerprintY: 742,
+    footerY: 744,
+    fingerprintY: 730,
     contentHash,
     companyName: args.companyName,
     projectName: args.project?.name,
