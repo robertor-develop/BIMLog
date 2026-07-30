@@ -14,7 +14,6 @@ import {
   computeContentHash,
   createPdfDocument,
   drawBrandedHeader,
-  drawFooter,
   drawTable,
   PALETTE,
   REPORT_THEMES,
@@ -423,13 +422,16 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
     if (!co) { res.status(404).json({ error: "Not found" }); return; }
     const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+    const generatedAt = new Date();
+    const contentHash = computeContentHash({ project: project[0], changeOrder: co });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
     const title = `${co.number} - Change Order Report`;
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
 
     doc.y = drawBrandedHeader(doc, { margin: 50, companyName: req.user!.companyName || "Company", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.changeOrder.detail }) + 12;
+    doc.fillColor("#1E293B");
 
     const field = (label: string, value: string) => {
       doc.fontSize(9).font("Helvetica-Bold").text(label + ": ", { continued: true });
@@ -442,7 +444,14 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
     if (co.scheduleImpactDays) field("Schedule Impact", `${co.scheduleImpactDays} days`);
     if (co.description) { doc.moveDown(0.5); doc.fontSize(9).font("Helvetica-Bold").text("Description:"); doc.font("Helvetica").text(co.description); }
 
-    drawFooter(doc, { margin: 50, y: doc.page.height - 30, projectName: project[0]?.name, timestamp: new Date().toLocaleDateString("en-US") });
+    addPageNumbers(doc, {
+      margin: 50,
+      companyName: req.user!.companyName || "Company",
+      projectName: project[0]?.name ?? "Project",
+      reportNumber: co.number,
+      timestamp: generatedAt.toISOString(),
+      contentHash,
+    });
     doc.end();
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });

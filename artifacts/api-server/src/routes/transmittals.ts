@@ -10,7 +10,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { sendEmail } from "../lib/email";
 import { createNotification } from "./notifications";
 import { singleFileUpload } from "../middlewares/multipart";
-import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, drawFooter, drawTable, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
+import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, drawTable, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
@@ -450,13 +450,16 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
     const items = await db.select().from(transmittalItemsTable).where(eq(transmittalItemsTable.transmittalId, txId));
     const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
 
-    const doc = createPdfDocument({ size: "LETTER", margin: 50 });
+    const generatedAt = new Date();
+    const contentHash = computeContentHash({ project: project[0], transmittal: tx, items });
+    const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true });
     const title = `${tx.number} - Transmittal Report`;
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
 
     doc.y = drawBrandedHeader(doc, { margin: 50, companyName: req.user!.companyName || "Company", title, projectName: project[0]?.name ?? "Project", projectCode: project[0]?.code, theme: REPORT_THEMES.transmittal.detail }) + 12;
+    doc.fillColor("#1E293B");
 
     // Fields
     const field = (label: string, value: string) => {
@@ -479,7 +482,14 @@ router.get("/projects/:projectId/transmittals/:transmittalId/export", authMiddle
       });
     }
 
-    drawFooter(doc, { margin: 50, y: doc.page.height - 30, projectName: project[0]?.name, timestamp: new Date().toLocaleDateString("en-US") });
+    addPageNumbers(doc, {
+      margin: 50,
+      companyName: req.user!.companyName || "Company",
+      projectName: project[0]?.name ?? "Project",
+      reportNumber: tx.number,
+      timestamp: generatedAt.toISOString(),
+      contentHash,
+    });
     doc.end();
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });

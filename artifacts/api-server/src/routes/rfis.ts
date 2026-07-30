@@ -2577,6 +2577,7 @@ router.get("/projects/:projectId/rfis/:rfiId/export-complete", authMiddleware, r
     const result = await buildCompleteRfiPackage({
       rfiNumber: rfi.number,
       projectName: project?.name || `Project ${projectId}`,
+      companyName: req.user!.companyName || "Project Company",
       canonicalRfiPdf: canonical.buffer,
       logicalState: {
         canonicalModel: canonical.model,

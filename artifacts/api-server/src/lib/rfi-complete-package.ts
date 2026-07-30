@@ -11,7 +11,7 @@ import { PDFArray, PDFDocument, PDFName } from "pdf-lib";
 import sharp from "sharp";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetInput, canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
-import { createPdfDocument } from "./pdf-kit";
+import { addPageNumbers, createPdfDocument, drawBrandedHeader, REPORT_THEMES } from "./pdf-kit";
 
 const MAX_SOURCE_BYTES = 100 * 1024 * 1024;
 const MAX_TOTAL_SOURCE_BYTES = 300 * 1024 * 1024;
@@ -674,6 +674,7 @@ async function convertItem(item: CompletePackageInputItem, signal?: AbortSignal)
 function renderManifestPdf(args: {
   rfiNumber: string;
   projectName: string;
+  companyName: string;
   fingerprint: string;
   items: CompletePackageManifestItem[];
   manifestPageRange: string;
@@ -684,15 +685,34 @@ function renderManifestPdf(args: {
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
+    const generatedAt = new Date();
+    const reportNumber = `RFI-PKG-${args.fingerprint.slice(0, 10).toUpperCase()}`;
+    const drawPageHeader = () => {
+      doc.y = drawBrandedHeader(doc, {
+        margin: 44,
+        companyName: args.companyName,
+        projectName: args.projectName,
+        title: "Complete RFI Package Manifest",
+        subtitle: args.rfiNumber,
+        reportNumber,
+        reportDate: generatedAt,
+        theme: REPORT_THEMES.rfi.detail,
+      }) + 12;
+    };
     const bottom = 742;
-    const ensure = (height: number) => { if (doc.y + height > bottom) doc.addPage(); };
-    doc.font("Helvetica-Bold").fontSize(17).fillColor("#173F6B").text("COMPLETE RFI PDF PACKAGE MANIFEST");
+    const ensure = (height: number) => {
+      if (doc.y + height <= bottom) return;
+      doc.addPage();
+      drawPageHeader();
+    };
+    drawPageHeader();
+    doc.font("Helvetica-Bold").fontSize(12).fillColor("#173F6B").text("PACKAGE CONTENT AND SOURCE MANIFEST");
     doc.moveDown(0.35).font("Helvetica").fontSize(9).fillColor("#334155")
       .text(`RFI: ${cleanLabel(args.rfiNumber)}`)
       .text(`Project: ${cleanLabel(args.projectName)}`)
       .text(`Logical package fingerprint: ${args.fingerprint}`)
       .text(`Manifest pages: ${args.manifestPageRange}`)
-      .text(`Generated: ${new Date().toISOString()}`);
+      .text(`Generated: ${generatedAt.toISOString()}`);
     doc.moveDown(0.6).fontSize(8).fillColor("#64748B")
       .text("The logical fingerprint is derived from canonical saved package state and source hashes, not PDF serialization or generation time.")
       .text("Office security boundary: OOXML external relationships are rejected before conversion; macros and interactive prompts are disabled; application secrets are excluded from the child environment. LibreOffice still runs under the host process account and is not an OS-level network or filesystem sandbox.");
@@ -713,6 +733,14 @@ function renderManifestPdf(args: {
       item.warnings.forEach(warning => doc.fillColor("#7C2D12").text(`Warning: ${cleanLabel(warning)}`));
       if (item.failureState) doc.fillColor("#991B1B").text(`Failure: ${cleanLabel(item.failureState)}`);
     }
+    addPageNumbers(doc, {
+      margin: 44,
+      companyName: args.companyName,
+      projectName: args.projectName,
+      reportNumber,
+      timestamp: generatedAt.toISOString(),
+      contentHash: args.fingerprint,
+    });
     doc.end();
   });
 }
@@ -734,6 +762,7 @@ async function appendPdf(target: PDFDocument, buffer: Buffer, label: string): Pr
 export async function buildCompleteRfiPackage(args: {
   rfiNumber: string;
   projectName: string;
+  companyName?: string;
   canonicalRfiPdf: Buffer;
   logicalState: unknown;
   items: CompletePackageInputItem[];
@@ -788,14 +817,15 @@ export async function buildCompleteRfiPackage(args: {
   }
 
   const manifestStart = output.getPageCount() + 1;
-  let manifestPdf = await renderManifestPdf({ rfiNumber: args.rfiNumber, projectName: args.projectName, fingerprint: logicalFingerprint, items: manifest, manifestPageRange: "0000-0000" });
+  const manifestIdentity = { rfiNumber: args.rfiNumber, projectName: args.projectName, companyName: args.companyName || "Project Company", fingerprint: logicalFingerprint, items: manifest };
+  let manifestPdf = await renderManifestPdf({ ...manifestIdentity, manifestPageRange: "0000-0000" });
   const manifestProbe = await loadPdf(manifestPdf, "Complete RFI PDF manifest");
   let manifestRange = `${manifestStart}-${manifestStart + manifestProbe.pdf.getPageCount() - 1}`;
-  manifestPdf = await renderManifestPdf({ rfiNumber: args.rfiNumber, projectName: args.projectName, fingerprint: logicalFingerprint, items: manifest, manifestPageRange: manifestRange });
+  manifestPdf = await renderManifestPdf({ ...manifestIdentity, manifestPageRange: manifestRange });
   const finalManifestProbe = await loadPdf(manifestPdf, "Complete RFI PDF manifest");
   if (finalManifestProbe.pdf.getPageCount() !== manifestProbe.pdf.getPageCount()) {
     manifestRange = `${manifestStart}-${manifestStart + finalManifestProbe.pdf.getPageCount() - 1}`;
-    manifestPdf = await renderManifestPdf({ rfiNumber: args.rfiNumber, projectName: args.projectName, fingerprint: logicalFingerprint, items: manifest, manifestPageRange: manifestRange });
+    manifestPdf = await renderManifestPdf({ ...manifestIdentity, manifestPageRange: manifestRange });
   }
   await appendPdf(output, manifestPdf, "Complete RFI PDF manifest");
   const buffer = Buffer.from(await output.save({ useObjectStreams: false, addDefaultPage: false, updateFieldAppearances: false }));

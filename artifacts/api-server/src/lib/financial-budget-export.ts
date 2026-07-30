@@ -4,7 +4,7 @@ import AdmZip from "adm-zip";
 import { createHash } from "crypto";
 import { FinancialControlError } from "./financial-control-contract";
 import { exactSignedDecimal } from "./financial-budget-contract";
-import { createPdfDocument } from "./pdf-kit";
+import { addPageNumbers, createPdfDocument, drawBrandedHeader, REPORT_THEMES } from "./pdf-kit";
 
 export type BaselineExport = {
   project: { name: string; code: string; companyName: string };
@@ -101,7 +101,7 @@ export async function buildBudgetCurrentViewPdf(data: BudgetCurrentViewExport): 
   };
   const drawHeader = () => {
     doc.rect(0, 0, doc.page.width, 58).fill("#1E3A5F");
-    doc.fillColor("#FFFFFF").fontSize(16).font("Helvetica-Bold").text("BIMLog", 40, 14, { width: 180 });
+    doc.fillColor("#FFFFFF").fontSize(16).font("Helvetica-Bold").text(safe(data.project.companyName) || "Company", 40, 14, { width: 180 });
     doc.fontSize(13).text(safe(data.reportTitle), 260, 14, { width: doc.page.width - 300, align: "right" });
     doc.fontSize(8).font("Helvetica").text(`${safe(data.project.name)} (${safe(data.project.code)})`, 260, 34, { width: doc.page.width - 300, align: "right" });
     doc.fillColor("#000000");
@@ -184,18 +184,22 @@ export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
     }),
     chunks: Buffer[] = [];
   doc.on("data", (c) => chunks.push(c));
-  doc
-    .fontSize(18)
-    .text("BIMLog Approved Budget Baseline")
-    .fontSize(10)
-    .text("Operational budget record — not an accounting certification.")
-    .moveDown();
-  doc
-    .fontSize(11)
-    .text(
-      `${safe(data.project.companyName)} | ${safe(data.project.name)} (${safe(data.project.code)})`,
-    );
-  doc.text(
+  const reportNumber = `BASELINE-${safe(data.project.code)}-V${data.snapshot.budgetVersion}`;
+  const drawHeader = () => {
+    doc.y = drawBrandedHeader(doc, {
+      margin: 42,
+      companyName: safe(data.project.companyName) || "Company",
+      projectName: safe(data.project.name) || "Project",
+      projectCode: safe(data.project.code),
+      title: "Approved Budget Baseline",
+      subtitle: "Operational budget record — not an accounting certification",
+      reportNumber,
+      reportDate: new Date(data.generatedAt),
+      theme: REPORT_THEMES.platform.standard,
+    }) + 12;
+  };
+  drawHeader();
+  doc.fillColor("#111827").fontSize(11).text(
     `Budget version: ${data.snapshot.budgetVersion} | Status: Approved | Currency: ${data.snapshot.currency}`,
   );
   doc.text(
@@ -206,7 +210,10 @@ export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
   );
   doc.moveDown().fontSize(9);
   for (const line of data.snapshot.lines) {
-    if (doc.y > 700) doc.addPage();
+    if (doc.y > 680) {
+      doc.addPage();
+      drawHeader();
+    }
     doc
       .text(
         `${safe(line.hierarchicalPath)}  ${safe(line.projectName)}`,
@@ -226,14 +233,16 @@ export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
     .text(`Content fingerprint: ${data.snapshot.contentFingerprint}`)
     .text(`Snapshot fingerprint: ${data.snapshot.snapshotFingerprint}`)
     .text(`Generated: ${data.generatedAt}`);
-  const range = doc.bufferedPageRange();
-  for (let i = 0; i < range.count; i++) {
-    doc.switchToPage(i);
-    doc.fontSize(8).text(`Page ${i + 1} of ${range.count}`, 42, 742, {
-      align: "right",
-      width: 528,
-    });
-  }
+  addPageNumbers(doc, {
+    margin: 42,
+    footerY: 760,
+    fingerprintY: 742,
+    contentHash: data.snapshot.snapshotFingerprint,
+    companyName: safe(data.project.companyName),
+    projectName: safe(data.project.name),
+    reportNumber,
+    timestamp: data.generatedAt,
+  });
   doc.end();
   return new Promise((resolve, reject) => {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
