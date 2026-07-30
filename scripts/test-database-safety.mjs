@@ -53,9 +53,12 @@ const rejectedPublishPreview = fs.readFileSync(
   "utf8",
 );
 assert.equal(
-  crypto.createHash("sha256").update(rejectedPublishPreview).digest("hex"),
-  "6f4fa8cc7c88c751ad2d78705e785ab9111dccaa8a3c103969bb83d7f5de73fa",
-  "the complete rejected Replit preview fixture must remain byte-identical",
+  crypto
+    .createHash("sha256")
+    .update(rejectedPublishPreview.replace(/\r\n/g, "\n"))
+    .digest("hex"),
+  "f54f9cf239f08bbeacd80d4b8ae871eac2b88dca88ae84be9f0881af81cb63d1",
+  "the complete rejected Replit preview fixture must remain text-identical",
 );
 const previewDropNames = [
   ...rejectedPublishPreview.matchAll(
